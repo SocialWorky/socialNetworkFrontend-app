@@ -1,0 +1,7 @@
+{
+  "name": "socialNetworkFrontend-app",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
