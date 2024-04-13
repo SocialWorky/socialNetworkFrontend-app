@@ -3,9 +3,9 @@ import { getTranslationsLanguage } from '../translations/translations';
 import { DOCUMENT } from '@angular/common';
 
 @Component({
-  selector: 'app-root',
+  selector: 'worky-root',
   templateUrl: 'app.component.html',
-  styleUrls: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
   constructor(@Inject(DOCUMENT) private document: Document, private renderer: Renderer2) {
