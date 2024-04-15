@@ -1,0 +1,52 @@
+@use "sass:math";
+
+/* General */
+$worky-app-width: 1600px;
+
+/* Typography */
+
+// Font-Family
+
+$worky-font-family-jost: "Jost";
+$worky-font-family-fira-mono: "Fira-Mono";
+$worky-font-family-global: $worky-font-family-jost;
+
+// Weights
+
+$worky-font-weight-bold: 700; // Bold
+$worky-font-weight-semibold: 600; // Semi Bold
+$worky-font-weight-regular: 400; // Regular
+$worky-font-weight-light: 300; // Light
+
+/* Kerning */
+
+$worky-kerning-1: -0.015rem; // -1.5%
+$worky-kerning-2: -0.0125rem; // -1.25%
+$worky-kerning-3: -0.01rem; // -1%
+$worky-kerning-4: -0.005rem; // -0.5%
+$worky-kerning-5: 0.0125rem; //  1.25%
+$worky-kerning-6: 0.015rem; //  1.5%
+
+/* Sizes */
+
+$worky-font-size-13: 46.2px; // Display 1
+$worky-font-size-12: 41px; // Display 2
+$worky-font-size-11: 36.5px; // Display 3
+$worky-font-size-10: 32.44px; // H1
+$worky-font-size-9: 28.8px; // H2
+$worky-font-size-8: 25.6px; // H3
+$worky-font-size-7: 22.8px; // H4
+$worky-font-size-6: 20.25px; // H5
+$worky-font-size-5: 18px; // H6
+$worky-font-size-4: 16px; // text, code
+$worky-font-size-3: 14.22px; // small text
+$worky-font-size-2: 12.64px; // smaller text
+$worky-font-size-1: 11.24px; // smallest text
+
+/* Icon Size */
+
+$worky-icon-size-5: 32px;
+$worky-icon-size-4: 24px;
+$worky-icon-size-3: 20.25px;
+$worky-icon-size-2: 16px;
+$worky-icon-size-1: 10px;
