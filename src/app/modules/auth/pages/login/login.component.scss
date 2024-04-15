@@ -1,5 +1,6 @@
 @use 'src/assets/styles/worky-typography.scss' as Fonts;
 @use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
 
 :host {
@@ -7,25 +8,35 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
+  @include breakpoints.below-sm {
+    height: auto;
+    padding: 20px;
+  }
   .content {
     width: 100%;
     display: flex;
+    @include breakpoints.below-sm {
+      flex-direction: column;
+    }
     .img-login {
       width: 50%;
       display: flex;
       justify-content: space-around;
+      @include breakpoints.below-sm {
+        width: 100%;
+        margin-bottom: 50px;
+        img {
+          width: 70%;
+        }
+      }
     }
     .content-login {
       width: 50%;
       padding: 3%;
 
-      .content-login-header {
-        display: block;
-        margin-bottom: 100px;
-        p {
-          @include Fonts.worky-text;
-          color: map-get(color.$worky-navy, 24)
-        }
+      @include breakpoints.below-sm {
+        width: 100%;
+        padding: 0;
       }
 
       .form-login {
@@ -93,7 +104,33 @@
 
       }
     }
+
+    .content-login-header {
+        margin-bottom: 100px;
+        h1 {
+          margin-block-end: 0;
+          margin-block-start: 0;
+        }
+        p {
+          @include Fonts.worky-text;
+          margin-block-end: 20px;
+          margin-block-start: 5px;
+          color: map-get(color.$worky-navy, 24)
+        }
+        @include breakpoints.below-sm {
+          display: none;
+        }
+      }
+    .content-login-header.movil {
+      display: none;
+      @include breakpoints.below-sm {
+        margin-bottom: 0;
+        display: block;
+      }
+    }
+
   }
+
 }
 
 ::ng-deep worky-buttons .worky-button {
