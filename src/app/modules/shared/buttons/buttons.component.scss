@@ -29,7 +29,7 @@
     }
 
     // Added to manage icons when the text is bigger than the button
-    ::ng-deep .worky-button-wrapper span[class^="worky-icon-"], span[class*=" worky-icon-"] {
+    ::ng-deep .worky-button-wrapper span[class^="material-icons"], span[class*=" material-icons"] {
       font-size: 20px;
       flex-shrink: 0;
     }
