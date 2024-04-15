@@ -1,0 +1,45 @@
+// Variables de pantalla
+$screen-sm-min: 600px;
+$screen-lg-min: 960px;
+$screen-lg: 1128px;
+$screen-xl: 1600px;
+
+// Mixins
+// Para dispositivos pequeños
+@mixin from-sm-up {
+  @media screen and (min-width: #{$screen-sm-min}) {
+    @content;
+  }
+}
+
+@mixin below-sm {
+  @media only screen and (max-width: #{$screen-sm-min}) {
+    @content;
+  }
+}
+
+// Para dispositivos medianos
+@mixin from-md-up {
+  @media screen and (min-width: #{$screen-lg-min}) {
+    @content;
+  }
+}
+
+@mixin below-md {
+  @media screen and (max-width: #{$screen-lg-min}) {
+    @content;
+  }
+}
+
+// Punto intermedio entre medianos y grandes
+@mixin from-md-lg-up {
+  @media screen and (min-width: #{$screen-lg}) {
+    @content;
+  }
+}
+
+@mixin below-md-lg {
+  @media screen and (max-width: #{$screen-lg}) {
+    @content;
+  }
+}

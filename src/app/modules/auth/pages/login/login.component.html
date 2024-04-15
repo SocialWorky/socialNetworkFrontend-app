@@ -1,1 +1,82 @@
-<p>login works!</p>,
+<div class="content">
+
+  <div class="content-login-header movil">
+    <h1 class="title-login">Login</h1>
+    <p class="subTitle-login">Start session with</p>
+  </div>
+
+  <div class="img-login">
+    <img src="assets/img/login/worky-login.svg" alt="Login" />
+  </div>
+
+  <div class="content-login">
+    <div class="content-login-header">
+      <h1 class="title-login">Login</h1>
+      <p class="subTitle-login">Start session with</p>
+    </div>
+
+    <form>
+      <div class="form-login">  
+        <div class="form-login-social">
+            <worky-buttons
+                [workyButtonType]="WorkyButtonType.Stroked"
+                [theme]="WorkyButtonTheme.Accent"
+                [width]="'100%'"
+                (click)="login()">
+                <span prefix-icon> <img src="assets/img/login/google-icon.png" alt="google">  </span>
+                <span basic-button-text>Sing in with Google</span>
+            </worky-buttons>
+        </div>
+
+        <div class="line-container-sign">
+            <div class="line"></div>
+            <div class="text">Or sign in with Email</div>
+            <div class="line"></div>
+        </div>
+
+
+        <div class="form-input">
+            <mat-form-field class="worky-input worky-accent">
+                <mat-label>Email</mat-label>
+                <input type="email" matInput formControlName="email" required>
+                <mat-error worky-validation-error-message formControlName="email"></mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="worky-input worky-accent">
+                <mat-label>Password</mat-label>
+                <input type="password" matInput formControlName="password" required>
+                <mat-error worky-validation-error-message formControlName="password"></mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="forget-password">
+            <span onclick="">Forget password?</span>
+        </div>
+
+
+        <div class="form-login-buttons">
+            <worky-buttons
+                [workyButtonType]="WorkyButtonType.Flat"
+                [theme]="WorkyButtonTheme.Accent"
+                [width]="'100%'"
+                (click)="login()">
+                <span basic-button-text>Login</span>
+            </worky-buttons>
+
+            <worky-buttons
+                [workyButtonType]="WorkyButtonType.Stroked"
+                [theme]="WorkyButtonTheme.Accent"
+                [width]="'100%'"
+                (click)="login()">
+                <span basic-button-text>Register</span>
+            </worky-buttons>
+        </div>
+      </div>
+    </form>
+
+
+
+
+  </div>
+
+</div>
