@@ -1,3 +1,104 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+
+
 :host {
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  .content {
+    width: 100%;
+    display: flex;
+    .img-login {
+      width: 50%;
+      display: flex;
+      justify-content: space-around;
+    }
+    .content-login {
+      width: 50%;
+      padding: 3%;
+
+      .content-login-header {
+        display: block;
+        margin-bottom: 100px;
+        p {
+          @include Fonts.worky-text;
+          color: map-get(color.$worky-navy, 24)
+        }
+      }
+
+      .form-login {
+        width: 70%;
+        display: block;
+        margin: 0 auto;
+
+        .form-login-social {
+          margin-bottom: 50px;
+
+          worky-buttons img {
+            width: 20px;
+            height: 20px;
+          }
+        }
+
+        .line-container-sign {
+          display: flex;
+          align-items: center;
+          position: relative;
+          width: 100%;
+          margin: 0 auto;
+
+          .line {
+            flex: 1;
+            height: 1px;
+            background-color: map-get(color.$worky-navy, 24);
+          }
+
+          .text {
+            color: map-get(color.$worky-navy, 24);
+            margin: 0 10px;
+            position: relative;
+            z-index: 1;
+          }
+        }
+
+        .form-input {
+          margin-top: 50px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .forget-password {
+          display: flex;
+          cursor: pointer;
+          justify-content: flex-end;
+          margin-bottom: 20px;
+          
+          span {
+            @include Fonts.worky-text;
+            color: color.$worky-color-blue;
+          }
+        }
+
+        .form-login-buttons {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          worky-buttons {
+            margin-bottom: 10px;
+          }
+        }
+
+      }
+    }
+  }
+}
+
+::ng-deep worky-buttons .worky-button {
+  height: 60px;
+  .worky-button-wrapper {
+    @include Fonts.worky-h6;
+  }
 }

@@ -1,4 +1,5 @@
-
+@use 'src/assets/styles/worky-variables.scss' as var;
+@use 'src/assets/styles/worky-palettes.scss' as color;
 // Custom Theming for Angular Material
 // For more information: https://material.angular.io/guide/theming
 @use '@angular/material' as mat;
@@ -64,3 +65,83 @@ $app-theme: mat.define-light-theme((
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.content-worky {
+  max-width: var.$worky-app-width;
+  margin: 0 auto;
+}
+
+ .worky-input {
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mat-mdc-floating-label {
+      top: calc(var(--mat-form-field-container-height) / 2);
+      background-color: color.$worky-color-light;
+    }
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-floating-label--float-above {
+      top: calc(var(--mat-form-field-container-height) / 4);
+    }
+    .mdc-line-ripple {
+      display: none;
+    }
+    .mat-mdc-text-field-wrapper {
+      width: 100%;
+      border: 1px solid color.$worky-color-navy;
+      border-radius: 8px;
+    }
+    .mdc-text-field {
+      overflow: visible;
+      .mat-mdc-form-field-focus-overlay {
+        background-color: color.$worky-color-light;
+      }
+    }
+    .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+      background-color: color.$worky-color-light;
+    }
+    .mat-mdc-text-field-wrapper:hover .mat-mdc-form-field-focus-overlay {
+      background-color: color.$worky-color-light;
+    }
+    .mat-mdc-form-field.mat-focused:not(:focus) .mat-mdc-form-field-focus-overlay {
+      background-color: color.$worky-color-light;
+    }
+    .mat-mdc-form-field.mat-focused .mat-mdc-form-field-focus-overlay {
+      background-color: color.$worky-color-light;
+    }
+    .mat-mdc-text-field--focused {
+      border-color: color.$worky-color-blue;
+    }
+  }
+
+  .worky-input.worky-accent {
+    .mdc-text-field--focused {
+      border: 1px solid color.$worky-color-blue;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-blue;
+      }
+    }
+  }
+
+  .worky-input.worky-warn {
+    .mdc-text-field--focused {
+      border: 1px solid color.$worky-color-red;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-red;
+      }
+    }
+  }
+
+  .worky-input.worky-primary {
+    .mdc-text-field--focused {
+      border: 1px solid color.$worky-color-teal;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-teal;
+      }
+    }
+  }
+
+  .worky-input.worky-basic {
+    .mdc-text-field--focused {
+      border: 1px solid color.$worky-color-navy;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-navy;
+      }
+    }
+  }
