@@ -1,0 +1,97 @@
+@import 'src/assets/styles/worky-palettes.scss';
+@import 'src/assets/styles/worky-typography.scss';
+
+:host {  
+  .worky-button {
+    max-width: 100%;
+    border-radius: 8px;
+    padding: 7px 16px;
+
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 21px;
+
+    .worky-button-wrapper {
+      display: flex;
+      width: 100%;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
+    }
+
+    // Added to manage text bigger than the button
+    ::ng-deep .worky-button-wrapper span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    // Added to manage icons when the text is bigger than the button
+    ::ng-deep .worky-button-wrapper span[class^="worky-icon-"], span[class*=" worky-icon-"] {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+  }
+}
+
+:host-context(.theme-basic) {
+  .worky-button-basic {
+    color: map-get($worky-navy, 100);
+  }
+  .worky-button-stroked {
+    color: map-get($worky-navy, 100);
+    border: 1px solid map-get($worky-navy, 100);
+  }
+  .worky-button-flat {
+    color: $worky-color-light;
+    background-color: map-get($worky-navy, 100);
+  }
+}
+
+:host-context(.theme-primary) {
+  .worky-button-basic {
+    color: map-get($worky-teal, 100);
+  }
+  .worky-button-stroked {
+    color: map-get($worky-teal, 100);
+    border: 1px solid map-get($worky-teal, 100);
+  }
+  .worky-button-flat {
+    color: $worky-color-light;
+    background-color: map-get($worky-teal, 100);
+  }
+}
+
+:host-context(.theme-accent) {
+  .worky-button-basic {
+    color: map-get($worky-blue, 100);
+  }
+  .worky-button-stroked {
+    color: map-get($worky-blue, 100);
+    border: 1px solid map-get($worky-blue, 100);
+  }
+  .worky-button-flat {
+    color: $worky-color-light;
+    background-color: map-get($worky-blue, 100);
+  }
+}
+
+:host-context(.theme-warn) {
+  .worky-button-basic {
+    color: map-get($worky-magenta, 100);
+  }
+  .worky-button-stroked {
+    color: map-get($worky-magenta, 100);
+    border: 1px solid map-get($worky-magenta, 100);
+  }
+  .worky-button-flat {
+    color: $worky-color-light;
+    background-color: map-get($worky-magenta, 100);
+  }
+}
+
+.mat-button-disabled {
+  opacity: 0.56;
+}
