@@ -1,7 +1,17 @@
 @use "./worky-variables.scss" as worky-var;
 
 
-/* Mixins to use in global styles when necessary */
+@mixin worky-font-roboto {
+  font-family: worky-var.$worky-font-roboto;
+}
+
+@mixin worky-font-montserrat {
+  font-family: worky-var.$worky-font-montserrat;
+}
+
+@mixin worky-font-open-sans {
+  font-family: worky-var.$worky-font-open-sans;
+}
 
 @mixin worky-display-1 {
   font-weight: worky-var.$worky-font-weight-bold;
@@ -78,7 +88,7 @@
 }
 
 @mixin worky-code-text {
-  font-family: worky-var.$worky-font-family-fira-mono;
+  font-family: worky-var.$worky-font-family-jost;
   font-weight: worky-var.$worky-font-weight-regular;
   font-size: worky-var.$worky-font-size-4;
 }
@@ -97,21 +107,16 @@
   font-family: worky-var.$worky-font-family-jost;
 }
 
-.worky-font-fira-mono {
-  font-family: worky-var.$worky-font-family-fira-mono;
+.worky-font-roboto {
+  @include worky-font-roboto;
 }
 
-.worky-font-mono {
-  font-family: "Roboto Mono", Menlo, "Lucida Console", "Courier New", monospace;
+.worky-font-montserrat {
+  @include worky-font-montserrat;
 }
 
-.worky-font-slab {
-  font-family: "Roboto-Slab", "Trebuchet MS", "Times New Roman", serif;
-}
-
-em,
-.font-italic {
-  font-style: italic;
+.worky-font-open-sans {
+  @include worky-font-open-sans;
 }
 
 strong {

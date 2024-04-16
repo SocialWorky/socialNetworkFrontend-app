@@ -1,50 +1,75 @@
 @use "sass:math";
 
-/* General */
+/* App Width */
 $worky-app-width: 1600px;
 
+/* Spacing */
+$worky-spacing-small: 8px;
+$worky-spacing-medium: 16px;
+$worky-spacing-large: 24px;
+
+/* Line Height */
+$worky-line-height-base: 1.5;
+
+/* Opacity */
+$worky-opacity-low: 0.5;
+$worky-opacity-medium: 0.7;
+$worky-opacity-high: 0.9;
+
+/* Container Width */
+$worky-container-width-sidebar: 20%;
+
+/* Z-Index */
+$worky-zindex-modal: 1000;
+$worky-zindex-dropdown: 500;
+$worky-zindex-topbar: 100;
+
+/* Border Radius */
+$worky-border-radius-small: 4px;
+$worky-border-radius-medium: 8px;
+$worky-border-radius-large: 16px;
+
+/* Additional Font Styles */
+$worky-font-style-italic: italic; // Estilo de fuente itálica
+$worky-font-style-underline: underline; // Estilo de fuente subrayada
+
+
 /* Typography */
-
-// Font-Family
-
+$worky-font-roboto: 'Roboto', sans-serif;
+$worky-font-montserrat: 'Montserrat', sans-serif;
+$worky-font-open-sans: 'Open Sans', sans-serif;
 $worky-font-family-jost: "Jost";
-$worky-font-family-fira-mono: "Fira-Mono";
-$worky-font-family-global: $worky-font-family-jost;
+$worky-font-family-global: $worky-font-roboto;
 
 // Weights
+$worky-font-weight-bold: 700;
+$worky-font-weight-semibold: 600;
+$worky-font-weight-regular: 400;
+$worky-font-weight-light: 300;
 
-$worky-font-weight-bold: 700; // Bold
-$worky-font-weight-semibold: 600; // Semi Bold
-$worky-font-weight-regular: 400; // Regular
-$worky-font-weight-light: 300; // Light
-
-/* Kerning */
-
-$worky-kerning-1: -0.015rem; // -1.5%
-$worky-kerning-2: -0.0125rem; // -1.25%
-$worky-kerning-3: -0.01rem; // -1%
-$worky-kerning-4: -0.005rem; // -0.5%
-$worky-kerning-5: 0.0125rem; //  1.25%
-$worky-kerning-6: 0.015rem; //  1.5%
+$worky-kerning-1: -0.015rem;
+$worky-kerning-2: -0.0125rem;
+$worky-kerning-3: -0.01rem;
+$worky-kerning-4: -0.005rem;
+$worky-kerning-5: 0.0125rem;
+$worky-kerning-6: 0.015rem;
 
 /* Sizes */
-
-$worky-font-size-13: 46.2px; // Display 1
-$worky-font-size-12: 41px; // Display 2
-$worky-font-size-11: 36.5px; // Display 3
-$worky-font-size-10: 32.44px; // H1
-$worky-font-size-9: 28.8px; // H2
-$worky-font-size-8: 25.6px; // H3
-$worky-font-size-7: 22.8px; // H4
-$worky-font-size-6: 20.25px; // H5
-$worky-font-size-5: 18px; // H6
-$worky-font-size-4: 16px; // text, code
-$worky-font-size-3: 14.22px; // small text
-$worky-font-size-2: 12.64px; // smaller text
-$worky-font-size-1: 11.24px; // smallest text
+$worky-font-size-13: 46.2px;
+$worky-font-size-12: 41px;
+$worky-font-size-11: 36.5px; 
+$worky-font-size-10: 32.44px; 
+$worky-font-size-9: 28.8px;
+$worky-font-size-8: 25.6px;
+$worky-font-size-7: 22.8px;
+$worky-font-size-6: 20.25px;
+$worky-font-size-5: 18px;
+$worky-font-size-4: 16px;
+$worky-font-size-3: 14.22px;
+$worky-font-size-2: 12.64px;
+$worky-font-size-1: 11.24px;
 
 /* Icon Size */
-
 $worky-icon-size-5: 32px;
 $worky-icon-size-4: 24px;
 $worky-icon-size-3: 20.25px;
