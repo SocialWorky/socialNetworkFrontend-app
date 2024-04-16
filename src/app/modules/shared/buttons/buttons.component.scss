@@ -21,14 +21,12 @@
       justify-content: center;
     }
 
-    // Added to manage text bigger than the button
     ::ng-deep .worky-button-wrapper span {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    // Added to manage icons when the text is bigger than the button
     ::ng-deep .worky-button-wrapper span[class^="material-icons"], span[class*=" material-icons"] {
       font-size: 20px;
       flex-shrink: 0;
@@ -40,7 +38,7 @@
   .worky-button-basic {
     color: map-get($worky-navy, 100);
   }
-  .worky-button-stroked {
+  .worky-button-outline {
     color: map-get($worky-navy, 100);
     border: 1px solid map-get($worky-navy, 100);
   }
@@ -54,7 +52,7 @@
   .worky-button-basic {
     color: map-get($worky-teal, 100);
   }
-  .worky-button-stroked {
+  .worky-button-outline {
     color: map-get($worky-teal, 100);
     border: 1px solid map-get($worky-teal, 100);
   }
@@ -68,7 +66,7 @@
   .worky-button-basic {
     color: map-get($worky-blue, 100);
   }
-  .worky-button-stroked {
+  .worky-button-outline {
     color: map-get($worky-blue, 100);
     border: 1px solid map-get($worky-blue, 100);
   }
@@ -82,7 +80,7 @@
   .worky-button-basic {
     color: map-get($worky-magenta, 100);
   }
-  .worky-button-stroked {
+  .worky-button-outline {
     color: map-get($worky-magenta, 100);
     border: 1px solid map-get($worky-magenta, 100);
   }
