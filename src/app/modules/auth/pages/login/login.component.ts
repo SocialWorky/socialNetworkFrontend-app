@@ -15,12 +15,11 @@ import { LoginData } from '../../interfaces/login.interface';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit { 
+  loginForm: FormGroup = new FormGroup({});
 
   WorkyButtonType = WorkyButtonType;
 
   WorkyButtonTheme = WorkyButtonTheme;
-
-  loginForm: FormGroup = new FormGroup({});
   
   messageError:string = "";
 
@@ -40,8 +39,7 @@ export class LoginComponent implements OnInit {
 
     this.loginForm = this._formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      rememberMe: [false]
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
 
     if (this.token !== null) {
@@ -71,7 +69,7 @@ export class LoginComponent implements OnInit {
     next: (response: any) => {
       if (response && response.token) {
         localStorage.setItem('token', response.token);
-        this._router.navigate(['/']);
+        this._router.navigate(['/home']);
       }
     },
     error: (error: any) => {

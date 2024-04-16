@@ -12,12 +12,12 @@ const routes: Routes = [
     redirectTo: 'auth',
     pathMatch: 'full',
   },
-  // {
-  //   path: '',
-  //   loadChildren: () => import('../app/modules/pages/pages.module').then( m => m.PagesModule),
-  //   pathMatch: 'full',
-  //   canActivate: [AuthGuard]
-  // },
+  {
+    path: '',
+    loadChildren: () => import('../app/modules/pages/pages.module').then( m => m.PagesModule),
+    pathMatch: 'full',
+    canActivate: [AuthGuard]
+  },
   {
     path: '**',
     redirectTo: '',
