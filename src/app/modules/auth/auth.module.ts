@@ -6,6 +6,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { AuthRoutingModule } from './auth-routing.module';
 import { MaterialModule } from '../shared/material/material.module';
 import { WorkyButtonsModule } from '../shared/buttons/buttons.module';
+import { TranslationsModule } from '../shared/translations/translations.module';
 
 
 @NgModule({
@@ -14,7 +15,8 @@ import { WorkyButtonsModule } from '../shared/buttons/buttons.module';
     CommonModule,
     AuthRoutingModule,
     MaterialModule,
-    WorkyButtonsModule
+    WorkyButtonsModule,
+    TranslationsModule
   ]
 })
 export class AuthModule { }
