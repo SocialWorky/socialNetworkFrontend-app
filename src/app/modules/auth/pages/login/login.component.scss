@@ -7,7 +7,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  // background-color: #00418b;
   height: 100vh;
   @include breakpoints.below-sm {
     height: auto;
