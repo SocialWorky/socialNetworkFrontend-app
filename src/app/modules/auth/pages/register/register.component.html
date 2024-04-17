@@ -13,54 +13,55 @@
         <div class="content-register-header">
             <h1 class="title-register">{{ 'register.title' | workyTranslations }}</h1>
             <p class="subTitle-register">{{ 'register.subTitle' | workyTranslations }}</p>
-    </div>
-    
-    <form>
-        <div class="form-register">  
-            <div class="form-input">
-                <mat-form-field class="worky-input worky-accent">
-                    <mat-label>{{ 'input.name' | workyTranslations }}</mat-label>
-                    <input type="text" formControlName="firstName" id="firstName" matInput required>
-                    <mat-error worky-validation-error-message formControlName="firstName"></mat-error>
-                </mat-form-field>
-    
-                <mat-form-field class="worky-input worky-accent">
-                    <mat-label>{{ 'input.lastname' | workyTranslations }}</mat-label>
-                    <input type="text" formControlName="lastName" id="lastName" matInput required>
-                    <mat-error worky-validation-error-message formControlName="lastName"></mat-error>
-                </mat-form-field>
-    
-                <mat-form-field class="worky-input worky-accent">
-                    <mat-label>{{ 'input.username' | workyTranslations }}</mat-label>
-                    <input type="text" formControlName="username" id="username" matInput required>
-                    <mat-error worky-validation-error-message formControlName="username"></mat-error>
-                </mat-form-field>
-    
-                <mat-form-field class="worky-input worky-accent">
-                    <mat-label>{{ 'input.email' | workyTranslations }}</mat-label>
-                    <input type="email" formControlName="email" id="email" matInput required>
-                    <mat-error worky-validation-error-message formControlName="email"></mat-error>
-                </mat-form-field>
-    
-                <mat-form-field class="worky-input worky-accent">
-                    <mat-label>{{ 'input.password' | workyTranslations }}</mat-label>
-                    <input type="password" formControlName="password" id="password" matInput required>
-                    <mat-error worky-validation-error-message formControlName="password"></mat-error>
-                </mat-form-field>
-            </div>
-
-            <div class="have-account">
-                <span onclick="">{{ 'register.haveAccountLogIn' | workyTranslations }}</span>
-            </div>
-    
-            <div class="form-register-buttons">
-                <worky-buttons
-                    [workyButtonType]="WorkyButtonType.Flat"
-                    [theme]="WorkyButtonTheme.Basic"
-                    [width]="'100%'">
-                    <span basic-button-text>{{ 'button.register' | workyTranslations }}</span>
-                </worky-buttons>
-            </div>
         </div>
-    </form>
+    
+        <form [formGroup]="registerForm" (ngSubmit)="register()">
+            <div class="form-register">  
+                <div class="form-input">
+                    <mat-form-field class="worky-input worky-accent">
+                        <mat-label>{{ 'input.name' | workyTranslations }}</mat-label>
+                            <input type="firstName" formControlName="firstName" id="firstName" matInput required>
+                        <mat-error worky-validation-error-message></mat-error>
+                    </mat-form-field>
+            
+                    <mat-form-field class="worky-input worky-accent">
+                        <mat-label>{{ 'input.lastname' | workyTranslations }}</mat-label>
+                            <input type="lastName" formControlName="lastName" id="lastName" matInput required>
+                        <mat-error worky-validation-error-message></mat-error>
+                    </mat-form-field>
+            
+                    <mat-form-field class="worky-input worky-accent">
+                        <mat-label>{{ 'input.username' | workyTranslations }}</mat-label>
+                            <input type="username" formControlName="username" id="username" matInput required>
+                        <mat-error worky-validation-error-message></mat-error>
+                    </mat-form-field>
+            
+                    <mat-form-field class="worky-input worky-accent">
+                        <mat-label>{{ 'input.email' | workyTranslations }}</mat-label>
+                            <input type="email" formControlName="email" id="email" matInput required>
+                        <mat-error worky-validation-error-message></mat-error>
+                    </mat-form-field>
+            
+                    <mat-form-field class="worky-input worky-accent">
+                        <mat-label>{{ 'input.password' | workyTranslations }}</mat-label>
+                            <input type="password" formControlName="password" id="password" matInput required>
+                        <mat-error worky-validation-error-message></mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="have-account">
+                    <span onclick="">{{ 'register.haveAccountLogIn' | workyTranslations }}</span>
+                </div>
+        
+                <div class="form-register-buttons">
+                    <worky-buttons
+                        [workyButtonType]="WorkyButtonType.Flat"
+                        [theme]="WorkyButtonTheme.Basic"
+                        [width]="'100%'">
+                        <span basic-button-text>{{ 'button.register' | workyTranslations }}</span>
+                    </worky-buttons>
+                </div>
+            </div>   
+        </form>
+    </div>
 </div> 
