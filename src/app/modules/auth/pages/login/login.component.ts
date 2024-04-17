@@ -8,6 +8,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { AuthApiService } from '../../services/apiLogin.service';
 import { LoginData } from '../../interfaces/login.interface';
+import { translations } from '../../../../../translations/translations';
 
 @Component({
   selector: 'worky-login',
@@ -53,14 +54,14 @@ export class LoginComponent implements OnInit {
   const password = this.loginForm.get('password')?.value;
 
   if (!this.loginForm.valid) {
-    this.mostrarErrorAlert('Email no valido o contraseña no valida');
+    this.mostrarErrorAlert(translations['login.emailOrPasswordIncorrect']);
     return;
   }
 
   const credentials: LoginData = { email, password };
 
   const loading = await this._loadingCtrl.create({
-    message: 'Conectando...',
+    message: translations['login.messageLoading'],
   });
 
   await loading.present();
@@ -74,11 +75,11 @@ export class LoginComponent implements OnInit {
     },
     error: (error: any) => {
       if (error.status === 401) {
-        this.mostrarErrorAlert('Credenciales incorrectas. Por favor, inténtalo de nuevo.');
+        this.mostrarErrorAlert(translations['login.messageErrorCredentials']);
         loading.dismiss();
       }
       if (error.status === 500) {
-        this.mostrarErrorAlert('Error en el servidor. Por favor, inténtalo de nuevo.');
+        this.mostrarErrorAlert(translations['login.messageErrorServer']);
         loading.dismiss();
       }
     },
@@ -97,9 +98,9 @@ export class LoginComponent implements OnInit {
 
   async mostrarErrorAlert(mensaje: string) {
     const alert = await this._alertController.create({
-      header: 'Error de Credenciales',
+      header: translations['login.messageErrorHeader'],
       message: mensaje,
-      buttons: ['OK']
+      buttons: [translations['button.ok']]
     });
 
     await alert.present();
