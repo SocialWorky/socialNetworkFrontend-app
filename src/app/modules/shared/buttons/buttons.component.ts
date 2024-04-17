@@ -27,8 +27,8 @@ export class ButtonsComponent {
     return this.workyButtonType === WorkyButtonType.Basic;
   }
 
-  get isStroked() {
-    return this.workyButtonType === WorkyButtonType.Stroked;
+  get isOutline() {
+    return this.workyButtonType === WorkyButtonType.Outline;
   }
 
   get isFlat() {
@@ -49,7 +49,6 @@ export class ButtonsComponent {
   @Input()
   disabled = false;
 
-  // If no width is specified, it will take the content width (with a maximum of 100%)
   // Input examples: '100%', '50%', '200px'
   @Input()
   width: string | undefined;

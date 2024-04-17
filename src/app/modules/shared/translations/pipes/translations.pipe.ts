@@ -10,11 +10,9 @@ export const getTranslationByQuantity = (key: string, quantity: number): string 
 
 export const linkTranslationArguments = (key: string, args: any[]): string => {
 
-  // TODO add log of missing key when trying to be used
   if (!translations[key]) return '';
 
   return translations[key].replace(/{(\d+)}/g, (match, number) => {
-    // TODO add log when a key is being used and is missing arguments
     return typeof args[number] !== 'undefined'
       ? args[number]
       : match
