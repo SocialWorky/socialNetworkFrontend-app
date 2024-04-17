@@ -13,8 +13,16 @@ export const translations = {
   // INPUTS
   'input.email': 'Email',
   'input.password': 'Password',
+  'input.name': 'Name',
+  'input.lastname': 'Lastname',
+  'input.username': 'Username',
   // BUTTONS
   'button.login': 'Login',
   'button.signUp': 'Sign up',
   'button.ok': 'Ok',
+  'button.register': 'Register',
+  // REGISTER COMPONENT
+  'register.title': 'Register',
+  'register.subTitle': 'Fill out the registration form',
+  'register.haveAccountLogIn': 'Already have an account? Log in',
 };
