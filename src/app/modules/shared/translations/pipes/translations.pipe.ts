@@ -22,7 +22,7 @@ export const linkTranslationArguments = (key: string, args: any[]): string => {
   });
 };
 
-@Pipe({ name: 'cotTranslations' })
+@Pipe({ name: 'workyTranslations' })
 export class TranslationsPipe implements PipeTransform {
   transform(value: string, type?: string, ...args: any[]): string {
     switch (type) {
