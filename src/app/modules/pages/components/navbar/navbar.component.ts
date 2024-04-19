@@ -7,19 +7,23 @@ import { DeviceDetectionService } from './../../../shared/services/DeviceDetecti
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
   token = localStorage.getItem('token');
 
   searchTerm: string = '';
 
-  get isMobile() {
-    return this._deviceDetectionService.isMobile;
+  get isMobile(): boolean {
+    return this._deviceDetectionService.isMobile();
   }
 
   constructor(
     private _router: Router,
     private _deviceDetectionService: DeviceDetectionService
-  ) { }
+  ) {}
+
+  ngOnInit() {
+    console.log('isMobile:', this.isMobile);
+  }
 
   logoutUser() {
     localStorage.removeItem('token');
