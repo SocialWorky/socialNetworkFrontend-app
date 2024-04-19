@@ -1,7 +1,10 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { DeviceDetectionService } from './../../../shared/services/DeviceDetection.service';
 import { Subscription } from 'rxjs';
+
+import { translations } from './../../../../../translations/translations'
+import { DeviceDetectionService } from './../../../shared/services/DeviceDetection.service';
+import { DropdownDataLink } from './../../../shared/worky-dropdown/interfaces/dataLink.interface';
 
 @Component({
   selector: 'worky-navbar',
@@ -10,8 +13,12 @@ import { Subscription } from 'rxjs';
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   token = localStorage.getItem('token');
+
   searchTerm: string = '';
+
   isMobile: boolean = false;
+
+  dataLinkProfile:DropdownDataLink[] = [];
 
   resizeSubscription: Subscription | undefined;
 
@@ -19,7 +26,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private _router: Router,
     private _deviceDetectionService: DeviceDetectionService,
     private _cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    this.menuProfile();
+  }
 
   ngOnInit() {
     this.isMobile = this._deviceDetectionService.isMobile();
@@ -58,6 +67,25 @@ export class NavbarComponent implements OnInit, OnDestroy {
     // Realiza la búsqueda si se presiona "Enter" y el término tiene al menos 3 caracteres
     if (event.key === 'Enter' && this.searchTerm.trim().length >= 3) {
       this.search(event);
+    }
+  }
+
+  menuProfile() {
+  this.dataLinkProfile = [
+    { link: '/auth/login',  title: 'Perfil' },
+    { link: '/settings',  title: 'Configuración' },
+    { function: this.logoutUser.bind(this),  title: translations['navbar.logout']},
+  ];
+}
+
+  handleLinkClicked(data: DropdownDataLink) {
+    if (data.function) {
+      if (typeof data.function === 'function') {
+        data.function();
+      }
+    }
+    if (data.link) {
+      this._router.navigate([data.link]);
     }
   }
 }
