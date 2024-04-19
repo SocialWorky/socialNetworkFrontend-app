@@ -1,7 +1,6 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-palettes' as colors;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
-@use 'src/assets/styles/worky-typography.scss' as fonts;
 
 .content-navbar {
   display: flex;
@@ -10,23 +9,11 @@
   background-color: colors.$worky-background-header-color;
 
   .worky-navbar {
+    width: 100%;
     display: flex;
     padding: 2px;
     align-items: center;
     width: variables.$worky-app-width;
-
-    .container-navbar {
-      display: flex;
-      align-items: center;
-      width: 100%;
-    }
-  }
-  .navbar {
-    color: colors.$worky-color-light; 
-    padding: 0px 10px;
-    .navbar-nav {
-        align-items: center;
-    }
   }
 
   .worky-brand {
