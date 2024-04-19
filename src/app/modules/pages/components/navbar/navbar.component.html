@@ -1,3 +1,141 @@
-<p>
-  navbar works!
-</p>
+<div class="content-navbar">
+  <nav class="navbar worky-navbar">
+    <div class="container-navbar">
+      <!-- Left elements -->
+      <div class="worky-brand">
+        <!-- Brand Logo-->
+        <a href="#">
+          <img
+            src="assets/img/navbar/worky-your-logo.png"
+            height="20"
+            alt="MDB Logo"
+            loading="lazy"
+            style="margin-top: 2px;"
+          />
+        </a>
+        <!-- Search -->
+        <form class="worky-search" (ngSubmit)="search($event)">
+          <div class="search-container">
+            <span class="material-icons search-icon">search</span>
+            <input
+              type="search"
+              class="form-control"
+              placeholder="Search"
+              aria-label="Search"
+              [(ngModel)]="searchTerm"
+              (input)="onInputChange($event)"
+              name="searchTerm"
+            />
+          </div>
+        </form>
+      </div>
+      <!-- Left elements -->
+
+      <!-- Center elements -->
+      <div class="worky-menu">
+
+        <div class="nav-item">
+          <a class="nav-link" href="/">
+            <span class="material-icons tab-menu">home</span>
+          </a>
+        </div>
+
+        <div class="nav-item">
+          <a class="nav-link" href="#">
+            <span class="material-icons tab-menu">person</span>
+          </a>
+        </div>
+      </div>
+      <!-- Center elements -->
+
+      <!-- Right elements -->
+      <div class="worky-profile" >
+        <!-- Message -->
+        <div class="nav-item dropdown">
+          <a
+            class="nav-link"
+            href="#"
+            id="navbarDropdownMendivink"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">
+            <span class="material-icons icon-navbar">mail</span>
+
+            <span class="badge rounded-pill badge-notification bg-danger">6</span>
+          </a>
+          <div
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="navbarDropdownMendivink">
+            <div>
+              <a class="dropdown-item" href="#">Some news</a>
+            </div>
+            <div>
+              <a class="dropdown-item" href="#">Another news</a>
+            </div>
+            <div>
+              <a class="dropdown-item" href="#">Something else here</a>
+            </div>
+          </div>
+        </div>
+        <!-- Notification -->
+        <div class="nav-item dropdown">
+          <a
+            class="nav-link"
+            href="#"
+            id="navbarDropdownMendivink"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">
+            <span class="material-icons icon-navbar">notifications</span>
+            <span class="badge rounded-pill badge-notification bg-danger">12</span>
+          </a>
+          <div
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="navbarDropdownMendivink">
+            <div>
+              <a class="dropdown-item" href="#">Some news</a>
+            </div>
+            <div>
+              <a class="dropdown-item" href="#">Another news</a>
+            </div>
+            <div>
+              <a class="dropdown-item" href="#">Something else here</a>
+            </div>
+          </div>
+        </div>
+        <!-- Profile -->
+        <div class="nav-item dropdown">
+          <a 
+            class="nav-link" 
+            href="#"
+            id="navbarDropdownMendivink"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">
+            <img
+              src="https://mdbcdn.b-cdn.net/img/new/avatars/1.webp"
+              class="img-profile-menu rounded-circle"
+              alt="Black and White Portrait of a Man"
+              loading="lazy"/>
+          </a>
+          <div
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="navbarDropdownMendivink">
+            <div>
+              <a class="dropdown-item" href="#">Some news</a>
+            </div>
+            <div>
+              <a class="dropdown-item" href="#">Another news</a>
+            </div>
+            <div *ngIf="token">
+              <a class="dropdown-item" (cdivck)="logoutUser()" href="">{{ 'navbar.logout' | workyTranslations }}</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- Right elements -->
+    </div>
+  </nav>
+</div>
+
