@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { DeviceDetectionService } from './../../../shared/services/DeviceDetection.service';
 
 @Component({
   selector: 'worky-navbar',
@@ -11,7 +12,14 @@ export class NavbarComponent {
 
   searchTerm: string = '';
 
-  constructor(private _router: Router) { }
+  get isMobile() {
+    return this._deviceDetectionService.isMobile;
+  }
+
+  constructor(
+    private _router: Router,
+    private _deviceDetectionService: DeviceDetectionService
+  ) { }
 
   logoutUser() {
     localStorage.removeItem('token');

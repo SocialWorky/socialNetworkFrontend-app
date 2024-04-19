@@ -7,6 +7,9 @@
   justify-content: center;
   height: variables.$worky-navbar-height;
   background-color: colors.$worky-background-header-color;
+  @include breakpoints.below-sm {
+    height: auto;
+  }
 
   .worky-navbar {
     width: 100%;
@@ -14,12 +17,19 @@
     padding: 2px;
     align-items: center;
     width: variables.$worky-app-width;
+    @include breakpoints.below-sm {
+      flex-direction: column;
+    }
   }
 
   .worky-brand {
     display: flex;
     justify-content: space-between;
     width: 30%;
+    @include breakpoints.below-sm {
+      width: 100%;
+      padding: 5px;
+    }
     a {
       img {
         width: 60px;
@@ -79,6 +89,11 @@
     }
     .icon-navbar {
         font-size: variables.$worky-font-size-7;
+    }
+    @include breakpoints.below-sm {
+      width: 100%;
+      justify-content: space-between;
+      padding: 5px;
     }
   }
 

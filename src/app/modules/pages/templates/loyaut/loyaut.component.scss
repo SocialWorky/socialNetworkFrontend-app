@@ -28,5 +28,6 @@
   min-width: variables.$worky-app-min-width;
   @include breakpoints.below-md {
     width: 100%;
+    padding: 5px;
   }
 }

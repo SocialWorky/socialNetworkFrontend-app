@@ -13,7 +13,9 @@
         />
       </a>
       <!-- Search -->
-      <form class="worky-search" (ngSubmit)="search($event)">
+      <form 
+        class="worky-search"
+        (ngSubmit)="search($event)">
         <div class="search-container">
           <span class="material-icons search-icon">search</span>
           <input
@@ -29,7 +31,7 @@
     </div>
 
     <!-- Center elements -->
-    <div class="worky-menu">
+    <div class="worky-menu" *ngIf="!isMobile">
 
       <div class="nav-item">
         <a class="nav-link" href="/">
@@ -123,7 +125,7 @@
             <a class="dropdown-item" href="#">Another news</a>
           </div>
           <div *ngIf="token">
-            <a class="dropdown-item" (cdivck)="logoutUser()" href="">{{ 'navbar.logout' | workyTranslations }}</a>
+            <a class="dropdown-item" (click)="logoutUser()" href="">{{ 'navbar.logout' | workyTranslations }}</a>
           </div>
         </div>
       </div>
