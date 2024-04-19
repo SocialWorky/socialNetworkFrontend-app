@@ -25,4 +25,6 @@ export const translations = {
   'register.title': 'Registro',
   'register.subTitle': 'Complete el formulario de registro',
   'register.haveAccountLogIn': '¿Ya tienes una cuenta? Inicia sesión',
+  // NAVBAR COMPONENT
+  'navbar.logout': 'Cerrar sesión',
 };

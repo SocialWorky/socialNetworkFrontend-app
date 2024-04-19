@@ -1,0 +1,33 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-social-app {
+  max-width: variables.$worky-app-width;
+  display: flex;
+  justify-content: center;
+  margin: auto;
+  padding-top: 10px;
+  @include breakpoints.below-md {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+::ng-deep worky-content-left-side,
+::ng-deep worky-content-right-side {
+  width: variables.$worky-container-width-sidebar;
+  display: flex;
+  justify-content: center;
+  @include breakpoints.below-md {
+    display: none;
+  }
+}
+
+::ng-deep .social-content-center {
+  width: variables.$worky-container-width-content;
+  min-width: variables.$worky-app-min-width;
+  @include breakpoints.below-md {
+    width: 100%;
+    padding: 5px;
+  }
+}

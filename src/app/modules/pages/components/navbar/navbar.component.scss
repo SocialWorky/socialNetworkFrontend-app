@@ -1,0 +1,121 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-navbar {
+  display: flex;
+  justify-content: center;
+  height: variables.$worky-navbar-height;
+  background-color: colors.$worky-background-header-color;
+  @include breakpoints.below-sm {
+    height: auto;
+  }
+
+  .worky-navbar {
+    width: 100%;
+    display: flex;
+    padding: 2px;
+    align-items: center;
+    width: variables.$worky-app-width;
+    @include breakpoints.below-sm {
+      flex-direction: column;
+    }
+  }
+
+  .worky-brand {
+    display: flex;
+    justify-content: space-between;
+    width: 30%;
+    @include breakpoints.below-sm {
+      width: 100%;
+      padding: 5px;
+    }
+    a {
+      img {
+        width: 60px;
+        height: auto;
+        margin-top: 5px;
+      }
+    }
+    .worky-search {
+      width: 100%;
+      padding: 5px 15px;
+      align-items: center;
+      align-content: center;
+      .search-container {
+        position: relative;
+      }
+
+      .search-icon {
+        position: absolute;
+        color: colors.$worky-color-app-dark;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1;
+      }
+      .form-control {
+        padding-left: 40px;
+        border-radius: variables.$worky-border-radius-medium;
+      }
+    }
+  }
+
+  .worky-menu {
+    display: flex;
+    list-style: none;
+    justify-content: center;
+    width: 50%;
+    .tab-menu {
+        font-size: variables.$worky-font-size-9;
+        padding: 10px;
+        &:hover {
+            background-color: colors.$worky-color-light;
+            color: colors.$worky-color-app-primary;
+            border-radius: 5px;
+        }
+    }
+  }
+
+  .worky-profile {
+    display: flex;
+    list-style: none;
+    justify-content: flex-end;
+    align-items: center;
+    align-content: center;
+    width: 20%;
+    .img-profile-menu {
+        height: 40px;
+    }
+    .icon-navbar {
+        font-size: variables.$worky-font-size-7;
+    }
+    @include breakpoints.below-sm {
+      width: 100%;
+      justify-content: space-between;
+      padding: 5px;
+    }
+  }
+
+  .nav-link {
+    color: colors.$worky-color-light;
+    display: flex;
+    padding: 2px 6px;
+    align-items: center;
+
+    .badge-notification {
+      background-color: colors.$worky-color-warn;
+      font-size: variables.$worky-font-size-1;
+      border-radius: 50%;
+      padding: 3px 7px;
+      margin-left: -10px;
+      margin-top: -15px;
+      display: flex;
+      align-items: center;
+      i {
+        margin-right: 5px;
+      }
+    }
+  }
+
+}
