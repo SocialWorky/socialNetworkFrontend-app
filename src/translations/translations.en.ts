@@ -25,4 +25,6 @@ export const translations = {
   'register.title': 'Register',
   'register.subTitle': 'Fill out the registration form',
   'register.haveAccountLogIn': 'Already have an account? Log in',
+  // NAVBAR COMPONENT
+  'navbar.logout': 'Log out',
 };
