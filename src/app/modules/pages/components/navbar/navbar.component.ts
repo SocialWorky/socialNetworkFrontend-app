@@ -1,28 +1,38 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { DeviceDetectionService } from './../../../shared/services/DeviceDetection.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'worky-navbar',
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   token = localStorage.getItem('token');
-
   searchTerm: string = '';
+  isMobile: boolean = false;
 
-  get isMobile(): boolean {
-    return this._deviceDetectionService.isMobile();
-  }
+  resizeSubscription: Subscription | undefined;
 
   constructor(
     private _router: Router,
-    private _deviceDetectionService: DeviceDetectionService
+    private _deviceDetectionService: DeviceDetectionService,
+    private _cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    console.log('isMobile:', this.isMobile);
+    this.isMobile = this._deviceDetectionService.isMobile();
+    this.resizeSubscription = this._deviceDetectionService.getResizeEvent().subscribe(() => {
+      this.isMobile = this._deviceDetectionService.isMobile();
+      this._cdr.markForCheck();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.resizeSubscription) {
+      this.resizeSubscription.unsubscribe();
+    }
   }
 
   logoutUser() {
@@ -50,5 +60,4 @@ export class NavbarComponent implements OnInit {
       this.search(event);
     }
   }
-
 }
