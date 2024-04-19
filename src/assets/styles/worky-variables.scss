@@ -2,6 +2,10 @@
 
 /* App Width */
 $worky-app-width: 1600px;
+$worky-app-min-width: 320px;
+
+/* Navbar */
+$worky-navbar-height: 90px;
 
 /* Spacing */
 $worky-spacing-small: 8px;
@@ -17,7 +21,8 @@ $worky-opacity-medium: 0.7;
 $worky-opacity-high: 0.9;
 
 /* Container Width */
-$worky-container-width-sidebar: 20%;
+$worky-container-width-sidebar: 25%;
+$worky-container-width-content: 50%;
 
 /* Z-Index */
 $worky-zindex-modal: 1000;

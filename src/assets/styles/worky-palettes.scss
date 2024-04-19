@@ -346,8 +346,14 @@ $worky-red: (
 
 
 /* worky App Components Colors */
+
+/* App */
+$worky-color-app-background: #FFFFFF;
+$worky-color-app-text: $worky-color-navy;
+$worky-color-app-dark: $worky-color-navy;
+
 $worky-color-app-primary: map-get($worky-blue, 100);
 $worky-color-app-secondary: map-get($worky-blue, 56);
-$worky-color-app-background: $worky-color-light;
 
-$worky-header-color: map-get($worky-navy, 7);
+/* App Components */
+$worky-background-header-color: map-get($worky-blue, 72);
