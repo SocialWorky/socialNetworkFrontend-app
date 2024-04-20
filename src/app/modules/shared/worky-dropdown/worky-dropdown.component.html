@@ -1,0 +1,31 @@
+<div
+  class="nav-link"
+  role="button"
+  [attr.data-bs-toggle]="dataLink?.length ? 'dropdown' : null">
+  <div *ngIf="img">
+    <img
+      src="{{ img }}"
+      class="img-dropdown rounded-circle"
+      loading="lazy"/>
+  </div>
+
+  <ng-container *ngIf="badge">
+  <span class="material-icons">{{ icon }}</span>
+  <span 
+    class="badge rounded-pill badge-notification bg-danger">
+    {{ badgeValue }}
+  </span>
+  </ng-container>
+
+
+</div>
+
+<div *ngIf="dataLink?.length"
+  class="dropdown-menu dropdown-menu-end">
+    <div *ngFor="let data of dataLink; let dataIndex = index;">
+      <span class="dropdown-item"
+         (click)="handleMenuItemClick(data)">
+         {{ data.title }}
+      </span>
+    </div>
+</div>

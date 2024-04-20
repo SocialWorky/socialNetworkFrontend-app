@@ -61,20 +61,11 @@
     }
   }
 
-  .worky-menu {
+  worky-menu-component {
     display: flex;
     list-style: none;
     justify-content: center;
     width: 50%;
-    .tab-menu {
-        font-size: variables.$worky-font-size-9;
-        padding: 10px;
-        &:hover {
-            background-color: colors.$worky-color-light;
-            color: colors.$worky-color-app-primary;
-            border-radius: 5px;
-        }
-    }
   }
 
   .worky-profile {
@@ -84,11 +75,8 @@
     align-items: center;
     align-content: center;
     width: 20%;
-    .img-profile-menu {
-        height: 40px;
-    }
-    .icon-navbar {
-        font-size: variables.$worky-font-size-7;
+    ::ng-deep worky-dropdown span.material-icons {
+        font-size: variables.$worky-font-size-9;
     }
     @include breakpoints.below-sm {
       width: 100%;
@@ -96,26 +84,4 @@
       padding: 5px;
     }
   }
-
-  .nav-link {
-    color: colors.$worky-color-light;
-    display: flex;
-    padding: 2px 6px;
-    align-items: center;
-
-    .badge-notification {
-      background-color: colors.$worky-color-warn;
-      font-size: variables.$worky-font-size-1;
-      border-radius: 50%;
-      padding: 3px 7px;
-      margin-left: -10px;
-      margin-top: -15px;
-      display: flex;
-      align-items: center;
-      i {
-        margin-right: 5px;
-      }
-    }
-  }
-
 }

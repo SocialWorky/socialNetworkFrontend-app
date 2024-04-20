@@ -1,7 +1,7 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, EventEmitter } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { Platform } from '@ionic/angular';
-import { Subject } from 'rxjs';
+import { Subject, fromEvent } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Injectable({
@@ -10,6 +10,7 @@ import { takeUntil } from 'rxjs/operators';
 export class DeviceDetectionService implements OnDestroy {
 
   private destroy$: Subject<void> = new Subject<void>();
+  private resizeEvent: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   private _isScreenSmallerThan600px: boolean = false;
 
@@ -17,7 +18,12 @@ export class DeviceDetectionService implements OnDestroy {
     private readonly _platform: Platform
   ) { 
     this.detectScreenSize();
-    window.addEventListener('resize', () => this.detectScreenSize());
+    fromEvent(window, 'resize')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.detectScreenSize();
+        this.resizeEvent.emit(this._isScreenSmallerThan600px);
+      });
   }
 
   ngOnDestroy() {
@@ -53,5 +59,9 @@ export class DeviceDetectionService implements OnDestroy {
 
   height() {
     return this._platform.height();
+  }
+
+  getResizeEvent(): EventEmitter<boolean> {
+    return this.resizeEvent;
   }
 }

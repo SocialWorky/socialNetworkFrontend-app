@@ -1,0 +1,12 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+
+.tab-menu {
+    font-size: variables.$worky-font-size-9;
+    padding: 10px;
+    &:hover {
+    background-color: colors.$worky-color-light;
+    color: colors.$worky-color-app-primary;
+    border-radius: variables.$worky-border-radius-medium;
+    }
+}
