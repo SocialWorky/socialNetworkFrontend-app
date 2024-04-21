@@ -22,7 +22,7 @@
 
 <div *ngIf="dataLink?.length"
   class="dropdown-menu dropdown-menu-end">
-    <div *ngFor="let data of dataLink; let dataIndex = index;">
+    <div class="content-dropdow" *ngFor="let data of dataLink; let dataIndex = index;">
       <span class="dropdown-item"
          (click)="handleMenuItemClick(data)">
          {{ data.title }}

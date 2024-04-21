@@ -19,8 +19,8 @@ export class AuthService {
       if (decodedToken && decodedToken.exp && decodedToken.exp > currentTime) {
         return true;
       } else {
-        this.router.navigate(['/auth']);
         localStorage.removeItem('token');
+        this.router.navigate(['/auth']);
         return false;
       }
     } else {

@@ -9,19 +9,11 @@ const routes: Routes = [
     path: '',
     component: LayoutPageComponent,
     children: [
-      { path: 'login', component: LoginComponent},
+      { path: 'login', component: LoginComponent },
+      { path: 'register', component: RegisterComponent },
       { path: '', redirectTo: 'login', pathMatch: 'full' },
     ],
-  },
-  {
-    path: '',
-    component: LayoutPageComponent,
-    children: [
-      { path: 'register', component: RegisterComponent},
-      { path: '', redirectTo: 'register', pathMatch: 'full' },
-    ],
-  },
-  
+  },  
 ];
 
 @NgModule({

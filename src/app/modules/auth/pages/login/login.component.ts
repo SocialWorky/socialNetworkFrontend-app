@@ -34,7 +34,12 @@ export class LoginComponent implements OnInit {
     private _alertController: AlertController,
     private _loadingCtrl: LoadingController,
     private _formBuilder: FormBuilder,
-    private _cdr: ChangeDetectorRef) { }
+    private _cdr: ChangeDetectorRef) { 
+    if (this.token !== null) {
+      this._router.navigate(['/home']);
+    }
+
+   }
 
  ngOnInit() {
 
@@ -43,9 +48,6 @@ export class LoginComponent implements OnInit {
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
 
-    if (this.token !== null) {
-      this._router.navigate(['/home']);
-    }
     this._cdr.detectChanges();
   }
   async login() {
