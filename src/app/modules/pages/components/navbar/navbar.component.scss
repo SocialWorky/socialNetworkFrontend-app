@@ -20,6 +20,9 @@
     @include breakpoints.below-sm {
       flex-direction: column;
     }
+    @include breakpoints.below-md-lg {
+      width: variables.$worky-app-width-xl;
+    }
   }
 
   .worky-brand {
