@@ -14,6 +14,10 @@ import { DropdownDataLink } from './../../../shared/worky-dropdown/interfaces/da
 export class NavbarComponent implements OnInit, OnDestroy {
   token = localStorage.getItem('token');
 
+  notifications: number = 0;
+
+  messages: number = 0;
+
   searchTerm: string = '';
 
   isMobile: boolean = false;
@@ -36,6 +40,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.isMobile = this._deviceDetectionService.isMobile();
       this._cdr.markForCheck();
     });
+    this.notifications = 2;
+    this.messages = 1;
   }
 
   ngOnDestroy() {

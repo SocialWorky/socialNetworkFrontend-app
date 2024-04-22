@@ -12,7 +12,7 @@ export class WorkyDropdownComponent  implements OnInit {
 
   @Input() badge?: boolean = false;
 
-  @Input() badgeValue?: number = 0;
+  @Input() badgeValue?: number | null | undefined = 0;
 
   @Input() dataLink?: DropdownDataLink[] = [];
 
