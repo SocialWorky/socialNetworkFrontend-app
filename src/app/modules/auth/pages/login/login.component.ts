@@ -35,14 +35,13 @@ export class LoginComponent implements OnInit {
     private _loadingCtrl: LoadingController,
     private _formBuilder: FormBuilder,
     private _cdr: ChangeDetectorRef) { 
-    if (this.token !== null) {
+
+    if (this.token) {
       this._router.navigate(['/home']);
     }
-
    }
 
  ngOnInit() {
-
     this.loginForm = this._formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
