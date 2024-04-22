@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
+import { ProfilesComponent } from './profiles/profiles.component';
 import { LoyautComponent } from './templates/loyaut/loyaut.component';
 
 const routes: Routes = [
@@ -9,6 +10,8 @@ const routes: Routes = [
     component: LoyautComponent ,
     children: [
       { path: '', component: HomeComponent, pathMatch: 'full'  },
+      { path: 'profile', component: ProfilesComponent, pathMatch: 'full' },
+      { path: '**', redirectTo: '', pathMatch: 'full' }
     ],
   },
 ];
