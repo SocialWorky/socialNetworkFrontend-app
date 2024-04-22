@@ -15,12 +15,12 @@
             <p class="subTitle-register">{{ 'register.subTitle' | workyTranslations }}</p>
         </div>
     
-        <form [formGroup]="registerForm" (ngSubmit)="register()">
+        <form [formGroup]="registerForm" (ngSubmit)="register()" autocomplete="off">
             <div class="form-register">  
                 <div class="form-input">
                     <mat-form-field class="worky-input worky-accent">
                         <mat-label>{{ 'input.name' | workyTranslations }}</mat-label>
-                            <input type="firstName" formControlName="firstName" id="firstName" matInput required>
+                            <input type="name" formControlName="name" id="name" matInput required>
                         <mat-error worky-validation-error-message></mat-error>
                     </mat-form-field>
             
@@ -50,7 +50,7 @@
                 </div>
 
                 <div class="have-account">
-                    <span onclick="">{{ 'register.haveAccountLogIn' | workyTranslations }}</span>
+                    <span routerLink="auth/login">{{ 'register.haveAccountLogIn' | workyTranslations }}</span>
                 </div>
         
                 <div class="form-register-buttons">
