@@ -30,3 +30,27 @@
         background-color: map-get(colors.$worky-blue, 72);
     }
 }
+
+
+.badge-notification {
+  position: relative;
+}
+
+@keyframes moverIcono {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.mover-icono {
+  animation: moverIcono 0.8s infinite alternate;
+}

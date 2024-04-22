@@ -10,13 +10,12 @@
   </div>
 
   <ng-container *ngIf="badge">
-  <span class="material-icons">{{ icon }}</span>
-  <span 
-    class="badge rounded-pill badge-notification bg-danger">
-    {{ badgeValue }}
-  </span>
+    <span class="material-icons" [class.mover-icono]="badgeValue">{{ icon }}</span>
+    <span *ngIf="badgeValue"
+      class="badge rounded-pill badge-notification bg-danger">
+      {{ badgeValue }}
+    </span>
   </ng-container>
-
 
 </div>
 
