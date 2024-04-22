@@ -17,5 +17,4 @@ export class AuthApiRegisterService {
     const url = `${this._baseUrl}/user/create`;
     return this.http.post(url, body);
   }
-
 }
