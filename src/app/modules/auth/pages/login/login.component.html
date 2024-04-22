@@ -33,7 +33,7 @@
             <div class="line"></div>
         </div>
 
-        <form [formGroup]="loginForm" (ngSubmit)="login()">
+        <form [formGroup]="loginForm" (ngSubmit)="login()" autocomplete="off">
             <div class="form-input">
                 <mat-form-field class="worky-input worky-accent">
                     <mat-label>{{ 'input.email' | workyTranslations }}</mat-label>
