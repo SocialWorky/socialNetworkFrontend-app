@@ -6,10 +6,12 @@ import { AlertController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AlertService } from '../../../shared/services/alert.service';
 
 import { AuthApiService } from '../../services/apiLogin.service';
 import { LoginData } from '../../interfaces/login.interface';
 import { translations } from '../../../../../translations/translations';
+import { Alerts, Position } from '../../../shared/enums/alerts.enum';
 
 @Component({
   selector: 'worky-login',
@@ -36,6 +38,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private _alertController: AlertController,
     private _loadingCtrl: LoadingController,
     private _formBuilder: FormBuilder,
+    private _alertService: AlertService,
     private _cdr: ChangeDetectorRef) { 
 
     if (this.token) {
@@ -114,7 +117,15 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.subscription = this._authApiService.validarCorreoConToken(token).subscribe({
       next: (response: any) => {
         if (response && response.message) {
-          this.mostrarErrorAlert(response.message);
+          this._alertService.showAlert(
+            'Correo validado',
+            'Ya puedes iniciar sesión, tu correo ha sido validado correctamente',
+             Alerts.SUCCESS,
+             Position.CENTER,
+             true,
+             true,
+             'Aceptar',
+          );
         }
       },
       error: (e: any) => {
