@@ -121,10 +121,22 @@ body {
         color: color.$worky-color-blue;
       }
     }
+    .mdc-text-field--invalid {
+      border: 1px solid color.$worky-color-red;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-red;
+      }
+    }
   }
 
   .worky-input.worky-warn {
     .mdc-text-field--focused {
+      border: 1px solid color.$worky-color-red;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-red;
+      }
+    }
+    .mdc-text-field--invalid {
       border: 1px solid color.$worky-color-red;
       .mat-mdc-floating-label.mdc-floating-label {
         color: color.$worky-color-red;
@@ -139,6 +151,12 @@ body {
         color: color.$worky-color-teal;
       }
     }
+    .mdc-text-field--invalid {
+      border: 1px solid color.$worky-color-red;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-red;
+      }
+    }
   }
 
   .worky-input.worky-basic {
@@ -146,6 +164,12 @@ body {
       border: 1px solid color.$worky-color-navy;
       .mat-mdc-floating-label.mdc-floating-label {
         color: color.$worky-color-navy;
+      }
+    }
+    .mdc-text-field--invalid {
+      border: 1px solid color.$worky-color-red;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-red;
       }
     }
   }
