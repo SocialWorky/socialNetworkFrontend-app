@@ -11,6 +11,7 @@ const routes: Routes = [
     children: [
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegisterComponent },
+      { path: 'validate/:token', component: LoginComponent },
       { path: '', redirectTo: 'login', pathMatch: 'full' },
     ],
   },
