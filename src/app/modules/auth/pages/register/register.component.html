@@ -38,7 +38,7 @@
             
                     <mat-form-field class="worky-input worky-accent">
                         <mat-label>{{ 'input.email' | workyTranslations }}</mat-label>
-                            <input type="email" formControlName="email" id="email" matInput required>
+                            <input type="email" formControlName="email" id="email" matInput #emailInput required>
                         <mat-error worky-validation-error-message></mat-error>
                     </mat-form-field>
             
@@ -54,12 +54,14 @@
                 </div>
         
                 <div class="form-register-buttons">
-                    <worky-buttons
+                    <worky-buttons *ngIf="!registerLoading"
                         [workyButtonType]="WorkyButtonType.Flat"
                         [theme]="WorkyButtonTheme.Basic"
+                        [disabled]="!registerForm.valid"
                         [width]="'100%'">
                         <span basic-button-text>{{ 'button.register' | workyTranslations }}</span>
                     </worky-buttons>
+                    <img *ngIf="registerLoading" width="50px" src="assets/img/shared/loading.gif" alt="Loading" />
                 </div>
             </div>   
         </form>

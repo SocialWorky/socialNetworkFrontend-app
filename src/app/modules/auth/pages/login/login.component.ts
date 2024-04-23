@@ -35,11 +35,11 @@ export class LoginComponent implements OnInit, OnDestroy {
     private _authApiService: AuthApiService,
     private _router: Router,
     private _activatedRoute: ActivatedRoute,
-    private _alertController: AlertController,
     private _loadingCtrl: LoadingController,
     private _formBuilder: FormBuilder,
     private _alertService: AlertService,
-    private _cdr: ChangeDetectorRef) { 
+    private _cdr: ChangeDetectorRef
+  ) { 
 
     if (this.token) {
       this._router.navigate(['/home']);
@@ -68,7 +68,15 @@ export class LoginComponent implements OnInit, OnDestroy {
     const password = this.loginForm.get('password')?.value;
 
     if (!this.loginForm.valid) {
-      this.mostrarErrorAlert(translations['login.emailOrPasswordIncorrect']);
+      this._alertService.showAlert(
+        translations['alert.title_error_credentials'],
+        translations['login.emailOrPasswordIncorrect'],
+        Alerts.ERROR,
+        Position.CENTER,
+        true,
+        true,
+        translations['button.ok'],
+      );
       return;
     }
 
@@ -90,15 +98,39 @@ export class LoginComponent implements OnInit, OnDestroy {
       error: (e: any) => {
         console.log(e);
         if (e.error.message === 'User is not verified') {
-          this.mostrarErrorAlert('Email no verificado');
+          this._alertService.showAlert(
+            translations['alert.title_emailValidated_error'],
+            translations['alert.message_emailValidated_error'],
+            Alerts.ERROR,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
           loading.dismiss();
         }
         if (e.error.message === 'Unauthorized access. Please provide valid credentials to access this resource') {
-          this.mostrarErrorAlert(translations['login.messageErrorCredentials']);
+          this._alertService.showAlert(
+            translations['alert.title_error_credentials'],
+            translations['alert.message_error_credentials'],
+            Alerts.ERROR,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
           loading.dismiss();
         }
         if (e.status === 500) {
-          this.mostrarErrorAlert(translations['login.messageErrorServer']);
+          this._alertService.showAlert(
+            translations['alert.title_error_server'],
+            translations['alert.message_error_server'],
+            Alerts.ERROR,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
           loading.dismiss();
         }
       },
@@ -110,7 +142,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   async validarCorreoConToken(token: string) {
     const loading = await this._loadingCtrl.create({
-      message: 'Validando correo...',
+      message: translations['login.messageValidationEmailLoading'],
     });
     await loading.present();
 
@@ -118,19 +150,27 @@ export class LoginComponent implements OnInit, OnDestroy {
       next: (response: any) => {
         if (response && response.message) {
           this._alertService.showAlert(
-            'Correo validado',
-            'Ya puedes iniciar sesión, tu correo ha sido validado correctamente',
-             Alerts.SUCCESS,
-             Position.CENTER,
-             true,
-             true,
-             'Aceptar',
+            translations['alert.title_emailValidated_success'],
+            translations['alert.message_emailValidated_success'],
+            Alerts.SUCCESS,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
           );
         }
       },
       error: (e: any) => {
-        console.log(e.error.text);
-        this.mostrarErrorAlert('Error validando correo');
+        this._alertService.showAlert(
+          translations['alert.title_emailValidated_error'],
+          translations['alert.message_emailValidated_error'],
+          Alerts.ERROR,
+          Position.CENTER,
+          true,
+          true,
+          translations['button.ok'],
+        );
+        loading.dismiss();
       },
       complete: () => {
         loading.dismiss();
@@ -144,15 +184,4 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.subscription.unsubscribe();
     }
   }
-
-  async mostrarErrorAlert(mensaje: string) {
-    const alert = await this._alertController.create({
-      header: translations['login.messageErrorHeader'],
-      message: mensaje,
-      buttons: [translations['button.ok']]
-    });
-
-    await alert.present();
-  }
-
 }
