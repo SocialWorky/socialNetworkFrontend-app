@@ -46,6 +46,10 @@
     color: $worky-color-light;
     background-color: map-get($worky-navy, 100);
   }
+  .worky-button-disabled {
+    color: map-get($worky-navy, 72);
+    background-color: map-get($worky-navy, 24);
+  }
 }
 
 :host-context(.theme-primary) {

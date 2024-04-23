@@ -10,6 +10,7 @@ export const translations = {
   'login.messageLoading': 'Conectando...',
   'login.messageErrorCredentials': 'Credenciales incorrectas. Por favor, inténtalo de nuevo.',
   'login.messageErrorServer': 'Error en el servidor. Por favor, inténtalo de nuevo.',
+  'login.messageValidationEmailLoading': 'Validando correo...',
   // INPUTS
   'input.email': 'Correo electrónico',
   'input.password': 'Contraseña',
@@ -21,6 +22,20 @@ export const translations = {
   'button.signUp': 'Registrarse',
   'button.ok': 'Aceptar',
   'button.register': 'Registro',
+  // ALERTS MESSAGES
+  'alert.title_error_server': 'Error en el servidor',
+  'alert.message_error_server': 'Error en el servidor. Por favor, inténtalo de nuevo.',
+  'alert.title_error_credentials': 'Credenciales incorrectas',
+  'alert.message_error_credentials': 'Credenciales incorrectas. Por favor, inténtalo de nuevo.',
+  'alert.emailAlreadyInUse': 'El correo electrónico ya está en uso',
+  'alert.usernameAlreadyInUse': 'El nombre de usuario ya está en uso',
+  'alert.title_emailValidated_error': 'Validar el correo!!',
+  'alert.message_emailValidated_error': 'Ha ocurrido un problema, tu email no ha sido validado correctamente, revisa tu bandeja de entrada y sigue las instrucciones',
+  'alert.title_emailValidated_success': 'Correo validado',
+  'alert.message_emailValidated_success': 'Ya puedes iniciar sesión, tu correo ha sido validado correctamente',
+  'alert.emailValidated': 'Correo validado',
+  'alert.error': 'Error',
+  'alert.errorMessage': 'Ha ocurrido un error al validar tu correo, por favor intenta de nuevo',
   // REGISTER COMPONENT
   'register.title': 'Registro',
   'register.subTitle': 'Complete el formulario de registro',

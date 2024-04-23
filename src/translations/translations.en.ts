@@ -10,6 +10,7 @@ export const translations = {
   'login.messageLoading': 'Connecting...',
   'login.messageErrorCredentials': 'Incorrect credentials. Please, try again.',
   'login.messageErrorServer': 'Server error. Please, try again.',
+  'login.messageValidationEmailLoading': 'Validating email...',
   // INPUTS
   'input.email': 'Email',
   'input.password': 'Password',
@@ -21,6 +22,20 @@ export const translations = {
   'button.signUp': 'Sign up',
   'button.ok': 'Ok',
   'button.register': 'Register',
+  // ALERTS MESSAGES
+  'alert.title_error_server': 'Server error',
+  'alert.message_error_server': 'Server error. Please, try again.',
+  'alert.title_error_credentials': 'Incorrect credentials',
+  'alert.message_error_credentials': 'Incorrect credentials. Please, try again.',
+  'alert.emailAlreadyInUse': 'The email is already in use',
+  'alert.usernameAlreadyInUse': 'The username is already in use',
+  'alert.title_emailValidated_error': 'Validate your email !!',
+  'alert.message_emailValidated_error': 'There was a problem, your email has not been validated correctly, check your inbox and follow the instructions',
+  'alert.title_emailValidated_success': 'Email validated',
+  'alert.message_emailValidated_success': 'You can now log in, your email has been successfully validated',
+  'alert.emailValidated': 'Email validated',
+  'alert.error': 'Error',
+  'alert.errorMessage': 'An error occurred while validating your email, please try again',
   // REGISTER COMPONENT
   'register.title': 'Register',
   'register.subTitle': 'Fill out the registration form',
