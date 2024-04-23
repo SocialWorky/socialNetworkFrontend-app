@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { WorkyButtonType, WorkyButtonTheme } from '../../../shared/buttons/models/worky-button-model';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
@@ -15,7 +15,7 @@ import { translations } from '../../../../../translations/translations';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements OnInit { 
+export class LoginComponent implements OnInit, OnDestroy { 
   loginForm: FormGroup = new FormGroup({});
 
   WorkyButtonType = WorkyButtonType;
@@ -74,12 +74,17 @@ export class LoginComponent implements OnInit {
         this._router.navigate(['/home']);
       }
     },
-    error: (error: any) => {
-      if (error.status === 401) {
+    error: (e: any) => {
+      console.log(e);
+      if (e.error.message === 'User is not verified') {
+        this.mostrarErrorAlert('Email no verificado');
+        loading.dismiss();
+      }
+      if (e.error.message === 'Unauthorized access. Please provide valid credentials to access this resource') {
         this.mostrarErrorAlert(translations['login.messageErrorCredentials']);
         loading.dismiss();
       }
-      if (error.status === 500) {
+      if (e.status === 500) {
         this.mostrarErrorAlert(translations['login.messageErrorServer']);
         loading.dismiss();
       }
@@ -91,7 +96,7 @@ export class LoginComponent implements OnInit {
 }
 
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
