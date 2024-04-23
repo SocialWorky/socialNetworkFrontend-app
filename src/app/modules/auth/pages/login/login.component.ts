@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { WorkyButtonType, WorkyButtonTheme } from '../../../shared/buttons/models/worky-button-model';
 import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
@@ -31,6 +32,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   constructor(
     private _authApiService: AuthApiService,
     private _router: Router,
+    private _activatedRoute: ActivatedRoute,
     private _alertController: AlertController,
     private _loadingCtrl: LoadingController,
     private _formBuilder: FormBuilder,
@@ -42,6 +44,14 @@ export class LoginComponent implements OnInit, OnDestroy {
    }
 
  ngOnInit() {
+
+    this._activatedRoute.paramMap.subscribe(params => {
+      const token = params.get('token');
+      if (token) {
+        this.validarCorreoConToken(token);
+      }
+    });
+
     this.loginForm = this._formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -51,49 +61,71 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
   async login() {
 
-  const email = this.loginForm.get('email')?.value;
-  const password = this.loginForm.get('password')?.value;
+    const email = this.loginForm.get('email')?.value;
+    const password = this.loginForm.get('password')?.value;
 
-  if (!this.loginForm.valid) {
-    this.mostrarErrorAlert(translations['login.emailOrPasswordIncorrect']);
-    return;
+    if (!this.loginForm.valid) {
+      this.mostrarErrorAlert(translations['login.emailOrPasswordIncorrect']);
+      return;
+    }
+
+    const credentials: LoginData = { email, password };
+
+    const loading = await this._loadingCtrl.create({
+      message: translations['login.messageLoading'],
+    });
+
+    await loading.present();
+
+    this.subscription = this._authApiService.loginUser(credentials).subscribe({
+      next: (response: any) => {
+        if (response && response.token) {
+          localStorage.setItem('token', response.token);
+          this._router.navigate(['/home']);
+        }
+      },
+      error: (e: any) => {
+        console.log(e);
+        if (e.error.message === 'User is not verified') {
+          this.mostrarErrorAlert('Email no verificado');
+          loading.dismiss();
+        }
+        if (e.error.message === 'Unauthorized access. Please provide valid credentials to access this resource') {
+          this.mostrarErrorAlert(translations['login.messageErrorCredentials']);
+          loading.dismiss();
+        }
+        if (e.status === 500) {
+          this.mostrarErrorAlert(translations['login.messageErrorServer']);
+          loading.dismiss();
+        }
+      },
+      complete: () => {
+        loading.dismiss();
+      }
+    });
   }
 
-  const credentials: LoginData = { email, password };
+  async validarCorreoConToken(token: string) {
+    const loading = await this._loadingCtrl.create({
+      message: 'Validando correo...',
+    });
+    await loading.present();
 
-  const loading = await this._loadingCtrl.create({
-    message: translations['login.messageLoading'],
-  });
-
-  await loading.present();
-
-  this.subscription = this._authApiService.loginUser(credentials).subscribe({
-    next: (response: any) => {
-      if (response && response.token) {
-        localStorage.setItem('token', response.token);
-        this._router.navigate(['/home']);
-      }
-    },
-    error: (e: any) => {
-      console.log(e);
-      if (e.error.message === 'User is not verified') {
-        this.mostrarErrorAlert('Email no verificado');
+    this.subscription = this._authApiService.validarCorreoConToken(token).subscribe({
+      next: (response: any) => {
+        if (response && response.message) {
+          this.mostrarErrorAlert(response.message);
+        }
+      },
+      error: (e: any) => {
+        console.log(e.error.text);
+        this.mostrarErrorAlert('Error validando correo');
+      },
+      complete: () => {
         loading.dismiss();
       }
-      if (e.error.message === 'Unauthorized access. Please provide valid credentials to access this resource') {
-        this.mostrarErrorAlert(translations['login.messageErrorCredentials']);
-        loading.dismiss();
-      }
-      if (e.status === 500) {
-        this.mostrarErrorAlert(translations['login.messageErrorServer']);
-        loading.dismiss();
-      }
-    },
-    complete: () => {
-      loading.dismiss();
-    }
-  });
-}
+    });
+  }
 
 
   ngOnDestroy(): void {
