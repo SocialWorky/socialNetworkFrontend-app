@@ -13,6 +13,7 @@ import { ProfilesComponent } from './profiles/profiles.component';
 import { WorkyMenuComponentComponent } from './components/navbar/worky-menu-component/worky-menu-component.component';
 import { WorkyDropdownModule } from '../shared/worky-dropdown/worky-dropdown.module';
 import { TranslationsModule } from '../shared/translations/translations.module';
+import { WorkyAvatarModule } from '../shared/worky-avatar/worky-avatar.module';
 
 
 @NgModule({
@@ -31,7 +32,8 @@ import { TranslationsModule } from '../shared/translations/translations.module';
     FormsModule,
     PagesRoutingModule,
     WorkyDropdownModule,
-    TranslationsModule
+    TranslationsModule,
+    WorkyAvatarModule
   ]
 })
 export class PagesModule { }

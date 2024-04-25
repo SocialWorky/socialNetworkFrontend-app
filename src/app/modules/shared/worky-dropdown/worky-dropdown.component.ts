@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { DropdownDataLink } from './interfaces/dataLink.interface';
-
 @Component({
   selector: 'worky-dropdown',
   templateUrl: './worky-dropdown.component.html',
