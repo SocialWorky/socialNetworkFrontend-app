@@ -8,6 +8,9 @@
       class="img-dropdown rounded-circle"
       loading="lazy"/>
   </div>
+  <div *ngIf="!img && !badge">
+    <worky-avatar username="Carlos Abarca" [size]="50"></worky-avatar>
+  </div>
 
   <ng-container *ngIf="badge">
     <span class="material-icons" [class.mover-icono]="badgeValue">{{ icon }}</span>

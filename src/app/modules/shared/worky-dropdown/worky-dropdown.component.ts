@@ -1,12 +1,14 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { DropdownDataLink } from './interfaces/dataLink.interface';
-
+import { WorkyAvatarComponent } from '../worky-avatar/worky-avatar.component';
 @Component({
   selector: 'worky-dropdown',
   templateUrl: './worky-dropdown.component.html',
   styleUrls: ['./worky-dropdown.component.scss'],
 })
 export class WorkyDropdownComponent  implements OnInit {
+
+  avatarComponent: WorkyAvatarComponent = new WorkyAvatarComponent();
 
   @Input() icon: string = 'add_circle';
 
