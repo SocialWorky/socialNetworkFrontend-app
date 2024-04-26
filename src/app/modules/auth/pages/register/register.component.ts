@@ -1,11 +1,16 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { WorkyButtonType, WorkyButtonTheme } from '../../../shared/buttons/models/worky-button-model';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { WorkyButtonType, WorkyButtonTheme } from '../../../shared/buttons/models/worky-button-model';
 import { RegisterData } from '../../interfaces/register.interface';
 import { AuthApiRegisterService } from '../../services/apiRegister.service';
-import { Router } from '@angular/router';
+
+import { environment } from '../../../../../environments/environment';
 import { RoleUser } from '../../models/roleUser.enum';
 import { MailRegisterValidateData } from '../../interfaces/mail.interface';
+import { AlertService } from '../../../shared/services/alert.service';
+import { translations } from '../../../../../translations/translations';
+import { Alerts, Position } from '../../../shared/enums/alerts.enum';
 
 @Component({
   selector: 'worky-register',
@@ -25,10 +30,13 @@ export class RegisterComponent implements OnInit {
 
   @ViewChild('emailInput') emailInput!: ElementRef;
 
+  @ViewChild('userNameInput') userNameInput!: ElementRef;
+
   constructor(
     private _formBuilder: FormBuilder,
     private _router: Router,
-    private _authApiRegisterService: AuthApiRegisterService
+    private _authApiRegisterService: AuthApiRegisterService,
+    private _alertService: AlertService,
   ) {}
 
   ngOnInit() {
@@ -44,15 +52,17 @@ export class RegisterComponent implements OnInit {
 
   async register() {
 
+    const baseUrl = environment.apiUrl;
+
     this.registerLoading = true;
 
-    this.mailDataValidate.url = 'http://localhost:4200/auth/validate/';
-    this.mailDataValidate.subject = 'Validate your email';
-    this.mailDataValidate.title = 'Welcome to Worky';
-    this.mailDataValidate.greet = 'Hello';
-    this.mailDataValidate.message = 'To validate your email, click the button below';
-    this.mailDataValidate.subMessage = 'If you did not register, ignore this email';
-    this.mailDataValidate.buttonMessage = 'Validate email';
+    this.mailDataValidate.url = `${baseUrl}/auth/validate/`;
+    this.mailDataValidate.subject = translations['email.validateEmailSubject'];
+    this.mailDataValidate.title = translations['email.validateEmailTitle'];
+    this.mailDataValidate.greet = translations['email.validateEmailGreet'];
+    this.mailDataValidate.message = translations['email.validateEmailMessage'];
+    this.mailDataValidate.subMessage = translations['email.validateEmailSubMessage'];
+    this.mailDataValidate.buttonMessage = translations['email.validateEmailButtonMessage'];
 
     const body = this.registerForm.value as RegisterData;
     body.mailDataValidate = this.mailDataValidate;
@@ -67,16 +77,36 @@ export class RegisterComponent implements OnInit {
           this.registerForm.get('email')?.setErrors({ emailInUse: true });
           this.registerForm.get('email')?.reset;
           this.emailInput.nativeElement.focus();
-          
           this.registerLoading = false;
-          console.log('E-mail is already in use');
+
+          this._alertService.showAlert(
+            translations['alert.title_error_register'],
+            translations['alert.registerEmailInUse'],
+            Alerts.ERROR,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
         }
         if (e.error.message === 'Username is already in use') {
           this.registerForm.get('username')?.setErrors({ usernameInUse: true });
+          this.registerForm.get('username')?.reset;
+          this.userNameInput.nativeElement.focus();
           this.registerLoading = false;
-          console.log('Username is already in use');
+
+          this._alertService.showAlert(
+            translations['alert.title_error_register'],
+            translations['alert.registerUsernameInUse'],
+            Alerts.ERROR,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
         }
-        console.log(e.error);
+        // console.log(e.error);
+        this.registerLoading = false;
       }     
     });
   }
