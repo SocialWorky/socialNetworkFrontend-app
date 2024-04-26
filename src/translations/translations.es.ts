@@ -36,6 +36,17 @@ export const translations = {
   'alert.emailValidated': 'Correo validado',
   'alert.error': 'Error',
   'alert.errorMessage': 'Ha ocurrido un error al validar tu correo, por favor intenta de nuevo',
+  'alert.title_error_register': 'Error al registrarse',
+  'alert.registerEmailInUse': 'El correo electrónico ya está en uso',
+  'alert.registerUsernameInUse': 'El nombre de usuario ya está en uso',
+  // EMAIL MESSAGES
+  'email.validateEmailSubject': 'Valida tu correo',
+  'email.validateEmailTitle': 'Bienvenido a Worky',
+  'email.validateEmailGreet': 'Hola',
+  'email.validateEmailMessage': 'Para validar tu correo, haz clic en el botón de abajo',
+  'email.validateEmailSubMessage': 'Si no te has registrado, ignora este correo',
+  'email.validateEmailButtonMessage': 'Validar correo',
+
   // REGISTER COMPONENT
   'register.title': 'Registro',
   'register.subTitle': 'Complete el formulario de registro',
