@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:3000/api/v1', 
+  apiUrl: 'https://backend-dev.worky.cl/api/v1',
+  baseUrl: 'http://localhost:4200',
 };

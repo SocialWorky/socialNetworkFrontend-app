@@ -39,6 +39,10 @@ export const translations = {
   'alert.title_error_register': 'Error al registrarse',
   'alert.registerEmailInUse': 'El correo electrónico ya está en uso',
   'alert.registerUsernameInUse': 'El nombre de usuario ya está en uso',
+  'alert.title_error_send_email': 'Error al enviar el correo',
+  'alert.message_error_send_email': 'Nos complace informarte que tu registro ha sido completado con éxito. <br> Sin embargo, hemos detectado un problema técnico con el envío del correo electrónico de validación de cuenta. <br> No te preocupes, tu registro ya está activo. En los próximos minutos recibirás un nuevo correo electrónico con el enlace para validar tu cuenta.',
+  'alert.title_success_register': 'Registro exitoso',
+  'alert.message_success_register': 'Tu registro ha sido exitoso, recibirás un correo para validar tu cuenta',
   // EMAIL MESSAGES
   'email.validateEmailSubject': 'Valida tu correo',
   'email.validateEmailTitle': 'Bienvenido a Worky',
@@ -46,11 +50,11 @@ export const translations = {
   'email.validateEmailMessage': 'Para validar tu correo, haz clic en el botón de abajo',
   'email.validateEmailSubMessage': 'Si no te has registrado, ignora este correo',
   'email.validateEmailButtonMessage': 'Validar correo',
-
   // REGISTER COMPONENT
   'register.title': 'Registro',
   'register.subTitle': 'Complete el formulario de registro',
   'register.haveAccountLogIn': '¿Ya tienes una cuenta? Inicia sesión',
+  'register.messageLoading': 'Registrando...',
   // NAVBAR COMPONENT
   'navbar.logout': 'Cerrar sesión',
 };
