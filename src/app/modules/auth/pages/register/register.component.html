@@ -61,7 +61,10 @@
                         [width]="'100%'">
                         <span basic-button-text>{{ 'button.register' | workyTranslations }}</span>
                     </worky-buttons>
-                    <img *ngIf="registerLoading" width="50px" src="assets/img/shared/loading.gif" alt="Loading" />
+                    <div class="loading-register" *ngIf="registerLoading">
+                      <div class="loader"></div>
+                      <div>{{ 'register.messageLoading' | workyTranslations }}</div>
+                    </div>
                 </div>
             </div>   
         </form>

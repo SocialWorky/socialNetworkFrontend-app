@@ -36,9 +36,13 @@ export const translations = {
   'alert.emailValidated': 'Email validated',
   'alert.error': 'Error',
   'alert.errorMessage': 'An error occurred while validating your email, please try again',
-  'alert.title_error_register': 'Error al registrarse',
-  'alert.registerEmailInUse': 'El correo electrónico ya está en uso',
-  'alert.registerUsernameInUse': 'El nombre de usuario ya está en uso',
+  'alert.title_error_register': 'Error registering',
+  'alert.registerEmailInUse': 'The email is already in use',
+  'alert.registerUsernameInUse': 'The username is already in use',
+  'alert.title_error_send_email': 'Error sending email',
+  'alert.message_error_send_email': 'We are pleased to inform you that your registration has been successfully completed. <br> However, we have detected a technical problem with sending the account validation email. <br> Do not worry, your registration is already active. In the next few minutes you will receive a new email with the link to validate your account.',
+  'alert.title_success_register': 'Successful registration',
+  'alert.message_success_register': 'Your registration was successful, you will receive an email to validate your account',
   // EMAIL MESSAGES
   'email.validateEmailSubject': 'Validate your email',
   'email.validateEmailTitle': 'Welcome to Worky',
@@ -46,11 +50,11 @@ export const translations = {
   'email.validateEmailMessage': 'To validate your email, click the button below',
   'email.validateEmailSubMessage': 'If you did not register, ignore this email',
   'email.validateEmailButtonMessage': 'Validate email',
-
 // REGISTER COMPONENT
   'register.title': 'Register',
   'register.subTitle': 'Fill out the registration form',
   'register.haveAccountLogIn': 'Already have an account? Log in',
+  'register.messageLoading': 'Registering...',
   // NAVBAR COMPONENT
   'navbar.logout': 'Log out',
 };

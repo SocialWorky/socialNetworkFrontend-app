@@ -1,6 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { WorkyButtonType, WorkyButtonTheme } from '../../../shared/buttons/models/worky-button-model';
 import { RegisterData } from '../../interfaces/register.interface';
 import { AuthApiRegisterService } from '../../services/apiRegister.service';
@@ -34,7 +33,6 @@ export class RegisterComponent implements OnInit {
 
   constructor(
     private _formBuilder: FormBuilder,
-    private _router: Router,
     private _authApiRegisterService: AuthApiRegisterService,
     private _alertService: AlertService,
   ) {}
@@ -52,7 +50,7 @@ export class RegisterComponent implements OnInit {
 
   async register() {
 
-    const baseUrl = environment.apiUrl;
+    const baseUrl = environment.baseUrl;
 
     this.registerLoading = true;
 
@@ -70,7 +68,16 @@ export class RegisterComponent implements OnInit {
     if (this.registerForm.invalid) return;
     await this._authApiRegisterService.registerUser(body).subscribe({
       next: () => {
-        this._router.navigate(['/auth/login']);
+        this._alertService.showAlert(
+          translations['alert.title_success_register'],
+          translations['alert.message_success_register'],
+          Alerts.SUCCESS,
+          Position.CENTER,
+          true,
+          true,
+          translations['button.ok'],
+          ['/auth/login'],
+        );
       },
       error: (e) => {
         if (e.error.message === 'E-mail is already in use') {
@@ -105,7 +112,18 @@ export class RegisterComponent implements OnInit {
             translations['button.ok'],
           );
         }
-        // console.log(e.error);
+        if (e.error.message === 'Failed send email') {
+          this._alertService.showAlert(
+            translations['alert.title_error_send_email'],
+            translations['alert.message_error_send_email'],
+            Alerts.INFO,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+            ['/auth/login'],
+          );
+        }
         this.registerLoading = false;
       }     
     });

@@ -42,7 +42,10 @@
       .form-register {
         width: 70%;
         display: block;
-        margin: 0 auto;        
+        margin: 0 auto;
+        @include breakpoints.below-sm {
+          width: 95%;
+        }   
         .form-input {
           margin-top: 50px;
           display: flex;
@@ -70,7 +73,7 @@
             margin-bottom: 10px;
           }
           img {
-            margin: auto;
+            margin-right: 10px;
           }
         }
       }
@@ -100,6 +103,15 @@
         display: block;
       }
     }
+  }
+
+  .loading-register {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+    grid-gap: 45px;
+    padding: 20px;
   }
 }
 
