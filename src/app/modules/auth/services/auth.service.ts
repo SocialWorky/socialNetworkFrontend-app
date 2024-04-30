@@ -70,7 +70,6 @@ export class AuthService {
     const url = `${environment.apiUrl}/user/checkUsername/${username}`;
     try {
       const data: any = await this.http.get(url).toPromise();
-      console.log('Data:', data);
       return data;
     } catch (error) {
       console.error('Error al consultar la API:', error);
