@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { OAuthModule } from 'angular-oauth2-oidc';
 
 import { LayoutPageComponent } from './templates/layout-page/layout-page.component';
 import { LoginComponent } from './pages/login/login.component';
@@ -15,6 +16,7 @@ import { TranslationsModule } from '../shared/translations/translations.module';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    OAuthModule.forRoot(),
     AuthRoutingModule,
     MaterialModule,
     WorkyButtonsModule,
