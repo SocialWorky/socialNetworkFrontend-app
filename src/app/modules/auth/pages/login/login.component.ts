@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { WorkyButtonType, WorkyButtonTheme } from '../../../shared/buttons/models/worky-button-model';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
@@ -19,14 +19,12 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements OnInit, OnDestroy, AfterViewInit { 
+export class LoginComponent implements OnInit, OnDestroy { 
   loginForm: FormGroup = new FormGroup({});
 
   WorkyButtonType = WorkyButtonType;
 
   WorkyButtonTheme = WorkyButtonTheme;
-  
-  messageError:string = "";
 
   token = localStorage.getItem('token');
 
@@ -51,11 +49,11 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
   ngOnInit() {
-
+    this.checkSessionGoogle();
     this._activatedRoute.paramMap.subscribe(params => {
       const token = params.get('token');
       if (token) {
-        this.validarCorreoConToken(token);
+        this.validateEmailWithToken(token);
       }
     });
 
@@ -68,19 +66,15 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
   }
 
-  ngAfterViewInit() {
-    setTimeout(() => {
-      this.checkSessionGoogle();
-      this._cdr.detectChanges();
-    }, 100);
-  }
-
   checkSessionGoogle() {
-    if (sessionStorage.getItem('id_token')) {
-      if (!this.token) {
-        this.loginGoogle();
+    setTimeout(() => {
+      if (sessionStorage.getItem('id_token')) {
+        if (!this.token) {
+          this.loginGoogle();
+        }
       }
-    }
+      this._cdr.detectChanges();
+    }, 500);
   }
 
   async login() {
@@ -168,11 +162,10 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
     await loading.present();
 
-    this._authGoogleService.login();
-
-    const loginDataGoogle: any = await this._authGoogleService.getProfile();
+    const loginDataGoogle: any = this._authGoogleService.getProfile();
 
     if (!loginDataGoogle) {
+      await this._authGoogleService.login();
       return;
     }
 
@@ -193,15 +186,16 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
         this._router.navigate(['/home']);
       }
     });
+    loading.dismiss();
   }
 
-  async validarCorreoConToken(token: string) {
+  async validateEmailWithToken(token: string) {
     const loading = await this._loadingCtrl.create({
       message: translations['login.messageValidationEmailLoading'],
     });
     await loading.present();
 
-    this.subscription = this._authApiService.validarCorreoConToken(token).subscribe({
+    this.subscription = this._authApiService.validateEmailWithToken(token).subscribe({
       next: (response: any) => {
         if (response && response.message) {
           this._alertService.showAlert(

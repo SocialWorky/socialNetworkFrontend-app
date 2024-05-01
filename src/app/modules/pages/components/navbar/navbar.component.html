@@ -50,6 +50,7 @@
       <!-- Profile -->
       <worky-dropdown
         [badge]=false
+        [img]="googleLoginSession ? pictureGoogle: undefined"
         [dataLink]="dataLinkProfile"
         (linkClicked)="handleLinkClicked($event)">
       </worky-dropdown>

@@ -23,7 +23,7 @@ export class AuthApiService {
     return this.http.post(url, data);
   }
 
-  validarCorreoConToken(token: string) {
+  validateEmailWithToken(token: string) {
     const url = `${this.baseUrl}/email/validate/${token}`;
     return this.http.post(url, {});
   }
