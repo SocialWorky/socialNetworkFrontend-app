@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { LoginData } from '../interfaces/login.interface';
+import { LoginData, LoginDataGloogle } from '../interfaces/login.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +16,11 @@ export class AuthApiService {
   loginUser(credentials: LoginData) {
     const url = `${this.baseUrl}/user/login`;
     return this.http.post(url, credentials);
+  }
+
+  loginGoogle(data: LoginDataGloogle ) {
+    const url = `${this.baseUrl}/user/loginGoogle`;
+    return this.http.post(url, data);
   }
 
   validarCorreoConToken(token: string) {

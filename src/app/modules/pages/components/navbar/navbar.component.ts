@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AuthGoogleService } from '../../../auth/services/auth-google.service';
 
 import { translations } from './../../../../../translations/translations'
 import { DeviceDetectionService } from './../../../shared/services/DeviceDetection.service';
@@ -13,6 +14,8 @@ import { DropdownDataLink } from './../../../shared/worky-dropdown/interfaces/da
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   token = localStorage.getItem('token');
+
+  googleLoginSession = localStorage.getItem('googleLogin');
 
   notifications: number = 0;
 
@@ -29,7 +32,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   constructor(
     private _router: Router,
     private _deviceDetectionService: DeviceDetectionService,
-    private _cdr: ChangeDetectorRef
+    private _cdr: ChangeDetectorRef,
+    private _authGoogleService: AuthGoogleService,
   ) {
     this.menuProfile();
   }
@@ -51,7 +55,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   logoutUser() {
+    if (this.googleLoginSession) this._authGoogleService.logout();
     localStorage.removeItem('token');
+    localStorage.removeItem('googleLogin');
     this._router.navigate(['/auth']);
   }
 
