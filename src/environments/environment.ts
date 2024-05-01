@@ -1,12 +1,13 @@
+import { env } from 'env'
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api/v1',
-  baseUrl: 'http://localhost:4200',
-  clienIdGoogle: '392454930418-dunulmihmuss90c042vn359mitdjjko8.apps.googleusercontent.com',
+  apiUrl: env.API_URL,
+  baseUrl: env.BASE_URL,
+  clienIdGoogle: env.CLIEN_ID_GOOGLE,
 };
 
 
