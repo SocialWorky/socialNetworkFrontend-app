@@ -1,5 +1,5 @@
 import { RoleUser } from '../models/roleUser.enum';
-import { MailRegisterValidateData } from '../interfaces/mail.interface';
+import { MailSendValidateData } from '../../shared/interfaces/mail.interface';
 
 export interface RegisterData {
   username: string;
@@ -8,5 +8,5 @@ export interface RegisterData {
   email: string;
   password: string;
   role: RoleUser;
-  mailDataValidate?: MailRegisterValidateData;
+  mailDataValidate?: MailSendValidateData;
 }

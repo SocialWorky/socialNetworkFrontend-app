@@ -50,6 +50,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
     this.notifications = 2;
     this.messages = 1;
+    this.pictureGoogle;
   }
 
   ngOnDestroy() {

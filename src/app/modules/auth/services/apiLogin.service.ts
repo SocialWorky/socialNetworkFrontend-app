@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { LoginData, LoginDataGloogle } from '../interfaces/login.interface';
+import { MailSendValidateData } from '../../shared/interfaces/mail.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +27,16 @@ export class AuthApiService {
   validateEmailWithToken(token: string) {
     const url = `${this.baseUrl}/email/validate/${token}`;
     return this.http.post(url, {});
+  }
+
+  forgotPassword(data: MailSendValidateData) {
+    const url = `${this.baseUrl}/email/forgotPassword`;
+    return this.http.post(url, data);
+  }
+
+  resetPassword(data: MailSendValidateData) {
+    const url = `${this.baseUrl}/email/resetPassword`;
+    return this.http.post(url, data);
   }
 
 }

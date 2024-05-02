@@ -13,6 +13,10 @@ import { LoginData } from '../../interfaces/login.interface';
 import { translations } from '../../../../../translations/translations';
 import { Alerts, Position } from '../../../shared/enums/alerts.enum';
 import { AuthService } from '../../services/auth.service';
+import { MailSendValidateData } from '../../../shared/interfaces/mail.interface';
+import { environment } from '../../../../../environments/environment';
+import { ResetPasswordModalComponent } from './reset-password-modal/reset-password-modal.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'worky-login',
@@ -30,6 +34,11 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   googleLoginSession = localStorage.getItem('googleLogin');
 
+  mailSendDataValidate: MailSendValidateData = {} as MailSendValidateData;
+
+  showResetPasswordModal = false;
+
+
   private subscription: Subscription = new Subscription();
 
   constructor (
@@ -41,19 +50,25 @@ export class LoginComponent implements OnInit, OnDestroy {
     private _alertService: AlertService,
     private _cdr: ChangeDetectorRef,
     private _authGoogleService: AuthGoogleService,
-    private _authService: AuthService
+    private _authService: AuthService,
+    private _dialog: MatDialog,
   ) { 
 
     if (this.token) {
       this._router.navigate(['/home']);
     }
   }
+
   ngOnInit() {
     this.checkSessionGoogle();
     this._activatedRoute.paramMap.subscribe(params => {
+      const tokenPassword = params.get('tokenPassword');
       const token = params.get('token');
       if (token) {
         this.validateEmailWithToken(token);
+      }
+      if (tokenPassword) {
+        this.openResetPasswordModal(tokenPassword);
       }
     });
 
@@ -64,6 +79,12 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this._cdr.detectChanges();
 
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   checkSessionGoogle() {
@@ -227,10 +248,91 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
   }
 
+  async forgotPassword() {
+    const email = this.loginForm.get('email')?.value;
 
-  ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
+    this.mailSendDataValidate.url = `${environment.baseUrl}/auth/reset-password/`;
+    this.mailSendDataValidate.subject = 'Reset your password';
+    this.mailSendDataValidate.title = 'Reset your password';
+    this.mailSendDataValidate.greet = 'Hello';
+    this.mailSendDataValidate.message = 'You have requested to reset your password. Click the button below to reset your password.';
+    this.mailSendDataValidate.subMessage = 'If you did not request a password reset, please ignore this email.';
+    this.mailSendDataValidate.buttonMessage = 'Reset password';
+
+
+    if (!this.loginForm.get('email')?.valid) {
+      this._alertService.showAlert(
+        translations['alert.title_error_credentials'],
+        translations['login.emailIncorrect'],
+        Alerts.ERROR,
+        Position.CENTER,
+        true,
+        true,
+        translations['button.ok'],
+      );
+      return;
     }
+
+    this.mailSendDataValidate.email = email;
+
+    console.log(this.mailSendDataValidate);
+
+    const loading = await this._loadingCtrl.create({
+      message: 'Enviando correo de restablecimiento de contraseña, por favor espere..',
+    });
+
+    await loading.present();
+
+    this.subscription = this._authApiService.forgotPassword(this.mailSendDataValidate).subscribe({
+      next: (response: any) => {
+        console.log(response);
+        if (response && response.message) {
+          this._alertService.showAlert(
+            'Envio exitoso',
+            'Se ha enviado un correo para restablecer la contraseña, por favor revise su bandeja de entrada',
+            Alerts.SUCCESS,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
+        }
+      },
+      error: (e: any) => {
+        if (e.error.message === 'Email not exist in the database or is invalid') {
+          this._alertService.showAlert(
+            'Error',
+            'El correo no existe o es inválido, por favor verifique el correo ingresado',
+            Alerts.ERROR,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
+          loading.dismiss();
+        }
+      },
+      complete: () => {
+        loading.dismiss();
+      }
+    });
   }
+
+  async openResetPasswordModal(token: string) {
+    this.showResetPasswordModal = true;
+    const dialogRef = this._dialog.open(ResetPasswordModalComponent, {
+      data: { token },
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.showResetPasswordModal = false;
+    });
+  }
+
+  closeResetPasswordModal() {
+    this.showResetPasswordModal = false;
+    this._dialog.closeAll();
+  }
+
 }
