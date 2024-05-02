@@ -33,6 +33,7 @@
             <div class="line"></div>
         </div>
 
+
         <form [formGroup]="loginForm" (ngSubmit)="login()" autocomplete="off">
             <div class="form-input">
                 <mat-form-field class="worky-input worky-accent">
@@ -49,7 +50,7 @@
             </div>
 
             <div class="forget-password">
-                <span onclick="">{{ 'login.forgotPassword' | workyTranslations }}</span>
+                <span (click)="forgotPassword()">{{ 'login.forgotPassword' | workyTranslations }}</span>
             </div>
 
 
@@ -75,5 +76,6 @@
       </div>
 
   </div>
+
 
 </div>

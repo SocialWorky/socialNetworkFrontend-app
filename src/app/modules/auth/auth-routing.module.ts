@@ -12,6 +12,7 @@ const routes: Routes = [
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegisterComponent },
       { path: 'validate/:token', component: LoginComponent },
+      { path: 'reset-password/:tokenPassword', component: LoginComponent },
       { path: '', redirectTo: 'login', pathMatch: 'full' },
     ],
   },

@@ -6,7 +6,7 @@ import { AuthApiRegisterService } from '../../services/apiRegister.service';
 
 import { environment } from '../../../../../environments/environment';
 import { RoleUser } from '../../models/roleUser.enum';
-import { MailRegisterValidateData } from '../../interfaces/mail.interface';
+import { MailSendValidateData } from '../../../shared/interfaces/mail.interface';
 import { AlertService } from '../../../shared/services/alert.service';
 import { translations } from '../../../../../translations/translations';
 import { Alerts, Position } from '../../../shared/enums/alerts.enum';
@@ -25,7 +25,7 @@ export class RegisterComponent implements OnInit {
 
   WorkyButtonTheme = WorkyButtonTheme;
 
-  mailDataValidate: MailRegisterValidateData = {} as MailRegisterValidateData;
+  mailDataValidate: MailSendValidateData = {} as MailSendValidateData;
 
   @ViewChild('emailInput') emailInput!: ElementRef;
 
