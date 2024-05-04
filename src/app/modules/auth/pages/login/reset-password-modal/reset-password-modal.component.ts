@@ -10,6 +10,7 @@ import { environment } from '../../../../../../environments/environment';
 import { AlertService } from '../../../../shared/services/alert.service';
 import { Alerts, Position } from '../../../../shared/enums/alerts.enum';
 import { translations } from '../../../../../../translations/translations';
+import { TemplateEmail } from '../../../../shared/interfaces/mail.interface';
 
 @Component({
   selector: 'worky-reset-password-modal',
@@ -62,6 +63,7 @@ export class ResetPasswordModalComponent  implements OnInit, OnDestroy {
     this.mailSendDataValidate.buttonMessage = 'Iniciar sesión';
     this.mailSendDataValidate.token = this.data.token;
     this.mailSendDataValidate.password = password;
+    this.mailSendDataValidate.template = TemplateEmail.RESET_PASSWORD;
 
     if(password){
 
