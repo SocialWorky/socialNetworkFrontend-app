@@ -1,6 +1,6 @@
 export interface MailSendValidateData {
-  email?: string;
   token?: string;
+  email?: string;
   password?: string;
   url?: string;
   subject: string;
@@ -9,4 +9,12 @@ export interface MailSendValidateData {
   message: string;
   subMessage: string;
   buttonMessage: string;
+  template: string;
+}
+
+export enum TemplateEmail {
+  RESET_PASSWORD = 'reset-password',
+  FORGOT_PASSWORD = 'forgot-password',
+  VALIDATE_EMAIL = 'forgot-password',
+  WELCOME = 'welcome',
 }

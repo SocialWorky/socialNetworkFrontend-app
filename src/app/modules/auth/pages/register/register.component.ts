@@ -10,6 +10,8 @@ import { MailSendValidateData } from '../../../shared/interfaces/mail.interface'
 import { AlertService } from '../../../shared/services/alert.service';
 import { translations } from '../../../../../translations/translations';
 import { Alerts, Position } from '../../../shared/enums/alerts.enum';
+import { TemplateEmail } from '../../../shared/interfaces/mail.interface';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'worky-register',
@@ -35,6 +37,7 @@ export class RegisterComponent implements OnInit {
     private _formBuilder: FormBuilder,
     private _authApiRegisterService: AuthApiRegisterService,
     private _alertService: AlertService,
+    private _loadingCtrl: LoadingController,
   ) {}
 
   ngOnInit() {
@@ -50,9 +53,13 @@ export class RegisterComponent implements OnInit {
 
   async register() {
 
+    this.registerLoading = true;
+    
     const baseUrl = environment.baseUrl;
 
-    this.registerLoading = true;
+    const loading = await this._loadingCtrl.create({
+      message: translations['register.messageLoading'],
+    });
 
     this.mailDataValidate.url = `${baseUrl}/auth/validate/`;
     this.mailDataValidate.subject = translations['email.validateEmailSubject'];
@@ -61,11 +68,15 @@ export class RegisterComponent implements OnInit {
     this.mailDataValidate.message = translations['email.validateEmailMessage'];
     this.mailDataValidate.subMessage = translations['email.validateEmailSubMessage'];
     this.mailDataValidate.buttonMessage = translations['email.validateEmailButtonMessage'];
+    this.mailDataValidate.template = TemplateEmail.WELCOME;
 
     const body = this.registerForm.value as RegisterData;
     body.mailDataValidate = this.mailDataValidate;
 
     if (this.registerForm.invalid) return;
+
+    await loading.present();
+
     await this._authApiRegisterService.registerUser(body).subscribe({
       next: () => {
         this._alertService.showAlert(
@@ -78,6 +89,7 @@ export class RegisterComponent implements OnInit {
           translations['button.ok'],
           ['/auth/login'],
         );
+        loading.dismiss();
       },
       error: (e) => {
         if (e.error.message === 'E-mail is already in use') {
@@ -95,6 +107,7 @@ export class RegisterComponent implements OnInit {
             true,
             translations['button.ok'],
           );
+          loading.dismiss();
         }
         if (e.error.message === 'Username is already in use') {
           this.registerForm.get('username')?.setErrors({ usernameInUse: true });
@@ -111,6 +124,7 @@ export class RegisterComponent implements OnInit {
             true,
             translations['button.ok'],
           );
+          loading.dismiss();
         }
         if (e.error.message === 'Failed send email') {
           this._alertService.showAlert(
@@ -125,6 +139,7 @@ export class RegisterComponent implements OnInit {
           );
         }
         this.registerLoading = false;
+        loading.dismiss();
       }     
     });
   }

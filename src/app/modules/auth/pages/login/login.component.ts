@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
+import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthGoogleService } from '../../services/auth-google.service';
 import { AlertService } from '../../../shared/services/alert.service';
@@ -16,7 +17,7 @@ import { AuthService } from '../../services/auth.service';
 import { MailSendValidateData } from '../../../shared/interfaces/mail.interface';
 import { environment } from '../../../../../environments/environment';
 import { ResetPasswordModalComponent } from './reset-password-modal/reset-password-modal.component';
-import { MatDialog } from '@angular/material/dialog';
+import { TemplateEmail } from '../../../shared/interfaces/mail.interface';
 
 @Component({
   selector: 'worky-login',
@@ -258,6 +259,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.mailSendDataValidate.message = 'You have requested to reset your password. Click the button below to reset your password.';
     this.mailSendDataValidate.subMessage = 'If you did not request a password reset, please ignore this email.';
     this.mailSendDataValidate.buttonMessage = 'Reset password';
+    this.mailSendDataValidate.template = TemplateEmail.FORGOT_PASSWORD;
 
 
     if (!this.loginForm.get('email')?.valid) {
@@ -275,8 +277,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.mailSendDataValidate.email = email;
 
-    console.log(this.mailSendDataValidate);
-
     const loading = await this._loadingCtrl.create({
       message: 'Enviando correo de restablecimiento de contraseña, por favor espere..',
     });
@@ -285,7 +285,6 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.subscription = this._authApiService.forgotPassword(this.mailSendDataValidate).subscribe({
       next: (response: any) => {
-        console.log(response);
         if (response && response.message) {
           this._alertService.showAlert(
             'Envio exitoso',
@@ -303,6 +302,18 @@ export class LoginComponent implements OnInit, OnDestroy {
           this._alertService.showAlert(
             'Error',
             'El correo no existe o es inválido, por favor verifique el correo ingresado',
+            Alerts.ERROR,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
+          loading.dismiss();
+        }
+        if (e.error.message === 'Failed to send email') {
+          this._alertService.showAlert(
+            'Error al enviar el correo',
+            'Ha ocurrido un error al enviar el correo, nuestro sistema reintentara enviarlo en unos minutos. Por favor, revise su bandeja de entrada.',
             Alerts.ERROR,
             Position.CENTER,
             true,
