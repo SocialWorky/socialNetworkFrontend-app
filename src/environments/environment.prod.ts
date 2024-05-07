@@ -1,5 +1,6 @@
 export const environment = {
   PRODUCTION: true,
+  GIT_SHA: 'GIT_SHA',
   API_URL: 'https://backend-dev.worky.cl/api/v1',
   BASE_URL: 'http://localhost:4200',
   CLIEN_ID_GOOGLE: '392454930418-dunulmihmuss90c042vn359mitdjjko8.apps.googleusercontent.com',
