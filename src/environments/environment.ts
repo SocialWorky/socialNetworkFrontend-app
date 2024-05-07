@@ -5,7 +5,7 @@ const env = require('../../env')
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  PRODUCTION: env.PRODUCTION,
+  PRODUCTION: false,
   API_URL: env.API_URL,
   BASE_URL: env.BASE_URL,
   CLIEN_ID_GOOGLE: env.CLIEN_ID_GOOGLE,
