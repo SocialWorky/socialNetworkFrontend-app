@@ -1,5 +1,5 @@
-import { env } from '../../env'
-//const env = require('.env')
+//import { env } from '../../env'
+const env = require('../../env')
 
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
