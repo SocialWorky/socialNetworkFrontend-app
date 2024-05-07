@@ -3,6 +3,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 COPY . .
+RUN node mynodejs.cjs
 CMD ["npm", "run", "start"]
 
 FROM node:20.12.2-alpine3.18 as dev-deps
