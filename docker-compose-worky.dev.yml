@@ -7,7 +7,7 @@ services:
     restart: always
     container_name: worky-frontend
     ports:
-      - ${APP_PORT}:4200
+      - ${APP_PORT}:80
     environment:
       API_URL: ${API_URL}
       BASE_URL: ${BASE_URL}
