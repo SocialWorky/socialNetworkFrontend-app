@@ -252,7 +252,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   async forgotPassword() {
     const email = this.loginForm.get('email')?.value;
 
-    this.mailSendDataValidate.url = `${environment.baseUrl}/auth/reset-password/`;
+    this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/reset-password/`;
     this.mailSendDataValidate.subject = 'Reset your password';
     this.mailSendDataValidate.title = 'Reset your password';
     this.mailSendDataValidate.greet = 'Hello';

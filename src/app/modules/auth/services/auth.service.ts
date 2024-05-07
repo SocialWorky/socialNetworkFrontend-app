@@ -67,7 +67,7 @@ export class AuthService {
   }
 
   async checkExistingUserName(username: string): Promise<boolean> {
-    const url = `${environment.apiUrl}/user/checkUsername/${username}`;
+    const url = `${environment.API_URL}/user/checkUsername/${username}`;
     try {
       const data: any = await this.http.get(url).toPromise();
       return data;

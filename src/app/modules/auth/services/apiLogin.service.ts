@@ -11,7 +11,7 @@ export class AuthApiService {
   private baseUrl: string;
 
   constructor(private http: HttpClient) {
-    this.baseUrl = environment.apiUrl;
+    this.baseUrl = environment.API_URL;
   }
 
   loginUser(credentials: LoginData) {

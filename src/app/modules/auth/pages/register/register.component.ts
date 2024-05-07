@@ -55,7 +55,7 @@ export class RegisterComponent implements OnInit {
 
     this.registerLoading = true;
     
-    const baseUrl = environment.baseUrl;
+    const baseUrl = environment.BASE_URL;
 
     const loading = await this._loadingCtrl.create({
       message: translations['register.messageLoading'],

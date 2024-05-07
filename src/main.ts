@@ -6,7 +6,7 @@ import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import { Translations } from './translations/translations';
 import { environment } from './environments/environment';
 
-if (environment.production) {
+if (environment.PRODUCTION) {
   enableProdMode();
 }
 

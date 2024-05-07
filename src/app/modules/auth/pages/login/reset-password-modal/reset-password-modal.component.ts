@@ -54,7 +54,7 @@ export class ResetPasswordModalComponent  implements OnInit, OnDestroy {
   async sendReset(){
     const password = this.resetPasswordForm.get('password')?.value;
 
-    this.mailSendDataValidate.url = `${environment.baseUrl}/auth/login`;
+    this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/login`;
     this.mailSendDataValidate.subject = 'Se ha restablecido tu contraseña';
     this.mailSendDataValidate.title = 'Contraseña restablecida';
     this.mailSendDataValidate.greet = 'Hola';

@@ -10,7 +10,7 @@ export class AuthApiRegisterService {
   private _baseUrl: string;
 
   constructor(private http: HttpClient) {
-    this._baseUrl = environment.apiUrl;
+    this._baseUrl = environment.API_URL;
   }
 
   registerUser(body: RegisterData) {

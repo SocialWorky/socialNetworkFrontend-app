@@ -1,17 +1,16 @@
-import { env } from 'env'
-
+import { env } from '../../env'
+//const env = require('.env')
 
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
-  apiUrl: env.API_URL,
-  baseUrl: env.BASE_URL,
-  clienIdGoogle: env.CLIEN_ID_GOOGLE,
+  PRODUCTION: true,
+  API_URL: env.API_URL,
+  BASE_URL: env.BASE_URL,
+  CLIEN_ID_GOOGLE: env.CLIEN_ID_GOOGLE,
 };
-
 
 /*
  * For easier debugging in development mode, you can import the following file
