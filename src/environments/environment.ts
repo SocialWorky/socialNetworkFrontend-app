@@ -1,4 +1,3 @@
-//import { env } from '../../env'
 const env = require('../../env')
 
 // This file can be replaced during build by using the `fileReplacements` array.
@@ -6,10 +5,12 @@ const env = require('../../env')
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  PRODUCTION: true,
+  PRODUCTION: env.PRODUCTION,
   API_URL: env.API_URL,
   BASE_URL: env.BASE_URL,
   CLIEN_ID_GOOGLE: env.CLIEN_ID_GOOGLE,
+  APP_PORT: env.APP_PORT,
+  APP_VERSION: env.APP_VERSION,
 };
 
 /*
