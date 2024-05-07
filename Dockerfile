@@ -13,6 +13,7 @@ RUN npm install --frozen-lockfile
 FROM node:20.12.2-alpine3.18 as builder
 WORKDIR /app
 COPY --from=dev-deps /app/node_modules ./node_modules
+COPY env.ts ./
 COPY . .
 RUN npm run build --prod
 
