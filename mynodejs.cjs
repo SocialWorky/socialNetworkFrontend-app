@@ -1,4 +1,4 @@
-require('dotenv').config();
+const env = require('env');
 const fs = require('fs');
 let path = require('path');
 const successColor = '\x1b[32m%s\x1b[0m';
@@ -9,12 +9,12 @@ envList.forEach(en => {
   const envPath = en !== 'local' ? `.${en}` : '';
 
   const envFile = `export const environment = {
-    production: '${process.env.PRODUCTION}',
-    apiUrl: '${process.env.API_URL}',
-    baseUrl: '${process.env.BASE_URL}',
-    clienIdGoogle: '${process.env.CLIEN_ID_GOOGLE}',
-    appVersion: '${process.env.APP_VERSION}',
-    appPort: '${process.env.APP_PORT}',
+    production: '${env.PRODUCTION}',
+    apiUrl: '${env.API_URL}',
+    baseUrl: '${env.BASE_URL}',
+    clienIdGoogle: '${env.CLIEN_ID_GOOGLE}',
+    appVersion: '${env.APP_VERSION}',
+    appPort: '${env.APP_PORT}',
   };
 `;
 
