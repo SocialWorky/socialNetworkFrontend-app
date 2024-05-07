@@ -14,7 +14,7 @@ FROM node:20.12.2-alpine3.18 as builder
 WORKDIR /app
 COPY --from=dev-deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build --prod
+RUN npm run build
 
 FROM node:20.12.2-alpine3.18 as prod-deps
 WORKDIR /app
@@ -23,7 +23,6 @@ RUN npm install --production --frozen-lockfile
 
 FROM node:20.12.2-alpine3.18 as prod
 WORKDIR /app
-ENV APP_VERSION=${APP_VERSION}
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/www ./www
 
