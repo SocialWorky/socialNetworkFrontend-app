@@ -64,6 +64,10 @@
     color: $worky-color-light;
     background-color: map-get($worky-teal, 100);
   }
+  .worky-button-disabled {
+    color: map-get($worky-teal, 72);
+    background-color: map-get($worky-teal, 24);
+  }
 }
 
 :host-context(.theme-accent) {
@@ -78,6 +82,10 @@
     color: $worky-color-light;
     background-color: map-get($worky-blue, 100);
   }
+  .worky-button-disabled {
+    color: map-get($worky-blue, 72);
+    background-color: map-get($worky-blue, 24);
+  }
 }
 
 :host-context(.theme-warn) {
@@ -91,6 +99,10 @@
   .worky-button-flat {
     color: $worky-color-light;
     background-color: map-get($worky-magenta, 100);
+  }
+  .worky-button-disabled {
+    color: map-get($worky-magenta, 72);
+    background-color: map-get($worky-magenta, 24);
   }
 }
 

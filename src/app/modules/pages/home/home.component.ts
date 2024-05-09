@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TypePublishing } from '../../shared/addPublication/enum/addPublication.enum';
 
 @Component({
   selector: 'worky-home',
@@ -6,6 +7,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent {
+
+  typePublishing = TypePublishing;
 
   constructor() { }
 
