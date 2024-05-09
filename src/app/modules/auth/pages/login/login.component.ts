@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { WorkyButtonType, WorkyButtonTheme } from '../../../shared/buttons/models/worky-button-model';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
@@ -39,6 +39,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   showResetPasswordModal = false;
 
+  @ViewChild('emailInput') emailInput!: ElementRef;
 
   private subscription: Subscription = new Subscription();
 
@@ -252,20 +253,13 @@ export class LoginComponent implements OnInit, OnDestroy {
   async forgotPassword() {
     const email = this.loginForm.get('email')?.value;
 
-    this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/reset-password/`;
-    this.mailSendDataValidate.subject = translations['email.resetPasswordSubject'];
-    this.mailSendDataValidate.title = translations['email.resetPasswordTitle'];
-    this.mailSendDataValidate.greet = translations['email.resetPasswordGreet'];
-    this.mailSendDataValidate.message = translations['email.resetPasswordMessage'];
-    this.mailSendDataValidate.subMessage = translations['email.resetPasswordSubMessage'];
-    this.mailSendDataValidate.buttonMessage = translations['email.resetPasswordButtonMessage'];
-    this.mailSendDataValidate.template = TemplateEmail.FORGOT_PASSWORD;
-
-
-    if (!this.loginForm.get('email')?.valid) {
+    if (!email) {
+      this.loginForm.get('email')?.setErrors({ emailInValid: true });
+      this.loginForm.get('email')?.reset;
+      this.emailInput.nativeElement.focus();
       this._alertService.showAlert(
-        translations['alert.title_error_credentials'],
-        translations['login.emailIncorrect'],
+        translations['alert.error_input_email_title'],
+        translations['alert.error_input_email_message'],
         Alerts.ERROR,
         Position.CENTER,
         true,
@@ -275,6 +269,14 @@ export class LoginComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/reset-password/`;
+    this.mailSendDataValidate.subject = translations['email.resetPasswordSubject'];
+    this.mailSendDataValidate.title = translations['email.resetPasswordTitle'];
+    this.mailSendDataValidate.greet = translations['email.resetPasswordGreet'];
+    this.mailSendDataValidate.message = translations['email.resetPasswordMessage'];
+    this.mailSendDataValidate.subMessage = translations['email.resetPasswordSubMessage'];
+    this.mailSendDataValidate.buttonMessage = translations['email.resetPasswordButtonMessage'];
+    this.mailSendDataValidate.template = TemplateEmail.FORGOT_PASSWORD;
     this.mailSendDataValidate.email = email;
 
     const loading = await this._loadingCtrl.create({
@@ -299,6 +301,9 @@ export class LoginComponent implements OnInit, OnDestroy {
       },
       error: (e: any) => {
         if (e.error.message === 'Email not exist in the database or is invalid') {
+          this.loginForm.get('email')?.setErrors({ emailInValid: true });
+          this.loginForm.get('email')?.reset;
+          this.emailInput.nativeElement.focus();
           this._alertService.showAlert(
             translations['alert.error_email_title_reset_password'],
             translations['alert.error_email_message_reset_password'],

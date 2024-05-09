@@ -48,9 +48,11 @@ export const translations = {
   'alert.title_reset_password_message': 'Envio exitoso',
   'alert.message_reset_password_message': 'Se ha enviado un correo electrónico con las instrucciones para restablecer tu contraseña',
   'alert.error_email_title_reset_password': 'Error al enviar el correo',
-  'alert.error_email_message_reset_password': 'El correo no existe o no está registrado en la plataforma, por favor, verifica tu correo e inténtalo de nuevo',
+  'alert.error_email_message_reset_password': 'El correo no existe, no es un correo valido o no está registrado en la plataforma, por favor, verifica tu correo e inténtalo de nuevo',
   'alert.error_send_email_title_reset_password': 'Error al enviar el correo',
   'alert.error_send_email_message_reset_password': 'Hemos detectado un problema técnico al enviar el correo de restablecimiento de contraseña, por favor, inténtalo de nuevo',
+  'alert.error_input_email_title': 'Correo electrónico no válido',
+  'alert.error_input_email_message': 'Introduce tu correo electrónico',
   // EMAIL MESSAGES
   'email.validateEmailSubject': 'Valida tu correo',
   'email.validateEmailTitle': 'Bienvenido a Worky',

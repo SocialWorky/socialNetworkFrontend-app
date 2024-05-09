@@ -38,7 +38,7 @@
             <div class="form-input">
                 <mat-form-field class="worky-input worky-accent">
                     <mat-label>{{ 'input.email' | workyTranslations }}</mat-label>
-                    <input type="email" formControlName="email" id="email" matInput required>
+                    <input type="email" formControlName="email" id="email" matInput #emailInput required>
                     <mat-error worky-validation-error-message></mat-error>
                 </mat-form-field>
 

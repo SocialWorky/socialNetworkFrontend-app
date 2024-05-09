@@ -51,6 +51,8 @@ export const translations = {
   'alert.error_email_message_reset_password': 'The email does not exist or is not registered on the platform, please check your email and try again',
   'alert.error_send_email_title_reset_password': 'Error sending email',
   'alert.error_send_email_message_reset_password': 'We have detected a technical problem when sending the password reset email, please try again',
+  'alert.error_input_email_title': 'Invalid email',
+  'alert.error_input_email_message': 'Enter your email',
   // EMAIL MESSAGES
   'email.validateEmailSubject': 'Validate your email',
   'email.validateEmailTitle': 'Welcome to Worky',
