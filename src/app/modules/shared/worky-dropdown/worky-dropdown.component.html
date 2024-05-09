@@ -9,7 +9,7 @@
       loading="lazy"/>
   </div>
   <div *ngIf="!img && !badge">
-    <worky-avatar username="Carlos Abarca" [size]="50"></worky-avatar>
+    <worky-avatar username="{{ userName }}" [size]="50"></worky-avatar>
   </div>
 
   <ng-container *ngIf="badge">
