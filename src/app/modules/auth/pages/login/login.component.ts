@@ -253,12 +253,12 @@ export class LoginComponent implements OnInit, OnDestroy {
     const email = this.loginForm.get('email')?.value;
 
     this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/reset-password/`;
-    this.mailSendDataValidate.subject = 'Reset your password';
-    this.mailSendDataValidate.title = 'Reset your password';
-    this.mailSendDataValidate.greet = 'Hello';
-    this.mailSendDataValidate.message = 'You have requested to reset your password. Click the button below to reset your password.';
-    this.mailSendDataValidate.subMessage = 'If you did not request a password reset, please ignore this email.';
-    this.mailSendDataValidate.buttonMessage = 'Reset password';
+    this.mailSendDataValidate.subject = translations['email.resetPasswordSubject'];
+    this.mailSendDataValidate.title = translations['email.resetPasswordTitle'];
+    this.mailSendDataValidate.greet = translations['email.resetPasswordGreet'];
+    this.mailSendDataValidate.message = translations['email.resetPasswordMessage'];
+    this.mailSendDataValidate.subMessage = translations['email.resetPasswordSubMessage'];
+    this.mailSendDataValidate.buttonMessage = translations['email.resetPasswordButtonMessage'];
     this.mailSendDataValidate.template = TemplateEmail.FORGOT_PASSWORD;
 
 
@@ -278,7 +278,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.mailSendDataValidate.email = email;
 
     const loading = await this._loadingCtrl.create({
-      message: 'Enviando correo de restablecimiento de contraseña, por favor espere..',
+      message: translations['login.messageResetPasswordLoading'],
     });
 
     await loading.present();
@@ -287,8 +287,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       next: (response: any) => {
         if (response && response.message) {
           this._alertService.showAlert(
-            'Envio exitoso',
-            'Se ha enviado un correo para restablecer la contraseña, por favor revise su bandeja de entrada',
+            translations['alert.title_reset_password_message'],
+            translations['alert.message_reset_password_message'],
             Alerts.SUCCESS,
             Position.CENTER,
             true,
@@ -300,8 +300,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       error: (e: any) => {
         if (e.error.message === 'Email not exist in the database or is invalid') {
           this._alertService.showAlert(
-            'Error',
-            'El correo no existe o es inválido, por favor verifique el correo ingresado',
+            translations['alert.error_email_title_reset_password'],
+            translations['alert.error_email_message_reset_password'],
             Alerts.ERROR,
             Position.CENTER,
             true,
@@ -312,8 +312,8 @@ export class LoginComponent implements OnInit, OnDestroy {
         }
         if (e.error.message === 'Failed to send email') {
           this._alertService.showAlert(
-            'Error al enviar el correo',
-            'Ha ocurrido un error al enviar el correo, nuestro sistema reintentara enviarlo en unos minutos. Por favor, revise su bandeja de entrada.',
+            translations['alert.error_send_email_title_reset_password'],
+            translations['alert.error_send_email_message_reset_password'],
             Alerts.ERROR,
             Position.CENTER,
             true,

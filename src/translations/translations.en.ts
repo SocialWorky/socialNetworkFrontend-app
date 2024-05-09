@@ -11,6 +11,7 @@ export const translations = {
   'login.messageErrorCredentials': 'Incorrect credentials. Please, try again.',
   'login.messageErrorServer': 'Server error. Please, try again.',
   'login.messageValidationEmailLoading': 'Validating email...',
+  'login.messageResetPasswordLoading': 'Sending password reset email, please wait...',
   // INPUTS
   'input.email': 'Email',
   'input.password': 'Password',
@@ -43,6 +44,13 @@ export const translations = {
   'alert.message_error_send_email': 'We are pleased to inform you that your registration has been successfully completed. <br> However, we have detected a technical problem with sending the account validation email. <br> Do not worry, your registration is already active. In the next few minutes you will receive a new email with the link to validate your account.',
   'alert.title_success_register': 'Successful registration',
   'alert.message_success_register': 'Your registration was successful, you will receive an email to validate your account',
+  // -> RESET PASSWORD
+  'alert.title_reset_password_message': 'Successful shipment',
+  'alert.message_reset_password_message': 'An email has been sent with the instructions to reset your password',
+  'alert.error_email_title_reset_password': 'Error sending email',
+  'alert.error_email_message_reset_password': 'The email does not exist or is not registered on the platform, please check your email and try again',
+  'alert.error_send_email_title_reset_password': 'Error sending email',
+  'alert.error_send_email_message_reset_password': 'We have detected a technical problem when sending the password reset email, please try again',
   // EMAIL MESSAGES
   'email.validateEmailSubject': 'Validate your email',
   'email.validateEmailTitle': 'Welcome to Worky',
@@ -50,6 +58,13 @@ export const translations = {
   'email.validateEmailMessage': 'To validate your email, click the button below',
   'email.validateEmailSubMessage': 'If you did not register, ignore this email',
   'email.validateEmailButtonMessage': 'Validate email',
+  // -> RESET PASSWORD
+  'email.resetPasswordSubject': 'Reset your password',
+  'email.resetPasswordTitle': 'Reset your password',
+  'email.resetPasswordGreet': 'Hello',
+  'email.resetPasswordMessage': 'You have requested to reset your password. Click the button below to reset your password.',
+  'email.resetPasswordSubMessage': 'If you did not request a password reset, please ignore this email.',
+  'email.resetPasswordButtonMessage': 'Reset password',
 // REGISTER COMPONENT
   'register.title': 'Register',
   'register.subTitle': 'Fill out the registration form',

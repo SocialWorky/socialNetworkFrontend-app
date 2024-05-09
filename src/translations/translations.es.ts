@@ -11,6 +11,7 @@ export const translations = {
   'login.messageErrorCredentials': 'Credenciales incorrectas. Por favor, inténtalo de nuevo.',
   'login.messageErrorServer': 'Error en el servidor. Por favor, inténtalo de nuevo.',
   'login.messageValidationEmailLoading': 'Validando correo...',
+  'login.messageResetPasswordLoading': 'Enviando correo de restablecimiento de contraseña, por favor espere...',
   // INPUTS
   'input.email': 'Correo electrónico',
   'input.password': 'Contraseña',
@@ -43,6 +44,13 @@ export const translations = {
   'alert.message_error_send_email': 'Nos complace informarte que tu registro ha sido completado con éxito. <br> Sin embargo, hemos detectado un problema técnico con el envío del correo electrónico de validación de cuenta. <br> No te preocupes, tu registro ya está activo. En los próximos minutos recibirás un nuevo correo electrónico con el enlace para validar tu cuenta.',
   'alert.title_success_register': 'Registro exitoso',
   'alert.message_success_register': 'Tu registro ha sido exitoso, recibirás un correo para validar tu cuenta',
+  // -> RESET PASSWORD
+  'alert.title_reset_password_message': 'Envio exitoso',
+  'alert.message_reset_password_message': 'Se ha enviado un correo electrónico con las instrucciones para restablecer tu contraseña',
+  'alert.error_email_title_reset_password': 'Error al enviar el correo',
+  'alert.error_email_message_reset_password': 'El correo no existe o no está registrado en la plataforma, por favor, verifica tu correo e inténtalo de nuevo',
+  'alert.error_send_email_title_reset_password': 'Error al enviar el correo',
+  'alert.error_send_email_message_reset_password': 'Hemos detectado un problema técnico al enviar el correo de restablecimiento de contraseña, por favor, inténtalo de nuevo',
   // EMAIL MESSAGES
   'email.validateEmailSubject': 'Valida tu correo',
   'email.validateEmailTitle': 'Bienvenido a Worky',
@@ -50,6 +58,13 @@ export const translations = {
   'email.validateEmailMessage': 'Para validar tu correo, haz clic en el botón de abajo',
   'email.validateEmailSubMessage': 'Si no te has registrado, ignora este correo',
   'email.validateEmailButtonMessage': 'Validar correo',
+  // -> RESET PASSWORD
+  'email.resetPasswordSubject': 'Restablece tu contraseña',
+  'email.resetPasswordTitle': 'Restablece tu contraseña',
+  'email.resetPasswordGreet': 'Hola',
+  'email.resetPasswordMessage': 'Has solicitado restablecer tu contraseña. Haz clic en el botón de abajo para restablecer tu contraseña.',
+  'email.resetPasswordSubMessage': 'Si no has solicitado restablecer la contraseña, por favor, ignora este correo.',
+  'email.resetPasswordButtonMessage': 'Restablecer contraseña',
   // REGISTER COMPONENT
   'register.title': 'Registro',
   'register.subTitle': 'Complete el formulario de registro',
