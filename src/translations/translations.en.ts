@@ -12,6 +12,12 @@ export const translations = {
   'login.messageErrorServer': 'Server error. Please, try again.',
   'login.messageValidationEmailLoading': 'Validating email...',
   'login.messageResetPasswordLoading': 'Sending password reset email, please wait...',
+  // PUBLICATIONS COMPONENT
+  'publishing.placeholder': 'What are you thinking,',
+  'publishing.privacy-public': 'Public',
+  'publishing.privacy-private': 'Private',
+  'publishing.privacy-friends': 'Friends',
+  'publishing.publish': 'Publish',
   // INPUTS
   'input.email': 'Email',
   'input.password': 'Password',

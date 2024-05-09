@@ -12,6 +12,12 @@ export const translations = {
   'login.messageErrorServer': 'Error en el servidor. Por favor, inténtalo de nuevo.',
   'login.messageValidationEmailLoading': 'Validando correo...',
   'login.messageResetPasswordLoading': 'Enviando correo de restablecimiento de contraseña, por favor espere...',
+  // PUBLICATIONS COMPONENT
+  'publishing.placeholder': '¿Qué estás pensando,',
+  'publishing.privacy-public': 'Público',
+  'publishing.privacy-private': 'Privado',
+  'publishing.privacy-friends': 'Amigos',
+  'publishing.publish': 'Publicar',
   // INPUTS
   'input.email': 'Correo electrónico',
   'input.password': 'Contraseña',

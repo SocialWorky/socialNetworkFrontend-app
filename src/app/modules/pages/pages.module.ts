@@ -14,6 +14,7 @@ import { WorkyMenuComponentComponent } from './components/navbar/worky-menu-comp
 import { WorkyDropdownModule } from '../shared/worky-dropdown/worky-dropdown.module';
 import { TranslationsModule } from '../shared/translations/translations.module';
 import { WorkyAvatarModule } from '../shared/worky-avatar/worky-avatar.module';
+import { AddPublicationModule } from '../shared/addPublication/addPublication.module';
 
 
 @NgModule({
@@ -33,7 +34,8 @@ import { WorkyAvatarModule } from '../shared/worky-avatar/worky-avatar.module';
     PagesRoutingModule,
     WorkyDropdownModule,
     TranslationsModule,
-    WorkyAvatarModule
+    WorkyAvatarModule,
+    AddPublicationModule,
   ]
 })
 export class PagesModule { }

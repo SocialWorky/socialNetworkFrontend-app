@@ -31,7 +31,10 @@
                 "output": "./svg"
               }
             ],
-            "styles": ["src/global.scss"],
+            "styles": [
+              "src/global.scss",
+              "node_modules/@ctrl/ngx-emoji-mart/picker.css"
+            ],
             "scripts": []
           },
           "configurations": {
