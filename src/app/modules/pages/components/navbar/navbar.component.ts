@@ -13,7 +13,6 @@ import { DropdownDataLink } from './../../../shared/worky-dropdown/interfaces/da
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent implements OnInit, OnDestroy {
-  token = localStorage.getItem('token');
 
   googleLoginSession = localStorage.getItem('googleLogin');
 
@@ -28,10 +27,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   dataLinkProfile:DropdownDataLink[] = [];
 
   resizeSubscription: Subscription | undefined;
-
-  get pictureGoogle(): string {
-    return this._authGoogleService.getProfile()?.['picture'];
-  }
 
   constructor(
     private _router: Router,
@@ -50,7 +45,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
     this.notifications = 2;
     this.messages = 1;
-    this.pictureGoogle;
   }
 
   ngOnDestroy() {

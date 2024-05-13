@@ -2,14 +2,14 @@
   class="nav-link"
   role="button"
   [attr.data-bs-toggle]="dataLink?.length ? 'dropdown' : null">
-  <div *ngIf="img">
+  <div *ngIf="img && img !=='avatar'">
     <img
       src="{{ img }}"
       class="img-dropdown rounded-circle"
       loading="lazy"/>
   </div>
-  <div *ngIf="!img && !badge">
-    <worky-avatar username="{{ userName }}" [size]="50"></worky-avatar>
+  <div *ngIf="img === 'avatar'">
+    <worky-avatar [size]="50"></worky-avatar>
   </div>
 
   <ng-container *ngIf="badge">
