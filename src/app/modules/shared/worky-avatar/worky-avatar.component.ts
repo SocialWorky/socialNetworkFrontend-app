@@ -1,11 +1,18 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { AuthService } from '../../auth/services/auth.service';
+import { Token } from '../interfaces/token.interface';
 
 @Component({
   selector: 'worky-avatar',
   templateUrl: './worky-avatar.component.html',
   styleUrls: ['./worky-avatar.component.scss'],
 })
-export class WorkyAvatarComponent {
+export class WorkyAvatarComponent implements OnInit {
+
+  token!: Token;
+
+  userAvatar: string = '';
+
   private _size: number = 30;
 
   imageData: string = ''; 
@@ -23,8 +30,8 @@ export class WorkyAvatarComponent {
     '#006633'  // Verde oscuro
   ];
 
-
   @Input() username: string = '';
+
   @Input()
   set size(value: number) {
     if (value >= 30 && value <= 100) {
@@ -37,22 +44,42 @@ export class WorkyAvatarComponent {
   }
 
   initials: string = '';
+
   backgroundColor: string = '';
+
   fontSize: number | null = null;
 
-  constructor() {
-    this.generateAvatar();
+  constructor(private _authService: AuthService) {
+
+    this.token = this._authService.getDecodedToken();
+
+    this.username = this.token.name;
+
+    this.userAvatar = this.token.avatar;
+
+    if (this.username && !this.userAvatar) {
+      this.generateAvatar();
+    }
+
+    if (this.userAvatar) this.imageData = this.userAvatar;
+
     this.fontSize = null;
     this._size = 30;
     this.colors = [...this.colors];
-    this.imageData = '';
     this.fontSize = null;
+  }
+  ngOnInit(): void {
+    this.username = this.token.name;
+    this.userAvatar = this.token.avatar;
   }
 
 
   // eslint-disable-next-line @angular-eslint/use-lifecycle-interface
   ngOnChanges() {
-    this.generateAvatar();
+    if (this.username && !this.userAvatar) {
+      this.generateAvatar();
+    }
+    if(this.userAvatar) this.imageData = this.userAvatar;
   }
 
   generateAvatar() {

@@ -204,12 +204,33 @@ export class LoginComponent implements OnInit, OnDestroy {
     };
 
     this.subscription = await this._authApiService.loginGoogle(dataGoogle).subscribe({
-      next: (response: any) => {
-        localStorage.setItem('token', response.token);
-        this._router.navigate(['/home']);
-      }
+      next: async (response: any) => {
+      localStorage.setItem('token', response.token);
+
+      const userId = this._authService.getDecodedToken()?.id;
+
+      this.subscription = await this._authApiService.avatarUpdate(userId, loginDataGoogle.picture, response.token).subscribe({
+        next: async (response: any) => {
+          if (response) {
+            await this._authService.renewToken(userId);
+            this.token = localStorage.getItem('token');
+            loading.dismiss();
+            this._router.navigate(['/home']);
+            this._cdr.detectChanges();
+          }
+        },
+        error: (e: any) => {
+          console.log(e);
+          loading.dismiss();
+          this._router.navigate(['/home']);
+        }
+      });
+
+      },
     });
+
     loading.dismiss();
+
   }
 
   async validateEmailWithToken(token: string) {

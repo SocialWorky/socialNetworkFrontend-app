@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { LoginData, LoginDataGloogle } from '../interfaces/login.interface';
 import { MailSendValidateData } from '../../shared/interfaces/mail.interface';
+import { Token } from '../../shared/interfaces/token.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +11,18 @@ import { MailSendValidateData } from '../../shared/interfaces/mail.interface';
 export class AuthApiService {
   private baseUrl: string;
 
+  private token: string;
+
+  private getHeaders(token: string): HttpHeaders {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return headers;
+  }
+
   constructor(private http: HttpClient) {
     this.baseUrl = environment.API_URL;
+    this.token = localStorage.getItem('token') || '';
   }
 
   loginUser(credentials: LoginData) {
@@ -37,6 +48,12 @@ export class AuthApiService {
   resetPassword(data: MailSendValidateData) {
     const url = `${this.baseUrl}/email/resetPassword`;
     return this.http.post(url, data);
+  }
+
+  avatarUpdate(_id: string , avatar: string, tokenResponse: any) {
+    const url = `${this.baseUrl}/user/edit/${_id}`;
+    const headers = this.getHeaders(tokenResponse);
+    return this.http.put(url, { avatar }, { headers });
   }
 
 }
