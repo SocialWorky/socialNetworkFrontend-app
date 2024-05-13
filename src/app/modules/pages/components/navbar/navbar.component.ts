@@ -28,10 +28,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   resizeSubscription: Subscription | undefined;
 
-  // get pictureGoogle(): string {
-  //   return this._authGoogleService.getProfile()?.['picture'];
-  // }
-
   constructor(
     private _router: Router,
     private _deviceDetectionService: DeviceDetectionService,
@@ -49,7 +45,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
     this.notifications = 2;
     this.messages = 1;
-    // this.pictureGoogle;
   }
 
   ngOnDestroy() {
