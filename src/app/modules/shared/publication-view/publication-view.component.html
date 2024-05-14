@@ -31,7 +31,8 @@
         <span>{{ publication?.reaction?.length }}</span>
       </div>
 
-      <div class="publication-footer-content-item" *ngIf="publication?.comment?.length">
+      <div class="publication-footer-content-item" *ngIf="publication?.comment?.length"
+        (click)="viewCommentsOn(indexPublication!)">
         <span> {{ publication?.comment?.length }} </span>
         <span> Comentarios </span>
       </div>
@@ -39,19 +40,53 @@
     </div>
 
     <div class="publication-footer-actions">
+
       <div class="publication-footer-actions-item">
         <i class="material-icons">mood</i>
         <span>Reaccionar</span>
       </div>
-      <div class="publication-footer-actions-item">
+
+      <div class="publication-footer-actions-item"
+        (click)="commentOn(indexPublication!)">
         <i class="material-icons">comment</i>
         <span>Comentar</span>
       </div>
+
       <div class="publication-footer-actions-item">
         <i class="material-icons">share</i>
         <span>Compartir</span>
       </div>
 
+    </div>
+  </div>
+
+  <div class="publication-comment-on" *ngIf="viewCommentSection === indexPublication">
+     <worky-add-publication 
+        [type]="typePublishing.COMMENT"
+        [idPublication]="publication?._id"
+        [indexPublication]="indexPublication">
+     </worky-add-publication>
+  </div>
+
+  <div class="publication-comment" *ngIf="viewComments === indexPublication">
+    <div class="publication-comment-item" *ngFor="let comment of publication?.comment">
+
+      <worky-avatar 
+        [size]="30"
+        img="{{ comment?.author?.avatar }}"
+        name="{{ comment?.author?.name }} {{ comment?.author?.lastName }} ">
+      </worky-avatar>
+
+      <div class="publication-comment-content">
+        <div class="publication-comment-content-header">
+          <span>{{ comment?.author?.name }} {{ comment?.author?.lastName }}</span>
+        </div>
+        <div class="publication-comment-content-body">
+          <span>{{ comment?.content }}</span>
+        </div>
+      </div>
+
+    </div>
   </div>
 
 </div>

@@ -65,8 +65,12 @@
     position: relative;
 
     .textarea-container {
+      display: flex;
+      align-items: center;
       position: relative;
       flex: 1;
+      margin-top: 10px;
+      gap: 10px;
 
       .publishing-textarea {
         width: 100%;
@@ -105,6 +109,11 @@
         overflow-y: auto;
       }
     }
+  }
+
+  .comment-body {
+    padding: 15px;
+    margin-top: 2rem;
   }
 
   .publishing-footer {

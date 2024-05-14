@@ -4,7 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { CreatePost } from '../addPublication/interfaces/createPost.interface';
 import { PublicationView } from '../interfaces/publicationView.interface';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -46,11 +46,10 @@ export class PublicationService {
 
   async getAllPublications(): Promise<PublicationView[]> {
     try {
-      const publications: PublicationView[] = await this.viewAll().toPromise() ?? [];
+      const publications: PublicationView[] = await firstValueFrom(this.viewAll()) ?? [];
       this.publicationsSubject.next(publications);
       return publications;
     } catch (error) {
-      // Maneja errores aquí
       console.error("Error al obtener las publicaciones:", error);
       return [];
     }
