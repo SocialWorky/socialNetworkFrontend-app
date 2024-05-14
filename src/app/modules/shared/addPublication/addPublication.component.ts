@@ -4,11 +4,13 @@ import { LoadingController } from '@ionic/angular';
 import { WorkyButtonType, WorkyButtonTheme } from '../../shared/buttons/models/worky-button-model';
 import { AuthService } from '../../auth/services/auth.service';
 import { PublicationService } from '../services/publication.service';
+import { CommentService } from '../services/comment.service';
 import { translations } from '../../../../translations/translations';
 import { TypePublishing, TypePrivacy } from './enum/addPublication.enum';
 import { Token } from '../interfaces/token.interface';
 import { AlertService } from '../../shared/services/alert.service';
 import { Alerts, Position } from '../../shared/enums/alerts.enum';
+import { CreateComment} from '../interfaces/addComment.interface';
 
 @Component({
   selector: 'worky-add-publication',
@@ -34,6 +36,8 @@ export class AddPublicationComponent  implements OnInit {
 
   isAuthenticated: boolean = false;
 
+  typePublishing = TypePublishing;
+
   public myForm: FormGroup = this._fb.group({
     content: ['', [Validators.required, Validators.minLength(1)]],
     privacy: [''],
@@ -42,12 +46,17 @@ export class AddPublicationComponent  implements OnInit {
 
   @Input() type: TypePublishing | undefined;
 
+  @Input() idPublication?: string;
+
+  @Input() indexPublication?: number;
+
   @ViewChild('postText') postTextRef!: ElementRef;
   
   constructor(
       private _fb: FormBuilder,
       private _authService: AuthService,
       private _publicationService: PublicationService,
+      private _commentService: CommentService,
       private _alertService: AlertService,
       private _loadingCtrl: LoadingController,
     ) { 
@@ -83,16 +92,74 @@ export class AddPublicationComponent  implements OnInit {
     this.showEmojiMenu = false;
   }
 
-  async onSavePost() {
-
-    const loading = await this._loadingCtrl.create({
-      message: 'Estamos publicando tu contenido, por favor espera un momento',
-    });
-
-    loading.present();
+  async onSave() {
 
     this.myForm.controls['authorId'].setValue(this.decodedToken.id);
     this.myForm.controls['privacy'].setValue(this.privacy);
+
+    if (this.type === TypePublishing.POST){
+      this.onSavePublication();
+    }
+    if (this.type === TypePublishing.COMMENT){
+      this.onSaveComment(this.idPublication as string);
+    }
+
+
+  }
+
+  private async onSaveComment(idPublication: string) {
+
+    const loadingComment = await this._loadingCtrl.create({
+      message: 'Estamos publicando tu comentario, por favor espera un momento',
+    });
+
+    loadingComment.present();
+
+    const dataComment: CreateComment = {
+      content: this.myForm.controls['content'].value,
+      authorId: this.decodedToken.id,
+      idPublication: idPublication,
+    };
+
+    this._commentService.createComment(dataComment).subscribe({
+      next: (message: any ) => {
+
+        const publications = this._publicationService.publicationsSubject.getValue();
+
+        publications[this.indexPublication!].comment.push(message.comment);
+
+        this._publicationService.publicationsSubject.next(publications);
+
+        if (message.message === 'Comment created successfully') {
+          this.myForm.controls['content'].setValue('');
+          this.autoResize();
+          this._alertService.showAlert(
+            'Comentario exitoso',
+            'Se ha comentado correctamente, gracias por participar',
+            Alerts.SUCCESS,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
+          loadingComment.dismiss();
+        }
+      },
+      error: (error) => {
+        console.error(error);
+      }
+    });
+    loadingComment.dismiss();
+  }
+
+  private async onSavePublication() {
+
+    const loadingPublications = await this._loadingCtrl.create({
+      message: 'Estamos publicando tu contenido, por favor espera un momento',
+    });
+
+    loadingPublications.present();
+
     this._publicationService.createPost(this.myForm.value).subscribe({
       next: (message: any ) => {
 
@@ -114,13 +181,14 @@ export class AddPublicationComponent  implements OnInit {
             true,
             translations['button.ok'],
           );
-          loading.dismiss();
+          loadingPublications.dismiss();
         }
       },
       error: (error) => {
         console.error(error);
       }
     });
+    loadingPublications.dismiss();
   }
 
   autoResize() {

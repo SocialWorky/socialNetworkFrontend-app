@@ -1,9 +1,9 @@
 <div class="publishing-container">
-  <form [formGroup]="myForm" (ngSubmit)="onSavePost()" autocomplete="off">
+  <form [formGroup]="myForm" (ngSubmit)="onSave()" autocomplete="off">
     <div class="publishing-header">
-      <worky-avatar [size]="60"></worky-avatar>
+      <worky-avatar [size]="60" *ngIf="type === typePublishing.POST"></worky-avatar>
 
-      <div class="user-name-content">
+      <div class="user-name-content" *ngIf="type !== typePublishing.COMMENT">
         <span>{{ userName }}</span>
 
         <div class="dropdown">
@@ -40,14 +40,18 @@
 
     </div>
 
-    <div class="publishing-body">
+    <div class="publishing-body" [class.comment-body]="type === typePublishing.COMMENT">
       <div class="textarea-container">
+
+        <worky-avatar [size]="35" *ngIf="type === typePublishing.COMMENT"></worky-avatar>
+
         <textarea #postText
           class="publishing-textarea"
           (input)="onTextareaInput()"
           formControlName="content"
-          placeholder="{{ 'publishing.placeholder' | workyTranslations }} {{ userName }}?">
+          placeholder="{{ type === typePublishing.POST ? ('publishing.placeholder' | workyTranslations) + ' ' + userName + '?' : 'comentar como ' + userName + '?' }}">
         </textarea>
+
       </div>
 
       <div class="extra-content">
@@ -77,7 +81,7 @@
         [theme]="WorkyButtonTheme.Accent"
         [disabled]="!myForm.valid || !myForm.dirty"
         [width]="'100%'">
-        <span basic-button-text>{{ 'publishing.publish' | workyTranslations }}</span>
+        <span basic-button-text>{{ type === typePublishing.POST ? ('publishing.publish' | workyTranslations) : 'Comentar' }}</span>
       </worky-buttons>
     </div>
 

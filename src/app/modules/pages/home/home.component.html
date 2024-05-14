@@ -9,9 +9,12 @@
   <worky-add-publication [type]="typePublishing.POST"></worky-add-publication>
 </div>
 
-@for(publication of publications; track publication.updatedAt) {
+@for(publication of publications; track publication; let i = $index ) {
   <div class="worky-module-container">
-    <worky-publication-view [publication]="publication"></worky-publication-view>
+    <worky-publication-view 
+      [publication]="publication"
+      [indexPublication]="i">
+    </worky-publication-view>
   </div>
 } @empty {
   <p>no publications</p>
