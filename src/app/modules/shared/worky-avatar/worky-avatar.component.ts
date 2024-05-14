@@ -32,6 +32,10 @@ export class WorkyAvatarComponent implements OnInit {
 
   @Input() username: string = '';
 
+  @Input() name?: string;
+
+  @Input() img?: string;
+
   @Input()
   set size(value: number) {
     if (value >= 30 && value <= 100) {
@@ -57,29 +61,43 @@ export class WorkyAvatarComponent implements OnInit {
 
     this.userAvatar = this.token.avatar;
 
-    if (this.username && !this.userAvatar) {
-      this.generateAvatar();
-    }
-
-    if (this.userAvatar) this.imageData = this.userAvatar;
+    this.loadImageUser();
 
     this.fontSize = null;
     this._size = 30;
     this.colors = [...this.colors];
     this.fontSize = null;
   }
+  // eslint-disable-next-line @angular-eslint/no-empty-lifecycle-method
   ngOnInit(): void {
-    this.username = this.token.name;
-    this.userAvatar = this.token.avatar;
+    // this.username = this.token.name;
+    // this.userAvatar = this.token.avatar;
   }
 
 
   // eslint-disable-next-line @angular-eslint/use-lifecycle-interface
   ngOnChanges() {
-    if (this.username && !this.userAvatar) {
+    this.loadImageUser();
+  }
+
+  loadImageUser() {
+
+    if(!this.name && !this.img) {
+
+      if (this.username && !this.userAvatar) {
+        this.generateAvatar();
+      }
+      if(this.userAvatar) this.imageData = this.userAvatar;
+
+    }
+    if (this.name && !this.img) {
+      this.username = this.name;
       this.generateAvatar();
     }
-    if(this.userAvatar) this.imageData = this.userAvatar;
+    if (this.img) {
+      this.imageData = this.img;
+    }
+
   }
 
   generateAvatar() {
