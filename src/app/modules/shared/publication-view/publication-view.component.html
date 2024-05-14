@@ -1,0 +1,57 @@
+<div class="content-publication-view">
+
+  <div class="publication-header">
+    <worky-avatar 
+      [size]="40"
+      img="{{ publication?.author?.avatar }}"
+      name="{{ publication?.author?.name }} {{ publication?.author?.lastName }} ">
+    </worky-avatar>
+
+    <div class="publication-header-content">
+      <div class="user-name-content">
+        <span>{{ publication?.author?.name }} {{ publication?.author?.lastName }}</span>
+      </div>
+      <div class="publication-date">
+        <span>{{ publication?.createdAt | date: 'dd/MM/yyyy' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="publication-body">
+    <div class="publication-content">
+      <span>{{ publication?.content }}</span>
+    </div>
+  </div>
+
+  <div class="publication-footer">
+    <div class="publication-footer-content">
+
+      <div class="publication-footer-content-item" *ngIf="publication?.reaction?.length">
+        <i class="material-icons">mood</i>
+        <span>{{ publication?.reaction?.length }}</span>
+      </div>
+
+      <div class="publication-footer-content-item" *ngIf="publication?.comment?.length">
+        <span> {{ publication?.comment?.length }} </span>
+        <span> Comentarios </span>
+      </div>
+
+    </div>
+
+    <div class="publication-footer-actions">
+      <div class="publication-footer-actions-item">
+        <i class="material-icons">mood</i>
+        <span>Reaccionar</span>
+      </div>
+      <div class="publication-footer-actions-item">
+        <i class="material-icons">comment</i>
+        <span>Comentar</span>
+      </div>
+      <div class="publication-footer-actions-item">
+        <i class="material-icons">share</i>
+        <span>Compartir</span>
+      </div>
+
+  </div>
+
+</div>
