@@ -126,7 +126,7 @@ export class AddPublicationComponent  implements OnInit {
 
         const publications = this._publicationService.publicationsSubject.getValue();
 
-        publications[this.indexPublication!].comment.push(message.comment);
+        publications[this.indexPublication!].comment.unshift(message.comment);
 
         this._publicationService.publicationsSubject.next(publications);
 
@@ -165,7 +165,7 @@ export class AddPublicationComponent  implements OnInit {
 
         const publicationsNew = this._publicationService.publicationsSubject.getValue();
 
-        publicationsNew.push(message.publications);
+        publicationsNew.unshift(message.publications);
 
         this._publicationService.publicationsSubject.next(publicationsNew);
 

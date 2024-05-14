@@ -25,17 +25,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
   async ngOnInit() {
-    await this._publicationService.getAllPublications();
+    await this._publicationService.getAllPublications(); // Espera a que se obtengan todas las publicaciones
     this.subscription.add(this._publicationService.publications$.subscribe(publicationsData => {
-      // Ordenar publicaciones por fecha
-      this.publications = publicationsData.map(publication => {
-        // Ordenar comentarios por fecha
-        const sortedComments = publication.comment.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        return {
-          ...publication,
-          comments: sortedComments
-        };
-      }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      this.publications = publicationsData;
       this._cdr.detectChanges();
     }));
   }
