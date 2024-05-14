@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
 import { WorkyButtonType, WorkyButtonTheme } from '../../shared/buttons/models/worky-button-model';
 import { AuthService } from '../../auth/services/auth.service';
-import { AddPublicationService } from './services/addPublication.service';
+import { PublicationService } from '../services/publication.service';
 import { translations } from '../../../../translations/translations';
 import { TypePublishing, TypePrivacy } from './enum/addPublication.enum';
 import { Token } from '../interfaces/token.interface';
@@ -47,7 +47,7 @@ export class AddPublicationComponent  implements OnInit {
   constructor(
       private _fb: FormBuilder,
       private _authService: AuthService,
-      private _addPublicationService: AddPublicationService,
+      private _publicationService: PublicationService,
       private _alertService: AlertService,
       private _loadingCtrl: LoadingController,
     ) { 
@@ -93,8 +93,15 @@ export class AddPublicationComponent  implements OnInit {
 
     this.myForm.controls['authorId'].setValue(this.decodedToken.id);
     this.myForm.controls['privacy'].setValue(this.privacy);
-    this._addPublicationService.createPost(this.myForm.value).subscribe({
+    this._publicationService.createPost(this.myForm.value).subscribe({
       next: (message: any ) => {
+
+        const publicationsNew = this._publicationService.publicationsSubject.getValue();
+
+        publicationsNew.push(message.publications);
+
+        this._publicationService.publicationsSubject.next(publicationsNew);
+
         if (message.message === 'Publication created successfully'){
           this.myForm.controls['content'].setValue('');
           this.autoResize();
