@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { AuthService } from '../../auth/services/auth.service';
 import { Token } from '../interfaces/token.interface';
 
@@ -7,7 +7,7 @@ import { Token } from '../interfaces/token.interface';
   templateUrl: './worky-avatar.component.html',
   styleUrls: ['./worky-avatar.component.scss'],
 })
-export class WorkyAvatarComponent implements OnInit {
+export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   token!: Token;
 
@@ -69,14 +69,9 @@ export class WorkyAvatarComponent implements OnInit {
     this.fontSize = null;
   }
   // eslint-disable-next-line @angular-eslint/no-empty-lifecycle-method
-  ngOnInit(): void {
-    // this.username = this.token.name;
-    // this.userAvatar = this.token.avatar;
-  }
+  ngOnInit(): void {}
 
-
-  // eslint-disable-next-line @angular-eslint/use-lifecycle-interface
-  ngOnChanges() {
+  ngOnChanges(): void {
     this.loadImageUser();
   }
 
@@ -104,26 +99,40 @@ export class WorkyAvatarComponent implements OnInit {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-    this.fontSize = this.size / 2.5;
+    const scaledSize = this.size;
+    const fontSize = (this.size / 2.3);
     this.initials = this.getInitials(this.username);
     this.backgroundColor = this.getColor(this.initials[0]);
 
     if (ctx) {
-      canvas.width = this.size;
-      canvas.height = this.size;
+      canvas.width = scaledSize;
+      canvas.height = scaledSize;
 
       ctx.beginPath();
       ctx.fillStyle = this.backgroundColor;
-      ctx.arc(this.size / 2.0, this.size / 2.1, this.size / 2.1 - 2, 0, 2 * Math.PI);
+      ctx.arc(scaledSize / 2, scaledSize / 2, scaledSize / 2, 0, 2 * Math.PI);
       ctx.fill();
 
-      ctx.font = `${this.fontSize}px Roboto, sans-serif`;
+      ctx.font = `${fontSize}px Roboto, sans-serif`;
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(this.initials, this.size / 2, this.size / 2);
 
-      this.imageData = canvas.toDataURL('image/png');
+      ctx.fillText(this.initials, scaledSize / 2, scaledSize / 1.85);
+
+      ctx.drawFocusIfNeeded(canvas);
+
+      const finalCanvas = document.createElement('canvas');
+      finalCanvas.width = this.size;
+      finalCanvas.height = this.size;
+      const finalCtx = finalCanvas.getContext('2d');
+
+      if (finalCtx) {
+        finalCtx.drawImage(canvas, 0, 0, scaledSize, scaledSize, 0, 0, this.size, this.size);
+        this.imageData = finalCanvas.toDataURL('image/png');
+      } else {
+        console.error('Error al obtener el contexto del canvas final');
+      }
     } else {
       console.error('Error al obtener el contexto del canvas');
     }
