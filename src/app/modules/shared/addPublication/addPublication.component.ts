@@ -11,6 +11,7 @@ import { Token } from '../interfaces/token.interface';
 import { AlertService } from '../../shared/services/alert.service';
 import { Alerts, Position } from '../../shared/enums/alerts.enum';
 import { CreateComment} from '../interfaces/addComment.interface';
+import { NotificationCommentService } from '../services/notificationComment.service';
 
 @Component({
   selector: 'worky-add-publication',
@@ -59,6 +60,7 @@ export class AddPublicationComponent  implements OnInit {
       private _commentService: CommentService,
       private _alertService: AlertService,
       private _loadingCtrl: LoadingController,
+      private _notificationCommentService: NotificationCommentService,
     ) { 
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
@@ -142,6 +144,12 @@ export class AddPublicationComponent  implements OnInit {
             true,
             translations['button.ok'],
           );
+          this._notificationCommentService.sendNotificationComment({
+            commentId: message.comment._id,
+            idPublication: idPublication,
+            userEmittedId: this.decodedToken.id,
+            authorPublicationId: publications[this.indexPublication!].author._id,
+          });
           loadingComment.dismiss();
         }
       },
