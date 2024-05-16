@@ -38,19 +38,19 @@ export class PublicationService {
     return this.http.post(url, post, { headers });
   }
 
-  private viewAll(): Observable<PublicationView[]> {
-    const url = `${this.baseUrl}/publications/all`;
+  private viewAll(page: number, size: number): Observable<PublicationView[]> {
+    const url = `${this.baseUrl}/publications/all?page=${page}&pageSize=${size}`;
     const headers = this.getHeaders();
     return this.http.get<PublicationView[]>(url, { headers });
   }
 
-  async getAllPublications(): Promise<PublicationView[]> {
+  async getAllPublications(page: number, size: number): Promise<PublicationView[]> {
     try {
-      const publications: PublicationView[] = await firstValueFrom(this.viewAll()) ?? [];
+      const publications: PublicationView[] = await firstValueFrom(this.viewAll(page, size)) ?? [];
       this.publicationsSubject.next(publications);
       return publications;
     } catch (error) {
-      console.error("Error al obtener las publicaciones:", error);
+      console.error(error);
       return [];
     }
   }

@@ -34,7 +34,7 @@
       <div class="publication-footer-content-item" *ngIf="publication?.comment?.length"
         (click)="viewCommentsOn(indexPublication!)">
         <span> {{ publication?.comment?.length }} </span>
-        <span> Comentarios </span>
+        <span> {{ 'publicationsView.spanComments' | workyTranslations }} </span>
       </div>
 
     </div>
@@ -43,18 +43,18 @@
 
       <div class="publication-footer-actions-item">
         <i class="material-icons">mood</i>
-        <span>Reaccionar</span>
+        <span>{{ 'publicationsView.spanReaction' | workyTranslations }}</span>
       </div>
 
       <div class="publication-footer-actions-item"
         (click)="commentOn(indexPublication!)">
         <i class="material-icons">comment</i>
-        <span>Comentar</span>
+        <span>{{ 'publicationsView.spanComment' | workyTranslations }}</span>
       </div>
 
       <div class="publication-footer-actions-item">
         <i class="material-icons">share</i>
-        <span>Compartir</span>
+        <span>{{ 'publicationsView.spanShare' | workyTranslations }}</span>
       </div>
 
     </div>

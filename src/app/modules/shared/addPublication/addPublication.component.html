@@ -49,7 +49,7 @@
           class="publishing-textarea"
           (input)="onTextareaInput()"
           formControlName="content"
-          placeholder="{{ type === typePublishing.POST ? ('publishing.placeholder' | workyTranslations) + ' ' + userName + '?' : 'comentar como ' + userName + '?' }}">
+          placeholder="{{ type === typePublishing.POST ? ('publishing.placeholder' | workyTranslations) + ' ' + userName + '?' : ('publishing.placeholderComment' | workyTranslations) + userName + '?' }}">
         </textarea>
 
       </div>
@@ -81,7 +81,7 @@
         [theme]="WorkyButtonTheme.Accent"
         [disabled]="!myForm.valid || !myForm.dirty"
         [width]="'100%'">
-        <span basic-button-text>{{ type === typePublishing.POST ? ('publishing.publish' | workyTranslations) : 'Comentar' }}</span>
+        <span basic-button-text>{{ type === typePublishing.POST ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
       </worky-buttons>
     </div>
 

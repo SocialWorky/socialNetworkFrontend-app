@@ -83,8 +83,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   menuProfile() {
   this.dataLinkProfile = [
-    { link: '/auth/login',  title: 'Perfil' },
-    { link: '/settings',  title: 'Configuración' },
+    // { link: '/auth/login',  title: 'Perfil' },
+    // { link: '/settings',  title: 'Configuración' },
     { function: this.logoutUser.bind(this),  title: translations['navbar.logout']},
   ];
 }

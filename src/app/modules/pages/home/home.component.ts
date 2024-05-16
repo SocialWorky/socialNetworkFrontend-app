@@ -7,6 +7,7 @@ import { NotificationCommentService } from '../../shared/services/notificationCo
 import { AuthService } from '../../auth/services/auth.service';
 import { AlertService } from '../../shared/services/alert.service';
 import { Alerts, Position } from '../../shared/enums/alerts.enum';
+import { translations } from '../../../../translations/translations';
 
 @Component({
   selector: 'worky-home',
@@ -21,6 +22,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   publications:PublicationView[]= [];
 
+  page = 1;
+
+  pageSize = 10;
+
   constructor(
     private _publicationService: PublicationService,
     private _cdr: ChangeDetectorRef,
@@ -29,16 +34,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _alertService: AlertService,
   ) {}
 
-  subscribeToNotificationComment() {
-    this.subscription.add(this._notificationCommentService.notificationComment$.subscribe((data: any) => {
-      if (data.authorPublicationId === this._authService.getDecodedToken().id) {  
-          const message = `Nuevo comentario en tu publicación`;
-          this._alertService.showAlert('notificacion', message, Alerts.SUCCESS, Position.CENTER,);
-        return;
-      }    
-     })
-    );
-  }
+async subscribeToNotificationComment() {
+  this.subscription.add(this._notificationCommentService.notificationComment$.subscribe(async (data: any) =>  {
+    // if (data.authorPublicationId === this._authService.getDecodedToken().id) { 
+    //   const message = `Nuevo comentario en tu publicación`;
+    //   this._alertService.showAlert('notificacion', message, Alerts.SUCCESS, Position.CENTER);
+    //   return;
+    // }
+    const newCommentInPublications = await this._publicationService.getAllPublications(this.page, this.pageSize);
+    this._publicationService.publicationsSubject.next(newCommentInPublications);
+  }));
+}
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
@@ -47,13 +53,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
   async ngOnInit() {
-    await this._publicationService.getAllPublications(); // Espera a que se obtengan todas las publicaciones
-    this.subscription.add(this._publicationService.publications$.subscribe(publicationsData => {
+    await this._publicationService.getAllPublications(this.page, this.pageSize);
+    this.subscription.add(this._publicationService.publications$.subscribe({
+      next: (publicationsData: PublicationView[]) => {
       this.publications = publicationsData;
-      this._cdr.detectChanges();
-    }));
+      this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error( translations['home.errorGetPublications'], error);
+      }
+    })
+    );
     this.subscribeToNotificationComment();
   }
-
 
 }

@@ -106,13 +106,11 @@ export class AddPublicationComponent  implements OnInit {
       this.onSaveComment(this.idPublication as string);
     }
 
-
   }
 
   private async onSaveComment(idPublication: string) {
-
     const loadingComment = await this._loadingCtrl.create({
-      message: 'Estamos publicando tu comentario, por favor espera un momento',
+      message: translations['addPublication.loadingCommentMessage'],
     });
 
     loadingComment.present();
@@ -124,20 +122,17 @@ export class AddPublicationComponent  implements OnInit {
     };
 
     this._commentService.createComment(dataComment).subscribe({
-      next: (message: any ) => {
-
-        const publications = this._publicationService.publicationsSubject.getValue();
-
+      next: async (message: any) => {
+        const publications = await this._publicationService.getAllPublications(1, 10);
         publications[this.indexPublication!].comment.unshift(message.comment);
-
         this._publicationService.publicationsSubject.next(publications);
 
         if (message.message === 'Comment created successfully') {
           this.myForm.controls['content'].setValue('');
           this.autoResize();
           this._alertService.showAlert(
-            'Comentario exitoso',
-            'Se ha comentado correctamente, gracias por participar',
+            translations['addPublication.alertCreateCommentTitle'],
+            translations['addPublication.alertCreateCommentMessage'],
             Alerts.SUCCESS,
             Position.CENTER,
             true,
@@ -150,54 +145,53 @@ export class AddPublicationComponent  implements OnInit {
             userEmittedId: this.decodedToken.id,
             authorPublicationId: publications[this.indexPublication!].author._id,
           });
-          loadingComment.dismiss();
         }
       },
       error: (error) => {
         console.error(error);
+      },
+      complete: () => {
+        loadingComment.dismiss();
       }
     });
-    loadingComment.dismiss();
   }
 
   private async onSavePublication() {
-
     const loadingPublications = await this._loadingCtrl.create({
-      message: 'Estamos publicando tu contenido, por favor espera un momento',
+      message: translations['addPublication.loadingPublicationMessage'],
     });
 
     loadingPublications.present();
 
     this._publicationService.createPost(this.myForm.value).subscribe({
-      next: (message: any ) => {
-
-        const publicationsNew = this._publicationService.publicationsSubject.getValue();
-
+      next: async (message: any) => {
+        const publicationsNew = await this._publicationService.publicationsSubject.getValue();
         publicationsNew.unshift(message.publications);
-
         this._publicationService.publicationsSubject.next(publicationsNew);
 
-        if (message.message === 'Publication created successfully'){
+        if (message.message === 'Publication created successfully') {
           this.myForm.controls['content'].setValue('');
           this.autoResize();
           this._alertService.showAlert(
-            'Publicacion exitosa',
-            'Se ha publicado correctamente, gracias por compartir',
+            translations['addPublication.alertCreatePublicationTitle'],
+            translations['addPublication.alertCreatePublicationMessage'],
             Alerts.SUCCESS,
             Position.CENTER,
             true,
             true,
             translations['button.ok'],
           );
-          loadingPublications.dismiss();
         }
       },
       error: (error) => {
         console.error(error);
+      },
+      complete: () => {
+        loadingPublications.dismiss();
       }
     });
-    loadingPublications.dismiss();
   }
+
 
   autoResize() {
     const postText = this.postTextRef.nativeElement as HTMLTextAreaElement;
@@ -210,6 +204,7 @@ export class AddPublicationComponent  implements OnInit {
   }
 
   postPrivacy(privacy: string): void {
+
     if (privacy === TypePrivacy.PUBLIC) {
       this.privacy = TypePrivacy.PUBLIC;
       this.privacyFront = `<i class="material-icons">language</i> ${translations['publishing.privacy-public']} <i class="material-icons">arrow_drop_down</i>`;
