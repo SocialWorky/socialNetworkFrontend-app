@@ -17,7 +17,6 @@ export class WeatherComponent implements OnDestroy {
   containerStyle = {};
   state = {
     error: '',
-    loading: false,
     locationNotFound: false
   };
 
@@ -43,14 +42,13 @@ export class WeatherComponent implements OnDestroy {
       return;
     }
 
-    this.state.loading = true;
     this.state.locationNotFound = false;
 
     this.weatherService.getWeather(this.city).pipe(
       takeUntil(this.unsubscribe$),
       catchError(() => {
         this.weatherData = null;
-        this.state = { ...this.state, error: 'Error fetching weather data', loading: false };
+        this.state = { ...this.state, error: 'Error fetching weather data'};
         this.cdr.detectChanges();
         return of(null);
       })
@@ -71,7 +69,6 @@ export class WeatherComponent implements OnDestroy {
       this.isExpanded = true;
       this.containerStyle = { height: '400px' }; // Aplicar estilos según sea necesario
     }
-    this.state.loading = false;
     this.cdr.detectChanges();
 
   }
