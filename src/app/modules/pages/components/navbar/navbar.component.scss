@@ -78,8 +78,21 @@
     align-items: center;
     align-content: center;
     width: 20%;
-    ::ng-deep worky-dropdown span.material-icons {
+
+    ::ng-deep worky-dropdown {
+      span.material-icons {
         font-size: variables.$worky-font-size-9;
+      }
+      .nav-link {
+        &:focus, &:hover {
+          color: map-get(colors.$worky-blue, 100);
+          span {
+            background-color: map-get(colors.$worky-blue, 24);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+          }
+        }
+      }
     }
     @include breakpoints.below-sm {
       width: 100%;
