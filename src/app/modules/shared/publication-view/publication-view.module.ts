@@ -4,7 +4,7 @@ import { PublicationViewComponent } from './publication-view.component';
 import { WorkyAvatarModule } from '../worky-avatar/worky-avatar.module';
 import { AddPublicationModule } from '../addPublication/addPublication.module';
 import { TranslationsModule } from '../translations/translations.module';
-
+import { WorkyDropdownModule } from '../worky-dropdown/worky-dropdown.module';
 
 @NgModule({
   declarations: [PublicationViewComponent],
@@ -12,7 +12,8 @@ import { TranslationsModule } from '../translations/translations.module';
     CommonModule,
     WorkyAvatarModule,
     AddPublicationModule,
-    TranslationsModule
+    TranslationsModule,
+    WorkyDropdownModule
   ],
   exports: [PublicationViewComponent]
 })

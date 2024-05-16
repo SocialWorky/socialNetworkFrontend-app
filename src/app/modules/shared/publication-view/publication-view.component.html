@@ -15,6 +15,20 @@
         <span>{{ publication?.createdAt | date: 'dd/MM/yyyy' }}</span>
       </div>
     </div>
+    <div class="publication-header-actions">
+      <!-- <i class="material-icons">more_horiz</i> -->
+
+      <worky-dropdown
+        icon="more_horiz"
+        [badge]=false
+        (click)="checkDataLink(publication?.author?._id!)"
+        [dataLink]="dataLinkActions"
+        (linkClicked)="handleActionsClicked($event, publication)">
+      </worky-dropdown>
+
+    </div>
+
+
   </div>
 
   <div class="publication-body">

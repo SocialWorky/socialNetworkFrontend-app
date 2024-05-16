@@ -1,3 +1,7 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
 .content-publication-view {
   .publication-header {
     display: flex;
@@ -8,6 +12,9 @@
         font-size: 0.8rem;
         color: rgb(8, 8, 119);
       }
+    }
+    .publication-header-actions {
+      margin-left: auto;
     }
   }
 
@@ -78,6 +85,12 @@
             }
         }
         }
+    }
+  }
+
+  ::ng-deep worky-dropdown {
+    .nav-link span {
+      color: colors.$worky-color-navy;
     }
   }
 }
