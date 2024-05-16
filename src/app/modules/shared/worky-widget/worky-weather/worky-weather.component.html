@@ -1,0 +1,57 @@
+<div class="container" [ngStyle]="containerStyle" [ngClass]="{'active': isExpanded}">
+  <div class="search">
+    <i class="material-icons">place</i>
+    <input type="text" [(ngModel)]="city" placeholder="enter your location" />
+    <button (click)="searchWeather()">
+      <i class="material-icons">search</i>
+    </button>
+  </div>
+
+  <div *ngIf="localTime" class="local-time">
+    Hora local: {{ localTime | date: 'shortTime' }} <!-- Formatea la hora como prefieras -->
+  </div>
+
+  <div *ngIf="weatherData" class="weather-box">
+    <div class="box">
+      <div class="info-weather">
+        <div class="weather">
+          <img [src]="getWeatherIcon(weatherData.weather[0].main)" />
+          <p class="temperature">{{ weatherData.main.temp }}<span>°C</span></p>
+          <p class="description">{{ weatherData.weather[0].description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="weatherData" class="weather-details">
+    <div class="humidity">
+      <i class="material-icons">water_drop</i>
+      <div class="text">
+        <div class="info-humidity">
+          <span>{{ weatherData.main.humidity }}%</span>
+        </div>
+        <p>Humidity</p>
+      </div>
+    </div>
+
+    <div class="wind">
+      <i class="material-icons">air</i>
+      <div class="text">
+        <div class="info-wind">
+          <span>{{ weatherData.wind.speed }} km/h</span>
+        </div>
+        <p>Wind Speed</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="not-found" *ngIf="state.locationNotFound">
+    <div class="box">
+      <img src="assets/img/widget/404.png">
+      <p>Oops! Location not found</p>
+    </div>  
+  </div>
+
+  <div *ngIf="state.error" class="error">{{ state.error }}</div>
+</div>
+

@@ -15,7 +15,7 @@ import { WorkyDropdownModule } from '../shared/worky-dropdown/worky-dropdown.mod
 import { TranslationsModule } from '../shared/translations/translations.module';
 import { WorkyAvatarModule } from '../shared/worky-avatar/worky-avatar.module';
 import { AddPublicationModule } from '../shared/addPublication/addPublication.module';
-
+import { WorkyWidgetModule } from 'src/app/modules/shared/worky-widget/worky-widget.module';
 
 @NgModule({
   declarations: [
@@ -36,6 +36,7 @@ import { AddPublicationModule } from '../shared/addPublication/addPublication.mo
     TranslationsModule,
     WorkyAvatarModule,
     AddPublicationModule,
+    WorkyWidgetModule
   ]
 })
 export class PagesModule { }
