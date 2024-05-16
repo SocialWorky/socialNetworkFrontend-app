@@ -16,20 +16,16 @@
 .content-dropdow {
     display: flex;
     align-items: center;
-    padding: 5px 10px;
+    padding: 8px 15px;
     cursor: pointer;
     transition: 0.3s;
+    gap: 10px;
     &:hover {
-        background-color: map-get(colors.$worky-blue, 72);
+        color: colors.$worky-color-light;
+        background-color: map-get(colors.$worky-blue, 56);
     }
 }
 
-.dropdown-item {
-    &:hover {
-        color: colors.$worky-color-light;
-        background-color: map-get(colors.$worky-blue, 72);
-    }
-}
 
 
 .badge-notification {

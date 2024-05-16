@@ -70,7 +70,7 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
 
   checkDataLink(userId: string) {
 
-    const menuDeletePublications = { function: this.deletePublications.bind(this),  title: 'Eliminar Publicacion'};
+    const menuDeletePublications = { icon:'delete' ,function: this.deletePublications.bind(this),  title: 'Eliminar Publicacion'};
 
     if (userId === this.dataUser.id || this.dataUser.role === RoleUser.ADMIN){
 
@@ -82,7 +82,7 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
   }
   menuActions() {
     this.dataLinkActions = [
-      { link: '/auth/login',  title: 'Reportar Publicación' },
+      { icon:'report', link: '/auth/login',  title: 'Reportar Publicación' },
     ];
   }
 
