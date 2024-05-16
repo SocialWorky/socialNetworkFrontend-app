@@ -14,7 +14,6 @@ export class WeatherComponent implements OnDestroy {
   weatherData: WeatherData | null = null;
   localTime: Date | null = null;
   isExpanded = false;
-  foundErrorStyle = {};
   containerStyle = {};
   state = {
     error: '',
@@ -49,40 +48,32 @@ export class WeatherComponent implements OnDestroy {
 
     this.weatherService.getWeather(this.city).pipe(
       takeUntil(this.unsubscribe$),
-      catchError(err => {
+      catchError(() => {
         this.weatherData = null;
-        this.state.error = 'Error fetching weather data';
-        this.state.loading = false;
-        // Si hay un error en la solicitud, asumimos que la ubicación no se encontró.
-        this.state.locationNotFound = false;
+        this.state = { ...this.state, error: 'Error fetching weather data', loading: false };
         this.cdr.detectChanges();
-        return of(null); // Retorna un Observable nulo para continuar el flujo
+        return of(null);
       })
-    ).subscribe(
-      (data) => {
-        console.log('Weather data:', data);
-        if (data && data.cod === '404') {
-          this.weatherData = null;
-          this.state.error = 'Oops! Location not found';
-          this.state.locationNotFound = true;
-        } else if (data) {
-          this.containerStyle = { height: '400px' };
-          this.isExpanded = true;
-          data.main.temp = Math.round(data.main.temp);
-          this.weatherData = data;
-          this.localTime = new Date();
-          this.state.error = '';
-          this.state.locationNotFound = false;
-        } else {
-          // Manejar otros casos donde data es undefined o no tiene la propiedad cod
-          this.state.error = '';
-          this.state.locationNotFound = true;
-        }
-        this.state.loading = false;
-        this.cdr.detectChanges();
-      }
-    );
-    
+    ).subscribe(data => this.handleWeatherData(data));
+  }
+
+  handleWeatherData(data: WeatherData | null) {
+    console.log('Weather data received:', data);
+    if (!data) {
+      this.state = { ...this.state, error: '', locationNotFound: true };
+    } else if (data.cod === '404') {
+      this.weatherData = null;
+      this.state = { ...this.state, error: 'Oops! Location not found', locationNotFound: true };
+    } else {
+      this.weatherData = { ...data, main: { ...data.main, temp: Math.round(data.main.temp) } };
+      this.localTime = new Date();
+      this.state = { ...this.state, error: '', locationNotFound: false };
+      this.isExpanded = true;
+      this.containerStyle = { height: '400px' }; // Aplicar estilos según sea necesario
+    }
+    this.state.loading = false;
+    this.cdr.detectChanges();
+
   }
 
   ngOnDestroy() {
