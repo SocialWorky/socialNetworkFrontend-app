@@ -13,21 +13,6 @@ export class WeatherService {
 
     getWeather(city: string): Observable<any> {
         const url = `${this.apiUrl}?q=${city}&units=metric&appid=${this.apiKey}`;
-        return this.http.get<any>(url).pipe(
-            map(response => {
-              // Asegúrate de que la respuesta incluya los campos necesarios
-                if (response && response.dt && response.timezone) {
-                // Convertir el timestamp Unix a milisegundos y crear un objeto Date
-                    const utcDate = new Date(response.dt * 1000);
-                
-                // Ajustar la fecha y hora según el desplazamiento de la zona horaria
-                    const localDate = new Date(utcDate.getTime() + response.timezone * 1000);
-                
-                // Agregar la hora local al objeto de respuesta
-                    response.localTime = localDate;
-                }
-                return response;
-            })
-        );;
+        return this.http.get<any>(url)
     }
 }

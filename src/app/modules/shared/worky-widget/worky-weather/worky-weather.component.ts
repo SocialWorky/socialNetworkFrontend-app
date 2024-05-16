@@ -26,7 +26,7 @@ export class WeatherComponent implements OnDestroy {
     Clear: 'assets/img/widget/clear.png',
     Rain: 'assets/img/widget/rain.png',
     Snow: 'assets/img/widget/snow.png',
-    Clouds: 'assets/img/widget/snow.png',
+    Clouds: 'assets/img/widget/cloud.png',
     Mist: 'assets/img/widget/mist.png',
     Haze: 'assets/img/widget/haze.png',
   };
@@ -66,7 +66,7 @@ export class WeatherComponent implements OnDestroy {
           this.state.error = 'Oops! Location not found';
           this.state.locationNotFound = true;
         } else if (data) {
-          this.containerStyle = { height: '450px' };
+          this.containerStyle = { height: '400px' };
           this.isExpanded = true;
           data.main.temp = Math.round(data.main.temp);
           this.weatherData = data;
