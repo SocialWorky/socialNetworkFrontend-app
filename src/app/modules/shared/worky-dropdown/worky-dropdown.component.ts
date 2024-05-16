@@ -9,24 +9,24 @@ import { DropdownDataLink } from './interfaces/dataLink.interface';
 })
 export class WorkyDropdownComponent  implements OnInit {
 
-  @Input() icon: string = 'add_circle';
+  @Input() icon: string | undefined;
 
   @Input() badge?: boolean = false;
 
   @Input() badgeValue?: number | null | undefined = 0;
 
-  @Input() dataLink?: DropdownDataLink[] = [];
+  @Input() dataLink?: DropdownDataLink<any>[] = [];
 
   @Input() img?: string | boolean = undefined;
 
-  @Output() linkClicked: EventEmitter<DropdownDataLink> = new EventEmitter<DropdownDataLink>();
+  @Output() linkClicked: EventEmitter<DropdownDataLink<any>> = new EventEmitter<DropdownDataLink<any>>();
 
   constructor(private _authService: AuthService) { }
 
   // eslint-disable-next-line @angular-eslint/no-empty-lifecycle-method
   ngOnInit() {}
 
-  handleMenuItemClick(data: DropdownDataLink) {
+  handleMenuItemClick(data: DropdownDataLink<any>) {
     this.linkClicked.emit(data);
   }
 

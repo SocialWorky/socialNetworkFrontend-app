@@ -12,9 +12,9 @@
     <worky-avatar [size]="50"></worky-avatar>
   </div>
 
-  <ng-container *ngIf="badge">
+  <ng-container>
     <span class="material-icons" [class.mover-icono]="badgeValue">{{ icon }}</span>
-    <span *ngIf="badgeValue"
+    <span *ngIf="badge && badgeValue"
       class="badge rounded-pill badge-notification bg-danger">
       {{ badgeValue }}
     </span>

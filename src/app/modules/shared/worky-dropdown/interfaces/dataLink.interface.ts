@@ -1,5 +1,5 @@
-export interface DropdownDataLink {
+export interface DropdownDataLink<T> {
   link?: string;
-  function?: () => void;
+  function?: (...args: T[]) => any;
   title: string;
 }

@@ -24,7 +24,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   isMobile: boolean = false;
 
-  dataLinkProfile:DropdownDataLink[] = [];
+  dataLinkProfile:DropdownDataLink<any>[] = [];
 
   resizeSubscription: Subscription | undefined;
 
@@ -89,7 +89,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ];
 }
 
-  handleLinkClicked(data: DropdownDataLink) {
+  handleLinkClicked(data: DropdownDataLink<any>) {
     if (data.function) {
       if (typeof data.function === 'function') {
         data.function();
