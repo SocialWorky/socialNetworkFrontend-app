@@ -3,6 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import { Token } from '../../shared/interfaces/token.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -34,9 +35,25 @@ export class AuthService {
     }
   }
 
-  getDecodedToken(): any {
+  async renewToken(_id: string) {
     const token = localStorage.getItem('token');
-    return token ? jwtDecode(token) : null;
+    const url = `${environment.API_URL}/user/renewtoken/${_id}`;
+    try {
+      const response: any = await this.http.get(url, { headers: { Authorization: `Bearer ${token}` }, responseType: 'text' }).toPromise();
+      const newToken = response;
+      localStorage.setItem('token', newToken);
+      return newToken;
+    } catch (error) {
+      console.error('Error al renovar el token:', error);
+      throw error;
+    }
+  }
+
+
+
+  getDecodedToken(): Token  {
+    const token = localStorage.getItem('token');
+    return jwtDecode(token!);
   }
 
   generatePassword(): string {

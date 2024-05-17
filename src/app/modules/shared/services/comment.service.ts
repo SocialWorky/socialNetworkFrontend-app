@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { environment } from '../../../../../environments/environment';
-import { CreatePost } from '../interfaces/createPost.interface';
-import { TypePublishing } from '../enum/addPublication.enum';
+import { environment } from '../../../../environments/environment';
+import { CreateComment } from '../interfaces/addComment.interface';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AddPublicationService {
+export class CommentService {
+
   private baseUrl: string;
   private token: string;
 
@@ -25,10 +25,10 @@ export class AddPublicationService {
     return headers;
   }
 
-  createPost(post: CreatePost) {
-    const url = `${this.baseUrl}/publications/create`;
+  createComment(comment: CreateComment) {
+    const url = `${this.baseUrl}/comments/create`;
     const headers = this.getHeaders();
-    return this.http.post(url, post, { headers });
+    return this.http.post(url, comment, { headers });
   }
 
 }

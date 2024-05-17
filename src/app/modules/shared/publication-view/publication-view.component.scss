@@ -1,0 +1,96 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-publication-view {
+  .publication-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    .publication-header-content {
+      .publication-date {
+        font-size: 0.8rem;
+        color: rgb(8, 8, 119);
+      }
+    }
+    .publication-header-actions {
+      margin-left: auto;
+    }
+  }
+
+  .publication-body {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .publication-footer {
+    .publication-footer-content {
+      display: flex;
+      justify-content: space-between;
+      .publication-footer-content-item {
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        gap: 0.2rem;
+        color:#65676b;
+        cursor: pointer;
+        i {
+          font-size: 15px;
+        }
+      }
+    }
+
+    .publication-footer-actions {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 1rem;
+      gap: 1rem;
+      border-top: 1px solid #E0E0E0;
+      .publication-footer-actions-item {
+        display: flex;
+        align-items: center;
+        margin-top: 1rem;
+        gap: 0.2rem;
+        color: #5F6266;
+        cursor: pointer;
+      }
+    }
+
+  }
+
+  .publication-comment {
+    margin-top: 40px;
+    .publication-comment-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-top: 0.3rem;
+        .publication-comment-content {
+        display: flex;
+        flex-direction: column;
+        padding: 0.5rem;
+        background-color: #f0f2f552;
+        border-radius: 12px;
+        width: 100%;
+        .publication-comment-content-header {
+            span {
+            font-size: 12px;
+            color: rgb(8, 8, 119);
+            }
+        }
+        .publication-comment-content-body {
+            span {
+            font-size: 15px;
+            color: #050505;
+            }
+        }
+        }
+    }
+  }
+
+  ::ng-deep worky-dropdown {
+    .nav-link span {
+      color: colors.$worky-color-navy;
+    }
+  }
+}

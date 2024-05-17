@@ -13,7 +13,6 @@ import { DropdownDataLink } from './../../../shared/worky-dropdown/interfaces/da
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent implements OnInit, OnDestroy {
-  token = localStorage.getItem('token');
 
   googleLoginSession = localStorage.getItem('googleLogin');
 
@@ -25,13 +24,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   isMobile: boolean = false;
 
-  dataLinkProfile:DropdownDataLink[] = [];
+  dataLinkProfile:DropdownDataLink<any>[] = [];
 
   resizeSubscription: Subscription | undefined;
-
-  get pictureGoogle(): string {
-    return this._authGoogleService.getProfile()?.['picture'];
-  }
 
   constructor(
     private _router: Router,
@@ -50,7 +45,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
     this.notifications = 2;
     this.messages = 1;
-    this.pictureGoogle;
   }
 
   ngOnDestroy() {
@@ -89,13 +83,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   menuProfile() {
   this.dataLinkProfile = [
-    { link: '/auth/login',  title: 'Perfil' },
-    { link: '/settings',  title: 'Configuración' },
-    { function: this.logoutUser.bind(this),  title: translations['navbar.logout']},
+    // { link: '/auth/login',  title: 'Perfil' },
+    // { link: '/settings',  title: 'Configuración' },
+    { icon: 'logout', function: this.logoutUser.bind(this),  title: translations['navbar.logout']},
   ];
 }
 
-  handleLinkClicked(data: DropdownDataLink) {
+  handleLinkClicked(data: DropdownDataLink<any>) {
     if (data.function) {
       if (typeof data.function === 'function') {
         data.function();

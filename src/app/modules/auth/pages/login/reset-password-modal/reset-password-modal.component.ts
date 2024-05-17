@@ -55,12 +55,12 @@ export class ResetPasswordModalComponent  implements OnInit, OnDestroy {
     const password = this.resetPasswordForm.get('password')?.value;
 
     this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/login`;
-    this.mailSendDataValidate.subject = 'Se ha restablecido tu contraseña';
-    this.mailSendDataValidate.title = 'Contraseña restablecida';
-    this.mailSendDataValidate.greet = 'Hola';
-    this.mailSendDataValidate.message = 'Tu contraseña ha sido restablecida correctamente';
-    this.mailSendDataValidate.subMessage = 'Si no has sido tú, por favor, ponte en contacto con nosotros.';
-    this.mailSendDataValidate.buttonMessage = 'Iniciar sesión';
+    this.mailSendDataValidate.subject = translations['email.confirmResetPasswordSubject'];
+    this.mailSendDataValidate.title = translations['email.confirmResetPasswordTitle'];
+    this.mailSendDataValidate.greet = translations['email.confirmResetPasswordGreet'];
+    this.mailSendDataValidate.message = translations['email.confirmResetPasswordMessage'];
+    this.mailSendDataValidate.subMessage = translations['email.validateEmailSubMessage'];
+    this.mailSendDataValidate.buttonMessage = translations['email.confirmResetPasswordButtonMessage'];
     this.mailSendDataValidate.token = this.data.token;
     this.mailSendDataValidate.password = password;
     this.mailSendDataValidate.template = TemplateEmail.RESET_PASSWORD;
@@ -68,7 +68,7 @@ export class ResetPasswordModalComponent  implements OnInit, OnDestroy {
     if(password){
 
       const loading = await this._loadingCtrl.create({
-        message: 'Cambiando contraseña, por favor espere..',
+        message: translations['resetPassword.messageLoading'],
       });
       await loading.present();
 
@@ -76,8 +76,8 @@ export class ResetPasswordModalComponent  implements OnInit, OnDestroy {
         next: (response) => {
           if (response) {
             this._alertService.showAlert(
-              'Contraseña restablecida correctamente',
-              'Tu contraseña ha sido restablecida correctamente, por favor, inicia sesión.',
+              translations['resetPassword.alertResetPasswordTitle'],
+              translations['resetPassword.alertResetPasswordMessage'],
               Alerts.SUCCESS,
               Position.CENTER,
               true,
@@ -91,8 +91,8 @@ export class ResetPasswordModalComponent  implements OnInit, OnDestroy {
         },
         error: (error) => {
           this._alertService.showAlert(
-            'Error al restablecer la contraseña',
-            'Ha ocurrido un error al restablecer la contraseña, por favor, inténtalo de nuevo.',
+            translations['resetPassword.alertErrorResetPasswordTitle'],
+            translations['resetPassword.alertErrorResetPasswordMessage'],
             Alerts.ERROR,
             Position.CENTER,
             true,

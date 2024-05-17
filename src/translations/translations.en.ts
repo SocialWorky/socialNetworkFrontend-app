@@ -14,10 +14,12 @@ export const translations = {
   'login.messageResetPasswordLoading': 'Sending password reset email, please wait...',
   // PUBLICATIONS COMPONENT
   'publishing.placeholder': 'What are you thinking,',
+  'publishing.placeholderComment': 'Comment as, ',
   'publishing.privacy-public': 'Public',
   'publishing.privacy-private': 'Private',
   'publishing.privacy-friends': 'Friends',
   'publishing.publish': 'Publish',
+  'publishing.comment': 'Comment',
   // INPUTS
   'input.email': 'Email',
   'input.password': 'Password',
@@ -29,6 +31,7 @@ export const translations = {
   'button.signUp': 'Sign up',
   'button.ok': 'Ok',
   'button.register': 'Register',
+  'button.reset': 'Reset',
   // ALERTS MESSAGES
   'alert.title_error_server': 'Server error',
   'alert.message_error_server': 'Server error. Please, try again.',
@@ -73,11 +76,39 @@ export const translations = {
   'email.resetPasswordMessage': 'You have requested to reset your password. Click the button below to reset your password.',
   'email.resetPasswordSubMessage': 'If you did not request a password reset, please ignore this email.',
   'email.resetPasswordButtonMessage': 'Reset password',
-// REGISTER COMPONENT
+  // -> CONFIRM RESET PASSWORD
+  'email.confirmResetPasswordSubject': 'Your password has been reset',
+  'email.confirmResetPasswordTitle': 'Password reset',
+  'email.confirmResetPasswordGreet': 'Hello',
+  'email.confirmResetPasswordMessage': 'Your password has been reset successfully',
+  'email.confirmResetPasswordSubMessage': 'If it was not you, please contact us.',
+  'email.confirmResetPasswordButtonMessage': 'Log in',
+  // REGISTER COMPONENT
   'register.title': 'Register',
   'register.subTitle': 'Fill out the registration form',
   'register.haveAccountLogIn': 'Already have an account? Log in',
   'register.messageLoading': 'Registering...',
   // NAVBAR COMPONENT
   'navbar.logout': 'Log out',
+  // HOME COMPONENT
+  'home.errorGetPublications': 'Error getting publications: ',
+  // ADD PUBLICATION COMPONENT
+  'addPublication.loadingCommentMessage': 'We are posting your comment, please wait a moment',
+  'addPublication.loadingPublicationMessage': 'We are posting your content, please wait a moment',
+  'addPublication.alertCreateCommentTitle': 'Successful comment',
+  'addPublication.alertCreateCommentMessage': 'It has been commented correctly, thank you for participating',
+  'addPublication.alertCreatePublicationTitle': 'Successful publication',
+  'addPublication.alertCreatePublicationMessage': 'Your publication has been successfully published',
+  // RESET PASSWORD COMPONENT
+  'resetPassword.title': 'Reset password',
+  'resetPassword.messageLoading': 'Resetting password...',
+  'resetPassword.alertResetPasswordTitle': 'Password reset',
+  'resetPassword.alertResetPasswordMessage': 'Your password has been reset successfully, please log in.',
+  'resetPassword.alertErrorResetPasswordTitle': 'Error resetting password',
+  'resetPassword.alertErrorResetPasswordMessage': 'An error occurred while resetting the password, please try again.',
+  // PUBLICATIONS VIEW COMPONENT
+  'publicationsView.spanComments': 'Comments',
+  'publicationsView.spanReaction': 'React',
+  'publicationsView.spanShare': 'Share',
+  'publicationsView.spanComment': 'Comment',
 };

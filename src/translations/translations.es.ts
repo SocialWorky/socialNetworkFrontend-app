@@ -14,10 +14,12 @@ export const translations = {
   'login.messageResetPasswordLoading': 'Enviando correo de restablecimiento de contraseña, por favor espere...',
   // PUBLICATIONS COMPONENT
   'publishing.placeholder': '¿Qué estás pensando,',
+  'publishing.placeholderComment': '¿Comentar como, ',
   'publishing.privacy-public': 'Público',
   'publishing.privacy-private': 'Privado',
   'publishing.privacy-friends': 'Amigos',
   'publishing.publish': 'Publicar',
+  'publishing.comment': 'Comentar',
   // INPUTS
   'input.email': 'Correo electrónico',
   'input.password': 'Contraseña',
@@ -29,6 +31,7 @@ export const translations = {
   'button.signUp': 'Registrarse',
   'button.ok': 'Aceptar',
   'button.register': 'Registro',
+  'button.reset': 'Restablecer',
   // ALERTS MESSAGES
   'alert.title_error_server': 'Error en el servidor',
   'alert.message_error_server': 'Error en el servidor. Por favor, inténtalo de nuevo.',
@@ -73,6 +76,13 @@ export const translations = {
   'email.resetPasswordMessage': 'Has solicitado restablecer tu contraseña. Haz clic en el botón de abajo para restablecer tu contraseña.',
   'email.resetPasswordSubMessage': 'Si no has solicitado restablecer la contraseña, por favor, ignora este correo.',
   'email.resetPasswordButtonMessage': 'Restablecer contraseña',
+  // -> CONFIRM RESET PASSWORD
+  'email.confirmResetPasswordSubject': 'Se ha restablecido tu contraseña',
+  'email.confirmResetPasswordTitle': 'Contraseña restablecida',
+  'email.confirmResetPasswordGreet': 'Hola',
+  'email.confirmResetPasswordMessage': 'Tu contraseña ha sido restablecida correctamente',
+  'email.confirmResetPasswordSubMessage': 'Si no has sido tú, por favor, ponte en contacto con nosotros.',
+  'email.confirmResetPasswordButtonMessage': 'Iniciar sesión',
   // REGISTER COMPONENT
   'register.title': 'Registro',
   'register.subTitle': 'Complete el formulario de registro',
@@ -80,4 +90,25 @@ export const translations = {
   'register.messageLoading': 'Registrando...',
   // NAVBAR COMPONENT
   'navbar.logout': 'Cerrar sesión',
+  // HOME COMPONENT
+  'home.errorGetPublications': 'Error al obtener las publicaciones: ',
+  // ADD PUBLICATION COMPONENT
+  'addPublication.loadingCommentMessage': 'Estamos publicando tu comentario, por favor espera un momento',
+  'addPublication.loadingPublicationMessage': 'Estamos publicando tu contenido, por favor espera un momento',
+  'addPublication.alertCreateCommentTitle': 'Comentario exitoso',
+  'addPublication.alertCreateCommentMessage': 'Se ha comentado correctamente, gracias por participar',
+  'addPublication.alertCreatePublicationTitle': 'Publicación exitosa',
+  'addPublication.alertCreatePublicationMessage': 'Se ha publicado correctamente, gracias por compartir',
+  // RESET PASSWORD COMPONENT
+  'resetPassword.title': 'Restablecer contraseña',
+  'resetPassword.messageLoading': 'Cambiando contraseña, por favor espere...',
+  'resetPassword.alertResetPasswordTitle': 'Contraseña restablecida',
+  'resetPassword.alertResetPasswordMessage': 'Tu contraseña ha sido restablecida correctamente, por favor, inicia sesión.',
+  'resetPassword.alertErrorResetPasswordTitle': 'Error al restablecer la contraseña',
+  'resetPassword.alertErrorResetPasswordMessage': 'Ha ocurrido un error al restablecer la contraseña, por favor, inténtalo de nuevo.',
+  // PUBLICATIONS VIEW COMPONENT
+  'publicationsView.spanComments': 'Comentarios',
+  'publicationsView.spanReaction': 'Reaccionar',
+  'publicationsView.spanShare': 'Compartir',
+  'publicationsView.spanComment': 'Comentar',
 };

@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AuthService } from '../../auth/services/auth.service';
 import { DropdownDataLink } from './interfaces/dataLink.interface';
-import { jwtDecode } from 'jwt-decode';
-import { Token } from '../interfaces/token.interface';
 
 @Component({
   selector: 'worky-dropdown',
@@ -10,32 +9,24 @@ import { Token } from '../interfaces/token.interface';
 })
 export class WorkyDropdownComponent  implements OnInit {
 
-  userName: string = '';
-
-  token = localStorage.getItem('token');
-
-  @Input() icon: string = 'add_circle';
+  @Input() icon: string | undefined;
 
   @Input() badge?: boolean = false;
 
   @Input() badgeValue?: number | null | undefined = 0;
 
-  @Input() dataLink?: DropdownDataLink[] = [];
+  @Input() dataLink?: DropdownDataLink<any>[] = [];
 
-  @Input() img?: string = undefined;
+  @Input() img?: string | boolean = undefined;
 
-  @Output() linkClicked: EventEmitter<DropdownDataLink> = new EventEmitter<DropdownDataLink>();
+  @Output() linkClicked: EventEmitter<DropdownDataLink<any>> = new EventEmitter<DropdownDataLink<any>>();
 
-  constructor() { }
+  constructor(private _authService: AuthService) { }
 
-  ngOnInit() {
-    if (this.token) {
-      const decodedToken: Token = jwtDecode(this.token);
-      this.userName = decodedToken.name;
-    }
-  }
+  // eslint-disable-next-line @angular-eslint/no-empty-lifecycle-method
+  ngOnInit() {}
 
-  handleMenuItemClick(data: DropdownDataLink) {
+  handleMenuItemClick(data: DropdownDataLink<any>) {
     this.linkClicked.emit(data);
   }
 

@@ -2,19 +2,19 @@
   class="nav-link"
   role="button"
   [attr.data-bs-toggle]="dataLink?.length ? 'dropdown' : null">
-  <div *ngIf="img">
+  <div *ngIf="img && img !=='avatar'">
     <img
       src="{{ img }}"
       class="img-dropdown rounded-circle"
       loading="lazy"/>
   </div>
-  <div *ngIf="!img && !badge">
-    <worky-avatar username="{{ userName }}" [size]="50"></worky-avatar>
+  <div *ngIf="img === 'avatar'">
+    <worky-avatar [size]="50"></worky-avatar>
   </div>
 
-  <ng-container *ngIf="badge">
+  <ng-container>
     <span class="material-icons" [class.mover-icono]="badgeValue">{{ icon }}</span>
-    <span *ngIf="badgeValue"
+    <span *ngIf="badge && badgeValue"
       class="badge rounded-pill badge-notification bg-danger">
       {{ badgeValue }}
     </span>
@@ -25,8 +25,8 @@
 <div *ngIf="dataLink?.length"
   class="dropdown-menu dropdown-menu-end">
     <div class="content-dropdow" *ngFor="let data of dataLink; let dataIndex = index;">
-      <span class="dropdown-item"
-         (click)="handleMenuItemClick(data)">
+      <span *ngIf="data.icon" class="material-icons" >{{ data.icon }}</span>
+      <span (click)="handleMenuItemClick(data)">
          {{ data.title }}
       </span>
     </div>

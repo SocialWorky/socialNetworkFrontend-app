@@ -191,17 +191,10 @@ body {
       align-items: center;
     }
   }
-  .nav-link:focus, .nav-link:hover {
-    color: map-get(color.$worky-blue, 100);
-    span {
-      background-color: map-get(color.$worky-blue, 24);
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
-    }
-  }
 
   /* HTML: <div class="loader"></div> */
   .loader {
+    margin: auto;
     --d:22px;
     width: 4px;
     height: 4px;

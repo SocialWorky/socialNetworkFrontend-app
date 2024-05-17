@@ -3,12 +3,15 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
 import { WorkyButtonType, WorkyButtonTheme } from '../../shared/buttons/models/worky-button-model';
 import { AuthService } from '../../auth/services/auth.service';
-import { AddPublicationService } from './services/addPublication.service';
+import { PublicationService } from '../services/publication.service';
+import { CommentService } from '../services/comment.service';
 import { translations } from '../../../../translations/translations';
 import { TypePublishing, TypePrivacy } from './enum/addPublication.enum';
 import { Token } from '../interfaces/token.interface';
 import { AlertService } from '../../shared/services/alert.service';
 import { Alerts, Position } from '../../shared/enums/alerts.enum';
+import { CreateComment} from '../interfaces/addComment.interface';
+import { NotificationCommentService } from '../services/notificationComment.service';
 
 @Component({
   selector: 'worky-add-publication',
@@ -34,6 +37,8 @@ export class AddPublicationComponent  implements OnInit {
 
   isAuthenticated: boolean = false;
 
+  typePublishing = TypePublishing;
+
   public myForm: FormGroup = this._fb.group({
     content: ['', [Validators.required, Validators.minLength(1)]],
     privacy: [''],
@@ -42,14 +47,20 @@ export class AddPublicationComponent  implements OnInit {
 
   @Input() type: TypePublishing | undefined;
 
+  @Input() idPublication?: string;
+
+  @Input() indexPublication?: number;
+
   @ViewChild('postText') postTextRef!: ElementRef;
   
   constructor(
       private _fb: FormBuilder,
       private _authService: AuthService,
-      private _addPublicationService: AddPublicationService,
+      private _publicationService: PublicationService,
+      private _commentService: CommentService,
       private _alertService: AlertService,
       private _loadingCtrl: LoadingController,
+      private _notificationCommentService: NotificationCommentService,
     ) { 
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
@@ -83,38 +94,104 @@ export class AddPublicationComponent  implements OnInit {
     this.showEmojiMenu = false;
   }
 
-  async onSavePost() {
-
-    const loading = await this._loadingCtrl.create({
-      message: 'Estamos publicando tu contenido, por favor espera un momento',
-    });
-
-    loading.present();
+  async onSave() {
 
     this.myForm.controls['authorId'].setValue(this.decodedToken.id);
     this.myForm.controls['privacy'].setValue(this.privacy);
-    this._addPublicationService.createPost(this.myForm.value).subscribe({
-      next: (message: any ) => {
-        if (message.message === 'Publication created successfully'){
+
+    if (this.type === TypePublishing.POST){
+      this.onSavePublication();
+    }
+    if (this.type === TypePublishing.COMMENT){
+      this.onSaveComment(this.idPublication as string);
+    }
+
+  }
+
+  private async onSaveComment(idPublication: string) {
+    const loadingComment = await this._loadingCtrl.create({
+      message: translations['addPublication.loadingCommentMessage'],
+    });
+
+    loadingComment.present();
+
+    const dataComment: CreateComment = {
+      content: this.myForm.controls['content'].value,
+      authorId: this.decodedToken.id,
+      idPublication: idPublication,
+    };
+
+    this._commentService.createComment(dataComment).subscribe({
+      next: async (message: any) => {
+        const publications = await this._publicationService.getAllPublications(1, 10);
+        publications[this.indexPublication!].comment.unshift(message.comment);
+        this._publicationService.publicationsSubject.next(publications);
+
+        if (message.message === 'Comment created successfully') {
           this.myForm.controls['content'].setValue('');
           this.autoResize();
           this._alertService.showAlert(
-            'Publicacion exitosa',
-            'Se ha publicado correctamente, gracias por compartir',
+            translations['addPublication.alertCreateCommentTitle'],
+            translations['addPublication.alertCreateCommentMessage'],
             Alerts.SUCCESS,
             Position.CENTER,
             true,
             true,
             translations['button.ok'],
           );
-          loading.dismiss();
+          this._notificationCommentService.sendNotificationComment({
+            commentId: message.comment._id,
+            idPublication: idPublication,
+            userEmittedId: this.decodedToken.id,
+            authorPublicationId: publications[this.indexPublication!].author._id,
+          });
         }
       },
       error: (error) => {
         console.error(error);
+      },
+      complete: () => {
+        loadingComment.dismiss();
       }
     });
   }
+
+  private async onSavePublication() {
+    const loadingPublications = await this._loadingCtrl.create({
+      message: translations['addPublication.loadingPublicationMessage'],
+    });
+
+    loadingPublications.present();
+
+    this._publicationService.createPost(this.myForm.value).subscribe({
+      next: async (message: any) => {
+        const publicationsNew = await this._publicationService.publicationsSubject.getValue();
+        publicationsNew.unshift(message.publications);
+        this._publicationService.publicationsSubject.next(publicationsNew);
+
+        if (message.message === 'Publication created successfully') {
+          this.myForm.controls['content'].setValue('');
+          this.autoResize();
+          this._alertService.showAlert(
+            translations['addPublication.alertCreatePublicationTitle'],
+            translations['addPublication.alertCreatePublicationMessage'],
+            Alerts.SUCCESS,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
+        }
+      },
+      error: (error) => {
+        console.error(error);
+      },
+      complete: () => {
+        loadingPublications.dismiss();
+      }
+    });
+  }
+
 
   autoResize() {
     const postText = this.postTextRef.nativeElement as HTMLTextAreaElement;
@@ -127,6 +204,7 @@ export class AddPublicationComponent  implements OnInit {
   }
 
   postPrivacy(privacy: string): void {
+
     if (privacy === TypePrivacy.PUBLIC) {
       this.privacy = TypePrivacy.PUBLIC;
       this.privacyFront = `<i class="material-icons">language</i> ${translations['publishing.privacy-public']} <i class="material-icons">arrow_drop_down</i>`;

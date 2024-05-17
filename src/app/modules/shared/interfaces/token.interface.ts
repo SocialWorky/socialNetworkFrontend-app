@@ -4,4 +4,5 @@ export interface Token {
   username: string;
   name: string;
   role: string;
+  avatar: string;
 }
