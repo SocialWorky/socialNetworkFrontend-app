@@ -112,13 +112,16 @@
   }
 
   .comment-body {
-    padding: 15px;
-    margin-top: 2rem;
+    padding: 5px;
+    .textarea-container {
+      textarea {
+        height: 35px!important;
+      }
+    }
   }
 
   .publishing-footer {
     display: flex;
     justify-content: flex-end;
-    margin-top: 15px;
   }
 }

@@ -26,6 +26,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   pageSize = 10;
 
+  loaderPublications?: boolean;
+
   constructor(
     private _publicationService: PublicationService,
     private _cdr: ChangeDetectorRef,
@@ -53,9 +55,11 @@ async subscribeToNotificationComment() {
     }
   }
   async ngOnInit() {
+    this.loaderPublications = true;
     await this._publicationService.getAllPublications(this.page, this.pageSize);
     this.subscription.add(this._publicationService.publications$.subscribe({
       next: (publicationsData: PublicationView[]) => {
+      this.loaderPublications = false;
       this.publications = publicationsData;
       this._cdr.markForCheck();
       },

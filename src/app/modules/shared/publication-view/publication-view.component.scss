@@ -9,8 +9,8 @@
     gap: 1rem;
     .publication-header-content {
       .publication-date {
-        font-size: 0.8rem;
-        color: rgb(8, 8, 119);
+        font-size: variables.$worky-font-size-0;
+        color: colors.$worky-color-navy;
       }
     }
     .publication-header-actions {
@@ -32,7 +32,7 @@
         align-items: center;
         font-size: 12px;
         gap: 0.2rem;
-        color:#65676b;
+        color: colors.$worky-color-navy;
         cursor: pointer;
         i {
           font-size: 15px;
@@ -44,47 +44,53 @@
       display: flex;
       justify-content: space-around;
       margin-top: 1rem;
-      gap: 1rem;
-      border-top: 1px solid #E0E0E0;
+      border-top: 1px solid colors.$worky-color-grey;
+      border-bottom: 1px solid colors.$worky-color-grey;
       .publication-footer-actions-item {
         display: flex;
         align-items: center;
-        margin-top: 1rem;
         gap: 0.2rem;
-        color: #5F6266;
+        padding: 8px 20px;
+        border-radius: variables.$worky-border-radius-medium;
+        color: colors.$worky-color-navy;
         cursor: pointer;
+        &:hover {
+          color: colors.$worky-color-blue;
+          background-color: colors.$worky-color-greyLight;
+        }
       }
     }
 
   }
 
   .publication-comment {
-    margin-top: 40px;
+    margin-top: 15px;
     .publication-comment-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.5rem;
-        margin-top: 0.3rem;
-        .publication-comment-content {
-        display: flex;
-        flex-direction: column;
-        padding: 0.5rem;
-        background-color: #f0f2f552;
-        border-radius: 12px;
-        width: 100%;
-        .publication-comment-content-header {
-            span {
-            font-size: 12px;
-            color: rgb(8, 8, 119);
-            }
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+      .publication-comment-content {
+         width: 100%;
+        .publication-comment-data {
+          padding: 0.5rem 1rem;
+          display: flex;
+          flex-direction: column;
+          background-color: colors.$worky-color-greyLight;
+          border-radius: 12px;
+          span {
+            font-size: variables.$worky-font-size-2;
+          }
+          .comment-author {
+            color: colors.$worky-color-blue;
+          }
         }
-        .publication-comment-content-body {
-            span {
-            font-size: 15px;
-            color: #050505;
-            }
+        .comment-date {
+          margin-left: 5px;
+          font-size: variables.$worky-font-size-0;
+          color: colors.$worky-color-navy;
         }
-        }
+      }
     }
   }
 

@@ -12,11 +12,11 @@
         <span>{{ publication?.author?.name }} {{ publication?.author?.lastName }}</span>
       </div>
       <div class="publication-date">
-        <span>{{ publication?.createdAt | date: 'dd/MM/yyyy' }}</span>
+        <span>{{ publication?.createdAt! | workyRelativeTime }}</span>
       </div>
     </div>
+
     <div class="publication-header-actions">
-      <!-- <i class="material-icons">more_horiz</i> -->
 
       <worky-dropdown
         icon="more_horiz"
@@ -27,7 +27,6 @@
       </worky-dropdown>
 
     </div>
-
 
   </div>
 
@@ -92,12 +91,11 @@
       </worky-avatar>
 
       <div class="publication-comment-content">
-        <div class="publication-comment-content-header">
-          <span>{{ comment?.author?.name }} {{ comment?.author?.lastName }}</span>
+        <div class="publication-comment-data">
+          <span class="comment-author">{{ comment?.author?.name }} {{ comment?.author?.lastName }}</span>
+          <span class="comment-content">{{ comment?.content }}</span>
         </div>
-        <div class="publication-comment-content-body">
-          <span>{{ comment?.content }}</span>
-        </div>
+        <span class="comment-date">{{ comment?.createdAt | workyRelativeTime }}</span>
       </div>
 
     </div>
