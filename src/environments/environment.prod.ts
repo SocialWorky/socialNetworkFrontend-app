@@ -7,4 +7,5 @@ export const environment = {
   APP_PORT: 4200,
   APP_VERSION: '1.0.0',
   WSURL: 'https://notifications-dev.worky.cl',
+  OPENCAGEAPIKEY: 'a7f24f0e6069426b9480725b48bf0403',
 };

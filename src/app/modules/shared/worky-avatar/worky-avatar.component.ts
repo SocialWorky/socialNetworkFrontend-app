@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular/core';
 import { AuthService } from '../../auth/services/auth.service';
 import { Token } from '../interfaces/token.interface';
 
@@ -53,7 +53,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   fontSize: number | null = null;
 
-  constructor(private _authService: AuthService) {
+  constructor(private _authService: AuthService, private _cdr: ChangeDetectorRef) {
 
     this.token = this._authService.getDecodedToken();
 

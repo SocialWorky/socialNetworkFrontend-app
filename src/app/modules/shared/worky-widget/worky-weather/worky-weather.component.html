@@ -1,0 +1,54 @@
+<div class="container-widget content-weather worky-module-container">
+  <div *ngIf="!city" class="loader"></div>
+  <ng-container *ngIf="city">
+
+    <div class="search">
+      <i class="material-icons">place</i>
+      <input type="text" [(ngModel)]="city" placeholder="your location" />
+
+      <worky-buttons
+          [workyButtonType]="WorkyButtonType.Outline"
+          [theme]="WorkyButtonTheme.Basic"
+          [width]="'50%'"
+          (click)="searchWeather()"
+          type="submit">
+          <span prefix-icon class="material-icons">search</span>
+      </worky-buttons>
+
+    </div>
+
+    <div *ngIf="localTime" class="local-time">
+      Hora local: {{ localTime | date: 'shortTime' }}
+    </div>
+
+    <ng-container *ngIf="weatherData">
+        <div class="info-weather">
+            <img [src]="getWeatherIcon(weatherData.weather[0].main)" />
+            <p class="temperature">{{ weatherData.main.temp }}<span>°C</span></p>
+            <p class="description">{{ weatherData.weather[0].description }}</p>
+        </div>
+    </ng-container>
+
+    <div *ngIf="weatherData" class="weather-details">
+
+      <div class="humidity">
+        <i class="material-icons">water_drop</i>
+        <div>
+          <span>{{ weatherData.main.humidity }}%</span>
+          <p>Humidity</p>
+        </div>
+      </div>
+
+      <div class="wind">
+        <i class="material-icons">air</i>
+        <div>
+          <span>{{ weatherData.wind.speed }} km/h</span>
+          <p>Wind Speed</p>
+        </div>
+      </div>
+
+    </div>
+
+  </ng-container>
+</div>
+
