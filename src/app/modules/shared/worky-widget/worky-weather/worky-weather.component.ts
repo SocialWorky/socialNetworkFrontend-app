@@ -1,20 +1,33 @@
-import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
-import { WeatherService } from '../../services/apiOpenWeather';
-import { catchError, takeUntil } from 'rxjs/operators';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, of } from 'rxjs';
-import { WeatherData } from '../interfaces/dataWeather.interface';
+import { catchError, takeUntil } from 'rxjs/operators';
+
+import { WeatherService } from './service/apiOpenWeather.service';
+import { WeatherData } from './interfaces/dataWeather.interface';
+import { WorkyButtonType, WorkyButtonTheme } from '../../../shared/buttons/models/worky-button-model';
+import { LocationService } from '../../services/location.service';
+import { GeocodingService } from '../../services/geocoding.service'
+import { StreetMapData } from './../../interfaces/streetMap.interface';
 
 @Component({
   selector: 'worky-weather',
   templateUrl: './worky-weather.component.html',
   styleUrls: ['./worky-weather.component.scss'],
 })
-export class WeatherComponent implements OnDestroy {
-  city: string = '';
+export class WeatherComponent implements OnInit, OnDestroy {
+
+  WorkyButtonType = WorkyButtonType;
+  WorkyButtonTheme = WorkyButtonTheme;
+
+  city: string | null = null;
   weatherData: WeatherData | null = null;
   localTime: Date | null = null;
   isExpanded = false;
-  containerStyle = {};
+
+  get isUserLocationReady() {
+    return this._locationService.isUserLocationReady;
+  }
+
   state = {
     error: '',
     locationNotFound: false
@@ -32,31 +45,60 @@ export class WeatherComponent implements OnDestroy {
   private unsubscribe$ = new Subject<void>();
 
   constructor(
-    private weatherService: WeatherService,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private _weatherService: WeatherService,
+    private _cdr: ChangeDetectorRef,
+    private _locationService: LocationService,
+    private _geocodingService: GeocodingService
+  ) {
+    this.city = false ? 'viña del mar' : '';
+    //this.searchWeather();
+  }
 
-  searchWeather() {
-    if (!this.city) {
-      this.state.error = 'Please enter a city name';
-      return;
+  async ngOnInit(): Promise<void> {
+    try {
+      const position = await this._locationService.getUserLocation();
+      const [latitude, longitude] = position;
+      await this.setCityFromCoordinates(latitude, longitude);
+      this.searchWeather();
+    } catch (error) {
+      console.error('Error getting location or geocoding data:', error);
+      this.state.error = 'Error getting location or geocoding data';
+    } finally {
+      this._cdr.markForCheck();
     }
+  }
 
+  async setCityFromCoordinates(latitude: number, longitude: number): Promise<void> {
+    try {
+      const data: StreetMapData = await this._geocodingService.reverseGeocode(latitude, longitude).toPromise();
+      if (data.results && data.results.length > 0) {
+        this.city = data.results[0].components.city || 'Unknown location';
+      }
+    } catch (error) {
+      console.error('Error getting geocoding data:', error);
+      this.state.error = 'Error getting geocoding data';
+    }
+  }
+
+  searchWeather(): void {
     this.state.locationNotFound = false;
 
-    this.weatherService.getWeather(this.city).pipe(
+    if (!this.city) {
+      this.state.error = 'Error fetching weather data';
+      return;
+    }
+    this._weatherService.getWeather(this.city).pipe(
       takeUntil(this.unsubscribe$),
       catchError(() => {
         this.weatherData = null;
-        this.state = { ...this.state, error: 'Error fetching weather data'};
-        this.cdr.detectChanges();
+        this.state = { ...this.state, error: 'Error fetching weather data' };
+        this._cdr.markForCheck();
         return of(null);
       })
     ).subscribe(data => this.handleWeatherData(data));
   }
 
-  handleWeatherData(data: WeatherData | null) {
-    console.log('Weather data received:', data);
+  handleWeatherData(data: WeatherData | null): void {
     if (!data) {
       this.state = { ...this.state, error: '', locationNotFound: true };
     } else if (data.cod === '404') {
@@ -66,21 +108,16 @@ export class WeatherComponent implements OnDestroy {
       this.weatherData = { ...data, main: { ...data.main, temp: Math.round(data.main.temp) } };
       this.localTime = new Date();
       this.state = { ...this.state, error: '', locationNotFound: false };
-      this.isExpanded = true;
-      this.containerStyle = { height: '400px' }; // Aplicar estilos según sea necesario
     }
-    this.cdr.detectChanges();
-
+    this._cdr.markForCheck();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
 
-  //Esta función asegura que muestre una imagen adecuada que corresponda al estado actual del clima reportado por la API. Si el estado del clima no tiene una imagen específica asignada en el mapa de iconos, se mostrará una imagen de nube por defecto.
   getWeatherIcon(weatherData: string): string {
     return this.weatherIcons[weatherData] || 'assets/img/widget/cloud.png';
   }
 }
-
