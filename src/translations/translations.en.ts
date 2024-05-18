@@ -92,6 +92,7 @@ export const translations = {
   'navbar.logout': 'Log out',
   // HOME COMPONENT
   'home.errorGetPublications': 'Error getting publications: ',
+  'home.notPublications': 'There are no publications',
   // ADD PUBLICATION COMPONENT
   'addPublication.loadingCommentMessage': 'We are posting your comment, please wait a moment',
   'addPublication.loadingPublicationMessage': 'We are posting your content, please wait a moment',
@@ -111,4 +112,12 @@ export const translations = {
   'publicationsView.spanReaction': 'React',
   'publicationsView.spanShare': 'Share',
   'publicationsView.spanComment': 'Comment',
+  // DATE OF PUBLICATION AND COMMENTS
+  'DATE_FNS.LESS_THAN_A_MINUTE': 'less than a minute ago',
+  'DATE_FNS.X_MINUTES': '{{count}} minutes ago',
+  'DATE_FNS.X_HOURS': '{{count}} hours ago',
+  'DATE_FNS.X_DAYS': '{{count}} days ago',
+  'DATE_FNS.X_MONTHS': '{{count}} months ago',
+  'DATE_FNS.X_YEARS': '{{count}} years ago',
+  'DATE_FNS.UNKNOWN': 'some time ago'
 };
