@@ -6,6 +6,11 @@ import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import { Translations } from './translations/translations';
 import { environment } from './environments/environment';
 
+if (!navigator.geolocation) {
+  console.error('Geolocation is not available');
+  throw new Error('Geolocation not supported in this browser');
+}
+
 if (environment.PRODUCTION) {
   enableProdMode();
 }
