@@ -1,0 +1,60 @@
+/* Estilos para el widget de noticias */
+/* Estilos para el contenedor de la lista de noticias */
+.content-news {
+    max-height: 400px; /* Altura máxima antes de que aparezca el scroll */
+    overflow-y: auto; /* Agrega scroll vertical si es necesario */
+} 
+
+.news-article {
+    margin-bottom: 20px; /* Espacio entre cada widget de noticias */
+}
+
+.news-card {
+    border: 1px solid #ccc; /* Borde del widget */
+    border-radius: 5px; /* Bordes redondeados */
+    overflow: hidden; /* Oculta el desbordamiento */
+}
+
+.news-image {
+    width: 100%;
+    height: auto;
+}
+
+.news-card-content {
+    padding: 15px; /* Espaciado interno */
+}
+
+.news-title {
+    font-size: 1.2em; /* Tamaño del título */
+    margin-bottom: 5px; /* Espacio inferior */
+}
+
+.news-date {
+    color: #888; /* Color de la fecha */
+    margin-bottom: 10px; /* Espacio inferior */
+}
+
+.news-description {
+    margin-bottom: 15px; /* Espacio inferior */
+}
+
+.news-read-more {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.news-read-more:hover {
+    background-color: #0056b3; /* Color de fondo al pasar el mouse */
+}
+
+  /* Estilos para el contenedor del widget de noticias */
+.news-widget-container {
+    height: 100%; /* Ocupa toda la altura del contenedor */
+    max-height: 400px; /* Altura máxima antes de que aparezca el scroll */
+    overflow-y: auto; /* Agrega scroll vertical si es necesario */
+}
