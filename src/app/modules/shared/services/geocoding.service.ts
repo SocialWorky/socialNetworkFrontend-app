@@ -11,9 +11,15 @@ export class GeocodingService {
 
   constructor(private http: HttpClient) {}
 
-  reverseGeocode(lat: number, lng: number): Observable<any> {
+  getGeocodeLatAndLng(lat: number, lng: number): Observable<any> {
     const apiKey = environment.OPENCAGEAPIKEY;
     const url = `${this.apiUrl}?q=${lat}+${lng}&key=${apiKey}`;
+    return this.http.get<any>(url);
+  }
+
+  getGeocodeCity(city: string): Observable<any> {
+    const apiKey = environment.OPENCAGEAPIKEY;
+    const url = `${this.apiUrl}?q=${city}&key=${apiKey}`;
     return this.http.get<any>(url);
   }
 }

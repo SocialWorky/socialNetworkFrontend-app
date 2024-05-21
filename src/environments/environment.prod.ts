@@ -8,4 +8,7 @@ export const environment = {
   APP_VERSION: '1.0.0',
   WSURL: 'https://notifications-dev.worky.cl',
   OPENCAGEAPIKEY: 'a7f24f0e6069426b9480725b48bf0403',
+  APIGEOLOCATIONS: 'https://geo-dev.worky.cl/api/v1', // GeoLocations API Service worky-geo-locations
+  APIWEATHERURL: 'https://api.weatherapi.com/v1/forecast.json', // Weather API Service URL
+  APIWEATHERTOKEN: '062b9c8b637b4fc3875164009242005', // Weather API Service TOKEN
 };

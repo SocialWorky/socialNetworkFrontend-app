@@ -8,6 +8,7 @@ export interface Result {
     annotations: Annotations;
     components:  Components;
     formatted:   string;
+    geometry:    Geometry;
 }
 
 export interface Annotations {
@@ -67,4 +68,9 @@ export interface Components {
 export interface Status {
     code:    number;
     message: string;
+}
+
+export interface Geometry {
+    lat: number;
+    lng: number;
 }

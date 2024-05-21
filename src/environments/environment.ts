@@ -4,13 +4,16 @@
 
 export const environment = {
   PRODUCTION: false,
-  API_URL: 'http://localhost:3000/api/v1',
+  API_URL: 'http://localhost:3000/api/v1', // Worky API Service Core
   BASE_URL: 'http://localhost:4200',
   CLIEN_ID_GOOGLE: '392454930418-dunulmihmuss90c042vn359mitdjjko8.apps.googleusercontent.com',
   APP_PORT: 4200,
   APP_VERSION: '1.0.0',
-  WSURL: 'http://localhost:3011',
-  OPENCAGEAPIKEY: 'a7f24f0e6069426b9480725b48bf0403',
+  WSURL: 'http://localhost:3011', // Worky-socket service
+  OPENCAGEAPIKEY: 'a7f24f0e6069426b9480725b48bf0403',  // GeoCoding API Key
+  APIGEOLOCATIONS: 'http://localhost:3013/api/v1', // GeoLocations API Service worky-geo-locations
+  APIWEATHERURL: 'https://api.weatherapi.com/v1/forecast.json', // Weather API Service URL
+  APIWEATHERTOKEN: '062b9c8b637b4fc3875164009242005', // Weather API Service TOKEN
 };
 
 

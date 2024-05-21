@@ -1,6 +1,6 @@
 ## Node -V
 ```bash
-$ 20.12.2
+$ 22.1.0
 ```
 
 ## Installation

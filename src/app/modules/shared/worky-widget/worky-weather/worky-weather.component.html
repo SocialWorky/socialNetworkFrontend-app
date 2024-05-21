@@ -10,7 +10,7 @@
           [workyButtonType]="WorkyButtonType.Outline"
           [theme]="WorkyButtonTheme.Basic"
           [width]="'50%'"
-          (click)="searchWeather()"
+          (click)="getWeatherCity(city)"
           type="submit">
           <span prefix-icon class="material-icons">search</span>
       </worky-buttons>
@@ -23,9 +23,10 @@
 
     <ng-container *ngIf="weatherData">
         <div class="info-weather">
-            <img [src]="getWeatherIcon(weatherData.weather[0].main)" />
-            <p class="temperature">{{ weatherData.main.temp }}<span>°C</span></p>
-            <p class="description">{{ weatherData.weather[0].description }}</p>
+            <img src="{{ weatherData.current.condition.icon }}" />
+            <p class="temperature">Min: {{ weatherData.forecast.forecastday[i].day.mintemp_c }}<span>°C</span></p>
+            <p class="temperature">Max: {{ weatherData.forecast.forecastday[i].day.maxtemp_c }}<span>°C</span></p>
+            <p class="description">{{ weatherData.forecast.forecastday[i].day.condition.text }}</p>
         </div>
     </ng-container>
 
@@ -34,16 +35,14 @@
       <div class="humidity">
         <i class="material-icons">water_drop</i>
         <div>
-          <span>{{ weatherData.main.humidity }}%</span>
-          <p>Humidity</p>
+          <span>{{ weatherData.forecast.forecastday[i].day.avghumidity }}%</span>
         </div>
       </div>
 
       <div class="wind">
         <i class="material-icons">air</i>
         <div>
-          <span>{{ weatherData.wind.speed }} km/h</span>
-          <p>Wind Speed</p>
+          <span>{{ weatherData.forecast.forecastday[i].day.maxwind_kph }} km/h</span>
         </div>
       </div>
 

@@ -37,25 +37,22 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: 20px;
       img {
-        width: 40%;
+        width: 60%;
       }
       .temperature {
         position: relative;
-        font-size: 50px;
+        font-size: 23px;
         line-height: 1;
-        font-weight: 700;
-        margin: 8px 0 5px -30px;
+        margin: 9px 0px 6px 0px;
         span {
           position: absolute;
-          font-size: 24px;
+          font-size: 12px;
           margin-left: 4px;
         }
       }
       .description {
-        font-size: 20px;
-        font-weight: 500;
+        font-size: 14px;
         text-transform: capitalize;
       }
     }
