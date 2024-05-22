@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject, firstValueFrom } from 'rxjs';
+import { Subject, interval, Subscription, firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { WeatherService } from './service/apiOpenWeather.service';
@@ -72,6 +72,8 @@ export class WeatherComponent implements OnInit, OnDestroy {
 
   private unsubscribe$ = new Subject<void>();
 
+  private timeSubscription: Subscription | undefined;
+
   constructor(
     private _weatherService: WeatherService,
     private _cdr: ChangeDetectorRef,
@@ -85,6 +87,7 @@ export class WeatherComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
+    this.localTime = new Date();
     const verify = await this.verifyWeatherData();
     if (!verify) {
       try {
@@ -98,12 +101,17 @@ export class WeatherComponent implements OnInit, OnDestroy {
       }
     }
     this._cdr.markForCheck();
+
+    this.timeSubscription = interval(1000).subscribe(() => {
+      this.localTime = new Date();
+      this._cdr.markForCheck();
+    });
   }
 
   async setCityFromCoordinates(latitude: number, longitude: number): Promise<void> {
     try {
       const result = await firstValueFrom(this._geoLocationsService.findLocationByLatAndLng(latitude, longitude).pipe(takeUntil(this.unsubscribe$)));
-      if (result.length === 0) {
+      if (!result) {
         const data = await firstValueFrom(this._geocodingService.getGeocodeLatAndLng(latitude, longitude).pipe(takeUntil(this.unsubscribe$)));
         if (data.results && data.results.length > 0) {
           await firstValueFrom(this._geoLocationsService.createLocations(data).pipe(takeUntil(this.unsubscribe$)));
@@ -128,6 +136,8 @@ export class WeatherComponent implements OnInit, OnDestroy {
         localStorage.setItem('WorkyWeatherData', JSON.stringify(data));
         this.weatherDataString = localStorage.getItem('WorkyWeatherData');
         this.weatherData = this.weatherDataString ? JSON.parse(this.weatherDataString) : null;
+
+        this.city = this.weatherData.location.name;
         this._cdr.markForCheck();
       },
       error: (error) => console.error('Error fetching weather data:', error)
@@ -186,6 +196,7 @@ export class WeatherComponent implements OnInit, OnDestroy {
       if (todayDate01Formatted === currentDay || todayDate02Formatted === currentDay || todayDate03Formatted === currentDay) {
         this.weatherData = this.WorkyWeatherData;
         this.city = this.weatherData.location.name;
+        this._cdr.markForCheck();
         verify = true;
       }
     }
@@ -195,5 +206,9 @@ export class WeatherComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+
+    if (this.timeSubscription) {
+      this.timeSubscription.unsubscribe();
+    }
   }
 }
