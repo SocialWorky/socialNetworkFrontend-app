@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Subject, firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { WeatherService } from './service/apiOpenWeather.service';
@@ -102,11 +102,11 @@ export class WeatherComponent implements OnInit, OnDestroy {
 
   async setCityFromCoordinates(latitude: number, longitude: number): Promise<void> {
     try {
-      const result = await this._geoLocationsService.findLocationByLatAndLng(latitude, longitude).pipe(takeUntil(this.unsubscribe$)).toPromise();
+      const result = await firstValueFrom(this._geoLocationsService.findLocationByLatAndLng(latitude, longitude).pipe(takeUntil(this.unsubscribe$)));
       if (result.length === 0) {
-        const data = await this._geocodingService.getGeocodeLatAndLng(latitude, longitude).pipe(takeUntil(this.unsubscribe$)).toPromise();
+        const data = await firstValueFrom(this._geocodingService.getGeocodeLatAndLng(latitude, longitude).pipe(takeUntil(this.unsubscribe$)));
         if (data.results && data.results.length > 0) {
-          await this._geoLocationsService.createLocations(data).pipe(takeUntil(this.unsubscribe$)).toPromise();
+          await firstValueFrom(this._geoLocationsService.createLocations(data).pipe(takeUntil(this.unsubscribe$)));
           this.city = data.results[0].components.city || 'Unknown location';
         }
       } else {
