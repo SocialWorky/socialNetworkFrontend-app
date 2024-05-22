@@ -86,10 +86,9 @@ async subscribeToNotificationComment() {
     const [latitude, longitude] = await this._locationService.getUserLocation();
     if (!latitude && !longitude) return
     const result = await firstValueFrom(this._geoLocationsService.findLocationByLatAndLng(latitude, longitude).pipe(takeUntil(this.unsubscribe$)));
-    if (result) return;
+    if (result.length !== 0) return;
     if (result.length === 0) {
       const data = await firstValueFrom(this._geocodingService.getGeocodeLatAndLng(latitude, longitude).pipe(takeUntil(this.unsubscribe$)));
-      console.log('DATA: ', data);
       if (data.results && data.results.length > 0) {
         await firstValueFrom(this._geoLocationsService.createLocations(data).pipe(takeUntil(this.unsubscribe$)));
       }
