@@ -1,21 +1,23 @@
 <div class="container-widget content-weather worky-module-container">
+
+  <div class="search">
+    <i class="material-icons">place</i>
+    <input type="text" [(ngModel)]="city" />
+
+    <worky-buttons
+        [workyButtonType]="WorkyButtonType.Outline"
+        [theme]="WorkyButtonTheme.Basic"
+        [width]="'50%'"
+        (click)="getWeatherCity(city)"
+        type="submit">
+        <span prefix-icon class="material-icons">search</span>
+    </worky-buttons>
+
+  </div>
+
   <div *ngIf="!city" class="loader"></div>
+  
   <ng-container *ngIf="city">
-
-    <div class="search">
-      <i class="material-icons">place</i>
-      <input type="text" [(ngModel)]="city" placeholder="your location" />
-
-      <worky-buttons
-          [workyButtonType]="WorkyButtonType.Outline"
-          [theme]="WorkyButtonTheme.Basic"
-          [width]="'50%'"
-          (click)="getWeatherCity(city)"
-          type="submit">
-          <span prefix-icon class="material-icons">search</span>
-      </worky-buttons>
-
-    </div>
 
     <div *ngIf="localTime" class="local-time">
       Hora local: {{ localTime | date: 'shortTime' }}
@@ -23,10 +25,14 @@
 
     <ng-container *ngIf="weatherData">
         <div class="info-weather">
-            <img src="{{ weatherData.current.condition.icon }}" />
-            <p class="temperature">Min: {{ weatherData.forecast.forecastday[i].day.mintemp_c }}<span>°C</span></p>
-            <p class="temperature">Max: {{ weatherData.forecast.forecastday[i].day.maxtemp_c }}<span>°C</span></p>
-            <p class="description">{{ weatherData.forecast.forecastday[i].day.condition.text }}</p>
+            <img [src]="getWeatherIconUrl(weatherData.forecast.forecastday[i].hour[currentHour].condition.icon)" />
+            <div class="temperature-current">{{ weatherData.forecast.forecastday[i].hour[currentHour].temp_c }}<span>°C</span></div>
+            <span>Temperatura Actual</span>
+            <div class="min-max">
+              <p class="temperature">Min: {{ weatherData.forecast.forecastday[i].day.mintemp_c }}<span>°C</span></p>
+              <p class="temperature">Max: {{ weatherData.forecast.forecastday[i].day.maxtemp_c }}<span>°C</span></p>
+            </div>
+            <p class="description">{{ weatherData.forecast.forecastday[i].hour[currentHour].condition.text }}</p>
         </div>
     </ng-container>
 
@@ -35,14 +41,14 @@
       <div class="humidity">
         <i class="material-icons">water_drop</i>
         <div>
-          <span>{{ weatherData.forecast.forecastday[i].day.avghumidity }}%</span>
+          <span>{{ weatherData.forecast.forecastday[i].hour[currentHour].humidity }}%</span>
         </div>
       </div>
 
       <div class="wind">
         <i class="material-icons">air</i>
         <div>
-          <span>{{ weatherData.forecast.forecastday[i].day.maxwind_kph }} km/h</span>
+          <span>{{ weatherData.forecast.forecastday[i].hour[currentHour].vis_km }} km/h</span>
         </div>
       </div>
 

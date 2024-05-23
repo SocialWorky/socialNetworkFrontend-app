@@ -13,7 +13,7 @@ export class GeocodingService {
 
   getGeocodeLatAndLng(lat: number, lng: number): Observable<any> {
     const apiKey = environment.OPENCAGEAPIKEY;
-    const url = `${this.apiUrl}?q=${lat}+${lng}&key=${apiKey}`;
+    const url = `${this.apiUrl}?q=${lat},${lng}&key=${apiKey}`;
     return this.http.get<any>(url);
   }
 

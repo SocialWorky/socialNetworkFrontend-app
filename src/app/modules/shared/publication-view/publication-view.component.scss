@@ -59,6 +59,12 @@
           background-color: colors.$worky-color-greyLight;
         }
       }
+      @include breakpoints.below-sm {
+        justify-content: center;
+        .publication-footer-actions-item {
+          padding: 8px 5px;
+        }
+      }
     }
 
   }

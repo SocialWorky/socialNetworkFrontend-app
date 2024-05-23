@@ -1,13 +1,17 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject, Subscription, firstValueFrom, takeUntil } from 'rxjs';
+
 import { TypePublishing } from '../../shared/addPublication/enum/addPublication.enum';
 import { PublicationView } from '../../shared/interfaces/publicationView.interface';
-import { Subscription } from 'rxjs';
 import { PublicationService } from '../../shared/services/publication.service';
 import { NotificationCommentService } from '../../shared/services/notificationComment.service';
 import { AuthService } from '../../auth/services/auth.service';
 import { AlertService } from '../../shared/services/alert.service';
 import { Alerts, Position } from '../../shared/enums/alerts.enum';
 import { translations } from '../../../../translations/translations';
+import { LocationService } from '../../shared/services/location.service';
+import { GeoLocationsService } from '../../shared/services/apiGeoLocations.service';
+import { GeocodingService } from '../../shared/services/geocoding.service';
 
 @Component({
   selector: 'worky-home',
@@ -28,13 +32,20 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   loaderPublications?: boolean;
 
+  private unsubscribe$ = new Subject<void>();
+
   constructor(
     private _publicationService: PublicationService,
     private _cdr: ChangeDetectorRef,
     private _notificationCommentService: NotificationCommentService,
     private _authService: AuthService,
     private _alertService: AlertService,
-  ) {}
+    private _locationService: LocationService,
+    private _geoLocationsService: GeoLocationsService,
+    private _geocodingService: GeocodingService
+  ) {
+    this.getLocationUser();
+  }
 
 async subscribeToNotificationComment() {
   this.subscription.add(this._notificationCommentService.notificationComment$.subscribe(async (data: any) =>  {
@@ -71,4 +82,18 @@ async subscribeToNotificationComment() {
     this.subscribeToNotificationComment();
   }
 
+  private async getLocationUser() {
+    const [latitude, longitude] = await this._locationService.getUserLocation();
+    if (!latitude && !longitude) return
+
+    const result = await firstValueFrom(this._geoLocationsService.findLocationByLatAndLng(latitude, longitude).pipe(takeUntil(this.unsubscribe$)));
+
+    if (result) return;
+    if (!result) {
+      const data = await firstValueFrom(this._geocodingService.getGeocodeLatAndLng(latitude, longitude).pipe(takeUntil(this.unsubscribe$)));
+      if (data.results && data.results.length > 0) {
+        await firstValueFrom(this._geoLocationsService.createLocations(data).pipe(takeUntil(this.unsubscribe$)));
+      }
+    }
+  }
 }
