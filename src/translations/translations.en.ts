@@ -119,5 +119,19 @@ export const translations = {
   'DATE_FNS.X_DAYS': '{{count}} days ago',
   'DATE_FNS.X_MONTHS': '{{count}} months ago',
   'DATE_FNS.X_YEARS': '{{count}} years ago',
-  'DATE_FNS.UNKNOWN': 'some time ago'
+  'DATE_FNS.UNKNOWN': 'some time ago',
+  // ADMIN MODULE
+  'admin.sidemenu-title': 'Worky',
+  'admin.sidemenu-subTitle': 'Admin panel',
+  'admin.sidemenu-welcome': 'Welcome:',
+  'admin.statistics.group-usersRegister': 'Registered Users',
+  'admin.statistics.group-publicationsTitle': 'Publications',
+  'admin.statistics.group-usersReport': 'Reported Users',
+  'admin.lastRegisteredUsers-title': 'Last 5 registered users',
+  'admin.lastRegisteredUsers-user': 'User',
+  'admin.lastRegisteredUsers-status': 'Status',
+  'admin.lastRegisteredUsers-email': 'Email',
+  'admin.lastRegisteredUsers-createdAt': 'Registration date',
+  'admin.lastRegisteredUsers-validated': 'Validated',
+  'admin.lastRegisteredUsers-pending': 'Pending',
 };
