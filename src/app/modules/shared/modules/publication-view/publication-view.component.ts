@@ -24,6 +24,8 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
 
   dataLinkActions:DropdownDataLink<any>[] = [];
 
+  dataShareActions:DropdownDataLink<any>[] = [];
+
   viewCommentSection: number | null = null;
 
   viewComments: number | null = null;
@@ -43,6 +45,7 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
   // eslint-disable-next-line @angular-eslint/no-empty-lifecycle-method
   ngOnInit() {
     this.menuActions();
+    this.menuShareActions();
     this._cdr.markForCheck();
   }
 
@@ -82,6 +85,12 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
   }
   menuActions() {
     this.dataLinkActions = [
+      { icon:'report', link: '/auth/login',  title: 'Reportar Publicación' },
+    ];
+  }
+
+    menuShareActions() {
+    this.dataShareActions = [
       { icon:'report', link: '/auth/login',  title: 'Reportar Publicación' },
     ];
   }
