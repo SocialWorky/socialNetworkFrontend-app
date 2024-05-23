@@ -44,6 +44,12 @@ export class PublicationService {
     return this.http.delete(url, { headers });
   }
 
+  getCountPublications(): Observable<number> {
+    const url = `${this.baseUrl}/publications/count`;
+    const headers = this.getHeaders();
+    return this.http.get<number>(url, { headers });
+  }
+
   private viewAll(page: number, size: number): Observable<PublicationView[]> {
     const url = `${this.baseUrl}/publications/all?page=${page}&pageSize=${size}`;
     const headers = this.getHeaders();
