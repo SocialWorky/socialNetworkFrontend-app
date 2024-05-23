@@ -129,7 +129,12 @@ export class LoginComponent implements OnInit, OnDestroy {
       next: (response: any) => {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
-          this._router.navigate(['/home']);
+          const token = this._authService.getDecodedToken();
+          if (token?.role === 'admin') {
+            this._router.navigate(['/admin']);
+          } else {
+            this._router.navigate(['/home']);
+          }
         }
       },
       error: (e: any) => {

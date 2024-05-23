@@ -2,6 +2,15 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "paths": {
+      "@env/*": ["src/environments/*"],
+      "@shared/*": ["src/app/modules/shared/*"],
+      "@auth/*": ["src/app/modules/auth/*"],
+      "@services/*": ["src/app/modules/shared/services/*"],
+      "@translations/*": ["src/translations/*"],
+      "@assets/*": ["src/assets/*"],
+      "@admin/*": ["src/app/modules/admin/*"],
+    },  
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
