@@ -1,17 +1,17 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, Subscription, firstValueFrom, takeUntil } from 'rxjs';
 
-import { TypePublishing } from '../../shared/addPublication/enum/addPublication.enum';
-import { PublicationView } from '../../shared/interfaces/publicationView.interface';
-import { PublicationService } from '../../shared/services/publication.service';
-import { NotificationCommentService } from '../../shared/services/notificationComment.service';
-import { AuthService } from '../../auth/services/auth.service';
-import { AlertService } from '../../shared/services/alert.service';
-import { Alerts, Position } from '../../shared/enums/alerts.enum';
-import { translations } from '../../../../translations/translations';
-import { LocationService } from '../../shared/services/location.service';
-import { GeoLocationsService } from '../../shared/services/apiGeoLocations.service';
-import { GeocodingService } from '../../shared/services/geocoding.service';
+import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
+import { PublicationView } from '@shared/interfaces/publicationView.interface';
+import { PublicationService } from '@shared/services/publication.service';
+import { NotificationCommentService } from '@shared/services/notificationComment.service';
+import { AuthService } from '@auth/services/auth.service';
+import { AlertService } from '@shared/services/alert.service';
+import { Alerts, Position } from '@shared/enums/alerts.enum';
+import { translations } from '@translations/translations';
+import { LocationService } from '@shared/services/location.service';
+import { GeoLocationsService } from '@shared/services/apiGeoLocations.service';
+import { GeocodingService } from '@shared/services/geocoding.service';
 
 @Component({
   selector: 'worky-home',

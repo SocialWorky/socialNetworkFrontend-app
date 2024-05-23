@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { translations } from '../../../../../translations/translations';
+import { translations } from '@translations/translations';
 
 export const getTranslationByQuantity = (key: string, quantity: number): string => {
   if (quantity === undefined) return translations[key] || '';

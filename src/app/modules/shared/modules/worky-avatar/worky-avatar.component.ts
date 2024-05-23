@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular/core';
-import { AuthService } from '../../auth/services/auth.service';
-import { Token } from '../interfaces/token.interface';
+import { AuthService } from '@auth/services/auth.service';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
   selector: 'worky-avatar',

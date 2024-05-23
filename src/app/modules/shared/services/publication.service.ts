@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { environment } from '../../../../environments/environment';
-import { CreatePost } from '../addPublication/interfaces/createPost.interface';
-import { PublicationView } from '../interfaces/publicationView.interface';
+import { environment } from '@env/environment';
+import { CreatePost } from '@shared/modules/addPublication/interfaces/createPost.interface';
+import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({

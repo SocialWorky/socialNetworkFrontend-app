@@ -8,9 +8,9 @@ import { LoginComponent } from './pages/login/login.component';
 import { ResetPasswordModalComponent } from './pages/login/reset-password-modal/reset-password-modal.component';
 import { RegisterComponent } from './pages/register/register.component';
 import { AuthRoutingModule } from './auth-routing.module';
-import { MaterialModule } from '../shared/material/material.module';
-import { WorkyButtonsModule } from '../shared/buttons/buttons.module';
-import { TranslationsModule } from '../shared/translations/translations.module';
+import { MaterialModule } from '@shared/modules/material/material.module';
+import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
+import { TranslationsModule } from '@shared/modules/translations/translations.module';
 @NgModule({
   declarations: [LayoutPageComponent, LoginComponent, RegisterComponent, ResetPasswordModalComponent],
   imports: [

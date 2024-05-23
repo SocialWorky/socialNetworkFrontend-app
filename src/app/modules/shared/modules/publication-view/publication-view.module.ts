@@ -5,7 +5,7 @@ import { WorkyAvatarModule } from '../worky-avatar/worky-avatar.module';
 import { AddPublicationModule } from '../addPublication/addPublication.module';
 import { TranslationsModule } from '../translations/translations.module';
 import { WorkyDropdownModule } from '../worky-dropdown/worky-dropdown.module';
-import { WorkyRelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
+import { WorkyRelativeTimePipe } from '@shared/pipes/relative-time.pipe';
 
 @NgModule({
     declarations: [PublicationViewComponent, WorkyRelativeTimePipe],

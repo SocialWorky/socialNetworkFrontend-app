@@ -3,12 +3,12 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 
-import { PublicationView } from '../../shared/interfaces/publicationView.interface';
+import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePublishing } from '../addPublication/enum/addPublication.enum';
 import { DropdownDataLink } from '../worky-dropdown/interfaces/dataLink.interface';
-import { AuthService } from '../../auth/services/auth.service';
-import { RoleUser } from '../../auth/models/roleUser.enum';
-import { PublicationService } from '../services/publication.service';
+import { AuthService } from '@auth/services/auth.service';
+import { RoleUser } from '@auth/models/roleUser.enum';
+import { PublicationService } from '@shared/services/publication.service';
 @Component({
   selector: 'worky-publication-view',
   templateUrl: './publication-view.component.html',

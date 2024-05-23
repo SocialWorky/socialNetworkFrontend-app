@@ -1,23 +1,23 @@
 import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { WorkyButtonType, WorkyButtonTheme } from '../../../shared/buttons/models/worky-button-model';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthGoogleService } from '../../services/auth-google.service';
-import { AlertService } from '../../../shared/services/alert.service';
 
-import { AuthApiService } from '../../services/apiLogin.service';
-import { LoginData } from '../../interfaces/login.interface';
-import { translations } from '../../../../../translations/translations';
-import { Alerts, Position } from '../../../shared/enums/alerts.enum';
-import { AuthService } from '../../services/auth.service';
-import { MailSendValidateData } from '../../../shared/interfaces/mail.interface';
-import { environment } from '../../../../../environments/environment';
+import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
+import { AuthGoogleService } from '@auth/services/auth-google.service';
+import { AlertService } from '@shared/services/alert.service';
+import { AuthApiService } from '@auth/services/apiLogin.service';
+import { LoginData } from '@auth/interfaces/login.interface';
+import { translations } from '@translations/translations';
+import { Alerts, Position } from '@shared/enums/alerts.enum';
+import { AuthService } from '@auth/services/auth.service';
+import { MailSendValidateData } from '@shared/interfaces/mail.interface';
+import { environment } from '@env/environment';
 import { ResetPasswordModalComponent } from './reset-password-modal/reset-password-modal.component';
-import { TemplateEmail } from '../../../shared/interfaces/mail.interface';
+import { TemplateEmail } from '@shared/interfaces/mail.interface';
 
 @Component({
   selector: 'worky-login',

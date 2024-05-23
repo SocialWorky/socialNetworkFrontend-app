@@ -4,10 +4,10 @@ import { takeUntil } from 'rxjs/operators';
 
 import { WeatherService } from './service/apiOpenWeather.service';
 import { Condition, WeatherMain } from './interfaces/dataWeather.interface';
-import { WorkyButtonType, WorkyButtonTheme } from '../../../shared/buttons/models/worky-button-model';
-import { LocationService } from '../../services/location.service';
-import { GeocodingService } from '../../services/geocoding.service';
-import { GeoLocationsService } from '../../services/apiGeoLocations.service';
+import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
+import { LocationService } from '@shared/services/location.service';
+import { GeocodingService } from '@shared/services/geocoding.service';
+import { GeoLocationsService } from '@shared/services/apiGeoLocations.service';
 
 @Component({
   selector: 'worky-weather',

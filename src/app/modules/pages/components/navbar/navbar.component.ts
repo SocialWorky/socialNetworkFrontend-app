@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { AuthGoogleService } from '@auth/services/auth-google.service';
 import { translations } from '@translations/translations'
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
-import { DropdownDataLink } from '@shared/worky-dropdown/interfaces/dataLink.interface';
+import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { AuthService } from '@auth/services/auth.service';
 
 @Component({

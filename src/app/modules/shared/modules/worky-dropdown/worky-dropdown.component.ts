@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { AuthService } from '../../auth/services/auth.service';
+import { AuthService } from '@auth/services/auth.service';
 import { DropdownDataLink } from './interfaces/dataLink.interface';
 
 @Component({

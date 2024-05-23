@@ -3,14 +3,14 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { LoadingController } from '@ionic/angular';
-import { WorkyButtonType, WorkyButtonTheme } from '../../../../shared/buttons/models/worky-button-model';
-import { AuthApiService } from '../../../services/apiLogin.service';
-import { MailSendValidateData } from '../../../../shared/interfaces/mail.interface';
-import { environment } from '../../../../../../environments/environment';
-import { AlertService } from '../../../../shared/services/alert.service';
-import { Alerts, Position } from '../../../../shared/enums/alerts.enum';
-import { translations } from '../../../../../../translations/translations';
-import { TemplateEmail } from '../../../../shared/interfaces/mail.interface';
+import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
+import { AuthApiService } from '@auth/services/apiLogin.service';
+import { MailSendValidateData } from '@shared/interfaces/mail.interface';
+import { environment } from '@env/environment';
+import { AlertService } from '@shared/services/alert.service';
+import { Alerts, Position } from '@shared/enums/alerts.enum';
+import { translations } from '@translations/translations';
+import { TemplateEmail } from '@shared/interfaces/mail.interface';
 
 @Component({
   selector: 'worky-reset-password-modal',

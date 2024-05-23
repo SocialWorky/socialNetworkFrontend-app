@@ -7,7 +7,7 @@ import { StatisticsComponent } from './shared/statistics/statistics.component';
 import { UserPendingValidationComponent } from './shared/user-pending-validation/user-pending-validation.component';
 
 import { AdminRoutingModule } from './admin-routing.module';
-import { WorkyAvatarModule } from '@shared/worky-avatar/worky-avatar.module';
+import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.module';
 
 
 @NgModule({

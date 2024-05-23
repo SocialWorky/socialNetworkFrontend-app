@@ -1,17 +1,17 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
-import { WorkyButtonType, WorkyButtonTheme } from '../../shared/buttons/models/worky-button-model';
-import { AuthService } from '../../auth/services/auth.service';
-import { PublicationService } from '../services/publication.service';
-import { CommentService } from '../services/comment.service';
-import { translations } from '../../../../translations/translations';
+import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
+import { AuthService } from '@auth/services/auth.service';
+import { PublicationService } from '@shared/services/publication.service';
+import { CommentService } from '@shared/services/comment.service';
+import { translations } from '@translations/translations';
 import { TypePublishing, TypePrivacy } from './enum/addPublication.enum';
-import { Token } from '../interfaces/token.interface';
-import { AlertService } from '../../shared/services/alert.service';
-import { Alerts, Position } from '../../shared/enums/alerts.enum';
-import { CreateComment} from '../interfaces/addComment.interface';
-import { NotificationCommentService } from '../services/notificationComment.service';
+import { Token } from '@shared/interfaces/token.interface';
+import { AlertService } from '@shared/services/alert.service';
+import { Alerts, Position } from '@shared/enums/alerts.enum';
+import { CreateComment} from '@shared/interfaces/addComment.interface';
+import { NotificationCommentService } from '@shared/services/notificationComment.service';
 
 @Component({
   selector: 'worky-add-publication',
