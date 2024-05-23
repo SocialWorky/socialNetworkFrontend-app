@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { routes } from '@admin/admin-routing.module';
 import { AuthService } from '@auth/services/auth.service';
+import { translations } from '@translations/translations';
 
 @Component({
   selector: 'worky-admin-sidemenu',
@@ -10,9 +11,9 @@ import { AuthService } from '@auth/services/auth.service';
 })
 export class SidemenuComponent  implements OnInit {
 
-  title: string = 'Worky';
+  title: string = translations['admin.sidemenu-title'];
 
-  subTitle: string = 'Sistema de administración';
+  subTitle: string = translations['admin.sidemenu-subTitle'];
 
   userName: string = 'Admin';
 

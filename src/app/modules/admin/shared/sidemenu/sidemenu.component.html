@@ -11,7 +11,7 @@
   </div>
 
   <div id="profile" class="px-6 py-10">
-    <p class="text-slate-500">Bienvenido: </p>
+    <p class="text-slate-500">{{ 'admin.sidemenu-welcome' | workyTranslations }}</p>
     <a href="#" class="inline-flex space-x-2 items-center">
       <span>
          <worky-avatar [size]="40"></worky-avatar>
@@ -27,7 +27,7 @@
          [routerLink]="item.path"
          routerLinkActive="bg-blue-900">
 
-        <div class="flex flex-col">
+        <div class="flex flex-col pl-2">
           <span class="text-lg font-bold leading-5 text-white">{{ item.title }}</span>
           <span class="text-sm text-white/50 hidden md:block">{{ item.path }}</span>
         </div>
@@ -45,8 +45,7 @@
       </span>
 
       <div class="flex flex-col">
-        <span class="text-lg font-bold leading-5 text-white">Cerrar Sesion</span>
-        <span class="text-sm text-white/50 hidden md:block">Logout</span>
+        <span class="text-lg font-bold leading-5 text-white">{{ 'navbar.logout' | workyTranslations }}</span>
       </div>
 
     </a>
