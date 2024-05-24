@@ -91,7 +91,10 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
 
     menuShareActions() {
     this.dataShareActions = [
-      { icon:'report', link: '/auth/login',  title: 'Reportar Publicación' },
+      { 
+        img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYdHPO0e7gXNrGZgpxf9ugCFtGMAS7zq1ytG56vSe2Nw&s',
+        linkUrl: 'https://www.facebook.com/sharer/sharer.php?u=https%3A//dev.worky.cl/',
+        title: 'Facebook' },
     ];
   }
 
@@ -126,6 +129,10 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
     }
     if (data.link) {
       this._router.navigate([data.link]);
+    }
+    if (data.linkUrl) {
+      const newLink = data.linkUrl + '/publication/' + publication._id;
+      window.open(newLink, '_blank');
     }
   }
 

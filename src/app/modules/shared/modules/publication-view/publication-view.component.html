@@ -68,12 +68,12 @@
       <div class="publication-footer-actions-item">
         <worky-dropdown
           icon="share"
+          [title]="'publicationsView.spanShare' | workyTranslations"
           [badge]=false
           (click)="checkDataLink(publication?.author?._id!)"
           [dataLink]="dataShareActions"
           (linkClicked)="handleActionsClicked($event, publication)">
         </worky-dropdown>
-          <span>{{ 'publicationsView.spanShare' | workyTranslations }}</span>
       </div>
 
     </div>

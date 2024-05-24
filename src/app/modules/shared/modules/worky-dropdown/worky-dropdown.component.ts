@@ -19,6 +19,8 @@ export class WorkyDropdownComponent  implements OnInit {
 
   @Input() img?: string | boolean = undefined;
 
+  @Input() title?: string | undefined;
+
   @Output() linkClicked: EventEmitter<DropdownDataLink<any>> = new EventEmitter<DropdownDataLink<any>>();
 
   constructor(private _authService: AuthService) { }
