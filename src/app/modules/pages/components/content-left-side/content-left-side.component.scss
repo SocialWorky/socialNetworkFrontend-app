@@ -1,0 +1,101 @@
+.side-left{
+    
+    width: 100%px;
+    font-family: Arial, sans-serif;
+
+    ::ng-deep worky-avatar {
+        margin: 10px;
+    }
+
+    .user-profile {
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+        }
+        span {
+            font-size: 18px; 
+            font-weight: bold; 
+            color: #333; 
+            margin-left: 0px; 
+        }
+        a {
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #007BFF; 
+            text-decoration: none; 
+            margin-left: 5px; 
+        }
+        a:hover {
+            text-decoration: underline; 
+        }
+        a:first-of-type {
+            margin-left: 0;
+        }
+    }
+
+    .navigation-menu{
+
+        margin: 5px 10px;
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        a {
+            display: block; 
+            text-decoration: none; 
+            padding: 15px 20px;
+        }
+        
+        a:hover {
+            background-color: #82c0fa; 
+        }
+        
+        .material-icons {
+            vertical-align: middle; /* Alinea los iconos con el texto */
+            margin-right: 5px; /* Espacio entre el icono y el texto */
+        }
+    }
+
+    .favorite-friends {
+        
+        margin-top: 20px;
+
+        .amigos h3{
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-left: 0px;
+        }
+
+        ul {
+            list-style-type: none; /* Remueve los estilos de lista */
+            padding: 0;
+            margin: 0;
+            font-family: Arial, sans-serif; /* Fuente de texto */
+
+            li {
+                padding: 10px 15px; /* Espaciado interno */
+            }
+            
+            li:last-child {
+                border-bottom: none; /* Remueve el borde del último elemento */
+            }
+            
+            li a {
+                text-decoration: none; /* Remueve el subrayado de los enlaces */
+                color: #333; /* Color del texto */
+                display: block; /* Hace que el enlace llene el li */
+            }
+            
+            li a:hover {
+                background-color: #c8e6c9; /* Color de fondo al pasar el mouse */
+                color: #33691e; /* Color del texto al pasar el mouse */
+            }
+        }
+    }
+}
