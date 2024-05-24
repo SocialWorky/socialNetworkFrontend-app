@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject, Subscription, firstValueFrom, takeUntil } from 'rxjs';
+import { Subject, Subscription, firstValueFrom, lastValueFrom, takeUntil } from 'rxjs';
 
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
@@ -12,6 +12,7 @@ import { translations } from '@translations/translations';
 import { LocationService } from '@shared/services/location.service';
 import { GeoLocationsService } from '@shared/services/apiGeoLocations.service';
 import { GeocodingService } from '@shared/services/geocoding.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'worky-home',
@@ -24,13 +25,15 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   typePublishing = TypePublishing;
 
-  publications:PublicationView[]= [];
+  publications:PublicationView[] = [];
 
   page = 1;
 
   pageSize = 10;
 
   loaderPublications?: boolean;
+
+  paramPublication?: boolean = false;
 
   private unsubscribe$ = new Subject<void>();
 
@@ -42,7 +45,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _alertService: AlertService,
     private _locationService: LocationService,
     private _geoLocationsService: GeoLocationsService,
-    private _geocodingService: GeocodingService
+    private _geocodingService: GeocodingService,
+    private _activatedRoute: ActivatedRoute,
   ) {
     this.getLocationUser();
   }
@@ -67,6 +71,10 @@ async subscribeToNotificationComment() {
   }
   async ngOnInit() {
     this.loaderPublications = true;
+
+    this.paramPublication = await this.getParamsPublication();
+    if (this.paramPublication) return;
+    
     await this._publicationService.getAllPublications(this.page, this.pageSize);
     this.subscription.add(this._publicationService.publications$.subscribe({
       next: (publicationsData: PublicationView[]) => {
@@ -81,6 +89,31 @@ async subscribeToNotificationComment() {
     );
     this.subscribeToNotificationComment();
   }
+
+  private async getParamsPublication(): Promise<boolean> {
+    let result = false;
+
+    const _idPublication = this._activatedRoute.snapshot.paramMap.get('_idPublication');
+
+    if (_idPublication) {
+      try {
+        const publication = await lastValueFrom(this._publicationService.getPublicationId(_idPublication));
+        if (publication.length) {
+          this.loaderPublications = false;
+          this.publications = publication;
+          this._cdr.markForCheck();
+          result = true;
+        } else {
+          result = false;
+        }
+      } catch (error) {
+        console.error('Error al obtener la publicación', error);
+      }
+    }
+
+    return result;
+  }
+
 
   private async getLocationUser() {
     const [latitude, longitude] = await this._locationService.getUserLocation();

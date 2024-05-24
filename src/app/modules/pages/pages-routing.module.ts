@@ -10,6 +10,7 @@ const routes: Routes = [
     component: LoyautComponent ,
     children: [
       { path: '', component: HomeComponent, pathMatch: 'full'  },
+      { path: 'publication/:_idPublication', component: HomeComponent, pathMatch: 'full'},
       { path: 'profile', component: ProfilesComponent, pathMatch: 'full' },
       { path: '**', redirectTo: '', pathMatch: 'full' }
     ],

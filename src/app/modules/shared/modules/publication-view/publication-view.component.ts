@@ -9,6 +9,7 @@ import { DropdownDataLink } from '../worky-dropdown/interfaces/dataLink.interfac
 import { AuthService } from '@auth/services/auth.service';
 import { RoleUser } from '@auth/models/roleUser.enum';
 import { PublicationService } from '@shared/services/publication.service';
+import { environment } from '@env/environment';
 @Component({
   selector: 'worky-publication-view',
   templateUrl: './publication-view.component.html',
@@ -90,11 +91,29 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
   }
 
     menuShareActions() {
+    //const url = environment.BASE_URL;
+    const url = 'https://dev.worky.cl';
     this.dataShareActions = [
       { 
-        img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYdHPO0e7gXNrGZgpxf9ugCFtGMAS7zq1ytG56vSe2Nw&s',
-        linkUrl: 'https://www.facebook.com/sharer/sharer.php?u=https%3A//dev.worky.cl/',
-        title: 'Facebook' },
+        img:'assets/img/logos/facebook.svg',
+        linkUrl: `https://web.facebook.com/sharer.php?u=${url}`,
+        title: 'Facebook'
+      },
+      {
+        img:'assets/img/logos/twitter_x.svg',
+        linkUrl: `https://twitter.com/intent/tweet?url=${url}`,
+        title: 'Twitter'
+      },
+      {
+        img:'assets/img/logos/linkedin.svg',
+        linkUrl: `https://www.linkedin.com/shareArticle?url=${url}`,
+        title: 'Linkedin'
+      },
+      {
+        img:'assets/img/logos/whatsapp.svg',
+        linkUrl: `whatsapp://send?text=${url}`,
+        title: 'Whatsapp'
+      },
     ];
   }
 
