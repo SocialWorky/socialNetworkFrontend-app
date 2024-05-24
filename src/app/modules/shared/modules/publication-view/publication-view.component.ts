@@ -91,8 +91,7 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
   }
 
     menuShareActions() {
-    //const url = environment.BASE_URL;
-    const url = 'https://dev.worky.cl';
+    const url = environment.BASE_URL;
     this.dataShareActions = [
       { 
         img:'assets/img/logos/facebook.svg',
