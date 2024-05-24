@@ -1,7 +1,8 @@
 .side-left{
-    
     width: 100%px;
     font-family: Arial, sans-serif;
+    position: static;
+    top: 10px;
 
     ::ng-deep worky-avatar {
         margin: 10px;

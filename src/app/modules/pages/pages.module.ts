@@ -17,6 +17,7 @@ import { WorkyAvatarModule } from '../shared/worky-avatar/worky-avatar.module';
 import { AddPublicationModule } from '../shared/addPublication/addPublication.module';
 import { WorkyWidgetModule } from 'src/app/modules/shared/worky-widget/worky-widget.module';
 import { PublicationViewModule } from '../shared/publication-view/publication-view.module';
+import { SuggestedFriendsModule } from '../shared/suggested-friends/suggested-friends.module';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { PublicationViewModule } from '../shared/publication-view/publication-vi
     WorkyAvatarModule,
     AddPublicationModule,
     WorkyWidgetModule,
-    PublicationViewModule
+    PublicationViewModule,
+    SuggestedFriendsModule
   ]
 })
 export class PagesModule { }
