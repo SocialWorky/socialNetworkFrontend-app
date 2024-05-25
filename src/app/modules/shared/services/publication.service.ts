@@ -38,6 +38,12 @@ export class PublicationService {
     return this.http.post(url, post, { headers });
   }
 
+  getPublicationId(id: string): Observable<PublicationView[]> {
+    const url = `${this.baseUrl}/publications/${id}`;
+    const headers = this.getHeaders();
+    return this.http.get<PublicationView[]>(url, { headers });
+  }
+
   deletePublication(id: string) {
     const url = `${this.baseUrl}/publications/delete/${id}`;
     const headers = this.getHeaders();

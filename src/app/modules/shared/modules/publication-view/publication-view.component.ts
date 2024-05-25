@@ -9,6 +9,7 @@ import { DropdownDataLink } from '../worky-dropdown/interfaces/dataLink.interfac
 import { AuthService } from '@auth/services/auth.service';
 import { RoleUser } from '@auth/models/roleUser.enum';
 import { PublicationService } from '@shared/services/publication.service';
+import { environment } from '@env/environment';
 @Component({
   selector: 'worky-publication-view',
   templateUrl: './publication-view.component.html',
@@ -23,6 +24,8 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
   typePublishing = TypePublishing;
 
   dataLinkActions:DropdownDataLink<any>[] = [];
+
+  dataShareActions:DropdownDataLink<any>[] = [];
 
   viewCommentSection: number | null = null;
 
@@ -43,6 +46,7 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
   // eslint-disable-next-line @angular-eslint/no-empty-lifecycle-method
   ngOnInit() {
     this.menuActions();
+    this.menuShareActions();
     this._cdr.markForCheck();
   }
 
@@ -86,6 +90,32 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
     ];
   }
 
+    menuShareActions() {
+    const url = environment.BASE_URL;
+    this.dataShareActions = [
+      { 
+        img:'assets/img/logos/facebook.svg',
+        linkUrl: `https://web.facebook.com/sharer.php?u=${url}`,
+        title: 'Facebook'
+      },
+      {
+        img:'assets/img/logos/twitter_x.svg',
+        linkUrl: `https://twitter.com/intent/tweet?url=${url}`,
+        title: 'Twitter'
+      },
+      {
+        img:'assets/img/logos/linkedin.svg',
+        linkUrl: `https://www.linkedin.com/shareArticle?url=${url}`,
+        title: 'Linkedin'
+      },
+      {
+        img:'assets/img/logos/whatsapp.svg',
+        linkUrl: `whatsapp://send?text=${url}`,
+        title: 'Whatsapp'
+      },
+    ];
+  }
+
   async deletePublications(publication: PublicationView) {
 
     const loadingComment = await this._loadingCtrl.create({
@@ -117,6 +147,10 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
     }
     if (data.link) {
       this._router.navigate([data.link]);
+    }
+    if (data.linkUrl) {
+      const newLink = data.linkUrl + '/publication/' + publication._id;
+      window.open(newLink, '_blank');
     }
   }
 

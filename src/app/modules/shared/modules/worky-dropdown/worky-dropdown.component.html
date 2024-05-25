@@ -20,12 +20,17 @@
     </span>
   </ng-container>
 
+  <span *ngIf="title" class="title-dropdown">{{ title }}</span>
+
 </div>
 
 <div *ngIf="dataLink?.length"
   class="dropdown-menu dropdown-menu-end">
     <div class="content-dropdow" *ngFor="let data of dataLink; let dataIndex = index;">
       <span *ngIf="data.icon" class="material-icons" >{{ data.icon }}</span>
+      <span *ngIf="data.img" class="icon-img-dropdown">
+        <img src="{{ data.img }}" loading="lazy"/>
+      </span>
       <span (click)="handleMenuItemClick(data)">
          {{ data.title }}
       </span>

@@ -58,6 +58,13 @@
           color: colors.$worky-color-blue;
           background-color: colors.$worky-color-greyLight;
         }
+
+        ::ng-deep worky-dropdown {
+          .dropdown-menu {
+            inset: 7px -26px auto auto!important;
+          }
+        }
+
       }
       @include breakpoints.below-sm {
         justify-content: center;

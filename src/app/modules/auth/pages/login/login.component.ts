@@ -63,7 +63,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.checkSessionGoogle();
-    this._activatedRoute.paramMap.subscribe(params => {
+     this.subscription.add(this._activatedRoute.paramMap.subscribe(params => {
       const tokenPassword = params.get('tokenPassword');
       const token = params.get('token');
       if (token) {
@@ -72,7 +72,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       if (tokenPassword) {
         this.openResetPasswordModal(tokenPassword);
       }
-    });
+    }));
 
     this.loginForm = this._formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
