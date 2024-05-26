@@ -1,0 +1,43 @@
+
+::ng-deep worky-avatar {
+    margin: 10px;
+}
+
+.content-side-left {
+    width: 100%;
+    margin: 12px 5px;
+    display: flex;
+    position: sticky;
+    top: 0px;
+    flex-direction: column;
+    align-items: baseline;
+
+    .profile-info {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #5555FF;
+        margin: 10px;
+    }
+
+    .sidebar-icon {
+        display: flex;
+        align-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        margin-bottom: 1rem;
+        color: #9ca3af;
+        transition: color 0.3s, transform 0.3s; /* Agrega la transición para el zoom */
+        text-decoration: none;
+
+        &:hover {
+            color: #4b5563; /* Cambia el color al pasar el cursor sobre el icono */
+            transform: scale(1.5); /* Aplica un zoom del 10% al icono */
+        }
+    }
+
+    .sidebar-text {
+        margin-left: 1rem;
+        text-decoration: none;
+    }
+}
+

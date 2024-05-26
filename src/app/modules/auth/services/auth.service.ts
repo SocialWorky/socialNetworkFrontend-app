@@ -9,6 +9,9 @@ import { Token } from '../../shared/interfaces/token.interface';
   providedIn: 'root'
 })
 export class AuthService {
+  getUserName(): string {
+    throw new Error('Method not implemented.');
+  }
 
   constructor(
     private router: Router,

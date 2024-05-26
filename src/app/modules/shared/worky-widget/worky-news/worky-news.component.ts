@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-
 import { NewsService } from './service/apiNews';
 import { NewsArticle } from './interface/dataNews.interface';
 
@@ -18,5 +17,5 @@ export class WorkyNewsComponent implements OnInit {
       console.log('Response from API:', response);
       this.articles = response.articles;
     });
-  }     
+  }
 }
