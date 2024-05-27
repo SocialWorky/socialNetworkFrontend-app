@@ -1,0 +1,38 @@
+/* Colors */
+$worky-color-navy: #113355;
+$worky-color-yellow: #FFCF00;
+$worky-color-yellow-text: #FFEE00;
+$worky-color-green: #33CC44;
+$worky-color-radium: #11DD66;
+$worky-color-teal: #11BB99;
+$worky-color-cyan: #22BBDD;
+$worky-color-blue: #2288EE;
+$worky-color-indigo: #5555FF;
+$worky-color-purple: #AA33FF;
+$worky-color-fuchsia: #FF33BB;
+$worky-color-magenta: #FF3366;
+$worky-color-red: #FF3333;
+
+$worky-color-light: #FFFFFF;
+$worky-color-greyLight: #f8f9fa;
+$worky-color-grey: #E4E6EB;
+/* Exportar variables SCSS como variables CSS */
+:root {
+  --worky-color-navy: #{$worky-color-navy};
+  --worky-color-yellow: #{$worky-color-yellow};
+  --worky-color-yellow-text: #{$worky-color-yellow-text};
+  --worky-color-green: #{$worky-color-green};
+  --worky-color-radium: #{$worky-color-radium};
+  --worky-color-teal: #{$worky-color-teal};
+  --worky-color-cyan: #{$worky-color-cyan};
+  --worky-color-blue: #{$worky-color-blue};
+  --worky-color-indigo: #{$worky-color-indigo};
+  --worky-color-purple: #{$worky-color-purple};
+  --worky-color-fuchsia: #{$worky-color-fuchsia};
+  --worky-color-magenta: #{$worky-color-magenta};
+  --worky-color-red: #{$worky-color-red};
+
+  --worky-color-light: #{$worky-color-light};
+  --worky-color-greyLight: #{$worky-color-greyLight};
+  --worky-color-grey: #{$worky-color-grey};
+}
