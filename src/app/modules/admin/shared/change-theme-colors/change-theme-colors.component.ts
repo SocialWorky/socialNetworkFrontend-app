@@ -45,7 +45,6 @@ export class ChangeThemeColorsComponent implements OnInit {
         this.changeColor(variable, theme[variable]);
       });
     });
-    //this._cdr.markForCheck();
   }
 
   async changeColor(variable: string, color: string) {

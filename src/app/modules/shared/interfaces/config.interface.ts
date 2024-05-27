@@ -1,6 +1,6 @@
 export interface Config {
   logoUrl?: string;
   title?: string;
-  themeColors?: string; // JSON string
+  themeColors?: string;
   privacyPolicy?: string;
 }
