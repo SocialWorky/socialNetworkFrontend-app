@@ -19,7 +19,7 @@ export class GeocodingService {
 
   getGeocodeCity(city: string): Observable<any> {
     const apiKey = environment.OPENCAGEAPIKEY;
-    const url = `${this.apiUrl}?q=${city}&key=${apiKey}&countrycode=cl&language=&roadinfo=1`;
+    const url = `${this.apiUrl}?q=${city}&key=${apiKey}&countrycode=cl&language=es&roadinfo=1&limit=25`;
     return this.http.get<any>(url);
   }
 }
