@@ -13,10 +13,18 @@
     }
 
     .user-name-content {
-      span {
-        font-size: 1.2rem;
-        font-weight: 600;
+      .name {
+        font-size: 1rem;
+        font-weight: 500;
         color: color.$worky-color-indigo;
+      }
+
+      .geoLocationName {
+        font-size: 0.8rem;
+        color: color.$worky-color-navy;
+        span {
+          font-weight: 700;
+        }
       }
 
       .form-select {
@@ -91,7 +99,23 @@
 
     .extra-content {
       display: flex;
+      align-items: center;
       justify-content: flex-end;
+      margin: 5px;
+      gap: 2px;
+      padding: 5px;
+      border: 1px solid color.$worky-color-greyLight;
+      border-radius: 8px;
+
+      .extra-content-item {
+        display: flex;
+        border-radius: 50%;
+        padding: 2px;
+        &:hover {
+          background: color.$worky-color-greyLight;
+        }
+      }
+
       .emoji-icon {
         color: color.$worky-color-grey;
         font-size: 24px;
@@ -108,6 +132,16 @@
         max-height: 300px;
         overflow-y: auto;
       }
+
+      .location-on {
+        color: map-get(color.$worky-red, 56);
+        font-size: 20px;
+        cursor: pointer;
+        :hover {
+          color: map-get(color.$worky-red, 9);
+        }
+      }
+
     }
   }
 

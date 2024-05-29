@@ -8,6 +8,7 @@ import { TranslationsModule } from '../translations/translations.module';
 import { WorkyButtonsModule } from '../buttons/buttons.module';
 import { AddPublicationComponent } from './addPublication.component';
 import { WorkyAvatarModule } from '../worky-avatar/worky-avatar.module';
+import { LocationSearchModule } from '../location-search/location-search.module';
 
 
 @NgModule({
@@ -21,7 +22,8 @@ import { WorkyAvatarModule } from '../worky-avatar/worky-avatar.module';
     WorkyButtonsModule,
     PickerComponent,
     ReactiveFormsModule,
-    WorkyAvatarModule
+    WorkyAvatarModule,
+    LocationSearchModule
   ],
   exports: [
     AddPublicationComponent,

@@ -1,6 +1,9 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
+import { MatDialog } from '@angular/material/dialog';
+
+
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { AuthService } from '@auth/services/auth.service';
 import { PublicationService } from '@shared/services/publication.service';
@@ -12,6 +15,8 @@ import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { CreateComment} from '@shared/interfaces/addComment.interface';
 import { NotificationCommentService } from '@shared/services/notificationComment.service';
+import { LocationSearchComponent } from '../location-search/location-search.component';
+import { ExtraData } from '@shared/modules/addPublication/interfaces/createPost.interface';
 
 @Component({
   selector: 'worky-add-publication',
@@ -24,6 +29,10 @@ export class AddPublicationComponent  implements OnInit {
   WorkyButtonTheme = WorkyButtonTheme;
 
   userName: string = '';
+
+  nameGeoLocation: string = '';
+
+  dataGeoLocation: string = '';
 
   showEmojiMenu = false;
 
@@ -43,6 +52,7 @@ export class AddPublicationComponent  implements OnInit {
     content: ['', [Validators.required, Validators.minLength(1)]],
     privacy: [''],
     authorId: [''],
+    extraData: [''],
    });
 
   @Input() type: TypePublishing | undefined;
@@ -61,6 +71,8 @@ export class AddPublicationComponent  implements OnInit {
       private _alertService: AlertService,
       private _loadingCtrl: LoadingController,
       private _notificationCommentService: NotificationCommentService,
+      private _dialog: MatDialog,
+      private _cdr: ChangeDetectorRef,
     ) { 
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
@@ -163,6 +175,20 @@ export class AddPublicationComponent  implements OnInit {
 
     loadingPublications.present();
 
+    const extraData: ExtraData = {
+      locations: {
+        title: this.nameGeoLocation,
+        urlMap: this.dataGeoLocation,
+      }
+    };
+
+    if (this.nameGeoLocation !== '' || this.dataGeoLocation !== '') {
+      console.log('extraData', JSON.stringify(extraData));
+      this.myForm.controls['extraData'].setValue(JSON.stringify(extraData));
+      console.log('extraData', this.myForm.controls['extraData'].value);
+      console.log('myFrom: ', this.myForm.value);
+    }
+
     this._publicationService.createPost(this.myForm.value).subscribe({
       next: async (message: any) => {
         const publicationsNew = await this._publicationService.publicationsSubject.getValue();
@@ -218,6 +244,24 @@ export class AddPublicationComponent  implements OnInit {
       this.privacyFront = `<i class="material-icons">lock</i> ${translations['publishing.privacy-private']} <i class="material-icons">arrow_drop_down</i>`;
     }
 
+  }
+
+openLocationSearch() {
+    const dialogRef = this._dialog.open(LocationSearchComponent, {
+      width: '400px',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const lat = result.geometry?.lat ? result.geometry.lat : result.lat;
+        const lng = result.geometry?.lng ? result.geometry.lng : result.lng;
+
+        const urlMap = 'https://www.google.com/maps/place/' + result.formatted.split(',')[0] + '/@' + lat + ',' + lng + ',15z';
+        this.dataGeoLocation = urlMap;
+        this.nameGeoLocation = result.formatted.split(',')[0];
+        this._cdr.markForCheck();
+      }
+    });
   }
 
 }

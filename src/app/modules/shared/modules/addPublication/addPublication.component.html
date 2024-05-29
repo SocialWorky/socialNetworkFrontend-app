@@ -4,8 +4,10 @@
       <worky-avatar [size]="60" *ngIf="type === typePublishing.POST"></worky-avatar>
 
       <div class="user-name-content" *ngIf="type !== typePublishing.COMMENT">
-        <span>{{ userName }}</span>
-
+        <div>
+          <span class="name"> {{ userName }} </span>
+          <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> está en <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span> 
+        </div>
         <div class="dropdown">
           <div class="form-select" [innerHTML]="privacyFront"
             data-bs-toggle="dropdown"
@@ -55,7 +57,15 @@
       </div>
 
       <div class="extra-content">
-        <div class="emoji-icon">
+
+        <div *ngIf="type === typePublishing.POST"
+             class="extra-content-item location-on"
+             matTooltip="Estoy Aquí"
+             (click)="openLocationSearch()">
+          <i class="material-icons">location_on</i>
+        </div>
+
+        <div class="extra-content-item emoji-icon" matTooltip="Agrega Emoji">
           <i class="material-icons" (click)="toggleEmojiMenu()">mood</i>
           <div *ngIf="showEmojiMenu" class="emoji-menu" (click)="preventClose($event)">
             <emoji-mart
@@ -68,6 +78,8 @@
             </emoji-mart>
           </div>
         </div>
+
+
       </div>
 
     </div>
