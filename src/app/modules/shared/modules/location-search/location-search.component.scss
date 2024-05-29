@@ -3,26 +3,33 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
 .worky-search {
-    width: 100%;
-    padding: 5px 15px;
-    align-content: center;
-    padding: 15px;
-    .search-container {
+  width: 100%;
+  padding: 5px 15px;
+  align-content: center;
+  padding: 15px;
+  .search-container {
     position: relative;
-    }
+  }
 
-    .search-icon {
+  .search-icon {
     position: absolute;
     color: colors.$worky-color-app-dark;
     left: 8px;
     top: 50%;
     transform: translateY(-50%);
     z-index: 1;
-    }
-    .form-control {
-    padding-left: 40px;
+  }
+  .form-control-search {
+    width: 100%;
+    padding: 5px 40px;
     border-radius: variables.$worky-border-radius-medium;
+    border: 1px solid colors.$worky-color-greyLight;
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: none;
     }
+   }
 }
 
 .location-search-results {

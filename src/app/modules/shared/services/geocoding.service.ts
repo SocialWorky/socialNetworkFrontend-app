@@ -13,13 +13,13 @@ export class GeocodingService {
 
   getGeocodeLatAndLng(lat: number, lng: number): Observable<any> {
     const apiKey = environment.OPENCAGEAPIKEY;
-    const url = `${this.apiUrl}?q=${lat},${lng}&key=${apiKey}`;
+    const url = `${this.apiUrl}?q=${lat},${lng}&key=${apiKey}&countrycode=cl&language=es`;
     return this.http.get<any>(url);
   }
 
   getGeocodeCity(city: string): Observable<any> {
     const apiKey = environment.OPENCAGEAPIKEY;
-    const url = `${this.apiUrl}?q=${city}&key=${apiKey}`;
+    const url = `${this.apiUrl}?q=${city}&key=${apiKey}&countrycode=cl&language=&roadinfo=1`;
     return this.http.get<any>(url);
   }
 }

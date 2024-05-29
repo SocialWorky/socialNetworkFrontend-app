@@ -5,13 +5,15 @@
       <div class="search-container">
         <span class="material-icons search-icon">search</span>
         <input
-          type="search"
-          class="form-control"
+          type="text"
+          class="form-control-search"
           placeholder="Search"
           [(ngModel)]="searchTerm"
           (input)="onInputChange($event)"
           (keydown)="onKeydown($event)"
           name="searchTerm"
+          autocomplete="off"
+          title=""
         />
       </div>
     </form>

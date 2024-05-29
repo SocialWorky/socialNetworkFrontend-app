@@ -59,7 +59,6 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
       this.nameGeoLocation = extraData.locations?.title || '';
       this.urrMap = extraData.locations?.urlMap || '';
     }
-    console.log('NameGEO: ', this.nameGeoLocation);
     this._cdr.markForCheck();
   }
 

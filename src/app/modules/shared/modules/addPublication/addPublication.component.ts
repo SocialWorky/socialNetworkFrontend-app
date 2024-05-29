@@ -183,10 +183,7 @@ export class AddPublicationComponent  implements OnInit {
     };
 
     if (this.nameGeoLocation !== '' || this.dataGeoLocation !== '') {
-      console.log('extraData', JSON.stringify(extraData));
       this.myForm.controls['extraData'].setValue(JSON.stringify(extraData));
-      console.log('extraData', this.myForm.controls['extraData'].value);
-      console.log('myFrom: ', this.myForm.value);
     }
 
     this._publicationService.createPost(this.myForm.value).subscribe({
@@ -256,7 +253,8 @@ openLocationSearch() {
         const lat = result.geometry?.lat ? result.geometry.lat : result.lat;
         const lng = result.geometry?.lng ? result.geometry.lng : result.lng;
 
-        const urlMap = 'https://www.google.com/maps/place/' + result.formatted.split(',')[0] + '/@' + lat + ',' + lng + ',15z';
+        //const urlMap = 'https://www.google.com/maps/place/' + result.formatted.split(',')[0];
+        const urlMap = `https://www.google.com/maps/?q=${result.formatted}&ll=${lat},${lng}`;
         this.dataGeoLocation = urlMap;
         this.nameGeoLocation = result.formatted.split(',')[0];
         this._cdr.markForCheck();

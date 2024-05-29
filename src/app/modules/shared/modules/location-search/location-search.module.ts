@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MaterialModule } from '../material/material.module';
+// import { MaterialModule } from '../material/material.module';
 import { LocationSearchComponent } from './location-search.component';
 
 
@@ -12,7 +12,7 @@ import { LocationSearchComponent } from './location-search.component';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    MaterialModule
+    //MaterialModule
   ],
   exports: [LocationSearchComponent]
 })
