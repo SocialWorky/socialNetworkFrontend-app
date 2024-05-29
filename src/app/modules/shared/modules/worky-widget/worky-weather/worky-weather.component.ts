@@ -107,11 +107,18 @@ export class WeatherComponent implements OnInit, OnDestroy {
     }
     this._cdr.markForCheck();
 
+
     this.timeSubscription = interval(1000).subscribe(() => {
-      this.localTime = new Date();
-      this.currentHour = this.localTime.getHours();
-      this._cdr.markForCheck();
+
+        const oldMinute = this.localTime.getMinutes();
+
+        if (this.localTime.getMinutes() === oldMinute) return;
+
+        this.localTime = new Date();
+        this.currentHour = this.localTime.getHours();
+        this._cdr.markForCheck()
     });
+
   }
 
   async setCityFromCoordinates(latitude: number, longitude: number): Promise<void> {

@@ -9,7 +9,8 @@
 
     <div class="publication-header-content">
       <div class="user-name-content">
-        <span>{{ publication?.author?.name }} {{ publication?.author?.lastName }}</span>
+        <span class="name">{{ publication?.author?.name }} {{ publication?.author?.lastName }}</span>
+        <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> está en <a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
       </div>
       <div class="publication-date">
         <span>{{ publication?.createdAt! | workyRelativeTime }}</span>

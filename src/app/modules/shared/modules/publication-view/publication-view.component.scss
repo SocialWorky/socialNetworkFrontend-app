@@ -8,6 +8,20 @@
     align-items: center;
     gap: 1rem;
     .publication-header-content {
+      .user-name-content {
+        .name {
+          font-size: variables.$worky-font-size-5;
+          color: colors.$worky-color-navy;
+         }
+        .geoLocationName {
+          font-size: variables.$worky-font-size-3;
+          color: colors.$worky-color-navy;
+          .urlLink {
+            color: colors.$worky-color-blue;
+            font-weight: 500;
+          }
+        }
+      }
       .publication-date {
         font-size: variables.$worky-font-size-0;
         color: colors.$worky-color-navy;

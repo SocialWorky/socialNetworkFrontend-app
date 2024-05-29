@@ -47,6 +47,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
     this.notifications = 2;
     this.messages = 1;
+    this.checkAdminDataLink();
   }
 
   ngOnDestroy() {
@@ -57,6 +58,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   logoutUser() {
    this._authService.logout();
+  }
+
+  checkAdminDataLink() {
+    const dataUser = this._authService.getDecodedToken();
+    const link = { icon: 'settings', link: '/admin',  title: 'Administración'}
+
+    if (dataUser && dataUser.role === 'admin') {
+      this.dataLinkProfile.push(link);
+    }
   }
 
   search(event: Event) {

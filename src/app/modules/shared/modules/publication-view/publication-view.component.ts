@@ -10,6 +10,7 @@ import { AuthService } from '@auth/services/auth.service';
 import { RoleUser } from '@auth/models/roleUser.enum';
 import { PublicationService } from '@shared/services/publication.service';
 import { environment } from '@env/environment';
+import { ExtraData } from '../addPublication/interfaces/createPost.interface';
 @Component({
   selector: 'worky-publication-view',
   templateUrl: './publication-view.component.html',
@@ -31,6 +32,12 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
 
   viewComments: number | null = null;
 
+  nameGeoLocation: string = '';
+
+  urrMap: string = '';
+
+  extraData: string[] = [];
+
   dataUser = this._authService.getDecodedToken();
 
   private subscription: Subscription = new Subscription();
@@ -47,6 +54,12 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
   ngOnInit() {
     this.menuActions();
     this.menuShareActions();
+    const extraData = JSON.parse(this.publication?.extraData as any);
+    if (extraData) {
+      this.nameGeoLocation = extraData.locations?.title || '';
+      this.urrMap = extraData.locations?.urlMap || '';
+    }
+    console.log('NameGEO: ', this.nameGeoLocation);
     this._cdr.markForCheck();
   }
 

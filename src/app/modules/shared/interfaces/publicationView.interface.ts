@@ -1,7 +1,10 @@
+import { ExtraData } from '../modules/addPublication/interfaces/createPost.interface';
+
 export interface PublicationView {
     _id:         string;
     content:     string;
     privacy:     string;
+    extraData:   ExtraData;
     createdAt:   Date;
     updatedAt:   Date;
     author:      Author;
