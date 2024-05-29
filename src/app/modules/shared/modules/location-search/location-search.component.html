@@ -1,0 +1,26 @@
+<div class="location-search">
+    <form 
+      class="worky-search"
+      (ngSubmit)="search($event)">
+      <div class="search-container">
+        <span class="material-icons search-icon">search</span>
+        <input
+          type="search"
+          class="form-control"
+          placeholder="Search"
+          [(ngModel)]="searchTerm"
+          (input)="onInputChange($event)"
+          (keydown)="onKeydown($event)"
+          name="searchTerm"
+        />
+      </div>
+    </form>
+
+    <div class="location-search-results" *ngIf="searchTerm.length > 0">
+      <div class="location-search-result" *ngFor="let location of listLocationsSearch" (click)="selectLocation(location)">
+        <span class="material-icons">place</span>
+        <span>{{ location?.formatted }}</span>
+      </div>
+
+  </div>
+

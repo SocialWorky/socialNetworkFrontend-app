@@ -1,0 +1,38 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.worky-search {
+    width: 100%;
+    padding: 5px 15px;
+    align-content: center;
+    padding: 15px;
+    .search-container {
+    position: relative;
+    }
+
+    .search-icon {
+    position: absolute;
+    color: colors.$worky-color-app-dark;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    }
+    .form-control {
+    padding-left: 40px;
+    border-radius: variables.$worky-border-radius-medium;
+    }
+}
+
+.location-search-results {
+  .location-search-result {
+    display: flex;
+    padding: 10px;
+    cursor: pointer;
+    &:hover {
+      color: colors.$worky-color-light;
+      background-color: colors.$worky-background-header-color;
+    }
+  }
+}
