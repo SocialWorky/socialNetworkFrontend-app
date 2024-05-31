@@ -54,11 +54,7 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
   ngOnInit() {
     this.menuActions();
     this.menuShareActions();
-    const extraData = JSON.parse(this.publication?.extraData as any);
-    if (extraData) {
-      this.nameGeoLocation = extraData.locations?.title || '';
-      this.urrMap = extraData.locations?.urlMap || '';
-    }
+    this.extraDataPublication();
     this._cdr.markForCheck();
   }
 
@@ -67,6 +63,22 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
       this.subscription.unsubscribe();
     }
   }
+
+  extraDataPublication() {
+
+  try {
+    const extraData = this.publication?.extraData ? JSON.parse(this.publication?.extraData as any ) : {};
+    if (extraData) {
+      this.nameGeoLocation = extraData.locations?.title || '';
+      this.urrMap = extraData.locations?.urlMap || '';
+    }
+  } catch (e) {
+    console.error('Error in file JSON: ', e);
+    this.nameGeoLocation = '';
+    this.urrMap = '';
+  }
+
+ }
 
   commentOn(index: number) {
     if (this.viewCommentSection === index) {
