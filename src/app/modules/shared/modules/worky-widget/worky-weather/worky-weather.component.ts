@@ -21,6 +21,8 @@ export class WeatherComponent implements OnInit, OnDestroy {
 
   localTime: Date;
 
+  oldHour: number = 0;
+
   currentHour: number = 0;
 
   i = 0;
@@ -105,16 +107,18 @@ export class WeatherComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       }
     }
-    this._cdr.markForCheck();
 
+    this.oldHour = this.localTime.getHours();
+
+    this._cdr.markForCheck();
 
     this.timeSubscription = interval(1000).subscribe(() => {
 
-        const oldMinute = this.localTime.getMinutes();
+        this.localTime = new Date();        
+        this._cdr.markForCheck()
 
-        if (this.localTime.getMinutes() === oldMinute) return;
-
-        this.localTime = new Date();
+        if (this.localTime.getHours() === this.oldHour) return;
+        this.oldHour = this.localTime.getHours();
         this.currentHour = this.localTime.getHours();
         this._cdr.markForCheck()
     });
@@ -229,7 +233,6 @@ export class WeatherComponent implements OnInit, OnDestroy {
   }
 
   getWeatherIconUrl(iconUrl: string): string {
-    const timestamp = new Date().getTime();
-    return `${iconUrl}?_=${timestamp}`;
+    return `${iconUrl}?_=${this.oldHour}`;
   }
 }
