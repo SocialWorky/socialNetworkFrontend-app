@@ -77,6 +77,15 @@
           .dropdown-menu {
             inset: 7px -26px auto auto!important;
           }
+          .nav-link {
+            span {
+              color: colors.$worky-color-navy;
+            }
+            &:hover span {
+              color: colors.$worky-color-blue;
+            }
+          }
+
         }
 
       }
