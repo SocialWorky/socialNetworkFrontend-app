@@ -4,6 +4,7 @@
 
 
 .publishing-container {
+  padding: 16px;
   .publishing-header {
     display: flex;
     align-items: center;
@@ -97,6 +98,39 @@
       }
     }
 
+    .previews {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .preview {
+      position: relative;
+      margin: 10px;
+      width: 100px;
+      height: 100px;
+      overflow: hidden;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .remove-button {
+      position: absolute;
+      cursor: pointer;
+      top: 5px;
+      right: 5px;
+      color: red;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+    }
+
+
     .extra-content {
       display: flex;
       align-items: center;
@@ -139,6 +173,15 @@
         cursor: pointer;
         :hover {
           color: map-get(color.$worky-red, 9);
+        }
+      }
+
+      .file-upload {
+        color: map-get(color.$worky-green, 56);
+        font-size: 24px;
+        cursor: pointer;
+        :hover {
+          color: map-get(color.$worky-green, 9);
         }
       }
 

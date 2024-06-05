@@ -17,6 +17,10 @@ import { CreateComment} from '@shared/interfaces/addComment.interface';
 import { NotificationCommentService } from '@shared/services/notificationComment.service';
 import { LocationSearchComponent } from '../location-search/location-search.component';
 import { ExtraData } from '@shared/modules/addPublication/interfaces/createPost.interface';
+import { ImageUploadModalComponent } from '../image-upload-modal/image-upload-modal.component';
+import { FileUploadService } from '@shared/services/file-upload.service';
+import { Subject, lastValueFrom, takeUntil } from 'rxjs';
+import { MediaFileUpload } from '@shared/interfaces/publicationView.interface';
 
 @Component({
   selector: 'worky-add-publication',
@@ -38,6 +42,10 @@ export class AddPublicationComponent  implements OnInit {
 
   privacyFront: string = '';
 
+  previews: { url: string, type: string }[] = [];
+
+  selectedFiles: File[] = [];
+
   privacy: TypePrivacy = TypePrivacy.PUBLIC;
 
   typePrivacy = TypePrivacy;
@@ -54,6 +62,8 @@ export class AddPublicationComponent  implements OnInit {
     authorId: [''],
     extraData: [''],
    });
+
+  private unsubscribe$ = new Subject<void>();
 
   @Input() type: TypePublishing | undefined;
 
@@ -73,6 +83,7 @@ export class AddPublicationComponent  implements OnInit {
       private _notificationCommentService: NotificationCommentService,
       private _dialog: MatDialog,
       private _cdr: ChangeDetectorRef,
+      private _fileUploadService: FileUploadService,
     ) { 
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
@@ -125,7 +136,7 @@ export class AddPublicationComponent  implements OnInit {
       message: translations['addPublication.loadingCommentMessage'],
     });
 
-    loadingComment.present();
+    await loadingComment.present();
 
     const dataComment: CreateComment = {
       content: this.myForm.controls['content'].value,
@@ -133,36 +144,60 @@ export class AddPublicationComponent  implements OnInit {
       idPublication: idPublication,
     };
 
-    this._commentService.createComment(dataComment).subscribe({
+    this._commentService.createComment(dataComment).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
-        const publications = await this._publicationService.getAllPublications(1, 10);
-        publications[this.indexPublication!].comment.unshift(message.comment);
-        this._publicationService.publicationsSubject.next(publications);
-
-        if (message.message === 'Comment created successfully') {
-          this.myForm.controls['content'].setValue('');
-          this.autoResize();
-          this._alertService.showAlert(
-            translations['addPublication.alertCreateCommentTitle'],
-            translations['addPublication.alertCreateCommentMessage'],
-            Alerts.SUCCESS,
-            Position.CENTER,
-            true,
-            true,
-            translations['button.ok'],
+        try {
+          const response = await lastValueFrom(
+            this._fileUploadService.uploadFile(this.selectedFiles, 'comments').pipe(takeUntil(this.unsubscribe$))
           );
-          this._notificationCommentService.sendNotificationComment({
-            commentId: message.comment._id,
-            idPublication: idPublication,
-            userEmittedId: this.decodedToken.id,
-            authorPublicationId: publications[this.indexPublication!].author._id,
+          const saveLocation = 'comments/';
+          const saveFilePromises = response.map((file: MediaFileUpload) => {
+            return lastValueFrom(
+              this._fileUploadService.saveUrlFile(
+                saveLocation + file.filename,
+                saveLocation + file.filenameThumbnail,
+                saveLocation + file.filenameCompressed,
+                message.comment._id, TypePublishing.COMMENT).pipe(takeUntil(this.unsubscribe$))
+            );
           });
+
+          await Promise.all(saveFilePromises);
+
+          this.selectedFiles = [];
+          this.previews = [];
+          this._cdr.markForCheck();
+
+          const publications = await this._publicationService.getAllPublications(1, 10);
+          publications[this.indexPublication!].comment.unshift(message.comment);
+          this._publicationService.publicationsSubject.next(publications);
+
+          if (message.message === 'Comment created successfully') {
+            this.myForm.controls['content'].setValue('');
+            this.autoResize();
+            this._alertService.showAlert(
+              translations['addPublication.alertCreateCommentTitle'],
+              translations['addPublication.alertCreateCommentMessage'],
+              Alerts.SUCCESS,
+              Position.CENTER,
+              true,
+              true,
+              translations['button.ok'],
+            );
+            this._notificationCommentService.sendNotificationComment({
+              commentId: message.comment._id,
+              idPublication: idPublication,
+              userEmittedId: this.decodedToken.id,
+              authorPublicationId: publications[this.indexPublication!].author._id,
+            });
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          loadingComment.dismiss();
         }
       },
       error: (error) => {
         console.error(error);
-      },
-      complete: () => {
         loadingComment.dismiss();
       }
     });
@@ -186,33 +221,60 @@ export class AddPublicationComponent  implements OnInit {
       this.myForm.controls['extraData'].setValue(JSON.stringify(extraData));
     }
 
-    this._publicationService.createPost(this.myForm.value).subscribe({
+    this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
-        const publicationsNew = await this._publicationService.publicationsSubject.getValue();
-        publicationsNew.unshift(message.publications);
-        this._publicationService.publicationsSubject.next(publicationsNew);
-
-        if (message.message === 'Publication created successfully') {
-          this.myForm.controls['content'].setValue('');
-          this.autoResize();
-          this._alertService.showAlert(
-            translations['addPublication.alertCreatePublicationTitle'],
-            translations['addPublication.alertCreatePublicationMessage'],
-            Alerts.SUCCESS,
-            Position.CENTER,
-            true,
-            true,
-            translations['button.ok'],
+        console.log('MENSAJE CREADO: ', message);
+        try {
+          const response = await lastValueFrom(
+            this._fileUploadService.uploadFile(this.selectedFiles, 'publications').pipe(takeUntil(this.unsubscribe$))
           );
+
+          const saveFilePromises = response.map((file: MediaFileUpload) => {
+            const saveLocation = 'publications/';
+            return lastValueFrom(
+              this._fileUploadService.saveUrlFile(
+                saveLocation + file.filename,
+                saveLocation + file.filenameThumbnail,
+                saveLocation + file.filenameCompressed,
+                 message.publications._id,
+                 TypePublishing.POST).pipe(takeUntil(this.unsubscribe$))
+            );
+          });
+
+          await Promise.all(saveFilePromises);
+
+          this.selectedFiles = [];
+          this.previews = [];
+          this._cdr.markForCheck();
+
+          const publicationsNew = await this._publicationService.getAllPublications(1, 10);
+          this._publicationService.publicationsSubject.next(publicationsNew);
+
+          if (message.message === 'Publication created successfully') {
+            this.myForm.controls['content'].setValue('');
+            this.autoResize();
+            this._alertService.showAlert(
+              translations['addPublication.alertCreatePublicationTitle'],
+              translations['addPublication.alertCreatePublicationMessage'],
+              Alerts.SUCCESS,
+              Position.CENTER,
+              true,
+              true,
+              translations['button.ok'],
+            );
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          loadingPublications.dismiss();
         }
       },
       error: (error) => {
         console.error(error);
-      },
-      complete: () => {
         loadingPublications.dismiss();
-      }
-    });
+      },
+    });  
+
   }
 
 
@@ -260,6 +322,45 @@ openLocationSearch() {
         this._cdr.markForCheck();
       }
     });
+  }
+
+openUploadModal() {
+  const dialogRef = this._dialog.open(ImageUploadModalComponent, {
+    data: {
+      maxFiles: this.type === TypePublishing.POST ? 10 : 1,
+    }
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      this.selectedFiles = result;
+      this.previews = [];
+      this.selectedFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          const fileType = file.type.split('/')[0];
+          if (fileType === 'image') {
+            this.previews.push({
+              type: 'image',
+              url: e.target.result
+            });
+          } else if (fileType === 'video') {
+            this.previews.push({
+              type: 'video',
+              url: e.target.result
+            });
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  });
+}
+
+
+  removeFile(index: number) {
+    this.selectedFiles.splice(index, 1);
+    this.previews.splice(index, 1);
   }
 
 }

@@ -21,3 +21,9 @@ export interface Author {
     lastName: string;
     avatar:   string;
 }
+
+export interface MediaFileUpload {
+  filename: string;
+  filenameThumbnail: string;
+  filenameCompressed: string;
+}
