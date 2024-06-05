@@ -5,6 +5,7 @@
 .content-publication-view {
   .publication-header {
     display: flex;
+    padding: 16px;
     align-items: center;
     gap: 1rem;
     .publication-header-content {
@@ -35,12 +36,16 @@
   .publication-body {
     margin-top: 1rem;
     margin-bottom: 1rem;
+    .publication-content {
+      padding: 16px;
+    }
   }
 
   .publication-footer {
     .publication-footer-content {
       display: flex;
       justify-content: space-between;
+      padding: 0px 16px 0px 16px;
       .publication-footer-content-item {
         display: flex;
         align-items: center;
@@ -101,6 +106,7 @@
 
   .publication-comment {
     margin-top: 15px;
+    padding: 16px;
     .publication-comment-item {
       display: flex;
       align-items: flex-start;

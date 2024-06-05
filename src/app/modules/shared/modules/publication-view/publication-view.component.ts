@@ -11,6 +11,7 @@ import { RoleUser } from '@auth/models/roleUser.enum';
 import { PublicationService } from '@shared/services/publication.service';
 import { environment } from '@env/environment';
 import { ExtraData } from '../addPublication/interfaces/createPost.interface';
+
 @Component({
   selector: 'worky-publication-view',
   templateUrl: './publication-view.component.html',
@@ -166,7 +167,7 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
   handleActionsClicked(data: DropdownDataLink<any>, publication: any) {
     if (data.function) {
       if (typeof data.function === 'function') {
-        data.function(publication); // Remove the 'publication' parameter from the function call
+        data.function(publication);
       }
     }
     if (data.link) {

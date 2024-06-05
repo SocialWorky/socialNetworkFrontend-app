@@ -35,6 +35,11 @@
     <div class="publication-content">
       <span>{{ publication?.content }}</span>
     </div>
+
+    <worky-image-organizer
+      [images]="publication?.media">
+    </worky-image-organizer>
+
   </div>
 
   <div class="publication-footer">
@@ -101,6 +106,9 @@
         <div class="publication-comment-data">
           <span class="comment-author">{{ comment?.author?.name }} {{ comment?.author?.lastName }}</span>
           <span class="comment-content">{{ comment?.content }}</span>
+              <worky-image-organizer 
+                [images]="comment?.media">
+              </worky-image-organizer>
         </div>
         <span class="comment-date">{{ comment?.createdAt | workyRelativeTime }}</span>
       </div>

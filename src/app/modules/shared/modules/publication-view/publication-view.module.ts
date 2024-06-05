@@ -6,6 +6,7 @@ import { AddPublicationModule } from '../addPublication/addPublication.module';
 import { TranslationsModule } from '../translations/translations.module';
 import { WorkyDropdownModule } from '../worky-dropdown/worky-dropdown.module';
 import { WorkyRelativeTimePipe } from '@shared/pipes/relative-time.pipe';
+import { ImageOrganizerModule } from '../image-organizer/image-organizer.module';
 
 @NgModule({
     declarations: [PublicationViewComponent, WorkyRelativeTimePipe],
@@ -16,6 +17,7 @@ import { WorkyRelativeTimePipe } from '@shared/pipes/relative-time.pipe';
         AddPublicationModule,
         TranslationsModule,
         WorkyDropdownModule,
+        ImageOrganizerModule
     ]
 })
 export class PublicationViewModule { }
