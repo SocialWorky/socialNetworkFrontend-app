@@ -78,6 +78,7 @@ async subscribeToNotificationComment() {
     await this._publicationService.getAllPublications(this.page, this.pageSize);
     this.subscription.add(this._publicationService.publications$.subscribe({
       next: (publicationsData: PublicationView[]) => {
+      console.log('publicationsData', publicationsData);
       this.loaderPublications = false;
       this.publications = publicationsData;
       this._cdr.markForCheck();
