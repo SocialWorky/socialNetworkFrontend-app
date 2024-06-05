@@ -1,0 +1,80 @@
+.upload-file-modal {
+  position: relative;
+  padding: 20px;
+  width: 450px;
+  max-width: 600px;
+  text-align: center;
+
+  .drag-drop-container {
+    height: 280px;
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    background-color: #f8f9fa;
+    position: relative;
+
+    .drag-drop-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .drag-drop-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('../../../../../assets/img/shared/drag-drop-upload-add-file.webp');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.3;
+      z-index: 1;
+    }
+  }
+
+
+}
+  .upload-button {
+    margin: 20px 0;
+  }
+
+  .previews {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .preview {
+    position: relative;
+    margin: 10px;
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .remove-button {
+    position: absolute;
+    cursor: pointer;
+    top: 5px;
+    right: 5px;
+    color: red;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+  }
+
+  .buttons {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 1rem;
+  }
+
