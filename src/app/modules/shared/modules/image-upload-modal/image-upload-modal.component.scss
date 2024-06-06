@@ -1,21 +1,36 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
 .upload-file-modal {
   position: relative;
   padding: 20px;
   width: 450px;
   max-width: 600px;
   text-align: center;
+  @include breakpoints.below-sm {
+    width: 100%;
+  }
 
   .drag-drop-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
     height: 280px;
-    border: 2px dashed #ccc;
+    border: 2px dashed color.$worky-color-grey;
     padding: 20px;
     text-align: center;
-    background-color: #f8f9fa;
+    background-color: color.$worky-color-greyLight;
     position: relative;
 
     .drag-drop-content {
       position: relative;
       z-index: 2;
+      p {
+        margin: 0;
+        @include Fonts.worky-text;
+        color: color.$worky-color-navy;
+      }
     }
 
     .drag-drop-background {
@@ -50,7 +65,7 @@
     width: 100px;
     height: 100px;
     overflow: hidden;
-    border: 1px solid #ccc;
+    border: 1px solid color.$worky-color-grey;
     border-radius: 4px;
   }
 
@@ -65,8 +80,8 @@
     cursor: pointer;
     top: 5px;
     right: 5px;
-    color: red;
-    background: rgba(255, 255, 255, 0.7);
+    color: color.$worky-color-red;
+    background: color.$worky-color-grey;
     border-radius: 50%;
   }
 

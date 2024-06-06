@@ -1,11 +1,9 @@
 <div class="upload-file-modal" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
   <input #fileInput type="file" multiple accept="image/*,video/*" (change)="onFileSelected($event)" hidden>
-  <div class="drag-drop-container">
+  <div class="drag-drop-container" (click)="fileInput.click()">
     <div class="drag-drop-content">
-      <p>Arrastra tus archivos aquí o</p>
-      <button mat-button (click)="fileInput.click()" class="upload-button">
-        Seleccionar Imágenes o Videos
-      </button>
+      <p>Arrastra tus archivos aquí o hacer click para seleccionar</p>
+      <i class="material-icons">cloud_upload</i>
     </div>
     <div class="drag-drop-background"></div>
   </div>

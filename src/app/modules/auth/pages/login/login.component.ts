@@ -18,6 +18,7 @@ import { MailSendValidateData } from '@shared/interfaces/mail.interface';
 import { environment } from '@env/environment';
 import { ResetPasswordModalComponent } from './reset-password-modal/reset-password-modal.component';
 import { TemplateEmail } from '@shared/interfaces/mail.interface';
+import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 
 @Component({
   selector: 'worky-login',
@@ -54,6 +55,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private _authGoogleService: AuthGoogleService,
     private _authService: AuthService,
     private _dialog: MatDialog,
+    private _deviceDetectionService: DeviceDetectionService,
   ) { 
 
     if (this.token) {
@@ -130,7 +132,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
           const token = this._authService.getDecodedToken();
-          if (token?.role === 'admin') {
+          if (token?.role === 'admin' && !this._deviceDetectionService.isMobile()) {
             this._router.navigate(['/admin']);
           } else {
             this._router.navigate(['/home']);

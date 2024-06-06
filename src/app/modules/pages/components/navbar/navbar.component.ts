@@ -64,7 +64,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     const dataUser = this._authService.getDecodedToken();
     const link = { icon: 'settings', link: '/admin',  title: 'Administración'}
 
-    if (dataUser && dataUser.role === 'admin') {
+    if (dataUser && dataUser.role === 'admin' && !this.isMobile) {
       this.dataLinkProfile.push(link);
     }
   }

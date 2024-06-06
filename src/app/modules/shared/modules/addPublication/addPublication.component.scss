@@ -142,6 +142,13 @@
       border-radius: 8px;
 
       .extra-content-item {
+
+        @include breakpoints.below-sm {
+          .material-icons {
+            font-size: 35px;
+          }
+        }
+
         display: flex;
         border-radius: 50%;
         padding: 2px;
@@ -152,7 +159,6 @@
 
       .emoji-icon {
         color: color.$worky-color-grey;
-        font-size: 24px;
         cursor: pointer;
         :hover {
           color: color.$worky-color-indigo;
@@ -169,7 +175,6 @@
 
       .location-on {
         color: map-get(color.$worky-red, 56);
-        font-size: 20px;
         cursor: pointer;
         :hover {
           color: map-get(color.$worky-red, 9);
@@ -178,7 +183,6 @@
 
       .file-upload {
         color: map-get(color.$worky-green, 56);
-        font-size: 24px;
         cursor: pointer;
         :hover {
           color: map-get(color.$worky-green, 9);
