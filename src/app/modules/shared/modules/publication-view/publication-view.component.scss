@@ -36,7 +36,6 @@
   .publication-body {
     margin-top: 1rem;
     margin-bottom: 1rem;
-    //max-height: 500px;
     overflow: auto;
     .publication-content {
       padding: 16px;
@@ -97,7 +96,6 @@
 
       }
       @include breakpoints.below-sm {
-        justify-content: center;
         .publication-footer-actions-item {
           padding: 8px 5px;
         }
