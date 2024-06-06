@@ -1,25 +1,44 @@
-.content-images {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 2px;
-  justify-items: center;
+.gallery-lightbox-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-height: 500px;
+  overflow: hidden;
+}
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  grid-template-rows: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 2px;
+  height: 100%;
+  align-items: stretch;
+}
+
+.gallery img {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  object-fit: cover;
+  aspect-ratio: 1;
+  &::after {
+    content: '';
+    display: block;
+    padding-bottom: 100%;
   }
 }
 
-/* Estilo específico para video-container */
+
+
+
 .video-container {
   width: 100%;
   position: relative;
-  padding-bottom: 56.25%; /* 16:9 ratio */
+  padding-bottom: 56.25%; /* 16:9 */
   height: 0;
   overflow: hidden;
 
-  /* Asegurar que no herede estilos de grid */
+
   display: block !important;
 }
 

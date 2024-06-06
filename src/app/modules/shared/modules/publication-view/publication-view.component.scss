@@ -36,6 +36,8 @@
   .publication-body {
     margin-top: 1rem;
     margin-bottom: 1rem;
+    //max-height: 500px;
+    overflow: auto;
     .publication-content {
       padding: 16px;
     }

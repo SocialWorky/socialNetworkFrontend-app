@@ -1,12 +1,18 @@
-<div class="content-images" *ngIf="images">
-  <ng-container *ngFor="let image of images; let last = last">
-    <ng-container *ngIf="isImageUrl(image.urlThumbnail)">
-      <div [style.grid-column-end]="last && images.length % 2 !== 0 ? 'span 2' : 'auto'">
-        <img [src]="urlMediaApi + image.urlCompressed" [alt]="image.urlThumbnail" loading="lazy" />
-      </div>
+<div class="gallery-lightbox-container" *ngIf="images">
+  <div class="gallery">
+    <ng-container *ngFor="let image of images; let last = last">
+      <ng-container *ngIf="isImageUrl(image.urlThumbnail)">
+        <img 
+          [ngSrc]="urlMediaApi + image.urlCompressed" fill
+          (click)="openImage(image)"
+          alt="Image"
+          style="position: relative;">
+      </ng-container>
     </ng-container>
-  </ng-container>
+  </div>
 </div>
+
+
 
 <div *ngIf="images">
   <ng-container *ngFor="let image of images; let last = last">
