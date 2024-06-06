@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, Subscription, firstValueFrom, lastValueFrom, takeUntil } from 'rxjs';
+import { Meta } from '@angular/platform-browser';
 
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
@@ -47,6 +48,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _geoLocationsService: GeoLocationsService,
     private _geocodingService: GeocodingService,
     private _activatedRoute: ActivatedRoute,
+    private _meta: Meta,
   ) {
     this.getLocationUser();
   }
@@ -78,7 +80,6 @@ async subscribeToNotificationComment() {
     await this._publicationService.getAllPublications(this.page, this.pageSize);
     this.subscription.add(this._publicationService.publications$.subscribe({
       next: (publicationsData: PublicationView[]) => {
-      console.log('publicationsData', publicationsData);
       this.loaderPublications = false;
       this.publications = publicationsData;
       this._cdr.markForCheck();
@@ -102,13 +103,19 @@ async subscribeToNotificationComment() {
         if (publication.length) {
           this.loaderPublications = false;
           this.publications = publication;
+
+          this._meta.updateTag({ property: 'og:title', content: 'Worky Social Networt' });
+          this._meta.updateTag({ property: 'og:description', content: this.publications[0].content });
+          this._meta.updateTag({ property: 'og:image', content: this.publications[0].media[0].url });
+
+
           this._cdr.markForCheck();
           result = true;
         } else {
           result = false;
         }
       } catch (error) {
-        console.error('Error al obtener la publicación', error);
+        console.error('Error get publications', error);
       }
     }
 
