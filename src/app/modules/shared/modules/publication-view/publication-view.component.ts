@@ -174,7 +174,7 @@ export class PublicationViewComponent  implements OnInit, OnDestroy {
       this._router.navigate([data.link]);
     }
     if (data.linkUrl) {
-      const newLink = data.linkUrl + '/publication/' + publication._id;
+      const newLink = data.linkUrl + '/publication/' + publication._id + '/';
       window.open(newLink, '_blank');
     }
   }

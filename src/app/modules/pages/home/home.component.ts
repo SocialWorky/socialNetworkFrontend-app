@@ -14,6 +14,7 @@ import { LocationService } from '@shared/services/location.service';
 import { GeoLocationsService } from '@shared/services/apiGeoLocations.service';
 import { GeocodingService } from '@shared/services/geocoding.service';
 import { ActivatedRoute } from '@angular/router';
+import { environment } from '@env/environment';
 
 @Component({
   selector: 'worky-home',
@@ -35,6 +36,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   loaderPublications?: boolean;
 
   paramPublication?: boolean = false;
+
+  urlMediaApi = environment.APIFILESERVICE;
 
   private unsubscribe$ = new Subject<void>();
 
@@ -105,9 +108,10 @@ async subscribeToNotificationComment() {
           this.publications = publication;
           this._meta.updateTag({ property: 'og:title', content: 'worky Social Network' });
           this._meta.updateTag({ property: 'og:description', content: this.publications[0]?.content });
-          this._meta.updateTag({ property: 'og:image', content: this.publications[0]?.media[0].url });
+          this._meta.updateTag({ property: 'og:image', content: this.urlMediaApi + this.publications[0]?.media[0].urlCompressed });
 
           this._meta.addTag({ name: 'robots', content: 'index, follow' });
+
           this._cdr.markForCheck();
           result = true;
         } else {
