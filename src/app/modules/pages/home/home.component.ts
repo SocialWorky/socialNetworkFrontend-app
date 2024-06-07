@@ -103,12 +103,11 @@ async subscribeToNotificationComment() {
         if (publication.length) {
           this.loaderPublications = false;
           this.publications = publication;
+          this._meta.updateTag({ property: 'og:title', content: 'worky Social Network' });
+          this._meta.updateTag({ property: 'og:description', content: this.publications[0]?.content });
+          this._meta.updateTag({ property: 'og:image', content: this.publications[0]?.media[0].url });
 
-          this._meta.updateTag({ property: 'og:title', content: 'Worky Social Networt' });
-          this._meta.updateTag({ property: 'og:description', content: this.publications[0].content });
-          this._meta.updateTag({ property: 'og:image', content: this.publications[0].media[0].url });
-
-
+          this._meta.addTag({ name: 'robots', content: 'index, follow' });
           this._cdr.markForCheck();
           result = true;
         } else {
