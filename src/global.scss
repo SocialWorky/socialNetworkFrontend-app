@@ -243,3 +243,47 @@ body {
     max-height: 450px;
   }
 
+  .link-preview {
+    max-height: 150px;
+    cursor: pointer;
+    border: 1px solid #cccccc70;
+    box-shadow: 0px 0px 20px 4px rgb(0 0 0 / 7%);
+    border-radius: 12px;
+    padding: 10px;
+    margin: 10px 10px;
+  }
+
+  .link-preview img {
+    max-width: 20%;
+    margin-right: 10px;
+  }
+
+  .link-preview-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .link-preview-info {
+    display: flex;
+    flex-direction: column;
+    h3 {
+      font-size: 1.2rem;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;  
+      color: map-get(color.$worky-navy, 100);
+    }
+    p {
+      padding: 5px;
+      font-size: 1rem;
+      color: map-get(color.$worky-navy, 56);
+      margin: 0;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      overflow: hidden;  
+    }
+  }

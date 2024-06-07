@@ -106,10 +106,11 @@ async subscribeToNotificationComment() {
         if (publication.length) {
           this.loaderPublications = false;
           this.publications = publication;
+
+          // section meta tags
           this._meta.updateTag({ property: 'og:title', content: 'worky Social Network' });
           this._meta.updateTag({ property: 'og:description', content: this.publications[0]?.content });
           this._meta.updateTag({ property: 'og:image', content: this.urlMediaApi + this.publications[0]?.media[0].urlCompressed });
-
           this._meta.addTag({ name: 'robots', content: 'index, follow' });
 
           this._cdr.markForCheck();

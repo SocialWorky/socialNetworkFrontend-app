@@ -147,25 +147,27 @@ export class AddPublicationComponent  implements OnInit {
     this._commentService.createComment(dataComment).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
         try {
-          const response = await lastValueFrom(
-            this._fileUploadService.uploadFile(this.selectedFiles, 'comments').pipe(takeUntil(this.unsubscribe$))
-          );
-          const saveLocation = 'comments/';
-          const saveFilePromises = response.map((file: MediaFileUpload) => {
-            return lastValueFrom(
-              this._fileUploadService.saveUrlFile(
-                saveLocation + file.filename,
-                saveLocation + file.filenameThumbnail,
-                saveLocation + file.filenameCompressed,
-                message.comment._id, TypePublishing.COMMENT).pipe(takeUntil(this.unsubscribe$))
+          if (this.selectedFiles.length) {
+            const response = await lastValueFrom(
+              this._fileUploadService.uploadFile(this.selectedFiles, 'comments').pipe(takeUntil(this.unsubscribe$))
             );
-          });
+            const saveLocation = 'comments/';
+            const saveFilePromises = response.map((file: MediaFileUpload) => {
+              return lastValueFrom(
+                this._fileUploadService.saveUrlFile(
+                  saveLocation + file.filename,
+                  saveLocation + file.filenameThumbnail,
+                  saveLocation + file.filenameCompressed,
+                  message.comment._id, TypePublishing.COMMENT).pipe(takeUntil(this.unsubscribe$))
+              );
+            });
 
-          await Promise.all(saveFilePromises);
+            await Promise.all(saveFilePromises);
 
-          this.selectedFiles = [];
-          this.previews = [];
-          this._cdr.markForCheck();
+            this.selectedFiles = [];
+            this.previews = [];
+            this._cdr.markForCheck();
+          }
 
           const publications = await this._publicationService.getAllPublications(1, 10);
           publications[this.indexPublication!].comment.unshift(message.comment);
@@ -225,27 +227,28 @@ export class AddPublicationComponent  implements OnInit {
       next: async (message: any) => {
         console.log('MENSAJE CREADO: ', message);
         try {
-          const response = await lastValueFrom(
-            this._fileUploadService.uploadFile(this.selectedFiles, 'publications').pipe(takeUntil(this.unsubscribe$))
-          );
-
-          const saveFilePromises = response.map((file: MediaFileUpload) => {
-            const saveLocation = 'publications/';
-            return lastValueFrom(
-              this._fileUploadService.saveUrlFile(
-                saveLocation + file.filename,
-                saveLocation + file.filenameThumbnail,
-                saveLocation + file.filenameCompressed,
-                 message.publications._id,
-                 TypePublishing.POST).pipe(takeUntil(this.unsubscribe$))
+          if (this.selectedFiles.length) {
+            const response = await lastValueFrom(
+              this._fileUploadService.uploadFile(this.selectedFiles, 'publications').pipe(takeUntil(this.unsubscribe$))
             );
-          });
+            const saveFilePromises = response.map((file: MediaFileUpload) => {
+              const saveLocation = 'publications/';
+              return lastValueFrom(
+                this._fileUploadService.saveUrlFile(
+                  saveLocation + file.filename,
+                  saveLocation + file.filenameThumbnail,
+                  saveLocation + file.filenameCompressed,
+                  message.publications._id,
+                  TypePublishing.POST).pipe(takeUntil(this.unsubscribe$))
+              );
+            });
 
-          await Promise.all(saveFilePromises);
+            await Promise.all(saveFilePromises);
 
-          this.selectedFiles = [];
-          this.previews = [];
-          this._cdr.markForCheck();
+            this.selectedFiles = [];
+            this.previews = [];
+            this._cdr.markForCheck();
+          }
 
           const publicationsNew = await this._publicationService.getAllPublications(1, 10);
           this._publicationService.publicationsSubject.next(publicationsNew);

@@ -7,10 +7,12 @@ import { TranslationsModule } from '../translations/translations.module';
 import { WorkyDropdownModule } from '../worky-dropdown/worky-dropdown.module';
 import { WorkyRelativeTimePipe } from '@shared/pipes/relative-time.pipe';
 import { ImageOrganizerModule } from '../image-organizer/image-organizer.module';
+import { WorkyProcessContentPipe } from '@shared/pipes/process-content.pipe';
+import { WorkyPreviewHtmlPipe } from '@shared/pipes/preview-html.pipe';
 
 @NgModule({
-    declarations: [PublicationViewComponent, WorkyRelativeTimePipe],
-    exports: [PublicationViewComponent, WorkyRelativeTimePipe],
+    declarations: [PublicationViewComponent, WorkyRelativeTimePipe, WorkyProcessContentPipe, WorkyPreviewHtmlPipe],
+    exports: [PublicationViewComponent, WorkyRelativeTimePipe, WorkyProcessContentPipe, WorkyPreviewHtmlPipe],
     imports: [
         CommonModule,
         WorkyAvatarModule,

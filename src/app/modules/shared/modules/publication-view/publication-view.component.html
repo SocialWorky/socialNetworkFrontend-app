@@ -33,12 +33,16 @@
 
   <div class="publication-body">
     <div class="publication-content">
-      <span>{{ publication?.content }}</span>
+      <span [innerHTML]="publication?.content | workyProcessContent"></span>
     </div>
 
-    <worky-image-organizer
+    <worky-image-organizer *ngIf="publication?.media?.length"
       [images]="publication?.media">
     </worky-image-organizer>
+
+    <div class="publication-url-preview">
+      <div [innerHTML]="publication?.content | workyPreviewHtml"></div>
+    </div>
 
   </div>
 

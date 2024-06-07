@@ -11,7 +11,6 @@ import { environment } from '@env/environment';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
-
 const config: SocketIoConfig = {
   url: environment.WSURL, 
   options: {},
