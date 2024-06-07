@@ -33,7 +33,7 @@
 
   <div class="publication-body">
     <div class="publication-content">
-      <span [innerHTML]="publication?.content | workyProcessContent"></span>
+      <div class="content" [innerHTML]="publication?.content | workyProcessContent"></div>
     </div>
 
     <worky-image-organizer *ngIf="publication?.media?.length"
@@ -41,7 +41,7 @@
     </worky-image-organizer>
 
     <div class="publication-url-preview">
-      <div [innerHTML]="publication?.content | workyPreviewHtml"></div>
+      <div class="content" [innerHTML]="publication?.content | workyPreviewHtml"></div>
     </div>
 
   </div>

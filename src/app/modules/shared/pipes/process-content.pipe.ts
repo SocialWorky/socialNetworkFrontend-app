@@ -1,14 +1,12 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { environment } from '@env/environment';
 
 @Pipe({
   name: 'workyProcessContent'
 })
 export class WorkyProcessContentPipe implements PipeTransform {
 
-  constructor(private http: HttpClient, private sanitizer: DomSanitizer) {}
+  constructor(private sanitizer: DomSanitizer) {}
 
   transform(value: string | undefined): string | SafeHtml {
     if (!value) return '';
