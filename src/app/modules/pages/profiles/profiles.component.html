@@ -1,3 +1,49 @@
-<p>
-  profiles works!
-</p>
+<div>
+    <div class="image-container">
+        <app-edit-img></app-edit-img>
+    </div>
+    <div class="content">
+        <div class="header">
+            <div class="avatar-container">
+                <div class="avatar">
+                    <worky-avatar [size]="100"></worky-avatar>
+                </div>
+            </div>
+            <div class="edit-button-container">
+                <button class="edit-button" (click)="abrirFormulario()">
+                    Edit Profile
+                </button>
+            </div>
+        </div>
+        <div class="profile-info">
+            <div class="user-basic">
+                <h2>Oscar.dev</h2>
+                <p>Oscar_santander</p>
+            </div>
+            <div class="description">
+                <p>Software Engineer / Designer / Entrepreneur <br>Visit my website to test a working <b></b></p>
+                <div class="additional-info">
+                    <span class="link">
+                        <i class="material-icons mb-2">link</i>
+                        <a href="https://dev.worky.cl/auth/login" target="#">https://dev.worky.cl/auth/login</a>
+                    </span>
+                    <span class="joined-date">
+                        <i class="material-icons mb-2">calendar_month</i>
+                        <span>Joined December, 2024</span>
+                    </span>
+                </div>
+            </div>
+            <div class="follow-info">
+                <div class="following">
+                    <span class="count">520</span><span> Following</span>
+                </div>
+                <div class="followers">
+                    <span class="count">23,4m </span><span> Followers</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+</div>
+
+<worky-home></worky-home>

@@ -1,0 +1,60 @@
+.module-heading {
+    padding: 8px 16px;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #000;
+    text-align: center;
+}
+
+.module-divider {
+    border-color: #2d3748;
+}
+
+.profile-image {
+    display: inline-block;
+    height: 40px;
+    width: auto;
+    border-radius: 9999px;
+    margin-left: 16px;
+    margin-top: 8px;
+}
+
+.profile-info {
+    margin-left: 12px;
+    margin-top: 8px;
+}
+
+.profile-name {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #000;
+}
+
+.profile-username {
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+.follow-button {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #000;
+    border: 2px solid #fff;
+    border-radius: 9999px;
+    transition: background-color 0.3s, color 0.3s;
+    text-decoration: none;
+}
+
+.follow-button:hover {
+    background-color: #2d3748;
+    color: #fff;
+}
+
+.show-more {
+    padding: 8px 16px;
+    margin-left: 8px;
+    font-weight: bold;
+    color: #3182ce;
+}

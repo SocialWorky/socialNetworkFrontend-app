@@ -1,1 +1,7 @@
-<worky-weather></worky-weather>
+<div *ngIf="!isUserProfile">
+    <worky-weather></worky-weather>
+</div>
+
+<div *ngIf="!isUserHome">
+    <worky-suggetion-to-follow></worky-suggetion-to-follow>
+</div>
