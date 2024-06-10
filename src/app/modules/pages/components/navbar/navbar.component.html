@@ -1,4 +1,4 @@
-<div class="content-navbar sticky">
+<div class="content-navbar">
   <nav class="worky-navbar">
     <!-- Left elements -->
     <div class="worky-brand">
@@ -29,6 +29,18 @@
           />
         </div>
       </form>
+
+      <!-- Resultados de búsqueda -->
+      <ul *ngIf="users.length > 0" class="search-results">
+        <li *ngFor="let user of users">
+          <worky-avatar
+            [img]="user.avatar"
+            [size]="30"
+            [name]="user.name + ' ' + user.lastName"
+          ></worky-avatar>
+          {{ user.name }} {{ user.lastName }} ({{ user.username }})
+        </li>
+      </ul>
 
     </div>
     <!-- Center elements -->
@@ -87,4 +99,3 @@
       </div>
   </nav>
 </div>
-

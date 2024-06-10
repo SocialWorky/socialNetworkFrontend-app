@@ -2,11 +2,11 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { AuthGoogleService } from '@auth/services/auth-google.service';
 import { translations } from '@translations/translations'
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { AuthService } from '@auth/services/auth.service';
+import { UserService } from '@shared/services/users.service';
 
 @Component({
   selector: 'worky-navbar',
@@ -29,12 +29,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   resizeSubscription: Subscription | undefined;
 
+  users: any[] = [];
+
   constructor(
     private _router: Router,
     private _deviceDetectionService: DeviceDetectionService,
     private _cdr: ChangeDetectorRef,
-    private _authGoogleService: AuthGoogleService,
     private _authService: AuthService,
+    private _userService: UserService,
   ) {
     this.menuProfile();
   }
@@ -70,21 +72,26 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   search(event: Event) {
-    // Realiza la búsqueda si el término tiene al menos 3 caracteres
     if (this.searchTerm.trim().length >= 3) {
-      console.log('Buscar:', this.searchTerm);
+      this._userService.getUserByName(this.searchTerm).subscribe((data: any) => {
+        this.users = data;
+      });
+    } else {
+      this.users = [];
+      this._cdr.markForCheck();
     }
   }
 
   onInputChange(event: Event) {
-    // Realiza la búsqueda automáticamente si se escriben más de 3 caracteres
     if (this.searchTerm.trim().length >= 3) {
       this.search(event);
+    } else {
+      this.users = [];
+      this._cdr.markForCheck();
     }
   }
 
   onEnter(event: any) {
-    // Realiza la búsqueda si se presiona "Enter" y el término tiene al menos 3 caracteres
     if (event.key === 'Enter' && this.searchTerm.trim().length >= 3) {
       this.search(event);
     }
