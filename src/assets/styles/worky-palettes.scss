@@ -1,36 +1,38 @@
-/* Colors */
-$worky-color-navy: #113355;
-$worky-color-yellow: #FFCF00;
-$worky-color-yellow-text: #FFEE00;
-$worky-color-green: #33CC44;
-$worky-color-radium: #11DD66;
-$worky-color-teal: #11BB99;
-$worky-color-cyan: #22BBDD;
-$worky-color-blue: #2288EE;
-$worky-color-indigo: #5555FF;
-$worky-color-purple: #AA33FF;
-$worky-color-fuchsia: #FF33BB;
-$worky-color-magenta: #FF3366;
-$worky-color-red: #FF3333;
+@import './worky-palettes-variables';
 
-$worky-color-light: #FFFFFF;
-$worky-color-greyLight: #f8f9fa;
-$worky-color-grey: #E4E6EB;
+$worky-color-navy: var(--worky-color-navy);
+$worky-color-yellow: var(--worky-color-yellow);
+$worky-color-yellow-text: var(--worky-color-yellow-text);
+$worky-color-green: var(--worky-color-green);
+$worky-color-radium: var(--worky-color-radium);
+$worky-color-teal: var(--worky-color-teal);
+$worky-color-cyan: var(--worky-color-cyan);
+$worky-color-blue: var(--worky-color-blue);
+$worky-color-indigo: var(--worky-color-indigo);
+$worky-color-purple: var(--worky-color-purple);
+$worky-color-fuchsia: var(--worky-color-fuchsia);
+$worky-color-magenta: var(--worky-color-magenta);
+$worky-color-red: var(--worky-color-red);
+
+$worky-color-light: var(--worky-color-light);
+$worky-color-greyLight: var(--worky-color-greyLight);
+$worky-color-grey: var(--worky-color-grey);
+
 $worky-color-dark: $worky-color-navy;
 $worky-color-primary: $worky-color-navy;
 $worky-color-accent: $worky-color-blue;
 $worky-color-warn: $worky-color-magenta;
 
 $worky-navy: (
-   3:  mix($worky-color-navy, $worky-color-light, 3%),
-   6:  mix($worky-color-navy, $worky-color-light, 6%),
-   7:  mix($worky-color-navy, $worky-color-light, 7%),
-   9:  mix($worky-color-navy, $worky-color-light, 9%),
-  12:  mix($worky-color-navy, $worky-color-light, 12%),
-  24:  mix($worky-color-navy, $worky-color-light, 24%),
-  56:  mix($worky-color-navy, $worky-color-light, 56%),
-  72:  mix($worky-color-navy, $worky-color-light, 72%),
-  87:  mix($worky-color-navy, $worky-color-light, 87%),
+   3:  color-mix(in srgb, $worky-color-navy, $worky-color-light 3%),
+   6:  color-mix(in srgb, $worky-color-navy, $worky-color-light 6%),
+   7:  color-mix(in srgb, $worky-color-navy, $worky-color-light 7%),
+   9:  color-mix(in srgb, $worky-color-navy, $worky-color-light 9%),
+  12:  color-mix(in srgb, $worky-color-navy, $worky-color-light 12%),
+  24:  color-mix(in srgb, $worky-color-navy, $worky-color-light 24%),
+  56:  color-mix(in srgb, $worky-color-navy, $worky-color-light 56%),
+  72:  color-mix(in srgb, $worky-color-navy, $worky-color-light 72%),
+  87:  color-mix(in srgb, $worky-color-navy, $worky-color-light 87%),
   100:     $worky-color-navy,
   contrast: (
       3: $worky-color-dark,
@@ -47,15 +49,15 @@ $worky-navy: (
 );
 
 $worky-yellow: (
-   3:  mix($worky-color-yellow, $worky-color-light, 3%),
-   6:  mix($worky-color-yellow, $worky-color-light, 6%),
-   7:  mix($worky-color-yellow, $worky-color-light, 7%),
-   9:  mix($worky-color-yellow, $worky-color-light, 9%),
-  12:  mix($worky-color-yellow, $worky-color-light, 12%),
-  24:  mix($worky-color-yellow, $worky-color-light, 24%),
-  56:  mix($worky-color-yellow, $worky-color-light, 56%),
-  72:  mix($worky-color-yellow, $worky-color-light, 72%),
-  87:  mix($worky-color-yellow, $worky-color-light, 87%),
+   3:  color-mix(in srgb, $worky-color-yellow, $worky-color-light 3%),
+   6:  color-mix(in srgb, $worky-color-yellow, $worky-color-light 6%),
+   7:  color-mix(in srgb, $worky-color-yellow, $worky-color-light 7%),
+   9:  color-mix(in srgb, $worky-color-yellow, $worky-color-light 9%),
+  12:  color-mix(in srgb, $worky-color-yellow, $worky-color-light 12%),
+  24:  color-mix(in srgb, $worky-color-yellow, $worky-color-light 24%),
+  56:  color-mix(in srgb, $worky-color-yellow, $worky-color-light 56%),
+  72:  color-mix(in srgb, $worky-color-yellow, $worky-color-light 72%),
+  87:  color-mix(in srgb, $worky-color-yellow, $worky-color-light 87%),
   100:     $worky-color-yellow,
   contrast: (
       3: $worky-color-dark,
@@ -72,15 +74,15 @@ $worky-yellow: (
 );
 
 $worky-yellow-text: (
-   3:  mix($worky-color-yellow-text, $worky-color-light, 3%),
-   6:  mix($worky-color-yellow-text, $worky-color-light, 6%),
-   7:  mix($worky-color-yellow-text, $worky-color-light, 7%),
-   9:  mix($worky-color-yellow-text, $worky-color-light, 9%),
-  12:  mix($worky-color-yellow-text, $worky-color-light, 12%),
-  24:  mix($worky-color-yellow-text, $worky-color-light, 24%),
-  56:  mix($worky-color-yellow-text, $worky-color-light, 56%),
-  72:  mix($worky-color-yellow-text, $worky-color-light, 72%),
-  87:  mix($worky-color-yellow-text, $worky-color-light, 87%),
+   3:  color-mix(in srgb, $worky-color-yellow-text, $worky-color-light 3%),
+   6:  color-mix(in srgb, $worky-color-yellow-text, $worky-color-light 6%),
+   7:  color-mix(in srgb, $worky-color-yellow-text, $worky-color-light 7%),
+   9:  color-mix(in srgb, $worky-color-yellow-text, $worky-color-light 9%),
+  12:  color-mix(in srgb, $worky-color-yellow-text, $worky-color-light 12%),
+  24:  color-mix(in srgb, $worky-color-yellow-text, $worky-color-light 24%),
+  56:  color-mix(in srgb, $worky-color-yellow-text, $worky-color-light 56%),
+  72:  color-mix(in srgb, $worky-color-yellow-text, $worky-color-light 72%),
+  87:  color-mix(in srgb, $worky-color-yellow-text, $worky-color-light 87%),
   100:     $worky-color-yellow-text,
   contrast: (
       3: $worky-color-dark,
@@ -97,15 +99,15 @@ $worky-yellow-text: (
 );
 
 $worky-green: (
-   3:  mix($worky-color-green, $worky-color-light, 3%),
-   6:  mix($worky-color-green, $worky-color-light, 6%),
-   7:  mix($worky-color-green, $worky-color-light, 7%),
-   9:  mix($worky-color-green, $worky-color-light, 9%),
-  12:  mix($worky-color-green, $worky-color-light, 12%),
-  24:  mix($worky-color-green, $worky-color-light, 24%),
-  56:  mix($worky-color-green, $worky-color-light, 56%),
-  72:  mix($worky-color-green, $worky-color-light, 72%),
-  87:  mix($worky-color-green, $worky-color-light, 87%),
+   3:  color-mix(in srgb, $worky-color-green, $worky-color-light 3%),
+   6:  color-mix(in srgb, $worky-color-green, $worky-color-light 6%),
+   7:  color-mix(in srgb, $worky-color-green, $worky-color-light 7%),
+   9:  color-mix(in srgb, $worky-color-green, $worky-color-light 9%),
+  12:  color-mix(in srgb, $worky-color-green, $worky-color-light 12%),
+  24:  color-mix(in srgb, $worky-color-green, $worky-color-light 24%),
+  56:  color-mix(in srgb, $worky-color-green, $worky-color-light 56%),
+  72:  color-mix(in srgb, $worky-color-green, $worky-color-light 72%),
+  87:  color-mix(in srgb, $worky-color-green, $worky-color-light 87%),
   100:     $worky-color-green,
   contrast: (
       3: $worky-color-dark,
@@ -122,15 +124,15 @@ $worky-green: (
 );
 
 $worky-radium: (
-   3:  mix($worky-color-radium, $worky-color-light, 3%),
-   6:  mix($worky-color-radium, $worky-color-light, 6%),
-   7:  mix($worky-color-radium, $worky-color-light, 7%),
-   9:  mix($worky-color-radium, $worky-color-light, 9%),
-  12:  mix($worky-color-radium, $worky-color-light, 12%),
-  24:  mix($worky-color-radium, $worky-color-light, 24%),
-  56:  mix($worky-color-radium, $worky-color-light, 56%),
-  72:  mix($worky-color-radium, $worky-color-light, 72%),
-  87:  mix($worky-color-radium, $worky-color-light, 87%),
+   3:  color-mix(in srgb, $worky-color-radium, $worky-color-light 3%),
+   6:  color-mix(in srgb, $worky-color-radium, $worky-color-light 6%),
+   7:  color-mix(in srgb, $worky-color-radium, $worky-color-light 7%),
+   9:  color-mix(in srgb, $worky-color-radium, $worky-color-light 9%),
+  12:  color-mix(in srgb, $worky-color-radium, $worky-color-light 12%),
+  24:  color-mix(in srgb, $worky-color-radium, $worky-color-light 24%),
+  56:  color-mix(in srgb, $worky-color-radium, $worky-color-light 56%),
+  72:  color-mix(in srgb, $worky-color-radium, $worky-color-light 72%),
+  87:  color-mix(in srgb, $worky-color-radium, $worky-color-light 87%),
   100:     $worky-color-radium,
   contrast: (
       3: $worky-color-dark,
@@ -147,15 +149,15 @@ $worky-radium: (
 );
 
 $worky-teal: (
-   3:  mix($worky-color-teal, $worky-color-light, 3%),
-   6:  mix($worky-color-teal, $worky-color-light, 6%),
-   7:  mix($worky-color-teal, $worky-color-light, 7%),
-   9:  mix($worky-color-teal, $worky-color-light, 9%),
-  12:  mix($worky-color-teal, $worky-color-light, 12%),
-  24:  mix($worky-color-teal, $worky-color-light, 24%),
-  56:  mix($worky-color-teal, $worky-color-light, 56%),
-  72:  mix($worky-color-teal, $worky-color-light, 72%),
-  87:  mix($worky-color-teal, $worky-color-light, 87%),
+   3:  color-mix(in srgb, $worky-color-teal, $worky-color-light 3%),
+   6:  color-mix(in srgb, $worky-color-teal, $worky-color-light 6%),
+   7:  color-mix(in srgb, $worky-color-teal, $worky-color-light 7%),
+   9:  color-mix(in srgb, $worky-color-teal, $worky-color-light 9%),
+  12:  color-mix(in srgb, $worky-color-teal, $worky-color-light 12%),
+  24:  color-mix(in srgb, $worky-color-teal, $worky-color-light 24%),
+  56:  color-mix(in srgb, $worky-color-teal, $worky-color-light 56%),
+  72:  color-mix(in srgb, $worky-color-teal, $worky-color-light 72%),
+  87:  color-mix(in srgb, $worky-color-teal, $worky-color-light 87%),
   100:     $worky-color-teal,
   contrast: (
       3: $worky-color-dark,
@@ -172,15 +174,15 @@ $worky-teal: (
 );
 
 $worky-cyan: (
-   3:  mix($worky-color-cyan, $worky-color-light, 3%),
-   6:  mix($worky-color-cyan, $worky-color-light, 6%),
-   7:  mix($worky-color-cyan, $worky-color-light, 7%),
-   9:  mix($worky-color-cyan, $worky-color-light, 9%),
-  12:  mix($worky-color-cyan, $worky-color-light, 12%),
-  24:  mix($worky-color-cyan, $worky-color-light, 24%),
-  56:  mix($worky-color-cyan, $worky-color-light, 56%),
-  72:  mix($worky-color-cyan, $worky-color-light, 72%),
-  87:  mix($worky-color-cyan, $worky-color-light, 87%),
+   3:  color-mix(in srgb, $worky-color-cyan, $worky-color-light 3%),
+   6:  color-mix(in srgb, $worky-color-cyan, $worky-color-light 6%),
+   7:  color-mix(in srgb, $worky-color-cyan, $worky-color-light 7%),
+   9:  color-mix(in srgb, $worky-color-cyan, $worky-color-light 9%),
+  12:  color-mix(in srgb, $worky-color-cyan, $worky-color-light 12%),
+  24:  color-mix(in srgb, $worky-color-cyan, $worky-color-light 24%),
+  56:  color-mix(in srgb, $worky-color-cyan, $worky-color-light 56%),
+  72:  color-mix(in srgb, $worky-color-cyan, $worky-color-light 72%),
+  87:  color-mix(in srgb, $worky-color-cyan, $worky-color-light 87%),
   100:     $worky-color-cyan,
   contrast: (
       3: $worky-color-dark,
@@ -197,15 +199,15 @@ $worky-cyan: (
 );
 
 $worky-blue: (
-   3:  mix($worky-color-blue, $worky-color-light, 3%),
-   6:  mix($worky-color-blue, $worky-color-light, 6%),
-   7:  mix($worky-color-blue, $worky-color-light, 7%),
-   9:  mix($worky-color-blue, $worky-color-light, 9%),
-  12:  mix($worky-color-blue, $worky-color-light, 12%),
-  24:  mix($worky-color-blue, $worky-color-light, 24%),
-  56:  mix($worky-color-blue, $worky-color-light, 56%),
-  72:  mix($worky-color-blue, $worky-color-light, 72%),
-  87:  mix($worky-color-blue, $worky-color-light, 87%),
+   3:  color-mix(in srgb, $worky-color-blue, $worky-color-light 3%),
+   6:  color-mix(in srgb, $worky-color-blue, $worky-color-light 6%),
+   7:  color-mix(in srgb, $worky-color-blue, $worky-color-light 7%),
+   9:  color-mix(in srgb, $worky-color-blue, $worky-color-light 9%),
+  12:  color-mix(in srgb, $worky-color-blue, $worky-color-light 12%),
+  24:  color-mix(in srgb, $worky-color-blue, $worky-color-light 24%),
+  56:  color-mix(in srgb, $worky-color-blue, $worky-color-light 56%),
+  72:  color-mix(in srgb, $worky-color-blue, $worky-color-light 72%),
+  87:  color-mix(in srgb, $worky-color-blue, $worky-color-light 87%),
   100:     $worky-color-blue,
   contrast: (
       3: $worky-color-dark,
@@ -222,15 +224,15 @@ $worky-blue: (
 );
 
 $worky-indigo: (
-   3:  mix($worky-color-indigo, $worky-color-light, 3%),
-   6:  mix($worky-color-indigo, $worky-color-light, 6%),
-   7:  mix($worky-color-indigo, $worky-color-light, 7%),
-   9:  mix($worky-color-indigo, $worky-color-light, 9%),
-  12:  mix($worky-color-indigo, $worky-color-light, 12%),
-  24:  mix($worky-color-indigo, $worky-color-light, 24%),
-  56:  mix($worky-color-indigo, $worky-color-light, 56%),
-  72:  mix($worky-color-indigo, $worky-color-light, 72%),
-  87:  mix($worky-color-indigo, $worky-color-light, 87%),
+   3:  color-mix(in srgb, $worky-color-indigo, $worky-color-light 3%),
+   6:  color-mix(in srgb, $worky-color-indigo, $worky-color-light 6%),
+   7:  color-mix(in srgb, $worky-color-indigo, $worky-color-light 7%),
+   9:  color-mix(in srgb, $worky-color-indigo, $worky-color-light 9%),
+  12:  color-mix(in srgb, $worky-color-indigo, $worky-color-light 12%),
+  24:  color-mix(in srgb, $worky-color-indigo, $worky-color-light 24%),
+  56:  color-mix(in srgb, $worky-color-indigo, $worky-color-light 56%),
+  72:  color-mix(in srgb, $worky-color-indigo, $worky-color-light 72%),
+  87:  color-mix(in srgb, $worky-color-indigo, $worky-color-light 87%),
   100:     $worky-color-indigo,
   contrast: (
       3: $worky-color-dark,
@@ -247,15 +249,15 @@ $worky-indigo: (
 );
 
 $worky-purple: (
-   3:  mix($worky-color-purple, $worky-color-light, 3%),
-   6:  mix($worky-color-purple, $worky-color-light, 6%),
-   7:  mix($worky-color-purple, $worky-color-light, 7%),
-   9:  mix($worky-color-purple, $worky-color-light, 9%),
-  12:  mix($worky-color-purple, $worky-color-light, 12%),
-  24:  mix($worky-color-purple, $worky-color-light, 24%),
-  56:  mix($worky-color-purple, $worky-color-light, 56%),
-  72:  mix($worky-color-purple, $worky-color-light, 72%),
-  87:  mix($worky-color-purple, $worky-color-light, 87%),
+   3:  color-mix(in srgb, $worky-color-purple, $worky-color-light 3%),
+   6:  color-mix(in srgb, $worky-color-purple, $worky-color-light 6%),
+   7:  color-mix(in srgb, $worky-color-purple, $worky-color-light 7%),
+   9:  color-mix(in srgb, $worky-color-purple, $worky-color-light 9%),
+  12:  color-mix(in srgb, $worky-color-purple, $worky-color-light 12%),
+  24:  color-mix(in srgb, $worky-color-purple, $worky-color-light 24%),
+  56:  color-mix(in srgb, $worky-color-purple, $worky-color-light 56%),
+  72:  color-mix(in srgb, $worky-color-purple, $worky-color-light 72%),
+  87:  color-mix(in srgb, $worky-color-purple, $worky-color-light 87%),
   100:     $worky-color-purple,
   contrast: (
       3: $worky-color-dark,
@@ -272,15 +274,15 @@ $worky-purple: (
 );
 
 $worky-fuchsia: (
-   3:  mix($worky-color-fuchsia, $worky-color-light, 3%),
-   6:  mix($worky-color-fuchsia, $worky-color-light, 6%),
-   7:  mix($worky-color-fuchsia, $worky-color-light, 7%),
-   9:  mix($worky-color-fuchsia, $worky-color-light, 9%),
-  12:  mix($worky-color-fuchsia, $worky-color-light, 12%),
-  24:  mix($worky-color-fuchsia, $worky-color-light, 24%),
-  56:  mix($worky-color-fuchsia, $worky-color-light, 56%),
-  72:  mix($worky-color-fuchsia, $worky-color-light, 72%),
-  87:  mix($worky-color-fuchsia, $worky-color-light, 87%),
+   3:  color-mix(in srgb, $worky-color-fuchsia, $worky-color-light 3%),
+   6:  color-mix(in srgb, $worky-color-fuchsia, $worky-color-light 6%),
+   7:  color-mix(in srgb, $worky-color-fuchsia, $worky-color-light 7%),
+   9:  color-mix(in srgb, $worky-color-fuchsia, $worky-color-light 9%),
+  12:  color-mix(in srgb, $worky-color-fuchsia, $worky-color-light 12%),
+  24:  color-mix(in srgb, $worky-color-fuchsia, $worky-color-light 24%),
+  56:  color-mix(in srgb, $worky-color-fuchsia, $worky-color-light 56%),
+  72:  color-mix(in srgb, $worky-color-fuchsia, $worky-color-light 72%),
+  87:  color-mix(in srgb, $worky-color-fuchsia, $worky-color-light 87%),
   100:     $worky-color-fuchsia,
   contrast: (
       3: $worky-color-dark,
@@ -297,15 +299,15 @@ $worky-fuchsia: (
 );
 
 $worky-magenta: (
-   3:  mix($worky-color-magenta, $worky-color-light, 3%),
-   6:  mix($worky-color-magenta, $worky-color-light, 6%),
-   7:  mix($worky-color-magenta, $worky-color-light, 7%),
-   9:  mix($worky-color-magenta, $worky-color-light, 9%),
-  12:  mix($worky-color-magenta, $worky-color-light, 12%),
-  24:  mix($worky-color-magenta, $worky-color-light, 24%),
-  56:  mix($worky-color-magenta, $worky-color-light, 56%),
-  72:  mix($worky-color-magenta, $worky-color-light, 72%),
-  87:  mix($worky-color-magenta, $worky-color-light, 87%),
+   3:  color-mix(in srgb, $worky-color-magenta, $worky-color-light 3%),
+   6:  color-mix(in srgb, $worky-color-magenta, $worky-color-light 6%),
+   7:  color-mix(in srgb, $worky-color-magenta, $worky-color-light 7%),
+   9:  color-mix(in srgb, $worky-color-magenta, $worky-color-light 9%),
+  12:  color-mix(in srgb, $worky-color-magenta, $worky-color-light 12%),
+  24:  color-mix(in srgb, $worky-color-magenta, $worky-color-light 24%),
+  56:  color-mix(in srgb, $worky-color-magenta, $worky-color-light 56%),
+  72:  color-mix(in srgb, $worky-color-magenta, $worky-color-light 72%),
+  87:  color-mix(in srgb, $worky-color-magenta, $worky-color-light 87%),
   100:     $worky-color-magenta,
   contrast: (
       3: $worky-color-dark,
@@ -322,15 +324,15 @@ $worky-magenta: (
 );
 
 $worky-red: (
-   3:  mix($worky-color-red, $worky-color-light, 3%),
-   6:  mix($worky-color-red, $worky-color-light, 6%),
-   7:  mix($worky-color-red, $worky-color-light, 7%),
-   9:  mix($worky-color-red, $worky-color-light, 9%),
-  12:  mix($worky-color-red, $worky-color-light, 12%),
-  24:  mix($worky-color-red, $worky-color-light, 24%),
-  56:  mix($worky-color-red, $worky-color-light, 56%),
-  72:  mix($worky-color-red, $worky-color-light, 72%),
-  87:  mix($worky-color-red, $worky-color-light, 87%),
+   3:  color-mix(in srgb, $worky-color-red, $worky-color-light 3%),
+   6:  color-mix(in srgb, $worky-color-red, $worky-color-light 6%),
+   7:  color-mix(in srgb, $worky-color-red, $worky-color-light 7%),
+   9:  color-mix(in srgb, $worky-color-red, $worky-color-light 9%),
+  12:  color-mix(in srgb, $worky-color-red, $worky-color-light 12%),
+  24:  color-mix(in srgb, $worky-color-red, $worky-color-light 24%),
+  56:  color-mix(in srgb, $worky-color-red, $worky-color-light 56%),
+  72:  color-mix(in srgb, $worky-color-red, $worky-color-light 72%),
+  87:  color-mix(in srgb, $worky-color-red, $worky-color-light 87%),
   100:     $worky-color-red,
   contrast: (
       3: $worky-color-dark,
@@ -346,7 +348,6 @@ $worky-red: (
   )
 );
 
-
 /* worky App Components Colors */
 
 /* App */
@@ -358,4 +359,4 @@ $worky-color-app-primary: map-get($worky-blue, 100);
 $worky-color-app-secondary: map-get($worky-blue, 56);
 
 /* App Components */
-$worky-background-header-color: map-get($worky-blue, 72);
+$worky-background-header-color: map-get($worky-blue, 24);

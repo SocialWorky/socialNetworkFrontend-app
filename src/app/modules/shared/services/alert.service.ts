@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import swal from 'sweetalert2';
+import  Swal  from 'sweetalert2'
 import { Alerts, Position } from './../enums/alerts.enum';
 import { Router } from '@angular/router';
 
@@ -21,7 +21,7 @@ export class AlertService {
     options?: [string | null]
   ) {
     message = message.replace(/<br>/g, '\n');
-    swal.fire({
+    Swal.fire({
       title: title,
       text: message,
       icon: icon,
@@ -38,7 +38,7 @@ export class AlertService {
           this._router.navigate([options[0]]);
         }
         if (options === null) {
-          swal.close();
+          Swal.close();
         }
       }
     });

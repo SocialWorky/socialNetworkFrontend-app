@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { environment } from '../../../../environments/environment';
-import { CreatePost } from '../addPublication/interfaces/createPost.interface';
-import { PublicationView } from '../interfaces/publicationView.interface';
+import { environment } from '@env/environment';
+import { CreatePost } from '@shared/modules/addPublication/interfaces/createPost.interface';
+import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({
@@ -38,10 +38,22 @@ export class PublicationService {
     return this.http.post(url, post, { headers });
   }
 
+  getPublicationId(id: string): Observable<PublicationView[]> {
+    const url = `${this.baseUrl}/publications/${id}`;
+    const headers = this.getHeaders();
+    return this.http.get<PublicationView[]>(url, { headers });
+  }
+
   deletePublication(id: string) {
     const url = `${this.baseUrl}/publications/delete/${id}`;
     const headers = this.getHeaders();
     return this.http.delete(url, { headers });
+  }
+
+  getCountPublications(): Observable<number> {
+    const url = `${this.baseUrl}/publications/count`;
+    const headers = this.getHeaders();
+    return this.http.get<number>(url, { headers });
   }
 
   private viewAll(page: number, size: number): Observable<PublicationView[]> {

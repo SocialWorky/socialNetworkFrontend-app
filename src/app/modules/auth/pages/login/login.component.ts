@@ -1,23 +1,24 @@
 import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { WorkyButtonType, WorkyButtonTheme } from '../../../shared/buttons/models/worky-button-model';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthGoogleService } from '../../services/auth-google.service';
-import { AlertService } from '../../../shared/services/alert.service';
 
-import { AuthApiService } from '../../services/apiLogin.service';
-import { LoginData } from '../../interfaces/login.interface';
-import { translations } from '../../../../../translations/translations';
-import { Alerts, Position } from '../../../shared/enums/alerts.enum';
-import { AuthService } from '../../services/auth.service';
-import { MailSendValidateData } from '../../../shared/interfaces/mail.interface';
-import { environment } from '../../../../../environments/environment';
+import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
+import { AuthGoogleService } from '@auth/services/auth-google.service';
+import { AlertService } from '@shared/services/alert.service';
+import { AuthApiService } from '@auth/services/apiLogin.service';
+import { LoginData } from '@auth/interfaces/login.interface';
+import { translations } from '@translations/translations';
+import { Alerts, Position } from '@shared/enums/alerts.enum';
+import { AuthService } from '@auth/services/auth.service';
+import { MailSendValidateData } from '@shared/interfaces/mail.interface';
+import { environment } from '@env/environment';
 import { ResetPasswordModalComponent } from './reset-password-modal/reset-password-modal.component';
-import { TemplateEmail } from '../../../shared/interfaces/mail.interface';
+import { TemplateEmail } from '@shared/interfaces/mail.interface';
+import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 
 @Component({
   selector: 'worky-login',
@@ -54,6 +55,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private _authGoogleService: AuthGoogleService,
     private _authService: AuthService,
     private _dialog: MatDialog,
+    private _deviceDetectionService: DeviceDetectionService,
   ) { 
 
     if (this.token) {
@@ -63,7 +65,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.checkSessionGoogle();
-    this._activatedRoute.paramMap.subscribe(params => {
+     this.subscription.add(this._activatedRoute.paramMap.subscribe(params => {
       const tokenPassword = params.get('tokenPassword');
       const token = params.get('token');
       if (token) {
@@ -72,7 +74,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       if (tokenPassword) {
         this.openResetPasswordModal(tokenPassword);
       }
-    });
+    }));
 
     this.loginForm = this._formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
@@ -129,7 +131,12 @@ export class LoginComponent implements OnInit, OnDestroy {
       next: (response: any) => {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
-          this._router.navigate(['/home']);
+          const token = this._authService.getDecodedToken();
+          if (token?.role === 'admin' && !this._deviceDetectionService.isMobile()) {
+            this._router.navigate(['/admin']);
+          } else {
+            this._router.navigate(['/home']);
+          }
         }
       },
       error: (e: any) => {

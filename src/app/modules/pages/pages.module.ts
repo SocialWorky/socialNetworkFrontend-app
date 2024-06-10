@@ -11,13 +11,14 @@ import { ContentRightSideComponent } from './components/content-right-side/conte
 import { ProfilesComponent } from './profiles/profiles.component';
 
 import { WorkyMenuComponentComponent } from './components/navbar/worky-menu-component/worky-menu-component.component';
-import { WorkyDropdownModule } from '../shared/worky-dropdown/worky-dropdown.module';
-import { TranslationsModule } from '../shared/translations/translations.module';
-import { WorkyAvatarModule } from '../shared/worky-avatar/worky-avatar.module';
-import { AddPublicationModule } from '../shared/addPublication/addPublication.module';
-import { WorkyWidgetModule } from 'src/app/modules/shared/worky-widget/worky-widget.module';
-import { PublicationViewModule } from '../shared/publication-view/publication-view.module';
-import { SideLeftModule } from '../shared/side-left/side-left.module';
+import { SideLeftModule } from '@shared/modules/side-left/side-left.module';
+import { WorkyDropdownModule } from '@shared/modules/worky-dropdown/worky-dropdown.module';
+import { TranslationsModule } from '@shared/modules/translations/translations.module';
+import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.module';
+import { AddPublicationModule } from '@shared/modules/addPublication/addPublication.module';
+import { WorkyWidgetModule } from '@shared/modules/worky-widget/worky-widget.module';
+import { PublicationViewModule } from '@shared/modules/publication-view/publication-view.module';
+
 
 @NgModule({
   declarations: [
@@ -38,8 +39,8 @@ import { SideLeftModule } from '../shared/side-left/side-left.module';
     TranslationsModule,
     WorkyAvatarModule,
     AddPublicationModule,
-    WorkyWidgetModule,
     PublicationViewModule,
+    WorkyWidgetModule,
     SideLeftModule
   ]
 })

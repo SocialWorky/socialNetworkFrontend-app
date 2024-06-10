@@ -1,0 +1,30 @@
+<div class="gallery-lightbox-container" *ngIf="images">
+  <div class="gallery">
+    <ng-container *ngFor="let image of images; let last = last">
+      <ng-container *ngIf="isImageUrl(image.urlThumbnail)">
+          <img 
+            [src]="urlMediaApi + image.urlCompressed"
+            (click)="openImage(image)"
+            alt="Image">
+      </ng-container>
+    </ng-container>
+  </div>
+</div>
+
+
+
+<div *ngIf="images">
+  <ng-container *ngFor="let image of images; let last = last">
+    <ng-container *ngIf="isVideoUrl(image.url)">
+      <div class="video-container">
+        <video [src]="urlMediaApi + image.url" controls loading="lazy" (loadedmetadata)="videoLoaded($event)">
+          <source type="video/mp4">
+          Tu navegador no soporta el elemento <code>video</code>.
+        </video>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>
+
+
+

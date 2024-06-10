@@ -46,4 +46,9 @@ export class GeoLocationsService {
     return this.http.get<any>(url);
   }
 
+  findLocationByCity(city: string): Observable<any> {
+    const url = `${this.baseUrl}/locations/${city}`;
+    return this.http.get<any>(url);
+  }
+
 }

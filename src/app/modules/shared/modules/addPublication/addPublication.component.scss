@@ -1,0 +1,208 @@
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'src/assets/styles/worky-variables.scss' as variables;
+
+
+.publishing-container {
+  padding: 16px;
+  .publishing-header {
+    display: flex;
+    align-items: center;
+
+    ::ng-deep worky-avatar {
+      margin: 10px;
+    }
+
+    .user-name-content {
+      .name {
+        font-size: 1rem;
+        font-weight: 500;
+        color: color.$worky-color-indigo;
+      }
+
+      .geoLocationName {
+        font-size: 0.8rem;
+        color: color.$worky-color-navy;
+        span {
+          font-weight: 700;
+        }
+      }
+
+      .form-select {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 130px;
+        margin-top: 2px;
+        background: color.$worky-color-greyLight;
+        border: 1px solid color.$worky-color-grey;
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 14px;
+        line-height: normal;
+        cursor: pointer;
+      }
+    }
+
+    .dropdown {
+      ul {
+        li {
+          padding: 3px 0;
+          cursor: pointer;
+
+          &:hover {
+            background: color.$worky-color-greyLight;
+          }
+          .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            font-size: 14px;
+            color: color.$worky-color-dark;
+            i {
+              margin-right: 10px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .publishing-body {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    .textarea-container {
+      display: flex;
+      align-items: center;
+      position: relative;
+      flex: 1;
+      margin-top: 10px;
+      gap: 10px;
+
+      .publishing-textarea {
+        width: 100%;
+        box-sizing: border-box;
+        border-radius: 8px;
+        border: 1px solid color.$worky-color-light;
+        resize: none;
+        overflow: hidden;
+        padding: 8px;
+        background: color.$worky-color-greyLight;
+        color: color.$worky-color-dark;
+      }
+
+      .publishing-textarea:focus {
+        outline: none;
+      }
+    }
+
+    .previews {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .preview {
+      position: relative;
+      margin: 10px;
+      width: 100px;
+      height: 100px;
+      overflow: hidden;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .remove-button {
+      position: absolute;
+      cursor: pointer;
+      top: 5px;
+      right: 5px;
+      color: red;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+    }
+
+
+    .extra-content {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin: 5px;
+      gap: 2px;
+      padding: 5px;
+      border: 1px solid color.$worky-color-greyLight;
+      border-radius: 8px;
+
+      .extra-content-item {
+
+        @include breakpoints.below-sm {
+          .material-icons {
+            font-size: 35px;
+          }
+        }
+
+        display: flex;
+        border-radius: 50%;
+        padding: 2px;
+        &:hover {
+          background: color.$worky-color-greyLight;
+        }
+      }
+
+      .emoji-icon {
+        color: color.$worky-color-grey;
+        cursor: pointer;
+        :hover {
+          color: color.$worky-color-indigo;
+        }
+      }
+      .emoji-menu {
+        position: absolute;
+        top: 100%;
+        right: 8px;
+        z-index: 1;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .location-on {
+        color: map-get(color.$worky-red, 56);
+        cursor: pointer;
+        :hover {
+          color: map-get(color.$worky-red, 9);
+        }
+      }
+
+      .file-upload {
+        color: map-get(color.$worky-green, 56);
+        cursor: pointer;
+        :hover {
+          color: map-get(color.$worky-green, 9);
+        }
+      }
+
+    }
+  }
+
+  .comment-body {
+    padding: 5px;
+    .textarea-container {
+      textarea {
+        height: 35px!important;
+      }
+    }
+  }
+
+  .publishing-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+}

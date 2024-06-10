@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { Token } from '../../shared/interfaces/token.interface';
+import { AuthGoogleService } from './auth-google.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,9 +14,13 @@ export class AuthService {
     throw new Error('Method not implemented.');
   }
 
+  googleLoginSession = localStorage.getItem('googleLogin');
+
   constructor(
     private router: Router,
     private http: HttpClient,
+    private _authGoogleService: AuthGoogleService,
+    private _router: Router
   ) {}
 
   isAuthenticated(): boolean {
@@ -96,4 +101,12 @@ export class AuthService {
       return false;
     }
   }
+
+  logout() {
+    if (this.googleLoginSession) this._authGoogleService.logout();
+    localStorage.removeItem('token');
+    localStorage.removeItem('googleLogin');
+    this._router.navigate(['/auth']);
+  }
+
 }

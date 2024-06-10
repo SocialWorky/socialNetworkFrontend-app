@@ -1,0 +1,148 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-publication-view {
+  .publication-header {
+    display: flex;
+    padding: 16px;
+    align-items: center;
+    gap: 1rem;
+    .publication-header-content {
+      .user-name-content {
+        .name {
+          font-size: variables.$worky-font-size-5;
+          color: colors.$worky-color-navy;
+         }
+        .geoLocationName {
+          font-size: variables.$worky-font-size-3;
+          color: colors.$worky-color-navy;
+          .urlLink {
+            color: colors.$worky-color-blue;
+            font-weight: 500;
+          }
+        }
+      }
+      .publication-date {
+        font-size: variables.$worky-font-size-0;
+        color: colors.$worky-color-navy;
+      }
+    }
+    .publication-header-actions {
+      margin-left: auto;
+    }
+  }
+
+  .publication-body {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    overflow: auto;
+    .publication-content {
+      padding: 16px;
+      .content {
+        width: 98%;
+        overflow: hidden;
+      }
+    }
+  }
+
+  .publication-footer {
+    .publication-footer-content {
+      display: flex;
+      justify-content: space-between;
+      padding: 0px 16px 0px 16px;
+      .publication-footer-content-item {
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        gap: 0.2rem;
+        color: colors.$worky-color-navy;
+        cursor: pointer;
+        i {
+          font-size: 15px;
+        }
+      }
+    }
+
+    .publication-footer-actions {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 1rem;
+      border-top: 1px solid colors.$worky-color-grey;
+      border-bottom: 1px solid colors.$worky-color-grey;
+      .publication-footer-actions-item {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+        padding: 8px 20px;
+        border-radius: variables.$worky-border-radius-medium;
+        color: colors.$worky-color-navy;
+        cursor: pointer;
+        &:hover {
+          color: colors.$worky-color-blue;
+          background-color: colors.$worky-color-greyLight;
+        }
+
+        ::ng-deep worky-dropdown {
+          .dropdown-menu {
+            inset: 7px -26px auto auto!important;
+          }
+          .nav-link {
+            span {
+              color: colors.$worky-color-navy;
+            }
+            &:hover span {
+              color: colors.$worky-color-blue;
+            }
+          }
+
+        }
+
+      }
+      @include breakpoints.below-sm {
+        .publication-footer-actions-item {
+          padding: 8px 5px;
+        }
+      }
+    }
+
+  }
+
+  .publication-comment {
+    margin-top: 15px;
+    padding: 16px;
+    .publication-comment-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+      .publication-comment-content {
+         width: 100%;
+        .publication-comment-data {
+          padding: 0.5rem 1rem;
+          display: flex;
+          flex-direction: column;
+          background-color: colors.$worky-color-greyLight;
+          border-radius: 12px;
+          span {
+            font-size: variables.$worky-font-size-2;
+          }
+          .comment-author {
+            color: colors.$worky-color-blue;
+          }
+        }
+        .comment-date {
+          margin-left: 5px;
+          font-size: variables.$worky-font-size-0;
+          color: colors.$worky-color-navy;
+        }
+      }
+    }
+  }
+
+  ::ng-deep worky-dropdown {
+    .nav-link span {
+      color: colors.$worky-color-navy;
+    }
+  }
+}

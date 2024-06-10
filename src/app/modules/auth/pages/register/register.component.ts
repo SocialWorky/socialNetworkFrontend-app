@@ -1,17 +1,17 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { WorkyButtonType, WorkyButtonTheme } from '../../../shared/buttons/models/worky-button-model';
-import { RegisterData } from '../../interfaces/register.interface';
-import { AuthApiRegisterService } from '../../services/apiRegister.service';
-
-import { environment } from '../../../../../environments/environment';
-import { RoleUser } from '../../models/roleUser.enum';
-import { MailSendValidateData } from '../../../shared/interfaces/mail.interface';
-import { AlertService } from '../../../shared/services/alert.service';
-import { translations } from '../../../../../translations/translations';
-import { Alerts, Position } from '../../../shared/enums/alerts.enum';
-import { TemplateEmail } from '../../../shared/interfaces/mail.interface';
 import { LoadingController } from '@ionic/angular';
+
+import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
+import { RegisterData } from '@auth/interfaces/register.interface';
+import { AuthApiRegisterService } from '@auth/services/apiRegister.service';
+import { environment } from '@env/environment';
+import { RoleUser } from '@auth/models/roleUser.enum';
+import { MailSendValidateData } from '@shared/interfaces/mail.interface';
+import { AlertService } from '@shared/services/alert.service';
+import { translations } from '@translations/translations';
+import { Alerts, Position } from '@shared/enums/alerts.enum';
+import { TemplateEmail } from '@shared/interfaces/mail.interface';
 
 @Component({
   selector: 'worky-register',

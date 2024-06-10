@@ -119,5 +119,19 @@ export const translations = {
   'DATE_FNS.X_DAYS': '{{count}} d',
   'DATE_FNS.X_MONTHS': '{{count}} meses',
   'DATE_FNS.X_YEARS': '{{count}} años',
-  'DATE_FNS.UNKNOWN': 'hace algún tiempo'
+  'DATE_FNS.UNKNOWN': 'hace algún tiempo',
+  // ADMIN MODULE
+  'admin.sidemenu-title': 'Worky',
+  'admin.sidemenu-subTitle': 'Sistema de administración',
+  'admin.sidemenu-welcome': 'Bienvenido:',
+  'admin.statistics.group-usersRegister': 'Usuarios Registrados',
+  'admin.statistics.group-publicationsTitle': 'Publicaciones',
+  'admin.statistics.group-usersReport': 'Usuarios Reportados',
+  'admin.lastRegisteredUsers-title': 'Últimos 5 usuarios registrados',
+  'admin.lastRegisteredUsers-user': 'Usuario',
+  'admin.lastRegisteredUsers-status': 'Estado',
+  'admin.lastRegisteredUsers-email': 'Correo',
+  'admin.lastRegisteredUsers-createdAt': 'Fecha de registro',
+  'admin.lastRegisteredUsers-validated': 'Validado',
+  'admin.lastRegisteredUsers-pending': 'Pendiente',
 };

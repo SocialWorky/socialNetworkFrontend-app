@@ -1,0 +1,123 @@
+<div class="content-publication-view">
+
+  <div class="publication-header">
+    <worky-avatar 
+      [size]="40"
+      img="{{ publication?.author?.avatar }}"
+      name="{{ publication?.author?.name }} {{ publication?.author?.lastName }} ">
+    </worky-avatar>
+
+    <div class="publication-header-content">
+      <div class="user-name-content">
+        <span class="name">{{ publication?.author?.name }} {{ publication?.author?.lastName }}</span>
+        <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> está en <a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
+      </div>
+      <div class="publication-date">
+        <span>{{ publication?.createdAt! | workyRelativeTime }}</span>
+      </div>
+    </div>
+
+    <div class="publication-header-actions">
+
+      <worky-dropdown
+        icon="more_horiz"
+        [badge]=false
+        (click)="checkDataLink(publication?.author?._id!)"
+        [dataLink]="dataLinkActions"
+        (linkClicked)="handleActionsClicked($event, publication)">
+      </worky-dropdown>
+
+    </div>
+
+  </div>
+
+  <div class="publication-body">
+    <div class="publication-content">
+      <div class="content" [innerHTML]="publication?.content | workyProcessContent"></div>
+    </div>
+
+    <worky-image-organizer *ngIf="publication?.media?.length"
+      [images]="publication?.media">
+    </worky-image-organizer>
+
+    <div class="publication-url-preview">
+      <div class="content" [innerHTML]="publication?.content | workyPreviewHtml"></div>
+    </div>
+
+  </div>
+
+  <div class="publication-footer">
+    <div class="publication-footer-content">
+
+      <div class="publication-footer-content-item" *ngIf="publication?.reaction?.length">
+        <i class="material-icons">mood</i>
+        <span>{{ publication?.reaction?.length }}</span>
+      </div>
+
+      <div class="publication-footer-content-item" *ngIf="publication?.comment?.length"
+        (click)="viewCommentsOn(indexPublication!)">
+        <span> {{ publication?.comment?.length }} </span>
+        <span> {{ 'publicationsView.spanComments' | workyTranslations }} </span>
+      </div>
+
+    </div>
+
+    <div class="publication-footer-actions">
+
+      <div class="publication-footer-actions-item">
+        <i class="material-icons">mood</i>
+        <span>{{ 'publicationsView.spanReaction' | workyTranslations }}</span>
+      </div>
+
+      <div class="publication-footer-actions-item"
+        (click)="commentOn(indexPublication!)">
+        <i class="material-icons">comment</i>
+        <span>{{ 'publicationsView.spanComment' | workyTranslations }}</span>
+      </div>
+
+      <div class="publication-footer-actions-item">
+        <worky-dropdown
+          icon="share"
+          [title]="'publicationsView.spanShare' | workyTranslations"
+          [badge]=false
+          (click)="checkDataLink(publication?.author?._id!)"
+          [dataLink]="dataShareActions"
+          (linkClicked)="handleActionsClicked($event, publication)">
+        </worky-dropdown>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="publication-comment-on" *ngIf="viewCommentSection === indexPublication">
+     <worky-add-publication 
+        [type]="typePublishing.COMMENT"
+        [idPublication]="publication?._id"
+        [indexPublication]="indexPublication">
+     </worky-add-publication>
+  </div>
+
+  <div class="publication-comment" *ngIf="viewComments === indexPublication">
+    <div class="publication-comment-item" *ngFor="let comment of publication?.comment">
+
+      <worky-avatar 
+        [size]="30"
+        img="{{ comment?.author?.avatar }}"
+        name="{{ comment?.author?.name }} {{ comment?.author?.lastName }} ">
+      </worky-avatar>
+
+      <div class="publication-comment-content">
+        <div class="publication-comment-data">
+          <span class="comment-author">{{ comment?.author?.name }} {{ comment?.author?.lastName }}</span>
+          <span class="comment-content">{{ comment?.content }}</span>
+              <worky-image-organizer 
+                [images]="comment?.media">
+              </worky-image-organizer>
+        </div>
+        <span class="comment-date">{{ comment?.createdAt | workyRelativeTime }}</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
