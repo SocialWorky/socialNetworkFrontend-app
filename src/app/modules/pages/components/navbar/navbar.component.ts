@@ -45,8 +45,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.isMobile = this._deviceDetectionService.isMobile();
       this._cdr.markForCheck();
     });
-    this.notifications = 2;
-    this.messages = 1;
+    this.notifications = 0;
+    this.messages = 0;
     this.checkAdminDataLink();
   }
 
