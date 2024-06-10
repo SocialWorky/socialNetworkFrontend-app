@@ -1,6 +1,6 @@
-import { Token } from '../interfaces/token.interface';
+import { Token } from '@shared/interfaces/token.interface'
 import { Component } from '@angular/core';
-import { AuthService } from '../../auth/services/auth.service';
+import { AuthService } from '@auth/services/auth.service';
 
 @Component({
   selector: 'side-left',
