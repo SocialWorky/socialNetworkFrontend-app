@@ -1,35 +1,28 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-
 import { environment } from '@env/environment';
 import { CreatePost } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PublicationService {
+  private publicationsSubject: BehaviorSubject<PublicationView[]> = new BehaviorSubject<PublicationView[]>([]);
+  public publications$: Observable<PublicationView[]> = this.publicationsSubject.asObservable().pipe(distinctUntilChanged());
 
-  publicationsSubject: BehaviorSubject<PublicationView[]> = new BehaviorSubject<PublicationView[]>([]);
+  private baseUrl: string = environment.API_URL;
+  private token: string = localStorage.getItem('token') || '';
 
-  publications$: Observable<PublicationView[]> = this.publicationsSubject.asObservable();
-
-
-  private baseUrl: string;
-  private token: string;
-
-  constructor(private http: HttpClient) {
-    this.baseUrl = environment.API_URL;
-    this.token = localStorage.getItem('token') || '';
-  }
+  constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
     const token = this.token;
-    const headers = new HttpHeaders({
+    return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    return headers;
   }
 
   createPost(post: CreatePost) {
@@ -57,7 +50,7 @@ export class PublicationService {
   }
 
   private viewAll(page: number, size: number): Observable<PublicationView[]> {
-    const url = `${this.baseUrl}/publications/all?page=${page}&pageSize=${size}`;
+    const url = `${this.baseUrl}/publications/all?page=${page}&pageSize=${size}&type=all`;
     const headers = this.getHeaders();
     return this.http.get<PublicationView[]>(url, { headers });
   }
@@ -73,5 +66,7 @@ export class PublicationService {
     }
   }
 
-
+  updatePublications(newPublications: PublicationView[]): void {
+    this.publicationsSubject.next(newPublications);
+  }
 }

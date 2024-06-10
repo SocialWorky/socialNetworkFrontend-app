@@ -12,6 +12,7 @@ export interface PublicationView {
     reaction:    any[];
     taggedUsers: any[];
     comment:     any[];
+    isMyFriend?: any;
 }
 
 export interface Author {

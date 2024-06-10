@@ -1,9 +1,7 @@
-import { ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
-
-
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { AuthService } from '@auth/services/auth.service';
 import { PublicationService } from '@shared/services/publication.service';
@@ -13,7 +11,7 @@ import { TypePublishing, TypePrivacy } from './enum/addPublication.enum';
 import { Token } from '@shared/interfaces/token.interface';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
-import { CreateComment} from '@shared/interfaces/addComment.interface';
+import { CreateComment } from '@shared/interfaces/addComment.interface';
 import { NotificationCommentService } from '@shared/services/notificationComment.service';
 import { LocationSearchComponent } from '../location-search/location-search.component';
 import { ExtraData } from '@shared/modules/addPublication/interfaces/createPost.interface';
@@ -27,13 +25,13 @@ import { MediaFileUpload } from '@shared/interfaces/publicationView.interface';
   templateUrl: './addPublication.component.html',
   styleUrls: ['./addPublication.component.scss'],
 })
-export class AddPublicationComponent  implements OnInit {
+export class AddPublicationComponent implements OnInit, OnDestroy {
   WorkyButtonType = WorkyButtonType;
-
+  
   WorkyButtonTheme = WorkyButtonTheme;
 
   userName: string = '';
-
+  
   nameGeoLocation: string = '';
 
   dataGeoLocation: string = '';
@@ -61,40 +59,42 @@ export class AddPublicationComponent  implements OnInit {
     privacy: [''],
     authorId: [''],
     extraData: [''],
-   });
+  });
 
   private unsubscribe$ = new Subject<void>();
 
   @Input() type: TypePublishing | undefined;
-
   @Input() idPublication?: string;
-
   @Input() indexPublication?: number;
 
   @ViewChild('postText') postTextRef!: ElementRef;
-  
+
   constructor(
-      private _fb: FormBuilder,
-      private _authService: AuthService,
-      private _publicationService: PublicationService,
-      private _commentService: CommentService,
-      private _alertService: AlertService,
-      private _loadingCtrl: LoadingController,
-      private _notificationCommentService: NotificationCommentService,
-      private _dialog: MatDialog,
-      private _cdr: ChangeDetectorRef,
-      private _fileUploadService: FileUploadService,
-    ) { 
+    private _fb: FormBuilder,
+    private _authService: AuthService,
+    private _publicationService: PublicationService,
+    private _commentService: CommentService,
+    private _alertService: AlertService,
+    private _loadingCtrl: LoadingController,
+    private _notificationCommentService: NotificationCommentService,
+    private _dialog: MatDialog,
+    private _cdr: ChangeDetectorRef,
+    private _fileUploadService: FileUploadService,
+  ) {
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
       this.decodedToken = this._authService.getDecodedToken();
       this.userName = this.decodedToken.name;
     }
-    }
+  }
 
-  // eslint-disable-next-line @angular-eslint/no-empty-lifecycle-method
   ngOnInit() {
-    this.postPrivacy(TypePrivacy.PUBLIC)
+    this.postPrivacy(TypePrivacy.PUBLIC);
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   ngAfterViewInit() {
@@ -118,17 +118,15 @@ export class AddPublicationComponent  implements OnInit {
   }
 
   async onSave() {
-
     this.myForm.controls['authorId'].setValue(this.decodedToken.id);
     this.myForm.controls['privacy'].setValue(this.privacy);
 
-    if (this.type === TypePublishing.POST){
+    if (this.type === TypePublishing.POST) {
       this.onSavePublication();
     }
-    if (this.type === TypePublishing.COMMENT){
+    if (this.type === TypePublishing.COMMENT) {
       this.onSaveComment(this.idPublication as string);
     }
-
   }
 
   private async onSaveComment(idPublication: string) {
@@ -171,7 +169,7 @@ export class AddPublicationComponent  implements OnInit {
 
           const publications = await this._publicationService.getAllPublications(1, 10);
           publications[this.indexPublication!].comment.unshift(message.comment);
-          this._publicationService.publicationsSubject.next(publications);
+          this._publicationService.updatePublications(publications);
 
           if (message.message === 'Comment created successfully') {
             this.myForm.controls['content'].setValue('');
@@ -251,7 +249,7 @@ export class AddPublicationComponent  implements OnInit {
           }
 
           const publicationsNew = await this._publicationService.getAllPublications(1, 10);
-          this._publicationService.publicationsSubject.next(publicationsNew);
+          this._publicationService.updatePublications(publicationsNew);
 
           if (message.message === 'Publication created successfully') {
             this.myForm.controls['content'].setValue('');
@@ -276,10 +274,8 @@ export class AddPublicationComponent  implements OnInit {
         console.error(error);
         loadingPublications.dismiss();
       },
-    });  
-
+    });
   }
-
 
   autoResize() {
     const postText = this.postTextRef.nativeElement as HTMLTextAreaElement;
@@ -292,7 +288,6 @@ export class AddPublicationComponent  implements OnInit {
   }
 
   postPrivacy(privacy: string): void {
-
     if (privacy === TypePrivacy.PUBLIC) {
       this.privacy = TypePrivacy.PUBLIC;
       this.privacyFront = `<i class="material-icons">language</i> ${translations['publishing.privacy-public']} <i class="material-icons">arrow_drop_down</i>`;
@@ -305,10 +300,9 @@ export class AddPublicationComponent  implements OnInit {
       this.privacy = TypePrivacy.PRIVATE;
       this.privacyFront = `<i class="material-icons">lock</i> ${translations['publishing.privacy-private']} <i class="material-icons">arrow_drop_down</i>`;
     }
-
   }
 
-openLocationSearch() {
+  openLocationSearch() {
     const dialogRef = this._dialog.open(LocationSearchComponent, {
       width: '400px',
     });
@@ -318,7 +312,6 @@ openLocationSearch() {
         const lat = result.geometry?.lat ? result.geometry.lat : result.lat;
         const lng = result.geometry?.lng ? result.geometry.lng : result.lng;
 
-        //const urlMap = 'https://www.google.com/maps/place/' + result.formatted.split(',')[0];
         const urlMap = `https://www.google.com/maps/?q=${result.formatted}&ll=${lat},${lng}`;
         this.dataGeoLocation = urlMap;
         this.nameGeoLocation = result.formatted.split(',')[0];
@@ -327,43 +320,41 @@ openLocationSearch() {
     });
   }
 
-openUploadModal() {
-  const dialogRef = this._dialog.open(ImageUploadModalComponent, {
-    data: {
-      maxFiles: this.type === TypePublishing.POST ? 10 : 1,
-    }
-  });
+  openUploadModal() {
+    const dialogRef = this._dialog.open(ImageUploadModalComponent, {
+      data: {
+        maxFiles: this.type === TypePublishing.POST ? 10 : 1,
+      }
+    });
 
-  dialogRef.afterClosed().subscribe(result => {
-    if (result) {
-      this.selectedFiles = result;
-      this.previews = [];
-      this.selectedFiles.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          const fileType = file.type.split('/')[0];
-          if (fileType === 'image') {
-            this.previews.push({
-              type: 'image',
-              url: e.target.result
-            });
-          } else if (fileType === 'video') {
-            this.previews.push({
-              type: 'video',
-              url: e.target.result
-            });
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-  });
-}
-
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.selectedFiles = result;
+        this.previews = [];
+        this.selectedFiles.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = (e: any) => {
+            const fileType = file.type.split('/')[0];
+            if (fileType === 'image') {
+              this.previews.push({
+                type: 'image',
+                url: e.target.result
+              });
+            } else if (fileType === 'video') {
+              this.previews.push({
+                type: 'video',
+                url: e.target.result
+              });
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    });
+  }
 
   removeFile(index: number) {
     this.selectedFiles.splice(index, 1);
     this.previews.splice(index, 1);
   }
-
 }
