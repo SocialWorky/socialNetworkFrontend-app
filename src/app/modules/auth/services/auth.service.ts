@@ -10,6 +10,9 @@ import { AuthGoogleService } from './auth-google.service';
   providedIn: 'root'
 })
 export class AuthService {
+  getUserName(): string {
+    throw new Error('Method not implemented.');
+  }
 
   googleLoginSession = localStorage.getItem('googleLogin');
 

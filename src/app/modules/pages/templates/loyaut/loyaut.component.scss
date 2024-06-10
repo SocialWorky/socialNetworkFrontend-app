@@ -16,7 +16,7 @@
 ::ng-deep worky-content-left-side,
 ::ng-deep worky-content-right-side {
   width: variables.$worky-container-width-sidebar;
-  display: flex;
+  display: block;
   justify-content: space-around;
   @include breakpoints.below-md {
     display: none;

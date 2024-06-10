@@ -5,9 +5,7 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: './content-left-side.component.html',
   styleUrls: ['./content-left-side.component.scss'],
 })
-export class ContentLeftSideComponent  {
+export class ContentLeftSideComponent{
 
   constructor() { }
-
-
 }
