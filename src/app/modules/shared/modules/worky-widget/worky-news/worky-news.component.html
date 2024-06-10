@@ -1,18 +1,18 @@
-<div class="container-widget content-news worky-module-container">
+<div *ngIf="articles.length" class="container-widget content-news worky-module-container">
   <div *ngFor="let article of articles" class="news-article">
     <div class="news-card">
-      <img class="news-image" [src]="article.urlToImage" alt="Imagen de noticia" *ngIf="article.urlToImage">
+      <img class="news-image" [src]="article.image_url" alt="Imagen de noticia" *ngIf="article.image_url">
       <div class="news-card-content">
         <h3 class="news-title">{{ article.title }}</h3>
-        <p class="news-date">{{ article.publishedAt | date:'short' }}</p>
+        <p class="news-date">{{ article.pubDate| date:'short' }}</p>
         <p class="news-description">{{ article.description }}</p>
-        <a class="news-read-more" [href]="article.url" target="_blank">Leer más</a>
+        <a class="news-read-more" [href]="article.link" target="_blank">Leer más</a>
       </div>
     </div>
   </div>
 </div>
 
 <div *ngIf="!articles.length">
-  <p>Cargando noticias...</p>
+  <div class="loader"></div>
 </div>
 

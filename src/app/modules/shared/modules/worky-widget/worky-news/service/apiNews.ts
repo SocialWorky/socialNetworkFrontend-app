@@ -1,19 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { NewsResponse } from '../interface/dataNews.interface';
+import { NewsArticle } from '../interface/dataNews.interface';
+import { environment } from '@env/environment';
 
 
 @Injectable({
     providedIn: 'root'
 })
 export class NewsService {
-    private apiUrl = 'https://newsapi.org/v2/top-headlines';
-    private apiKey = 'b622b6a2f70745199032c7267f98df6b'; // Reemplaza con tu API key de NewsAPI b622b6a2f70745199032c7267f98df6b
+    private apiUrl = `${environment.APIGEOLOCATIONS}/news`;
 
     constructor(private http: HttpClient) {}
 
-    getTopSportsHeadlines(): Observable<NewsResponse> {
-        return this.http.get<NewsResponse>(`${this.apiUrl}?sources=bbc-news&apiKey=${this.apiKey}`);
+    getNews(date: string): Observable<NewsArticle[]> {
+      return this.http.get<NewsArticle[]>(`${this.apiUrl}/${date}`);
+    }
+
+    getFetchNews(): Observable<any> {
+      return this.http.get<NewsArticle[]>(`${this.apiUrl}/fetch`);
     }
 }

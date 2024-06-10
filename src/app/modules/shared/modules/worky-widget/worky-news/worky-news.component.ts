@@ -10,12 +10,18 @@ import { NewsArticle } from './interface/dataNews.interface';
 export class WorkyNewsComponent implements OnInit {
   articles: NewsArticle[] = [];
 
-  constructor(private newsService: NewsService) {}
+  constructor(private _newsService: NewsService) {}
 
   ngOnInit() {
-    this.newsService.getTopSportsHeadlines().subscribe((response) => {
-      console.log('Response from API:', response);
-      this.articles = response.articles;
+    const date = new Date().toISOString().split('T')[0];
+    this._newsService.getNews(date).subscribe((articles) => {
+      if (articles.length > 0) {
+        this.articles = articles;
+      } else {
+        this._newsService.getFetchNews().subscribe((articles) => {
+          this.articles = articles;
+        });
+      }
     });
   }
 }

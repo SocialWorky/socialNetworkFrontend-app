@@ -32,7 +32,12 @@
     }
 
     .news-description {
-        margin-bottom: 15px;
+      margin-bottom: 15px;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 4;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .news-read-more {
