@@ -33,13 +33,13 @@
     position: relative;
 }
 
-.edit-button-container {
+.edit-button-container, .follow-button-container {
     display: flex;
     flex-direction: column;
     text-align: right;
 }
 
-.edit-button {
+.edit-button, .follow-button, .add-friend-button {
     display: flex;
     justify-content: center;
     max-height: max-content;
@@ -53,7 +53,7 @@
     transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.edit-button:hover {
+.edit-button:hover, .follow-button:hover, .add-friend-button:hover {
     border-color: #1d4ed8;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -135,3 +135,4 @@
 .text-gray-600 {
     color: #4b5563;
 }
+

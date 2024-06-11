@@ -9,9 +9,17 @@
                     <worky-avatar [size]="100"></worky-avatar>
                 </div>
             </div>
-            <div class="edit-button-container">
+            <div class="edit-button-container" *ngIf="isCurrentUser">
                 <button class="edit-button" (click)="abrirFormulario()">
                     Edit Profile
+                </button>
+            </div>
+            <div class="follow-button-container" *ngIf="!isCurrentUser">
+                <button class="follow-button" (click)="followUser()">
+                    Follow
+                </button>
+                <button class="add-friend-button" (click)="addFriend()">
+                    Add Friend
                 </button>
             </div>
         </div>
@@ -38,7 +46,7 @@
                     <span class="count">520</span><span> Following</span>
                 </div>
                 <div class="followers">
-                    <span class="count">23,4m </span><span> Followers</span>
+                    <span class="count">23,4m</span><span> Followers</span>
                 </div>
             </div>
         </div>
@@ -46,4 +54,3 @@
     <hr>
 </div>
 
-<worky-home></worky-home>
