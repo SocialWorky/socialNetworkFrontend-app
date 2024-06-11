@@ -12,16 +12,29 @@ export class WorkyNewsComponent implements OnInit {
 
   constructor(private _newsService: NewsService) {}
 
-  ngOnInit() {
-    const date = new Date().toISOString().split('T')[0];
-    this._newsService.getNews(date).subscribe((articles) => {
-      if (articles.length > 0) {
-        this.articles = articles;
-      } else {
-        this._newsService.getFetchNews().subscribe((articles) => {
+ngOnInit() {
+  const currentDate = new Date();
+  const date = currentDate.toISOString().split('T')[0];
+
+  this._newsService.getNews(date).subscribe((articles) => {
+    if (articles.length) {
+      this.articles = articles;
+    } else {     
+      const previousDate = new Date(currentDate);
+      previousDate.setDate(currentDate.getDate() - 1);
+      const previousDateString = previousDate.toISOString().split('T')[0];
+      
+      this._newsService.getNews(previousDateString).subscribe((articles) => {
+        if (articles.length) {
           this.articles = articles;
-        });
-      }
-    });
-  }
+        } else {
+          this._newsService.getFetchNews().subscribe((articles) => {
+            this.articles = articles;
+          });
+        }
+      });
+    }
+  });
+}
+
 }
