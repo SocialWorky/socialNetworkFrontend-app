@@ -12,7 +12,12 @@ export class EditImgComponent implements OnInit {
 
   constructor() {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    const savedImage = localStorage.getItem('savedImage');
+    if (savedImage) {
+      this.imageSrc = savedImage;
+    }
+  }
 
   loadImage(event: any): void {
     const file = event.target.files[0];
@@ -20,6 +25,7 @@ export class EditImgComponent implements OnInit {
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.imageSrc = e.target.result;
+        localStorage.setItem('savedImage', this.imageSrc); // Guardar en localStorage
       };
       reader.readAsDataURL(file);
       this.dialogVisible = false;
@@ -36,6 +42,7 @@ export class EditImgComponent implements OnInit {
 
   removeImage(): void {
     this.imageSrc = ''; // O pon una imagen predeterminada de "sin imagen"
+    localStorage.removeItem('savedImage'); // Remover de localStorage
     this.dialogVisible = false;
   }
 }

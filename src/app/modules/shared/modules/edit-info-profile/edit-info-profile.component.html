@@ -1,22 +1,24 @@
 <div class="container">
-  <form [formGroup]="editProfileForm" (ngSubmit)="guardarCambios()">
-    <div class="form-group">
-      <label for="titulo">Título</label>
-      <input type="text" id="titulo" formControlName="titulo" class="form-control" placeholder="Oscar.dev">
+  <div *ngIf="!isSaved; else savedMessage">
+    <form [formGroup]="editProfileForm" (ngSubmit)="guardarCambios()">
+      <div class="form-group">
+        <label for="titulo">Título</label>
+        <input type="text" id="titulo" formControlName="titulo" class="form-control" placeholder="Oscar.dev">
+      </div>s
+      <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <textarea id="descripcion" formControlName="descripcion" class="form-control" rows="3" placeholder="Software Engineer / Designer / Entrepreneur"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="url">URL</label>
+        <input type="text" id="url" formControlName="url" class="form-control" placeholder="https://dev.worky.cl/auth/login">
+      </div>
+      <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    </form>
+  </div>
+  <ng-template #savedMessage>
+    <div class="alert alert-success" role="alert">
+      Cambios guardados exitosamente.
     </div>
-    <div class="form-group">
-      <label for="usuario">Usuario</label>
-      <input type="text" id="usuario" formControlName="usuario" class="form-control" placeholder="Oscar_santander">
-    </div>
-    <div class="form-group">
-      <label for="descripcion">Descripción</label>
-      <textarea id="descripcion" formControlName="descripcion" class="form-control" rows="3">Software Engineer / Designer / Entrepreneur</textarea>
-    </div>
-    <div class="form-group">
-      <label for="url">URL</label>
-      <input type="text" id="url" formControlName="url" class="form-control" placeholder="https://dev.worky.cl/auth/login">
-    </div>
-    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-  </form>
+  </ng-template>
 </div>
-

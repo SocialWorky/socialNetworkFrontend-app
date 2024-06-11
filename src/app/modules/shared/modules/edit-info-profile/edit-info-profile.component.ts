@@ -7,31 +7,41 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
   styleUrls: ['./edit-info-profile.component.scss'],
 })
 export class EditInfoProfileComponent implements OnInit {
-  editProfileForm: FormGroup = this.fb.group({
-    titulo: ['', Validators.required],
-    usuario: ['', Validators.required],
-    descripcion: ['', Validators.required],
-    url: ['', Validators.required],
-    // Añade aquí más campos según necesites
-  });
+  editProfileForm: FormGroup;
+  isSaved: boolean = false;
 
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder) {
+    this.editProfileForm = this.fb.group({
+      titulo: ['', Validators.required],
+      descripcion: ['', Validators.required],
+      url: ['', Validators.required],
+    });
+  }
 
   ngOnInit() {
-    // Aquí puedes establecer valores iniciales si es necesario
+    this.cargarDatos();
+  }
+
+  cargarDatos() {
+    const datosGuardados = localStorage.getItem('datosPerfil');
+    if (datosGuardados) {
+      this.editProfileForm.setValue(JSON.parse(datosGuardados));
+    }
   }
 
   guardarCambios() {
     if (this.editProfileForm.valid) {
-      // Convertir los datos del formulario a una cadena JSON
       const datosFormulario = JSON.stringify(this.editProfileForm.value);
-      // Guardar los datos en localStorage
       localStorage.setItem('datosPerfil', datosFormulario);
-      // Cerrar el modal después de guardar los cambios
-      // ... tu código para cerrar el modal
       console.log('Cambios guardados localmente.');
+      this.isSaved = true;
+      // Desplazar el contenido del modal hacia el mensaje de éxito
+      setTimeout(() => {
+        const modalBody = document.querySelector('.modal-body');
+        if (modalBody) {
+          modalBody.scrollTop = modalBody.scrollHeight;
+        }
+      }, 0);
     }
   }
-  
 }
-
