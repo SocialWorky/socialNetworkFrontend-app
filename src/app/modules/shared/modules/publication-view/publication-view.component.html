@@ -10,21 +10,21 @@
     <div class="publication-header-content">
       <div class="user-name-content">
 
-        <div *ngIf="publication.isMyFriend?.status === 'accepted' || dataUser.id === publication.author._id; else notFriend">
+        <div *ngIf="publication.isMyFriend || dataUser.id === publication.author._id; else notFriend">
           <span class="name">{{ publication.author.name }} {{ publication.author.lastName }}</span>
         </div>
 
         <ng-template #notFriend>
           <span class="name">{{ publication.author.name }} {{ publication.author.lastName }} <i class="material-icons">keyboard_arrow_right</i> 
 
-            <a *ngIf="publication.isMyFriend === null" class="follow-my-friend" 
+            <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending === null" class="follow-my-friend" 
               (click)="followMyFriend(publication.author._id)">
-              Seguir
+              {{ 'publicationsView.follow' | workyTranslations }}
             </a>
 
-            <a *ngIf="publication.isMyFriend?.status === 'pending'" class="follow-my-friend" 
-              (click)="cancelFriendship(publication.isMyFriend?.id)">
-              Cancelar Solicitud
+            <a *ngIf="publication.isFriendshipPending && !publication.isMyFriend" class="follow-my-friend" 
+              (click)="cancelFriendship(publication.isFriendshipPending)">
+              {{ 'publicationsView.cancelRequest' | workyTranslations }}
             </a>
 
           </span>
@@ -140,7 +140,7 @@
 
       <div class="publication-comment-content">
         <div class="publication-comment-data">
-          <span class="comment-author">{{ comment.author.name }} {{ comment?.author.lastName }}</span>
+          <span class="comment-author">{{ comment.author.name }} {{ comment.author.lastName }}</span>
           <span class="comment-content">{{ comment.content }}</span>
               <worky-image-organizer 
                 [images]="comment.media">

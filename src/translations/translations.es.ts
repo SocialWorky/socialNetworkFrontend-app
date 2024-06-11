@@ -112,6 +112,12 @@ export const translations = {
   'publicationsView.spanReaction': 'Reaccionar',
   'publicationsView.spanShare': 'Compartir',
   'publicationsView.spanComment': 'Comentar',
+  'publicationsView.follow': 'Seguir',
+  'publicationsView.unfollow': 'Dejar de seguir',
+  'publicationsView.cancelRequest': 'Cancelar solicitud',
+  'publicationsView.loadingDeletePublication': 'Eliminando publicación...',
+  'publicationsView.reportPublication': 'Reportar publicación',
+  'publicationsView.deletePublication': 'Eliminar publicación',
   // DATE OF PUBLICATION AND COMMENTS
   'DATE_FNS.LESS_THAN_A_MINUTE': 'hace un momento',
   'DATE_FNS.X_MINUTES': '{{count}} m',
