@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { TemplatesComponent } from './templates/templates.component';
 import { HomeComponent } from '@admin/pages/home/home.component';
 import { ChangeThemeComponent } from './pages/change-theme/change-theme.component';
+import { CustomCssComponent } from './shared/custom-css/custom-css.component';
 
 export const routes: Routes = [
   {
@@ -12,6 +13,7 @@ export const routes: Routes = [
       { title: 'Inicio', path: 'home', component: HomeComponent },
       { title: 'Muro', path: 'publications', redirectTo: '../' },
       { title: 'Cambio de colores', path: 'change-theme', component: ChangeThemeComponent},
+      { title: 'Estilos Personalizados', path: 'custom-css', component: CustomCssComponent},
       // { title: 'Usuarios', path: 'users', component: UsersComponent },
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ],
