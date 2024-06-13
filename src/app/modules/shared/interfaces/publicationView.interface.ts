@@ -12,6 +12,7 @@ export interface PublicationView {
     reaction:    any[];
     taggedUsers: any[];
     comment:     any[];
+    isMyFriend?: any;
 }
 
 export interface Author {
@@ -20,4 +21,10 @@ export interface Author {
     name:     string;
     lastName: string;
     avatar:   string;
+}
+
+export interface MediaFileUpload {
+  filename: string;
+  filenameThumbnail: string;
+  filenameCompressed: string;
 }

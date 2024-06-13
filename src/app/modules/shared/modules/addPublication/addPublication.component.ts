@@ -1,9 +1,7 @@
-import { ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
-
-
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { AuthService } from '@auth/services/auth.service';
 import { PublicationService } from '@shared/services/publication.service';
@@ -13,23 +11,27 @@ import { TypePublishing, TypePrivacy } from './enum/addPublication.enum';
 import { Token } from '@shared/interfaces/token.interface';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
-import { CreateComment} from '@shared/interfaces/addComment.interface';
+import { CreateComment } from '@shared/interfaces/addComment.interface';
 import { NotificationCommentService } from '@shared/services/notificationComment.service';
 import { LocationSearchComponent } from '../location-search/location-search.component';
 import { ExtraData } from '@shared/modules/addPublication/interfaces/createPost.interface';
+import { ImageUploadModalComponent } from '../image-upload-modal/image-upload-modal.component';
+import { FileUploadService } from '@shared/services/file-upload.service';
+import { Subject, lastValueFrom, takeUntil } from 'rxjs';
+import { MediaFileUpload } from '@shared/interfaces/publicationView.interface';
 
 @Component({
   selector: 'worky-add-publication',
   templateUrl: './addPublication.component.html',
   styleUrls: ['./addPublication.component.scss'],
 })
-export class AddPublicationComponent  implements OnInit {
+export class AddPublicationComponent implements OnInit, OnDestroy {
   WorkyButtonType = WorkyButtonType;
-
+  
   WorkyButtonTheme = WorkyButtonTheme;
 
   userName: string = '';
-
+  
   nameGeoLocation: string = '';
 
   dataGeoLocation: string = '';
@@ -37,6 +39,10 @@ export class AddPublicationComponent  implements OnInit {
   showEmojiMenu = false;
 
   privacyFront: string = '';
+
+  previews: { url: string, type: string }[] = [];
+
+  selectedFiles: File[] = [];
 
   privacy: TypePrivacy = TypePrivacy.PUBLIC;
 
@@ -53,37 +59,42 @@ export class AddPublicationComponent  implements OnInit {
     privacy: [''],
     authorId: [''],
     extraData: [''],
-   });
+  });
+
+  private unsubscribe$ = new Subject<void>();
 
   @Input() type: TypePublishing | undefined;
-
   @Input() idPublication?: string;
-
   @Input() indexPublication?: number;
 
   @ViewChild('postText') postTextRef!: ElementRef;
-  
+
   constructor(
-      private _fb: FormBuilder,
-      private _authService: AuthService,
-      private _publicationService: PublicationService,
-      private _commentService: CommentService,
-      private _alertService: AlertService,
-      private _loadingCtrl: LoadingController,
-      private _notificationCommentService: NotificationCommentService,
-      private _dialog: MatDialog,
-      private _cdr: ChangeDetectorRef,
-    ) { 
+    private _fb: FormBuilder,
+    private _authService: AuthService,
+    private _publicationService: PublicationService,
+    private _commentService: CommentService,
+    private _alertService: AlertService,
+    private _loadingCtrl: LoadingController,
+    private _notificationCommentService: NotificationCommentService,
+    private _dialog: MatDialog,
+    private _cdr: ChangeDetectorRef,
+    private _fileUploadService: FileUploadService,
+  ) {
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
       this.decodedToken = this._authService.getDecodedToken();
       this.userName = this.decodedToken.name;
     }
-    }
+  }
 
-  // eslint-disable-next-line @angular-eslint/no-empty-lifecycle-method
   ngOnInit() {
-    this.postPrivacy(TypePrivacy.PUBLIC)
+    this.postPrivacy(TypePrivacy.PUBLIC);
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   ngAfterViewInit() {
@@ -107,17 +118,15 @@ export class AddPublicationComponent  implements OnInit {
   }
 
   async onSave() {
-
     this.myForm.controls['authorId'].setValue(this.decodedToken.id);
     this.myForm.controls['privacy'].setValue(this.privacy);
 
-    if (this.type === TypePublishing.POST){
+    if (this.type === TypePublishing.POST) {
       this.onSavePublication();
     }
-    if (this.type === TypePublishing.COMMENT){
+    if (this.type === TypePublishing.COMMENT) {
       this.onSaveComment(this.idPublication as string);
     }
-
   }
 
   private async onSaveComment(idPublication: string) {
@@ -125,7 +134,7 @@ export class AddPublicationComponent  implements OnInit {
       message: translations['addPublication.loadingCommentMessage'],
     });
 
-    loadingComment.present();
+    await loadingComment.present();
 
     const dataComment: CreateComment = {
       content: this.myForm.controls['content'].value,
@@ -133,36 +142,62 @@ export class AddPublicationComponent  implements OnInit {
       idPublication: idPublication,
     };
 
-    this._commentService.createComment(dataComment).subscribe({
+    this._commentService.createComment(dataComment).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
-        const publications = await this._publicationService.getAllPublications(1, 10);
-        publications[this.indexPublication!].comment.unshift(message.comment);
-        this._publicationService.publicationsSubject.next(publications);
+        try {
+          if (this.selectedFiles.length) {
+            const response = await lastValueFrom(
+              this._fileUploadService.uploadFile(this.selectedFiles, 'comments').pipe(takeUntil(this.unsubscribe$))
+            );
+            const saveLocation = 'comments/';
+            const saveFilePromises = response.map((file: MediaFileUpload) => {
+              return lastValueFrom(
+                this._fileUploadService.saveUrlFile(
+                  saveLocation + file.filename,
+                  saveLocation + file.filenameThumbnail,
+                  saveLocation + file.filenameCompressed,
+                  message.comment._id, TypePublishing.COMMENT).pipe(takeUntil(this.unsubscribe$))
+              );
+            });
 
-        if (message.message === 'Comment created successfully') {
-          this.myForm.controls['content'].setValue('');
-          this.autoResize();
-          this._alertService.showAlert(
-            translations['addPublication.alertCreateCommentTitle'],
-            translations['addPublication.alertCreateCommentMessage'],
-            Alerts.SUCCESS,
-            Position.CENTER,
-            true,
-            true,
-            translations['button.ok'],
-          );
-          this._notificationCommentService.sendNotificationComment({
-            commentId: message.comment._id,
-            idPublication: idPublication,
-            userEmittedId: this.decodedToken.id,
-            authorPublicationId: publications[this.indexPublication!].author._id,
-          });
+            await Promise.all(saveFilePromises);
+
+            this.selectedFiles = [];
+            this.previews = [];
+            this._cdr.markForCheck();
+          }
+
+          const publications = await this._publicationService.getAllPublications(1, 10);
+          publications[this.indexPublication!].comment.unshift(message.comment);
+          this._publicationService.updatePublications(publications);
+
+          if (message.message === 'Comment created successfully') {
+            this.myForm.controls['content'].setValue('');
+            this.autoResize();
+            this._alertService.showAlert(
+              translations['addPublication.alertCreateCommentTitle'],
+              translations['addPublication.alertCreateCommentMessage'],
+              Alerts.SUCCESS,
+              Position.CENTER,
+              true,
+              true,
+              translations['button.ok'],
+            );
+            this._notificationCommentService.sendNotificationComment({
+              commentId: message.comment._id,
+              idPublication: idPublication,
+              userEmittedId: this.decodedToken.id,
+              authorPublicationId: publications[this.indexPublication!].author._id,
+            });
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          loadingComment.dismiss();
         }
       },
       error: (error) => {
         console.error(error);
-      },
-      complete: () => {
         loadingComment.dismiss();
       }
     });
@@ -186,35 +221,61 @@ export class AddPublicationComponent  implements OnInit {
       this.myForm.controls['extraData'].setValue(JSON.stringify(extraData));
     }
 
-    this._publicationService.createPost(this.myForm.value).subscribe({
+    this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
-        const publicationsNew = await this._publicationService.publicationsSubject.getValue();
-        publicationsNew.unshift(message.publications);
-        this._publicationService.publicationsSubject.next(publicationsNew);
+        console.log('MENSAJE CREADO: ', message);
+        try {
+          if (this.selectedFiles.length) {
+            const response = await lastValueFrom(
+              this._fileUploadService.uploadFile(this.selectedFiles, 'publications').pipe(takeUntil(this.unsubscribe$))
+            );
+            const saveFilePromises = response.map((file: MediaFileUpload) => {
+              const saveLocation = 'publications/';
+              return lastValueFrom(
+                this._fileUploadService.saveUrlFile(
+                  saveLocation + file.filename,
+                  saveLocation + file.filenameThumbnail,
+                  saveLocation + file.filenameCompressed,
+                  message.publications._id,
+                  TypePublishing.POST).pipe(takeUntil(this.unsubscribe$))
+              );
+            });
 
-        if (message.message === 'Publication created successfully') {
-          this.myForm.controls['content'].setValue('');
-          this.autoResize();
-          this._alertService.showAlert(
-            translations['addPublication.alertCreatePublicationTitle'],
-            translations['addPublication.alertCreatePublicationMessage'],
-            Alerts.SUCCESS,
-            Position.CENTER,
-            true,
-            true,
-            translations['button.ok'],
-          );
+            await Promise.all(saveFilePromises);
+
+            this.selectedFiles = [];
+            this.previews = [];
+            this._cdr.markForCheck();
+          }
+
+          const publicationsNew = await this._publicationService.getAllPublications(1, 10);
+          this._publicationService.updatePublications(publicationsNew);
+
+          if (message.message === 'Publication created successfully') {
+            this.myForm.controls['content'].setValue('');
+            this.autoResize();
+            this._alertService.showAlert(
+              translations['addPublication.alertCreatePublicationTitle'],
+              translations['addPublication.alertCreatePublicationMessage'],
+              Alerts.SUCCESS,
+              Position.CENTER,
+              true,
+              true,
+              translations['button.ok'],
+            );
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          loadingPublications.dismiss();
         }
       },
       error: (error) => {
         console.error(error);
-      },
-      complete: () => {
         loadingPublications.dismiss();
-      }
+      },
     });
   }
-
 
   autoResize() {
     const postText = this.postTextRef.nativeElement as HTMLTextAreaElement;
@@ -227,7 +288,6 @@ export class AddPublicationComponent  implements OnInit {
   }
 
   postPrivacy(privacy: string): void {
-
     if (privacy === TypePrivacy.PUBLIC) {
       this.privacy = TypePrivacy.PUBLIC;
       this.privacyFront = `<i class="material-icons">language</i> ${translations['publishing.privacy-public']} <i class="material-icons">arrow_drop_down</i>`;
@@ -240,10 +300,9 @@ export class AddPublicationComponent  implements OnInit {
       this.privacy = TypePrivacy.PRIVATE;
       this.privacyFront = `<i class="material-icons">lock</i> ${translations['publishing.privacy-private']} <i class="material-icons">arrow_drop_down</i>`;
     }
-
   }
 
-openLocationSearch() {
+  openLocationSearch() {
     const dialogRef = this._dialog.open(LocationSearchComponent, {
       width: '400px',
     });
@@ -253,7 +312,6 @@ openLocationSearch() {
         const lat = result.geometry?.lat ? result.geometry.lat : result.lat;
         const lng = result.geometry?.lng ? result.geometry.lng : result.lng;
 
-        //const urlMap = 'https://www.google.com/maps/place/' + result.formatted.split(',')[0];
         const urlMap = `https://www.google.com/maps/?q=${result.formatted}&ll=${lat},${lng}`;
         this.dataGeoLocation = urlMap;
         this.nameGeoLocation = result.formatted.split(',')[0];
@@ -262,4 +320,41 @@ openLocationSearch() {
     });
   }
 
+  openUploadModal() {
+    const dialogRef = this._dialog.open(ImageUploadModalComponent, {
+      data: {
+        maxFiles: this.type === TypePublishing.POST ? 10 : 1,
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.selectedFiles = result;
+        this.previews = [];
+        this.selectedFiles.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = (e: any) => {
+            const fileType = file.type.split('/')[0];
+            if (fileType === 'image') {
+              this.previews.push({
+                type: 'image',
+                url: e.target.result
+              });
+            } else if (fileType === 'video') {
+              this.previews.push({
+                type: 'video',
+                url: e.target.result
+              });
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    });
+  }
+
+  removeFile(index: number) {
+    this.selectedFiles.splice(index, 1);
+    this.previews.splice(index, 1);
+  }
 }

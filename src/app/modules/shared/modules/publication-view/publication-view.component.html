@@ -1,19 +1,51 @@
-<div class="content-publication-view">
+<div class="content-publication-view" *ngIf="publication">
 
   <div class="publication-header">
     <worky-avatar 
       [size]="40"
-      img="{{ publication?.author?.avatar }}"
-      name="{{ publication?.author?.name }} {{ publication?.author?.lastName }} ">
+      img="{{ publication.author.avatar }}"
+      name="{{ publication.author.name }} {{ publication.author.lastName }} ">
     </worky-avatar>
 
     <div class="publication-header-content">
       <div class="user-name-content">
-        <span class="name">{{ publication?.author?.name }} {{ publication?.author?.lastName }}</span>
+
+        <div *ngIf="publication.isMyFriend?.status === 'accepted' || dataUser.id === publication.author._id; else notFriend">
+          <span class="name">{{ publication.author.name }} {{ publication.author.lastName }}</span>
+        </div>
+
+        <ng-template #notFriend>
+          <span class="name">{{ publication.author.name }} {{ publication.author.lastName }} <i class="material-icons">keyboard_arrow_right</i> 
+
+            <a *ngIf="publication.isMyFriend === null" class="follow-my-friend" 
+              (click)="followMyFriend(publication.author._id)">
+              Seguir
+            </a>
+
+            <a *ngIf="publication.isMyFriend?.status === 'pending'" class="follow-my-friend" 
+              (click)="cancelFriendship(publication.isMyFriend?.id)">
+              Cancelar Solicitud
+            </a>
+
+          </span>
+        </ng-template>       
+
+
         <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> está en <a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
       </div>
       <div class="publication-date">
-        <span>{{ publication?.createdAt! | workyRelativeTime }}</span>
+        <span>{{ publication.createdAt! | workyRelativeTime }}</span>
+
+        <ng-container *ngIf="publication.privacy === typePrivacy.PUBLIC">
+          <i class="material-icons">public</i>
+        </ng-container>
+        <ng-container *ngIf="publication.privacy === typePrivacy.FRIENDS">
+          <i class="material-icons">people</i>
+        </ng-container>
+        <ng-container *ngIf="publication.privacy === typePrivacy.PRIVATE">
+          <i class="material-icons">lock</i>
+        </ng-container>
+
       </div>
     </div>
 
@@ -22,7 +54,7 @@
       <worky-dropdown
         icon="more_horiz"
         [badge]=false
-        (click)="checkDataLink(publication?.author?._id!)"
+        (click)="checkDataLink(publication.author._id)"
         [dataLink]="dataLinkActions"
         (linkClicked)="handleActionsClicked($event, publication)">
       </worky-dropdown>
@@ -33,21 +65,30 @@
 
   <div class="publication-body">
     <div class="publication-content">
-      <span>{{ publication?.content }}</span>
+      <div class="content" [innerHTML]="publication.content | workyProcessContent"></div>
     </div>
+
+    <worky-image-organizer *ngIf="publication.media.length"
+      [images]="publication.media">
+    </worky-image-organizer>
+
+    <div class="publication-url-preview">
+      <div class="content" [innerHTML]="publication.content | workyPreviewHtml"></div>
+    </div>
+
   </div>
 
   <div class="publication-footer">
     <div class="publication-footer-content">
 
-      <div class="publication-footer-content-item" *ngIf="publication?.reaction?.length">
+      <div class="publication-footer-content-item" *ngIf="publication.reaction.length">
         <i class="material-icons">mood</i>
-        <span>{{ publication?.reaction?.length }}</span>
+        <span>{{ publication.reaction.length }}</span>
       </div>
 
-      <div class="publication-footer-content-item" *ngIf="publication?.comment?.length"
+      <div class="publication-footer-content-item" *ngIf="publication.comment.length"
         (click)="viewCommentsOn(indexPublication!)">
-        <span> {{ publication?.comment?.length }} </span>
+        <span> {{ publication.comment.length }} </span>
         <span> {{ 'publicationsView.spanComments' | workyTranslations }} </span>
       </div>
 
@@ -71,7 +112,7 @@
           icon="share"
           [title]="'publicationsView.spanShare' | workyTranslations"
           [badge]=false
-          (click)="checkDataLink(publication?.author?._id!)"
+          (click)="checkDataLink(publication.author._id)"
           [dataLink]="dataShareActions"
           (linkClicked)="handleActionsClicked($event, publication)">
         </worky-dropdown>
@@ -83,26 +124,29 @@
   <div class="publication-comment-on" *ngIf="viewCommentSection === indexPublication">
      <worky-add-publication 
         [type]="typePublishing.COMMENT"
-        [idPublication]="publication?._id"
+        [idPublication]="publication._id"
         [indexPublication]="indexPublication">
      </worky-add-publication>
   </div>
 
   <div class="publication-comment" *ngIf="viewComments === indexPublication">
-    <div class="publication-comment-item" *ngFor="let comment of publication?.comment">
+    <div class="publication-comment-item" *ngFor="let comment of publication.comment">
 
       <worky-avatar 
         [size]="30"
-        img="{{ comment?.author?.avatar }}"
-        name="{{ comment?.author?.name }} {{ comment?.author?.lastName }} ">
+        img="{{ comment.author.avatar }}"
+        name="{{ comment.author.name }} {{ comment.author.lastName }} ">
       </worky-avatar>
 
       <div class="publication-comment-content">
         <div class="publication-comment-data">
-          <span class="comment-author">{{ comment?.author?.name }} {{ comment?.author?.lastName }}</span>
-          <span class="comment-content">{{ comment?.content }}</span>
+          <span class="comment-author">{{ comment.author.name }} {{ comment?.author.lastName }}</span>
+          <span class="comment-content">{{ comment.content }}</span>
+              <worky-image-organizer 
+                [images]="comment.media">
+              </worky-image-organizer>
         </div>
-        <span class="comment-date">{{ comment?.createdAt | workyRelativeTime }}</span>
+        <span class="comment-date">{{ comment.createdAt | workyRelativeTime }}</span>
       </div>
 
     </div>

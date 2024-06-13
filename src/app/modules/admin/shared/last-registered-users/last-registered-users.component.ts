@@ -22,13 +22,27 @@ export class LastRegisteredUsersComponent  implements OnInit, OnDestroy {
   ngOnInit() {
     this.getUsers();
   }
-
   private getUsers() {
-    this.subscription.add(this._userService.searchUsers(5).subscribe((data) => {
-      this.users = data;
+    this.subscription.add(this._userService.searchUsers(5).subscribe((data: User[]) => {
+      const filterDate = new Date('2023-01-01');
+
+      const filteredUsers = data.filter(user => {
+        const registrationDate = new Date(user.createdAt);
+        return registrationDate > filterDate;
+      });
+
+      const sortedUsers = filteredUsers.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA;
+      });
+
+      this.users = sortedUsers;
       this._cdr.markForCheck();
     }));
   }
+
+
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();

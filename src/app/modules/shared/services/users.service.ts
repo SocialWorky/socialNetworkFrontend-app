@@ -39,4 +39,10 @@ export class UserService {
     return this.http.get(url, { headers });
   }
 
+  getUserByName(name: string): Observable<any> {
+    const url = `${this.baseUrl}/user/username/${name}`;
+    const headers = this.getHeaders();
+    return this.http.get(url, { headers });
+  }
+
 }

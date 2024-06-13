@@ -11,6 +11,7 @@ import { ContentRightSideComponent } from './components/content-right-side/conte
 import { ProfilesComponent } from './profiles/profiles.component';
 
 import { WorkyMenuComponentComponent } from './components/navbar/worky-menu-component/worky-menu-component.component';
+import { SideLeftModule } from '@shared/modules/side-left/side-left.module';
 import { WorkyDropdownModule } from '@shared/modules/worky-dropdown/worky-dropdown.module';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
 import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.module';
@@ -20,6 +21,7 @@ import { PublicationViewModule } from '@shared/modules/publication-view/publicat
 import { SuggetionToFollowModule } from '@shared/modules/suggetion-to-follow/suggetion-to-follow.module';
 import { EditImgModule } from '@shared/modules/edit-img/edit-img.module';
 import { EditInfoProfileModule } from '@shared/modules/edit-info-profile/edit-info-profile.module';
+
 
 @NgModule({
   declarations: [
@@ -40,11 +42,13 @@ import { EditInfoProfileModule } from '@shared/modules/edit-info-profile/edit-in
     TranslationsModule,
     WorkyAvatarModule,
     AddPublicationModule,
+    PublicationViewModule,
     WorkyWidgetModule,
     PublicationViewModule,
     SuggetionToFollowModule,
     EditImgModule,
-    EditInfoProfileModule
+    EditInfoProfileModule,
+    SideLeftModule,
   ]
 })
 export class PagesModule { }

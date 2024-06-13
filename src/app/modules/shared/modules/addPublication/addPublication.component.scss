@@ -4,6 +4,7 @@
 
 
 .publishing-container {
+  padding: 16px;
   .publishing-header {
     display: flex;
     align-items: center;
@@ -97,6 +98,39 @@
       }
     }
 
+    .previews {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .preview {
+      position: relative;
+      margin: 10px;
+      width: 100px;
+      height: 100px;
+      overflow: hidden;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .remove-button {
+      position: absolute;
+      cursor: pointer;
+      top: 5px;
+      right: 5px;
+      color: red;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+    }
+
+
     .extra-content {
       display: flex;
       align-items: center;
@@ -108,6 +142,13 @@
       border-radius: 8px;
 
       .extra-content-item {
+
+        @include breakpoints.below-sm {
+          .material-icons {
+            font-size: 35px;
+          }
+        }
+
         display: flex;
         border-radius: 50%;
         padding: 2px;
@@ -118,7 +159,6 @@
 
       .emoji-icon {
         color: color.$worky-color-grey;
-        font-size: 24px;
         cursor: pointer;
         :hover {
           color: color.$worky-color-indigo;
@@ -135,10 +175,17 @@
 
       .location-on {
         color: map-get(color.$worky-red, 56);
-        font-size: 20px;
         cursor: pointer;
         :hover {
           color: map-get(color.$worky-red, 9);
+        }
+      }
+
+      .file-upload {
+        color: map-get(color.$worky-green, 56);
+        cursor: pointer;
+        :hover {
+          color: map-get(color.$worky-green, 9);
         }
       }
 

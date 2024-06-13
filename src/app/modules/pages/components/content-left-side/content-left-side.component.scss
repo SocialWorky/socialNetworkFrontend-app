@@ -1,0 +1,6 @@
+@use 'src/assets/styles/worky-variables' as variables;
+
+.side-left-container {
+  position: sticky;
+  top: variables.$worky-navbar-height + 25px;
+}

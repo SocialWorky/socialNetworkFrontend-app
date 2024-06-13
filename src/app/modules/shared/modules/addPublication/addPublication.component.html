@@ -54,9 +54,26 @@
           placeholder="{{ type === typePublishing.POST ? ('publishing.placeholder' | workyTranslations) + ' ' + userName + '?' : ('publishing.placeholderComment' | workyTranslations) + userName + '?' }}">
         </textarea>
 
+
       </div>
 
+      <div class="previews">
+        <div *ngFor="let preview of previews; let i = index" class="preview">
+          <img *ngIf="preview.type === 'image'" [src]="preview.url" alt="Image Preview">
+          <video *ngIf="preview.type === 'video'" [src]="preview.url" controls></video>
+          <i class="material-icons remove-button" (click)="removeFile(i)">close</i>
+        </div>
+      </div>
+
+
       <div class="extra-content">
+
+        <div class="extra-content-item file-upload"
+             matTooltip="Subir Imagen"
+             (click)="openUploadModal()">
+          <i class="material-icons">add_photo_alternate</i>
+
+        </div>
 
         <div *ngIf="type === typePublishing.POST"
              class="extra-content-item location-on"

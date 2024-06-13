@@ -1,0 +1,66 @@
+.content-news {
+    max-height: 400px;
+    overflow-y: hidden; /* Oculta el scroll por defecto */
+
+    .news-article {
+        margin-bottom: 20px;
+    }
+
+    .news-card {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .news-image {
+        width: 100%;
+        height: auto;
+    }
+
+    .news-card-content {
+        padding: 15px;
+    }
+
+    .news-title {
+        font-size: 1.2em;
+        margin-bottom: 5px;
+    }
+
+    .news-date {
+        color: #888;
+        margin-bottom: 10px;
+    }
+
+    .news-description {
+      margin-bottom: 15px;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .news-read-more {
+        display: block;
+        text-align: center;
+        padding: 10px;
+        background-color: #007bff;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    .news-read-more:hover {
+        background-color: #0056b3;
+    }
+
+    &:hover {
+        overflow-y: auto; /* Muestra el scroll cuando se coloca el cursor sobre el widget */
+    }
+
+    /* Hace el scroll más delgado */
+    scrollbar-width: thin;
+
+    /* Cambia el color del scroll */
+    scrollbar-color: #ffffff #f0f0f0;
+} 

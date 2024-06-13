@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 
 @Component({
   selector: 'worky-loyaut',
@@ -7,6 +8,10 @@ import { Component } from '@angular/core';
 })
 export class LoyautComponent  {
 
-  constructor() { }
+  get isMobile(): boolean {
+    return this._deviceDetectionService.isMobile();
+  }
+
+  constructor( private _deviceDetectionService: DeviceDetectionService ) { }
 
 }

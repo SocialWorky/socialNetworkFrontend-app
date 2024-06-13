@@ -24,17 +24,30 @@
             placeholder="Search"
             [(ngModel)]="searchTerm"
             (input)="onInputChange($event)"
+            autocomplete="off"
             name="searchTerm"
           />
         </div>
       </form>
 
+      <!-- Resultados de búsqueda -->
+      <ul *ngIf="users.length > 0" class="search-results">
+        <li *ngFor="let user of users">
+          <worky-avatar
+            [img]="user.avatar"
+            [size]="30"
+            [name]="user.name + ' ' + user.lastName"
+          ></worky-avatar>
+          {{ user.name }} {{ user.lastName }} ({{ user.username }})
+        </li>
+      </ul>
+
     </div>
     <!-- Center elements -->
     <worky-menu-component *ngIf="!isMobile"></worky-menu-component>
     <!-- Right elements -->
-    <div class="worky-profile">
-      <worky-menu-component *ngIf="isMobile"></worky-menu-component>
+
+    <div class="worky-profile" *ngIf="!isMobile">
       <!-- Message -->
       <worky-dropdown 
         icon="mail"
@@ -56,5 +69,33 @@
       </worky-dropdown>
     </div>
 
+
+ </nav>
+</div>
+
+<div class="content-navbar sticky" *ngIf="isMobile">
+  <nav class="worky-navbar">
+      <div class="worky-profile ">
+        <worky-menu-component></worky-menu-component>
+        <!-- Message -->
+        <worky-dropdown 
+          icon="mail"
+          [badgeValue]="messages > 0 ? messages : null"
+          [badge]=true>
+        </worky-dropdown>
+        <!-- Notification -->
+        <worky-dropdown 
+          icon="notifications"
+          [badgeValue]="notifications > 0 ? notifications : null"  
+          [badge]=true>
+        </worky-dropdown>
+        <!-- Profile -->
+        <worky-dropdown
+          [badge]=false
+          img="avatar"
+          [dataLink]="dataLinkProfile"
+          (linkClicked)="handleLinkClicked($event)">
+        </worky-dropdown>
+      </div>
   </nav>
 </div>
