@@ -64,6 +64,10 @@ export class AuthService {
     return jwtDecode(token!);
   }
 
+  getUseFromToken(token: string): Token {
+    return jwtDecode(token);
+  }
+
   generatePassword(): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+';
     let password = '';

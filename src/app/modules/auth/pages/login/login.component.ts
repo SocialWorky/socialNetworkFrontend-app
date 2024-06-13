@@ -1,9 +1,8 @@
-import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
@@ -14,10 +13,9 @@ import { LoginData } from '@auth/interfaces/login.interface';
 import { translations } from '@translations/translations';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { AuthService } from '@auth/services/auth.service';
-import { MailSendValidateData } from '@shared/interfaces/mail.interface';
+import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
 import { environment } from '@env/environment';
 import { ResetPasswordModalComponent } from './reset-password-modal/reset-password-modal.component';
-import { TemplateEmail } from '@shared/interfaces/mail.interface';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 
 @Component({
@@ -25,7 +23,7 @@ import { DeviceDetectionService } from '@shared/services/DeviceDetection.service
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent implements OnInit, OnDestroy { 
+export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   loginForm: FormGroup = new FormGroup({});
 
   WorkyButtonType = WorkyButtonType;
@@ -38,13 +36,11 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   mailSendDataValidate: MailSendValidateData = {} as MailSendValidateData;
 
-  showResetPasswordModal = false;
-
   @ViewChild('emailInput') emailInput!: ElementRef;
 
   private subscription: Subscription = new Subscription();
 
-  constructor (
+  constructor(
     private _authApiService: AuthApiService,
     private _router: Router,
     private _activatedRoute: ActivatedRoute,
@@ -56,8 +52,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private _authService: AuthService,
     private _dialog: MatDialog,
     private _deviceDetectionService: DeviceDetectionService,
-  ) { 
-
+  ) {
     if (this.token) {
       this._router.navigate(['/home']);
     }
@@ -65,24 +60,32 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.checkSessionGoogle();
-     this.subscription.add(this._activatedRoute.paramMap.subscribe(params => {
-      const tokenPassword = params.get('tokenPassword');
-      const token = params.get('token');
-      if (token) {
-        this.validateEmailWithToken(token);
-      }
-      if (tokenPassword) {
-        this.openResetPasswordModal(tokenPassword);
-      }
-    }));
-
     this.loginForm = this._formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
 
     this._cdr.detectChanges();
+  }
 
+  ngAfterViewInit(): void {
+
+    const token = this._activatedRoute.snapshot.paramMap.get('token');
+    const tokenPassword = this._activatedRoute.snapshot.paramMap.get('tokenPassword');
+
+    if (token) {
+      this.validateEmailWithToken(token);
+    }
+
+    this._dialog.afterOpened.subscribe(() => {
+      this._dialog.openDialogs.forEach(dialog => {
+        dialog.id === 'mat-mdc-dialog-1' ? dialog.close() : null;
+      });
+    });
+
+    if (tokenPassword ) {
+      this.openResetPasswordModal(tokenPassword);
+    }
   }
 
   ngOnDestroy(): void {
@@ -91,7 +94,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
   }
 
-  checkSessionGoogle() {
+  async checkSessionGoogle() {
     setTimeout(() => {
       if (sessionStorage.getItem('id_token')) {
         if (!this.token) {
@@ -119,7 +122,10 @@ export class LoginComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const credentials: LoginData = { email, password };
+    const credentials: LoginData = {
+      email: email.toLowerCase(),
+      password: password,
+    };
 
     const loading = await this._loadingCtrl.create({
       message: translations['login.messageLoading'],
@@ -140,7 +146,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         }
       },
       error: (e: any) => {
-        console.log(e);
         if (e.error.message === 'User is not verified') {
           this._alertService.showAlert(
             translations['alert.title_emailValidated_error'],
@@ -185,7 +190,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   async loginGoogle() {
-
     const loading = await this._loadingCtrl.create({
       message: translations['login.messageLoading'],
     });
@@ -212,32 +216,31 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.subscription = await this._authApiService.loginGoogle(dataGoogle).subscribe({
       next: async (response: any) => {
-      localStorage.setItem('token', response.token);
+        localStorage.setItem('token', response.token);
 
-      const userId = this._authService.getDecodedToken()?.id;
+        const userId = this._authService.getDecodedToken()?.id;
 
-      this.subscription = await this._authApiService.avatarUpdate(userId, loginDataGoogle.picture, response.token).subscribe({
-        next: async (response: any) => {
-          if (response) {
-            await this._authService.renewToken(userId);
-            this.token = localStorage.getItem('token');
+        this.subscription = await this._authApiService.avatarUpdate(userId, loginDataGoogle.picture, response.token).subscribe({
+          next: async (response: any) => {
+            if (response) {
+              await this._authService.renewToken(userId);
+              this.token = localStorage.getItem('token');
+              loading.dismiss();
+              this._router.navigate(['/home']);
+              this._cdr.detectChanges();
+            }
+          },
+          error: (e: any) => {
+            console.log(e);
             loading.dismiss();
             this._router.navigate(['/home']);
-            this._cdr.detectChanges();
           }
-        },
-        error: (e: any) => {
-          console.log(e);
-          loading.dismiss();
-          this._router.navigate(['/home']);
-        }
-      });
+        });
 
       },
     });
 
     loading.dismiss();
-
   }
 
   async validateEmailWithToken(token: string) {
@@ -313,7 +316,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     await loading.present();
 
-    this.subscription = this._authApiService.forgotPassword(this.mailSendDataValidate).subscribe({
+    this.subscription = await this._authApiService.forgotPassword(this.mailSendDataValidate).subscribe({
       next: (response: any) => {
         if (response && response.message) {
           this._alertService.showAlert(
@@ -363,20 +366,18 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   async openResetPasswordModal(token: string) {
-    this.showResetPasswordModal = true;
     const dialogRef = this._dialog.open(ResetPasswordModalComponent, {
       data: { token },
-      disableClose: true
     });
-
+    this._cdr.markForCheck();
+    
     dialogRef.afterClosed().subscribe(result => {
-      this.showResetPasswordModal = false;
+      this.closeResetPasswordModal();
     });
   }
 
-  closeResetPasswordModal() {
-    this.showResetPasswordModal = false;
+ closeResetPasswordModal() {
     this._dialog.closeAll();
+    this._cdr.detectChanges();
   }
-
 }
