@@ -68,3 +68,4 @@ testem.log
 Thumbs.db
 env.ts
 .nx/cache
+package-lock.json
