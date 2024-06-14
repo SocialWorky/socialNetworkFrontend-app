@@ -97,8 +97,11 @@
     <div class="publication-footer-actions">
 
       <div class="publication-footer-actions-item">
-        <i class="material-icons">mood</i>
-        <span>{{ 'publicationsView.spanReaction' | workyTranslations }}</span>
+        <worky-reactions
+        [type]="typePublishing.POST"
+        [idPublication]="publication._id"
+        [reactionsToPublication]="publication.reaction">
+        </worky-reactions>
       </div>
 
       <div class="publication-footer-actions-item"

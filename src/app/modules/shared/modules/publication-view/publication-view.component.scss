@@ -79,12 +79,14 @@
     }
 
     .publication-footer-actions {
+      position: relative;
       display: flex;
       justify-content: space-around;
       margin-top: 1rem;
       border-top: 1px solid colors.$worky-color-grey;
       border-bottom: 1px solid colors.$worky-color-grey;
       .publication-footer-actions-item {
+        position: relative;
         display: flex;
         align-items: center;
         gap: 0.2rem;
