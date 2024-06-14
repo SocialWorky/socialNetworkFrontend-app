@@ -167,7 +167,6 @@ export class WeatherComponent implements OnInit, OnDestroy {
     this._geocodingService.getGeocodeCity(city).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data) => {
         if (data.results && data.results.length > 0) {
-          // const { lat, lng } = data.results[0].geometry;
           this._geoLocationsService.createLocations(data).pipe(takeUntil(this.unsubscribe$)).subscribe({
             next: () => {
               console.log('Location created:');

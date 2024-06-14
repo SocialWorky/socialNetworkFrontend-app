@@ -3,15 +3,15 @@
     <form [formGroup]="editProfileForm" (ngSubmit)="guardarCambios()">
       <div class="form-group">
         <label for="titulo">Título</label>
-        <input type="text" id="titulo" formControlName="titulo" class="form-control" placeholder="Oscar.dev">
+        <input type="text" id="titulo" formControlName="titulo" class="form-control" >
       </div>
       <div class="form-group">
         <label for="descripcion">Descripción</label>
-        <textarea id="descripcion" formControlName="descripcion" class="form-control" rows="3" placeholder="Software Engineer / Designer / Entrepreneur"></textarea>
+        <textarea id="descripcion" formControlName="descripcion" class="form-control" rows="3"></textarea>
       </div>
       <div class="form-group">
         <label for="url">URL</label>
-        <input type="text" id="url" formControlName="url" class="form-control" placeholder="https://dev.worky.cl/auth/login">
+        <input type="text" id="url" formControlName="url" class="form-control">
       </div>
       <button type="submit" class="btn btn-primary">Guardar Cambios</button>
     </form>

@@ -1,14 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'worky-suggetion-to-follow',
   templateUrl: './suggetion-to-follow.component.html',
   styleUrls: ['./suggetion-to-follow.component.scss'],
 })
-export class SuggetionToFollowComponent  implements OnInit {
+export class SuggetionToFollowComponent {
 
   constructor() { }
-
-  ngOnInit() {}
 
 }

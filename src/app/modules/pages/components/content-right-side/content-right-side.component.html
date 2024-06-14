@@ -1,8 +1,15 @@
-<div *ngIf="!isUserProfile" class="side-right-container">
-    <worky-weather class="widget"></worky-weather>
-    <worky-news class="widget"></worky-news>
+<div class="side-right-container">
+
+    <ng-container *ngIf="rutaUrl !== '/profile'">
+        <worky-weather class="widget"></worky-weather>
+        <worky-news class="widget"></worky-news>
+    </ng-container>
+
+    <ng-container *ngIf="rutaUrl == '/profile'">
+        <worky-suggetion-to-follow></worky-suggetion-to-follow>
+        <app-contacts></app-contacts>
+    </ng-container>
+
 </div>
 
-<div *ngIf="!isUserHome">
-    <worky-suggestion-to-follow></worky-suggestion-to-follow>
-</div>
+

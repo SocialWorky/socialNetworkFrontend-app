@@ -14,26 +14,18 @@
                     Edit Profile
                 </button>
             </div>
-            <div class="follow-button-container" *ngIf="!isCurrentUser">
-                <button class="follow-button" (click)="followUser()">
-                    Follow
-                </button>
-                <button class="add-friend-button" (click)="addFriend()">
-                    Add Friend
-                </button>
-            </div>
         </div>
         <div class="profile-info">
             <div class="user-basic">
-                <h2>Oscar.dev</h2>
-                <p>Oscar_santander</p>
+                <h2>{{ userData?.titulo }}</h2>
+                <p>{{ userName }}</p>
             </div>
             <div class="description">
-                <p>Software Engineer / Designer / Entrepreneur <br>Visit my website to test a working <b></b></p>
+                <p>{{ userData?.descripcion }}</p>
                 <div class="additional-info">
                     <span class="link">
                         <i class="material-icons mb-2">link</i>
-                        <a href="https://dev.worky.cl/auth/login" target="#">https://dev.worky.cl/auth/login</a>
+                        <a href="{{ userData?.url }}" target="#">{{ userData?.url }}</a>
                     </span>
                     <span class="joined-date">
                         <i class="material-icons mb-2">calendar_month</i>
@@ -53,4 +45,3 @@
     </div>
     <hr>
 </div>
-

@@ -21,6 +21,7 @@ import { PublicationViewModule } from '@shared/modules/publication-view/publicat
 import { SuggetionToFollowModule } from '@shared/modules/suggetion-to-follow/suggetion-to-follow.module';
 import { EditImgModule } from '@shared/modules/edit-img/edit-img.module';
 import { EditInfoProfileModule } from '@shared/modules/edit-info-profile/edit-info-profile.module';
+import { ContactsModule } from '@shared/modules/contacts/contacts.module';
 
 
 @NgModule({
@@ -49,6 +50,7 @@ import { EditInfoProfileModule } from '@shared/modules/edit-info-profile/edit-in
     EditImgModule,
     EditInfoProfileModule,
     SideLeftModule,
+    ContactsModule,
   ]
 })
 export class PagesModule { }
