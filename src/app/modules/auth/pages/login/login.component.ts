@@ -198,6 +198,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const loginDataGoogle: any = this._authGoogleService.getProfile();
 
+    console.log('LOGINDATAGOOGLE: ', loginDataGoogle);
+
     if (!loginDataGoogle) {
       await this._authGoogleService.login();
       return;
@@ -214,8 +216,13 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       password: await this._authService.generatePassword(),
     };
 
+    console.log('DATAGOOOGLE: ', dataGoogle);
+
     this.subscription = await this._authApiService.loginGoogle(dataGoogle).subscribe({
       next: async (response: any) => {
+
+        console.log('RESPONSE LOGIN GOOGLE: ', response);
+
         localStorage.setItem('token', response.token);
 
         const userId = this._authService.getDecodedToken()?.id;
