@@ -64,7 +64,9 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   private unsubscribe$ = new Subject<void>();
 
   @Input() type: TypePublishing | undefined;
+
   @Input() idPublication?: string;
+
   @Input() indexPublication?: number;
 
   @ViewChild('postText') postTextRef!: ElementRef;

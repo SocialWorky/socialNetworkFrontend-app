@@ -15,7 +15,6 @@ import { GeoLocationsService } from '@shared/services/apiGeoLocations.service';
 import { GeocodingService } from '@shared/services/geocoding.service';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from '@env/environment';
-import { FriendsService } from '@shared/services/friends.service';
 
 @Component({
   selector: 'worky-home',
@@ -52,7 +51,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _geocodingService: GeocodingService,
     private _activatedRoute: ActivatedRoute,
     private _meta: Meta,
-    private _friendsService: FriendsService,
   ) {
     this.getLocationUser();
   }
@@ -65,18 +63,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe({
       next: async (publicationsData: PublicationView[]) => {
-        this.publications = await publicationsData.map((publication: PublicationView) => {
-          this._friendsService.getIsMyFriend(publication.author._id).subscribe({
-            next: (isMyFriend: any) => {
-              publication.isMyFriend = isMyFriend;
-            },
-            error: (error: any) => {
-              console.error('Error getting is my friend', error);
-            }
-          
-          });
-          return publication;
-        });
+        this.publications = publicationsData;
+        this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error getting publications', error);

@@ -1,0 +1,57 @@
+<div class="bg-gray-900 text-white py-12">
+    <div class="max-w-lg mx-auto bg-gray-800 p-8 rounded-lg shadow-lg">
+        <h2 class="text-3xl font-semibold mb-6">Crear Nueva Reacción</h2>
+        <form [formGroup]="reactionForm" (ngSubmit)="createCustomReaction()">
+            <div class="mb-6">
+                <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Nombre de la reacción:</label>
+                <input formControlName="name" id="name" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                <div *ngIf="reactionForm.controls['name'].invalid && reactionForm.controls['name'].touched" class="text-red-500 text-sm mt-2">El nombre es requerido.</div>
+            </div>
+            <div class="mb-6">
+                <label for="emoji" class="block text-sm font-medium text-gray-300 mb-2">Emoji o URL de la imagen:</label>
+                <input formControlName="emoji" id="emoji" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                <div *ngIf="reactionForm.controls['emoji'].invalid && reactionForm.controls['emoji'].touched" class="text-red-500 text-sm mt-2">El emoji es requerido.</div>
+            </div>
+            <div class="mb-6">
+                <label for="image" class="block text-sm font-medium text-gray-300 mb-2">O subir imagen:</label>
+                <input id="image" type="file" (change)="onFileChange($event)" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+            </div>
+            <div class="mt-6">
+                <button type="submit" [disabled]="reactionForm.invalid" class="w-full bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600">Agregar Reacción</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="bg-gray-900 text-white py-12">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-semibold mb-6">Reacciones Disponibles</h2>
+        <div class="bg-gray-800 rounded-lg shadow-lg">
+            <table class="min-w-max w-full table-auto">
+                <thead>
+                    <tr class="bg-gray-700 text-gray-300 uppercase text-sm leading-normal">
+                        <th class="py-3 px-6 text-left">Nombre</th>
+                        <th class="py-3 px-6 text-left">Imagen</th>
+                        <th class="py-3 px-6 text-center">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody class="text-gray-300 text-sm font-light">
+                    <tr *ngFor="let data of reactionsList">
+                        <td class="py-3 px-6 text-left whitespace-nowrap">{{ data.name}}</td>
+                        <td class="py-3 px-6 text-left">
+                            <img src="{{ data.emoji }}" alt="Like icon" class="h-8 w-8">
+                        </td>
+                        <td class="py-3 px-6 text-center">
+                            <button class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded focus:outline-none focus:bg-red-600"
+                            (click)="deleteReaction(data._id)">
+                             Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

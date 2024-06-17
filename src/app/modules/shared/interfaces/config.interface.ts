@@ -3,4 +3,5 @@ export interface Config {
   title?: string;
   themeColors?: string;
   privacyPolicy?: string;
+  customCss?: string;
 }

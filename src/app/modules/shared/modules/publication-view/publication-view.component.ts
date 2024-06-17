@@ -12,6 +12,7 @@ import { RoleUser } from '@auth/models/roleUser.enum';
 import { PublicationService } from '@shared/services/publication.service';
 import { environment } from '@env/environment';
 import { FriendsService } from '@shared/services/friends.service';
+import { translations } from '@translations/translations';
 
 
 @Component({
@@ -90,10 +91,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
   }
 
   checkDataLink(userId: string) {
-    const menuDeletePublications = { icon: 'delete', function: this.deletePublications.bind(this), title: 'Eliminar Publicacion' };
+    const menuDeletePublications = { icon: 'delete', function: this.deletePublications.bind(this), title: translations['publicationsView.deletePublication'] };
 
     if (userId === this.dataUser.id || this.dataUser.role === RoleUser.ADMIN) {
-      if (!this.dataLinkActions.find((element) => element.title === 'Eliminar Publicacion')) {
+      if (!this.dataLinkActions.find((element) => element.title === translations['publicationsView.deletePublication'])) {
         this.dataLinkActions.push(menuDeletePublications);
       }
     }
@@ -101,7 +102,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
 
   menuActions() {
     this.dataLinkActions = [
-      { icon: 'report', link: '/auth/login', title: 'Reportar Publicación' },
+      { icon: 'report', link: '/auth/login', title: translations['publicationsView.reportPublication'] },
     ];
   }
 
@@ -132,11 +133,11 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
   }
 
   async deletePublications(publication: PublicationView) {
-    const loadingComment = await this._loadingCtrl.create({
-      message: 'Eliminando publicación...',
+    const loadingDeletePublication = await this._loadingCtrl.create({
+      message: translations['publicationsView.loadingDeletePublication'],
     });
 
-    loadingComment.present();
+    loadingDeletePublication.present();
 
     this._publicationService.deletePublication(publication._id).pipe(
       takeUntil(this.destroy$)
@@ -144,11 +145,11 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
       next: async () => {
         const publications = await this._publicationService.getAllPublications(1, 10);
         this._publicationService.updatePublications(publications);
-        loadingComment.dismiss();
+        loadingDeletePublication.dismiss();
       },
       error: (error) => {
         console.error(error);
-        loadingComment.dismiss();
+        loadingDeletePublication.dismiss();
       },
     });
   }
@@ -171,7 +172,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
         this._publicationService.updatePublications(refreshPublications);
       },
       error: (error) => {
-        console.error('Error al enviar solicitud', error);
+        console.error('Error the send request', error);
       }
     });
   }

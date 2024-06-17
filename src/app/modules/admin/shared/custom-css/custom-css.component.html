@@ -1,0 +1,27 @@
+<div class="custom-css-editor">
+  <h2 class="editor-title">Editor de CSS Personalizado</h2>
+  <div class="editor-info">
+    <p class="editor-description">Para sobrescribir estilos, use <code>!important</code> cuando sea necesario.</p>
+    <p class="editor-description">Ejemplo: <code>color: red !important;</code></p>
+    <p class="editor-description">Puede utilizar las siguientes propiedades CSS:</p>
+    <ul class="tag-list">
+      <li><code>color</code></li>
+      <li><code>font-size</code></li>
+      <li><code>font-family</code></li>
+      <li><code>background-color</code></li>
+      <li><code>border</code></li>
+    </ul>
+    <p class="editor-description">Además, puede usar las siguientes clases de la aplicación:</p>
+    <ul class="tag-list">
+      <li><code>.content-navbar</code> - Barra de navegación</li>
+      <li><code>.content-worky</code> - Contenido principal de la página</li>
+      <li><code>.content-social-app</code> - Área social de la aplicación</li>
+    </ul>
+  </div>
+  <form class="editor-form" (submit)="saveCustomCss()">
+    <textarea class="editor-textarea" [(ngModel)]="customCss" name="customCss" rows="10" cols="50"
+      placeholder="Ingrese su CSS personalizado aquí"></textarea>
+    <br />
+    <button class="editor-button" type="submit" (click)="saveCustomCss()">Guardar CSS</button>
+  </form>
+</div>

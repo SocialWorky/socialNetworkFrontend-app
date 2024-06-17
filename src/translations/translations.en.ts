@@ -112,6 +112,12 @@ export const translations = {
   'publicationsView.spanReaction': 'React',
   'publicationsView.spanShare': 'Share',
   'publicationsView.spanComment': 'Comment',
+  'publicationsView.follow': 'Follow',
+  'publicationsView.unfollow': 'Unfollow',
+  'publicationsView.cancelRequest': 'Cancel request',
+  'publicationsView.loadingDeletePublication': 'Deleting publication...',
+  'publicationsView.reportPublication': 'Report publication',
+  'publicationsView.deletePublication': 'Delete publication',
   // DATE OF PUBLICATION AND COMMENTS
   'DATE_FNS.LESS_THAN_A_MINUTE': 'less than a minute ago',
   'DATE_FNS.X_MINUTES': '{{count}} minutes ago',

@@ -12,7 +12,8 @@ export interface PublicationView {
     reaction:    any[];
     taggedUsers: any[];
     comment:     any[];
-    isMyFriend?: any;
+    isMyFriend?: boolean;
+    isFriendshipPending?: string;
 }
 
 export interface Author {

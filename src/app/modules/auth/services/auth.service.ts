@@ -57,11 +57,13 @@ export class AuthService {
     }
   }
 
-
-
   getDecodedToken(): Token  {
     const token = localStorage.getItem('token');
     return jwtDecode(token!);
+  }
+
+  getUseFromToken(token: string): Token {
+    return jwtDecode(token);
   }
 
   generatePassword(): string {
@@ -85,10 +87,11 @@ export class AuthService {
       while (exists) {
           username = `${username}${counter}`;
           exists = await this.checkExistingUserName(username);
+          if (!exists) break;
           counter++;
       }
 
-      return username;
+      return await username;
   }
 
   async checkExistingUserName(username: string): Promise<boolean> {
@@ -97,7 +100,6 @@ export class AuthService {
       const data: any = await this.http.get(url).toPromise();
       return data;
     } catch (error) {
-      console.error('Error al consultar la API:', error);
       return false;
     }
   }
