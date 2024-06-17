@@ -1,0 +1,14 @@
+<div class="image-container" (mouseenter)="showIcon = true" (mouseleave)="showIcon = false">
+  <img id="editableImage" class="image zoom-effect" [src]="imageSrc" alt="Editar Imagen" (click)="openDialog()">
+  
+  <div class="edit-icon" *ngIf="showIcon" (click)="openDialog()">
+    <i class="material-icons">edit</i>
+  </div>
+
+  <div class="dialog" *ngIf="dialogVisible">
+    <label for="fileUpload" class="custom-file-upload">Cambiar</label>
+    <input type="file" id="fileUpload" accept="image/*" (change)="loadImage($event)">
+    <button (click)="removeImage()">Quitar</button>
+    <button (click)="closeDialog()">Cancelar</button>
+  </div>
+</div>

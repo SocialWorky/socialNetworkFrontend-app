@@ -18,6 +18,10 @@ import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.mod
 import { AddPublicationModule } from '@shared/modules/addPublication/addPublication.module';
 import { WorkyWidgetModule } from '@shared/modules/worky-widget/worky-widget.module';
 import { PublicationViewModule } from '@shared/modules/publication-view/publication-view.module';
+import { SuggetionToFollowModule } from '@shared/modules/suggetion-to-follow/suggetion-to-follow.module';
+import { EditImgProfileComponent } from './profiles/components/edit-img/edit-img-profile.component';
+import { EditInfoProfileComponent } from './profiles/components/edit-info-profile/edit-info-profile.component';
+import { ContactsModule } from '@shared/modules/contacts/contacts.module';
 
 
 @NgModule({
@@ -28,7 +32,9 @@ import { PublicationViewModule } from '@shared/modules/publication-view/publicat
     NavbarComponent,
     ContentLeftSideComponent,
     ContentRightSideComponent,
-    WorkyMenuComponentComponent
+    WorkyMenuComponentComponent,
+    EditImgProfileComponent,
+    EditInfoProfileComponent,
 
   ],
   imports: [
@@ -41,7 +47,10 @@ import { PublicationViewModule } from '@shared/modules/publication-view/publicat
     AddPublicationModule,
     PublicationViewModule,
     WorkyWidgetModule,
-    SideLeftModule
+    PublicationViewModule,
+    SuggetionToFollowModule,
+    SideLeftModule,
+    ContactsModule,
   ]
 })
 export class PagesModule { }

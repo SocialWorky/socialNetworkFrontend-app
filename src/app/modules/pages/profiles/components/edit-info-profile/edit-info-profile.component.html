@@ -1,0 +1,24 @@
+<div class="container">
+  <div *ngIf="!isSaved; else savedMessage">
+    <form [formGroup]="editProfileForm" (ngSubmit)="guardarCambios()">
+      <div class="form-group">
+        <label for="titulo">Título</label>
+        <input type="text" id="titulo" formControlName="titulo" class="form-control" >
+      </div>
+      <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <textarea id="descripcion" formControlName="descripcion" class="form-control" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="url">URL</label>
+        <input type="text" id="url" formControlName="url" class="form-control">
+      </div>
+      <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    </form>
+  </div>
+  <ng-template #savedMessage>
+    <div class="alert alert-success" role="alert">
+      Cambios guardados exitosamente.
+    </div>
+  </ng-template>
+</div>

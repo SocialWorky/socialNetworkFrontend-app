@@ -3,8 +3,6 @@
     width: 100%;
     margin: 12px 5px;
     display: flex;
-    //position: sticky;
-    //top: 0px;
     flex-direction: column;
     align-items: baseline;
 
@@ -22,12 +20,12 @@
         height: 2.5rem;
         margin-bottom: 1rem;
         color: #9ca3af;
-        transition: color 0.3s, transform 0.3s; /* Agrega la transición para el zoom */
+        transition: color 0.3s, transform 0.3s; 
         text-decoration: none;
 
         &:hover {
-            color: #4b5563; /* Cambia el color al pasar el cursor sobre el icono */
-            transform: scale(1.5); /* Aplica un zoom del 10% al icono */
+            color: #4b5563; 
+            transform: scale(1.5); 
         }
     }
 

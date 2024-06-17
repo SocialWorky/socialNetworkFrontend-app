@@ -1,0 +1,140 @@
+.image-container {
+    width: 100%;
+    height: 200px;
+    margin-top: 1rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 3px solid rgb(230, 220, 220);
+
+    .image {
+        transition: transform 0.2s ease-in-out;
+        transform-origin: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    &:hover .image {
+        transform: scale(1.1);
+    }
+}
+
+.content {
+    padding: 1rem;
+}
+
+.header {
+    display: flex;
+    width: 100%;
+}
+
+.avatar-container {
+    flex: 1;
+    margin-top: -6rem;
+    position: relative;
+}
+
+.edit-button-container, .follow-button-container {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+
+    .edit-button, .follow-button, .add-friend-button {
+        display: flex;
+        justify-content: center;
+        max-height: max-content;
+        white-space: nowrap;
+        border: 1px solid #3b82f6;
+        color: #3b82f6;
+        background: transparent;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: bold;
+        transition: border-color 0.3s, box-shadow 0.3s;
+
+        &:hover {
+            border-color: #1d4ed8;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    }
+}
+
+.profile-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    margin-left: 0.5rem;
+
+    .user-basic {
+        h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #000000;
+        }
+
+        p {
+            font-size: 0.875rem;
+            font-weight: medium;
+            color: #4b5563;
+        }
+    }
+
+    .description {
+        margin-top: 0.75rem;
+
+        p {
+            color: #000000;
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    .additional-info {
+        display: flex;
+        flex-direction: column;
+        color: #4b5563;
+
+        .link, .joined-date {
+            display: flex;
+            margin-right: 0.5rem;
+
+            .icon {
+                margin-bottom: 0.5rem;
+            }
+
+            a {
+                margin-left: 0.25rem;
+                color: #60a5fa;
+            }
+        }
+    }
+}
+
+.follow-info {
+    padding-top: 0.75rem;
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+
+    > div {
+        padding-right: 0.75rem;
+        padding-left: 0.75rem;
+        border-right: 1px solid #b9c4d3;
+
+        &:last-child {
+            border-right: none;
+        }
+    }
+}
+
+.text-center {
+    text-align: center;
+}
+
+.count {
+    font-weight: bold;
+    color: #000000;
+}
+
+.text-gray-600 {
+    color: #4b5563;
+}
