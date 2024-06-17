@@ -1,11 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 
 @Component({
-  selector: 'app-edit-img',
-  templateUrl: './edit-img.component.html',
-  styleUrls: ['./edit-img.component.scss'],
+  selector: 'worky-edit-img-profile',
+  templateUrl: './edit-img-profile.component.html',
+  styleUrls: ['./edit-img-profile.component.scss'],
 })
-export class EditImgComponent implements OnInit {
+export class EditImgProfileComponent implements OnInit {
   imageSrc: string = '/assets/img/shared/drag-drop-upload-add-file.webp'; // Ruta de tu imagen predeterminada
   showIcon: boolean = false;
   dialogVisible: boolean = false;

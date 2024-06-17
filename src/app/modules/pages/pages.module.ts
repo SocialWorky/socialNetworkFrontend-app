@@ -19,8 +19,8 @@ import { AddPublicationModule } from '@shared/modules/addPublication/addPublicat
 import { WorkyWidgetModule } from '@shared/modules/worky-widget/worky-widget.module';
 import { PublicationViewModule } from '@shared/modules/publication-view/publication-view.module';
 import { SuggetionToFollowModule } from '@shared/modules/suggetion-to-follow/suggetion-to-follow.module';
-import { EditImgModule } from '@shared/modules/edit-img/edit-img.module';
-import { EditInfoProfileModule } from '@shared/modules/edit-info-profile/edit-info-profile.module';
+import { EditImgProfileComponent } from './profiles/components/edit-img/edit-img-profile.component';
+import { EditInfoProfileComponent } from './profiles/components/edit-info-profile/edit-info-profile.component';
 import { ContactsModule } from '@shared/modules/contacts/contacts.module';
 
 
@@ -32,7 +32,9 @@ import { ContactsModule } from '@shared/modules/contacts/contacts.module';
     NavbarComponent,
     ContentLeftSideComponent,
     ContentRightSideComponent,
-    WorkyMenuComponentComponent
+    WorkyMenuComponentComponent,
+    EditImgProfileComponent,
+    EditInfoProfileComponent,
 
   ],
   imports: [
@@ -47,8 +49,6 @@ import { ContactsModule } from '@shared/modules/contacts/contacts.module';
     WorkyWidgetModule,
     PublicationViewModule,
     SuggetionToFollowModule,
-    EditImgModule,
-    EditInfoProfileModule,
     SideLeftModule,
     ContactsModule,
   ]

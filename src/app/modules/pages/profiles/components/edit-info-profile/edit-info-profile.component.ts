@@ -1,10 +1,10 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ChangeDetectorRef } from '@angular/core'; // Importa ChangeDetectorRef
-import { ProfileService } from './profile-service/profileService'; // Asegúrate de importar el servicio
+import { ProfileService } from '../../services/profile.service'; // Asegúrate de importar el servicio
 
 @Component({
-  selector: 'app-edit-info-profile',
+  selector: 'worky-edit-info-profile',
   templateUrl: './edit-info-profile.component.html',
   styleUrls: ['./edit-info-profile.component.scss'],
 })

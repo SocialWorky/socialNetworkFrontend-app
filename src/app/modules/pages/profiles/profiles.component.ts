@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
+
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
-import { EditInfoProfileComponent } from '@shared/modules/edit-info-profile/edit-info-profile.component';
-import { ProfileService } from '@shared/modules/edit-info-profile/profile-service/profileService';
-import { Subscription } from 'rxjs';
-import { ChangeDetectorRef } from '@angular/core';
+import { EditInfoProfileComponent } from './components/edit-info-profile/edit-info-profile.component';
+import { ProfileService } from './services/profile.service';
 import { UserService } from '@shared/services/users.service';
 
 @Component({

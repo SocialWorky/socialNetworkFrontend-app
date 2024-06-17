@@ -11,7 +11,7 @@
     (mouseenter)="showReactions()"
     (click)="deleteReaction(reactionUserInPublication._id)">
     <img [src]="reactionUserInPublication.customReaction.emoji" [alt]="reactionUserInPublication.customReaction.name">
-    <span>{{ reactionUserInPublication.customReaction.name }}</span>
+    <div>{{ reactionUserInPublication.customReaction.name }}</div>
   </div>
 
   <div class="reaction-popup" *ngIf="reactionsVisible">
