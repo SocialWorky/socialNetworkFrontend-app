@@ -1,13 +1,22 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
 
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { EditInfoProfileComponent } from './components/edit-info-profile/edit-info-profile.component';
 import { ProfileService } from './services/profile.service';
 import { UserService } from '@shared/services/users.service';
+import { ActivatedRoute } from '@angular/router';
+import { User } from '@shared/interfaces/user.interface';
+import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
+import { PublicationView } from '@shared/interfaces/publicationView.interface';
+import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
+import { PublicationService } from '@shared/services/publication.service';
+import { NotificationCommentService } from '@shared/services/notificationComment.service';
+import { FriendsService } from '@shared/services/friends.service';
+import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
 
 @Component({
   selector: 'app-profiles',
@@ -15,78 +24,239 @@ import { UserService } from '@shared/services/users.service';
   styleUrls: ['./profiles.component.scss'],
 })
 export class ProfilesComponent implements OnInit, OnDestroy {
-  userName: string = '';
-  userData: any; // Variable para almacenar los datos del perfil
+  private destroy$ = new Subject<void>();
+
+  typePublishing = TypePublishing;
+
+  publications: PublicationView[] = [];
+
+  page = 1;
+
+  pageSize = 10;
+
+  WorkyButtonType = WorkyButtonType;
+
+  WorkyButtonTheme = WorkyButtonTheme;
+
+  paramPublication: boolean = false;
+
+  loaderPublications?: boolean = false;
+
+  userData: User | undefined;
+
+  idUserProfile: string = '';
 
   decodedToken!: Token;
 
   isAuthenticated: boolean = false;
+
   isCurrentUser: boolean = false;
 
-  private perfilSubscription!: Subscription;
+  isFriend: boolean = false;
+
+  isFriendPending: { status: boolean; _id: string } = { status: false, _id: '' };
+
+  idPendingFriend: string = '';
+
+  userReceives!: UserData;
+  
+  userRequest!: UserData;
+
+  private profileSubscription!: Subscription;
 
   constructor(
-    public dialog: MatDialog,
+    public _dialog: MatDialog,
     private _authService: AuthService,
-    private profileService: ProfileService,
-    private userService: UserService,
-    private _cdr: ChangeDetectorRef 
-  ) {
-    this.isAuthenticated = this._authService.isAuthenticated();
-    if (this.isAuthenticated) {
-      this.decodedToken = this._authService.getDecodedToken();
-      this.userName = this.decodedToken.name;
-      this.obtenerDatosPerfil(); // Obtener los datos del perfil al inicializar el componente
-    }
-  }
+    private _profileService: ProfileService,
+    private _userService: UserService,
+    private _cdr: ChangeDetectorRef,
+    private _activatedRoute: ActivatedRoute,
+    private _publicationService: PublicationService,
+    private _notificationCommentService: NotificationCommentService,
+    private _friendsService: FriendsService,
+  ) {}
 
-  ngOnInit(): void {
-    this.checkIfCurrentUser();
-    // Suscribirse a los cambios en el perfil
-    this.perfilSubscription = this.profileService.perfilActualizado$.subscribe(() => {
-      this.obtenerDatosPerfil(); // Actualizar los datos del perfil cuando se emita el evento
-      this._cdr.detectChanges(); // Forzar la detección de cambios
+  async ngOnInit(): Promise<void> {
+
+    this.idUserProfile = this._activatedRoute.snapshot.paramMap.get('profileId') || '';
+
+    if (this.idUserProfile === '') {
+      this.idUserProfile = this._authService.getDecodedToken().id;
+    } else {
+      this.getUserFriend();
+    }
+
+    this.decodedToken = this._authService.getDecodedToken();
+
+    this.isCurrentUser = this.idUserProfile === this.decodedToken.id;
+
+    this.getDataProfile();
+
+    this.loaderPublications = true;
+
+    this.paramPublication = await this.getParamsPublication();
+    if (this.paramPublication) return;
+    this._publicationService.publications$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: async (publicationsData: PublicationView[]) => {
+        this.publications = publicationsData;
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error(error);
+      }
     });
+
+    await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
+
+    this.loaderPublications = false;
+    this._cdr.markForCheck();
+    this.subscribeToNotificationComment();
   }
 
   ngOnDestroy(): void {
-    if (this.perfilSubscription) {
-      this.perfilSubscription.unsubscribe(); // Desuscribirse para evitar fugas de memoria
+    if (this.profileSubscription) {
+      this.profileSubscription.unsubscribe();
     }
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   abrirFormulario(): void {
-    const dialogRef = this.dialog.open(EditInfoProfileComponent, {
+    const dialogRef = this._dialog.open(EditInfoProfileComponent, {
       width: '250px',
-      // Puedes pasar datos al modal si es necesario
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result && result.actualizado) {
-        this.obtenerDatosPerfil(); // Actualizar los datos del perfil si se guardaron cambios
-        this._cdr.detectChanges(); // Forzar la detección de cambios
+        this.getDataProfile();
+        this._cdr.markForCheck();
       }
     });
   }
 
-  checkIfCurrentUser(): void {
-    // Lógica para determinar si el usuario actual es el propietario del perfil
-    // Esto es un ejemplo y deberías reemplazarlo con tu lógica real
-    const currentUserId = 'user123'; // Supongamos que este es el ID del usuario actual
-    const profileOwnerId = 'user123'; // Supongamos que este es el ID del propietario del perfil
-    this.isCurrentUser = currentUserId === profileOwnerId;
-  }
+  async getDataProfile(): Promise<void> {
 
-  obtenerDatosPerfil(): void {
-    // Obtener los datos del perfil desde el almacenamiento local
-    const datosPerfil = localStorage.getItem('datosPerfil');
-    if (datosPerfil) {
-      this.userData = JSON.parse(datosPerfil);
-    }
+    this.profileSubscription = await this._userService.getUserById(this.idUserProfile).subscribe({
+      next: (response) => {
+        this.userData = response;
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error(error);
+      },
+    });
   }
 
   cambiosGuardadosHandler(): void {
-    this.obtenerDatosPerfil(); // Actualizar los datos del perfil
-    this._cdr.detectChanges(); // Forzar la detección de cambios
+    this.getDataProfile();
+    this._cdr.markForCheck();
   }
+
+  async subscribeToNotificationComment() {
+    this._notificationCommentService.notificationComment$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(async (data: any) => {
+      const newCommentInPublications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
+      this._publicationService.updatePublications(newCommentInPublications);
+    });
+  }
+
+  private async getParamsPublication(): Promise<boolean> {
+    let result = false;
+    const _idPublication = this._activatedRoute.snapshot.paramMap.get('_idPublication');
+    if (_idPublication) {
+      try {
+        const publication = await lastValueFrom(this._publicationService.getPublicationId(_idPublication));
+        if (publication.length) {
+          this.loaderPublications = false;
+          this.publications = publication;
+
+          this._cdr.markForCheck();
+          result = true;
+        } else {
+          result = false;
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    return result;
+  }
+
+  getUserFriend() {
+    this._userService.getUserFriends(this._authService.getDecodedToken().id, this.idUserProfile).subscribe({
+      next: (response) => {
+        this.getUserFriendPending();
+      },
+      error: (error) => {
+        console.error(error);
+      },
+    });
+  }
+
+  getUserFriendPending(): void {
+    this._friendsService.getIsMyFriend(this._authService.getDecodedToken().id, this.idUserProfile).subscribe({
+      next: (response: FriendsStatus) => {
+        this.isFriendPending.status = response?.status === 'pending';
+        this.idPendingFriend = response?.id;
+        if ( response?.status === 'pending') {
+          this.userReceives = response?.receiver;
+          this.userRequest = response?.requester;
+          this.isFriend = false;
+          this._cdr.markForCheck();
+        }
+        if (response?.status === 'accepted') {
+          this.isFriend = true;
+          this._cdr.markForCheck();
+        }
+        if (response === null) {
+          this.isFriend = false;
+          this._cdr.markForCheck();
+        }
+      },
+      error: (error: any) => {
+        console.error(error);
+      },
+    });
+  }
+
+  followMyFriend(_id: string) {
+    this._friendsService.requestFriend(_id).subscribe({
+      next: async () => {
+        const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
+        this._publicationService.updatePublications(refreshPublications);
+        this.getUserFriendPending();
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error(error);
+      }
+    });
+  }
+
+  cancelFriendship(_id: string) {
+    this._friendsService.deleteFriend(_id).subscribe({
+      next: async (data) => {
+        const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
+        this._publicationService.updatePublications(refreshPublications);
+        this.getUserFriend();
+        this._cdr.markForCheck();
+      }
+    });
+    this._cdr.markForCheck();
+  }
+
+  acceptFriendship(_id: string) {
+    this._friendsService.acceptFriendship(_id).subscribe({
+      next: async (data) => {
+        this.getUserFriendPending();
+        const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
+        this._publicationService.updatePublications(refreshPublications);
+        this._cdr.markForCheck();
+      }
+    });
+  }
+
 }
