@@ -10,7 +10,7 @@
     <div class="publication-header-content">
       <div class="user-name-content">
 
-        <div *ngIf="publication.isMyFriend || dataUser.id === publication.author._id; else notFriend">
+        <div *ngIf="publication.isMyFriend || (dataUser.id === publication.author._id && !publication.isMyFriend); else notFriend">
           <span class="name">{{ publication.author.name }} {{ publication.author.lastName }}</span>
         </div>
 
@@ -20,20 +20,20 @@
             
             <ng-container *ngIf="!isProfile">
 
-              <i class="material-icons">keyboard_arrow_right</i> 
+              <i *ngIf="!publication.isMyFriend" class="material-icons">keyboard_arrow_right</i> 
 
-              <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending === null" class="follow-my-friend" 
+              <a *ngIf="!publication.isMyFriend && (!userRequest?._id || !userReceive?._id )" class="follow-my-friend" 
                 (click)="followMyFriend(publication.author._id)">
                 {{ 'publicationsView.follow' | workyTranslations }}
               </a>
 
-              <a *ngIf="publication.isFriendshipPending && !publication.isMyFriend && userRequest?._id === dataUser.id" class="follow-my-friend" 
-                (click)="cancelFriendship(publication.isFriendshipPending)">
+              <a *ngIf="!publication.isMyFriend && userRequest?._id === dataUser.id" class="follow-my-friend" 
+                (click)="cancelFriendship(publication.isFriendshipPending!)">
                 {{ 'publicationsView.cancelRequest' | workyTranslations }}
               </a>
 
-              <a *ngIf="publication.isFriendshipPending && !publication.isMyFriend && userRequest?._id !== dataUser.id" class="follow-my-friend" 
-                (click)="acceptFriendship(publication.isFriendshipPending)">
+              <a *ngIf="userReceive?._id === dataUser.id" class="follow-my-friend" 
+                (click)="acceptFriendship(publication.isFriendshipPending!)">
                 Aceptar Amistad
               </a>
 

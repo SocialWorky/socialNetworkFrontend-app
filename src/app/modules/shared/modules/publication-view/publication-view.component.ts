@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -21,7 +21,7 @@ import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
   templateUrl: './publication-view.component.html',
   styleUrls: ['./publication-view.component.scss'],
 })
-export class PublicationViewComponent implements OnInit, OnDestroy {
+export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() publication: PublicationView | undefined;
 
   @Input() indexPublication?: number;
@@ -44,7 +44,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
 
   extraData: string[] = [];
 
-  userRequest!: UserData;
+  userRequest?: UserData;
+  
+  userReceive?: UserData;
 
   routeUrl: string = '';
 
@@ -62,17 +64,26 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
     private _publicationService: PublicationService,
     private _friendsService: FriendsService,
   ) {}
+  async ngAfterViewInit() {
+    await this.getUserFriendPending();
+  }
 
-  ngOnInit() {
+  async ngOnInit() {
+    await this.userReceive;
     this.menuActions();
     this.menuShareActions();
     this.extraDataPublication();
     this.routeUrl = this._router.url;
     if (this.routeUrl.includes('profile')) {
       this.isProfile = true;
+    } else {
+      this.isProfile = false;
     }
+    this.getUserFriendPending();
     this._cdr.markForCheck();
   }
+
+
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -176,11 +187,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  followMyFriend(_id: string) {
-    this._friendsService.requestFriend(_id).subscribe({
+  async followMyFriend(_id: string) {
+    await this._friendsService.requestFriend(_id).subscribe({
       next: async () => {
         const refreshPublications = await this._publicationService.getAllPublications(1, 10);
         this._publicationService.updatePublications(refreshPublications);
+        this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error the send request', error);
@@ -193,17 +205,17 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
       next: async (data) => {
         const refreshPublications = await this._publicationService.getAllPublications(1, 10);
         this._publicationService.updatePublications(refreshPublications);
+        this._cdr.markForCheck();
       }
     });
   }
 
-  getUserFriendPending(): void {
-    this._friendsService.getIsMyFriend(this._authService.getDecodedToken().id, this.publication?.author?._id || '').subscribe({
+  async getUserFriendPending() {
+    await this._friendsService.getIsMyFriend(this._authService.getDecodedToken().id, this.publication?.author?._id || '').subscribe({
       next: (response: FriendsStatus) => {
-        if ( response?.status === 'pending') {
-          this.userRequest = response?.requester;
-          this._cdr.markForCheck();
-        }
+        this.userRequest = response?.requester;
+        this.userReceive = response?.receiver;
+        this._cdr.markForCheck();
       },
       error: (error: any) => {
         console.error(error);

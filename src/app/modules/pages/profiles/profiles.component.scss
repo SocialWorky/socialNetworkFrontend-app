@@ -65,11 +65,23 @@
   width: 100%;
   display: flex;
   justify-content: center;
+
+  @include breakpoints.below-sm {
+    flex-direction: column;
+  }
+
   .content-left-profile {
     width: 40%;
+    @include breakpoints.below-sm {
+      width: 100%;
+    }
   }
   .content-section-wall {
     width: 60%;
     margin-left: 1rem;
+    @include breakpoints.below-sm {
+      width: 100%;
+      margin-left: 0;
+    }
   }
 }
