@@ -7,7 +7,8 @@ export interface PublicationView {
     extraData:   ExtraData;
     createdAt:   Date;
     updatedAt:   Date;
-    author:      Author;
+    author:      User;
+    userReceiving?: User;
     media:       any[];
     reaction:    any[];
     taggedUsers: any[];
@@ -16,7 +17,7 @@ export interface PublicationView {
     isFriendshipPending?: string;
 }
 
-export interface Author {
+export interface User {
     _id:      string;
     username: string;
     name:     string;

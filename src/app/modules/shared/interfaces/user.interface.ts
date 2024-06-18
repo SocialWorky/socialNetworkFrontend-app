@@ -1,3 +1,5 @@
+import { ProfileData } from '../../pages/profiles/interface/profile.interface';
+
 export interface User {
   _id: string;
   username: string;
@@ -10,4 +12,5 @@ export interface User {
   avatar: string;
   createdAt: string;
   updatedAt: string;
+  profile: ProfileData;
 }

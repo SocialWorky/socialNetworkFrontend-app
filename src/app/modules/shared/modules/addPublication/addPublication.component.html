@@ -1,7 +1,10 @@
 <div class="publishing-container">
   <form [formGroup]="myForm" (ngSubmit)="onSave()" autocomplete="off">
     <div class="publishing-header">
-      <worky-avatar [size]="60" *ngIf="type === typePublishing.POST"></worky-avatar>
+
+
+
+      <worky-avatar [size]="60" *ngIf="type === typePublishing.POST || typePublishing.POSTPROFILE"></worky-avatar>
 
       <div class="user-name-content" *ngIf="type !== typePublishing.COMMENT">
         <div>
@@ -51,7 +54,7 @@
           class="publishing-textarea"
           (input)="onTextareaInput()"
           formControlName="content"
-          placeholder="{{ type === typePublishing.POST ? ('publishing.placeholder' | workyTranslations) + ' ' + userName + '?' : ('publishing.placeholderComment' | workyTranslations) + userName + '?' }}">
+          placeholder="{{ type === typePublishing.POST || typePublishing.POSTPROFILE ? ('publishing.placeholder' | workyTranslations) + ' ' + userName + '?' : ('publishing.placeholderComment' | workyTranslations) + userName + '?' }}">
         </textarea>
 
 
@@ -100,8 +103,6 @@
       </div>
 
     </div>
-
-
 
     <div class="publishing-footer">
       <worky-buttons
