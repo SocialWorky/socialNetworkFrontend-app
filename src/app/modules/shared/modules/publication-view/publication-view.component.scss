@@ -22,6 +22,11 @@
             font-weight: 500;
           }
          }
+
+        .link-name {
+          cursor: pointer;
+        }
+
         .geoLocationName {
           font-size: variables.$worky-font-size-3;
           color: colors.$worky-color-navy;

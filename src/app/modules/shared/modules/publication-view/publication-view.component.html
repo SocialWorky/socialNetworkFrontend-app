@@ -15,18 +15,29 @@
         </div>
 
         <ng-template #notFriend>
-          <span class="name">{{ publication.author.name }} {{ publication.author.lastName }} <i class="material-icons">keyboard_arrow_right</i> 
+          <span (click)="viewProfile(publication.author._id)" class="name link-name">
+            {{ publication.author.name }} {{ publication.author.lastName }} 
+            
+            <ng-container *ngIf="!isProfile">
 
-            <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending === null" class="follow-my-friend" 
-              (click)="followMyFriend(publication.author._id)">
-              {{ 'publicationsView.follow' | workyTranslations }}
-            </a>
+              <i class="material-icons">keyboard_arrow_right</i> 
 
-            <a *ngIf="publication.isFriendshipPending && !publication.isMyFriend" class="follow-my-friend" 
-              (click)="cancelFriendship(publication.isFriendshipPending)">
-              {{ 'publicationsView.cancelRequest' | workyTranslations }}
-            </a>
+              <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending === null" class="follow-my-friend" 
+                (click)="followMyFriend(publication.author._id)">
+                {{ 'publicationsView.follow' | workyTranslations }}
+              </a>
 
+              <a *ngIf="publication.isFriendshipPending && !publication.isMyFriend && userRequest?._id === dataUser.id" class="follow-my-friend" 
+                (click)="cancelFriendship(publication.isFriendshipPending)">
+                {{ 'publicationsView.cancelRequest' | workyTranslations }}
+              </a>
+
+              <a *ngIf="publication.isFriendshipPending && !publication.isMyFriend && userRequest?._id !== dataUser.id" class="follow-my-friend" 
+                (click)="acceptFriendship(publication.isFriendshipPending)">
+                Aceptar Amistad
+              </a>
+
+            </ng-container>
           </span>
         </ng-template>       
 

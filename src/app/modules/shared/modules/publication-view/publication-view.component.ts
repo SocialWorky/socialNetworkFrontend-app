@@ -13,6 +13,7 @@ import { PublicationService } from '@shared/services/publication.service';
 import { environment } from '@env/environment';
 import { FriendsService } from '@shared/services/friends.service';
 import { translations } from '@translations/translations';
+import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
 
 
 @Component({
@@ -43,6 +44,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
 
   extraData: string[] = [];
 
+  userRequest!: UserData;
+
+  routeUrl: string = '';
+
+  isProfile: boolean = false;
+
   dataUser = this._authService.getDecodedToken();
 
   private destroy$ = new Subject<void>();
@@ -60,6 +67,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
     this.menuActions();
     this.menuShareActions();
     this.extraDataPublication();
+    this.routeUrl = this._router.url;
+    if (this.routeUrl.includes('profile')) {
+      this.isProfile = true;
+    }
     this._cdr.markForCheck();
   }
 
@@ -184,6 +195,35 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
         this._publicationService.updatePublications(refreshPublications);
       }
     });
+  }
+
+  getUserFriendPending(): void {
+    this._friendsService.getIsMyFriend(this._authService.getDecodedToken().id, this.publication?.author?._id || '').subscribe({
+      next: (response: FriendsStatus) => {
+        if ( response?.status === 'pending') {
+          this.userRequest = response?.requester;
+          this._cdr.markForCheck();
+        }
+      },
+      error: (error: any) => {
+        console.error(error);
+      },
+    });
+  }
+
+  acceptFriendship(_id: string) {
+    this._friendsService.acceptFriendship(_id).subscribe({
+      next: async (data) => {
+        this.getUserFriendPending();
+        const refreshPublications = await this._publicationService.getAllPublications(1, 10);
+        this._publicationService.updatePublications(refreshPublications);
+        this._cdr.markForCheck();
+      }
+    });
+  }
+
+  viewProfile(_id: string) {
+    this._router.navigate(['/profile', _id]);
   }
 
 }
