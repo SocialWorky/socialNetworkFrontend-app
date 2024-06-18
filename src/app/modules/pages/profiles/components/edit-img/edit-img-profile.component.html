@@ -1,8 +1,9 @@
 <div class="image-container" (mouseenter)="showIcon = true" (mouseleave)="showIcon = false">
   <img id="editableImage" class="image zoom-effect" [src]="imageSrc" alt="Editar Imagen" (click)="openDialog()">
   
-  <div class="edit-icon" *ngIf="showIcon" (click)="openDialog()">
-    <i class="material-icons">edit</i>
+  <div *ngIf="showIcon" class="edit-icon">
+    <i class="material-icons"
+       (click)="openDialog()">edit</i>
   </div>
 
   <div class="dialog" *ngIf="dialogVisible">

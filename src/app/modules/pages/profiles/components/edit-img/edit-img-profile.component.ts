@@ -6,8 +6,10 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
   styleUrls: ['./edit-img-profile.component.scss'],
 })
 export class EditImgProfileComponent implements OnInit {
-  imageSrc: string = '/assets/img/shared/drag-drop-upload-add-file.webp'; // Ruta de tu imagen predeterminada
+  imageSrc: string = '/assets/img/shared/drag-drop-upload-add-file.webp';
+
   showIcon: boolean = false;
+
   dialogVisible: boolean = false;
 
   constructor(private _cdr: ChangeDetectorRef) {}
