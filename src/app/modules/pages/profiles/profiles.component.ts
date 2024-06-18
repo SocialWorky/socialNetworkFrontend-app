@@ -248,8 +248,8 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
   }
 
-  acceptFriendship(_id: string) {
-    this._friendsService.acceptFriendship(_id).subscribe({
+  async acceptFriendship(_id: string) {
+    await this._friendsService.acceptFriendship(_id).subscribe({
       next: async (data) => {
         this.getUserFriendPending();
         const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
