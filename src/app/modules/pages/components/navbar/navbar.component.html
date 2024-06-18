@@ -30,9 +30,8 @@
         </div>
       </form>
 
-      <!-- Resultados de búsqueda -->
       <ul *ngIf="users.length > 0" class="search-results">
-        <li *ngFor="let user of users">
+        <li *ngFor="let user of users" (click)="viewProfile(user._id)">
           <worky-avatar
             [img]="user.avatar"
             [size]="30"

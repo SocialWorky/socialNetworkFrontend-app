@@ -115,4 +115,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this._router.navigate([data.link]);
     }
   }
+
+  viewProfile(_id: string) {
+    this._router.navigate(['/profile', _id]);
+    this.users = [];
+    this.searchTerm = '';
+  }
+
 }

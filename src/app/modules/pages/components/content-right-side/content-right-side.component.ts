@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'worky-content-right-side',
@@ -8,11 +7,7 @@ import { Router } from '@angular/router';
 })
 export class ContentRightSideComponent implements OnInit {
 
-  rutaUrl: string = '';
+  constructor() {}
 
-  constructor(private _router: Router) {}
-
-  ngOnInit(): void {
-    this.rutaUrl = this._router.url;
-  }
+  ngOnInit(): void {}
 }

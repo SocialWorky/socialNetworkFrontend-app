@@ -22,6 +22,7 @@ import { SuggetionToFollowModule } from '@shared/modules/suggetion-to-follow/sug
 import { EditImgProfileComponent } from './profiles/components/edit-img/edit-img-profile.component';
 import { EditInfoProfileComponent } from './profiles/components/edit-info-profile/edit-info-profile.component';
 import { ContactsModule } from '@shared/modules/contacts/contacts.module';
+import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
 
 
 @NgModule({
@@ -51,6 +52,7 @@ import { ContactsModule } from '@shared/modules/contacts/contacts.module';
     SuggetionToFollowModule,
     SideLeftModule,
     ContactsModule,
+    WorkyButtonsModule
   ]
 })
 export class PagesModule { }
