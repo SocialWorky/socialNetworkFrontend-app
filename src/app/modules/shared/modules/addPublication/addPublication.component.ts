@@ -17,8 +17,11 @@ import { LocationSearchComponent } from '../location-search/location-search.comp
 import { ExtraData } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { ImageUploadModalComponent } from '../image-upload-modal/image-upload-modal.component';
 import { FileUploadService } from '@shared/services/file-upload.service';
-import { Subject, lastValueFrom, takeUntil } from 'rxjs';
+import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
 import { MediaFileUpload } from '@shared/interfaces/publicationView.interface';
+import { UserService } from '@shared/services/users.service';
+import { GlobalEventService } from '@shared/services/globalEventService.service';
+import { User } from '@shared/interfaces/user.interface';
 
 @Component({
   selector: 'worky-add-publication',
@@ -30,7 +33,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   
   WorkyButtonTheme = WorkyButtonTheme;
 
-  userName: string = '';
+  user: User = {} as User;
   
   nameGeoLocation: string = '';
 
@@ -54,6 +57,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   typePublishing = TypePublishing;
 
+  profileImageUrl: string | null = '';
+
   public myForm: FormGroup = this._fb.group({
     content: ['', [Validators.required, Validators.minLength(1)]],
     privacy: [''],
@@ -62,6 +67,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   });
 
   private unsubscribe$ = new Subject<void>();
+
+  private subscription: Subscription | undefined;
 
   @Input() type: TypePublishing | undefined;
 
@@ -82,25 +89,48 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _dialog: MatDialog,
     private _cdr: ChangeDetectorRef,
     private _fileUploadService: FileUploadService,
+    private _userService: UserService,
+    private _globalEventService: GlobalEventService,
   ) {
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
       this.decodedToken = this._authService.getDecodedToken();
-      this.userName = this.decodedToken.name;
     }
   }
 
   ngOnInit() {
     this.postPrivacy(TypePrivacy.PUBLIC);
+    this.getUser();
+    this.subscription = this._globalEventService.profileImage$.subscribe(async newImageUrl => {
+      this.profileImageUrl = newImageUrl;
+      const publicationsNew = await this._publicationService.getAllPublications(1, 10);
+      this._publicationService.updatePublications(publicationsNew);
+    });
   }
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   ngAfterViewInit() {
     this.autoResize();
+  }
+
+  async getUser() {
+    await this._userService.getUserById(this.decodedToken.id).pipe(takeUntil(this.unsubscribe$)).subscribe({
+      next: (response: User) => {
+        this.user = response;
+        this.profileImageUrl = response.avatar;
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error(error);
+      },
+    });
   }
 
   toggleEmojiMenu() {

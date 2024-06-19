@@ -1,14 +1,18 @@
-<div class="publishing-container">
+<div class="publishing-container" *ngIf="user">
   <form [formGroup]="myForm" (ngSubmit)="onSave()" autocomplete="off">
     <div class="publishing-header">
 
 
 
-      <worky-avatar [size]="60" *ngIf="type === typePublishing.POST || typePublishing.POSTPROFILE"></worky-avatar>
+      <worky-avatar *ngIf="type === typePublishing.POST || typePublishing.POSTPROFILE"
+        [size]="60" 
+        img="{{ profileImageUrl }}"
+        name="{{ user.name}} {{ user.lastName }}">
+      </worky-avatar>
 
       <div class="user-name-content" *ngIf="type !== typePublishing.COMMENT">
         <div>
-          <span class="name"> {{ userName }} </span>
+          <span class="name"> {{ user.name }} {{ user.lastName }} </span>
           <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> está en <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span> 
         </div>
         <div class="dropdown">
@@ -54,7 +58,7 @@
           class="publishing-textarea"
           (input)="onTextareaInput()"
           formControlName="content"
-          placeholder="{{ type === typePublishing.POST || typePublishing.POSTPROFILE ? ('publishing.placeholder' | workyTranslations) + ' ' + userName + '?' : ('publishing.placeholderComment' | workyTranslations) + userName + '?' }}">
+          placeholder="{{ type === typePublishing.POST || typePublishing.POSTPROFILE ? ('publishing.placeholder' | workyTranslations) + ' ' + user.name + ' ' + user.lastName + '?' : ('publishing.placeholderComment' | workyTranslations) + user.name + ' ' + user.lastName + '?' }}">
         </textarea>
 
 

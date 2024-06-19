@@ -10,11 +10,21 @@
         <div class="header">
             <div class="avatar-container">
                 <div class="avatar">
-                    <worky-avatar 
-                     [size]="100"
-                     img= "{{ userData.avatar }}"
-                     name="{{ userData.name }} {{ userData.lastName }}">
-                    </worky-avatar>
+
+                  <div class="overlay" [class.show]="isUploading">
+                    <div class="loading-spinner"></div>
+                  </div>
+
+                  <worky-avatar
+                    [size]="100"
+                    img= "{{ userData.avatar }}"
+                    name="{{ userData.name }} {{ userData.lastName }}">
+                  </worky-avatar>
+
+                  <div class="edit-icon-avatar" *ngIf="isCurrentUser">
+                    <i class="material-icons" (click)="openUploadModal()">photo_camera</i>
+                  </div>
+
                 </div>
             </div>
 

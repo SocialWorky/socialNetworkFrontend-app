@@ -6,7 +6,6 @@ import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { EditInfoProfileComponent } from './components/edit-info-profile/edit-info-profile.component';
-import { ProfileService } from './services/profile.service';
 import { UserService } from '@shared/services/users.service';
 import { ActivatedRoute } from '@angular/router';
 import { User } from '@shared/interfaces/user.interface';
@@ -17,6 +16,10 @@ import { PublicationService } from '@shared/services/publication.service';
 import { NotificationCommentService } from '@shared/services/notificationComment.service';
 import { FriendsService } from '@shared/services/friends.service';
 import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
+import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';
+import { FileUploadService } from '@shared/services/file-upload.service';
+import { environment } from '@env/environment';
+import { GlobalEventService } from '@shared/services/globalEventService.service';
 
 @Component({
   selector: 'app-profiles',
@@ -25,6 +28,8 @@ import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
 })
 export class ProfilesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+
+  private unsubscribe$ = new Subject<void>();
 
   typePublishing = TypePublishing;
 
@@ -58,6 +63,18 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   idPendingFriend: string = '';
 
+  selectedFiles: File[] = [];
+
+  imgCoverDefault = '/assets/img/shared/drag-drop-upload-add-file.webp';
+
+  selectedImage: string | undefined;
+
+  cropper: Cropper | undefined;
+
+  originalMimeType: string | undefined;
+
+  isUploading = false;
+
   userReceives!: UserData;
   
   userRequest!: UserData;
@@ -67,13 +84,14 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   constructor(
     public _dialog: MatDialog,
     private _authService: AuthService,
-    private _profileService: ProfileService,
     private _userService: UserService,
     private _cdr: ChangeDetectorRef,
     private _activatedRoute: ActivatedRoute,
     private _publicationService: PublicationService,
     private _notificationCommentService: NotificationCommentService,
     private _friendsService: FriendsService,
+    private _fileUploadService: FileUploadService,
+    private _globalEventService: GlobalEventService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -259,4 +277,66 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     });
   }
 
+  async openUploadModal() {
+    const dialogRef = this._dialog.open(ImageUploadModalComponent, {
+      data: {
+        maxFiles: 1,
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.length > 0) {
+        this.selectedFiles = result;
+        const file = this.selectedFiles[0];
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          this.selectedImage = e.target.result;
+          this.uploadImg();
+          this._cdr.detectChanges();
+        };
+        reader.readAsDataURL(file);
+      }
+      
+    });
+  }
+
+  async uploadImg() {
+    this.isUploading = true;
+    this._cdr.markForCheck();
+
+    const userId = this._authService.getDecodedToken().id;
+    const uploadLocation = 'profile-avatar';
+    if (this.selectedImage) {
+      const response = await lastValueFrom(
+        this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation).pipe(takeUntil(this.unsubscribe$))
+      );
+
+      const urlImgUpload = environment.APIFILESERVICE + uploadLocation + '/' + response[0].filename;
+
+      await this._userService.userEdit(userId, {
+        avatar: urlImgUpload,
+      }).pipe(takeUntil(this.unsubscribe$)).subscribe({
+        next: (data) => {
+          this._globalEventService.updateProfileImage(urlImgUpload);
+          if (this.userData) {
+            this.userData.avatar = urlImgUpload;
+          }
+          setTimeout(() => {
+            this.isUploading = false;
+            this._cdr.markForCheck();
+          }, 1200);
+        },
+        error: (error) => {
+          console.error('Error updating profile', error);
+          this.isUploading = false;
+          this._cdr.markForCheck();
+        }
+      });
+
+      await Promise.all(response);
+
+      this.selectedFiles = [];
+      this._cdr.markForCheck();
+    }
+  }
 }

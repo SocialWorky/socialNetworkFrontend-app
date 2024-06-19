@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 import { environment } from '@env/environment';
-import { CreatePost } from '@shared/modules/addPublication/interfaces/createPost.interface';
-import { PublicationView } from '@shared/interfaces/publicationView.interface';
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+
 
 @Injectable({
   providedIn: 'root'
@@ -49,6 +48,12 @@ export class UserService {
     const url = `${this.baseUrl}/user/${id}`;
     const headers = this.getHeaders();
     return this.http.get(url, { headers });
+  }
+
+  userEdit(id: string, data: any): Observable<any> {
+    const url = `${this.baseUrl}/user/edit/${id}`;
+    const headers = this.getHeaders();
+    return this.http.put(url, data, { headers });
   }
 
   getUserFriends(_id: string, _idRequest: string): Observable<boolean> {
