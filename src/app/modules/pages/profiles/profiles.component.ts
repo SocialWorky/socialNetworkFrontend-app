@@ -139,7 +139,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   async getDataProfile(): Promise<void> {
 
     this.profileSubscription = await this._userService.getUserById(this.idUserProfile).subscribe({
-      next: (response) => {
+      next: (response: User) => {
         this.userData = response;
         this._cdr.markForCheck();
       },

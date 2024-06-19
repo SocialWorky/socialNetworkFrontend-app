@@ -26,8 +26,8 @@ export class ProfileService {
     return headers;
   }
 
-  updateProfile(profileData: ProfileData): Observable<ProfileData> {
-    const url = `${this.baseUrl}/user/profile`;
+  updateProfile(idUser: string, profileData: ProfileData): Observable<ProfileData> {
+    const url = `${this.baseUrl}/user/profile/${idUser}`;
     const headers = this.getHeaders();
     return this.http.put<ProfileData>(url, profileData, { headers });
   }

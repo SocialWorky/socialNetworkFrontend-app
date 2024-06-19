@@ -1,6 +1,9 @@
-<div class="content-header-profile">
+<div *ngIf="userData" class="content-header-profile">
     <div class="image-container">
-        <worky-edit-img-profile></worky-edit-img-profile>
+        <worky-edit-img-profile 
+          [isCurrentUser]="isCurrentUser"
+          [profileImage]="userData.profile.coverImage">
+        </worky-edit-img-profile>
     </div>
     <div class="content">
 
@@ -9,8 +12,8 @@
                 <div class="avatar">
                     <worky-avatar 
                      [size]="100"
-                     img= "{{ userData?.avatar }}"
-                     name="{{ userData?.name }} {{ userData?.lastName }}">
+                     img= "{{ userData.avatar }}"
+                     name="{{ userData.name }} {{ userData.lastName }}">
                     </worky-avatar>
                 </div>
             </div>
@@ -60,8 +63,8 @@
         <div class="profile-info">
 
             <div class="user-basic">
-                <h2>{{ userData?.name }} {{ userData?.lastName}}</h2>
-                <p>({{ userData?.username }})</p>
+                <h2>{{ userData.name }} {{ userData.lastName}}</h2>
+                <p>({{ userData.username }})</p>
             </div>
 
         </div>
