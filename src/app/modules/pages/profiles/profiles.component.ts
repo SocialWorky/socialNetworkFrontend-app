@@ -102,19 +102,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.idUserProfile = await this._activatedRoute.snapshot.paramMap.get('profileId') || '';
     this._cdr.markForCheck();
 
-    if (this.idUserProfile === '') {
-      console.log('No se ha encontrado el perfil');
+    if (this.idUserProfile === '') { 
       this.idUserProfile = await this._authService.getDecodedToken().id;
       this._cdr.markForCheck();
     } 
 
-    await this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response) => {
-      },
-      error: (error) => {
-        console.error(error);
-      },
-    });
+    await this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe();
 
     this.getUserFriend();
     
@@ -125,22 +118,8 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.getDataProfile();
 
     this.loaderPublications = true;
-
-    this.paramPublication = await this.getParamsPublication();
-    if (this.paramPublication) return;
-    this._publicationService.publications$.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: async (publicationsData: PublicationView[]) => {
-        this.publications = publicationsData;
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error(error);
-      }
-    });
-
-    await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
+    
+    this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
 
     this.loaderPublications = false;
     this._cdr.markForCheck();
@@ -193,28 +172,6 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       const newCommentInPublications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
       this._publicationService.updatePublications(newCommentInPublications);
     });
-  }
-
-  private async getParamsPublication(): Promise<boolean> {
-    let result = false;
-    const _idPublication = this._activatedRoute.snapshot.paramMap.get('_idPublication');
-    if (_idPublication) {
-      try {
-        const publication = await lastValueFrom(this._publicationService.getPublicationId(_idPublication));
-        if (publication.length) {
-          this.loaderPublications = false;
-          this.publications = publication;
-
-          this._cdr.markForCheck();
-          result = true;
-        } else {
-          result = false;
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    return result;
   }
 
   getUserFriend() {
