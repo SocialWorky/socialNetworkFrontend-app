@@ -20,6 +20,7 @@ import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/im
 import { FileUploadService } from '@shared/services/file-upload.service';
 import { environment } from '@env/environment';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
+import { ProfileService } from './services/profile.service';
 
 @Component({
   selector: 'app-profiles',
@@ -91,19 +92,32 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _notificationCommentService: NotificationCommentService,
     private _friendsService: FriendsService,
     private _fileUploadService: FileUploadService,
-    private _globalEventService: GlobalEventService
-  ) {}
+    private _globalEventService: GlobalEventService,
+    private _profileService: ProfileService
+  ) {
+  }
 
   async ngOnInit(): Promise<void> {
 
-    this.idUserProfile = this._activatedRoute.snapshot.paramMap.get('profileId') || '';
+    this.idUserProfile = await this._activatedRoute.snapshot.paramMap.get('profileId') || '';
+    this._cdr.markForCheck();
 
     if (this.idUserProfile === '') {
-      this.idUserProfile = this._authService.getDecodedToken().id;
-    } else {
-      this.getUserFriend();
-    }
+      console.log('No se ha encontrado el perfil');
+      this.idUserProfile = await this._authService.getDecodedToken().id;
+      this._cdr.markForCheck();
+    } 
 
+    await this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (response) => {
+      },
+      error: (error) => {
+        console.error(error);
+      },
+    });
+
+    this.getUserFriend();
+    
     this.decodedToken = this._authService.getDecodedToken();
 
     this.isCurrentUser = this.idUserProfile === this.decodedToken.id;

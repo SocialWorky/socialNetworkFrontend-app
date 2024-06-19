@@ -31,4 +31,11 @@ export class ProfileService {
     const headers = this.getHeaders();
     return this.http.put<ProfileData>(url, profileData, { headers });
   }
+
+  validateProfile(idUser: string): Observable<ProfileData> {
+    const url = `${this.baseUrl}/user/validate-profile/${idUser}`;
+    const headers = this.getHeaders();
+    return this.http.get<ProfileData>(url, { headers });
+  }
+
 }
