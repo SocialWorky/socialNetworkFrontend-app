@@ -49,15 +49,15 @@ export class PublicationService {
     return this.http.get<number>(url, { headers });
   }
 
-  private viewAll(page: number, size: number): Observable<PublicationView[]> {
-    const url = `${this.baseUrl}/publications/all?page=${page}&pageSize=${size}&type=all`;
+  private viewAll(page: number, size: number, type: string = 'all', consultId: string = '' ): Observable<PublicationView[]> {
+    const url = `${this.baseUrl}/publications/all?page=${page}&pageSize=${size}&type=${type}&consultId=${consultId}`;
     const headers = this.getHeaders();
     return this.http.get<PublicationView[]>(url, { headers });
   }
 
-  async getAllPublications(page: number, size: number): Promise<PublicationView[]> {
+  async getAllPublications(page: number, size: number, type?: string, consultId?: string): Promise<PublicationView[]> {
     try {
-      const publications: PublicationView[] = await firstValueFrom(this.viewAll(page, size)) ?? [];
+      const publications: PublicationView[] = await firstValueFrom(this.viewAll(page, size, type, consultId)) ?? [];
       this.publicationsSubject.next(publications);
       return publications;
     } catch (error) {

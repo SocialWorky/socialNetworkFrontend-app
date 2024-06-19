@@ -12,6 +12,7 @@ const routes: Routes = [
       { path: '', component: HomeComponent, pathMatch: 'full'  },
       { path: 'publication/:_idPublication', component: HomeComponent, pathMatch: 'full'},
       { path: 'profile', component: ProfilesComponent, pathMatch: 'full' },
+      { path: 'profile/:profileId', component: ProfilesComponent, pathMatch: 'full' },
       { path: '**', redirectTo: '', pathMatch: 'full' }
     ],
   },

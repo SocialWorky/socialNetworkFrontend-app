@@ -41,7 +41,7 @@ export class EditInfoProfileComponent implements OnInit {
       const datosFormulario = JSON.stringify(this.editProfileForm.value);
       localStorage.setItem('datosPerfil', datosFormulario);
       this.isSaved = true;
-      this.profileService.actualizarPerfil(); // Llamar al método del servicio para actualizar el perfil
+      // this.profileService.actualizarPerfil(); // Llamar al método del servicio para actualizar el perfil
       this.cambiosGuardados.emit(); // Emitir el evento cuando se guarden los cambios
       this._cdr.detectChanges(); // Forzar la detección de cambios
     }

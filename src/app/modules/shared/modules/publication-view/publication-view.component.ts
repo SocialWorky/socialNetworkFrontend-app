@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -13,6 +13,7 @@ import { PublicationService } from '@shared/services/publication.service';
 import { environment } from '@env/environment';
 import { FriendsService } from '@shared/services/friends.service';
 import { translations } from '@translations/translations';
+import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
 
 
 @Component({
@@ -20,7 +21,7 @@ import { translations } from '@translations/translations';
   templateUrl: './publication-view.component.html',
   styleUrls: ['./publication-view.component.scss'],
 })
-export class PublicationViewComponent implements OnInit, OnDestroy {
+export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() publication: PublicationView | undefined;
 
   @Input() indexPublication?: number;
@@ -43,6 +44,14 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
 
   extraData: string[] = [];
 
+  userRequest?: UserData;
+  
+  userReceive?: UserData;
+
+  routeUrl: string = '';
+
+  isProfile: boolean = false;
+
   dataUser = this._authService.getDecodedToken();
 
   private destroy$ = new Subject<void>();
@@ -55,13 +64,26 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
     private _publicationService: PublicationService,
     private _friendsService: FriendsService,
   ) {}
+  async ngAfterViewInit() {
+    await this.getUserFriendPending();
+  }
 
-  ngOnInit() {
+  async ngOnInit() {
+    await this.userReceive;
     this.menuActions();
     this.menuShareActions();
     this.extraDataPublication();
+    this.routeUrl = this._router.url;
+    if (this.routeUrl.includes('profile')) {
+      this.isProfile = true;
+    } else {
+      this.isProfile = false;
+    }
+    this.getUserFriendPending();
     this._cdr.markForCheck();
   }
+
+
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -165,11 +187,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  followMyFriend(_id: string) {
-    this._friendsService.requestFriend(_id).subscribe({
+  async followMyFriend(_id: string) {
+    await this._friendsService.requestFriend(_id).subscribe({
       next: async () => {
         const refreshPublications = await this._publicationService.getAllPublications(1, 10);
         this._publicationService.updatePublications(refreshPublications);
+        this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error the send request', error);
@@ -182,8 +205,37 @@ export class PublicationViewComponent implements OnInit, OnDestroy {
       next: async (data) => {
         const refreshPublications = await this._publicationService.getAllPublications(1, 10);
         this._publicationService.updatePublications(refreshPublications);
+        this._cdr.markForCheck();
       }
     });
+  }
+
+  async getUserFriendPending() {
+    await this._friendsService.getIsMyFriend(this._authService.getDecodedToken().id, this.publication?.author?._id || '').subscribe({
+      next: (response: FriendsStatus) => {
+        this.userRequest = response?.requester;
+        this.userReceive = response?.receiver;
+        this._cdr.markForCheck();
+      },
+      error: (error: any) => {
+        console.error(error);
+      },
+    });
+  }
+
+  acceptFriendship(_id: string) {
+    this._friendsService.acceptFriendship(_id).subscribe({
+      next: async (data) => {
+        this.getUserFriendPending();
+        const refreshPublications = await this._publicationService.getAllPublications(1, 10);
+        this._publicationService.updatePublications(refreshPublications);
+        this._cdr.markForCheck();
+      }
+    });
+  }
+
+  viewProfile(_id: string) {
+    this._router.navigate(['/profile', _id]);
   }
 
 }

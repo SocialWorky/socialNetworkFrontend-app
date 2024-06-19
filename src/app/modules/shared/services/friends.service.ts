@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 import { environment } from '@env/environment';
 import { AuthService } from '@auth/services/auth.service';
-import { Observable } from 'rxjs';
+import { FriendsStatus } from '@shared/interfaces/friend.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -26,12 +27,10 @@ export class FriendsService {
     return headers;
   }
 
-  getIsMyFriend(friendId: string): any {
-    const _id = this._authService.getDecodedToken().id;
+  getIsMyFriend(_id: string, friendId: string): Observable<FriendsStatus> {
     const url = `${this.baseUrl}/friends/isfriend/${_id}/${friendId}`;
     const headers = this.getHeaders();
-    return this.http.get(url, { headers });
-
+    return this.http.get<FriendsStatus>(url, { headers });
   }
 
   requestFriend(friendId: string): Observable<any> {
@@ -49,5 +48,11 @@ export class FriendsService {
     const url = `${this.baseUrl}/friends/${id}`;
     const headers = this.getHeaders();
     return this.http.delete(url, { headers });
+  }
+
+  acceptFriendship(id: string): Observable<any> {
+    const url = `${this.baseUrl}/friends/accept/${id}`;
+    const headers = this.getHeaders();
+    return this.http.put(url, {}, { headers });
   }
 }

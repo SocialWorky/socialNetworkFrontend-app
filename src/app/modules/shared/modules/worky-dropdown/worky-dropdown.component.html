@@ -9,7 +9,11 @@
       loading="lazy"/>
   </div>
   <div *ngIf="img === 'avatar'">
-    <worky-avatar [size]="50"></worky-avatar>
+    <worky-avatar 
+      [size]="50"
+      img="{{ profileImageUrl }}"
+      name="{{ user.name }} {{ user.lastName }}">
+    </worky-avatar>
   </div>
 
   <ng-container>

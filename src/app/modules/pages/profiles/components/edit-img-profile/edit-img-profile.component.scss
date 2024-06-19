@@ -1,0 +1,110 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.image-container {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  margin: auto;
+  overflow: hidden;
+  height: 250px;
+
+  .image {
+    object-fit: cover;
+    display: block;
+  }
+
+  .zoom-effect {
+    transition: transform 0.2s;
+  }
+
+  .zoom-effect:hover {
+    transform: scale(1.05);
+  }
+
+  .edit-icon {
+    display: flex;
+    flex-direction: column;
+    top: 10px;
+    right: 10px;
+    position: absolute;
+    color: color.$worky-color-light;
+    i {
+      cursor: pointer;
+      border-radius: 50%;
+      background-color: color.$worky-color-navy;
+      padding: 5px;
+      margin: 2px;
+    }
+  }
+}
+
+.preview img {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.edit-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
+
+.crop-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.crop-container img {
+  max-width: 100%;
+}
+
+.preview {
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    display: none;
+  }
+
+  .overlay.show {
+    display: flex;
+  }
+
+  .loading-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #fff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}

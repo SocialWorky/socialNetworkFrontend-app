@@ -1,64 +1,95 @@
-.image-container {
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-header-profile {
+
+  .image-container {
     width: 100%;
-    height: 200px;
+    height: 250px;
     margin-top: 1rem;
     border-radius: 0.5rem;
     overflow: hidden;
-    border: 3px solid rgb(230, 220, 220);
-
+    border: 1px solid color.$worky-color-grey;
     .image {
-        transition: transform 0.2s ease-in-out;
-        transform-origin: center;
-        width: 100%;
-        height: 100%;
+      transition: transform 0.2s ease-in-out;
+      transform-origin: center;
+      width: 100%;
+      height: 100%;
     }
-
     &:hover .image {
         transform: scale(1.1);
     }
-}
+  }
 
-.content {
+  .content {
     padding: 1rem;
-}
+  }
 
-.header {
+  .header {
     display: flex;
     width: 100%;
-}
+  }
 
-.avatar-container {
+  .avatar-container {
     flex: 1;
     margin-top: -6rem;
     position: relative;
-}
 
-.edit-button-container, .follow-button-container {
-    display: flex;
-    flex-direction: column;
-    text-align: right;
-
-    .edit-button, .follow-button, .add-friend-button {
-        display: flex;
-        justify-content: center;
-        max-height: max-content;
-        white-space: nowrap;
-        border: 1px solid #3b82f6;
-        color: #3b82f6;
-        background: transparent;
-        padding: 0.5rem 1rem;
-        border-radius: 9999px;
-        font-weight: bold;
-        transition: border-color 0.3s, box-shadow 0.3s;
-
-        &:hover {
-            border-color: #1d4ed8;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1;
+      display: none;
     }
-}
 
-.profile-info {
+    .overlay.show {
+      display: flex;
+    }
+
+    .loading-spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid #fff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    .edit-icon-avatar {
+      display: flex;
+      flex-direction: row;
+      bottom: 20px;
+      left: 50px;
+      position: absolute;
+      color: color.$worky-color-light;
+      i {
+        cursor: pointer;
+        border-radius: 50%;
+        background-color: color.$worky-color-navy;
+        padding: 5px;
+        margin: 2px;
+      }
+    }
+  }
+
+  .profile-info {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -67,74 +98,44 @@
 
     .user-basic {
         h2 {
-            font-size: 1.25rem;
+            @include Fonts.worky-h3;
             font-weight: bold;
-            color: #000000;
+            color: color.$worky-color-navy;
         }
 
         p {
             font-size: 0.875rem;
             font-weight: medium;
-            color: #4b5563;
+            color: color.$worky-color-grey;
         }
     }
+  }
 
-    .description {
-        margin-top: 0.75rem;
+}
 
-        p {
-            color: #000000;
-            margin-bottom: 0.5rem;
-        }
+.content-body-profile {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+
+  @include breakpoints.below-sm {
+    flex-direction: column;
+  }
+
+  .content-left-profile {
+    width: 40%;
+    @include breakpoints.below-sm {
+      width: 100%;
     }
-
-    .additional-info {
-        display: flex;
-        flex-direction: column;
-        color: #4b5563;
-
-        .link, .joined-date {
-            display: flex;
-            margin-right: 0.5rem;
-
-            .icon {
-                margin-bottom: 0.5rem;
-            }
-
-            a {
-                margin-left: 0.25rem;
-                color: #60a5fa;
-            }
-        }
+  }
+  .content-section-wall {
+    width: 60%;
+    margin-left: 1rem;
+    @include breakpoints.below-sm {
+      width: 100%;
+      margin-left: 0;
     }
+  }
 }
 
-.follow-info {
-    padding-top: 0.75rem;
-    display: flex;
-    justify-content: flex-start;
-    width: 100%;
 
-    > div {
-        padding-right: 0.75rem;
-        padding-left: 0.75rem;
-        border-right: 1px solid #b9c4d3;
-
-        &:last-child {
-            border-right: none;
-        }
-    }
-}
-
-.text-center {
-    text-align: center;
-}
-
-.count {
-    font-weight: bold;
-    color: #000000;
-}
-
-.text-gray-600 {
-    color: #4b5563;
-}

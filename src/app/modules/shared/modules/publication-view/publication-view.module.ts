@@ -10,6 +10,7 @@ import { ImageOrganizerModule } from '../image-organizer/image-organizer.module'
 import { WorkyProcessContentPipe } from '@shared/pipes/process-content.pipe';
 import { WorkyPreviewHtmlPipe } from '@shared/pipes/preview-html.pipe';
 import { ReactionsModule } from '../reactions/reactions.module';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
     declarations: [PublicationViewComponent, WorkyRelativeTimePipe, WorkyProcessContentPipe, WorkyPreviewHtmlPipe],
@@ -21,7 +22,8 @@ import { ReactionsModule } from '../reactions/reactions.module';
         TranslationsModule,
         WorkyDropdownModule,
         ImageOrganizerModule,
-        ReactionsModule
+        ReactionsModule,
+        RouterModule,
     ]
 })
 export class PublicationViewModule { }
