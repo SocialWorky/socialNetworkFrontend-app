@@ -151,7 +151,6 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
         coverImage: uploadLocation + '/' + response[0].filename,
       }).pipe(takeUntil(this.unsubscribe$)).subscribe({
         next: (data) => {
-          console.log('Profile updated', data);
           this.isUploading = false; 
           this._cdr.detectChanges();
         },
@@ -167,6 +166,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
       await Promise.all(response);
 
       this.selectedFiles = [];
+      this.selectedImage = undefined;
       this._cdr.markForCheck();
     }
   }
