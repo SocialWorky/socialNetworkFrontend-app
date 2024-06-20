@@ -384,7 +384,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   openUploadModal() {
     const dialogRef = this._dialog.open(ImageUploadModalComponent, {
       data: {
-        maxFiles: this.type === TypePublishing.POST || this.typePublishing.POSTPROFILE ? 10 : 1,
+        maxFiles: this.type === TypePublishing.POST || this.type === TypePublishing.POSTPROFILE ? 10 : 1,
       }
     });
 

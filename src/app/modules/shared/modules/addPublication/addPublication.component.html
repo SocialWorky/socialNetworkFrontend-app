@@ -64,7 +64,7 @@
           (input)="onTextareaInput()"
           formControlName="content"
           placeholder="{{ 
-              type === typePublishing.POST || typePublishing.POSTPROFILE ? ('publishing.placeholder' | workyTranslations) + ' ' + user.name + ' ' + user.lastName + '?' :
+              type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.placeholder' | workyTranslations) + ' ' + user.name + ' ' + user.lastName + '?' :
               ('publishing.placeholderComment' | workyTranslations) + user.name + ' ' + user.lastName + '?' 
           }}">
         </textarea>
@@ -90,7 +90,7 @@
 
         </div>
 
-        <div *ngIf="type === typePublishing.POST || typePublishing.POSTPROFILE"
+        <div *ngIf="type === typePublishing.POST || type === typePublishing.POSTPROFILE"
              class="extra-content-item location-on"
              matTooltip="Estoy Aquí"
              (click)="openLocationSearch()">
@@ -123,7 +123,7 @@
         [theme]="WorkyButtonTheme.Accent"
         [disabled]="!myForm.valid || !myForm.dirty"
         [width]="'100%'">
-        <span basic-button-text>{{ type === typePublishing.POST || typePublishing.POSTPROFILE ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
+        <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
       </worky-buttons>
     </div>
 
