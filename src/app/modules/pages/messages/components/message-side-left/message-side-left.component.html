@@ -1,9 +1,25 @@
 <div class="content-list">
   <span class="tittle">Active Conversations</span>
   <div class="users">
-    <button *ngFor="let user of users" class="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2">
+    <button *ngFor="let user of users" class="button">
       <worky-avatar [size]="40" class="profile-img"></worky-avatar>
-      <span class="ml-2 text-sm font-semibold">{{ user.name }} {{ user.lastName }}</span>
+      <span class="user-name">{{ user.name }} {{ user.lastName }}</span>
+    </button>
+    <button *ngFor="let user of users" class="button">
+      <worky-avatar [size]="40" class="profile-img"></worky-avatar>
+      <span class="user-name">{{ user.name }} {{ user.lastName }}</span>
+    </button>
+    <button *ngFor="let user of users" class="button">
+      <worky-avatar [size]="40" class="profile-img"></worky-avatar>
+      <span class="user-name">{{ user.name }} {{ user.lastName }}</span>
+    </button>
+    <button *ngFor="let user of users" class="button">
+      <worky-avatar [size]="40" class="profile-img"></worky-avatar>
+      <span class="user-name">{{ user.name }} {{ user.lastName }}</span>
+    </button>
+    <button *ngFor="let user of users" class="button">
+      <worky-avatar [size]="40" class="profile-img"></worky-avatar>
+      <span class="user-name">{{ user.name }} {{ user.lastName }}</span>
     </button>
   </div>
 </div>

@@ -19,12 +19,42 @@
     .users{
         display: flex;
         flex-direction: column;
+        overflow-y: hidden;
         margin-top: calc(0.25rem/* 4px */ * calc(1 - var(--tw-space-y-reverse)));
         margin-bottom: calc(0.25rem/* 4px */ * var(--tw-space-y-reverse));
         margin-top: 1rem/* 16px */;
         margin-left: -0.5rem/* -8px */;
         margin-right: -0.5rem/* -8px */;
-        height: 12rem/* 192px */;
-        overflow-y: auto;
+        max-height: 480px;
+
+        &:hover {
+            overflow-y: auto; /* Muestra el scroll cuando se coloca el cursor sobre el widget */
+        }
+    
+        /* Hace el scroll más delgado */
+        scrollbar-width: thin;
+    
+        /* Cambia el color del scroll */
+        scrollbar-color: #ffffff #f0f0f0;
     }
+
+    .button{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        border-radius: 0.75rem/* 12px */;
+        padding: 0.5rem/* 8px */;
+        transition: background-color 0.3s;
+    }
+
+    .button:hover {
+        background-color: var(--worky-color-greyLight); /* Aplica el color definido al hacer hover */
+    }
+
+    .user-name{
+        margin-left: 0.5rem/* 8px */;
+        font-size: 0.875rem/* 14px */;
+        font-weight: 500;
+    }
+
 }
