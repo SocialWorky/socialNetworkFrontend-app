@@ -5,6 +5,7 @@ export interface CreatePost {
   authorId: string;
   idPublication?: string;
   extraData?: ExtraData;
+  userReceivingId?: string;
 }
 
 export interface ExtraData {

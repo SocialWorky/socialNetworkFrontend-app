@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 
 import { CustomReactionsService } from '@admin/shared/manage-reactions/service/customReactions.service';
 import { CustomReactionList } from '@admin/interfaces/customReactions.interface';
@@ -7,13 +7,14 @@ import { ReactionsService } from '@shared/services/reactions.service';
 import { AuthService } from '@auth/services/auth.service';
 import { PublicationService } from '@shared/services/publication.service';
 import { PublicationsReactions } from '@shared/interfaces/reactions.interface';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'worky-reactions',
   templateUrl: './reactions.component.html',
   styleUrls: ['./reactions.component.scss'],
 })
-export class ReactionsComponent implements OnInit {
+export class ReactionsComponent implements OnInit, OnDestroy {
   reactionsVisible = false;
 
   reactions: Array<CustomReactionList & { zoomed: boolean }> = [];
@@ -22,11 +23,15 @@ export class ReactionsComponent implements OnInit {
 
   @Input() type: TypePublishing | undefined;
 
+  @Input() userProfile?: string;
+
   @Input() idPublication: string | undefined;
 
   @Input() reactionsToPublication: PublicationsReactions[] = [];
 
   token = this._authService.getDecodedToken();
+
+  private destroy$ = new Subject<void>();
 
   get reactionUserInPublication() {
     return this.reactionsToPublication.find((reaction) => reaction.user._id === this.token.id);
@@ -44,27 +49,29 @@ export class ReactionsComponent implements OnInit {
     this.loadReactions();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   addReaction(reaction: CustomReactionList) {
 
     if (this.reactionUserInPublication) {
       this.editReaction(this.reactionUserInPublication._id, reaction);
       return;
     }
-
-    console.log('this.token.id', this.token.id);
     this._reactionsService
       .createReaction({
         authorId: this.token.id,
         _idCustomReaction: reaction._id,
-        isPublications: this.type === TypePublishing.POST ? true : false,
+        isPublications: this.type === TypePublishing.POST || TypePublishing.POSTPROFILE ? true : false,
         isComment: this.type === TypePublishing.COMMENT ? true : false,
         _idPublication: this.idPublication!,
-      })
+      }).pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: async (reaction) => {
+        next: async () => {
           this.reactionsVisible = false;
-          const publicationsNew = await this._publicationService.getAllPublications(1, 10);
-          this._publicationService.updatePublications(publicationsNew);
+          this.refreshPublications();
         },
         error: (err) => {
           console.error('Failed to add reaction', err);
@@ -73,10 +80,9 @@ export class ReactionsComponent implements OnInit {
   }
 
   deleteReaction(idReaction: string) {
-    this._reactionsService.deleteReaction(idReaction).subscribe({
+    this._reactionsService.deleteReaction(idReaction).pipe(takeUntil(this.destroy$)).subscribe({
       next: async () => {
-        const publicationsNew = await this._publicationService.getAllPublications(1, 10);
-        this._publicationService.updatePublications(publicationsNew);
+        this.refreshPublications();
       },
       error: (err) => {
         console.error('Failed to delete reaction', err);
@@ -85,19 +91,15 @@ export class ReactionsComponent implements OnInit {
   }
 
   editReaction(id: string, reaction: CustomReactionList) {
-    console.log('idReaction', id);
-    console.log('reaction edit', reaction);
     this._reactionsService.editReaction(id, {
       authorId: this.token.id,
       _idCustomReaction: reaction._id,
-      isPublications: this.type === TypePublishing.POST ? true : false,
+      isPublications: this.type === TypePublishing.POST || this.typePublishing.POSTPROFILE ? true : false,
       isComment: this.type === TypePublishing.COMMENT ? true : false,
       _idPublication: this.idPublication!,
-    }).subscribe({
-      next: async (data) => {
-        console.log('data', data);
-        const publicationsNew = await this._publicationService.getAllPublications(1, 10);
-        this._publicationService.updatePublications(publicationsNew);
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: async () => {
+        this.refreshPublications();
       },
       error: (err) => {
         console.error('Failed to edit reaction', err);
@@ -106,7 +108,7 @@ export class ReactionsComponent implements OnInit {
   }
 
   loadReactions() {
-    this._customReactionsService.getCustomReactionsAll().subscribe({
+    this._customReactionsService.getCustomReactionsAll().pipe(takeUntil(this.destroy$)).subscribe({
       next: (reactions: CustomReactionList[]) => {
         this.reactions = reactions.map((reaction) => ({
           ...reaction,
@@ -134,5 +136,18 @@ export class ReactionsComponent implements OnInit {
 
   zoomOut(reaction: CustomReactionList & { zoomed: boolean }) {
     reaction.zoomed = false;
+  }
+
+  async refreshPublications() {
+    if (this.type === TypePublishing.POSTPROFILE) {
+      const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.userProfile);
+      this._publicationService.updatePublications(refreshPublications);
+      this._cdr.markForCheck();
+
+    } else {
+      const refreshPublications = await this._publicationService.getAllPublications(1, 10);
+      this._publicationService.updatePublications(refreshPublications);
+      this._cdr.markForCheck();
+    }
   }
 }

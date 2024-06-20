@@ -10,10 +10,20 @@
     <div class="publication-header-content">
       <div class="user-name-content">
 
-        <div *ngIf="publication.isMyFriend || (dataUser.id === publication.author._id && !publication.isMyFriend); else notFriend">
+        <div class="user-name" *ngIf="publication.isMyFriend || (dataUser.id === publication.author._id && !publication.isMyFriend); else notFriend">
           <span (click)="viewProfile(publication.author._id)" class="name link-name">
             {{ publication.author.name }} {{ publication.author.lastName }}
           </span>
+
+          <i *ngIf="publication.userReceiving" class="material-icons">keyboard_arrow_right</i>
+
+          <ng-container *ngIf="publication.userReceiving">
+              <span (click)="viewProfile(publication.userReceiving._id)" class="name link-name">
+                {{ publication.userReceiving.name }} {{ publication.userReceiving.lastName }}
+              </span>
+          </ng-container>
+
+
         </div>
 
         <ng-template #notFriend>
@@ -23,7 +33,6 @@
             </span>
 
             <span class="name">
-              
               <ng-container *ngIf="!isProfile">
 
                 <i *ngIf="!publication.isMyFriend" class="material-icons">keyboard_arrow_right</i> 
@@ -44,6 +53,8 @@
                 </a>
 
               </ng-container>
+
+
             </span>
           </div>
         </ng-template>       
@@ -116,7 +127,8 @@
 
       <div class="publication-footer-actions-item">
         <worky-reactions
-        [type]="typePublishing.POST"
+        [type]="type"
+        [userProfile]="userProfile"
         [idPublication]="publication._id"
         [reactionsToPublication]="publication.reaction">
         </worky-reactions>

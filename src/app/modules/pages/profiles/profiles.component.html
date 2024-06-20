@@ -22,7 +22,7 @@
                   </worky-avatar>
 
                   <div class="edit-icon-avatar" *ngIf="isCurrentUser">
-                    <i class="material-icons" (click)="openUploadModal()">photo_camera</i>
+                    <i class="material-icons" (click)="openUploadModalAvatar()">photo_camera</i>
                   </div>
 
                 </div>
@@ -92,7 +92,8 @@
       <div *ngIf="(isFriend && !isFriendPending.status) || isCurrentUser" class="worky-module-container">
 
         <worky-add-publication
-          [type]="typePublishing.POSTPROFILE">
+          [type]="typePublishing.POSTPROFILE"
+          [idUserProfile]="idUserProfile">
         </worky-add-publication>
 
       </div>
@@ -102,6 +103,8 @@
         <div class="worky-module-container">
           <worky-publication-view
           [publication]="publication"
+          [type]="typePublishing.POSTPROFILE"
+          [userProfile]="idUserProfile"
           [indexPublication]="i">
           </worky-publication-view>
         </div>

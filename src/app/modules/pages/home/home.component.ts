@@ -57,8 +57,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     this.loaderPublications = true;
+
     this.paramPublication = await this.getParamsPublication();
     if (this.paramPublication) return;
+
     this._publicationService.publications$.pipe(
       takeUntil(this.destroy$)
     ).subscribe({
@@ -70,7 +72,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         console.error('Error getting publications', error);
       }
     });
+
     await this._publicationService.getAllPublications(this.page, this.pageSize);
+
     this.loaderPublications = false;
     this._cdr.markForCheck();
     this.subscribeToNotificationComment();

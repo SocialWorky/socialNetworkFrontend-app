@@ -118,10 +118,23 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.getDataProfile();
 
     this.loaderPublications = true;
-    
+
+    this._publicationService.publications$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: async (publicationsData: PublicationView[]) => {
+        this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error getting publications', error);
+      }
+    });
+
     this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
 
     this.loaderPublications = false;
+
     this._cdr.markForCheck();
     this.subscribeToNotificationComment();
   }
@@ -175,7 +188,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   getUserFriend() {
-    this._userService.getUserFriends(this._authService.getDecodedToken().id, this.idUserProfile).subscribe({
+    this._userService.getUserFriends(this._authService.getDecodedToken().id, this.idUserProfile).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response) => {
         this.getUserFriendPending();
       },
@@ -186,7 +199,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   getUserFriendPending(): void {
-    this._friendsService.getIsMyFriend(this._authService.getDecodedToken().id, this.idUserProfile).subscribe({
+    this._friendsService.getIsMyFriend(this._authService.getDecodedToken().id, this.idUserProfile).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: FriendsStatus) => {
         this.isFriendPending.status = response?.status === 'pending';
         this.idPendingFriend = response?.id;
@@ -212,7 +225,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   followMyFriend(_id: string) {
-    this._friendsService.requestFriend(_id).subscribe({
+    this._friendsService.requestFriend(_id).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async () => {
         const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
         this._publicationService.updatePublications(refreshPublications);
@@ -226,7 +239,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   cancelFriendship(_id: string) {
-    this._friendsService.deleteFriend(_id).subscribe({
+    this._friendsService.deleteFriend(_id).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (data) => {
         const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
         this._publicationService.updatePublications(refreshPublications);
@@ -238,7 +251,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   async acceptFriendship(_id: string) {
-    await this._friendsService.acceptFriendship(_id).subscribe({
+    await this._friendsService.acceptFriendship(_id).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (data) => {
         this.getUserFriendPending();
         const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
@@ -248,21 +261,21 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     });
   }
 
-  async openUploadModal() {
-    const dialogRef = this._dialog.open(ImageUploadModalComponent, {
+  async openUploadModalAvatar() {
+    const dialogRefAvatar = this._dialog.open(ImageUploadModalComponent, {
       data: {
         maxFiles: 1,
       }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRefAvatar.afterClosed().pipe(takeUntil(this.unsubscribe$)).subscribe(result => {
       if (result && result.length > 0) {
         this.selectedFiles = result;
         const file = this.selectedFiles[0];
         const reader = new FileReader();
         reader.onload = (e: any) => {
           this.selectedImage = e.target.result;
-          this.uploadImg();
+          this.uploadImgAvatar();
           this._cdr.detectChanges();
         };
         reader.readAsDataURL(file);
@@ -271,7 +284,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     });
   }
 
-  async uploadImg() {
+  async uploadImgAvatar() {
     this.isUploading = true;
     this._cdr.markForCheck();
 

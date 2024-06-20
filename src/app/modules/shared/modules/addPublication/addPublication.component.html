@@ -15,7 +15,8 @@
           <span class="name"> {{ user.name }} {{ user.lastName }} </span>
           <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> está en <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span> 
         </div>
-        <div class="dropdown">
+
+        <div class="dropdown" *ngIf="!typePublishing.POSTPROFILE || (idUserProfile === userToken && typePublishing.POSTPROFILE) || (typePublishing.POST && !idUserProfile)">
           <div class="form-select" [innerHTML]="privacyFront"
             data-bs-toggle="dropdown"
             aria-expanded="false">
@@ -52,13 +53,20 @@
     <div class="publishing-body" [class.comment-body]="type === typePublishing.COMMENT">
       <div class="textarea-container">
 
-        <worky-avatar [size]="35" *ngIf="type === typePublishing.COMMENT"></worky-avatar>
+        <worky-avatar *ngIf="type === typePublishing.COMMENT"
+          [size]="35"
+          img="{{ profileImageUrl }}"
+          name="{{ user.name}} {{ user.lastName }}">
+        </worky-avatar>
 
         <textarea #postText
           class="publishing-textarea"
           (input)="onTextareaInput()"
           formControlName="content"
-          placeholder="{{ type === typePublishing.POST || typePublishing.POSTPROFILE ? ('publishing.placeholder' | workyTranslations) + ' ' + user.name + ' ' + user.lastName + '?' : ('publishing.placeholderComment' | workyTranslations) + user.name + ' ' + user.lastName + '?' }}">
+          placeholder="{{ 
+              type === typePublishing.POST || typePublishing.POSTPROFILE ? ('publishing.placeholder' | workyTranslations) + ' ' + user.name + ' ' + user.lastName + '?' :
+              ('publishing.placeholderComment' | workyTranslations) + user.name + ' ' + user.lastName + '?' 
+          }}">
         </textarea>
 
 
@@ -82,7 +90,7 @@
 
         </div>
 
-        <div *ngIf="type === typePublishing.POST"
+        <div *ngIf="type === typePublishing.POST || typePublishing.POSTPROFILE"
              class="extra-content-item location-on"
              matTooltip="Estoy Aquí"
              (click)="openLocationSearch()">
@@ -115,7 +123,7 @@
         [theme]="WorkyButtonTheme.Accent"
         [disabled]="!myForm.valid || !myForm.dirty"
         [width]="'100%'">
-        <span basic-button-text>{{ type === typePublishing.POST ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
+        <span basic-button-text>{{ type === typePublishing.POST || typePublishing.POSTPROFILE ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
       </worky-buttons>
     </div>
 

@@ -120,7 +120,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
       }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.unsubscribe$)).subscribe(result => {
       if (result && result.length > 0) {
         this.selectedFiles = result;
         const file = this.selectedFiles[0];

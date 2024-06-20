@@ -1,7 +1,9 @@
 import { ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
+import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
+
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { AuthService } from '@auth/services/auth.service';
 import { PublicationService } from '@shared/services/publication.service';
@@ -17,7 +19,6 @@ import { LocationSearchComponent } from '../location-search/location-search.comp
 import { ExtraData } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { ImageUploadModalComponent } from '../image-upload-modal/image-upload-modal.component';
 import { FileUploadService } from '@shared/services/file-upload.service';
-import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
 import { MediaFileUpload } from '@shared/interfaces/publicationView.interface';
 import { UserService } from '@shared/services/users.service';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
@@ -64,7 +65,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     privacy: [''],
     authorId: [''],
     extraData: [''],
+    userReceivingId: [''],
   });
+
+  get userToken(): string {
+    return this.decodedToken.id;
+  }
 
   private unsubscribe$ = new Subject<void>();
 
@@ -75,6 +81,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   @Input() idPublication?: string;
 
   @Input() indexPublication?: number;
+
+  @Input() idUserProfile?: string;
 
   @ViewChild('postText') postTextRef!: ElementRef;
 
@@ -103,8 +111,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this.getUser();
     this.subscription = this._globalEventService.profileImage$.subscribe(async newImageUrl => {
       this.profileImageUrl = newImageUrl;
-      const publicationsNew = await this._publicationService.getAllPublications(1, 10);
-      this._publicationService.updatePublications(publicationsNew);
+
+      if(this.type === TypePublishing.POSTPROFILE) {
+        const publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.decodedToken.id);
+        this._publicationService.updatePublications(publicationsNew);
+      }
+
     });
   }
 
@@ -153,7 +165,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this.myForm.controls['authorId'].setValue(this.decodedToken.id);
     this.myForm.controls['privacy'].setValue(this.privacy);
 
-    if (this.type === TypePublishing.POST) {
+    if (this.type === TypePublishing.POST || this.type === TypePublishing.POSTPROFILE) {
       this.onSavePublication();
     }
     if (this.type === TypePublishing.COMMENT) {
@@ -199,9 +211,17 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
             this._cdr.markForCheck();
           }
 
-          const publications = await this._publicationService.getAllPublications(1, 10);
-          publications[this.indexPublication!].comment.unshift(message.comment);
-          this._publicationService.updatePublications(publications);
+          let publicationsNew = [];
+
+          if(this.type === TypePublishing.POSTPROFILE){
+            publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
+            publicationsNew[this.indexPublication!].comment.unshift(message.comment);
+            this._publicationService.updatePublications(publicationsNew);
+          } else {
+            publicationsNew = await this._publicationService.getAllPublications(1, 10);
+            publicationsNew[this.indexPublication!].comment.unshift(message.comment);
+            this._publicationService.updatePublications(publicationsNew);
+          }
 
           if (message.message === 'Comment created successfully') {
             this.myForm.controls['content'].setValue('');
@@ -219,7 +239,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
               commentId: message.comment._id,
               idPublication: idPublication,
               userEmittedId: this.decodedToken.id,
-              authorPublicationId: publications[this.indexPublication!].author._id,
+              authorPublicationId: publicationsNew[this.indexPublication!].author._id,
             });
           }
         } catch (error) {
@@ -253,9 +273,13 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       this.myForm.controls['extraData'].setValue(JSON.stringify(extraData));
     }
 
+    if (this.type === TypePublishing.POSTPROFILE && this.idUserProfile !== this.decodedToken.id) {
+      this.myForm.controls['userReceivingId'].setValue(this.idUserProfile);
+      this.myForm.controls['privacy'].setValue(TypePrivacy.FRIENDS);
+    }
+
     this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
-        console.log('MENSAJE CREADO: ', message);
         try {
           if (this.selectedFiles.length) {
             const response = await lastValueFrom(
@@ -280,8 +304,13 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
             this._cdr.markForCheck();
           }
 
-          const publicationsNew = await this._publicationService.getAllPublications(1, 10);
-          this._publicationService.updatePublications(publicationsNew);
+          if(this.type === TypePublishing.POSTPROFILE){
+            const publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
+            this._publicationService.updatePublications(publicationsNew);
+          } else {
+            const publicationsNew = await this._publicationService.getAllPublications(1, 10);
+            this._publicationService.updatePublications(publicationsNew);
+          }
 
           if (message.message === 'Publication created successfully') {
             this.myForm.controls['content'].setValue('');
@@ -355,7 +384,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   openUploadModal() {
     const dialogRef = this._dialog.open(ImageUploadModalComponent, {
       data: {
-        maxFiles: this.type === TypePublishing.POST ? 10 : 1,
+        maxFiles: this.type === TypePublishing.POST || this.typePublishing.POSTPROFILE ? 10 : 1,
       }
     });
 

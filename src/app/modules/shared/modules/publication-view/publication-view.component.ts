@@ -26,6 +26,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   @Input() indexPublication?: number;
 
+  @Input() type?: TypePublishing | undefined;
+
+  @Input() userProfile?: string;
+
   typePublishing = TypePublishing;
 
   typePrivacy = TypePrivacy;
@@ -164,10 +168,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._publicationService.deletePublication(publication._id).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: async () => {
-        const publications = await this._publicationService.getAllPublications(1, 10);
-        this._publicationService.updatePublications(publications);
-        loadingDeletePublication.dismiss();
+      next: () => {
+        this.refreshPublications();
       },
       error: (error) => {
         console.error(error);
@@ -188,11 +190,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async followMyFriend(_id: string) {
-    await this._friendsService.requestFriend(_id).subscribe({
-      next: async () => {
-        const refreshPublications = await this._publicationService.getAllPublications(1, 10);
-        this._publicationService.updatePublications(refreshPublications);
-        this._cdr.markForCheck();
+    await this._friendsService.requestFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+       this.refreshPublications();
       },
       error: (error) => {
         console.error('Error the send request', error);
@@ -201,17 +201,15 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   cancelFriendship(_id: string) {
-    this._friendsService.deleteFriend(_id).subscribe({
-      next: async (data) => {
-        const refreshPublications = await this._publicationService.getAllPublications(1, 10);
-        this._publicationService.updatePublications(refreshPublications);
-        this._cdr.markForCheck();
+    this._friendsService.deleteFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.refreshPublications();
       }
     });
   }
 
   async getUserFriendPending() {
-    await this._friendsService.getIsMyFriend(this._authService.getDecodedToken().id, this.publication?.author?._id || '').subscribe({
+    await this._friendsService.getIsMyFriend(this._authService.getDecodedToken().id, this.publication?.author?._id || '').pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: FriendsStatus) => {
         this.userRequest = response?.requester;
         this.userReceive = response?.receiver;
@@ -224,18 +222,29 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   acceptFriendship(_id: string) {
-    this._friendsService.acceptFriendship(_id).subscribe({
-      next: async (data) => {
+    this._friendsService.acceptFriendship(_id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
         this.getUserFriendPending();
-        const refreshPublications = await this._publicationService.getAllPublications(1, 10);
-        this._publicationService.updatePublications(refreshPublications);
-        this._cdr.markForCheck();
+        this.refreshPublications();
       }
     });
   }
 
   viewProfile(_id: string) {
     this._router.navigate(['/profile', _id]);
+  }
+
+  async refreshPublications() {
+    if (this.type === TypePublishing.POSTPROFILE) {
+      const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.userProfile);
+      this._publicationService.updatePublications(refreshPublications);
+      this._cdr.markForCheck();
+
+    } else {
+      const refreshPublications = await this._publicationService.getAllPublications(1, 10);
+      this._publicationService.updatePublications(refreshPublications);
+      this._cdr.markForCheck();
+    }
   }
 
 }

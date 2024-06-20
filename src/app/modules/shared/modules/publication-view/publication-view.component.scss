@@ -10,6 +10,10 @@
     gap: 1rem;
     .publication-header-content {
       .user-name-content {
+        .user-name {
+          display: flex;
+          align-items: center;
+        }
         .name {
           display: flex;
           align-items: center;
