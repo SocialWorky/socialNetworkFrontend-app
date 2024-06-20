@@ -1,0 +1,30 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-list {
+    width: 15rem;
+
+    .tittle{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.75rem/* 12px */;
+        line-height: 1rem/* 16px */;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .users{
+        display: flex;
+        flex-direction: column;
+        margin-top: calc(0.25rem/* 4px */ * calc(1 - var(--tw-space-y-reverse)));
+        margin-bottom: calc(0.25rem/* 4px */ * var(--tw-space-y-reverse));
+        margin-top: 1rem/* 16px */;
+        margin-left: -0.5rem/* -8px */;
+        margin-right: -0.5rem/* -8px */;
+        height: 12rem/* 192px */;
+        overflow-y: auto;
+    }
+}

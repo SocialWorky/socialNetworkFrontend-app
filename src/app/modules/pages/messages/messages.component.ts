@@ -1,14 +1,26 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from '@auth/services/auth.service';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
   selector: 'worky-messages',
   templateUrl: './messages.component.html',
   styleUrls: ['./messages.component.scss'],
 })
-export class MessagesComponent  implements OnInit {
+export class MessagesComponent {
 
-  constructor() { }
+  userName: string = '';
 
-  ngOnInit() {}
+  decodedToken!: Token;
+
+  isAuthenticated: boolean = false;
+
+  constructor(private _authService: AuthService) { 
+    this.isAuthenticated = this._authService.isAuthenticated();
+    if (this.isAuthenticated) {
+      this.decodedToken = this._authService.getDecodedToken();
+      this.userName = this.decodedToken.name;
+    }
+  }
 
 }

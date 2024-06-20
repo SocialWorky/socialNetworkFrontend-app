@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { UserService } from '@shared/services/users.service';
 
 @Component({
   selector: 'worky-message-side-left',
@@ -7,8 +8,19 @@ import { Component, OnInit } from '@angular/core';
 })
 export class MessageSideLeftComponent  implements OnInit {
 
-  constructor() { }
+  users: any[] = [];
 
-  ngOnInit() {}
+  constructor(private userService: UserService) { }
+
+  ngOnInit(): void {
+    this.userService.getAllUsers().subscribe(
+      (data) => {
+        this.users = data;
+      },
+      (error) => {
+        console.error('Error fetching users', error);
+      }
+    );
+  }
 
 }

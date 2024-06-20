@@ -1,0 +1,52 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-header-messages {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    width: 15rem;
+
+    .avatar-info{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: var(--worky-color-greyLight);
+        border: 1px solid var(--worky-color-light);
+        margin-top: 1rem/* 16px */;
+        width: 100%;
+        padding-top: 1.5rem/* 24px */;
+        padding-bottom: 1.5rem/* 24px */;
+        padding-left: 1rem/* 16px */;
+        padding-right: 1rem/* 16px */;
+        border-radius: 0.5rem/* 8px */;
+
+        .name{
+            padding-top: 0.75rem/* 24px */;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--worky-color-indigo);
+        }
+
+        .toggle{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin-top: 0.45rem;
+
+            .material-icons{
+                font-size: 40px;
+            }
+
+            .text{
+                line-height: 1;
+                margin-left: 0.25rem;
+                font-size: 0.75rem;
+                line-height: 1rem;
+            }
+        }
+    }
+}

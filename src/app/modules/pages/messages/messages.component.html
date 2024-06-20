@@ -1,3 +1,12 @@
-<div class="content-header-message">
-    
+<div class="content-header-messages">
+    <div class="avatar-info">
+        <worky-avatar [size]="60" class="profile-img"></worky-avatar>
+        <span class="name">{{ userName }}</span>
+        <div class="toggle">
+            <i class="material-icons">toggle_on</i>
+            <span class="text">Active</span>
+        </div>
+    </div>
 </div>
+
+<worky-message-side-left></worky-message-side-left>

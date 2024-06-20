@@ -24,12 +24,14 @@ import { EditInfoProfileComponent } from './profiles/components/edit-info-profil
 import { ContactsModule } from '@shared/modules/contacts/contacts.module';
 import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
 import { MessagesComponent } from './messages/messages.component';
+import { MessageSideLeftComponent } from './messages/components/message-side-left/message-side-left.component';
 
 
 @NgModule({
   declarations: [
     HomeComponent,
     MessagesComponent,
+    MessageSideLeftComponent,
     ProfilesComponent,
     LoyautComponent,
     NavbarComponent,
