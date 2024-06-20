@@ -170,6 +170,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     ).subscribe({
       next: () => {
         this.refreshPublications();
+        loadingDeletePublication.dismiss();
       },
       error: (error) => {
         console.error(error);

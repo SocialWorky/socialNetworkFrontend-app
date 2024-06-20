@@ -4,7 +4,7 @@
 
 
 
-      <worky-avatar *ngIf="type === typePublishing.POST || typePublishing.POSTPROFILE"
+      <worky-avatar *ngIf="type === typePublishing.POST || type === typePublishing.POSTPROFILE"
         [size]="60" 
         img="{{ profileImageUrl }}"
         name="{{ user.name}} {{ user.lastName }}">

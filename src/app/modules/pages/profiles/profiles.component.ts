@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
+import { Subject, Subscription, distinctUntilChanged, lastValueFrom, takeUntil } from 'rxjs';
+import * as _ from 'lodash';
 
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
@@ -120,11 +121,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.loaderPublications = true;
 
     this._publicationService.publications$.pipe(
+      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
       takeUntil(this.destroy$)
     ).subscribe({
       next: async (publicationsData: PublicationView[]) => {
         this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
-        this._cdr.markForCheck();
+       this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error getting publications', error);
