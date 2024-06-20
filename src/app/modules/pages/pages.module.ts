@@ -23,11 +23,13 @@ import { EditImgProfileComponent } from './profiles/components/edit-img-profile/
 import { EditInfoProfileComponent } from './profiles/components/edit-info-profile/edit-info-profile.component';
 import { ContactsModule } from '@shared/modules/contacts/contacts.module';
 import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
+import { MessagesComponent } from './messages/messages.component';
 
 
 @NgModule({
   declarations: [
     HomeComponent,
+    MessagesComponent,
     ProfilesComponent,
     LoyautComponent,
     NavbarComponent,
