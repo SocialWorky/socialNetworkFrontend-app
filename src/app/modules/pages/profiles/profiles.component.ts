@@ -24,7 +24,7 @@ import { GlobalEventService } from '@shared/services/globalEventService.service'
 import { ProfileService } from './services/profile.service';
 
 @Component({
-  selector: 'app-profiles',
+  selector: 'worky-profiles',
   templateUrl: './profiles.component.html',
   styleUrls: ['./profiles.component.scss'],
 })
@@ -95,18 +95,19 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _fileUploadService: FileUploadService,
     private _globalEventService: GlobalEventService,
     private _profileService: ProfileService
-  ) {
-  }
+  ) {}
 
   async ngOnInit(): Promise<void> {
-
     this.idUserProfile = await this._activatedRoute.snapshot.paramMap.get('profileId') || '';
     this._cdr.markForCheck();
 
-    if (this.idUserProfile === '') { 
+    if (this.idUserProfile === '') {
+      console.log('No hay id de perfil');
       this.idUserProfile = await this._authService.getDecodedToken().id;
       this._cdr.markForCheck();
-    } 
+    }
+
+    this.getDataProfile();
 
     await this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe();
 
@@ -116,28 +117,26 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
     this.isCurrentUser = this.idUserProfile === this.decodedToken.id;
 
-    this.getDataProfile();
-
     this.loaderPublications = true;
 
     this._publicationService.publications$.pipe(
       distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
       takeUntil(this.destroy$)
     ).subscribe({
-      next: async (publicationsData: PublicationView[]) => {
+      next: async () => {
         this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
-       this._cdr.markForCheck();
+        this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error getting publications', error);
       }
     });
 
-    this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
+    // this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
 
     this.loaderPublications = false;
 
-    this._cdr.markForCheck();
+    this._cdr.detectChanges();
     this.subscribeToNotificationComment();
   }
 
@@ -154,7 +153,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       width: '250px',
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result) => {
       if (result && result.actualizado) {
         this.getDataProfile();
         this._cdr.markForCheck();
@@ -164,7 +163,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   async getDataProfile(): Promise<void> {
 
-    this.profileSubscription = await this._userService.getUserById(this.idUserProfile).subscribe({
+    this.profileSubscription = await this._userService.getUserById(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: User) => {
         this.userData = response;
         this._cdr.markForCheck();
@@ -173,11 +172,6 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         console.error(error);
       },
     });
-  }
-
-  cambiosGuardadosHandler(): void {
-    this.getDataProfile();
-    this._cdr.markForCheck();
   }
 
   async subscribeToNotificationComment() {

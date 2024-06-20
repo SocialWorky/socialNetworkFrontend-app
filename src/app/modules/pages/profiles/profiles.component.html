@@ -28,52 +28,48 @@
                 </div>
             </div>
 
-            <worky-buttons *ngIf="isCurrentUser"
-                [workyButtonType]="WorkyButtonType.Outline"
-                [theme]="WorkyButtonTheme.Accent"
-                [width]="'100%'"
-                (click)="abrirFormulario()">
-                <span basic-button-text>Edit Profile</span>
-            </worky-buttons>
+            <div class="btn-container-header">
 
-            <worky-buttons *ngIf="!isFriend && !isFriendPending.status && !isCurrentUser"
-                [workyButtonType]="WorkyButtonType.Outline"
-                [theme]="WorkyButtonTheme.Accent"
-                [width]="'100%'"
-                (click)="followMyFriend(idUserProfile)">
-                <span basic-button-text>{{ 'publicationsView.follow' | workyTranslations }}</span>
-            </worky-buttons>
+              <worky-buttons *ngIf="!isFriend && !isFriendPending.status && !isCurrentUser"
+                  [workyButtonType]="WorkyButtonType.Outline"
+                  [theme]="WorkyButtonTheme.Accent"
+                  [width]="'100%'"
+                  (click)="followMyFriend(idUserProfile)">
+                  <span basic-button-text>{{ 'publicationsView.follow' | workyTranslations }}</span>
+              </worky-buttons>
 
-            <worky-buttons *ngIf="isFriendPending.status && userReceives._id === idUserProfile"
-                [workyButtonType]="WorkyButtonType.Outline"
-                [theme]="WorkyButtonTheme.Warn"
-                [width]="'100%'"
-                (click)="cancelFriendship(idPendingFriend)">
-                <span basic-button-text>{{ 'publicationsView.cancelRequest' | workyTranslations }}</span>
-            </worky-buttons>
+              <worky-buttons *ngIf="isFriendPending.status && userReceives._id === idUserProfile"
+                  [workyButtonType]="WorkyButtonType.Outline"
+                  [theme]="WorkyButtonTheme.Warn"
+                  [width]="'100%'"
+                  (click)="cancelFriendship(idPendingFriend)">
+                  <span basic-button-text>{{ 'publicationsView.cancelRequest' | workyTranslations }}</span>
+              </worky-buttons>
 
-            <worky-buttons *ngIf="isFriendPending.status && userRequest._id === idUserProfile"
-                [workyButtonType]="WorkyButtonType.Outline"
-                [theme]="WorkyButtonTheme.Accent"
-                [width]="'100%'"
-                (click)="acceptFriendship(idPendingFriend)">
-                <span basic-button-text>Aceptar Amistad</span>
-            </worky-buttons>
+              <worky-buttons *ngIf="isFriendPending.status && userRequest._id === idUserProfile"
+                  [workyButtonType]="WorkyButtonType.Outline"
+                  [theme]="WorkyButtonTheme.Accent"
+                  [width]="'100%'"
+                  (click)="acceptFriendship(idPendingFriend)">
+                  <span basic-button-text>Aceptar Amistad</span>
+              </worky-buttons>
 
-            <worky-buttons *ngIf="isFriend && !isCurrentUser"
-                [workyButtonType]="WorkyButtonType.Outline"
-                [theme]="WorkyButtonTheme.Basic"
-                [width]="'100%'"
-                (click)="cancelFriendship(idPendingFriend)">
-                <span basic-button-text>Dejar de Seguir</span>
-            </worky-buttons>
+              <worky-buttons *ngIf="isFriend && !isCurrentUser"
+                  [workyButtonType]="WorkyButtonType.Outline"
+                  [theme]="WorkyButtonTheme.Basic"
+                  [width]="'100%'"
+                  (click)="cancelFriendship(idPendingFriend)">
+                  <span basic-button-text>Dejar de Seguir</span>
+              </worky-buttons>
 
+            </div>
         </div>
 
         <div class="profile-info">
 
             <div class="user-basic">
                 <h2>{{ userData.name }} {{ userData.lastName}}</h2>
+                <span> {{ userData.profile.legend }}</span>
                 <p>({{ userData.username }})</p>
             </div>
 
@@ -84,7 +80,12 @@
 <div class="content-body-profile">
 
     <div class="content-left-profile">
-
+      <div class="worky-module-container">
+        <worky-profile-detail *ngIf="userData"
+          [isCurrentUser]="isCurrentUser"
+          [userData]="userData">
+        </worky-profile-detail>
+      </div>
     </div>
 
     <div class="content-section-wall">

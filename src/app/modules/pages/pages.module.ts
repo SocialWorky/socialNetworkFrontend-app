@@ -9,6 +9,7 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 import { ContentLeftSideComponent } from './components/content-left-side/content-left-side.component';
 import { ContentRightSideComponent } from './components/content-right-side/content-right-side.component';
 import { ProfilesComponent } from './profiles/profiles.component';
+import { ProfileDetailComponent } from './profiles/components/profile-detail/profile-detail.component';
 
 import { WorkyMenuComponentComponent } from './components/navbar/worky-menu-component/worky-menu-component.component';
 import { SideLeftModule } from '@shared/modules/side-left/side-left.module';
@@ -36,6 +37,7 @@ import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
     WorkyMenuComponentComponent,
     EditImgProfileComponent,
     EditInfoProfileComponent,
+    ProfileDetailComponent,
 
   ],
   imports: [

@@ -1,7 +1,9 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, Subscription, firstValueFrom, lastValueFrom } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import * as _ from 'lodash';
 import { Meta } from '@angular/platform-browser';
+
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { PublicationService } from '@shared/services/publication.service';
@@ -62,6 +64,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.paramPublication) return;
 
     this._publicationService.publications$.pipe(
+      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
       takeUntil(this.destroy$)
     ).subscribe({
       next: async (publicationsData: PublicationView[]) => {

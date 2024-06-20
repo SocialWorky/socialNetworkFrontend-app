@@ -113,7 +113,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       this.profileImageUrl = newImageUrl;
 
       if(this.type === TypePublishing.POSTPROFILE) {
-        const publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.decodedToken.id);
+        const publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
         this._publicationService.updatePublications(publicationsNew);
       }
 

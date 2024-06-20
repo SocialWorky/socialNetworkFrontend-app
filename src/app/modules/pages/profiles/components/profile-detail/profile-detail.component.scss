@@ -1,0 +1,44 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.container-detail {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  .header-detail {
+    span {
+      color: color.$worky-color-navy;
+      font-size: 25px;
+      font-weight: bold;
+    }  
+  }
+
+  .body-detail {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    .detail {
+      display: flex;
+      align-items: center;
+      i {
+        border-radius: 50%;
+        color: white;
+        background-color: color.$worky-color-navy;
+        padding: 8px;
+        margin: 2px 10px 2px 0;
+      }
+      .label-detail {
+        font-size: 16px;
+        color: color.$worky-color-navy;
+        font-weight: bold;
+        margin-right: 5px;
+      }
+    }
+  }
+
+  .footer-detail {
+    margin-top: 20px;
+  }
+}
