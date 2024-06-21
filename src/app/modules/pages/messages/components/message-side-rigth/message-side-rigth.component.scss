@@ -11,9 +11,7 @@
     height: 100%;
     padding: 1rem;
 
-    .content-section-wall{
-        display: flex;
-        flex-direction: column;
+    .content-section-wall{      
         height: 100%;
         overflow-y: hidden;
         margin-bottom: 1rem;
@@ -29,15 +27,12 @@
 
     .grid-container{
         display: grid;
-        grid-template-columns: repeat(12, minmax(0, 1fr));
-        row-gap: 0.5rem;
 
         .responsive-item-issuing{
             display: flex;
             flex-direction: row;
             align-items: center;
-            grid-column-start: 1;
-            grid-column-end: 8;
+            grid-column: 1 / 8;
             padding: 0.75rem;
             border-radius: 0.5rem;
 
