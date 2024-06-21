@@ -13,7 +13,7 @@ import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/model
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationService } from '@shared/services/publication.service';
-import { NotificationCommentService } from '@shared/services/notificationComment.service';
+import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
 import { FriendsService } from '@shared/services/friends.service';
 import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
 import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';

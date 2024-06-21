@@ -5,9 +5,9 @@ import { takeUntil } from 'rxjs/operators';
 import { WeatherService } from './service/apiOpenWeather.service';
 import { Condition, WeatherMain } from './interfaces/dataWeather.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
-import { LocationService } from '@shared/services/location.service';
-import { GeocodingService } from '@shared/services/geocoding.service';
-import { GeoLocationsService } from '@shared/services/apiGeoLocations.service';
+import { LocationService } from '@shared/services/apis/location.service';
+import { GeocodingService } from '@shared/services/apis/geocoding.service';
+import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.service';
 
 @Component({
   selector: 'worky-weather',

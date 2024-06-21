@@ -7,14 +7,14 @@ import { Meta } from '@angular/platform-browser';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { PublicationService } from '@shared/services/publication.service';
-import { NotificationCommentService } from '@shared/services/notificationComment.service';
+import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
 import { AuthService } from '@auth/services/auth.service';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
-import { LocationService } from '@shared/services/location.service';
-import { GeoLocationsService } from '@shared/services/apiGeoLocations.service';
-import { GeocodingService } from '@shared/services/geocoding.service';
+import { LocationService } from '@shared/services/apis/location.service';
+import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.service';
+import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from '@env/environment';
 
@@ -100,6 +100,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private async getParamsPublication(): Promise<boolean> {
     let result = false;
     const _idPublication = this._activatedRoute.snapshot.paramMap.get('_idPublication');
+    console.log('idPublication', _idPublication);
     if (_idPublication) {
       try {
         const publication = await lastValueFrom(this._publicationService.getPublicationId(_idPublication));
@@ -110,7 +111,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           // section meta tags
           this._meta.updateTag({ property: 'og:title', content: 'worky Social Network' });
           this._meta.updateTag({ property: 'og:description', content: this.publications[0]?.content });
-          this._meta.updateTag({ property: 'og:image', content: this.urlMediaApi + this.publications[0]?.media[0].urlCompressed });
+          this._meta.updateTag({ property: 'og:image', content: this.urlMediaApi + this.publications[0]?.media[0]?.url });
           this._meta.addTag({ name: 'robots', content: 'index, follow' });
 
           this._cdr.markForCheck();

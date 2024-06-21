@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { StreetMapData } from '../interfaces/streetMap.interface';
-import { CreateLocationRequest } from '../interfaces/apiGeoLocations.interface';
-import { environment } from '../../../../environments/environment';
+import { StreetMapData } from '../../interfaces/streetMap.interface';
+import { CreateLocationRequest } from '../../interfaces/apiGeoLocations.interface';
+import { environment } from '@env/environment'
 import { Observable } from 'rxjs';
 
 @Injectable({

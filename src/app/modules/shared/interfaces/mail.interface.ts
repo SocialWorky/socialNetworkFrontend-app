@@ -17,4 +17,5 @@ export enum TemplateEmail {
   FORGOT_PASSWORD = 'forgot-password',
   VALIDATE_EMAIL = 'forgot-password',
   WELCOME = 'welcome',
+  NOTIFICATION = 'notification'
 }

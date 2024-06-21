@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { environment } from '@env/environment';
 import { LoginData, LoginDataGloogle } from '../interfaces/login.interface';
-import { MailSendValidateData } from '../../shared/interfaces/mail.interface';
-import { Token } from '../../shared/interfaces/token.interface';
+import { MailSendValidateData } from '@shared/interfaces/mail.interface';
 
 @Injectable({
   providedIn: 'root'

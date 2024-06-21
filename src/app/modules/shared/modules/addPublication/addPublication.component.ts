@@ -14,7 +14,7 @@ import { Token } from '@shared/interfaces/token.interface';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { CreateComment } from '@shared/interfaces/addComment.interface';
-import { NotificationCommentService } from '@shared/services/notificationComment.service';
+import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
 import { LocationSearchComponent } from '../location-search/location-search.component';
 import { ExtraData } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { ImageUploadModalComponent } from '../image-upload-modal/image-upload-modal.component';

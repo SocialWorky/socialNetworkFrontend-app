@@ -1,0 +1,15 @@
+.content-create-report {
+  width: 400px;
+  display: flex;
+  padding: 10px;
+  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+  .content-create-report__body {
+    width: 100%;
+    ::ng-deep mat-form-field {
+        width: 100%;
+    }
+  }
+
+}
