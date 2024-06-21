@@ -2,13 +2,17 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
-.content-header-messages {
+.container {
+
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    gap: 20px;
     padding-top: 2rem;
-    padding-bottom: 2rem;
-    width: 15rem;
+
+    .content-left-messages{
+        display: flex;
+        flex-direction: column;
+        width: 15rem;
+    }
 
     .avatar-info{
         display: flex;
@@ -16,7 +20,6 @@
         align-items: center;
         background: var(--worky-color-greyLight);
         border: 1px solid var(--worky-color-light);
-        margin-top: 1rem/* 16px */;
         width: 100%;
         padding-top: 1.5rem/* 24px */;
         padding-bottom: 1.5rem/* 24px */;
@@ -48,5 +51,10 @@
                 line-height: 1rem;
             }
         }
+    }
+
+    .content-right-message{
+        width: 80%;
+        height: 800px;
     }
 }

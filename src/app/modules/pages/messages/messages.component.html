@@ -1,12 +1,19 @@
-<div class="content-header-messages">
-    <div class="avatar-info">
-        <worky-avatar [size]="60" class="profile-img"></worky-avatar>
-        <span class="name">{{ userName }}</span>
-        <div class="toggle">
-            <i class="material-icons">toggle_on</i>
-            <span class="text">Active</span>
+<div class="container">
+    <div class="content-left-messages">
+        <div class="avatar-info">
+            <worky-avatar [size]="60" class="profile-img"></worky-avatar>
+            <span class="name">{{ userName }}</span>
+            <div class="toggle">
+                <i class="material-icons">toggle_on</i>
+                <span class="text">Active</span>
+            </div>
         </div>
+        <worky-message-side-left></worky-message-side-left>
     </div>
-</div>
 
-<worky-message-side-left></worky-message-side-left>
+
+    <div class="content-right-message">
+        <worky-message-side-rigth></worky-message-side-rigth>
+    </div>
+
+</div>

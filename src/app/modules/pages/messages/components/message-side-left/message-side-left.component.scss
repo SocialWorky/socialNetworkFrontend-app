@@ -4,6 +4,7 @@
 
 .content-list {
     width: 15rem;
+    padding-top: 30px;
 
     .tittle{
         display: flex;
@@ -22,9 +23,7 @@
         overflow-y: hidden;
         margin-top: calc(0.25rem/* 4px */ * calc(1 - var(--tw-space-y-reverse)));
         margin-bottom: calc(0.25rem/* 4px */ * var(--tw-space-y-reverse));
-        margin-top: 1rem/* 16px */;
-        margin-left: -0.5rem/* -8px */;
-        margin-right: -0.5rem/* -8px */;
+        margin: 1rem -0.5rem 0 -0.5rem;
         max-height: 480px;
 
         &:hover {

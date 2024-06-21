@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef  } from '@angular/core';
+import { AuthService } from '@auth/services/auth.service';
+import { User } from '@shared/interfaces/user.interface';
 import { UserService } from '@shared/services/users.service';
 
 @Component({
@@ -8,19 +10,27 @@ import { UserService } from '@shared/services/users.service';
 })
 export class MessageSideLeftComponent  implements OnInit {
 
-  users: any[] = [];
+  users: User[] = [];
 
-  constructor(private userService: UserService) { }
+  currentUserId: string = '';
+
+  constructor(
+    private userService: UserService,
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
+    this.currentUserId = this.authService.getDecodedToken().id;
+
     this.userService.getAllUsers().subscribe(
-      (data) => {
-        this.users = data;
+      (data: User[]) => { // Especificar que data es un array de User[]
+        this.users = data.filter((user: User) => user._id !== this.currentUserId);
+        this.cdr.detectChanges();
       },
       (error) => {
         console.error('Error fetching users', error);
       }
     );
   }
-
 }

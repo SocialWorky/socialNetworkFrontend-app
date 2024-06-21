@@ -25,6 +25,7 @@ import { ContactsModule } from '@shared/modules/contacts/contacts.module';
 import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
 import { MessagesComponent } from './messages/messages.component';
 import { MessageSideLeftComponent } from './messages/components/message-side-left/message-side-left.component';
+import { MessageSideRigthComponent } from './messages/components/message-side-rigth/message-side-rigth.component';
 
 
 @NgModule({
@@ -32,6 +33,7 @@ import { MessageSideLeftComponent } from './messages/components/message-side-lef
     HomeComponent,
     MessagesComponent,
     MessageSideLeftComponent,
+    MessageSideRigthComponent,
     ProfilesComponent,
     LoyautComponent,
     NavbarComponent,
