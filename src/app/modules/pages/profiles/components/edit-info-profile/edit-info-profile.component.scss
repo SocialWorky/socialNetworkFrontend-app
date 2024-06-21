@@ -4,12 +4,14 @@
 
 .content-edit-detail-profile {
   display: flex;
-  width: 500px;
+  width: 550px;
   padding: 15px;
+  @include breakpoints.below-sm {
+    width: 100%;
+  }
 
   .edit-profile-container {
     width: 100%;
-
     .form-detail-basic {
       width: 100%;
       display: block;
@@ -37,3 +39,10 @@
    }
 
   }
+
+.cdk-global-overlay-wrapper .cdk-overlay-pane {
+  @include breakpoints.below-sm {
+    max-width: 100% !important;
+    width: 95%;
+  }
+} 
