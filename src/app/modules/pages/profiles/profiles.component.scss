@@ -11,14 +11,9 @@
     border-radius: 0.5rem;
     overflow: hidden;
     border: 1px solid color.$worky-color-grey;
-    .image {
-      transition: transform 0.2s ease-in-out;
-      transform-origin: center;
-      width: 100%;
-      height: 100%;
-    }
-    &:hover .image {
-        transform: scale(1.1);
+
+    @include breakpoints.below-sm {
+      height: 180px;
     }
   }
 
@@ -91,22 +86,27 @@
         justify-content: flex-end;
       }
     }
-  }
 
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+      margin-left: 0.5rem;
 
-
-  .profile-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    width: 100%;
-    margin-left: 0.5rem;
-
-    .user-basic {
-        h2 {
-            @include Fonts.worky-h3;
-            font-weight: bold;
-            color: color.$worky-color-navy;
+      .user-basic {
+        .content-name-action {
+          display: flex;
+          gap: 10px;
+          h2 {
+              @include Fonts.worky-h3;
+              font-weight: bold;
+              color: color.$worky-color-navy;
+          }
+          .whatsapp-icon {
+            width: 30px;
+            cursor: pointer;
+          }
         }
 
         p {
@@ -114,9 +114,9 @@
             font-weight: medium;
             color: color.$worky-color-grey;
         }
+      }
     }
   }
-
 }
 
 .content-body-profile {

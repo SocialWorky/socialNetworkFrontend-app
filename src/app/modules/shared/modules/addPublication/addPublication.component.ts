@@ -58,7 +58,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   typePublishing = TypePublishing;
 
-  profileImageUrl: string | null = '';
+  profileImageUrl: null | string = null;
 
   public myForm: FormGroup = this._fb.group({
     content: ['', [Validators.required, Validators.minLength(1)]],
@@ -109,15 +109,24 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.postPrivacy(TypePrivacy.PUBLIC);
     this.getUser();
-    this.subscription = this._globalEventService.profileImage$.subscribe(async newImageUrl => {
+    this.subscription = this._globalEventService.profileImage$.pipe(
+      takeUntil(this.unsubscribe$)
+    ).subscribe(newImageUrl => {
+
       this.profileImageUrl = newImageUrl;
 
-      if(this.type === TypePublishing.POSTPROFILE) {
-        const publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
-        this._publicationService.updatePublications(publicationsNew);
+      if (this.type === TypePublishing.POSTPROFILE) {
+        (async () => {
+          try {
+            const publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
+            this._publicationService.updatePublications(publicationsNew);
+          } catch (error) {
+            console.error('Error getting publications', error);
+          }
+        })();
       }
-
     });
+
   }
 
   ngOnDestroy(): void {
@@ -135,8 +144,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   async getUser() {
     await this._userService.getUserById(this.decodedToken.id).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: User) => {
-        this.user = response;
         this.profileImageUrl = response.avatar;
+        this.user = response;
         this._cdr.markForCheck();
       },
       error: (error) => {

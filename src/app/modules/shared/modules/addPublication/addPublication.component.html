@@ -2,51 +2,51 @@
   <form [formGroup]="myForm" (ngSubmit)="onSave()" autocomplete="off">
     <div class="publishing-header">
 
+      <ng-container *ngIf="type === typePublishing.POST || type === typePublishing.POSTPROFILE">
+        <worky-avatar
+          [size]="60" 
+          img="{{ profileImageUrl }}"
+          name="{{ user.name}} {{ user.lastName }}">
+        </worky-avatar>
 
-
-      <worky-avatar *ngIf="type === typePublishing.POST || type === typePublishing.POSTPROFILE"
-        [size]="60" 
-        img="{{ profileImageUrl }}"
-        name="{{ user.name}} {{ user.lastName }}">
-      </worky-avatar>
-
-      <div class="user-name-content" *ngIf="type !== typePublishing.COMMENT">
-        <div>
-          <span class="name"> {{ user.name }} {{ user.lastName }} </span>
-          <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> está en <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span> 
-        </div>
-
-        <div class="dropdown" *ngIf="!typePublishing.POSTPROFILE || (idUserProfile === userToken && typePublishing.POSTPROFILE) || (typePublishing.POST && !idUserProfile)">
-          <div class="form-select" [innerHTML]="privacyFront"
-            data-bs-toggle="dropdown"
-            aria-expanded="false">
+        <div class="user-name-content">
+          <div>
+            <span class="name"> {{ user.name }} {{ user.lastName }} </span>
+            <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> está en <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span> 
           </div>
-          <ul
-            class="dropdown-menu "
-            aria-labelledby="navbarDropdownMenuLink">
-            <li>
-              <div class="dropdown-item"
-                (click)="postPrivacy(typePrivacy.PUBLIC)">
-                <i class="material-icons">language</i> {{ 'publishing.privacy-public' | workyTranslations }}
-              </div>
-            </li>
 
-            <li>
-              <div class="dropdown-item"
-                (click)="postPrivacy(typePrivacy.FRIENDS)">
-                <i class="material-icons">group</i> {{ 'publishing.privacy-friends' | workyTranslations }}
-              </div>
-            </li>
+          <div class="dropdown" *ngIf="!typePublishing.POSTPROFILE || (idUserProfile === userToken && typePublishing.POSTPROFILE) || (typePublishing.POST && !idUserProfile)">
+            <div class="form-select" [innerHTML]="privacyFront"
+              data-bs-toggle="dropdown"
+              aria-expanded="false">
+            </div>
+            <ul
+              class="dropdown-menu "
+              aria-labelledby="navbarDropdownMenuLink">
+              <li>
+                <div class="dropdown-item"
+                  (click)="postPrivacy(typePrivacy.PUBLIC)">
+                  <i class="material-icons">language</i> {{ 'publishing.privacy-public' | workyTranslations }}
+                </div>
+              </li>
 
-            <li>
-              <div class="dropdown-item"
-                (click)="postPrivacy(typePrivacy.PRIVATE)">
-                <i class="material-icons">lock</i> {{ 'publishing.privacy-private' | workyTranslations }}
-              </div>
-            </li>
-          </ul>
+              <li>
+                <div class="dropdown-item"
+                  (click)="postPrivacy(typePrivacy.FRIENDS)">
+                  <i class="material-icons">group</i> {{ 'publishing.privacy-friends' | workyTranslations }}
+                </div>
+              </li>
+
+              <li>
+                <div class="dropdown-item"
+                  (click)="postPrivacy(typePrivacy.PRIVATE)">
+                  <i class="material-icons">lock</i> {{ 'publishing.privacy-private' | workyTranslations }}
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
+      </ng-container>
 
     </div>
 

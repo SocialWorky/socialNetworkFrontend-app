@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, Subscription, distinctUntilChanged, lastValueFrom, takeUntil } from 'rxjs';
@@ -6,7 +6,6 @@ import * as _ from 'lodash';
 
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
-import { EditInfoProfileComponent } from './components/edit-info-profile/edit-info-profile.component';
 import { UserService } from '@shared/services/users.service';
 import { ActivatedRoute } from '@angular/router';
 import { User } from '@shared/interfaces/user.interface';
@@ -22,6 +21,7 @@ import { FileUploadService } from '@shared/services/file-upload.service';
 import { environment } from '@env/environment';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { ProfileService } from './services/profile.service';
+import { ProfileNotificationService } from '@shared/services/notifications/profile-notification.service';
 
 @Component({
   selector: 'worky-profiles',
@@ -94,7 +94,8 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _friendsService: FriendsService,
     private _fileUploadService: FileUploadService,
     private _globalEventService: GlobalEventService,
-    private _profileService: ProfileService
+    private _profileService: ProfileService,
+    private _profileNotificationService: ProfileNotificationService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -102,7 +103,6 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
 
     if (this.idUserProfile === '') {
-      console.log('No hay id de perfil');
       this.idUserProfile = await this._authService.getDecodedToken().id;
       this._cdr.markForCheck();
     }
@@ -132,6 +132,11 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       }
     });
 
+    this._profileNotificationService.profileUpdated$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.getDataProfile();
+      this._cdr.markForCheck();
+    });
+
     // this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
 
     this.loaderPublications = false;
@@ -148,22 +153,9 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  abrirFormulario(): void {
-    const dialogRef = this._dialog.open(EditInfoProfileComponent, {
-      width: '250px',
-    });
-
-    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result) => {
-      if (result && result.actualizado) {
-        this.getDataProfile();
-        this._cdr.markForCheck();
-      }
-    });
-  }
-
   async getDataProfile(): Promise<void> {
 
-    this.profileSubscription = await this._userService.getUserById(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
+    await this._userService.getUserById(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: User) => {
         this.userData = response;
         this._cdr.markForCheck();
@@ -318,5 +310,9 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this.selectedFiles = [];
       this._cdr.markForCheck();
     }
+  }
+
+  openWhatsApp() {
+    window.open('https://wa.me/' + this.userData?.profile?.whatsapp?.number, '_blank');
   }
 }

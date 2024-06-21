@@ -1,118 +1,131 @@
-<div *ngIf="userData" class="content-header-profile">
-    <div class="image-container">
-        <worky-edit-img-profile 
-          [isCurrentUser]="isCurrentUser"
-          [profileImage]="userData.profile.coverImage">
-        </worky-edit-img-profile>
-    </div>
-    <div class="content">
+<div *ngIf="!userData" class="loader"></div> 
 
-        <div class="header">
-            <div class="avatar-container">
-                <div class="avatar">
+<div *ngIf="userData" >
 
-                  <div class="overlay" [class.show]="isUploading">
-                    <div class="loading-spinner"></div>
+  <div class="content-header-profile">
+      <div class="image-container">
+          <worky-edit-img-profile 
+            [isCurrentUser]="isCurrentUser"
+            [profileImage]="userData.profile.coverImage">
+          </worky-edit-img-profile>
+      </div>
+      <div class="content">
+
+          <div class="header">
+              <div class="avatar-container">
+                  <div class="avatar">
+
+                    <div class="overlay" [class.show]="isUploading">
+                      <div class="loading-spinner"></div>
+                    </div>
+
+                    <worky-avatar
+                      [size]="100"
+                      img= "{{ userData.avatar }}"
+                      name="{{ userData.name }} {{ userData.lastName }}">
+                    </worky-avatar>
+
+                    <div class="edit-icon-avatar" *ngIf="isCurrentUser">
+                      <i class="material-icons" (click)="openUploadModalAvatar()">photo_camera</i>
+                    </div>
+
                   </div>
+              </div>
 
-                  <worky-avatar
-                    [size]="100"
-                    img= "{{ userData.avatar }}"
-                    name="{{ userData.name }} {{ userData.lastName }}">
-                  </worky-avatar>
+              <div class="btn-container-header">
 
-                  <div class="edit-icon-avatar" *ngIf="isCurrentUser">
-                    <i class="material-icons" (click)="openUploadModalAvatar()">photo_camera</i>
-                  </div>
+                <worky-buttons *ngIf="!isFriend && !isFriendPending.status && !isCurrentUser"
+                    [workyButtonType]="WorkyButtonType.Outline"
+                    [theme]="WorkyButtonTheme.Accent"
+                    [width]="'100%'"
+                    (click)="followMyFriend(idUserProfile)">
+                    <span basic-button-text>{{ 'publicationsView.follow' | workyTranslations }}</span>
+                </worky-buttons>
 
-                </div>
-            </div>
+                <worky-buttons *ngIf="isFriendPending.status && userReceives._id === idUserProfile"
+                    [workyButtonType]="WorkyButtonType.Outline"
+                    [theme]="WorkyButtonTheme.Warn"
+                    [width]="'100%'"
+                    (click)="cancelFriendship(idPendingFriend)">
+                    <span basic-button-text>{{ 'publicationsView.cancelRequest' | workyTranslations }}</span>
+                </worky-buttons>
 
-            <div class="btn-container-header">
+                <worky-buttons *ngIf="isFriendPending.status && userRequest._id === idUserProfile"
+                    [workyButtonType]="WorkyButtonType.Outline"
+                    [theme]="WorkyButtonTheme.Accent"
+                    [width]="'100%'"
+                    (click)="acceptFriendship(idPendingFriend)">
+                    <span basic-button-text>Aceptar Amistad</span>
+                </worky-buttons>
 
-              <worky-buttons *ngIf="!isFriend && !isFriendPending.status && !isCurrentUser"
-                  [workyButtonType]="WorkyButtonType.Outline"
-                  [theme]="WorkyButtonTheme.Accent"
-                  [width]="'100%'"
-                  (click)="followMyFriend(idUserProfile)">
-                  <span basic-button-text>{{ 'publicationsView.follow' | workyTranslations }}</span>
-              </worky-buttons>
+                <worky-buttons *ngIf="isFriend && !isCurrentUser"
+                    [workyButtonType]="WorkyButtonType.Outline"
+                    [theme]="WorkyButtonTheme.Basic"
+                    [width]="'100%'"
+                    (click)="cancelFriendship(idPendingFriend)">
+                    <span basic-button-text>Dejar de Seguir</span>
+                </worky-buttons>
 
-              <worky-buttons *ngIf="isFriendPending.status && userReceives._id === idUserProfile"
-                  [workyButtonType]="WorkyButtonType.Outline"
-                  [theme]="WorkyButtonTheme.Warn"
-                  [width]="'100%'"
-                  (click)="cancelFriendship(idPendingFriend)">
-                  <span basic-button-text>{{ 'publicationsView.cancelRequest' | workyTranslations }}</span>
-              </worky-buttons>
+              </div>
+          </div>
 
-              <worky-buttons *ngIf="isFriendPending.status && userRequest._id === idUserProfile"
-                  [workyButtonType]="WorkyButtonType.Outline"
-                  [theme]="WorkyButtonTheme.Accent"
-                  [width]="'100%'"
-                  (click)="acceptFriendship(idPendingFriend)">
-                  <span basic-button-text>Aceptar Amistad</span>
-              </worky-buttons>
+          <div class="profile-info">
 
-              <worky-buttons *ngIf="isFriend && !isCurrentUser"
-                  [workyButtonType]="WorkyButtonType.Outline"
-                  [theme]="WorkyButtonTheme.Basic"
-                  [width]="'100%'"
-                  (click)="cancelFriendship(idPendingFriend)">
-                  <span basic-button-text>Dejar de Seguir</span>
-              </worky-buttons>
+              <div class="user-basic">
+                <div class="content-name-action">
+                  <h2>{{ userData.name }} {{ userData.lastName}}</h2>
 
-            </div>
-        </div>
+                  <img *ngIf="userData.profile.whatsapp?.isViewable" 
+                    class="whatsapp-icon"
+                    src="assets/img/logos/whatsapp.svg" alt="whatsapp"
+                    (click)="openWhatsApp()">
 
-        <div class="profile-info">
-
-            <div class="user-basic">
-                <h2>{{ userData.name }} {{ userData.lastName}}</h2>
+                </div>    
                 <span> {{ userData.profile.legend }}</span>
-                <p>({{ userData.username }})</p>
-            </div>
+                 <p>({{ userData.username }})</p>
+              </div>
 
-        </div>
-    </div>
-</div>
-
-<div class="content-body-profile">
-
-    <div class="content-left-profile">
-      <div class="worky-module-container">
-        <worky-profile-detail *ngIf="userData"
-          [isCurrentUser]="isCurrentUser"
-          [userData]="userData">
-        </worky-profile-detail>
+          </div>
       </div>
-    </div>
+  </div>
 
-    <div class="content-section-wall">
+  <div class="content-body-profile">
 
-      <div *ngIf="(isFriend && !isFriendPending.status) || isCurrentUser" class="worky-module-container">
-
-        <worky-add-publication
-          [type]="typePublishing.POSTPROFILE"
-          [idUserProfile]="idUserProfile">
-        </worky-add-publication>
-
-      </div>
-
-      <div *ngIf="loaderPublications" class="loader"></div> 
-      @for(publication of publications; track publication; let i = $index ) {
+      <div class="content-left-profile">
         <div class="worky-module-container">
-          <worky-publication-view
-          [publication]="publication"
-          [type]="typePublishing.POSTPROFILE"
-          [userProfile]="idUserProfile"
-          [indexPublication]="i">
-          </worky-publication-view>
+          <worky-profile-detail *ngIf="userData"
+            [isCurrentUser]="isCurrentUser"
+            [userData]="userData">
+          </worky-profile-detail>
         </div>
-      } @empty {
-       <span *ngIf="!loaderPublications">{{ 'home.notPublications' | workyTranslations }}</span> 
-      }
-    
-    </div>
+      </div>
+
+      <div class="content-section-wall">
+
+        <div *ngIf="(isFriend && !isFriendPending.status) || isCurrentUser" class="worky-module-container">
+
+          <worky-add-publication
+            [type]="typePublishing.POSTPROFILE"
+            [idUserProfile]="idUserProfile">
+          </worky-add-publication>
+
+        </div>
+
+        <div *ngIf="loaderPublications" class="loader"></div> 
+        @for(publication of publications; track publication; let i = $index ) {
+          <div class="worky-module-container">
+            <worky-publication-view
+            [publication]="publication"
+            [type]="typePublishing.POSTPROFILE"
+            [userProfile]="idUserProfile"
+            [indexPublication]="i">
+            </worky-publication-view>
+          </div>
+        } @empty {
+        <span *ngIf="!loaderPublications">{{ 'home.notPublications' | workyTranslations }}</span> 
+        }
+      
+      </div>
+  </div>
 
 </div>

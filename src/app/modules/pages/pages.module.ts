@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { PagesRoutingModule } from './pages-routing.module';
 import { HomeComponent } from './home/home.component';
@@ -10,6 +10,7 @@ import { ContentLeftSideComponent } from './components/content-left-side/content
 import { ContentRightSideComponent } from './components/content-right-side/content-right-side.component';
 import { ProfilesComponent } from './profiles/profiles.component';
 import { ProfileDetailComponent } from './profiles/components/profile-detail/profile-detail.component';
+import { MaterialModule } from '@shared/modules/material/material.module';
 
 import { WorkyMenuComponentComponent } from './components/navbar/worky-menu-component/worky-menu-component.component';
 import { SideLeftModule } from '@shared/modules/side-left/side-left.module';
@@ -21,7 +22,7 @@ import { WorkyWidgetModule } from '@shared/modules/worky-widget/worky-widget.mod
 import { PublicationViewModule } from '@shared/modules/publication-view/publication-view.module';
 import { SuggetionToFollowModule } from '@shared/modules/suggetion-to-follow/suggetion-to-follow.module';
 import { EditImgProfileComponent } from './profiles/components/edit-img-profile/edit-img-profile.component';
-import { EditInfoProfileComponent } from './profiles/components/edit-info-profile/edit-info-profile.component';
+import { EditInfoProfileDetailComponent } from './profiles/components/edit-info-profile/edit-info-profile.component';
 import { ContactsModule } from '@shared/modules/contacts/contacts.module';
 import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
 
@@ -36,13 +37,14 @@ import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
     ContentRightSideComponent,
     WorkyMenuComponentComponent,
     EditImgProfileComponent,
-    EditInfoProfileComponent,
+    EditInfoProfileDetailComponent,
     ProfileDetailComponent,
 
   ],
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     PagesRoutingModule,
     WorkyDropdownModule,
     TranslationsModule,
@@ -51,10 +53,11 @@ import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
     PublicationViewModule,
     WorkyWidgetModule,
     PublicationViewModule,
+    MaterialModule,
     SuggetionToFollowModule,
     SideLeftModule,
     ContactsModule,
-    WorkyButtonsModule
+    WorkyButtonsModule,
   ]
 })
 export class PagesModule { }
