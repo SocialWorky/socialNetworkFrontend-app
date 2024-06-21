@@ -286,3 +286,11 @@ body {
       overflow: hidden;  
     }
   }
+
+.cdk-global-overlay-wrapper .cdk-overlay-pane {
+  @include breakpoints.below-sm {
+    max-width: 100% !important;
+    width: 95%;
+  }
+} 
+

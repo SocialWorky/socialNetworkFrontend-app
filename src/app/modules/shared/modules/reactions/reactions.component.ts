@@ -1,5 +1,4 @@
 import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
-
 import { CustomReactionsService } from '@admin/shared/manage-reactions/service/customReactions.service';
 import { CustomReactionList } from '@admin/interfaces/customReactions.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
@@ -32,6 +31,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   token = this._authService.getDecodedToken();
 
   private destroy$ = new Subject<void>();
+  private touchTimeout: any;
 
   get reactionUserInPublication() {
     return this.reactionsToPublication.find((reaction) => reaction.user._id === this.token.id);
@@ -55,7 +55,6 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   }
 
   addReaction(reaction: CustomReactionList) {
-
     if (this.reactionUserInPublication) {
       this.editReaction(this.reactionUserInPublication._id, reaction);
       return;
@@ -148,6 +147,18 @@ export class ReactionsComponent implements OnInit, OnDestroy {
       const refreshPublications = await this._publicationService.getAllPublications(1, 10);
       this._publicationService.updatePublications(refreshPublications);
       this._cdr.markForCheck();
+    }
+  }
+
+  onTouchStart() {
+    this.touchTimeout = setTimeout(() => {
+      this.showReactions();
+    }, 500);
+  }
+
+  onTouchEnd() {
+    if (this.touchTimeout) {
+      clearTimeout(this.touchTimeout);
     }
   }
 }

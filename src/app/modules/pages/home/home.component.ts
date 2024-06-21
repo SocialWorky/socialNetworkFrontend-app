@@ -100,7 +100,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   private async getParamsPublication(): Promise<boolean> {
     let result = false;
     const _idPublication = this._activatedRoute.snapshot.paramMap.get('_idPublication');
-    console.log('idPublication', _idPublication);
     if (_idPublication) {
       try {
         const publication = await lastValueFrom(this._publicationService.getPublicationId(_idPublication));
