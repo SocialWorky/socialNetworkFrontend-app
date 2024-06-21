@@ -24,7 +24,7 @@ export class MessageSideLeftComponent  implements OnInit {
     this.currentUserId = this.authService.getDecodedToken().id;
 
     this.userService.getAllUsers().subscribe(
-      (data: User[]) => { // Especificar que data es un array de User[]
+      (data: User[]) => { 
         this.users = data.filter((user: User) => user._id !== this.currentUserId);
         this.cdr.detectChanges();
       },
