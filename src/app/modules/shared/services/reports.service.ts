@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { environment } from 'src/environments/environment';
 import { ReportCreate } from '../interfaces/report.interface';
+import { ReportStatus } from '../enums/report.enum';
+import { Observable } from 'rxjs';
 
 
 
@@ -37,6 +39,12 @@ export class ReportsService {
     const url = `${this.baseUrl}/reports/${id}`;
     const headers = this.getHeaders();
     return this.http.put(url, report, { headers });
+  }
+
+  getReportsStatus(status: ReportStatus): Observable<any> {
+    const url = `${this.baseUrl}/reports/status/${status}`;
+    const headers = this.getHeaders();
+    return this.http.get(url, { headers });
   }
 
 }

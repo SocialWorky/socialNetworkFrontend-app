@@ -3,6 +3,9 @@ import { Subscription } from 'rxjs';
 import { User } from '@shared/interfaces/user.interface';
 import { UserService } from '@shared/services/users.service';
 import { PublicationService } from '@shared/services/publication.service';
+import { ReportsService } from '@shared/services/reports.service';
+import { ReportStatus } from '@shared/enums/report.enum';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'worky-admin-statistics',
@@ -17,6 +20,9 @@ export class StatisticsComponent  implements OnInit {
 
   private _countPublications: number = 0;
 
+  private _reportsStatusPending = [];
+
+
   get allUsersLength() {
     return this._allUsers.length;
   }
@@ -25,15 +31,21 @@ export class StatisticsComponent  implements OnInit {
     return this._countPublications;
   }
 
+  get ReportsStatusPendingCount() {
+    return this._reportsStatusPending.length;
+  }
+
   constructor (
     private _userService: UserService,
     private _publicationService: PublicationService,
     private _cdr: ChangeDetectorRef,
+    private _reportsService: ReportsService
   ) { }
 
   ngOnInit() {
     this.getAllUsers();
     this.getCountPublications();
+    this.getReportsStatusPending();
   }
 
   private getAllUsers() {
@@ -46,6 +58,13 @@ export class StatisticsComponent  implements OnInit {
   private getCountPublications() {
     this.subscription.add(this._publicationService.getCountPublications().subscribe((data) => {
       this._countPublications = data;
+      this._cdr.markForCheck();
+    }));
+  }
+
+  private getReportsStatusPending() {
+    this.subscription.add(this._reportsService.getReportsStatus(ReportStatus.PENDING).subscribe((data) => {
+      this._reportsStatusPending = data;
       this._cdr.markForCheck();
     }));
   }
