@@ -15,12 +15,18 @@ export class MessagesComponent {
 
   isAuthenticated: boolean = false;
 
+  isActive: boolean = true;
+
   constructor(private _authService: AuthService) { 
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
       this.decodedToken = this._authService.getDecodedToken();
       this.userName = this.decodedToken.name;
     }
+  }
+
+  toggleActive(): void {
+    this.isActive = !this.isActive; // Alterna el estado
   }
 
 }

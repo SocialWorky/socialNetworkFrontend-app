@@ -1,7 +1,7 @@
 <div class="content-list">
   <span class="tittle">Active Conversations</span>
   <div class="users">
-    <button *ngFor="let user of users" class="button">
+    <button *ngFor="let user of users" class="button" (click)="navigateToUser(user._id)">
       <worky-avatar [size]="40" [img]="user.avatar"></worky-avatar>
       <span class="user-name">{{ user.name }} {{ user.lastName }}</span>
     </button>

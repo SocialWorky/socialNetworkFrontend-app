@@ -3,7 +3,6 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
 .container {
-
     display: flex;
     gap: 20px;
     padding-top: 2rem;
@@ -20,24 +19,19 @@
         align-items: center;
         background: var(--worky-color-greyLight);
         border: 1px solid var(--worky-color-light);
-        width: 100%;
-        padding-top: 1.5rem;
-        padding-bottom: 1.5rem;
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding: 1.5rem 1rem;
         border-radius: 0.5rem;
 
         .name{
             padding-top: 0.75rem;
             font-size: 1rem;
-            font-weight: 500;
             color: var(--worky-color-indigo);
         }
 
         .toggle{
             display: flex;
-            flex-direction: row;
             align-items: center;
+            cursor: pointer;
             margin-top: 0.45rem;
 
             .material-icons{
@@ -45,10 +39,16 @@
             }
 
             .text{
-                line-height: 1;
                 margin-left: 0.25rem;
                 font-size: 0.75rem;
-                line-height: 1rem;
+            }
+
+            &.active .material-icons {
+                color: var(--worky-color-teal); 
+            }
+            
+            &.inactive .material-icons {
+                color: var(--worky-color-red); 
             }
         }
     }

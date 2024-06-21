@@ -3,16 +3,9 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
 .content-list {
-    width: 15rem;
     padding-top: 30px;
 
-    .tittle{
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 0.75rem;
-        line-height: 1rem;
+    .tittle{       
         font-size: 15px;
         font-weight: 600;
     }
@@ -50,6 +43,7 @@
         margin-left: 0.5rem;
         font-size: 0.875rem;
         font-weight: 500;
+        text-transform: lowercase;
     }
 
 }
