@@ -1,4 +1,6 @@
 import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+
 import { CustomReactionsService } from '@admin/shared/manage-reactions/service/customReactions.service';
 import { CustomReactionList } from '@admin/interfaces/customReactions.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
@@ -6,7 +8,10 @@ import { ReactionsService } from '@shared/services/reactions.service';
 import { AuthService } from '@auth/services/auth.service';
 import { PublicationService } from '@shared/services/publication.service';
 import { PublicationsReactions } from '@shared/interfaces/reactions.interface';
-import { Subject, takeUntil } from 'rxjs';
+import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
+import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
+import { environment } from '@env/environment';
+import { PublicationView } from '@shared/interfaces/publicationView.interface';
 
 @Component({
   selector: 'worky-reactions',
@@ -24,13 +29,16 @@ export class ReactionsComponent implements OnInit, OnDestroy {
 
   @Input() userProfile?: string;
 
-  @Input() idPublication: string | undefined;
+  @Input() publication: PublicationView | undefined;
 
   @Input() reactionsToPublication: PublicationsReactions[] = [];
 
   token = this._authService.getDecodedToken();
 
+  private mailSendNotification: MailSendValidateData = {} as MailSendValidateData;
+
   private destroy$ = new Subject<void>();
+
   private touchTimeout: any;
 
   get reactionUserInPublication() {
@@ -43,6 +51,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
     private _reactionsService: ReactionsService,
     private _authService: AuthService,
     private _publicationService: PublicationService,
+    private _emailNotificationService: EmailNotificationService
   ) {}
 
   ngOnInit() {
@@ -65,11 +74,12 @@ export class ReactionsComponent implements OnInit, OnDestroy {
         _idCustomReaction: reaction._id,
         isPublications: this.type === TypePublishing.POST || TypePublishing.POSTPROFILE ? true : false,
         isComment: this.type === TypePublishing.COMMENT ? true : false,
-        _idPublication: this.idPublication!,
+        _idPublication: this.publication?._id!,
       }).pipe(takeUntil(this.destroy$))
       .subscribe({
         next: async () => {
           this.reactionsVisible = false;
+          this.sendEmailNotificationReaction(this.publication!, reaction);
           this.refreshPublications();
         },
         error: (err) => {
@@ -95,7 +105,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
       _idCustomReaction: reaction._id,
       isPublications: this.type === TypePublishing.POST || this.typePublishing.POSTPROFILE ? true : false,
       isComment: this.type === TypePublishing.COMMENT ? true : false,
-      _idPublication: this.idPublication!,
+      _idPublication: this.publication?._id!,
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: async () => {
         this.refreshPublications();
@@ -160,5 +170,23 @@ export class ReactionsComponent implements OnInit, OnDestroy {
     if (this.touchTimeout) {
       clearTimeout(this.touchTimeout);
     }
+  }
+
+    sendEmailNotificationReaction(publication: PublicationView, reaction: CustomReactionList) {
+
+    if (this.token.id === publication.author._id) return;
+
+    this.mailSendNotification.url = `${environment.BASE_URL}/publication/${publication._id}`;
+    this.mailSendNotification.subject = 'Han reaccionado a tu publicación';
+    this.mailSendNotification.title = 'Notificación de reacción';
+    this.mailSendNotification.greet = 'Hola';
+    this.mailSendNotification.message = 'El usuario ' + this.token.name + ' ha reaccionado a tu publicación';
+    this.mailSendNotification.subMessage = 'Su reacción fue: <img src="'+ reaction.emoji +'" width="20px" alt="'+ reaction.name +'"> ' + reaction.name;
+    this.mailSendNotification.buttonMessage = 'Ver publicación';
+    this.mailSendNotification.template = TemplateEmail.NOTIFICATION;
+    this.mailSendNotification.email = publication?.author.email;
+
+    this._emailNotificationService.sendNotification(this.mailSendNotification).pipe(takeUntil(this.destroy$)).subscribe();
+
   }
 }
