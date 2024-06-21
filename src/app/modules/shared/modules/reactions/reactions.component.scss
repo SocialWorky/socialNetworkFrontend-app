@@ -25,7 +25,8 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
   @include breakpoints.below-sm {
-    left: 100%;
+    left: 110%;
+    bottom: 120%;
   }
 
 }
@@ -57,4 +58,12 @@
     width: 20px;
     height: 20px;
   }
+}
+
+.reaction-container,
+.content-text-reaction,
+.selected-reaction {
+  user-select: none; 
+  -webkit-user-select: none;
+  -ms-user-select: none;
 }
