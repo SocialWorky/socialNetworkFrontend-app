@@ -23,6 +23,9 @@ import { MediaFileUpload } from '@shared/interfaces/publicationView.interface';
 import { UserService } from '@shared/services/users.service';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { User } from '@shared/interfaces/user.interface';
+import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
+import { environment } from '@env/environment';
+import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
 
 @Component({
   selector: 'worky-add-publication',
@@ -76,6 +79,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   private subscription: Subscription | undefined;
 
+  private mailSendNotification: MailSendValidateData = {} as MailSendValidateData;
+
   @Input() type: TypePublishing | undefined;
 
   @Input() idPublication?: string;
@@ -99,6 +104,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _fileUploadService: FileUploadService,
     private _userService: UserService,
     private _globalEventService: GlobalEventService,
+    private _emailNotificationService: EmailNotificationService,
   ) {
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
@@ -231,6 +237,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
             publicationsNew[this.indexPublication!].comment.unshift(message.comment);
             this._publicationService.updatePublications(publicationsNew);
           }
+
+          this.sendEmailNotificationReaction(publicationsNew[this.indexPublication!], message.comment);
 
           if (message.message === 'Comment created successfully') {
             this.myForm.controls['content'].setValue('');
@@ -426,5 +434,23 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   removeFile(index: number) {
     this.selectedFiles.splice(index, 1);
     this.previews.splice(index, 1);
+  }
+
+  sendEmailNotificationReaction(publication: any, comment: any) {
+
+    if (this.userToken === publication.author._id) return;
+
+    this.mailSendNotification.url = `${environment.BASE_URL}/publication/${publication._id}`;
+    this.mailSendNotification.subject = 'Han comentado tu publicación';
+    this.mailSendNotification.title = 'Notificación de comentario en publicación';
+    this.mailSendNotification.greet = 'Hola';
+    this.mailSendNotification.message = 'El usuario ' + this.user.name + ' ' + this.user.lastName + ' ha comentado tu publicación';
+    this.mailSendNotification.subMessage = 'Su comentario fue: ' + comment.content;
+    this.mailSendNotification.buttonMessage = 'Ver publicación';
+    this.mailSendNotification.template = TemplateEmail.NOTIFICATION;
+    this.mailSendNotification.email = publication?.author.email;
+
+    this._emailNotificationService.sendNotification(this.mailSendNotification).pipe(takeUntil(this.unsubscribe$)).subscribe();
+
   }
 }
