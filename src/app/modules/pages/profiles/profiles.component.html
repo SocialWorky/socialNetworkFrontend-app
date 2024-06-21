@@ -92,12 +92,10 @@
   <div class="content-body-profile">
 
       <div class="content-left-profile">
-        <div class="worky-module-container">
-          <worky-profile-detail *ngIf="userData"
-            [isCurrentUser]="isCurrentUser"
-            [userData]="userData">
-          </worky-profile-detail>
-        </div>
+        <worky-profile-detail *ngIf="userData"
+          [isCurrentUser]="isCurrentUser"
+          [userData]="userData">
+        </worky-profile-detail>
       </div>
 
       <div class="content-section-wall">

@@ -12,6 +12,7 @@ import { AlertService } from '@shared/services/alert.service';
 import { translations } from '@translations/translations';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { TemplateEmail } from '@shared/interfaces/mail.interface';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'worky-register',
@@ -28,6 +29,8 @@ export class RegisterComponent implements OnInit {
   WorkyButtonTheme = WorkyButtonTheme;
 
   mailDataValidate: MailSendValidateData = {} as MailSendValidateData;
+
+  private unsubscribe$ = new Subject<void>();
 
   @ViewChild('emailInput') emailInput!: ElementRef;
 
@@ -77,7 +80,7 @@ export class RegisterComponent implements OnInit {
 
     await loading.present();
 
-    await this._authApiRegisterService.registerUser(body).subscribe({
+    await this._authApiRegisterService.registerUser(body).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: () => {
         this._alertService.showAlert(
           translations['alert.title_success_register'],

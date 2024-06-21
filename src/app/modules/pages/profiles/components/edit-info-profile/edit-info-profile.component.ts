@@ -57,7 +57,6 @@ export class EditInfoProfileDetailComponent implements OnInit {
 
   ngOnInit() {
     this.loadBasicDetail();
-    console.log('whatsapp data:', this.editProfailDetailForm.get('whatsapp'));
   }
 
   toggleWhatsApp() {

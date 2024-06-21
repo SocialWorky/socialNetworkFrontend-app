@@ -2,13 +2,24 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
+.content-description {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  span {
+    color: map-get(color.$worky-navy, 24);
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
 .container-detail {
   display: flex;
   flex-direction: column;
   padding: 10px;
   .header-detail {
     span {
-      color: color.$worky-color-navy;
+      color: map-get(color.$worky-navy, 24);
       font-size: 25px;
       font-weight: bold;
     }  
@@ -31,7 +42,7 @@
       }
       .label-detail {
         font-size: 16px;
-        color: color.$worky-color-navy;
+        color: map-get(color.$worky-navy, 24);
         font-weight: bold;
         margin-right: 5px;
       }

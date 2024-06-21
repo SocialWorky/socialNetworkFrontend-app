@@ -34,7 +34,7 @@
           width: 100px;
           height: 100px;
           border-radius: 50%;
-          background-color: rgba(0, 0, 0, 0.5);
+          background-color: map-get(color.$worky-navy, 9);
           display: flex;
           justify-content: center;
           align-items: center;
@@ -110,9 +110,9 @@
         }
 
         p {
-            font-size: 0.875rem;
+            font-size: 14px;
             font-weight: medium;
-            color: color.$worky-color-grey;
+            color: map-get(color.$worky-navy, 24);
         }
       }
     }
