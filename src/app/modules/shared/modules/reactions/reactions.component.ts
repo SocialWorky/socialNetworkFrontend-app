@@ -150,15 +150,13 @@ export class ReactionsComponent implements OnInit, OnDestroy {
     }
   }
 
-  onTouchStart(event: TouchEvent) {
-    event.preventDefault();
+  onTouchStart() {
     this.touchTimeout = setTimeout(() => {
       this.showReactions();
     }, 500);
   }
 
-  onTouchEnd(event: TouchEvent) {
-    event.preventDefault();
+  onTouchEnd() {
     if (this.touchTimeout) {
       clearTimeout(this.touchTimeout);
     }

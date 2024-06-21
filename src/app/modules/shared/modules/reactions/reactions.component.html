@@ -1,11 +1,9 @@
-<div class="reaction-container"
-     (touchstart)="onTouchStart($event)"
-     (touchend)="onTouchEnd($event)">
+<div class="reaction-container" (mouseleave)="hideReactions()">
 
   <div class="content-text-reaction"
        (mouseenter)="showReactions()"
-       (touchstart)="onTouchStart($event)"
-       (touchend)="onTouchEnd($event)"
+       (touchstart)="onTouchStart()"
+       (touchend)="onTouchEnd()"
        *ngIf="!reactionUserInPublication">
     <i class="material-icons">mood</i>
     <span>{{ 'publicationsView.spanReaction' | workyTranslations }}</span>
@@ -15,8 +13,8 @@
        class="selected-reaction" 
        (mouseenter)="showReactions()"
        (click)="deleteReaction(reactionUserInPublication._id)"
-       (touchstart)="onTouchStart($event)"
-       (touchend)="onTouchEnd($event)">
+       (touchstart)="onTouchStart()"
+       (touchend)="onTouchEnd()">
     <img [src]="reactionUserInPublication.customReaction.emoji" [alt]="reactionUserInPublication.customReaction.name">
     <div>{{ reactionUserInPublication.customReaction.name }}</div>
   </div>

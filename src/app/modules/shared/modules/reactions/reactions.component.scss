@@ -25,8 +25,8 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
   @include breakpoints.below-sm {
-    left: 110%;
-    bottom: 120%;
+    left: 130%;
+    bottom: 90%;
   }
 
 }
