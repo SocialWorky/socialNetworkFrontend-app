@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit, Renderer2 } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, Inject, OnInit, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { getTranslationsLanguage } from '../translations/translations';
 import { ConfigService } from '@shared/services/config.service';
@@ -13,7 +13,7 @@ export class AppComponent implements OnInit {
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private _renderer: Renderer2,
-    private _configService: ConfigService
+    private _configService: ConfigService,
   ) {
     this.applyCustomCss();
   }

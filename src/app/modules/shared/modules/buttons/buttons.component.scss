@@ -109,3 +109,7 @@
 .mat-button-disabled {
   opacity: 0.56;
 }
+
+::ng-deep .mat-mdc-button .mdc-button__label {
+  z-index: 0!important;
+}

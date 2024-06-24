@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject, Subscription, firstValueFrom, lastValueFrom } from 'rxjs';
+import { Subject, firstValueFrom, lastValueFrom } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { Meta } from '@angular/platform-browser';
@@ -68,19 +68,53 @@ export class HomeComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe({
       next: async (publicationsData: PublicationView[]) => {
-        this.publications = publicationsData;
-        this._cdr.markForCheck();
+        this.updatePublications(publicationsData);
       },
       error: (error) => {
         console.error('Error getting publications', error);
       }
     });
 
-    await this._publicationService.getAllPublications(this.page, this.pageSize);
+    await this.loadPublications();
 
     this.loaderPublications = false;
     this._cdr.markForCheck();
     this.subscribeToNotificationComment();
+  }
+
+  async loadPublications() {
+    if (this.loaderPublications) return;
+    this.page = this.page + 1;
+    this.loaderPublications = true;
+    try {
+      const newPublications = await this._publicationService.getAllPublications(this.page, this.pageSize);
+      const uniqueNewPublications = newPublications.filter(newPub => 
+        !this.publications.some(pub => pub._id === newPub._id)
+      );
+
+      if (uniqueNewPublications.length > 0) {
+        this.publications = [...this.publications, ...uniqueNewPublications];
+        this.page++;
+        console.log('publications', this.publications);
+        console.log('page', this.page);
+        console.log('pageSize', this.pageSize);
+      }
+    } catch (error) {
+      console.error('Error loading publications', error);
+    }
+    this.loaderPublications = false;
+    this._cdr.markForCheck();
+  }
+
+  onScroll(event: any) {
+    const scrollTop = event.target.scrollTop;
+    const scrollHeight = event.target.scrollHeight;
+    const offsetHeight = event.target.offsetHeight;
+    const threshold = 100;
+
+    if (scrollTop + offsetHeight + threshold >= scrollHeight && !this.loaderPublications) {
+      this.loadPublications();
+    }
   }
 
   async subscribeToNotificationComment() {
@@ -136,5 +170,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (data.results && data.results.length > 0) {
       await firstValueFrom(this._geoLocationsService.createLocations(data).pipe(takeUntil(this.destroy$)));
     }
+  }
+
+  private updatePublications(publicationsData: PublicationView[]) {
+    const uniquePublications = publicationsData.filter(newPub => 
+      !this.publications.some(pub => pub._id === newPub._id)
+    );
+
+    if (this.page === 1) {
+      this.publications = uniquePublications;
+    } else {
+      this.publications = [...this.publications, ...uniquePublications];
+    }
+    this._cdr.markForCheck();
   }
 }

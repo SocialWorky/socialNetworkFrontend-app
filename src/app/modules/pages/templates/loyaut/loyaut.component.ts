@@ -1,7 +1,8 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { Subscription, filter } from 'rxjs';
+
+import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 
 @Component({
   selector: 'worky-loyaut',
@@ -24,10 +25,10 @@ export class LoyautComponent implements OnInit {
   constructor( 
     private _deviceDetectionService: DeviceDetectionService,
     private _router: Router,
-    private _cdr: ChangeDetectorRef
+    private _cdr: ChangeDetectorRef,
   ) {}
 
-ngOnInit(): void {
+  ngOnInit(): void {
     this.routeSub = this._router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd)

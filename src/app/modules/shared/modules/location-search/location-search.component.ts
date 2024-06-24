@@ -52,7 +52,7 @@ export class LocationSearchComponent {
 
   selectLocation(location: any) {
 
-    if (!location.id){
+    if (!location._id){
       const locationData: StreetMapData = {
         results: [location],
         status: { code: 200, message: 'OK'},

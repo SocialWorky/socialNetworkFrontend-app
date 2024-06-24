@@ -3,21 +3,41 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
 .content-publication-view {
+
+  .publication-header-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 10px;
+  }
+
   .publication-header {
     display: flex;
-    padding: 16px;
+    padding: 0px 16px 16px 16px;
     align-items: center;
     gap: 1rem;
     .publication-header-content {
+      display: flex;
+      flex-direction: column;
       .user-name-content {
+        display: flex;
+        align-items: center;
+        gap: 5px;
         .user-name {
           display: flex;
           align-items: center;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          gap: 5px;
         }
         .name {
+          width: auto;
           display: flex;
           align-items: center;
-          font-size: variables.$worky-font-size-5;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          font-size: variables.$worky-font-size-4;
           color: colors.$worky-color-navy;
           .follow-my-friend {
             cursor: pointer;
@@ -25,6 +45,11 @@
             font-size: variables.$worky-font-size-3;
             font-weight: 500;
           }
+
+          @include breakpoints.below-md {
+
+          }
+
          }
 
         .link-name {
@@ -35,13 +60,24 @@
           display: flex;
         }
 
-        .geoLocationName {
-          font-size: variables.$worky-font-size-3;
-          color: colors.$worky-color-navy;
-          .urlLink {
-            color: colors.$worky-color-blue;
-            font-weight: 500;
-          }
+
+      }
+      .geoLocationName {
+        display: flex;
+        align-items: center;
+        font-size: variables.$worky-font-size-3;
+        color: colors.$worky-color-navy;
+        gap: 5px;
+        .is-in {
+          min-width: 50px;
+          font-weight: 700;
+        }
+        .urlLink {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          color: colors.$worky-color-blue;
+          font-weight: 500;
         }
       }
       .publication-date {
@@ -54,9 +90,6 @@
           font-size: variables.$worky-font-size-2;
         }
       }
-    }
-    .publication-header-actions {
-      margin-left: auto;
     }
   }
 

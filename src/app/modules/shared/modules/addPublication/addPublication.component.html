@@ -10,9 +10,9 @@
         </worky-avatar>
 
         <div class="user-name-content">
-          <div>
+          <div class="content-name-geo">
             <span class="name"> {{ user.name }} {{ user.lastName }} </span>
-            <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> está en <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span> 
+            <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">está en </p> <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span> 
           </div>
 
           <div class="dropdown" *ngIf="!typePublishing.POSTPROFILE || (idUserProfile === userToken && typePublishing.POSTPROFILE) || (typePublishing.POST && !idUserProfile)">

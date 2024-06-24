@@ -1,6 +1,18 @@
 <div class="content-publication-view" *ngIf="publication">
 
+  <div class="publication-header-actions">
+
+    <worky-dropdown
+      icon="more_horiz"
+      [badge]=false
+      (click)="checkDataLink(publication.author._id)"
+      [dataLink]="dataLinkActions"
+      (linkClicked)="handleActionsClicked($event, publication)">
+    </worky-dropdown>
+
+  </div>
   <div class="publication-header">
+
     <worky-avatar 
       [size]="40"
       img="{{ publication.author.avatar }}"
@@ -9,7 +21,6 @@
 
     <div class="publication-header-content">
       <div class="user-name-content">
-
         <div class="user-name" *ngIf="publication.isMyFriend || (dataUser.id === publication.author._id && !publication.isMyFriend); else notFriend">
           <span (click)="viewProfile(publication.author._id)" class="name link-name">
             {{ publication.author.name }} {{ publication.author.lastName }}
@@ -22,8 +33,6 @@
                 {{ publication.userReceiving.name }} {{ publication.userReceiving.lastName }}
               </span>
           </ng-container>
-
-
         </div>
 
         <ng-template #notFriend>
@@ -58,10 +67,10 @@
             </span>
           </div>
         </ng-template>       
-
-
-        <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> está en <a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
       </div>
+
+      <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">está en </p><a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
+
       <div class="publication-date">
         <span>{{ publication.createdAt! | workyRelativeTime }}</span>
 
@@ -76,18 +85,6 @@
         </ng-container>
 
       </div>
-    </div>
-
-    <div class="publication-header-actions">
-
-      <worky-dropdown
-        icon="more_horiz"
-        [badge]=false
-        (click)="checkDataLink(publication.author._id)"
-        [dataLink]="dataLinkActions"
-        (linkClicked)="handleActionsClicked($event, publication)">
-      </worky-dropdown>
-
     </div>
 
   </div>

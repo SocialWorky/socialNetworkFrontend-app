@@ -14,19 +14,30 @@
     }
 
     .user-name-content {
-      .name {
-        font-size: 1rem;
-        font-weight: 500;
-        color: color.$worky-color-indigo;
+      .content-name-geo {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+
+        .name {
+          font-size: 1rem;
+          font-weight: 500;
+          color: color.$worky-color-indigo;
+        }
+
+        .geoLocationName {
+          display: flex;
+          align-items: center;
+          font-size: 0.8rem;
+          color: color.$worky-color-navy;
+          gap: 5px;
+          .is-in {
+            font-weight: 700;
+          }
+        }
+
       }
 
-      .geoLocationName {
-        font-size: 0.8rem;
-        color: color.$worky-color-navy;
-        span {
-          font-weight: 700;
-        }
-      }
 
       .form-select {
         display: flex;
