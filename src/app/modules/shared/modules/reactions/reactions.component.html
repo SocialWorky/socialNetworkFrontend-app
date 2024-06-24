@@ -1,21 +1,25 @@
-
 <div class="reaction-container" (mouseleave)="hideReactions()">
 
-  <div class="content-text-reaction" (mouseenter)="showReactions()" *ngIf="!reactionUserInPublication">
+  <div class="content-text-reaction"
+       (mouseenter)="showReactions()"
+       (touchstart)="onTouchStart()"
+       (touchend)="onTouchEnd()"
+       *ngIf="!reactionUserInPublication">
     <i class="material-icons">mood</i>
     <span>{{ 'publicationsView.spanReaction' | workyTranslations }}</span>
   </div>
 
   <div *ngIf="reactionUserInPublication"
-    class="selected-reaction" 
-    (mouseenter)="showReactions()"
-    (click)="deleteReaction(reactionUserInPublication._id)">
+       class="selected-reaction" 
+       (mouseenter)="showReactions()"
+       (click)="deleteReaction(reactionUserInPublication._id)"
+       (touchstart)="onTouchStart()"
+       (touchend)="onTouchEnd()">
     <img [src]="reactionUserInPublication.customReaction.emoji" [alt]="reactionUserInPublication.customReaction.name">
     <div>{{ reactionUserInPublication.customReaction.name }}</div>
   </div>
 
   <div class="reaction-popup" *ngIf="reactionsVisible">
-
     <div class="reaction" 
          *ngFor="let reaction of reactions" 
          [class.zoomed]="reaction.zoomed" 
@@ -25,8 +29,6 @@
          matTooltipPosition="above"
          (click)="addReaction(reaction)">
       <img class="reaction-image" [src]="reaction.emoji" [alt]="reaction.name">
-
     </div>
   </div>
 </div>
-

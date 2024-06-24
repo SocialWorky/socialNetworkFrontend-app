@@ -4,6 +4,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { environment } from '@env/environment';
 import { ProfileData } from '../interface/profile.interface';
+import { ProfileNotificationService } from '@shared/services/notifications/profile-notification.service';
+import { tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +15,10 @@ export class ProfileService {
   private baseUrl: string;
   private token: string;
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private _profileNotificationService: ProfileNotificationService
+  ) {
     this.baseUrl = environment.API_URL;
     this.token = localStorage.getItem('token') || '';
   }
@@ -29,7 +34,11 @@ export class ProfileService {
   updateProfile(idUser: string, profileData: ProfileData): Observable<ProfileData> {
     const url = `${this.baseUrl}/user/profile/${idUser}`;
     const headers = this.getHeaders();
-    return this.http.put<ProfileData>(url, profileData, { headers });
+    return this.http.put<ProfileData>(url, profileData, { headers }).pipe(
+      tap(() => {
+        this._profileNotificationService.notifyProfileUpdated();
+      })
+    );
   }
 
   validateProfile(idUser: string): Observable<ProfileData> {

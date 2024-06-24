@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { LoadingController } from '@ionic/angular';
+import { MatDialog } from '@angular/material/dialog';
 
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePrivacy, TypePublishing } from '../addPublication/enum/addPublication.enum';
@@ -14,7 +15,12 @@ import { environment } from '@env/environment';
 import { FriendsService } from '@shared/services/friends.service';
 import { translations } from '@translations/translations';
 import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
-
+import { ReportsService } from '@shared/services/reports.service';
+import { ReportCreate } from '@shared/interfaces/report.interface';
+import { ReportType, ReportStatus } from '@shared/enums/report.enum';
+import { ReportResponseComponent } from '../publication-view/report-response/report-response.component';
+import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
+import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
 
 @Component({
   selector: 'worky-publication-view',
@@ -58,6 +64,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   dataUser = this._authService.getDecodedToken();
 
+  private mailSendDataValidate: MailSendValidateData = {} as MailSendValidateData;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -67,6 +75,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _loadingCtrl: LoadingController,
     private _publicationService: PublicationService,
     private _friendsService: FriendsService,
+    private _reportsService: ReportsService,
+    public _dialog: MatDialog,
+    private _emailNotificationService: EmailNotificationService,
   ) {}
   async ngAfterViewInit() {
     await this.getUserFriendPending();
@@ -128,7 +139,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   menuActions() {
     this.dataLinkActions = [
-      { icon: 'report', link: '/auth/login', title: translations['publicationsView.reportPublication'] },
+      { icon: 'report', function: this.createReport.bind(this), title: translations['publicationsView.reportPublication'] },
     ];
   }
 
@@ -246,6 +257,67 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       this._publicationService.updatePublications(refreshPublications);
       this._cdr.markForCheck();
     }
+  }
+
+  createReport(publication: PublicationView) {
+    this.openUploadModal(publication);
+  }
+
+    async openUploadModal(publication: PublicationView) {
+      const dialogRef = this._dialog.open(ReportResponseComponent, {});
+      dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (result: any) => {
+        if (result) {
+
+          const loadingCreateReport = await this._loadingCtrl.create({
+            message: 'Creando reporte...',
+          });
+
+          loadingCreateReport.present();
+
+          const report: ReportCreate = {
+            type: ReportType.POST,
+            _idReported: publication._id,
+            reporting_user: this.dataUser.id,
+            status: ReportStatus.PENDING,
+            detail_report: result,
+          };
+          await this._reportsService.createReport(report).pipe(takeUntil(this.destroy$)).subscribe({
+            next: (data) => {
+              loadingCreateReport.dismiss();
+              this.sendEmailNotificationReport(publication, result);
+              this._cdr.markForCheck();
+            },
+            error: (error) => {
+              console.error('Error creating report:', error);
+              loadingCreateReport.dismiss();
+            }
+          });
+          loadingCreateReport.dismiss();
+        }
+      });
+  }
+
+  sendEmailNotificationReport(publication: PublicationView, reportMessage: string) {
+
+    this.mailSendDataValidate.url = `${environment.BASE_URL}/publication/${publication._id}`;
+    this.mailSendDataValidate.subject = 'Reporte de publicación';
+    this.mailSendDataValidate.title = 'Reporte de publicación';
+    this.mailSendDataValidate.greet = 'Hola';
+    this.mailSendDataValidate.message = 'Tu reporte ha sido enviado con éxito, pronto revisaremos tu solicitud.';
+    this.mailSendDataValidate.subMessage = 'Tu mensaje: ' + reportMessage;
+    this.mailSendDataValidate.buttonMessage = 'Ver publicación Reportada';
+    this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
+    this.mailSendDataValidate.email = this.dataUser.email;
+
+    this._emailNotificationService.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (data) => {
+        console.log(data);
+      },
+      error: (error) => {
+        console.error('Error sending email:', error);
+      }
+    });
+
   }
 
 }

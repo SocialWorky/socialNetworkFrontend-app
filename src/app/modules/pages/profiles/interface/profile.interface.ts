@@ -2,7 +2,7 @@ export interface ProfileData {
   id?: string;
   legend?: string;
   coverImage?: string;
-  dateOfBirth?: Date;
+  dateOfBirth?: string;
   description?: string;
   location?: Location;
   socialNetworks?: SocialNetworks;

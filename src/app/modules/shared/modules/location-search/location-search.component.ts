@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { StreetMapData } from '@shared/interfaces/streetMap.interface';
-import { GeoLocationsService } from '@shared/services/apiGeoLocations.service';
-import { GeocodingService } from '@shared/services/geocoding.service';
+import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.service';
+import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -52,7 +52,7 @@ export class LocationSearchComponent {
 
   selectLocation(location: any) {
 
-    if (!location.id){
+    if (!location._id){
       const locationData: StreetMapData = {
         results: [location],
         status: { code: 200, message: 'OK'},

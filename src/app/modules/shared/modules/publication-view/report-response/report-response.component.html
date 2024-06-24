@@ -1,0 +1,32 @@
+<div class="content-create-report">
+  <div class="content-create-report__header">
+    <h3 class="content-create-report__title">Reportar Publicación</h3>
+  </div>
+
+  <div class="content-create-report__body">
+
+    <form [formGroup]="createReportForm" autocomplete="off">
+      <div class="form-report-content">
+        <div class="form-input">
+          <mat-form-field class="worky-input worky-accent">
+            <mat-label>Motivo del reporte</mat-label>
+            <textarea id="detail_report" formControlName="detail_report" matInput></textarea>
+          </mat-form-field>
+
+
+          <div class="content-create-report__actions">
+            <worky-buttons
+              type="submit"
+              [workyButtonType]="WorkyButtonType.Flat"
+              [theme]="WorkyButtonTheme.Accent"
+              (click)="createReportForm.valid && createReport()"
+              [width]="'100%'">
+              <span basic-button-text>Enviar Reporte</span>
+            </worky-buttons>
+          </div>
+        </div>
+      </div>
+    </form>
+
+  </div>
+</div>

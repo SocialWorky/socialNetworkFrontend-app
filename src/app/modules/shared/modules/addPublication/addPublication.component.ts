@@ -14,7 +14,7 @@ import { Token } from '@shared/interfaces/token.interface';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { CreateComment } from '@shared/interfaces/addComment.interface';
-import { NotificationCommentService } from '@shared/services/notificationComment.service';
+import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
 import { LocationSearchComponent } from '../location-search/location-search.component';
 import { ExtraData } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { ImageUploadModalComponent } from '../image-upload-modal/image-upload-modal.component';
@@ -23,6 +23,9 @@ import { MediaFileUpload } from '@shared/interfaces/publicationView.interface';
 import { UserService } from '@shared/services/users.service';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { User } from '@shared/interfaces/user.interface';
+import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
+import { environment } from '@env/environment';
+import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
 
 @Component({
   selector: 'worky-add-publication',
@@ -58,7 +61,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   typePublishing = TypePublishing;
 
-  profileImageUrl: string | null = '';
+  profileImageUrl: null | string = null;
 
   public myForm: FormGroup = this._fb.group({
     content: ['', [Validators.required, Validators.minLength(1)]],
@@ -75,6 +78,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   private unsubscribe$ = new Subject<void>();
 
   private subscription: Subscription | undefined;
+
+  private mailSendNotification: MailSendValidateData = {} as MailSendValidateData;
 
   @Input() type: TypePublishing | undefined;
 
@@ -99,6 +104,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _fileUploadService: FileUploadService,
     private _userService: UserService,
     private _globalEventService: GlobalEventService,
+    private _emailNotificationService: EmailNotificationService,
   ) {
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
@@ -109,15 +115,24 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.postPrivacy(TypePrivacy.PUBLIC);
     this.getUser();
-    this.subscription = this._globalEventService.profileImage$.subscribe(async newImageUrl => {
+    this.subscription = this._globalEventService.profileImage$.pipe(
+      takeUntil(this.unsubscribe$)
+    ).subscribe(newImageUrl => {
+
       this.profileImageUrl = newImageUrl;
 
-      if(this.type === TypePublishing.POSTPROFILE) {
-        const publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.decodedToken.id);
-        this._publicationService.updatePublications(publicationsNew);
+      if (this.type === TypePublishing.POSTPROFILE) {
+        (async () => {
+          try {
+            const publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
+            this._publicationService.updatePublications(publicationsNew);
+          } catch (error) {
+            console.error('Error getting publications', error);
+          }
+        })();
       }
-
     });
+
   }
 
   ngOnDestroy(): void {
@@ -135,8 +150,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   async getUser() {
     await this._userService.getUserById(this.decodedToken.id).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: User) => {
-        this.user = response;
         this.profileImageUrl = response.avatar;
+        this.user = response;
         this._cdr.markForCheck();
       },
       error: (error) => {
@@ -222,6 +237,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
             publicationsNew[this.indexPublication!].comment.unshift(message.comment);
             this._publicationService.updatePublications(publicationsNew);
           }
+
+          this.sendEmailNotificationReaction(publicationsNew[this.indexPublication!], message.comment);
 
           if (message.message === 'Comment created successfully') {
             this.myForm.controls['content'].setValue('');
@@ -384,7 +401,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   openUploadModal() {
     const dialogRef = this._dialog.open(ImageUploadModalComponent, {
       data: {
-        maxFiles: this.type === TypePublishing.POST || this.typePublishing.POSTPROFILE ? 10 : 1,
+        maxFiles: this.type === TypePublishing.POST || this.type === TypePublishing.POSTPROFILE ? 10 : 1,
       }
     });
 
@@ -417,5 +434,23 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   removeFile(index: number) {
     this.selectedFiles.splice(index, 1);
     this.previews.splice(index, 1);
+  }
+
+  sendEmailNotificationReaction(publication: any, comment: any) {
+
+    if (this.userToken === publication.author._id) return;
+
+    this.mailSendNotification.url = `${environment.BASE_URL}/publication/${publication._id}`;
+    this.mailSendNotification.subject = 'Han comentado tu publicación';
+    this.mailSendNotification.title = 'Notificación de comentario en publicación';
+    this.mailSendNotification.greet = 'Hola';
+    this.mailSendNotification.message = 'El usuario ' + this.user.name + ' ' + this.user.lastName + ' ha comentado tu publicación';
+    this.mailSendNotification.subMessage = 'Su comentario fue: ' + comment.content;
+    this.mailSendNotification.buttonMessage = 'Ver publicación';
+    this.mailSendNotification.template = TemplateEmail.NOTIFICATION;
+    this.mailSendNotification.email = publication?.author.email;
+
+    this._emailNotificationService.sendNotification(this.mailSendNotification).pipe(takeUntil(this.unsubscribe$)).subscribe();
+
   }
 }

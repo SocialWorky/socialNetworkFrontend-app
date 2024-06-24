@@ -1,67 +1,48 @@
-.container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
-    .form-group {
-        margin-bottom: 20px;
+.content-edit-detail-profile {
+  display: flex;
+  width: 550px;
+  padding: 15px;
+  @include breakpoints.below-sm {
+    width: 100%;
+  }
+
+  .edit-profile-container {
+    width: 100%;
+    .form-detail-basic {
+      width: 100%;
+      display: block;
+      margin: 0 auto;
+      @include breakpoints.below-sm {
+        width: 95%;
+      }   
+      .form-input {
+        margin-top: 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+        
+      span {
+        @include Fonts.worky-text;
+        color: color.$worky-color-navy;
+      }
     }
 
-    label {
-        font-weight: bold;
-        margin-bottom: 5px;
-        display: block;
+    .whatsapp-content {
+      margin-bottom: 10px;
     }
 
-    .form-control {
-        border-radius: 4px;
-        border: 1px solid #ced4da;
-        padding: 10px;
-        font-size: 16px;
+   }
 
-        &[rows] {
-            resize: vertical;
-        }
-    }
+  }
 
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-        padding: 10px 20px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-
-        &:hover {
-            background-color: #0056b3;
-            border-color: #004085;
-        }
-    }
-
-    .alert-success {
-        font-size: 16px;
-        text-align: center;
-        border-radius: 4px;
-    }
-
-    .mt-3 {
-        margin-top: 1rem;
-    }
-
-    .mt-4 {
-        margin-top: 2rem;
-    }
-
-    h4 {
-        font-weight: bold;
-        margin-bottom: 15px;
-    }
-
-    p {
-        font-size: 16px;
-        margin-bottom: 10px;
-    }
-}
+.cdk-global-overlay-wrapper .cdk-overlay-pane {
+  @include breakpoints.below-sm {
+    max-width: 100% !important;
+    width: 95%;
+  }
+} 

@@ -33,6 +33,8 @@
 }
 
 .location-search-results {
+   max-height: 250px;
+   overflow-y: auto;
   .location-search-result {
     display: flex;
     padding: 10px;

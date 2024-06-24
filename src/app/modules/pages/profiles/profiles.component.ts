@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, Subscription, distinctUntilChanged, lastValueFrom, takeUntil } from 'rxjs';
@@ -6,7 +6,6 @@ import * as _ from 'lodash';
 
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
-import { EditInfoProfileComponent } from './components/edit-info-profile/edit-info-profile.component';
 import { UserService } from '@shared/services/users.service';
 import { ActivatedRoute } from '@angular/router';
 import { User } from '@shared/interfaces/user.interface';
@@ -14,7 +13,7 @@ import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/model
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationService } from '@shared/services/publication.service';
-import { NotificationCommentService } from '@shared/services/notificationComment.service';
+import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
 import { FriendsService } from '@shared/services/friends.service';
 import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
 import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';
@@ -22,9 +21,10 @@ import { FileUploadService } from '@shared/services/file-upload.service';
 import { environment } from '@env/environment';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { ProfileService } from './services/profile.service';
+import { ProfileNotificationService } from '@shared/services/notifications/profile-notification.service';
 
 @Component({
-  selector: 'app-profiles',
+  selector: 'worky-profiles',
   templateUrl: './profiles.component.html',
   styleUrls: ['./profiles.component.scss'],
 })
@@ -94,19 +94,20 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _friendsService: FriendsService,
     private _fileUploadService: FileUploadService,
     private _globalEventService: GlobalEventService,
-    private _profileService: ProfileService
-  ) {
-  }
+    private _profileService: ProfileService,
+    private _profileNotificationService: ProfileNotificationService,
+  ) {}
 
   async ngOnInit(): Promise<void> {
-
     this.idUserProfile = await this._activatedRoute.snapshot.paramMap.get('profileId') || '';
     this._cdr.markForCheck();
 
-    if (this.idUserProfile === '') { 
+    if (this.idUserProfile === '') {
       this.idUserProfile = await this._authService.getDecodedToken().id;
       this._cdr.markForCheck();
-    } 
+    }
+
+    this.getDataProfile();
 
     await this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe();
 
@@ -116,28 +117,31 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
     this.isCurrentUser = this.idUserProfile === this.decodedToken.id;
 
-    this.getDataProfile();
-
     this.loaderPublications = true;
 
     this._publicationService.publications$.pipe(
       distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
       takeUntil(this.destroy$)
     ).subscribe({
-      next: async (publicationsData: PublicationView[]) => {
+      next: async () => {
         this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
-       this._cdr.markForCheck();
+        this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error getting publications', error);
       }
     });
 
-    this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
+    this._profileNotificationService.profileUpdated$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.getDataProfile();
+      this._cdr.markForCheck();
+    });
+
+    // this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
 
     this.loaderPublications = false;
 
-    this._cdr.markForCheck();
+    this._cdr.detectChanges();
     this.subscribeToNotificationComment();
   }
 
@@ -149,22 +153,9 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  abrirFormulario(): void {
-    const dialogRef = this._dialog.open(EditInfoProfileComponent, {
-      width: '250px',
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result && result.actualizado) {
-        this.getDataProfile();
-        this._cdr.markForCheck();
-      }
-    });
-  }
-
   async getDataProfile(): Promise<void> {
 
-    this.profileSubscription = await this._userService.getUserById(this.idUserProfile).subscribe({
+    await this._userService.getUserById(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: User) => {
         this.userData = response;
         this._cdr.markForCheck();
@@ -173,11 +164,6 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         console.error(error);
       },
     });
-  }
-
-  cambiosGuardadosHandler(): void {
-    this.getDataProfile();
-    this._cdr.markForCheck();
   }
 
   async subscribeToNotificationComment() {
@@ -324,5 +310,9 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this.selectedFiles = [];
       this._cdr.markForCheck();
     }
+  }
+
+  openWhatsApp() {
+    window.open('https://wa.me/' + this.userData?.profile?.whatsapp?.number, '_blank');
   }
 }

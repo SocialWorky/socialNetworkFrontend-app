@@ -83,6 +83,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
         this.generateAvatar();
       }
       if(this.userAvatar) this.imageData = this.userAvatar;
+      this._cdr.markForCheck();
 
     }
     if (this.name && !this.img) {
