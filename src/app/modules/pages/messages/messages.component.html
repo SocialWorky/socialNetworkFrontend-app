@@ -1,0 +1,19 @@
+<div class="container">
+    <div class="content-left-messages">
+        <div class="avatar-info">
+            <worky-avatar [size]="60" class="profile-img"></worky-avatar>
+            <span class="name">{{ userName }}</span>
+            <div class="toggle" (click)="toggleActive()" [ngClass]="{ 'active': isActive, 'inactive': !isActive }">
+                <i class="material-icons">{{ isActive ? 'toggle_on' : 'toggle_off' }}</i>
+                <span class="text">{{ isActive ? 'Active' : 'Inactive' }}</span>
+            </div>
+        </div>
+        <worky-message-side-left></worky-message-side-left>
+    </div>
+
+
+    <div class="content-right-message">
+        <worky-message-side-rigth></worky-message-side-rigth>
+    </div>
+
+</div>

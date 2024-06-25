@@ -1,0 +1,49 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-list {
+    padding-top: 30px;
+
+    .tittle{       
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .users{
+        display: flex;
+        flex-direction: column;
+        overflow-y: hidden;
+        margin: 1rem -0.5rem 0 -0.5rem;
+        max-height: 480px;
+
+        &:hover {
+            overflow-y: auto; 
+        }
+    
+        scrollbar-width: thin;
+    
+        scrollbar-color: #ffffff #f0f0f0;
+    }
+
+    .button{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        border-radius: 0.75rem;
+        padding: 0.5rem;
+        transition: background-color 0.3s;
+    }
+
+    .button:hover {
+        background-color: var(--worky-color-greyLight); 
+    }
+
+    .user-name{
+        margin-left: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: lowercase;
+    }
+
+}

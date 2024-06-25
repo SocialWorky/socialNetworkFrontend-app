@@ -1,0 +1,78 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-right-message{
+    display: flex;
+    flex-direction: column;
+    border-radius: 0.5rem;
+    background: var(--worky-color-greyLight);
+    border: 1px solid var(--worky-color-light);
+    height: 100%;
+    padding: 1rem;
+
+    .content-section-wall{      
+        height: 100%;
+        overflow-y: hidden;
+        margin-bottom: 1rem;
+
+        &:hover {
+            overflow-y: auto; 
+        }
+    
+        scrollbar-width: thin;
+    
+        scrollbar-color: #ffffff #f0f0f0;
+    }
+
+    .grid-container{
+        display: grid;
+
+        .responsive-item-issuing{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            grid-column: 1 / 8;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+
+            .issuing-user{
+                position: relative;
+                margin-left: 0.75rem;
+                background-color: var(--worky-color-light);
+                padding-top: 0.5rem;
+                padding-bottom: 0.5rem;
+                padding-left: 1rem;
+                padding-right: 1rem;
+                box-shadow: 0 0 0 1px #0000000d;
+                border-radius: 0.75rem;
+            }
+        }
+
+        .responsive-item-receiving{
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            flex-direction: row-reverse;
+            grid-column-start: 6;
+            grid-column-end: 13;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+
+            .receiving-user{
+                position: relative;
+                margin-right: 0.75rem;
+                font-size: 0.875rem;
+                line-height: 1.25rem;
+                background-color: var(--worky-color-indigo);
+                color: var(--worky-color-light);
+                padding-top: 0.5rem;
+                padding-bottom: 0.5rem;
+                padding-left: 1rem;
+                padding-right: 1rem;
+                box-shadow: 0 0 0 1px #0000000d;
+                border-radius: 0.75rem;
+            }
+        }
+    }
+}

@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { ProfilesComponent } from './profiles/profiles.component';
 import { LoyautComponent } from './templates/loyaut/loyaut.component';
+import { MessagesComponent } from './messages/messages.component';
 
 const routes: Routes = [
   {
@@ -13,6 +14,8 @@ const routes: Routes = [
       { path: 'publication/:_idPublication', component: HomeComponent, pathMatch: 'full'},
       { path: 'profile', component: ProfilesComponent, pathMatch: 'full' },
       { path: 'profile/:profileId', component: ProfilesComponent, pathMatch: 'full' },
+      { path: 'messages', component: MessagesComponent, pathMatch: 'full' },
+      { path: 'messages/:messagesId', component: MessagesComponent, pathMatch: 'full' },
       { path: '**', redirectTo: '', pathMatch: 'full' }
     ],
   },
