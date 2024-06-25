@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
+import { MessageService } from '../../services/message.service';
 
 @Component({
   selector: 'worky-message-side-rigth',
@@ -13,7 +14,7 @@ export class MessageSideRigthComponent  implements OnInit {
   
   WorkyButtonTheme = WorkyButtonTheme;
 
-  constructor() { }
+  constructor(private _messageService: MessageService) { }
 
   ngOnInit() {}
 
