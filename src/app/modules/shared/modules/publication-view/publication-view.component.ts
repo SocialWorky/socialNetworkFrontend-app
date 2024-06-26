@@ -20,7 +20,6 @@ import { ReportCreate } from '@shared/interfaces/report.interface';
 import { ReportType, ReportStatus } from '@shared/enums/report.enum';
 import { ReportResponseComponent } from '../publication-view/report-response/report-response.component';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
-import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
 
 @Component({
   selector: 'worky-publication-view',
@@ -63,8 +62,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   isProfile: boolean = false;
 
   dataUser = this._authService.getDecodedToken();
-
-  private mailSendDataValidate: MailSendValidateData = {} as MailSendValidateData;
 
   private destroy$ = new Subject<void>();
 
@@ -201,9 +198,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     }
   }
 
-  async followMyFriend(_id: string) {
-    await this._friendsService.requestFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
+  async followMyFriend(_idUser: string) {
+    await this._friendsService.requestFriend(_idUser).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
+       this._emailNotificationService.sendFriendRequestNotification(_idUser);
        this.refreshPublications();
       },
       error: (error) => {
@@ -233,10 +231,11 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     });
   }
 
-  acceptFriendship(_id: string) {
+  acceptFriendship(_id: string, idUser: string) {
     this._friendsService.acceptFriendship(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.getUserFriendPending();
+        this._emailNotificationService.acceptFriendRequestNotification(idUser);
         this.refreshPublications();
       }
     });
@@ -251,11 +250,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.userProfile);
       this._publicationService.updatePublications(refreshPublications);
       this._cdr.markForCheck();
-
     } else {
       const refreshPublications = await this._publicationService.getAllPublications(1, 10);
-      this._publicationService.updatePublications(refreshPublications);
       this._cdr.markForCheck();
+      this._publicationService.updatePublications(refreshPublications);
     }
   }
 
@@ -284,7 +282,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           await this._reportsService.createReport(report).pipe(takeUntil(this.destroy$)).subscribe({
             next: (data) => {
               loadingCreateReport.dismiss();
-              this.sendEmailNotificationReport(publication, result);
+              this._emailNotificationService.sendEmailNotificationReport(publication, result);
               this._cdr.markForCheck();
             },
             error: (error) => {
@@ -296,28 +294,4 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         }
       });
   }
-
-  sendEmailNotificationReport(publication: PublicationView, reportMessage: string) {
-
-    this.mailSendDataValidate.url = `${environment.BASE_URL}/publication/${publication._id}`;
-    this.mailSendDataValidate.subject = 'Reporte de publicación';
-    this.mailSendDataValidate.title = 'Reporte de publicación';
-    this.mailSendDataValidate.greet = 'Hola';
-    this.mailSendDataValidate.message = 'Tu reporte ha sido enviado con éxito, pronto revisaremos tu solicitud.';
-    this.mailSendDataValidate.subMessage = 'Tu mensaje: ' + reportMessage;
-    this.mailSendDataValidate.buttonMessage = 'Ver publicación Reportada';
-    this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
-    this.mailSendDataValidate.email = this.dataUser.email;
-
-    this._emailNotificationService.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (data) => {
-        console.log(data);
-      },
-      error: (error) => {
-        console.error('Error sending email:', error);
-      }
-    });
-
-  }
-
 }

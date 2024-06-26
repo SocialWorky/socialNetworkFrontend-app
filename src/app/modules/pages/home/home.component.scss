@@ -1,4 +1,10 @@
 .content-publications {
   height: 92vh;
   overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none; 
+}
+
+.content-publications::-webkit-scrollbar {
+  display: none;
 }

@@ -173,15 +173,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private updatePublications(publicationsData: PublicationView[]) {
-    const uniquePublications = publicationsData.filter(newPub => 
-      !this.publications.some(pub => pub._id === newPub._id)
-    );
-
-    if (this.page === 1) {
-      this.publications = uniquePublications;
-    } else {
-      this.publications = [...this.publications, ...uniquePublications];
-    }
+    publicationsData.forEach(newPub => {
+        const index = this.publications.findIndex(pub => pub._id === newPub._id);
+        if (index !== -1) {
+            this.publications[index] = newPub;
+        } else {
+            this.publications.push(newPub);
+        }
+    });
     this._cdr.markForCheck();
   }
+
 }

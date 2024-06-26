@@ -83,6 +83,27 @@ export const translations = {
   'email.confirmResetPasswordMessage': 'Tu contraseña ha sido restablecida correctamente',
   'email.confirmResetPasswordSubMessage': 'Si no has sido tú, por favor, ponte en contacto con nosotros.',
   'email.confirmResetPasswordButtonMessage': 'Iniciar sesión',
+  // -> NOTIFICATION SEND REPORT PUBLICATION
+  'email.sendReportPublicationSubject': 'Reporte de publicación',
+  'email.sendReportPublicationTitle': 'Has reportado una publicación',
+  'email.sendReportPublicationGreet': 'Hola',
+  'email.sendReportPublicationMessage': 'Has reportado una publicación. ¿Por qué motivo?, pronto revisaremos tu reporte.',
+  'email.sendReportPublicationSubMessage': 'Motivo: ',
+  'email.sendReportPublicationButtonMessage': 'Ver publicación',
+  // -> NOTIFICATION SEND FRIEND REQUEST EMAIL
+  'email.sendFriendRequestSubject': 'Solicitud de amistad',
+  'email.sendFriendRequestTitle': 'Te han enviado una solicitud de amistad',
+  'email.sendFriendRequestGreet': 'Hola',
+  'email.sendFriendRequestMessage': 'Has recibido una solicitud de amistad de amistad. ¿Aceptas?',
+  'email.sendFriendRequestSubMessage': 'Solicitud de amistad de: ',
+  'email.sendFriendRequestButtonMessage': 'Ver perfil de: ',
+  // -> NOTIFICATION ACCEPT FRIEND REQUEST EMAIL
+  'email.acceptFriendRequestSubject': 'Solicitud de amistad aceptada',
+  'email.acceptFriendRequestTitle': 'Han aceptado tu solicitud de amistad',
+  'email.acceptFriendRequestGreet': 'Hola',
+  'email.acceptFriendRequestMessage': 'Han aceptado tu solicitud de amistad. Ahora son amigos.',
+  'email.acceptFriendRequestSubMessage': 'Solicitud de amistad aceptada de: ',
+  'email.acceptFriendRequestButtonMessage': 'Ver perfil de: ',
   // REGISTER COMPONENT
   'register.title': 'Registro',
   'register.subTitle': 'Complete el formulario de registro',

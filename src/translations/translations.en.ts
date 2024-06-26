@@ -83,6 +83,27 @@ export const translations = {
   'email.confirmResetPasswordMessage': 'Your password has been reset successfully',
   'email.confirmResetPasswordSubMessage': 'If it was not you, please contact us.',
   'email.confirmResetPasswordButtonMessage': 'Log in',
+  // -> NOTIFICATION SEND REPORT PUBLICATION
+  'email.sendReportPublicationSubject': 'Publication report',
+  'email.sendReportPublicationTitle': 'You have reported a publication',
+  'email.sendReportPublicationGreet': 'Hello',
+  'email.sendReportPublicationMessage': 'You have reported a publication. Why?, we will review your report soon.',
+  'email.sendReportPublicationSubMessage': 'Reason: ',
+  'email.sendReportPublicationButtonMessage': 'View publication',
+  // -> NOTIFICATION SEND FRIEND REQUEST EMAIL
+  'email.sendFriendRequestSubject': 'Friend request',
+  'email.sendFriendRequestTitle': 'You have received a friend request',
+  'email.sendFriendRequestGreet': 'Hello',
+  'email.sendFriendRequestMessage': 'You have received a friend request. Do you accept?',
+  'email.sendFriendRequestSubMessage': 'Friend request from: ',
+  'email.sendFriendRequestButtonMessage': 'View profile of: ',
+  // -> NOTIFICATION ACCEPT FRIEND REQUEST EMAIL
+  'email.acceptFriendRequestSubject': 'Friend request accepted',
+  'email.acceptFriendRequestTitle': 'Friend request accepted',
+  'email.acceptFriendRequestGreet': 'Hello',
+  'email.acceptFriendRequestMessage': 'You have accepted a friend request. Now you are friends.',
+  'email.acceptFriendRequestSubMessage': 'Friend request accepted from: ',
+  'email.acceptFriendRequestButtonMessage': 'View profile of: ',
   // REGISTER COMPONENT
   'register.title': 'Register',
   'register.subTitle': 'Fill out the registration form',

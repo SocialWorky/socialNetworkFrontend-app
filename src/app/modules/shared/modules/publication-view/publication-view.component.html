@@ -57,7 +57,7 @@
                 </a>
 
                 <a *ngIf="userReceive?._id === dataUser.id" class="follow-my-friend" 
-                  (click)="acceptFriendship(publication.isFriendshipPending!)">
+                  (click)="acceptFriendship(publication.isFriendshipPending!, publication.author._id)">
                   Aceptar Amistad
                 </a>
 

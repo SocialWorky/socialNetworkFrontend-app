@@ -22,6 +22,7 @@ import { environment } from '@env/environment';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { ProfileService } from './services/profile.service';
 import { ProfileNotificationService } from '@shared/services/notifications/profile-notification.service';
+import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 
 @Component({
   selector: 'worky-profiles',
@@ -58,6 +59,8 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   isAuthenticated: boolean = false;
 
   isCurrentUser: boolean = false;
+
+  dataUser = this._authService.getDecodedToken();
 
   isFriend: boolean = false;
 
@@ -96,6 +99,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _globalEventService: GlobalEventService,
     private _profileService: ProfileService,
     private _profileNotificationService: ProfileNotificationService,
+    private _emailNotificationService: EmailNotificationService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -136,8 +140,6 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this.getDataProfile();
       this._cdr.markForCheck();
     });
-
-    // this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
 
     this.loaderPublications = false;
 
@@ -218,6 +220,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
         this._publicationService.updatePublications(refreshPublications);
         this.getUserFriendPending();
+        this._emailNotificationService.sendFriendRequestNotification(_id);
         this._cdr.markForCheck();
       },
       error: (error) => {
@@ -244,6 +247,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this.getUserFriendPending();
         const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
         this._publicationService.updatePublications(refreshPublications);
+        this._emailNotificationService.acceptFriendRequestNotification(this.idUserProfile);
         this._cdr.markForCheck();
       }
     });
