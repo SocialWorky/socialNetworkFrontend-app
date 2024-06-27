@@ -58,10 +58,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.loaderPublications = true;
-
     this.paramPublication = await this.getParamsPublication();
     if (this.paramPublication) return;
+    
+    await this.loadPublications();
 
     this._publicationService.publications$.pipe(
       distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
@@ -75,16 +75,12 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
     });
 
-    await this.loadPublications();
-
-    this.loaderPublications = false;
     this._cdr.markForCheck();
     this.subscribeToNotificationComment();
   }
 
   async loadPublications() {
     if (this.loaderPublications) return;
-    this.page = this.page + 1;
     this.loaderPublications = true;
     try {
       const newPublications = await this._publicationService.getAllPublications(this.page, this.pageSize);
@@ -94,11 +90,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
       if (uniqueNewPublications.length > 0) {
         this.publications = [...this.publications, ...uniqueNewPublications];
-        this.page++;
-        console.log('publications', this.publications);
-        console.log('page', this.page);
-        console.log('pageSize', this.pageSize);
       }
+        this.page++;
     } catch (error) {
       console.error('Error loading publications', error);
     }

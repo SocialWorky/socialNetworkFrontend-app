@@ -202,7 +202,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     await this._friendsService.requestFriend(_idUser).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
        this._emailNotificationService.sendFriendRequestNotification(_idUser);
-       this.refreshPublications();
+       this.viewProfile(_idUser);
       },
       error: (error) => {
         console.error('Error the send request', error);
@@ -210,10 +210,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     });
   }
 
-  cancelFriendship(_id: string) {
+  cancelFriendship(_id: string, authorId: string) {
     this._friendsService.deleteFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
-        this.refreshPublications();
+        this.viewProfile(authorId);
       }
     });
   }
@@ -236,7 +236,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       next: () => {
         this.getUserFriendPending();
         this._emailNotificationService.acceptFriendRequestNotification(idUser);
-        this.refreshPublications();
+        this.viewProfile(idUser);
       }
     });
   }

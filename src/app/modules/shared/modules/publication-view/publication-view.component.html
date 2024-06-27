@@ -1,4 +1,4 @@
-<div class="content-publication-view" *ngIf="publication">
+<div [id]="publication._id" class="content-publication-view" *ngIf="publication">
 
   <div class="publication-header-actions">
 
@@ -52,7 +52,7 @@
                 </a>
 
                 <a *ngIf="!publication.isMyFriend && userRequest?._id === dataUser.id" class="follow-my-friend" 
-                  (click)="cancelFriendship(publication.isFriendshipPending!)">
+                  (click)="cancelFriendship(publication.isFriendshipPending!, publication.author._id)">
                   {{ 'publicationsView.cancelRequest' | workyTranslations }}
                 </a>
 
