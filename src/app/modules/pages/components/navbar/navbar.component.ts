@@ -7,6 +7,8 @@ import { DeviceDetectionService } from '@shared/services/DeviceDetection.service
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { UserService } from '@shared/services/users.service';
+import { SocketService } from '@shared/services/socket.service';
+import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 
 @Component({
   selector: 'worky-navbar',
@@ -37,8 +39,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private _cdr: ChangeDetectorRef,
     private _authService: AuthService,
     private _userService: UserService,
+    private _socketService: SocketService,
+    private _notificationUsersService: NotificationUsersService,
   ) {
     this.menuProfile();
+    const token = this._authService.getDecodedToken();
+    this._socketService.connectToWebSocket(token);
   }
 
   ngOnInit() {
@@ -59,6 +65,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   logoutUser() {
+   this._notificationUsersService.logoutUser();
    this._authService.logout();
   }
 

@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject, firstValueFrom, lastValueFrom } from 'rxjs';
+import { Subject, Subscription, firstValueFrom, lastValueFrom } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { Meta } from '@angular/platform-browser';
@@ -17,6 +17,7 @@ import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.servi
 import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from '@env/environment';
+import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 
 @Component({
   selector: 'worky-home',
@@ -53,15 +54,33 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _geocodingService: GeocodingService,
     private _activatedRoute: ActivatedRoute,
     private _meta: Meta,
+    private _notificationUsersService: NotificationUsersService,
   ) {
     this.getLocationUser();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   async ngOnInit() {
     this.paramPublication = await this.getParamsPublication();
     if (this.paramPublication) return;
-    
+
     await this.loadPublications();
+
+    this._notificationUsersService.userStatuses$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (userStatuses: any) => {
+        console.log('User statuses:', userStatuses[0]);
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error getting user statuses', error);
+      }
+    })
 
     this._publicationService.publications$.pipe(
       distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
@@ -91,7 +110,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (uniqueNewPublications.length > 0) {
         this.publications = [...this.publications, ...uniqueNewPublications];
       }
-        this.page++;
+      this.page++;
     } catch (error) {
       console.error('Error loading publications', error);
     }
@@ -117,11 +136,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       const newCommentInPublications = await this._publicationService.getAllPublications(this.page, this.pageSize);
       this._publicationService.updatePublications(newCommentInPublications);
     });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   private async getParamsPublication(): Promise<boolean> {
@@ -167,14 +181,13 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private updatePublications(publicationsData: PublicationView[]) {
     publicationsData.forEach(newPub => {
-        const index = this.publications.findIndex(pub => pub._id === newPub._id);
-        if (index !== -1) {
-            this.publications[index] = newPub;
-        } else {
-            this.publications.push(newPub);
-        }
+      const index = this.publications.findIndex(pub => pub._id === newPub._id);
+      if (index !== -1) {
+        this.publications[index] = newPub;
+      } else {
+        this.publications.push(newPub);
+      }
     });
     this._cdr.markForCheck();
   }
-
 }
