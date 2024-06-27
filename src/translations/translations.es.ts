@@ -94,7 +94,7 @@ export const translations = {
   'email.sendFriendRequestSubject': 'Solicitud de amistad',
   'email.sendFriendRequestTitle': 'Te han enviado una solicitud de amistad',
   'email.sendFriendRequestGreet': 'Hola',
-  'email.sendFriendRequestMessage': 'Has recibido una solicitud de amistad de amistad. ¿Aceptas?',
+  'email.sendFriendRequestMessage': 'Has recibido una solicitud de amistad. ¿Aceptas?',
   'email.sendFriendRequestSubMessage': 'Solicitud de amistad de: ',
   'email.sendFriendRequestButtonMessage': 'Ver perfil de: ',
   // -> NOTIFICATION ACCEPT FRIEND REQUEST EMAIL

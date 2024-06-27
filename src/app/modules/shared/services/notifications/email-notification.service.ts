@@ -90,7 +90,7 @@ export class EmailNotificationService {
 
   async sendFriendRequestNotification(_idUser: string) {
     await this.userById(_idUser).then((user) => {
-      this.mailSendDataValidate.url = `${environment.BASE_URL}/profile/${user._id}`;
+      this.mailSendDataValidate.url = `${environment.BASE_URL}/profile/${this.dataUser.id}`;
       this.mailSendDataValidate.subject = translations['email.sendFriendRequestSubject'];
       this.mailSendDataValidate.title = translations['email.sendFriendRequestTitle'];
       this.mailSendDataValidate.greet = translations['email.sendFriendRequestGreet'];

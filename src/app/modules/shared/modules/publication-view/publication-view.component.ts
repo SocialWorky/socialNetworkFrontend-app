@@ -255,6 +255,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       this._cdr.markForCheck();
       this._publicationService.updatePublications(refreshPublications);
     }
+    this._cdr.markForCheck();
   }
 
   createReport(publication: PublicationView) {
