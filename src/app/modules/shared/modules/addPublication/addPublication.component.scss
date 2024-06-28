@@ -215,5 +215,8 @@
   .publishing-footer {
     display: flex;
     justify-content: flex-end;
+    worky-buttons .worky-button {
+      height: 40px;
+    }
   }
 }

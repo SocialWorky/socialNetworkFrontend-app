@@ -1,6 +1,6 @@
-<div class="reaction-container" (mouseleave)="hideReactions()">
+<div class="reaction-container no-select-text" (mouseleave)="hideReactions()">
 
-  <div class="content-text-reaction"
+  <div class="content-text-reaction no-select-text"
        (mouseenter)="showReactions()"
        (touchstart)="onTouchStart()"
        (touchend)="onTouchEnd()"
@@ -10,7 +10,7 @@
   </div>
 
   <div *ngIf="reactionUserInPublication"
-       class="selected-reaction" 
+       class="selected-reaction no-select-text" 
        (mouseenter)="showReactions()"
        (click)="deleteReaction(reactionUserInPublication._id)"
        (touchstart)="onTouchStart()"

@@ -292,5 +292,11 @@ body {
     max-width: 100% !important;
     width: 95%;
   }
-} 
+}
+
+.no-select-text {
+  user-select: none; 
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
 
