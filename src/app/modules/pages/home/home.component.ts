@@ -69,7 +69,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     await this.loadPublications();
 
     this._publicationService.publications$.pipe(
-      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+      // distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
       takeUntil(this.destroy$)
     ).subscribe({
       next: async (publicationsData: PublicationView[]) => {
@@ -169,11 +169,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     publicationsData.forEach(newPub => {
       const index = this.publications.findIndex(pub => pub._id === newPub._id);
       if (index !== -1) {
-        this.publications[index] = newPub;
+        // Verificar si la publicación ha cambiado
+        if (JSON.stringify(this.publications[index]) !== JSON.stringify(newPub)) {
+          this.publications[index] = newPub;
+          this._cdr.markForCheck();
+        }
       } else {
         this.publications.push(newPub);
+        this._cdr.markForCheck();
       }
     });
     this._cdr.markForCheck();
   }
+
 }

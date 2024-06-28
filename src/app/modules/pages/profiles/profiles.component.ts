@@ -141,6 +141,8 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this._cdr.markForCheck();
     });
 
+    this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
+
     this.loaderPublications = false;
 
     this._cdr.detectChanges();

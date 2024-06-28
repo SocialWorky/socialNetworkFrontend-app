@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 
 import { translations } from '@translations/translations'
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
@@ -9,6 +9,8 @@ import { AuthService } from '@auth/services/auth.service';
 import { UserService } from '@shared/services/users.service';
 import { SocketService } from '@shared/services/socket.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
+import { NotificationService } from '@shared/services/notifications/notification.service';
+import { NotificationCenterService } from '@shared/services/notificationCenter.service';
 
 @Component({
   selector: 'worky-navbar',
@@ -16,6 +18,7 @@ import { NotificationUsersService } from '@shared/services/notifications/notific
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent implements OnInit, OnDestroy {
+  private unsubscribe$ = new Subject<void>();
 
   googleLoginSession = localStorage.getItem('googleLogin');
 
@@ -33,6 +36,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   users: any[] = [];
 
+  token = this._authService.getDecodedToken();
+
   constructor(
     private _router: Router,
     private _deviceDetectionService: DeviceDetectionService,
@@ -41,27 +46,36 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private _userService: UserService,
     private _socketService: SocketService,
     private _notificationUsersService: NotificationUsersService,
+    private _notificationService: NotificationService,
+    private _notificationCenterService: NotificationCenterService,
   ) {
     this.menuProfile();
-    const token = this._authService.getDecodedToken();
-    this._socketService.connectToWebSocket(token);
+    this.token = this._authService.getDecodedToken();
+    this._socketService.connectToWebSocket(this.token);
   }
 
   ngOnInit() {
     this.isMobile = this._deviceDetectionService.isMobile();
-    this.resizeSubscription = this._deviceDetectionService.getResizeEvent().subscribe(() => {
+    this._deviceDetectionService.getResizeEvent().pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
       this.isMobile = this._deviceDetectionService.isMobile();
       this._cdr.markForCheck();
     });
-    this.notifications = 0;
-    this.messages = 0;
+    this._notificationService.notification$.pipe(takeUntil(this.unsubscribe$)).subscribe({
+      next: () => {
+        this.getNotification();
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error getting notifications', error);
+      }
+    });
     this.checkAdminDataLink();
+    this._cdr.markForCheck();
   }
 
   ngOnDestroy() {
-    if (this.resizeSubscription) {
-      this.resizeSubscription.unsubscribe();
-    }
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   logoutUser() {
@@ -80,7 +94,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   search(event: Event) {
     if (this.searchTerm.trim().length >= 3) {
-      this._userService.getUserByName(this.searchTerm).subscribe((data: any) => {
+      this._userService.getUserByName(this.searchTerm).pipe(takeUntil(this.unsubscribe$)).subscribe((data: any) => {
         this.users = data;
       });
     } else {
@@ -127,6 +141,20 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this._router.navigate(['/profile', _id]);
     this.users = [];
     this.searchTerm = '';
+  }
+
+  async getNotification() {
+    const userId = await this._authService.getDecodedToken().id;
+    await this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
+      next: (data: any) => {
+        this.notifications = data.filter((notification: any) => !notification.read).length;
+        this.messages = data.filter((notification: any) => notification.type === 'message' && !notification.read).length;
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error getting notifications', error);
+      }
+    });
   }
 
 }

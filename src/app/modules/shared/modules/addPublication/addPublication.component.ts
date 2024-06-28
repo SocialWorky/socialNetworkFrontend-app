@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
-import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
+import { Observable, Subject, Subscription, lastValueFrom, of, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
@@ -19,13 +19,14 @@ import { LocationSearchComponent } from '../location-search/location-search.comp
 import { ExtraData } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { ImageUploadModalComponent } from '../image-upload-modal/image-upload-modal.component';
 import { FileUploadService } from '@shared/services/file-upload.service';
-import { MediaFileUpload } from '@shared/interfaces/publicationView.interface';
+import { MediaFileUpload, PublicationView } from '@shared/interfaces/publicationView.interface';
 import { UserService } from '@shared/services/users.service';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { User } from '@shared/interfaces/user.interface';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { environment } from '@env/environment';
 import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
+import { NotificationCenterService } from '@shared/services/notificationCenter.service';
 
 @Component({
   selector: 'worky-add-publication',
@@ -105,6 +106,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _userService: UserService,
     private _globalEventService: GlobalEventService,
     private _emailNotificationService: EmailNotificationService,
+    private _notificationCenterService: NotificationCenterService,
   ) {
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
@@ -226,19 +228,54 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
             this._cdr.markForCheck();
           }
 
-          let publicationsNew = [];
+          // let publicationsNew: PublicationView[] = [];
 
-          if(this.type === TypePublishing.POSTPROFILE){
-            publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
-            publicationsNew[this.indexPublication!].comment.unshift(message.comment);
-            this._publicationService.updatePublications(publicationsNew);
-          } else {
-            publicationsNew = await this._publicationService.getAllPublications(1, 10);
-            publicationsNew[this.indexPublication!].comment.unshift(message.comment);
-            this._publicationService.updatePublications(publicationsNew);
-          }
+          // if(this.type === TypePublishing.POSTPROFILE){
+          //   publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
+          //   publicationsNew[this.indexPublication!].comment.unshift(message.comment);
+          //   this._publicationService.updatePublications(publicationsNew);
+          // } else {
 
-          this.sendEmailNotificationReaction(publicationsNew[this.indexPublication!], message.comment);
+          await this._publicationService.getPublicationId(idPublication).pipe(takeUntil(this.unsubscribe$)).subscribe({
+            next: (publication: PublicationView[]) => {
+              this._publicationService.updatePublications(publication);
+              this.sendEmailNotificationReaction(publication[0], message.comment);
+
+              if (this.userToken === publication[0].author._id) return;
+
+              const dataNotification = {
+                comment: message.comment.content,
+                postId: idPublication,
+                userIdComment: this.decodedToken.id,
+                avatarComment: this.decodedToken.avatar,
+                nameComment: this.decodedToken.name,
+                userIdReceiver: publication[0].author._id,
+                avatarReceiver: publication[0].author.avatar,
+                nameReceiver: publication[0].author.name + ' ' + publication[0].author.lastName,
+              };
+
+              this._notificationCenterService.createNotification({
+                userId: publication[0].author._id,
+                type: 'comment',
+                content: 'Han comentado tu publicación',
+                link: `/publication/${idPublication}`,
+                additionalData: JSON.stringify(dataNotification),
+              }).subscribe();
+              this._notificationCommentService.sendNotificationComment(dataNotification);
+
+
+            },
+            error: (error) => {
+              console.error(error);
+            }
+          });
+            //console.log('publicationsNew', publicationsNew);
+            //publicationsNew = await this._publicationService.getAllPublications(1, 10);
+            //publicationsNew[this.indexPublication!].comment.unshift(message.comment);
+            //this._publicationService.updatePublications(publicationsNew);
+
+              
+          //}
 
           if (message.message === 'Comment created successfully') {
             this.myForm.controls['content'].setValue('');
@@ -252,12 +289,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
               true,
               translations['button.ok'],
             );
-            this._notificationCommentService.sendNotificationComment({
-              commentId: message.comment._id,
-              idPublication: idPublication,
-              userEmittedId: this.decodedToken.id,
-              authorPublicationId: publicationsNew[this.indexPublication!].author._id,
-            });
           }
         } catch (error) {
           console.error(error);

@@ -69,4 +69,9 @@ export class PublicationService {
   updatePublications(newPublications: PublicationView[]): void {
     this.publicationsSubject.next(newPublications);
   }
+
+  getPublications(): PublicationView[] {
+    return this.publicationsSubject.getValue();
+  }
+
 }

@@ -57,9 +57,13 @@ export class AuthService {
     }
   }
 
-  getDecodedToken(): Token  {
+  getDecodedToken(): Token {
     const token = localStorage.getItem('token');
-    return jwtDecode(token!);
+    if (token) {
+      return jwtDecode(token);
+    } else {
+      throw new Error('Token not found.');
+    }
   }
 
   getUseFromToken(token: string): Token {
