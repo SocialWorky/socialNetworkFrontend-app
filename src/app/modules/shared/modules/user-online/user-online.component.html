@@ -1,4 +1,4 @@
-<div *ngIf="usersOnline.length > 1" class="worky-module-container container-online">
+<div class="worky-module-container container-online">
   <div class="worky-module-header">
       <div class="worky-module-title">Usuarios Online</div>
   </div>
@@ -13,6 +13,14 @@
           class="worky-user-avatar">
         </worky-avatar>
       </div>
+
+      <div class="offline-user-content" *ngIf="usersOnline?.length === 1">
+        <div class="worky-user-avatar">
+          <img src="assets/img/shared/user-icon-on.webp" alt="No hay usuarios online">
+          <span class="worky-user-name">No hay usuarios online</span>
+        </div>
+      </div>
+
   </div>
 
 </div>

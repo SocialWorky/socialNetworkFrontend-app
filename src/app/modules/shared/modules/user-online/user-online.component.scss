@@ -20,6 +20,19 @@
     .worky-user {
       cursor: pointer;
     }
+    .offline-user-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: colors.$worky-color-navy;
+      .worky-user-avatar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+    }
   }
 
 }

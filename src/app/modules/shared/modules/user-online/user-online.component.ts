@@ -14,7 +14,7 @@ import { AuthService } from '@auth/services/auth.service';
 export class UserOnlineComponent  implements OnInit, OnDestroy {
   private _destroy$ = new Subject<void>();
 
-  usersOnline: Token[] = [];
+  usersOnline: Token[] | undefined;
 
   currenUser = this._authService.getDecodedToken();
 
@@ -23,7 +23,7 @@ export class UserOnlineComponent  implements OnInit, OnDestroy {
     private _notificationUsersService: NotificationUsersService,
     private _router: Router,
     private _authService: AuthService
-  ) { }
+  ) {}
 
   ngOnInit() {
     this._notificationUsersService.userStatuses$.pipe(
