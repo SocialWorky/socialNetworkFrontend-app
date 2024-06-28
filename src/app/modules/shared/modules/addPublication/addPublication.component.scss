@@ -16,7 +16,7 @@
     .user-name-content {
       .content-name-geo {
         display: flex;
-        align-items: center;
+        flex-direction: column;
         gap: 5px;
 
         .name {

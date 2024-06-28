@@ -34,7 +34,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   @Input() name?: string;
 
-  @Input() img?: string;
+  @Input() img?: string | null | undefined;
 
   @Input()
   set size(value: number) {
@@ -77,6 +77,8 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   loadImageUser() {
 
+    if(this.img === 'null') this.img = null;
+
     if(!this.name && !this.img) {
 
       if (this.username && !this.userAvatar) {
@@ -84,7 +86,6 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
       }
       if(this.userAvatar) this.imageData = this.userAvatar;
       this._cdr.markForCheck();
-
     }
     if (this.name && !this.img) {
       this.username = this.name;
@@ -93,7 +94,6 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
     if (this.img) {
       this.imageData = this.img;
     }
-
   }
 
   generateAvatar() {

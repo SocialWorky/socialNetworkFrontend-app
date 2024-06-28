@@ -17,7 +17,6 @@ import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.servi
 import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from '@env/environment';
-import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 
 @Component({
   selector: 'worky-home',
@@ -54,7 +53,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _geocodingService: GeocodingService,
     private _activatedRoute: ActivatedRoute,
     private _meta: Meta,
-    private _notificationUsersService: NotificationUsersService,
   ) {
     this.getLocationUser();
   }
@@ -69,18 +67,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.paramPublication) return;
 
     await this.loadPublications();
-
-    this._notificationUsersService.userStatuses$.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (userStatuses: any) => {
-        console.log('User statuses:', userStatuses[0]);
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Error getting user statuses', error);
-      }
-    })
 
     this._publicationService.publications$.pipe(
       distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),

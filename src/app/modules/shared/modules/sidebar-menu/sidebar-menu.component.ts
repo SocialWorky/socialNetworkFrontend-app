@@ -3,11 +3,11 @@ import { Component } from '@angular/core';
 import { AuthService } from '@auth/services/auth.service';
 
 @Component({
-  selector: 'side-left',
-  templateUrl: './side-left.component.html',
-  styleUrls: ['./side-left.component.scss'],
+  selector: 'worky-sidebar-menu',
+  templateUrl: './sidebar-menu.component.html',
+  styleUrls: ['./sidebar-menu.component.scss'],
 })
-export class SideLeftComponent{
+export class SideBarMenuComponent{
 
   userName: string = '';
 

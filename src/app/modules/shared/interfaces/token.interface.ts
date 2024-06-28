@@ -5,4 +5,6 @@ export interface Token {
   name: string;
   role: string;
   avatar: string;
+  status?: string;
+  _id?: string;
 }

@@ -13,7 +13,7 @@ import { ProfileDetailComponent } from './profiles/components/profile-detail/pro
 import { MaterialModule } from '@shared/modules/material/material.module';
 
 import { WorkyMenuComponentComponent } from './components/navbar/worky-menu-component/worky-menu-component.component';
-import { SideLeftModule } from '@shared/modules/side-left/side-left.module';
+import { SideBarMenutModule } from '@shared/modules/sidebar-menu/sidebar-menu.module';
 import { WorkyDropdownModule } from '@shared/modules/worky-dropdown/worky-dropdown.module';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
 import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.module';
@@ -25,6 +25,7 @@ import { EditImgProfileComponent } from './profiles/components/edit-img-profile/
 import { EditInfoProfileDetailComponent } from './profiles/components/edit-info-profile/edit-info-profile.component';
 import { ContactsModule } from '@shared/modules/contacts/contacts.module';
 import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
+import { UserOnlineModule } from '@shared/modules/user-online/user-online.module';
 
 
 @NgModule({
@@ -55,9 +56,10 @@ import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
     PublicationViewModule,
     MaterialModule,
     SuggetionToFollowModule,
-    SideLeftModule,
+    SideBarMenutModule,
     ContactsModule,
     WorkyButtonsModule,
+    UserOnlineModule
   ]
 })
 export class PagesModule { }
