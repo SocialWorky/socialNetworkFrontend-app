@@ -3,9 +3,6 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
 .content-navbar {
-  position: sticky;
-  top: 0;
-  z-index: 2;
   display: flex;
   justify-content: center;
   height: variables.$worky-navbar-height;
