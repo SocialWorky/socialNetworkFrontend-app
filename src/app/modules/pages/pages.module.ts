@@ -26,6 +26,7 @@ import { EditInfoProfileDetailComponent } from './profiles/components/edit-info-
 import { ContactsModule } from '@shared/modules/contacts/contacts.module';
 import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
 import { UserOnlineModule } from '@shared/modules/user-online/user-online.module';
+import { NotificationsPanelModule } from '@shared/modules/notifications-panel/notifications-panel.module';
 
 
 @NgModule({
@@ -59,7 +60,8 @@ import { UserOnlineModule } from '@shared/modules/user-online/user-online.module
     SideBarMenutModule,
     ContactsModule,
     WorkyButtonsModule,
-    UserOnlineModule
+    UserOnlineModule,
+    NotificationsPanelModule
   ]
 })
 export class PagesModule { }

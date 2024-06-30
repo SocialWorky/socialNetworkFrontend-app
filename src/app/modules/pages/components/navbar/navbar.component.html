@@ -1,5 +1,5 @@
 <div class="content-navbar">
-  <nav class="worky-navbar">
+ <nav class="worky-navbar">
     <!-- Left elements -->
     <div class="worky-brand">
       <!-- Brand Logo-->
@@ -56,7 +56,8 @@
       <!-- Notification -->
       <worky-dropdown 
         icon="notifications"
-        [badgeValue]="notifications > 0 ? notifications : null"  
+        [badgeValue]="notifications > 0 ? notifications : null" 
+        (click)="notificationsPanel.togglePanel()"
         [badge]=true>
       </worky-dropdown>
       <!-- Profile -->
@@ -85,7 +86,8 @@
         <!-- Notification -->
         <worky-dropdown 
           icon="notifications"
-          [badgeValue]="notifications > 0 ? notifications : null"  
+          [badgeValue]="notifications > 0 ? notifications : null"
+          (click)="notificationsPanel.togglePanel()"
           [badge]=true>
         </worky-dropdown>
         <!-- Profile -->
@@ -98,3 +100,5 @@
       </div>
   </nav>
 </div>
+
+<worky-notifications-panel #notificationsPanel></worky-notifications-panel>

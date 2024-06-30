@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { Token } from '../../shared/interfaces/token.interface';
 import { AuthGoogleService } from './auth-google.service';
+import { UserService } from '../../shared/services/users.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,8 @@ export class AuthService {
     private router: Router,
     private http: HttpClient,
     private _authGoogleService: AuthGoogleService,
-    private _router: Router
+    private _router: Router,
+    private _userService: UserService
   ) {}
 
   isAuthenticated(): boolean {
@@ -30,7 +32,7 @@ export class AuthService {
       const decodedToken: any = jwtDecode(token);
       const currentTime = Math.floor(Date.now() / 1000);
 
-      if (decodedToken && decodedToken.exp && decodedToken.exp > currentTime) {
+      if (decodedToken && decodedToken.exp && (decodedToken.exp > currentTime)) {
         return true;
       } else {
         localStorage.removeItem('token');

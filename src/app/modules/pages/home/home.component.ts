@@ -17,6 +17,7 @@ import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.servi
 import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from '@env/environment';
+import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 
 @Component({
   selector: 'worky-home',
@@ -53,6 +54,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _geocodingService: GeocodingService,
     private _activatedRoute: ActivatedRoute,
     private _meta: Meta,
+    private _notificationUsersService: NotificationUsersService,
   ) {
     this.getLocationUser();
   }
@@ -63,6 +65,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this._notificationUsersService.loginUser();
     this.paramPublication = await this.getParamsPublication();
     if (this.paramPublication) return;
 
