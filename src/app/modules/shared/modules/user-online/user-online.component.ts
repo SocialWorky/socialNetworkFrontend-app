@@ -30,8 +30,10 @@ export class UserOnlineComponent  implements OnInit, OnDestroy {
       takeUntil(this._destroy$)
     ).subscribe({
       next: (userStatuses) => {
-        this.usersOnline = userStatuses[0];
-        this._cdr.markForCheck();
+        setTimeout(() => {
+          this.usersOnline = userStatuses[0];
+          this._cdr.markForCheck();
+        }, 1000);
       },
       error: (error) => {
         console.error('Error getting user statuses', error);
@@ -45,7 +47,6 @@ export class UserOnlineComponent  implements OnInit, OnDestroy {
   }
 
   goToProfile(_id: string) {
-    console.log('Go to profile', _id);
     this._router.navigate(['/profile/', _id]);
   }
 

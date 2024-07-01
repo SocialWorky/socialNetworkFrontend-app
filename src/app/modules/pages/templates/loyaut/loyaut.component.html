@@ -1,6 +1,6 @@
 <worky-navbar></worky-navbar>
 
-<div class="content-social-app">
+<div class="content-social-app" [class.content-profile-app]="isProfile">
   
   <worky-content-left-side *ngIf="!isMobile && !isProfile"></worky-content-left-side>
   
