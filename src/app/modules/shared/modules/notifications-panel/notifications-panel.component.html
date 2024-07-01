@@ -1,8 +1,36 @@
 <div class="notifications-panel" [class.active]="isActive">
   <div class="content-header">
-    <h2>Notificaciones</h2>
+    <div class="text-section">
+      <span>Notificaciones</span>
+      <p> Tienes {{ unreadNotifications }} notificaciones sin leer.</p>
+    </div>
     <i class="material-icons" (click)="togglePanel()">close</i>
   </div>
-  <!-- Aquí puedes colocar el contenido de tus notificaciones -->
+
+  <div class="content-body">
+
+    <div class="notification-item" *ngFor="let notification of formatListNotifications">
+
+      <div class="notification-item-content" 
+        [class.notification-not-viewed]="notification.read === false"
+        (click)="goToLink(notification.link, notification._id)">
+        <div class="notification-item-header">
+          <span class="notification-item-title">{{notification.content}}</span>
+          <span class="notification-item-date">Hace {{notification.createdAt | workyRelativeTime }}</span>
+        </div>
+
+        <div class="notification-item-body" *ngIf="notification.type === type.COMMENT">
+          <i class="material-icons">{{ notification.icon }}</i>
+          <div class="content">
+            <span> {{ notification.additionalDataComment?.nameComment }} Comento: </span>
+            <span class="notification-item-description">{{ notification.additionalDataComment?.comment }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>  
+
+
 </div>
 

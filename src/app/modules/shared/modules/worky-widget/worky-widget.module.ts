@@ -5,16 +5,17 @@ import { FormsModule } from '@angular/forms';
 import { WeatherComponent } from './worky-weather/worky-weather.component';
 import { WorkyButtonsModule } from '../buttons/buttons.module';
 import { WorkyNewsComponent } from './worky-news/worky-news.component';
-import { WorkyDateFormatPipe } from '@shared/pipes/dateFormat.pipe';
+import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
 
 
 @NgModule({
-  declarations: [WeatherComponent, WorkyNewsComponent, WorkyDateFormatPipe],
+  declarations: [WeatherComponent, WorkyNewsComponent],
   imports: [
     CommonModule,
     FormsModule,
-    WorkyButtonsModule
+    WorkyButtonsModule,
+    PipesSharedModule
   ],
-  exports: [WeatherComponent, WorkyNewsComponent, WorkyDateFormatPipe]
+  exports: [WeatherComponent, WorkyNewsComponent]
 })
 export class WorkyWidgetModule { }

@@ -41,7 +41,6 @@ import { NotificationsPanelModule } from '@shared/modules/notifications-panel/no
     EditImgProfileComponent,
     EditInfoProfileDetailComponent,
     ProfileDetailComponent,
-
   ],
   imports: [
     CommonModule,
@@ -54,7 +53,6 @@ import { NotificationsPanelModule } from '@shared/modules/notifications-panel/no
     AddPublicationModule,
     PublicationViewModule,
     WorkyWidgetModule,
-    PublicationViewModule,
     MaterialModule,
     SuggetionToFollowModule,
     SideBarMenutModule,

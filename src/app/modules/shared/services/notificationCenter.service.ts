@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { environment } from 'src/environments/environment';
 import { NotificationCenter } from '@shared/interfaces/notificationsCenter.interface';
+import { NotificationsData } from '@shared/modules/notifications-panel/interfaces/notificationsData.interface';
+import { Observable } from 'rxjs';
 
 
 
@@ -33,11 +35,16 @@ export class NotificationCenterService {
     return this.http.post(url, notification, { headers });
   }
 
-  getNotifications(userId: string) {
+  getNotifications(userId: string): Observable<NotificationsData> {
     const url = `${this.baseUrl}/notifications/${userId}`;
     const headers = this.getHeaders();
-    return this.http.get(url, { headers });
+    return this.http.get<NotificationsData>(url, { headers });
   }
 
+  updateNotification(notificationId: string) {
+    const url = `${this.baseUrl}/notifications/${notificationId}`;
+    const headers = this.getHeaders();
+    return this.http.put(url, {}, { headers });
+  }
 
 }
