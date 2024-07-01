@@ -62,13 +62,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
     this._notificationService.notification$.pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: () => {
-        this.getNotification();
-        this._cdr.markForCheck();
+        setTimeout(() => {
+          this.getNotification();
+        }, 1000)
       },
       error: (error) => {
         console.error('Error getting notifications', error);
       }
     });
+    // this.getNotification();
     this.checkAdminDataLink();
     this._cdr.markForCheck();
   }
@@ -143,11 +145,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.searchTerm = '';
   }
 
-  async getNotification() {
-    const userId = await this._authService.getDecodedToken().id;
-    await this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
+  getNotification() {
+    const userId = this._authService.getDecodedToken().id;
+    this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {
-        this.notifications = data.filter((notification: any) => !notification.read).length;
+        this.notifications = data.filter((notification: any) => !notification.read).length; 
         this.messages = data.filter((notification: any) => notification.type === 'message' && !notification.read).length;
         this._cdr.markForCheck();
       },

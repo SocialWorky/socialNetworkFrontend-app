@@ -39,6 +39,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   paramPublication: boolean = false;
 
+  hasMorePublications: boolean = true;
+
   urlMediaApi = environment.APIFILESERVICE;
 
   dataUser = this._authService.getDecodedToken();
@@ -72,11 +74,24 @@ export class HomeComponent implements OnInit, OnDestroy {
     await this.loadPublications();
 
     this._publicationService.publications$.pipe(
-      // distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
       takeUntil(this.destroy$)
     ).subscribe({
       next: async (publicationsData: PublicationView[]) => {
         this.updatePublications(publicationsData);
+      },
+      error: (error) => {
+        console.error('Error getting publications', error);
+      }
+    });
+
+    this._publicationService.publicationsDeleted$.pipe(
+      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: async (publicationsData: PublicationView[]) => {
+        this.publications = this.publications.filter(pub => !publicationsData.some(pubDeleted => pubDeleted._id === pub._id));
+        this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error getting publications', error);
@@ -88,7 +103,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   async loadPublications() {
-    if (this.loaderPublications) return;
+    if (this.loaderPublications || !this.hasMorePublications) return;
     this.loaderPublications = true;
     try {
       const newPublications = await this._publicationService.getAllPublications(this.page, this.pageSize);
@@ -98,12 +113,15 @@ export class HomeComponent implements OnInit, OnDestroy {
 
       if (uniqueNewPublications.length > 0) {
         this.publications = [...this.publications, ...uniqueNewPublications];
+        this.page++;
+      } else {
+        this.hasMorePublications = false;
       }
-      this.page++;
+      this.loaderPublications = false;
     } catch (error) {
       console.error('Error loading publications', error);
+      this.loaderPublications = false;
     }
-    this.loaderPublications = false;
     this._cdr.markForCheck();
   }
 
@@ -113,7 +131,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const offsetHeight = event.target.offsetHeight;
     const threshold = 100;
 
-    if (scrollTop + offsetHeight + threshold >= scrollHeight && !this.loaderPublications) {
+    if (scrollTop + offsetHeight + threshold >= scrollHeight && !this.loaderPublications && this.hasMorePublications) {
       this.loadPublications();
     }
   }
@@ -172,7 +190,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     publicationsData.forEach(newPub => {
       const index = this.publications.findIndex(pub => pub._id === newPub._id);
       if (index !== -1) {
-        // Verificar si la publicación ha cambiado
         if (JSON.stringify(this.publications[index]) !== JSON.stringify(newPub)) {
           this.publications[index] = newPub;
           this._cdr.markForCheck();
@@ -182,6 +199,15 @@ export class HomeComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       }
     });
+
+    this.publications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    this.publications.forEach(pub => {
+      if (pub.comment) {
+        pub.comment.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      }
+    });
+
     this._cdr.markForCheck();
   }
 
