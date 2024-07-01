@@ -37,7 +37,7 @@ export class NotificationCommentService implements OnDestroy {
     }
 
     sendNotificationComment(payload: NewComment) {
-      this._notificationService.sendNotification();
+      this.socket.emit('generalNotification');
       this.socket.emit('newComment', payload);
     }
 
