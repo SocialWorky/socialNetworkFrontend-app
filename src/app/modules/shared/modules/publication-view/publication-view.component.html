@@ -44,14 +44,14 @@
             <span class="name">
               <ng-container *ngIf="!isProfile">
 
-                <i *ngIf="!publication.isMyFriend" class="material-icons">keyboard_arrow_right</i> 
+                <i *ngIf="!publication.isMyFriend && publication.isFriendshipPending" class="material-icons">keyboard_arrow_right</i> 
 
                 <a *ngIf="!publication.isMyFriend && (!userRequest?._id || !userReceive?._id )" class="follow-my-friend" 
                   (click)="followMyFriend(publication.author._id)">
                   {{ 'publicationsView.follow' | workyTranslations }}
                 </a>
 
-                <a *ngIf="!publication.isMyFriend && userRequest?._id === dataUser.id" class="follow-my-friend" 
+                <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending && userRequest?._id === dataUser.id" class="follow-my-friend" 
                   (click)="cancelFriendship(publication.isFriendshipPending!, publication.author._id)">
                   {{ 'publicationsView.cancelRequest' | workyTranslations }}
                 </a>
@@ -170,9 +170,14 @@
 
       <div class="publication-comment-content">
         <div class="publication-comment-data">
-          <span class="comment-author">{{ comment.author.name }} {{ comment.author.lastName }}</span>
+          <div class="content-name-header">
+            <span class="comment-author">{{ comment.author.name }} {{ comment.author.lastName }}</span>
+            <div *ngIf="comment.author._id === dataUser.id"
+              class="material-icons delete-comment"
+              (click)="deleteComment(comment._id, publication._id)">delete</div>
+          </div>
           <span class="comment-content">{{ comment.content }}</span>
-              <worky-image-organizer 
+              <worky-image-organizer *ngIf="comment.media.length"
                 [images]="comment.media">
               </worky-image-organizer>
         </div>

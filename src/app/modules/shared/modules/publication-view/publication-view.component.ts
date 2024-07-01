@@ -20,6 +20,8 @@ import { ReportCreate } from '@shared/interfaces/report.interface';
 import { ReportType, ReportStatus } from '@shared/enums/report.enum';
 import { ReportResponseComponent } from '../publication-view/report-response/report-response.component';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
+import { CommentService } from '@shared/services/comment.service';
+import { set } from 'lodash';
 
 @Component({
   selector: 'worky-publication-view',
@@ -71,6 +73,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _authService: AuthService,
     private _loadingCtrl: LoadingController,
     private _publicationService: PublicationService,
+    private _commentService: CommentService,
     private _friendsService: FriendsService,
     private _reportsService: ReportsService,
     public _dialog: MatDialog,
@@ -177,7 +180,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       takeUntil(this.destroy$)
     ).subscribe({
       next: () => {
-        this.refreshPublications();
+        this._publicationService.updatePublicationsDeleted([publication]);
         loadingDeletePublication.dismiss();
       },
       error: (error) => {
@@ -245,17 +248,15 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._router.navigate(['/profile', _id]);
   }
 
-  async refreshPublications() {
-    if (this.type === TypePublishing.POSTPROFILE) {
-      const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.userProfile);
-      this._publicationService.updatePublications(refreshPublications);
-      this._cdr.markForCheck();
-    } else {
-      const refreshPublications = await this._publicationService.getAllPublications(1, 10);
-      this._cdr.markForCheck();
-      this._publicationService.updatePublications(refreshPublications);
+  async refreshPublications(_id?: string) {
+    if (_id) {
+      await this._publicationService.getPublicationId(_id).pipe(takeUntil(this.destroy$)).subscribe({
+          next: (publication: PublicationView[]) => {
+            this._publicationService.updatePublications(publication);
+            this._cdr.markForCheck();
+          }
+      });
     }
-    this._cdr.markForCheck();
   }
 
   createReport(publication: PublicationView) {
@@ -294,5 +295,25 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           loadingCreateReport.dismiss();
         }
       });
+  }
+
+  async deleteComment(_id: string, id_publication: string) {
+    const loadingDeleteComment = await this._loadingCtrl.create({
+      message: 'Eliminando comentario...',
+    });
+
+    loadingDeleteComment.present();
+
+    this._commentService.deletComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.refreshPublications(id_publication);
+        loadingDeleteComment.dismiss();
+      },
+      error: (error) => {
+        console.error('Error deleting comment:', error);
+        loadingDeleteComment.dismiss();
+      }
+    });
+    loadingDeleteComment.dismiss();
   }
 }

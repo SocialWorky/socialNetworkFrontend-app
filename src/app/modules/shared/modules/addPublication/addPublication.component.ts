@@ -228,14 +228,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
             this._cdr.markForCheck();
           }
 
-          // let publicationsNew: PublicationView[] = [];
-
-          // if(this.type === TypePublishing.POSTPROFILE){
-          //   publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
-          //   publicationsNew[this.indexPublication!].comment.unshift(message.comment);
-          //   this._publicationService.updatePublications(publicationsNew);
-          // } else {
-
           await this._publicationService.getPublicationId(idPublication).pipe(takeUntil(this.unsubscribe$)).subscribe({
             next: (publication: PublicationView[]) => {
               this._publicationService.updatePublications(publication);
@@ -269,13 +261,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
               console.error(error);
             }
           });
-            //console.log('publicationsNew', publicationsNew);
-            //publicationsNew = await this._publicationService.getAllPublications(1, 10);
-            //publicationsNew[this.indexPublication!].comment.unshift(message.comment);
-            //this._publicationService.updatePublications(publicationsNew);
-
-              
-          //}
 
           if (message.message === 'Comment created successfully') {
             this.myForm.controls['content'].setValue('');
@@ -352,13 +337,14 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
             this._cdr.markForCheck();
           }
 
-          if(this.type === TypePublishing.POSTPROFILE){
-            const publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
-            this._publicationService.updatePublications(publicationsNew);
-          } else {
-            const publicationsNew = await this._publicationService.getAllPublications(1, 10);
-            this._publicationService.updatePublications(publicationsNew);
-          }
+          await this._publicationService.getPublicationId(message.publications._id).pipe(takeUntil(this.unsubscribe$)).subscribe({
+            next: (publication: PublicationView[]) => {
+              this._publicationService.updatePublications(publication);
+            },
+            error: (error) => {
+              console.error(error);
+            }
+          });
 
           if (message.message === 'Publication created successfully') {
             this.myForm.controls['content'].setValue('');
