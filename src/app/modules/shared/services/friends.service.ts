@@ -34,7 +34,7 @@ export class FriendsService {
   }
 
   requestFriend(friendId: string): Observable<any> {
-    const _id = this._authService.getDecodedToken().id;
+    const _id = this._authService.getDecodedToken()?.id;
     const body = {
       senderId: _id,
       receiverId: friendId

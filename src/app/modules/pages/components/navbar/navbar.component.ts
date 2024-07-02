@@ -51,7 +51,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ) {
     this.menuProfile();
     this.token = this._authService.getDecodedToken();
-    this._socketService.connectToWebSocket(this.token);
+    this._socketService.connectToWebSocket(this.token!);
   }
 
   ngOnInit() {
@@ -146,7 +146,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   getNotification() {
-    const userId = this._authService.getDecodedToken().id;
+    const userId = this._authService.getDecodedToken()?.id!;
     this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {
         this.notifications = data.filter((notification: any) => !notification.read).length; 

@@ -107,7 +107,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
 
     if (this.idUserProfile === '') {
-      this.idUserProfile = await this._authService.getDecodedToken().id;
+      this.idUserProfile = this._authService.getDecodedToken()?.id!;
       this._cdr.markForCheck();
     }
 
@@ -117,7 +117,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
     this.getUserFriend();
     
-    this.decodedToken = this._authService.getDecodedToken();
+    this.decodedToken = this._authService.getDecodedToken()!;
 
     this.isCurrentUser = this.idUserProfile === this.decodedToken.id;
 
@@ -180,7 +180,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   getUserFriend() {
-    this._userService.getUserFriends(this._authService.getDecodedToken().id, this.idUserProfile).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._userService.getUserFriends(this._authService.getDecodedToken()?.id!, this.idUserProfile).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response) => {
         this.getUserFriendPending();
       },
@@ -191,7 +191,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   getUserFriendPending(): void {
-    this._friendsService.getIsMyFriend(this._authService.getDecodedToken().id, this.idUserProfile).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._friendsService.getIsMyFriend(this._authService.getDecodedToken()?.id!, this.idUserProfile).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: FriendsStatus) => {
         this.isFriendPending.status = response?.status === 'pending';
         this.idPendingFriend = response?.id;
@@ -282,7 +282,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.isUploading = true;
     this._cdr.markForCheck();
 
-    const userId = this._authService.getDecodedToken().id;
+    const userId = this._authService.getDecodedToken()?.id!;
     const uploadLocation = 'profile-avatar';
     if (this.selectedImage) {
       const response = await lastValueFrom(

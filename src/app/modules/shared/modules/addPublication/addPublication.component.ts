@@ -100,7 +100,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   ) {
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
-      this.decodedToken = this._authService.getDecodedToken();
+      this.decodedToken = this._authService.getDecodedToken()!;
     }
   }
 

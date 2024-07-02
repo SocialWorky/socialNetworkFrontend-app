@@ -75,7 +75,7 @@ export class EmailNotificationService {
     this.mailSendDataValidate.subMessage = translations['email.sendReportPublicationSubMessage'] + reportMessage;
     this.mailSendDataValidate.buttonMessage = translations['email.sendReportPublicationButtonMessage'];
     this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
-    this.mailSendDataValidate.email = this.dataUser.email;
+    this.mailSendDataValidate.email = this.dataUser?.email;
 
     this.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe({
       next: (data) => {
@@ -90,13 +90,13 @@ export class EmailNotificationService {
 
   async sendFriendRequestNotification(_idUser: string) {
     await this.userById(_idUser).then((user) => {
-      this.mailSendDataValidate.url = `${environment.BASE_URL}/profile/${this.dataUser.id}`;
+      this.mailSendDataValidate.url = `${environment.BASE_URL}/profile/${this.dataUser?.id}`;
       this.mailSendDataValidate.subject = translations['email.sendFriendRequestSubject'];
       this.mailSendDataValidate.title = translations['email.sendFriendRequestTitle'];
       this.mailSendDataValidate.greet = translations['email.sendFriendRequestGreet'];
       this.mailSendDataValidate.message = translations['email.sendFriendRequestMessage']
-      this.mailSendDataValidate.subMessage = `${translations['email.sendFriendRequestSubMessage']} ${this.dataUser.name}`;
-      this.mailSendDataValidate.buttonMessage = `${translations['email.sendFriendRequestButtonMessage']} ${this.dataUser.name}`;
+      this.mailSendDataValidate.subMessage = `${translations['email.sendFriendRequestSubMessage']} ${this.dataUser?.name}`;
+      this.mailSendDataValidate.buttonMessage = `${translations['email.sendFriendRequestButtonMessage']} ${this.dataUser?.name}`;
       this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
       this.mailSendDataValidate.email = user.email;
 
@@ -113,13 +113,13 @@ export class EmailNotificationService {
 
   async acceptFriendRequestNotification(_idUser: string) {
     await this.userById(_idUser).then((user) => {
-      this.mailSendDataValidate.url = `${environment.BASE_URL}/profile/${this.dataUser.id}`;
+      this.mailSendDataValidate.url = `${environment.BASE_URL}/profile/${this.dataUser?.id}`;
       this.mailSendDataValidate.subject = translations['email.acceptFriendRequestSubject'];
       this.mailSendDataValidate.title = translations['email.acceptFriendRequestTitle'];
       this.mailSendDataValidate.greet = translations['email.acceptFriendRequestGreet'];
       this.mailSendDataValidate.message = translations['email.acceptFriendRequestMessage']
-      this.mailSendDataValidate.subMessage = `${translations['email.acceptFriendRequestSubMessage']} ${this.dataUser.name}`;
-      this.mailSendDataValidate.buttonMessage = `${translations['email.acceptFriendRequestButtonMessage']} ${this.dataUser.name}`;
+      this.mailSendDataValidate.subMessage = `${translations['email.acceptFriendRequestSubMessage']} ${this.dataUser?.name}`;
+      this.mailSendDataValidate.buttonMessage = `${translations['email.acceptFriendRequestButtonMessage']} ${this.dataUser?.name}`;
       this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
       this.mailSendDataValidate.email = user.email;
 

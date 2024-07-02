@@ -20,7 +20,7 @@
 
     <div class="publication-header-content">
       <div class="user-name-content">
-        <div class="user-name" *ngIf="publication.isMyFriend || (dataUser.id === publication.userReceiving?._id && !publication.isMyFriend) || (dataUser.id === publication.author._id && !publication.isMyFriend); else notFriend">
+        <div class="user-name" *ngIf="publication.isMyFriend || (dataUser?.id === publication.userReceiving?._id && !publication.isMyFriend) || (dataUser?.id === publication.author._id && !publication.isMyFriend); else notFriend">
           <span (click)="viewProfile(publication.author._id)" class="name link-name">
             {{ publication.author.name }} {{ publication.author.lastName }}
           </span>
@@ -50,12 +50,12 @@
                   {{ 'publicationsView.follow' | workyTranslations }}
                 </a>
 
-                <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending && userRequest?._id === dataUser.id" class="follow-my-friend" 
+                <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending && userRequest?._id === dataUser?.id" class="follow-my-friend" 
                   (click)="cancelFriendship(publication.isFriendshipPending!, publication.author._id)">
                   {{ 'publicationsView.cancelRequest' | workyTranslations }}
                 </a>
 
-                <a *ngIf="userReceive?._id === dataUser.id" class="follow-my-friend" 
+                <a *ngIf="userReceive?._id === dataUser?.id" class="follow-my-friend" 
                   (click)="acceptFriendship(publication.isFriendshipPending!, publication.author._id)">
                   Aceptar Amistad
                 </a>
@@ -171,7 +171,7 @@
         <div class="publication-comment-data">
           <div class="content-name-header">
             <span class="comment-author">{{ comment.author.name }} {{ comment.author.lastName }}</span>
-            <div *ngIf="comment.author._id === dataUser.id"
+            <div *ngIf="comment.author._id === dataUser?.id"
               class="material-icons delete-comment"
               (click)="deleteComment(comment._id, publication._id)">delete</div>
           </div>

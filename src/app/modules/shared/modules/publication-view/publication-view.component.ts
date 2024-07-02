@@ -145,7 +145,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   checkDataLink(userId: string) {
     const menuDeletePublications = { icon: 'delete', function: this.deletePublications.bind(this), title: translations['publicationsView.deletePublication'] };
 
-    if (userId === this.dataUser.id || this.dataUser.role === RoleUser.ADMIN) {
+    if (userId === this.dataUser?.id || this.dataUser?.role === RoleUser.ADMIN) {
       if (!this.dataLinkActions.find((element) => element.title === translations['publicationsView.deletePublication'])) {
         this.dataLinkActions.push(menuDeletePublications);
       }
@@ -237,7 +237,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async getUserFriendPending() {
-    await this._friendsService.getIsMyFriend(this._authService.getDecodedToken().id, this.publication?.author?._id || '').pipe(takeUntil(this.destroy$)).subscribe({
+    await this._friendsService.getIsMyFriend(this._authService.getDecodedToken()?.id!, this.publication?.author?._id || '').pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: FriendsStatus) => {
         this.userRequest = response?.requester;
         this.userReceive = response?.receiver;
@@ -293,7 +293,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           const report: ReportCreate = {
             type: ReportType.POST,
             _idReported: publication._id,
-            reporting_user: this.dataUser.id,
+            reporting_user: this.dataUser?.id!,
             status: ReportStatus.PENDING,
             detail_report: result,
           };

@@ -18,7 +18,7 @@ export class SideBarMenuComponent{
   constructor(private _authService: AuthService) { 
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
-      this.decodedToken = this._authService.getDecodedToken();
+      this.decodedToken = this._authService.getDecodedToken()!;
       this.userName = this.decodedToken.name;
     }
   }

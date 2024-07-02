@@ -48,7 +48,7 @@ export class NotificationsPanelComponent  implements OnInit, OnDestroy {
   }
 
   async getNotifications() {
-    const userId = this._authService.getDecodedToken().id;
+    const userId = this._authService.getDecodedToken()?.id!;
     this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
         this.unreadNotifications = 0;

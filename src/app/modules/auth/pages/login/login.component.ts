@@ -141,7 +141,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       next: (response: any) => {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
-          const token = this._authService.getDecodedToken();
+          const token = this._authService.getDecodedToken()!;
 
           this._socketService.connectToWebSocket(token);
 
@@ -228,7 +228,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
         localStorage.setItem('token', response.token);
 
-        const userId = this._authService.getDecodedToken()?.id;
+        const userId = this._authService.getDecodedToken()?.id!;
 
         this.subscription = await this._authApiService.avatarUpdate(userId, loginDataGoogle.picture, response.token).subscribe({
           next: async (response: any) => {
@@ -247,7 +247,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         });
 
-          const token = this._authService.getDecodedToken();
+          const token = this._authService.getDecodedToken()!;
           this._socketService.connectToWebSocket(token);
           this._notificationUsersService.loginUser();
       },

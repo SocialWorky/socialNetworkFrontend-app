@@ -44,7 +44,7 @@ export class WorkyDropdownComponent  implements OnInit, OnDestroy{
     private _userService: UserService,
     private _cdr: ChangeDetectorRef,
   ) { 
-    this.decodedToken = this._authService.getDecodedToken();
+    this.decodedToken = this._authService.getDecodedToken()!;
   }
 
   ngOnInit() {

@@ -104,7 +104,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
       this.selectedImage = croppedImageUrl;
       this._cdr.detectChanges();
 
-      const file = this.dataURLtoFile(croppedImageUrl, this._authService.getDecodedToken().id, this.originalMimeType!);
+      const file = this.dataURLtoFile(croppedImageUrl, this._authService.getDecodedToken()?.id!, this.originalMimeType!);
       this.selectedFiles = [file];
     }
   }
@@ -153,7 +153,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     this.isUploading = true;
     this._cdr.detectChanges();
 
-    const userId = this._authService.getDecodedToken().id;
+    const userId = this._authService.getDecodedToken()?.id!;
     const uploadLocation = 'profile';
     if (this.selectedImage) {
       const response = await lastValueFrom(

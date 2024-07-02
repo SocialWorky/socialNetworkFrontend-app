@@ -45,7 +45,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   private touchTimeout: any;
 
   get reactionUserInPublication() {
-    return this.reactionsToPublication.find((reaction) => reaction.user._id === this.token.id);
+    return this.reactionsToPublication.find((reaction) => reaction.user._id === this.token?.id);
   }
 
   constructor(
@@ -75,7 +75,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
     }
     this._reactionsService
       .createReaction({
-        authorId: this.token.id,
+        authorId: this.token?.id!,
         _idCustomReaction: reaction._id,
         isPublications: this.type === TypePublishing.POST || TypePublishing.POSTPROFILE ? true : false,
         isComment: this.type === TypePublishing.COMMENT ? true : false,
@@ -86,15 +86,15 @@ export class ReactionsComponent implements OnInit, OnDestroy {
           this.reactionsVisible = false;
           this.sendEmailNotificationReaction(this.publication!, reaction);
 
-          if(this.publication?.author._id === this.token.id) return;
+          if(this.publication?.author._id === this.token?.id) return;
 
           const dataNotification = {
             name: reaction.name,
             emoji: reaction.emoji,
             _id: reaction._id,
-            userIdReaction: this.token.id,
-            userNameReaction: this.token.name,
-            userAvatarReaction: this.token.avatar,
+            userIdReaction: this.token?.id,
+            userNameReaction: this.token?.name,
+            userAvatarReaction: this.token?.avatar,
           };
 
           this._notificationCenterService.createNotification({
@@ -131,7 +131,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
 
   editReaction(id: string, reaction: CustomReactionList) {
     this._reactionsService.editReaction(id, {
-      authorId: this.token.id,
+      authorId: this.token?.id!,
       _idCustomReaction: reaction._id,
       isPublications: this.type === TypePublishing.POST || this.typePublishing.POSTPROFILE ? true : false,
       isComment: this.type === TypePublishing.COMMENT ? true : false,
@@ -207,13 +207,13 @@ export class ReactionsComponent implements OnInit, OnDestroy {
 
     sendEmailNotificationReaction(publication: PublicationView, reaction: CustomReactionList) {
 
-    if (this.token.id === publication.author._id) return;
+    if (this.token?.id === publication.author._id) return;
 
     this.mailSendNotification.url = `${environment.BASE_URL}/publication/${publication._id}`;
     this.mailSendNotification.subject = 'Han reaccionado a tu publicación';
     this.mailSendNotification.title = 'Notificación de reacción';
     this.mailSendNotification.greet = 'Hola';
-    this.mailSendNotification.message = 'El usuario ' + this.token.name + ' ha reaccionado a tu publicación';
+    this.mailSendNotification.message = 'El usuario ' + this.token?.name + ' ha reaccionado a tu publicación';
     this.mailSendNotification.subMessage = 'Su reacción fue: <img src="'+ reaction.emoji +'" width="20px" alt="'+ reaction.name +'"> ' + reaction.name;
     this.mailSendNotification.buttonMessage = 'Ver publicación';
     this.mailSendNotification.template = TemplateEmail.NOTIFICATION;
