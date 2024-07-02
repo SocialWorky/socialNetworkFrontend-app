@@ -1,4 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
@@ -25,14 +26,15 @@ export class NotificationService implements OnDestroy {
           throw error;
         })
       )
-      .subscribe(() => {
-        this._notification.next();
+      .subscribe((data: any) => {
+        this._notification.next(data);
       });
   }
 
-  sendNotification() {
-    this.socket.emit('generalNotification');
+  sendNotification(publication?: PublicationView) {
+    this.socket.emit('generalNotification', publication);
   }
+
 
   ngOnDestroy() {
     this._unsubscribeAll.next();

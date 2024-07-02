@@ -18,6 +18,7 @@ import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from '@env/environment';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
+import { NotificationService } from '@shared/services/notifications/notification.service';
 
 @Component({
   selector: 'worky-home',
@@ -57,6 +58,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _activatedRoute: ActivatedRoute,
     private _meta: Meta,
     private _notificationUsersService: NotificationUsersService,
+    private _notificationService: NotificationService
   ) {
     this.getLocationUser();
   }
@@ -95,6 +97,18 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error getting publications', error);
+      }
+    });
+
+    this._notificationService.notification$.pipe(
+      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (data: any) => {
+        if(data) {
+          this.updatePublications([data]);
+          this._cdr.markForCheck();
+        }
       }
     });
 
@@ -190,7 +204,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     publicationsData.forEach(newPub => {
       const index = this.publications.findIndex(pub => pub._id === newPub._id);
       if (index !== -1) {
-        if (JSON.stringify(this.publications[index]) !== JSON.stringify(newPub)) {
+        const existingPub = this.publications[index];
+        if (
+          JSON.stringify(existingPub) !== JSON.stringify(newPub) ||
+          JSON.stringify(existingPub.comment) !== JSON.stringify(newPub.comment) ||
+          JSON.stringify(existingPub.reaction) !== JSON.stringify(newPub.reaction)
+        ) {
           this.publications[index] = newPub;
           this._cdr.markForCheck();
         }
@@ -210,5 +229,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this._cdr.markForCheck();
   }
+
 
 }

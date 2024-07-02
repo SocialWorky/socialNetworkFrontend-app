@@ -26,6 +26,16 @@
             <span class="notification-item-description">{{ notification.additionalDataComment?.comment }}</span>
           </div>
         </div>
+
+        <div class="notification-item-body" *ngIf="notification.type === type.LIKE">
+          <i class="material-icons">{{ notification.icon }}</i>
+          <div class="content">
+            <span> {{ notification.additionalDataLike?.userNameReaction }} ha reaccionado con un: <img src="{{ notification.additionalDataLike?.emoji }}"> </span>
+          </div>
+        </div>
+
+
+
       </div>
 
     </div>

@@ -27,6 +27,7 @@ import { EmailNotificationService } from '@shared/services/notifications/email-n
 import { environment } from '@env/environment';
 import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
 import { NotificationCenterService } from '@shared/services/notificationCenter.service';
+import { NotificationType } from '@shared/modules/notifications-panel/enums/notificationsType.enum';
 
 @Component({
   selector: 'worky-add-publication',
@@ -248,11 +249,11 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
               this._notificationCenterService.createNotification({
                 userId: publication[0].author._id,
-                type: 'comment',
+                type: NotificationType.COMMENT,
                 content: 'Han comentado tu publicación',
                 link: `/publication/${idPublication}`,
                 additionalData: JSON.stringify(dataNotification),
-              }).subscribe();
+              }).pipe(takeUntil(this.unsubscribe$)).subscribe();
               this._notificationCommentService.sendNotificationComment(dataNotification);
 
 

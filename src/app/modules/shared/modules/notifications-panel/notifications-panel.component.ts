@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 
 import { AuthService } from '@auth/services/auth.service';
 import { NotificationCenterService } from '@shared/services/notificationCenter.service';
-import { AdditionalDataComment, NotificationsData } from './interfaces/notificationsData.interface';
+import { AdditionalDataComment, AdditionalDataLike, NotificationsData } from './interfaces/notificationsData.interface';
 import { NotificationType } from './enums/notificationsType.enum';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 
@@ -65,6 +65,16 @@ export class NotificationsPanelComponent  implements OnInit, OnDestroy {
               ...notification,
               additionalDataComment,
             });
+          }
+
+          if (notification.type === this.type.LIKE) {
+            const additionalDataLike: AdditionalDataLike = JSON.parse(notification.additionalData as string);
+            notification.icon = 'add_reaction';
+            this.formatListNotifications.push({
+              ...notification,
+              additionalDataLike,
+            });
+          }
 
             this.formatListNotifications.sort((a, b) => {
               if (a.read === b.read) {
@@ -77,7 +87,6 @@ export class NotificationsPanelComponent  implements OnInit, OnDestroy {
             });
 
             this._cdr.markForCheck();
-          }
         });
       },
       error: (error) => {

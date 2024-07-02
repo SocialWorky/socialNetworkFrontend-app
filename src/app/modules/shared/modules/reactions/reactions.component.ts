@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, map, takeUntil } from 'rxjs';
 
 import { CustomReactionsService } from '@admin/shared/manage-reactions/service/customReactions.service';
 import { CustomReactionList } from '@admin/interfaces/customReactions.interface';
@@ -12,6 +12,9 @@ import { EmailNotificationService } from '@shared/services/notifications/email-n
 import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
 import { environment } from '@env/environment';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
+import { NotificationType } from '@shared/modules/notifications-panel/enums/notificationsType.enum';
+import { NotificationCenterService } from '@shared/services/notificationCenter.service';
+import { NotificationService } from '@shared/services/notifications/notification.service';
 
 @Component({
   selector: 'worky-reactions',
@@ -51,7 +54,9 @@ export class ReactionsComponent implements OnInit, OnDestroy {
     private _reactionsService: ReactionsService,
     private _authService: AuthService,
     private _publicationService: PublicationService,
-    private _emailNotificationService: EmailNotificationService
+    private _emailNotificationService: EmailNotificationService,
+    private _notificationCenterService: NotificationCenterService,
+    private _notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -80,6 +85,30 @@ export class ReactionsComponent implements OnInit, OnDestroy {
         next: async () => {
           this.reactionsVisible = false;
           this.sendEmailNotificationReaction(this.publication!, reaction);
+
+          if(this.publication?.author._id === this.token.id) return;
+
+          const dataNotification = {
+            name: reaction.name,
+            emoji: reaction.emoji,
+            _id: reaction._id,
+            userIdReaction: this.token.id,
+            userNameReaction: this.token.name,
+            userAvatarReaction: this.token.avatar,
+          };
+
+          this._notificationCenterService.createNotification({
+            userId: this.publication?.author._id!,
+            type: NotificationType.LIKE,
+            content: 'Han reaccionado a tu publicación',
+            link: `/publication/${this.publication?._id}`,
+            additionalData: JSON.stringify(dataNotification),
+          }).pipe(takeUntil(this.destroy$)).subscribe();
+
+          this._notificationService.sendNotification(this.publication);
+
+
+
           this.refreshPublications();
         },
         error: (err) => {
@@ -91,6 +120,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   deleteReaction(idReaction: string) {
     this._reactionsService.deleteReaction(idReaction).pipe(takeUntil(this.destroy$)).subscribe({
       next: async () => {
+        this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
       },
       error: (err) => {
@@ -108,6 +138,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
       _idPublication: this.publication?._id!,
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: async () => {
+        this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
       },
       error: (err) => {
@@ -148,16 +179,31 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   }
 
   async refreshPublications() {
-    if (this.type === TypePublishing.POSTPROFILE) {
-      const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.userProfile);
-      this._publicationService.updatePublications(refreshPublications);
-      this._cdr.markForCheck();
+if (!this.publication?._id) return;
 
-    } else {
-      const refreshPublications = await this._publicationService.getAllPublications(1, 10);
-      this._publicationService.updatePublications(refreshPublications);
-      this._cdr.markForCheck();
-    }
+    this._publicationService.getPublicationId(this.publication._id).pipe(
+      takeUntil(this.destroy$),
+    ).subscribe({
+      next: (publications: PublicationView[]) => {
+        this._publicationService.updatePublications(publications);
+      },
+      error: (error) => {
+        console.error(error);
+      }
+    });
+
+
+    //this._publicationService.updatePublications(publicationNew);
+    // if (this.type === TypePublishing.POSTPROFILE) {
+    //   const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.userProfile);
+    //   this._publicationService.updatePublications(refreshPublications);
+    //   this._cdr.markForCheck();
+
+    // } else {
+    //   const refreshPublications = await this._publicationService.getAllPublications(1, 10);
+    //   this._publicationService.updatePublications(refreshPublications);
+    //   this._cdr.markForCheck();
+    // }
   }
 
   onTouchStart() {

@@ -10,6 +10,7 @@ export interface NotificationsData {
   // ADDITIONAL PROPERTY
   icon?: string;
   additionalDataComment?: AdditionalDataComment;
+  additionalDataLike?: AdditionalDataLike;
 }
 
 export interface AdditionalDataComment {
@@ -21,4 +22,13 @@ export interface AdditionalDataComment {
   userIdReceiver: string;
   avatarReceiver: string;
   nameReceiver: string;
+}
+
+export interface AdditionalDataLike {
+  _id: string;
+  emoji: string;
+  name: string;
+  userIdReaction: string;
+  userNameReaction: string;
+  userAvatarReaction: string;
 }

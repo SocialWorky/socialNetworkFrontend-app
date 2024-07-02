@@ -82,6 +82,13 @@
       .content {
         display: flex;
         flex-direction: column;
+        span {
+          display: flex;
+          gap: 9px;
+        }
+        img {
+          width: 25px;
+        }
       
       }
     }
