@@ -268,7 +268,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       await this._publicationService.getPublicationId(_id).pipe(takeUntil(this.destroy$)).subscribe({
           next: (publication: PublicationView[]) => {
             this._publicationService.updatePublications(publication);
-            console.log('Publication updated:', publication);
             this._cdr.markForCheck();
           }
       });

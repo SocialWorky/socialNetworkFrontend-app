@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Subject, map, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 
 import { CustomReactionsService } from '@admin/shared/manage-reactions/service/customReactions.service';
 import { CustomReactionList } from '@admin/interfaces/customReactions.interface';
@@ -10,10 +10,7 @@ import { PublicationService } from '@shared/services/publication.service';
 import { PublicationsReactions } from '@shared/interfaces/reactions.interface';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
-import { environment } from '@env/environment';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
-import { NotificationType } from '@shared/modules/notifications-panel/enums/notificationsType.enum';
-import { NotificationCenterService } from '@shared/services/notificationCenter.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 
 @Component({
@@ -55,7 +52,6 @@ export class ReactionsComponent implements OnInit, OnDestroy {
     private _authService: AuthService,
     private _publicationService: PublicationService,
     private _emailNotificationService: EmailNotificationService,
-    private _notificationCenterService: NotificationCenterService,
     private _notificationService: NotificationService
   ) {}
 
@@ -84,30 +80,9 @@ export class ReactionsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: async () => {
           this.reactionsVisible = false;
-          this.sendEmailNotificationReaction(this.publication!, reaction);
+          this._emailNotificationService.reactionsNotification(this.publication!, reaction);
 
           if(this.publication?.author._id === this.token?.id) return;
-
-          const dataNotification = {
-            name: reaction.name,
-            emoji: reaction.emoji,
-            _id: reaction._id,
-            userIdReaction: this.token?.id,
-            userNameReaction: this.token?.name,
-            userAvatarReaction: this.token?.avatar,
-          };
-
-          this._notificationCenterService.createNotification({
-            userId: this.publication?.author._id!,
-            type: NotificationType.LIKE,
-            content: 'Han reaccionado a tu publicación',
-            link: `/publication/${this.publication?._id}`,
-            additionalData: JSON.stringify(dataNotification),
-          }).pipe(takeUntil(this.destroy$)).subscribe();
-
-          this._notificationService.sendNotification(this.publication);
-
-
 
           this.refreshPublications();
         },
@@ -203,23 +178,5 @@ export class ReactionsComponent implements OnInit, OnDestroy {
     if (this.touchTimeout) {
       clearTimeout(this.touchTimeout);
     }
-  }
-
-    sendEmailNotificationReaction(publication: PublicationView, reaction: CustomReactionList) {
-
-    if (this.token?.id === publication.author._id) return;
-
-    this.mailSendNotification.url = `${environment.BASE_URL}/publication/${publication._id}`;
-    this.mailSendNotification.subject = 'Han reaccionado a tu publicación';
-    this.mailSendNotification.title = 'Notificación de reacción';
-    this.mailSendNotification.greet = 'Hola';
-    this.mailSendNotification.message = 'El usuario ' + this.token?.name + ' ha reaccionado a tu publicación';
-    this.mailSendNotification.subMessage = 'Su reacción fue: <img src="'+ reaction.emoji +'" width="20px" alt="'+ reaction.name +'"> ' + reaction.name;
-    this.mailSendNotification.buttonMessage = 'Ver publicación';
-    this.mailSendNotification.template = TemplateEmail.NOTIFICATION;
-    this.mailSendNotification.email = publication?.author.email;
-
-    this._emailNotificationService.sendNotification(this.mailSendNotification).pipe(takeUntil(this.destroy$)).subscribe();
-
   }
 }
