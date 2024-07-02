@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { User } from '@shared/interfaces/user.interface';
 import { environment } from '@env/environment';
 
 
@@ -44,10 +45,10 @@ export class UserService {
     return this.http.get(url, { headers });
   }
 
-  getUserById(id: string): Observable<any> {
+  getUserById(id: string): Observable<User> {
     const url = `${this.baseUrl}/user/${id}`;
     const headers = this.getHeaders();
-    return this.http.get(url, { headers });
+    return this.http.get<User>(url, { headers });
   }
 
   userEdit(id: string, data: any): Observable<any> {

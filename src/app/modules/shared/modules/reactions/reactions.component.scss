@@ -17,7 +17,7 @@
   position: absolute;
   display: flex;
   bottom: 100%;
-  left: 50%;
+  left: 90%;
   transform: translateX(-50%);
   background-color: white;
   padding: 13px;
@@ -58,12 +58,4 @@
     width: 20px;
     height: 20px;
   }
-}
-
-.reaction-container,
-.content-text-reaction,
-.selected-reaction {
-  user-select: none; 
-  -webkit-user-select: none;
-  -ms-user-select: none;
 }

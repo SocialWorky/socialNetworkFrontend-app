@@ -3,7 +3,7 @@
     <div class="publishing-header">
 
       <ng-container *ngIf="type === typePublishing.POST || type === typePublishing.POSTPROFILE">
-        <worky-avatar
+        <worky-avatar *ngIf="user.name && user.lastName"
           [size]="60" 
           img="{{ profileImageUrl }}"
           name="{{ user.name}} {{ user.lastName }}">
@@ -53,7 +53,7 @@
     <div class="publishing-body" [class.comment-body]="type === typePublishing.COMMENT">
       <div class="textarea-container">
 
-        <worky-avatar *ngIf="type === typePublishing.COMMENT"
+        <worky-avatar *ngIf="type === typePublishing.COMMENT && user.name && user.lastName"
           [size]="35"
           img="{{ profileImageUrl }}"
           name="{{ user.name}} {{ user.lastName }}">

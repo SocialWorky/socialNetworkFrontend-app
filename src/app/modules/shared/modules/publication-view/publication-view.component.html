@@ -1,7 +1,6 @@
 <div class="content-publication-view" *ngIf="publication">
 
   <div class="publication-header-actions">
-
     <worky-dropdown
       icon="more_horiz"
       [badge]=false
@@ -9,11 +8,11 @@
       [dataLink]="dataLinkActions"
       (linkClicked)="handleActionsClicked($event, publication)">
     </worky-dropdown>
-
   </div>
+
   <div class="publication-header">
 
-    <worky-avatar 
+    <worky-avatar *ngIf="publication.author.name && publication.author.lastName"
       [size]="40"
       img="{{ publication.author.avatar }}"
       name="{{ publication.author.name }} {{ publication.author.lastName }} ">
@@ -21,7 +20,7 @@
 
     <div class="publication-header-content">
       <div class="user-name-content">
-        <div class="user-name" *ngIf="publication.isMyFriend || (dataUser.id === publication.author._id && !publication.isMyFriend); else notFriend">
+        <div class="user-name" *ngIf="publication.isMyFriend || (dataUser?.id === publication.userReceiving?._id && !publication.isMyFriend) || (dataUser?.id === publication.author._id && !publication.isMyFriend); else notFriend">
           <span (click)="viewProfile(publication.author._id)" class="name link-name">
             {{ publication.author.name }} {{ publication.author.lastName }}
           </span>
@@ -44,20 +43,20 @@
             <span class="name">
               <ng-container *ngIf="!isProfile">
 
-                <i *ngIf="!publication.isMyFriend" class="material-icons">keyboard_arrow_right</i> 
+                <i *ngIf="!publication.isMyFriend || publication.isFriendshipPending" class="material-icons">keyboard_arrow_right</i> 
 
                 <a *ngIf="!publication.isMyFriend && (!userRequest?._id || !userReceive?._id )" class="follow-my-friend" 
                   (click)="followMyFriend(publication.author._id)">
                   {{ 'publicationsView.follow' | workyTranslations }}
                 </a>
 
-                <a *ngIf="!publication.isMyFriend && userRequest?._id === dataUser.id" class="follow-my-friend" 
-                  (click)="cancelFriendship(publication.isFriendshipPending!)">
+                <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending && userRequest?._id === dataUser?.id" class="follow-my-friend" 
+                  (click)="cancelFriendship(publication.isFriendshipPending!, publication.author._id)">
                   {{ 'publicationsView.cancelRequest' | workyTranslations }}
                 </a>
 
-                <a *ngIf="userReceive?._id === dataUser.id" class="follow-my-friend" 
-                  (click)="acceptFriendship(publication.isFriendshipPending!)">
+                <a *ngIf="userReceive?._id === dataUser?.id" class="follow-my-friend" 
+                  (click)="acceptFriendship(publication.isFriendshipPending!, publication.author._id)">
                   Aceptar Amistad
                 </a>
 
@@ -131,13 +130,13 @@
         </worky-reactions>
       </div>
 
-      <div class="publication-footer-actions-item"
+      <div class="publication-footer-actions-item no-select-text"
         (click)="commentOn(indexPublication!)">
         <i class="material-icons">comment</i>
         <span>{{ 'publicationsView.spanComment' | workyTranslations }}</span>
       </div>
 
-      <div class="publication-footer-actions-item">
+      <div class="publication-footer-actions-item no-select-text">
         <worky-dropdown
           icon="share"
           [title]="'publicationsView.spanShare' | workyTranslations"
@@ -170,9 +169,14 @@
 
       <div class="publication-comment-content">
         <div class="publication-comment-data">
-          <span class="comment-author">{{ comment.author.name }} {{ comment.author.lastName }}</span>
+          <div class="content-name-header">
+            <span class="comment-author">{{ comment.author.name }} {{ comment.author.lastName }}</span>
+            <div *ngIf="comment.author._id === dataUser?.id"
+              class="material-icons delete-comment"
+              (click)="deleteComment(comment._id, publication._id)">delete</div>
+          </div>
           <span class="comment-content">{{ comment.content }}</span>
-              <worky-image-organizer 
+              <worky-image-organizer *ngIf="comment.media.length"
                 [images]="comment.media">
               </worky-image-organizer>
         </div>

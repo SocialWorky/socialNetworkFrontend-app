@@ -1,4 +1,14 @@
 .content-publications {
-  height: 92vh;
+  height: 90vh;
   overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none; 
+}
+
+.content-publications::-webkit-scrollbar {
+  display: none;
+}
+
+.last-publication {
+  margin-bottom: 50px;
 }

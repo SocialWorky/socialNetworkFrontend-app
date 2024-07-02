@@ -3,10 +3,13 @@
 
 .content-social-app {
   max-width: variables.$worky-app-width;
+  height: 88vh;
   display: flex;
   justify-content: center;
   margin: auto;
   padding-top: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
   @include breakpoints.below-md {
     flex-direction: column;
     align-items: center;
@@ -19,6 +22,9 @@
   height: 90vh;
   display: block;
   justify-content: space-around;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none; 
   @include breakpoints.below-md {
     display: none;
   }
@@ -35,4 +41,11 @@
 .messages-view,
 .profile-view  {
   width: 100%;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none; 
+}
+
+.content-profile-app {
+  padding-top: 0px;
 }

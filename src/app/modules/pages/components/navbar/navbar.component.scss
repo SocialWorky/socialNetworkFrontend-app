@@ -3,9 +3,6 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
 .content-navbar {
-  position: sticky;
-  top: 0;
-  z-index: 2;
   display: flex;
   justify-content: center;
   height: variables.$worky-navbar-height;
@@ -78,11 +75,11 @@
       border-radius: variables.$worky-border-radius-medium;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
       overflow-y: auto;
-      z-index: 10000;
+      z-index: 9999;
       @include breakpoints.below-sm {
         width: 98%;
         margin-left: 0;
-        z-index: 10000;
+        z-index: 9999;
       }
     }
 

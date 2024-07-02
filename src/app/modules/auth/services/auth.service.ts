@@ -5,40 +5,34 @@ import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { Token } from '../../shared/interfaces/token.interface';
 import { AuthGoogleService } from './auth-google.service';
+import { UserService } from '../../shared/services/users.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  getUserName(): string {
-    throw new Error('Method not implemented.');
-  }
-
   googleLoginSession = localStorage.getItem('googleLogin');
 
   constructor(
     private router: Router,
     private http: HttpClient,
     private _authGoogleService: AuthGoogleService,
-    private _router: Router
+    private _router: Router,
+    private _userService: UserService
   ) {}
 
   isAuthenticated(): boolean {
     const token = localStorage.getItem('token');
-
     if (token) {
       const decodedToken: any = jwtDecode(token);
       const currentTime = Math.floor(Date.now() / 1000);
-
-      if (decodedToken && decodedToken.exp && decodedToken.exp > currentTime) {
+      if (decodedToken && decodedToken.exp && (decodedToken.exp > currentTime)) {
         return true;
       } else {
-        localStorage.removeItem('token');
-        this.router.navigate(['/auth']);
+        this.clearSession();
         return false;
       }
     } else {
-      this.router.navigate(['/auth']);
       return false;
     }
   }
@@ -57,9 +51,13 @@ export class AuthService {
     }
   }
 
-  getDecodedToken(): Token  {
+  getDecodedToken(): Token | null {
     const token = localStorage.getItem('token');
-    return jwtDecode(token!);
+    if (token) {
+      return jwtDecode(token);
+    } else {
+      return null;
+    }
   }
 
   getUseFromToken(token: string): Token {
@@ -69,29 +67,23 @@ export class AuthService {
   generatePassword(): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+';
     let password = '';
-    
     for (let i = 0; i < 12; i++) {
-        const index = Math.floor(Math.random() * characters.length);
-        password += characters.charAt(index);
+      const index = Math.floor(Math.random() * characters.length);
+      password += characters.charAt(index);
     }
-    
     return password;
   }
 
   async generateUserName(email: string, name: string, lastName: string): Promise<string> {
-      let username = `${name.toLowerCase().replace(/\s/g, '')}${lastName.toLowerCase().replace(/\s/g, '')}`;
-
-      let exists = await this.checkExistingUserName(username);
-
-      let counter = 1;
-      while (exists) {
-          username = `${username}${counter}`;
-          exists = await this.checkExistingUserName(username);
-          if (!exists) break;
-          counter++;
-      }
-
-      return await username;
+    let username = `${name.toLowerCase().replace(/\s/g, '')}${lastName.toLowerCase().replace(/\s/g, '')}`;
+    let exists = await this.checkExistingUserName(username);
+    let counter = 1;
+    while (exists) {
+      username = `${username}${counter}`;
+      exists = await this.checkExistingUserName(username);
+      counter++;
+    }
+    return username;
   }
 
   async checkExistingUserName(username: string): Promise<boolean> {
@@ -106,9 +98,13 @@ export class AuthService {
 
   logout() {
     if (this.googleLoginSession) this._authGoogleService.logout();
-    localStorage.removeItem('token');
-    localStorage.removeItem('googleLogin');
+    this.clearSession();
     this._router.navigate(['/auth']);
   }
 
+  private clearSession() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('googleLogin');
+    this.router.navigate(['/auth']);
+  }
 }

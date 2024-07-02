@@ -44,8 +44,12 @@ $worky-font-style-underline: underline; // Estilo de fuente subrayada
 $worky-font-roboto: 'Roboto', sans-serif;
 $worky-font-montserrat: 'Montserrat', sans-serif;
 $worky-font-open-sans: 'Open Sans', sans-serif;
+$worky-font-merriweather: 'Merriweather', serif;
+$worky-font-merriweather-sans: 'Merriweather Sans', sans-serif;
+$worky-font-merriweather-serif: 'Merriweather Serif', serif;
+
 $worky-font-family-jost: "Jost";
-$worky-font-family-global: $worky-font-roboto;
+$worky-font-family-global: $worky-font-merriweather-sans;
 
 // Weights
 $worky-font-weight-bold: 700;

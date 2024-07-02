@@ -1,0 +1,18 @@
+<div class="worky-module-container container-online">
+  <div class="worky-module-header">
+      <div class="worky-module-title">Usuarios Online ({{ usersOnline?.length }})</div>
+  </div>
+
+  <div class="user-online-container">
+      <div class="worky-user" *ngFor="let user of usersOnline">
+        <worky-avatar
+          [size]="60"
+          [name]="user.name"
+          [img]="user.avatar"
+          (click)="goToProfile(user._id!)"
+          class="worky-user-avatar">
+        </worky-avatar>
+      </div>
+  </div>
+
+</div>

@@ -1,21 +1,19 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
 
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { AuthService } from '@auth/services/auth.service';
 
 @Component({
   selector: 'worky-loyaut',
   templateUrl: './loyaut.component.html',
   styleUrls: ['./loyaut.component.scss'],
 })
-
-export class LoyautComponent implements OnInit {
+export class LoyautComponent implements OnInit, OnDestroy {
 
   routeUrl: string = '';
-
   isProfile: boolean = false;
-
   isMessages: boolean = false;
 
   private routeSub: Subscription | undefined;
@@ -24,10 +22,19 @@ export class LoyautComponent implements OnInit {
     return this._deviceDetectionService.isMobile();
   }
 
-  constructor( 
+  get token() {
+    return this._authService.getDecodedToken();
+  }
+
+  get isAuthenticated(): boolean {
+    return !!this.token;
+  }
+
+  constructor(
     private _deviceDetectionService: DeviceDetectionService,
     private _router: Router,
     private _cdr: ChangeDetectorRef,
+    private _authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -53,5 +60,4 @@ export class LoyautComponent implements OnInit {
       this.routeSub.unsubscribe();
     }
   }
-
 }

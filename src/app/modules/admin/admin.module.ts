@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 
 import { TemplatesComponent } from './templates/templates.component';
-import { HomeComponent } from './pages/home/home.component';
+import { HomeAdminComponent } from './pages/home/home.component';
 import { ChangeThemeComponent } from './pages/change-theme/change-theme.component';
 
 import { SidemenuComponent } from './shared/sidemenu/sidemenu.component';
@@ -23,7 +23,7 @@ import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.mod
   declarations: [
     TemplatesComponent,
     SidemenuComponent,
-    HomeComponent,
+    HomeAdminComponent,
     ChangeThemeComponent,
     StatisticsComponent,
     LastRegisteredUsersComponent,

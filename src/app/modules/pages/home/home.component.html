@@ -8,7 +8,7 @@
   <div *ngIf="loaderPublications" class="loader"></div> 
 
   @for(publication of publications; track publication; let i = $index ) {
-    <div class="worky-module-container">
+    <div [ngClass]="{'worky-module-container': true, 'last-publication': i === publications.length - 1}">
       <worky-publication-view
         [publication]="publication"
         [type]="typePublishing.POST"

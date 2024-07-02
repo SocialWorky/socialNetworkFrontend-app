@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -20,7 +20,9 @@ import { ReportCreate } from '@shared/interfaces/report.interface';
 import { ReportType, ReportStatus } from '@shared/enums/report.enum';
 import { ReportResponseComponent } from '../publication-view/report-response/report-response.component';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
-import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
+import { CommentService } from '@shared/services/comment.service';
+import { NotificationService } from '@shared/services/notifications/notification.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'worky-publication-view',
@@ -28,7 +30,7 @@ import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.int
   styleUrls: ['./publication-view.component.scss'],
 })
 export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit {
-  @Input() publication: PublicationView | undefined;
+  @Input() publication!: PublicationView;
 
   @Input() indexPublication?: number;
 
@@ -64,8 +66,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   dataUser = this._authService.getDecodedToken();
 
-  private mailSendDataValidate: MailSendValidateData = {} as MailSendValidateData;
-
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -74,10 +74,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _authService: AuthService,
     private _loadingCtrl: LoadingController,
     private _publicationService: PublicationService,
+    private _commentService: CommentService,
     private _friendsService: FriendsService,
     private _reportsService: ReportsService,
     public _dialog: MatDialog,
     private _emailNotificationService: EmailNotificationService,
+    private _notificationService: NotificationService
   ) {}
   async ngAfterViewInit() {
     await this.getUserFriendPending();
@@ -95,6 +97,19 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       this.isProfile = false;
     }
     this.getUserFriendPending();
+
+    this._notificationService.notification$.pipe(
+      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (data: any) => {
+        if (data?._id === this.publication._id) {
+          this.refreshPublications(data._id);
+          this._cdr.markForCheck();
+        }
+      }
+    });
+
     this._cdr.markForCheck();
   }
 
@@ -130,7 +145,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   checkDataLink(userId: string) {
     const menuDeletePublications = { icon: 'delete', function: this.deletePublications.bind(this), title: translations['publicationsView.deletePublication'] };
 
-    if (userId === this.dataUser.id || this.dataUser.role === RoleUser.ADMIN) {
+    if (userId === this.dataUser?.id || this.dataUser?.role === RoleUser.ADMIN) {
       if (!this.dataLinkActions.find((element) => element.title === translations['publicationsView.deletePublication'])) {
         this.dataLinkActions.push(menuDeletePublications);
       }
@@ -180,7 +195,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       takeUntil(this.destroy$)
     ).subscribe({
       next: () => {
-        this.refreshPublications();
+        this._publicationService.updatePublicationsDeleted([publication]);
         loadingDeletePublication.dismiss();
       },
       error: (error) => {
@@ -201,10 +216,11 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     }
   }
 
-  async followMyFriend(_id: string) {
-    await this._friendsService.requestFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
+  async followMyFriend(_idUser: string) {
+    await this._friendsService.requestFriend(_idUser).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
-       this.refreshPublications();
+       this._emailNotificationService.sendFriendRequestNotification(_idUser);
+       this.viewProfile(_idUser);
       },
       error: (error) => {
         console.error('Error the send request', error);
@@ -212,16 +228,16 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     });
   }
 
-  cancelFriendship(_id: string) {
+  cancelFriendship(_id: string, authorId: string) {
     this._friendsService.deleteFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
-        this.refreshPublications();
+        this.viewProfile(authorId);
       }
     });
   }
 
   async getUserFriendPending() {
-    await this._friendsService.getIsMyFriend(this._authService.getDecodedToken().id, this.publication?.author?._id || '').pipe(takeUntil(this.destroy$)).subscribe({
+    await this._friendsService.getIsMyFriend(this._authService.getDecodedToken()?.id!, this.publication?.author?._id || '').pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: FriendsStatus) => {
         this.userRequest = response?.requester;
         this.userReceive = response?.receiver;
@@ -233,11 +249,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     });
   }
 
-  acceptFriendship(_id: string) {
+  acceptFriendship(_id: string, idUser: string) {
     this._friendsService.acceptFriendship(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.getUserFriendPending();
-        this.refreshPublications();
+        this._emailNotificationService.acceptFriendRequestNotification(idUser);
+        this.viewProfile(idUser);
       }
     });
   }
@@ -246,16 +263,14 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._router.navigate(['/profile', _id]);
   }
 
-  async refreshPublications() {
-    if (this.type === TypePublishing.POSTPROFILE) {
-      const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.userProfile);
-      this._publicationService.updatePublications(refreshPublications);
-      this._cdr.markForCheck();
-
-    } else {
-      const refreshPublications = await this._publicationService.getAllPublications(1, 10);
-      this._publicationService.updatePublications(refreshPublications);
-      this._cdr.markForCheck();
+  async refreshPublications(_id?: string) {
+    if (_id) {
+      await this._publicationService.getPublicationId(_id).pipe(takeUntil(this.destroy$)).subscribe({
+          next: (publication: PublicationView[]) => {
+            this._publicationService.updatePublications(publication);
+            this._cdr.markForCheck();
+          }
+      });
     }
   }
 
@@ -277,14 +292,14 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           const report: ReportCreate = {
             type: ReportType.POST,
             _idReported: publication._id,
-            reporting_user: this.dataUser.id,
+            reporting_user: this.dataUser?.id!,
             status: ReportStatus.PENDING,
             detail_report: result,
           };
           await this._reportsService.createReport(report).pipe(takeUntil(this.destroy$)).subscribe({
             next: (data) => {
               loadingCreateReport.dismiss();
-              this.sendEmailNotificationReport(publication, result);
+              this._emailNotificationService.sendEmailNotificationReport(publication, result);
               this._cdr.markForCheck();
             },
             error: (error) => {
@@ -297,27 +312,23 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       });
   }
 
-  sendEmailNotificationReport(publication: PublicationView, reportMessage: string) {
-
-    this.mailSendDataValidate.url = `${environment.BASE_URL}/publication/${publication._id}`;
-    this.mailSendDataValidate.subject = 'Reporte de publicación';
-    this.mailSendDataValidate.title = 'Reporte de publicación';
-    this.mailSendDataValidate.greet = 'Hola';
-    this.mailSendDataValidate.message = 'Tu reporte ha sido enviado con éxito, pronto revisaremos tu solicitud.';
-    this.mailSendDataValidate.subMessage = 'Tu mensaje: ' + reportMessage;
-    this.mailSendDataValidate.buttonMessage = 'Ver publicación Reportada';
-    this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
-    this.mailSendDataValidate.email = this.dataUser.email;
-
-    this._emailNotificationService.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (data) => {
-        console.log(data);
-      },
-      error: (error) => {
-        console.error('Error sending email:', error);
-      }
+  async deleteComment(_id: string, id_publication: string) {
+    const loadingDeleteComment = await this._loadingCtrl.create({
+      message: 'Eliminando comentario...',
     });
 
-  }
+    loadingDeleteComment.present();
 
+    this._commentService.deletComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.refreshPublications(id_publication);
+        loadingDeleteComment.dismiss();
+      },
+      error: (error) => {
+        console.error('Error deleting comment:', error);
+        loadingDeleteComment.dismiss();
+      }
+    });
+    loadingDeleteComment.dismiss();
+  }
 }

@@ -17,10 +17,10 @@
   }
 
   @include breakpoints.below-sm {
-    height: 180px;
+    height: 190px;
     .image {
       display: contents;
-      object-fit: fill;
+      object-fit: cover;
     }
   }
 
@@ -63,9 +63,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    @include breakpoints.below-sm {
-      object-fit: fill;
-    }
   }
 
 

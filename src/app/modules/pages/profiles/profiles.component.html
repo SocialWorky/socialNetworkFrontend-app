@@ -110,6 +110,7 @@
         </div>
 
         <div *ngIf="loaderPublications" class="loader"></div> 
+
         @for(publication of publications; track publication; let i = $index ) {
           <div class="worky-module-container">
             <worky-publication-view

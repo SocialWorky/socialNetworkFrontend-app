@@ -1,16 +1,16 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SideLeftComponent } from './side-left.component';
+import { SideBarMenuComponent } from './sidebar-menu.component';
 import { WorkyAvatarModule } from '../worky-avatar/worky-avatar.module';
 
 
 
 @NgModule({
-  declarations: [SideLeftComponent],
+  declarations: [SideBarMenuComponent],
   imports: [
     CommonModule,
     WorkyAvatarModule
   ],
-  exports: [SideLeftComponent]
+  exports: [SideBarMenuComponent]
 })
-export class SideLeftModule { }
+export class SideBarMenutModule { }

@@ -13,7 +13,7 @@ import { ProfileDetailComponent } from './profiles/components/profile-detail/pro
 import { MaterialModule } from '@shared/modules/material/material.module';
 
 import { WorkyMenuComponentComponent } from './components/navbar/worky-menu-component/worky-menu-component.component';
-import { SideLeftModule } from '@shared/modules/side-left/side-left.module';
+import { SideBarMenutModule } from '@shared/modules/sidebar-menu/sidebar-menu.module';
 import { WorkyDropdownModule } from '@shared/modules/worky-dropdown/worky-dropdown.module';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
 import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.module';
@@ -28,6 +28,8 @@ import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
 import { MessagesComponent } from './messages/messages.component';
 import { MessageSideLeftComponent } from './messages/components/message-side-left/message-side-left.component';
 import { MessageSideRigthComponent } from './messages/components/message-side-rigth/message-side-rigth.component';
+import { UserOnlineModule } from '@shared/modules/user-online/user-online.module';
+import { NotificationsPanelModule } from '@shared/modules/notifications-panel/notifications-panel.module';
 
 
 @NgModule({
@@ -45,7 +47,6 @@ import { MessageSideRigthComponent } from './messages/components/message-side-ri
     EditImgProfileComponent,
     EditInfoProfileDetailComponent,
     ProfileDetailComponent,
-
   ],
   imports: [
     CommonModule,
@@ -58,12 +59,13 @@ import { MessageSideRigthComponent } from './messages/components/message-side-ri
     AddPublicationModule,
     PublicationViewModule,
     WorkyWidgetModule,
-    PublicationViewModule,
     MaterialModule,
     SuggetionToFollowModule,
-    SideLeftModule,
+    SideBarMenutModule,
     ContactsModule,
     WorkyButtonsModule,
+    UserOnlineModule,
+    NotificationsPanelModule
   ]
 })
 export class PagesModule { }

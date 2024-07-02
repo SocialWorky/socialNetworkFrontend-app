@@ -10,8 +10,8 @@ import { PublicationService } from '@shared/services/publication.service';
 import { PublicationsReactions } from '@shared/interfaces/reactions.interface';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
-import { environment } from '@env/environment';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
+import { NotificationService } from '@shared/services/notifications/notification.service';
 
 @Component({
   selector: 'worky-reactions',
@@ -42,7 +42,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   private touchTimeout: any;
 
   get reactionUserInPublication() {
-    return this.reactionsToPublication.find((reaction) => reaction.user._id === this.token.id);
+    return this.reactionsToPublication.find((reaction) => reaction.user._id === this.token?.id);
   }
 
   constructor(
@@ -51,7 +51,8 @@ export class ReactionsComponent implements OnInit, OnDestroy {
     private _reactionsService: ReactionsService,
     private _authService: AuthService,
     private _publicationService: PublicationService,
-    private _emailNotificationService: EmailNotificationService
+    private _emailNotificationService: EmailNotificationService,
+    private _notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -70,7 +71,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
     }
     this._reactionsService
       .createReaction({
-        authorId: this.token.id,
+        authorId: this.token?.id!,
         _idCustomReaction: reaction._id,
         isPublications: this.type === TypePublishing.POST || TypePublishing.POSTPROFILE ? true : false,
         isComment: this.type === TypePublishing.COMMENT ? true : false,
@@ -79,7 +80,10 @@ export class ReactionsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: async () => {
           this.reactionsVisible = false;
-          this.sendEmailNotificationReaction(this.publication!, reaction);
+          this._emailNotificationService.reactionsNotification(this.publication!, reaction);
+
+          if(this.publication?.author._id === this.token?.id) return;
+
           this.refreshPublications();
         },
         error: (err) => {
@@ -91,6 +95,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   deleteReaction(idReaction: string) {
     this._reactionsService.deleteReaction(idReaction).pipe(takeUntil(this.destroy$)).subscribe({
       next: async () => {
+        this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
       },
       error: (err) => {
@@ -101,13 +106,14 @@ export class ReactionsComponent implements OnInit, OnDestroy {
 
   editReaction(id: string, reaction: CustomReactionList) {
     this._reactionsService.editReaction(id, {
-      authorId: this.token.id,
+      authorId: this.token?.id!,
       _idCustomReaction: reaction._id,
       isPublications: this.type === TypePublishing.POST || this.typePublishing.POSTPROFILE ? true : false,
       isComment: this.type === TypePublishing.COMMENT ? true : false,
       _idPublication: this.publication?._id!,
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: async () => {
+        this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
       },
       error: (err) => {
@@ -148,16 +154,18 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   }
 
   async refreshPublications() {
-    if (this.type === TypePublishing.POSTPROFILE) {
-      const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.userProfile);
-      this._publicationService.updatePublications(refreshPublications);
-      this._cdr.markForCheck();
+    if (!this.publication?._id) return;
 
-    } else {
-      const refreshPublications = await this._publicationService.getAllPublications(1, 10);
-      this._publicationService.updatePublications(refreshPublications);
-      this._cdr.markForCheck();
-    }
+    this._publicationService.getPublicationId(this.publication._id).pipe(
+      takeUntil(this.destroy$),
+    ).subscribe({
+      next: (publications: PublicationView[]) => {
+        this._publicationService.updatePublications(publications);
+      },
+      error: (error) => {
+        console.error(error);
+      }
+    });
   }
 
   onTouchStart() {
@@ -170,23 +178,5 @@ export class ReactionsComponent implements OnInit, OnDestroy {
     if (this.touchTimeout) {
       clearTimeout(this.touchTimeout);
     }
-  }
-
-    sendEmailNotificationReaction(publication: PublicationView, reaction: CustomReactionList) {
-
-    if (this.token.id === publication.author._id) return;
-
-    this.mailSendNotification.url = `${environment.BASE_URL}/publication/${publication._id}`;
-    this.mailSendNotification.subject = 'Han reaccionado a tu publicación';
-    this.mailSendNotification.title = 'Notificación de reacción';
-    this.mailSendNotification.greet = 'Hola';
-    this.mailSendNotification.message = 'El usuario ' + this.token.name + ' ha reaccionado a tu publicación';
-    this.mailSendNotification.subMessage = 'Su reacción fue: <img src="'+ reaction.emoji +'" width="20px" alt="'+ reaction.name +'"> ' + reaction.name;
-    this.mailSendNotification.buttonMessage = 'Ver publicación';
-    this.mailSendNotification.template = TemplateEmail.NOTIFICATION;
-    this.mailSendNotification.email = publication?.author.email;
-
-    this._emailNotificationService.sendNotification(this.mailSendNotification).pipe(takeUntil(this.destroy$)).subscribe();
-
   }
 }

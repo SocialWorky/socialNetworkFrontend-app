@@ -16,8 +16,12 @@
     align-items: center;
     gap: 1rem;
     .publication-header-content {
+      width: 85%;
       display: flex;
       flex-direction: column;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       .user-name-content {
         display: flex;
         align-items: center;
@@ -179,19 +183,34 @@
       gap: 0.5rem;
       margin-top: 0.3rem;
       .publication-comment-content {
-         width: 100%;
+         max-width: 100%;
         .publication-comment-data {
-          padding: 0.5rem 1rem;
+          padding: 0.4rem 1rem 0.4rem 1rem;
           display: flex;
           flex-direction: column;
           background-color: colors.$worky-color-greyLight;
-          border-radius: 12px;
+          border-radius: 8px;
           span {
             font-size: variables.$worky-font-size-2;
           }
-          .comment-author {
-            color: colors.$worky-color-blue;
+          .content-name-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            .comment-author {
+              color: colors.$worky-color-blue;
+            }
+            .delete-comment {
+              margin-left: 15px;
+              padding: 5px;
+              background-color: rgb(228, 228, 228);
+              border-radius: 50%;
+              cursor: pointer;
+              font-size: 15px;
+              color: rgb(166, 0, 0);
+            }
           }
+
         }
         .comment-date {
           margin-left: 5px;

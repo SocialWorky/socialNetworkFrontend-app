@@ -17,6 +17,8 @@ import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.int
 import { environment } from '@env/environment';
 import { ResetPasswordModalComponent } from './reset-password-modal/reset-password-modal.component';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { SocketService } from '@shared/services/socket.service';
+import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 
 @Component({
   selector: 'worky-login',
@@ -52,6 +54,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     private _authService: AuthService,
     private _dialog: MatDialog,
     private _deviceDetectionService: DeviceDetectionService,
+    private _socketService: SocketService,
+    private _notificationUsersService: NotificationUsersService,
   ) {
     if (this.token) {
       this._router.navigate(['/home']);
@@ -137,7 +141,12 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       next: (response: any) => {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
-          const token = this._authService.getDecodedToken();
+          const token = this._authService.getDecodedToken()!;
+
+          this._socketService.connectToWebSocket(token);
+
+          this._notificationUsersService.loginUser();
+
           if (token?.role === 'admin' && !this._deviceDetectionService.isMobile()) {
             this._router.navigate(['/admin']);
           } else {
@@ -219,7 +228,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
         localStorage.setItem('token', response.token);
 
-        const userId = this._authService.getDecodedToken()?.id;
+        const userId = this._authService.getDecodedToken()?.id!;
 
         this.subscription = await this._authApiService.avatarUpdate(userId, loginDataGoogle.picture, response.token).subscribe({
           next: async (response: any) => {
@@ -238,6 +247,9 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         });
 
+          const token = this._authService.getDecodedToken()!;
+          this._socketService.connectToWebSocket(token);
+          this._notificationUsersService.loginUser();
       },
     });
 

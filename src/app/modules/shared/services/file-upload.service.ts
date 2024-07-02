@@ -28,7 +28,7 @@ export class FileUploadService {
 
   uploadFile(files: File[], destination: string) {
     const url = environment.APIFILESERVICE + 'upload';
-    const id = this._authService.getDecodedToken().id;
+    const id = this._authService.getDecodedToken()?.id;
     const headers = this.getHeaders();
     const formData = new FormData();
 

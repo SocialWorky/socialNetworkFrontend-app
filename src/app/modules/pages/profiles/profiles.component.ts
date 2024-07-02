@@ -22,6 +22,7 @@ import { environment } from '@env/environment';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { ProfileService } from './services/profile.service';
 import { ProfileNotificationService } from '@shared/services/notifications/profile-notification.service';
+import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 
 @Component({
   selector: 'worky-profiles',
@@ -58,6 +59,8 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   isAuthenticated: boolean = false;
 
   isCurrentUser: boolean = false;
+
+  dataUser = this._authService.getDecodedToken();
 
   isFriend: boolean = false;
 
@@ -96,6 +99,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _globalEventService: GlobalEventService,
     private _profileService: ProfileService,
     private _profileNotificationService: ProfileNotificationService,
+    private _emailNotificationService: EmailNotificationService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -103,7 +107,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
 
     if (this.idUserProfile === '') {
-      this.idUserProfile = await this._authService.getDecodedToken().id;
+      this.idUserProfile = this._authService.getDecodedToken()?.id!;
       this._cdr.markForCheck();
     }
 
@@ -113,7 +117,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
     this.getUserFriend();
     
-    this.decodedToken = this._authService.getDecodedToken();
+    this.decodedToken = this._authService.getDecodedToken()!;
 
     this.isCurrentUser = this.idUserProfile === this.decodedToken.id;
 
@@ -137,7 +141,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this._cdr.markForCheck();
     });
 
-    // this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
+    this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
 
     this.loaderPublications = false;
 
@@ -176,7 +180,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   getUserFriend() {
-    this._userService.getUserFriends(this._authService.getDecodedToken().id, this.idUserProfile).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._userService.getUserFriends(this._authService.getDecodedToken()?.id!, this.idUserProfile).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response) => {
         this.getUserFriendPending();
       },
@@ -187,7 +191,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   getUserFriendPending(): void {
-    this._friendsService.getIsMyFriend(this._authService.getDecodedToken().id, this.idUserProfile).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._friendsService.getIsMyFriend(this._authService.getDecodedToken()?.id!, this.idUserProfile).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: FriendsStatus) => {
         this.isFriendPending.status = response?.status === 'pending';
         this.idPendingFriend = response?.id;
@@ -218,6 +222,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
         this._publicationService.updatePublications(refreshPublications);
         this.getUserFriendPending();
+        this._emailNotificationService.sendFriendRequestNotification(_id);
         this._cdr.markForCheck();
       },
       error: (error) => {
@@ -244,6 +249,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this.getUserFriendPending();
         const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
         this._publicationService.updatePublications(refreshPublications);
+        this._emailNotificationService.acceptFriendRequestNotification(this.idUserProfile);
         this._cdr.markForCheck();
       }
     });
@@ -276,7 +282,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.isUploading = true;
     this._cdr.markForCheck();
 
-    const userId = this._authService.getDecodedToken().id;
+    const userId = this._authService.getDecodedToken()?.id!;
     const uploadLocation = 'profile-avatar';
     if (this.selectedImage) {
       const response = await lastValueFrom(

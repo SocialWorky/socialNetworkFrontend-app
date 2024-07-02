@@ -1,10 +1,21 @@
-import { ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  Input,
+  OnInit,
+  OnDestroy,
+  ViewChild,
+  AfterViewInit
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
-import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
+import { Observable, Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-
-import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
+import {
+  WorkyButtonType,
+  WorkyButtonTheme
+} from '@shared/modules/buttons/models/worky-button-model';
 import { AuthService } from '@auth/services/auth.service';
 import { PublicationService } from '@shared/services/publication.service';
 import { CommentService } from '@shared/services/comment.service';
@@ -19,51 +30,40 @@ import { LocationSearchComponent } from '../location-search/location-search.comp
 import { ExtraData } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { ImageUploadModalComponent } from '../image-upload-modal/image-upload-modal.component';
 import { FileUploadService } from '@shared/services/file-upload.service';
-import { MediaFileUpload } from '@shared/interfaces/publicationView.interface';
+import { MediaFileUpload, PublicationView } from '@shared/interfaces/publicationView.interface';
 import { UserService } from '@shared/services/users.service';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { User } from '@shared/interfaces/user.interface';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { environment } from '@env/environment';
 import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
+import { NotificationCenterService } from '@shared/services/notificationCenter.service';
+import { NotificationType } from '@shared/modules/notifications-panel/enums/notificationsType.enum';
 
 @Component({
   selector: 'worky-add-publication',
   templateUrl: './addPublication.component.html',
   styleUrls: ['./addPublication.component.scss'],
 })
-export class AddPublicationComponent implements OnInit, OnDestroy {
+export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit {
   WorkyButtonType = WorkyButtonType;
-  
   WorkyButtonTheme = WorkyButtonTheme;
-
-  user: User = {} as User;
-  
-  nameGeoLocation: string = '';
-
-  dataGeoLocation: string = '';
-
-  showEmojiMenu = false;
-
-  privacyFront: string = '';
-
-  previews: { url: string, type: string }[] = [];
-
-  selectedFiles: File[] = [];
-
-  privacy: TypePrivacy = TypePrivacy.PUBLIC;
-
   typePrivacy = TypePrivacy;
-
-  decodedToken!: Token;
-
-  isAuthenticated: boolean = false;
-
   typePublishing = TypePublishing;
 
-  profileImageUrl: null | string = null;
+  user: User = {} as User;
+  profileImageUrl: string | null = null;
+  nameGeoLocation = '';
+  dataGeoLocation = '';
+  showEmojiMenu = false;
+  privacy = TypePrivacy.PUBLIC;
+  privacyFront = '';
+  previews: { url: string; type: string }[] = [];
+  selectedFiles: File[] = [];
+  decodedToken!: Token;
+  isAuthenticated = false;
 
-  public myForm: FormGroup = this._fb.group({
+  myForm: FormGroup = this._fb.group({
     content: ['', [Validators.required, Validators.minLength(1)]],
     privacy: [''],
     authorId: [''],
@@ -71,22 +71,13 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     userReceivingId: [''],
   });
 
-  get userToken(): string {
-    return this.decodedToken.id;
-  }
-
   private unsubscribe$ = new Subject<void>();
-
-  private subscription: Subscription | undefined;
-
   private mailSendNotification: MailSendValidateData = {} as MailSendValidateData;
+  private subscription?: Subscription;
 
-  @Input() type: TypePublishing | undefined;
-
+  @Input() type?: TypePublishing;
   @Input() idPublication?: string;
-
   @Input() indexPublication?: number;
-
   @Input() idUserProfile?: string;
 
   @ViewChild('postText') postTextRef!: ElementRef;
@@ -105,59 +96,53 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _userService: UserService,
     private _globalEventService: GlobalEventService,
     private _emailNotificationService: EmailNotificationService,
+    private _notificationCenterService: NotificationCenterService
   ) {
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
-      this.decodedToken = this._authService.getDecodedToken();
+      this.decodedToken = this._authService.getDecodedToken()!;
     }
   }
 
   ngOnInit() {
     this.postPrivacy(TypePrivacy.PUBLIC);
     this.getUser();
-    this.subscription = this._globalEventService.profileImage$.pipe(
-      takeUntil(this.unsubscribe$)
-    ).subscribe(newImageUrl => {
-
-      this.profileImageUrl = newImageUrl;
-
-      if (this.type === TypePublishing.POSTPROFILE) {
-        (async () => {
-          try {
-            const publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
-            this._publicationService.updatePublications(publicationsNew);
-          } catch (error) {
-            console.error('Error getting publications', error);
-          }
-        })();
-      }
-    });
-
+    this.subscription = this._globalEventService.profileImage$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(newImageUrl => {
+        this.profileImageUrl = newImageUrl;
+        if (this.type === TypePublishing.POSTPROFILE) {
+          this.updatePublications(TypePublishing.POSTPROFILE, this.idUserProfile);
+        }
+      });
   }
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription?.unsubscribe();
   }
 
   ngAfterViewInit() {
     this.autoResize();
   }
 
-  async getUser() {
-    await this._userService.getUserById(this.decodedToken.id).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (response: User) => {
-        this.profileImageUrl = response.avatar;
-        this.user = response;
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error(error);
-      },
-    });
+  get userToken(): string {
+    return this.decodedToken.id;
+  }
+
+  private async getUser() {
+    this._userService
+      .getUserById(this.decodedToken.id)
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe({
+        next: (response: User) => {
+          this.profileImageUrl = response.avatar;
+          this.user = response;
+          this._cdr.markForCheck();
+        },
+        error: console.error,
+      });
   }
 
   toggleEmojiMenu() {
@@ -171,19 +156,16 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   onEmojiClick(event: any) {
     const selectedEmoji = event.emoji.native;
     const currentContent = this.myForm.get('content')?.value;
-    const newContent = currentContent + selectedEmoji;
-    this.myForm.get('content')?.setValue(newContent);
+    this.myForm.get('content')?.setValue(currentContent + selectedEmoji);
     this.showEmojiMenu = false;
   }
 
   async onSave() {
     this.myForm.controls['authorId'].setValue(this.decodedToken.id);
     this.myForm.controls['privacy'].setValue(this.privacy);
-
     if (this.type === TypePublishing.POST || this.type === TypePublishing.POSTPROFILE) {
       this.onSavePublication();
-    }
-    if (this.type === TypePublishing.COMMENT) {
+    } else if (this.type === TypePublishing.COMMENT) {
       this.onSaveComment(this.idPublication as string);
     }
   }
@@ -198,78 +180,41 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     const dataComment: CreateComment = {
       content: this.myForm.controls['content'].value,
       authorId: this.decodedToken.id,
-      idPublication: idPublication,
+      idPublication,
     };
 
     this._commentService.createComment(dataComment).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
-        try {
-          if (this.selectedFiles.length) {
-            const response = await lastValueFrom(
-              this._fileUploadService.uploadFile(this.selectedFiles, 'comments').pipe(takeUntil(this.unsubscribe$))
-            );
-            const saveLocation = 'comments/';
-            const saveFilePromises = response.map((file: MediaFileUpload) => {
-              return lastValueFrom(
-                this._fileUploadService.saveUrlFile(
-                  saveLocation + file.filename,
-                  saveLocation + file.filenameThumbnail,
-                  saveLocation + file.filenameCompressed,
-                  message.comment._id, TypePublishing.COMMENT).pipe(takeUntil(this.unsubscribe$))
-              );
-            });
-
-            await Promise.all(saveFilePromises);
-
-            this.selectedFiles = [];
-            this.previews = [];
-            this._cdr.markForCheck();
-          }
-
-          let publicationsNew = [];
-
-          if(this.type === TypePublishing.POSTPROFILE){
-            publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
-            publicationsNew[this.indexPublication!].comment.unshift(message.comment);
-            this._publicationService.updatePublications(publicationsNew);
-          } else {
-            publicationsNew = await this._publicationService.getAllPublications(1, 10);
-            publicationsNew[this.indexPublication!].comment.unshift(message.comment);
-            this._publicationService.updatePublications(publicationsNew);
-          }
-
-          this.sendEmailNotificationReaction(publicationsNew[this.indexPublication!], message.comment);
-
-          if (message.message === 'Comment created successfully') {
-            this.myForm.controls['content'].setValue('');
-            this.autoResize();
-            this._alertService.showAlert(
-              translations['addPublication.alertCreateCommentTitle'],
-              translations['addPublication.alertCreateCommentMessage'],
-              Alerts.SUCCESS,
-              Position.CENTER,
-              true,
-              true,
-              translations['button.ok'],
-            );
-            this._notificationCommentService.sendNotificationComment({
-              commentId: message.comment._id,
-              idPublication: idPublication,
-              userEmittedId: this.decodedToken.id,
-              authorPublicationId: publicationsNew[this.indexPublication!].author._id,
-            });
-          }
-        } catch (error) {
-          console.error(error);
-        } finally {
-          loadingComment.dismiss();
-        }
+        await this.handleCommentResponse(message, idPublication);
+        loadingComment.dismiss();
       },
-      error: (error) => {
+      error: error => {
         console.error(error);
         loadingComment.dismiss();
       }
     });
+  }
+
+  private async handleCommentResponse(message: any, idPublication: string) {
+    try {
+      if (this.selectedFiles.length) {
+        const response = await this.uploadFiles('comments', message.comment._id);
+        await this.saveFiles(response, 'comments/', message.comment._id, TypePublishing.COMMENT);
+      }
+
+      await this.updatePublicationAndNotify(idPublication, message.comment);
+
+      if (message.message === 'Comment created successfully') {
+        this.myForm.controls['content'].setValue('');
+        this.autoResize();
+        this.showSuccessAlert(
+          translations['addPublication.alertCreateCommentTitle'],
+          translations['addPublication.alertCreateCommentMessage']
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   private async onSavePublication() {
@@ -279,16 +224,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
     loadingPublications.present();
 
-    const extraData: ExtraData = {
-      locations: {
-        title: this.nameGeoLocation,
-        urlMap: this.dataGeoLocation,
-      }
-    };
-
-    if (this.nameGeoLocation !== '' || this.dataGeoLocation !== '') {
-      this.myForm.controls['extraData'].setValue(JSON.stringify(extraData));
-    }
+    this.setExtraData();
 
     if (this.type === TypePublishing.POSTPROFILE && this.idUserProfile !== this.decodedToken.id) {
       this.myForm.controls['userReceivingId'].setValue(this.idUserProfile);
@@ -297,62 +233,126 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
     this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
-        try {
-          if (this.selectedFiles.length) {
-            const response = await lastValueFrom(
-              this._fileUploadService.uploadFile(this.selectedFiles, 'publications').pipe(takeUntil(this.unsubscribe$))
-            );
-            const saveFilePromises = response.map((file: MediaFileUpload) => {
-              const saveLocation = 'publications/';
-              return lastValueFrom(
-                this._fileUploadService.saveUrlFile(
-                  saveLocation + file.filename,
-                  saveLocation + file.filenameThumbnail,
-                  saveLocation + file.filenameCompressed,
-                  message.publications._id,
-                  TypePublishing.POST).pipe(takeUntil(this.unsubscribe$))
-              );
-            });
-
-            await Promise.all(saveFilePromises);
-
-            this.selectedFiles = [];
-            this.previews = [];
-            this._cdr.markForCheck();
-          }
-
-          if(this.type === TypePublishing.POSTPROFILE){
-            const publicationsNew = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
-            this._publicationService.updatePublications(publicationsNew);
-          } else {
-            const publicationsNew = await this._publicationService.getAllPublications(1, 10);
-            this._publicationService.updatePublications(publicationsNew);
-          }
-
-          if (message.message === 'Publication created successfully') {
-            this.myForm.controls['content'].setValue('');
-            this.autoResize();
-            this._alertService.showAlert(
-              translations['addPublication.alertCreatePublicationTitle'],
-              translations['addPublication.alertCreatePublicationMessage'],
-              Alerts.SUCCESS,
-              Position.CENTER,
-              true,
-              true,
-              translations['button.ok'],
-            );
-          }
-        } catch (error) {
-          console.error(error);
-        } finally {
-          loadingPublications.dismiss();
-        }
+        await this.handlePublicationResponse(message);
+        loadingPublications.dismiss();
       },
-      error: (error) => {
+      error: error => {
         console.error(error);
         loadingPublications.dismiss();
       },
     });
+  }
+
+  private async handlePublicationResponse(message: any) {
+    try {
+      if (this.selectedFiles.length) {
+        const response = await this.uploadFiles('publications', message.publications._id);
+        await this.saveFiles(response, 'publications/', message.publications._id, TypePublishing.POST);
+      }
+
+      await this.updatePublicationAndNotify(message.publications._id);
+
+      if (message.message === 'Publication created successfully') {
+        this.myForm.controls['content'].setValue('');
+        this.autoResize();
+        this.showSuccessAlert(
+          translations['addPublication.alertCreatePublicationTitle'],
+          translations['addPublication.alertCreatePublicationMessage']
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  private setExtraData() {
+    const extraData: ExtraData = {
+      locations: {
+        title: this.nameGeoLocation,
+        urlMap: this.dataGeoLocation,
+      }
+    };
+    if (this.nameGeoLocation || this.dataGeoLocation) {
+      this.myForm.controls['extraData'].setValue(JSON.stringify(extraData));
+    }
+  }
+
+  private async uploadFiles(folder: string, id: string) {
+    return await lastValueFrom(
+      this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$))
+    );
+  }
+
+  private async saveFiles(response: MediaFileUpload[], saveLocation: string, id: string, type: TypePublishing) {
+    const saveFilePromises = response.map(file => {
+      return lastValueFrom(
+        this._fileUploadService.saveUrlFile(
+          saveLocation + file.filename,
+          saveLocation + file.filenameThumbnail,
+          saveLocation + file.filenameCompressed,
+          id,
+          type
+        ).pipe(takeUntil(this.unsubscribe$))
+      );
+    });
+    await Promise.all(saveFilePromises);
+    this.selectedFiles = [];
+    this.previews = [];
+    this._cdr.markForCheck();
+  }
+
+  private async updatePublicationAndNotify(idPublication: string, comment?: any) {
+    this._publicationService.getPublicationId(idPublication).pipe(takeUntil(this.unsubscribe$)).subscribe({
+      next: (publication: PublicationView[]) => {
+        this._publicationService.updatePublications(publication);
+        if (comment) {
+          this.sendEmailNotificationReaction(publication[0], comment);
+          this.createNotificationAndSendComment(publication[0], comment);
+        }
+      },
+      error: console.error
+    });
+  }
+
+  private createNotificationAndSendComment(publication: PublicationView, comment: any) {
+    if (this.userToken === publication.author._id) return;
+
+    const dataNotification = this.createNotificationData(publication, comment);
+
+    this._notificationCenterService.createNotification({
+      userId: publication.author._id,
+      type: NotificationType.COMMENT,
+      content: 'Han comentado tu publicación',
+      link: `/publication/${publication._id}`,
+      additionalData: JSON.stringify(dataNotification),
+    }).pipe(takeUntil(this.unsubscribe$)).subscribe();
+
+    this._notificationCommentService.sendNotificationComment(dataNotification);
+  }
+
+  private createNotificationData(publication: PublicationView, comment: any) {
+    return {
+      comment: comment.content,
+      postId: publication._id,
+      userIdComment: this.decodedToken.id,
+      avatarComment: this.decodedToken.avatar,
+      nameComment: this.decodedToken.name,
+      userIdReceiver: publication.author._id,
+      avatarReceiver: publication.author.avatar,
+      nameReceiver: `${publication.author.name} ${publication.author.lastName}`,
+    };
+  }
+
+  private showSuccessAlert(title: string, message: string) {
+    this._alertService.showAlert(
+      title,
+      message,
+      Alerts.SUCCESS,
+      Position.CENTER,
+      true,
+      true,
+      translations['button.ok'],
+    );
   }
 
   autoResize() {
@@ -366,17 +366,19 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   postPrivacy(privacy: string): void {
-    if (privacy === TypePrivacy.PUBLIC) {
-      this.privacy = TypePrivacy.PUBLIC;
-      this.privacyFront = `<i class="material-icons">language</i> ${translations['publishing.privacy-public']} <i class="material-icons">arrow_drop_down</i>`;
-    }
-    if (privacy === TypePrivacy.FRIENDS) {
-      this.privacy = TypePrivacy.FRIENDS;
-      this.privacyFront = `<i class="material-icons">group</i> ${translations['publishing.privacy-friends']} <i class="material-icons">arrow_drop_down</i>`;
-    }
-    if (privacy === TypePrivacy.PRIVATE) {
-      this.privacy = TypePrivacy.PRIVATE;
-      this.privacyFront = `<i class="material-icons">lock</i> ${translations['publishing.privacy-private']} <i class="material-icons">arrow_drop_down</i>`;
+    switch (privacy) {
+      case TypePrivacy.PUBLIC:
+        this.privacy = TypePrivacy.PUBLIC;
+        this.privacyFront = `<i class="material-icons">language</i> ${translations['publishing.privacy-public']} <i class="material-icons">arrow_drop_down</i>`;
+        break;
+      case TypePrivacy.FRIENDS:
+        this.privacy = TypePrivacy.FRIENDS;
+        this.privacyFront = `<i class="material-icons">group</i> ${translations['publishing.privacy-friends']} <i class="material-icons">arrow_drop_down</i>`;
+        break;
+      case TypePrivacy.PRIVATE:
+        this.privacy = TypePrivacy.PRIVATE;
+        this.privacyFront = `<i class="material-icons">lock</i> ${translations['publishing.privacy-private']} <i class="material-icons">arrow_drop_down</i>`;
+        break;
     }
   }
 
@@ -387,15 +389,17 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        const lat = result.geometry?.lat ? result.geometry.lat : result.lat;
-        const lng = result.geometry?.lng ? result.geometry.lng : result.lng;
-
-        const urlMap = `https://www.google.com/maps/?q=${result.formatted}&ll=${lat},${lng}`;
-        this.dataGeoLocation = urlMap;
-        this.nameGeoLocation = result.formatted.split(',')[0];
+        this.setLocationData(result);
         this._cdr.markForCheck();
       }
     });
+  }
+
+  private setLocationData(result: any) {
+    const lat = result.geometry?.lat ?? result.lat;
+    const lng = result.geometry?.lng ?? result.lng;
+    this.dataGeoLocation = `https://www.google.com/maps/?q=${result.formatted}&ll=${lat},${lng}`;
+    this.nameGeoLocation = result.formatted.split(',')[0];
   }
 
   openUploadModal() {
@@ -408,26 +412,23 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.selectedFiles = result;
-        this.previews = [];
-        this.selectedFiles.forEach(file => {
-          const reader = new FileReader();
-          reader.onload = (e: any) => {
-            const fileType = file.type.split('/')[0];
-            if (fileType === 'image') {
-              this.previews.push({
-                type: 'image',
-                url: e.target.result
-              });
-            } else if (fileType === 'video') {
-              this.previews.push({
-                type: 'video',
-                url: e.target.result
-              });
-            }
-          };
-          reader.readAsDataURL(file);
-        });
+        this.createPreviews();
       }
+    });
+  }
+
+  private createPreviews() {
+    this.previews = [];
+    this.selectedFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        const fileType = file.type.split('/')[0];
+        this.previews.push({
+          type: fileType === 'image' ? 'image' : 'video',
+          url: e.target.result
+        });
+      };
+      reader.readAsDataURL(file);
     });
   }
 
@@ -437,20 +438,29 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   sendEmailNotificationReaction(publication: any, comment: any) {
-
     if (this.userToken === publication.author._id) return;
 
-    this.mailSendNotification.url = `${environment.BASE_URL}/publication/${publication._id}`;
-    this.mailSendNotification.subject = 'Han comentado tu publicación';
-    this.mailSendNotification.title = 'Notificación de comentario en publicación';
-    this.mailSendNotification.greet = 'Hola';
-    this.mailSendNotification.message = 'El usuario ' + this.user.name + ' ' + this.user.lastName + ' ha comentado tu publicación';
-    this.mailSendNotification.subMessage = 'Su comentario fue: ' + comment.content;
-    this.mailSendNotification.buttonMessage = 'Ver publicación';
-    this.mailSendNotification.template = TemplateEmail.NOTIFICATION;
-    this.mailSendNotification.email = publication?.author.email;
+    this.mailSendNotification = {
+      url: `${environment.BASE_URL}/publication/${publication._id}`,
+      subject: 'Han comentado tu publicación',
+      title: 'Notificación de comentario en publicación',
+      greet: 'Hola',
+      message: `El usuario ${this.user.name} ${this.user.lastName} ha comentado tu publicación`,
+      subMessage: `Su comentario fue: ${comment.content}`,
+      buttonMessage: 'Ver publicación',
+      template: TemplateEmail.NOTIFICATION,
+      email: publication?.author.email,
+    };
 
     this._emailNotificationService.sendNotification(this.mailSendNotification).pipe(takeUntil(this.unsubscribe$)).subscribe();
+  }
 
+  private async updatePublications(type: TypePublishing, idUserProfile?: string) {
+    try {
+      const publicationsNew = await this._publicationService.getAllPublications(1, 10, type, idUserProfile);
+      this._publicationService.updatePublications(publicationsNew);
+    } catch (error) {
+      console.error('Error getting publications', error);
+    }
   }
 }

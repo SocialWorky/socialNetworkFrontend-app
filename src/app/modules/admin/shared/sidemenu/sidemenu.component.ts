@@ -26,7 +26,7 @@ export class SidemenuComponent  implements OnInit {
   constructor(private _authService: AuthService) { }
 
   ngOnInit() {
-    const token = this._authService.getDecodedToken();
+    const token = this._authService.getDecodedToken()!;
     this.userName = token?.name;
   }
 

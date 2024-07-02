@@ -8,6 +8,7 @@ import { FileUploadService } from '@shared/services/file-upload.service';
 import { ProfileService } from '../../services/profile.service';
 import { AuthService } from '@auth/services/auth.service';
 import { environment } from '@env/environment';
+import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 
 @Component({
   selector: 'worky-edit-img-profile',
@@ -35,6 +36,8 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
 
   isUploading = false;
 
+  isMobile = this._deviceDetectionService.isMobile();
+
   @ViewChild('imageElement') imageElement: ElementRef | undefined;
 
   @ViewChild('cropperImage') cropperImage: ElementRef | undefined;
@@ -49,6 +52,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     private _fileUploadService: FileUploadService,
     private _profileService: ProfileService,
     private _authService: AuthService,
+    private _deviceDetectionService: DeviceDetectionService
   ) {}
 
   ngAfterViewInit(): void {
@@ -100,7 +104,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
       this.selectedImage = croppedImageUrl;
       this._cdr.detectChanges();
 
-      const file = this.dataURLtoFile(croppedImageUrl, this._authService.getDecodedToken().id, this.originalMimeType!);
+      const file = this.dataURLtoFile(croppedImageUrl, this._authService.getDecodedToken()?.id!, this.originalMimeType!);
       this.selectedFiles = [file];
     }
   }
@@ -122,16 +126,25 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
 
     dialogRef.afterClosed().pipe(takeUntil(this.unsubscribe$)).subscribe(result => {
       if (result && result.length > 0) {
+
         this.selectedFiles = result;
         const file = this.selectedFiles[0];
         this.originalMimeType = file.type;
         const reader = new FileReader();
         reader.onload = (e: any) => {
           this.selectedImage = e.target.result;
-          this.cropping = true;
+          if (!this.isMobile) this.cropping = true;
           this._cdr.detectChanges();
         };
         reader.readAsDataURL(file);
+
+        console.log('isMobile', this.isMobile);
+
+        if (this.isMobile) {
+          setTimeout(() => {
+            this.uploadImg();
+          }, 1000);
+        }
       }
     });
   }
@@ -140,7 +153,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     this.isUploading = true;
     this._cdr.detectChanges();
 
-    const userId = this._authService.getDecodedToken().id;
+    const userId = this._authService.getDecodedToken()?.id!;
     const uploadLocation = 'profile';
     if (this.selectedImage) {
       const response = await lastValueFrom(

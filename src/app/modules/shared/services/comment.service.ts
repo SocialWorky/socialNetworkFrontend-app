@@ -31,4 +31,10 @@ export class CommentService {
     return this.http.post(url, comment, { headers });
   }
 
+  deletComment(id: string) {
+    const url = `${this.baseUrl}/comments/${id}`;
+    const headers = this.getHeaders();
+    return this.http.delete(url, { headers });
+  }
+
 }

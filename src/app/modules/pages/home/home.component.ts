@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject, firstValueFrom, lastValueFrom } from 'rxjs';
+import { Subject, Subscription, firstValueFrom, lastValueFrom } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { Meta } from '@angular/platform-browser';
@@ -17,6 +17,7 @@ import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.servi
 import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from '@env/environment';
+import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 
 @Component({
   selector: 'worky-home',
@@ -38,6 +39,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   paramPublication: boolean = false;
 
+  hasMorePublications: boolean = true;
+
   urlMediaApi = environment.APIFILESERVICE;
 
   dataUser = this._authService.getDecodedToken();
@@ -53,21 +56,37 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _geocodingService: GeocodingService,
     private _activatedRoute: ActivatedRoute,
     private _meta: Meta,
+    private _notificationUsersService: NotificationUsersService,
   ) {
     this.getLocationUser();
   }
 
-  async ngOnInit() {
-    this.loaderPublications = true;
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
+  async ngOnInit() {
+    this._notificationUsersService.loginUser();
     this.paramPublication = await this.getParamsPublication();
     if (this.paramPublication) return;
+
+    await this.loadPublications();
+   
+    this._cdr.markForCheck();
+
+    this.loadSubscription();
+
+    this.subscribeToNotificationComment();
+  }
+
+  private loadSubscription() {
 
     this._publicationService.publications$.pipe(
       distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
       takeUntil(this.destroy$)
     ).subscribe({
-      next: async (publicationsData: PublicationView[]) => {
+      next: (publicationsData: PublicationView[]) => {
         this.updatePublications(publicationsData);
       },
       error: (error) => {
@@ -75,16 +94,22 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
     });
 
-    await this.loadPublications();
-
-    this.loaderPublications = false;
-    this._cdr.markForCheck();
-    this.subscribeToNotificationComment();
+    this._publicationService.publicationsDeleted$.pipe(
+      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (publicationsData: PublicationView[]) => {
+        this.publications = this.publications.filter(pub => !publicationsData.some(pubDeleted => pubDeleted._id === pub._id));
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error getting publications', error);
+      }
+    });
   }
 
   async loadPublications() {
-    if (this.loaderPublications) return;
-    this.page = this.page + 1;
+    if (this.loaderPublications || !this.hasMorePublications) return;
     this.loaderPublications = true;
     try {
       const newPublications = await this._publicationService.getAllPublications(this.page, this.pageSize);
@@ -95,16 +120,18 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (uniqueNewPublications.length > 0) {
         this.publications = [...this.publications, ...uniqueNewPublications];
         this.page++;
-        console.log('publications', this.publications);
-        console.log('page', this.page);
-        console.log('pageSize', this.pageSize);
+        this._cdr.markForCheck();
+      } else {
+        this.hasMorePublications = false;
       }
+      this.loaderPublications = false;
     } catch (error) {
       console.error('Error loading publications', error);
+      this.loaderPublications = false;
     }
-    this.loaderPublications = false;
     this._cdr.markForCheck();
   }
+
 
   onScroll(event: any) {
     const scrollTop = event.target.scrollTop;
@@ -112,7 +139,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const offsetHeight = event.target.offsetHeight;
     const threshold = 100;
 
-    if (scrollTop + offsetHeight + threshold >= scrollHeight && !this.loaderPublications) {
+    if (scrollTop + offsetHeight + threshold >= scrollHeight && !this.loaderPublications && this.hasMorePublications) {
       this.loadPublications();
     }
   }
@@ -123,13 +150,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     ).subscribe(async (data: any) => {
       const newCommentInPublications = await this._publicationService.getAllPublications(this.page, this.pageSize);
       this._publicationService.updatePublications(newCommentInPublications);
+      this._cdr.markForCheck();
     });
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
 
   private async getParamsPublication(): Promise<boolean> {
     let result = false;
@@ -173,15 +197,37 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private updatePublications(publicationsData: PublicationView[]) {
-    const uniquePublications = publicationsData.filter(newPub => 
-      !this.publications.some(pub => pub._id === newPub._id)
-    );
+    let shouldUpdate = false;
+    publicationsData.forEach(newPub => {
+      const index = this.publications.findIndex(pub => pub._id === newPub._id);
+      if (index !== -1) {
+        const existingPub = this.publications[index];
+        if (
+          JSON.stringify(existingPub) !== JSON.stringify(newPub) ||
+          JSON.stringify(existingPub.comment) !== JSON.stringify(newPub.comment) ||
+          JSON.stringify(existingPub.reaction) !== JSON.stringify(newPub.reaction)
+        ) {
+          this.publications[index] = newPub;
+          this._cdr.markForCheck();
+          shouldUpdate = true;
+        }
+      } else {
+        this.publications.push(newPub);
+        shouldUpdate = true;
+      }
+    });
 
-    if (this.page === 1) {
-      this.publications = uniquePublications;
-    } else {
-      this.publications = [...this.publications, ...uniquePublications];
+    if (shouldUpdate) {
+      this.publications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      this.publications.forEach(pub => {
+        if (pub.comment) {
+          pub.comment.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        }
+      });
+
+      this._cdr.markForCheck();
     }
-    this._cdr.markForCheck();
   }
+
 }

@@ -1,0 +1,38 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.container-online {
+  padding: 10px;
+  .worky-module-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .worky-module-title {
+      font-size: 1.5rem;
+      color: colors.$worky-color-navy;
+    }
+  }
+  .user-online-container {
+    display: flex;
+    margin-top: 20px;
+    gap: 10px;
+    .worky-user {
+      cursor: pointer;
+    }
+    .offline-user-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: colors.$worky-color-navy;
+      .worky-user-avatar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+
+}

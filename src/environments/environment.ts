@@ -11,6 +11,7 @@ export const environment = {
   APP_PORT: 4200,
   APP_VERSION: '1.0.0',
   WSURL: 'https://notifications-dev.worky.cl', // Worky-socket service
+  //WSURL: 'http://localhost:3011', // Worky-socket service localhost
   OPENCAGEAPIKEY: 'a7f24f0e6069426b9480725b48bf0403',  // GeoCoding API Key
   APIGEOLOCATIONS: 'https://geo-dev.worky.cl/api/v1', // GeoLocations API Service worky-geo-locations
   // APIGEOLOCATIONS: 'http://localhost:3013/api/v1', // GeoLocations API Service worky-geo-locations LOCAL
@@ -19,6 +20,8 @@ export const environment = {
   //APIFILESERVICE: 'http://localhost:3005/', // File Service URL LOCAL
   APIFILESERVICE: 'https://file-service-dev.worky.cl/', // File Service URL
   APIMESSAGESERVICE: 'http://localhost:3020/api/v1', // Message Service URL LOCAL
+  //APINOTIFICATIONCENTER: 'http://localhost:3010/api/v1', // Notification Center API Service URL LOCAL
+  APINOTIFICATIONCENTER: 'https://notification-center-dev.worky.cl/api/v1', // Notification Center API Service URL
 };
 
 

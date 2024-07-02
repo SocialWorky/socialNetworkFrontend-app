@@ -11,7 +11,13 @@ import { distinctUntilChanged } from 'rxjs/operators';
 })
 export class PublicationService {
   private publicationsSubject: BehaviorSubject<PublicationView[]> = new BehaviorSubject<PublicationView[]>([]);
+
+  private publicationsSubjectDeleted: BehaviorSubject<PublicationView[]> = new BehaviorSubject<PublicationView[]>([]);
+
+  public publicationsDeleted$: Observable<PublicationView[]> = this.publicationsSubjectDeleted.asObservable().pipe(distinctUntilChanged());
+
   public publications$: Observable<PublicationView[]> = this.publicationsSubject.asObservable().pipe(distinctUntilChanged());
+
 
   private baseUrl: string = environment.API_URL;
   private token: string = localStorage.getItem('token') || '';
@@ -37,7 +43,7 @@ export class PublicationService {
     return this.http.get<PublicationView[]>(url, { headers });
   }
 
-  deletePublication(id: string) {
+  deletePublication(id: string): Observable<any> {
     const url = `${this.baseUrl}/publications/delete/${id}`;
     const headers = this.getHeaders();
     return this.http.delete(url, { headers });
@@ -69,4 +75,17 @@ export class PublicationService {
   updatePublications(newPublications: PublicationView[]): void {
     this.publicationsSubject.next(newPublications);
   }
+
+  updatePublicationsDeleted(newPublications: PublicationView[]): void {
+    this.publicationsSubjectDeleted.next(newPublications);
+  }
+
+  cleanPublication(): void {
+    this.publicationsSubject.next([]);
+  }
+
+  getPublications(): PublicationView[] {
+    return this.publicationsSubject.getValue();
+  }
+
 }
