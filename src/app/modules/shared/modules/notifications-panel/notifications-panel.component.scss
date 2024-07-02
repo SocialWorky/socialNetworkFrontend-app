@@ -52,9 +52,9 @@
     margin-bottom: 10px;
     border-radius: 8px;
     padding: 10px;
-    background-color: #f5f5f5;
+    background-color: colors.$worky-color-greyLight;
     &:hover {
-      background-color: #e5e5e5;
+      background-color: colors.$worky-color-grey;
     }
 
     .notification-item-header {
@@ -62,7 +62,8 @@
       align-items: center;
       justify-content: center;
       .notification-item-title {
-        font-size: 16px;
+        font-size: 20px;
+        color: colors.$worky-color-navy;
         font-weight: 500;
         margin-bottom: 5px;
       }
@@ -79,6 +80,9 @@
       flex-direction: row;
       align-items: center;
       gap: 10px;
+      i {
+        color: colors.$worky-color-navy;
+      }
       .content {
         display: flex;
         flex-direction: column;
@@ -95,14 +99,26 @@
   }
 
   .notification-not-viewed {
-    background-color: #003591b1;
-    color: #fff;
+    background-color: map-get(colors.$worky-navy, 24);
+    color: colors.$worky-color-light;
     &:hover {
-      background-color: #003591;
+      background-color: map-get(colors.$worky-navy, 9);
     }
 
-    .notification-item-header .notification-item-date {
-      color: #fff;
+    .notification-item-body {
+      i {
+        color: colors.$worky-color-yellow;
+      }
+    }
+
+    .notification-item-header {
+
+      .notification-item-title {
+        color: colors.$worky-color-light;
+      }
+      .notification-item-date {
+        color: colors.$worky-color-light;
+      }
     }
 
   }

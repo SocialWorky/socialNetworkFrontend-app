@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 
 import { AuthService } from '@auth/services/auth.service';
 import { NotificationCenterService } from '@shared/services/notificationCenter.service';
-import { AdditionalDataComment, AdditionalDataLike, NotificationsData } from './interfaces/notificationsData.interface';
+import { AdditionalDataComment, AdditionalDataLike, AdditionalDataFriendRequest, AdditionalDataFriendAccept, NotificationsData } from './interfaces/notificationsData.interface';
 import { NotificationType } from './enums/notificationsType.enum';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 
@@ -73,6 +73,24 @@ export class NotificationsPanelComponent  implements OnInit, OnDestroy {
             this.formatListNotifications.push({
               ...notification,
               additionalDataLike,
+            });
+          }
+
+          if (notification.type === this.type.FRIEND_REQUEST) {
+            const additionalDataFriendRequest: AdditionalDataFriendRequest = JSON.parse(notification.additionalData as string);
+            notification.icon = 'person_add';
+            this.formatListNotifications.push({
+              ...notification,
+              additionalDataFriendRequest,
+            });
+          }
+
+          if (notification.type === this.type.FRIEND_ACCEPTED) {
+            const additionalDataFriendAccept: AdditionalDataFriendAccept = JSON.parse(notification.additionalData as string);
+            notification.icon = 'person_add';
+            this.formatListNotifications.push({
+              ...notification,
+              additionalDataFriendAccept,
             });
           }
 

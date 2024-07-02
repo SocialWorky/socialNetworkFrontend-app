@@ -11,6 +11,8 @@ export interface NotificationsData {
   icon?: string;
   additionalDataComment?: AdditionalDataComment;
   additionalDataLike?: AdditionalDataLike;
+  additionalDataFriendRequest?: AdditionalDataFriendRequest;
+  additionalDataFriendAccept?: AdditionalDataFriendAccept;
 }
 
 export interface AdditionalDataComment {
@@ -31,4 +33,16 @@ export interface AdditionalDataLike {
   userIdReaction: string;
   userNameReaction: string;
   userAvatarReaction: string;
+}
+
+export interface AdditionalDataFriendRequest {
+  sendUserId: string;
+  sendUserName: string;
+  sendUserAvatar: string;
+}
+
+export interface AdditionalDataFriendAccept {
+  acceptUserId: string;
+  acceptUserName: string;
+  acceptUserAvatar: string;
 }

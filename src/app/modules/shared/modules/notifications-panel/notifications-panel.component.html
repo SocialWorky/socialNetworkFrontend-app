@@ -34,7 +34,19 @@
           </div>
         </div>
 
+        <div class="notification-item-body" *ngIf="notification.type === type.FRIEND_REQUEST">
+          <i class="material-icons">{{ notification.icon }}</i>
+          <div class="content">
+            <span> {{ notification.additionalDataFriendRequest?.sendUserName }} te ha solicitado amistad. </span>
+          </div>
+        </div>
 
+        <div class="notification-item-body" *ngIf="notification.type === type.FRIEND_ACCEPTED">
+          <i class="material-icons">{{ notification.icon }}</i>
+          <div class="content">
+            <span> {{ notification.additionalDataFriendAccept?.acceptUserName }} ha aceptado tu solicitud de amistad. </span>
+          </div>
+        </div>
 
       </div>
 
