@@ -18,7 +18,6 @@ import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from '@env/environment';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
-import { NotificationService } from '@shared/services/notifications/notification.service';
 
 @Component({
   selector: 'worky-home',
@@ -58,12 +57,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _activatedRoute: ActivatedRoute,
     private _meta: Meta,
     private _notificationUsersService: NotificationUsersService,
-    private _notificationService: NotificationService
   ) {
     this.getLocationUser();
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -74,12 +72,21 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.paramPublication) return;
 
     await this.loadPublications();
+   
+    this._cdr.markForCheck();
+
+    this.loadSubscription();
+
+    this.subscribeToNotificationComment();
+  }
+
+  private loadSubscription() {
 
     this._publicationService.publications$.pipe(
       distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
       takeUntil(this.destroy$)
     ).subscribe({
-      next: async (publicationsData: PublicationView[]) => {
+      next: (publicationsData: PublicationView[]) => {
         this.updatePublications(publicationsData);
       },
       error: (error) => {
@@ -91,7 +98,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
       takeUntil(this.destroy$)
     ).subscribe({
-      next: async (publicationsData: PublicationView[]) => {
+      next: (publicationsData: PublicationView[]) => {
         this.publications = this.publications.filter(pub => !publicationsData.some(pubDeleted => pubDeleted._id === pub._id));
         this._cdr.markForCheck();
       },
@@ -99,21 +106,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         console.error('Error getting publications', error);
       }
     });
-
-    this._notificationService.notification$.pipe(
-      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (data: any) => {
-        if(data) {
-          this.updatePublications([data]);
-          this._cdr.markForCheck();
-        }
-      }
-    });
-
-    this._cdr.markForCheck();
-    this.subscribeToNotificationComment();
   }
 
   async loadPublications() {
@@ -128,6 +120,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (uniqueNewPublications.length > 0) {
         this.publications = [...this.publications, ...uniqueNewPublications];
         this.page++;
+        this._cdr.markForCheck();
       } else {
         this.hasMorePublications = false;
       }
@@ -138,6 +131,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
     this._cdr.markForCheck();
   }
+
 
   onScroll(event: any) {
     const scrollTop = event.target.scrollTop;
@@ -156,8 +150,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     ).subscribe(async (data: any) => {
       const newCommentInPublications = await this._publicationService.getAllPublications(this.page, this.pageSize);
       this._publicationService.updatePublications(newCommentInPublications);
+      this._cdr.markForCheck();
     });
   }
+
 
   private async getParamsPublication(): Promise<boolean> {
     let result = false;
@@ -201,6 +197,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private updatePublications(publicationsData: PublicationView[]) {
+    let shouldUpdate = false;
     publicationsData.forEach(newPub => {
       const index = this.publications.findIndex(pub => pub._id === newPub._id);
       if (index !== -1) {
@@ -212,23 +209,25 @@ export class HomeComponent implements OnInit, OnDestroy {
         ) {
           this.publications[index] = newPub;
           this._cdr.markForCheck();
+          shouldUpdate = true;
         }
       } else {
         this.publications.push(newPub);
-        this._cdr.markForCheck();
+        shouldUpdate = true;
       }
     });
 
-    this.publications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    if (shouldUpdate) {
+      this.publications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    this.publications.forEach(pub => {
-      if (pub.comment) {
-        pub.comment.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      }
-    });
+      this.publications.forEach(pub => {
+        if (pub.comment) {
+          pub.comment.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        }
+      });
 
-    this._cdr.markForCheck();
+      this._cdr.markForCheck();
+    }
   }
-
 
 }

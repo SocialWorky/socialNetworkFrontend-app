@@ -1,7 +1,6 @@
 <div class="content-publication-view" *ngIf="publication">
 
   <div class="publication-header-actions">
-
     <worky-dropdown
       icon="more_horiz"
       [badge]=false
@@ -9,11 +8,11 @@
       [dataLink]="dataLinkActions"
       (linkClicked)="handleActionsClicked($event, publication)">
     </worky-dropdown>
-
   </div>
+
   <div class="publication-header">
 
-    <worky-avatar 
+    <worky-avatar *ngIf="publication.author.name && publication.author.lastName"
       [size]="40"
       img="{{ publication.author.avatar }}"
       name="{{ publication.author.name }} {{ publication.author.lastName }} ">
@@ -21,7 +20,7 @@
 
     <div class="publication-header-content">
       <div class="user-name-content">
-        <div class="user-name" *ngIf="publication.isMyFriend || (dataUser.id === publication.author._id && !publication.isMyFriend); else notFriend">
+        <div class="user-name" *ngIf="publication.isMyFriend || (dataUser.id === publication.userReceiving?._id && !publication.isMyFriend) || (dataUser.id === publication.author._id && !publication.isMyFriend); else notFriend">
           <span (click)="viewProfile(publication.author._id)" class="name link-name">
             {{ publication.author.name }} {{ publication.author.lastName }}
           </span>
@@ -44,7 +43,7 @@
             <span class="name">
               <ng-container *ngIf="!isProfile">
 
-                <i *ngIf="!publication.isMyFriend && publication.isFriendshipPending" class="material-icons">keyboard_arrow_right</i> 
+                <i *ngIf="!publication.isMyFriend || publication.isFriendshipPending" class="material-icons">keyboard_arrow_right</i> 
 
                 <a *ngIf="!publication.isMyFriend && (!userRequest?._id || !userReceive?._id )" class="follow-my-friend" 
                   (click)="followMyFriend(publication.author._id)">

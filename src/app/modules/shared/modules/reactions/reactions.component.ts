@@ -179,7 +179,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   }
 
   async refreshPublications() {
-if (!this.publication?._id) return;
+    if (!this.publication?._id) return;
 
     this._publicationService.getPublicationId(this.publication._id).pipe(
       takeUntil(this.destroy$),
@@ -191,19 +191,6 @@ if (!this.publication?._id) return;
         console.error(error);
       }
     });
-
-
-    //this._publicationService.updatePublications(publicationNew);
-    // if (this.type === TypePublishing.POSTPROFILE) {
-    //   const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.userProfile);
-    //   this._publicationService.updatePublications(refreshPublications);
-    //   this._cdr.markForCheck();
-
-    // } else {
-    //   const refreshPublications = await this._publicationService.getAllPublications(1, 10);
-    //   this._publicationService.updatePublications(refreshPublications);
-    //   this._cdr.markForCheck();
-    // }
   }
 
   onTouchStart() {

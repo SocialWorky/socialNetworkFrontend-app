@@ -3,6 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
 
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { AuthService } from '@auth/services/auth.service';
 
 @Component({
   selector: 'worky-loyaut',
@@ -22,10 +23,15 @@ export class LoyautComponent implements OnInit {
     return this._deviceDetectionService.isMobile();
   }
 
+  get token() {
+    return this._authService.getDecodedToken();
+  }
+
   constructor( 
     private _deviceDetectionService: DeviceDetectionService,
     private _router: Router,
     private _cdr: ChangeDetectorRef,
+    private _authService: AuthService
   ) {}
 
   ngOnInit(): void {

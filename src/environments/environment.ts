@@ -4,14 +4,14 @@
 
 export const environment = {
   PRODUCTION: false,
-  API_URL: 'http://localhost:3000/api/v1', // Worky API Service Core
-  // API_URL: 'https://backend-dev.worky.cl/api/v1', // Worky API Service Core
+  // API_URL: 'http://localhost:3000/api/v1', // Worky API Service Core
+  API_URL: 'https://backend-dev.worky.cl/api/v1', // Worky API Service Core
   BASE_URL: 'http://localhost:4200',
   CLIEN_ID_GOOGLE: '392454930418-dunulmihmuss90c042vn359mitdjjko8.apps.googleusercontent.com',
   APP_PORT: 4200,
   APP_VERSION: '1.0.0',
-  // WSURL: 'https://notifications-dev.worky.cl', // Worky-socket service
-  WSURL: 'http://localhost:3011', // Worky-socket service localhost
+  WSURL: 'https://notifications-dev.worky.cl', // Worky-socket service
+  //WSURL: 'http://localhost:3011', // Worky-socket service localhost
   OPENCAGEAPIKEY: 'a7f24f0e6069426b9480725b48bf0403',  // GeoCoding API Key
   APIGEOLOCATIONS: 'https://geo-dev.worky.cl/api/v1', // GeoLocations API Service worky-geo-locations
   // APIGEOLOCATIONS: 'http://localhost:3013/api/v1', // GeoLocations API Service worky-geo-locations LOCAL
@@ -19,8 +19,8 @@ export const environment = {
   APIWEATHERTOKEN: '062b9c8b637b4fc3875164009242005', // Weather API Service TOKEN
   //APIFILESERVICE: 'http://localhost:3005/', // File Service URL LOCAL
   APIFILESERVICE: 'https://file-service-dev.worky.cl/', // File Service URL
-  APINOTIFICATIONCENTER: 'http://localhost:3010/api/v1', // Notification Center API Service URL LOCAL
-  //APINOTIFICATIONCENTER: 'https://notification-center-dev.worky.cl/api/v1', // Notification Center API Service URL
+  //APINOTIFICATIONCENTER: 'http://localhost:3010/api/v1', // Notification Center API Service URL LOCAL
+  APINOTIFICATIONCENTER: 'https://notification-center-dev.worky.cl/api/v1', // Notification Center API Service URL
 };
 
 

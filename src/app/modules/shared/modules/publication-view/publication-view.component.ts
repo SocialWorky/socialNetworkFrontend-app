@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -21,7 +21,8 @@ import { ReportType, ReportStatus } from '@shared/enums/report.enum';
 import { ReportResponseComponent } from '../publication-view/report-response/report-response.component';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { CommentService } from '@shared/services/comment.service';
-import { set } from 'lodash';
+import { NotificationService } from '@shared/services/notifications/notification.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'worky-publication-view',
@@ -29,7 +30,7 @@ import { set } from 'lodash';
   styleUrls: ['./publication-view.component.scss'],
 })
 export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit {
-  @Input() publication: PublicationView | undefined;
+  @Input() publication!: PublicationView;
 
   @Input() indexPublication?: number;
 
@@ -78,6 +79,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _reportsService: ReportsService,
     public _dialog: MatDialog,
     private _emailNotificationService: EmailNotificationService,
+    private _notificationService: NotificationService
   ) {}
   async ngAfterViewInit() {
     await this.getUserFriendPending();
@@ -95,6 +97,19 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       this.isProfile = false;
     }
     this.getUserFriendPending();
+
+    this._notificationService.notification$.pipe(
+      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (data: any) => {
+        if (data?._id === this.publication._id) {
+          this.refreshPublications(data._id);
+          this._cdr.markForCheck();
+        }
+      }
+    });
+
     this._cdr.markForCheck();
   }
 
@@ -253,6 +268,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       await this._publicationService.getPublicationId(_id).pipe(takeUntil(this.destroy$)).subscribe({
           next: (publication: PublicationView[]) => {
             this._publicationService.updatePublications(publication);
+            console.log('Publication updated:', publication);
             this._cdr.markForCheck();
           }
       });
