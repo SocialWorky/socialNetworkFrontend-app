@@ -63,7 +63,7 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
           }
         }
       });
-    if(!this.currentUserId) return
+
     await this.getUserMessages();
   }
 
