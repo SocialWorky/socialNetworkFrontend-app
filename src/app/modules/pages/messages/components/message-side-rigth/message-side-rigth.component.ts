@@ -11,6 +11,7 @@ import { NotificationMessageChatService } from '@shared/services/notifications/n
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { ActivatedRoute } from '@angular/router';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'worky-message-side-rigth',
@@ -52,11 +53,11 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     private _deviceDetectionService: DeviceDetectionService
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
+    this.userIdMessage = this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
+    this.userId = this.userIdMessage;
     if (this.isMobile) {
-      this.userIdMessage = this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
-      if (this.userIdMessage) {
-        this.userId = this.userIdMessage;
+      if (this.userIdMessage && this.currentUser.id) {
         this.loadMessagesWithUser(this.currentUser.id, this.userIdMessage);
       }
       this._cdr.markForCheck();
@@ -68,13 +69,13 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
         next: (message: any) => {
           if (message.senderId === this.userId || message.receiverId === this.userId) {
             this.messages.push(message);
-            this._cdr.detectChanges();
+            this._cdr.markForCheck();
             this.scrollToBottom();
           }
         }
       });
 
-    this._notificationService.notification$
+    await this._notificationService.notification$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
         next: (notification: any) => {
@@ -102,14 +103,14 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   }
 
   private async loadMessagesWithUser(currentUserId: string, userIdMessage: string) {
-    this.getUser(userIdMessage);
+    await this.getUser(userIdMessage);
     this.loadMessages = true;
     this._messageService.getConversationsWithUser(currentUserId, userIdMessage).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (messages: Message[]) => {
         this.messages = messages;
         this.scrollToBottom();
         this.loadMessages = false;
-        this._cdr.detectChanges();
+        this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading messages:', error);
@@ -190,11 +191,14 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     }, 500);
   }
 
-  markMessagesAsRead() {
+  async markMessagesAsRead() {
+    if(this.isMobile) this.userId = this.userIdMessage;
+
     if (this.userId && this.messages.length > 0) {
       const chatId = this.messages[0].chatId;
-      this._messageService.markMessagesAsRead(chatId, this.userId).subscribe({
+      await this._messageService.markMessagesAsRead(chatId, this.userId).subscribe({
         next: (updatedMessages: Message[]) => {
+          this._notificationService.sendNotification(updatedMessages);
           this.updateMessages(updatedMessages);
           this._cdr.detectChanges();
         },

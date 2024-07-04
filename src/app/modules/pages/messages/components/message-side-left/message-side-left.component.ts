@@ -45,23 +45,26 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     this.userIdMessage = await this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
 
-    this._cdr.markForCheck();
-
     this.currentUserId = this._authService.getDecodedToken()!.id;
+
+    this._cdr.markForCheck();
 
     this._notificationMessageChatService.notificationMessageChat$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
         next: (message: any) => {
           if (message.senderId === this.currentUserId) {
-            this.getUserMessages(message.receiverId);
+            this.getUserMessages();
+            this._cdr.markForCheck();
           }
           if (message.receiverId === this.currentUserId) {
-            this.getUserMessages(message.senderId);
+            this.getUserMessages();
+            this._cdr.markForCheck();
           }
         }
       });
-    await this.getUserMessages(this.currentUserId);
+    if(!this.currentUserId) return
+    await this.getUserMessages();
   }
 
   ngOnDestroy() {
@@ -75,9 +78,9 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
     }
     this.userIdSelected.emit(userId);
   }
-  private async getUserMessages(userId: string) {
+  private async getUserMessages() {
     this.users = [];
-    this._messageService.getUsersWithConversations().pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._messageService.getUsersWithConversations().pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: string[]) => {
         response.forEach((userId: string) => {
           this.userService.getUserById(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({

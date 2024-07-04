@@ -75,7 +75,7 @@
                 <div class="content-name-action">
                   <h2>{{ userData.name }} {{ userData.lastName}}</h2>
 
-                  <div class="material-icons send-message-icon"
+                  <div class="material-icons send-message-icon" *ngIf="idUserProfile !== dataUser?.id"
                     (click)="sendMessage(userData._id)">chat
                   </div>
 

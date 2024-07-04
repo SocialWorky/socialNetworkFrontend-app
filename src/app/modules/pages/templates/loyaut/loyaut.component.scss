@@ -1,15 +1,19 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
+:host {
+  width: 100%;
+  height: 100%;
+}
+
 .content-social-app {
-  max-width: variables.$worky-app-width;
-  height: 88vh;
   display: flex;
   justify-content: center;
   margin: auto;
-  padding-top: 10px;
-  overflow: hidden;
   box-sizing: border-box;
+  max-width: variables.$worky-app-width;
+  max-height: 100%;
+  overflow: hidden;
   @include breakpoints.below-md {
     padding-top: 0px;
     flex-direction: column;
@@ -20,7 +24,6 @@
 ::ng-deep worky-content-left-side,
 ::ng-deep worky-content-right-side {
   width: variables.$worky-container-width-sidebar;
-  height: 90vh;
   display: block;
   justify-content: space-around;
   overflow-y: scroll;
@@ -47,9 +50,27 @@
   -ms-overflow-style: none; 
 }
 
+.content-messages-app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  max-width: variables.$worky-app-width;
+  max-height: 100%;
+  padding: 10px;
+  overflow: hidden;
+  height: 100%;
+  padding-bottom: 53px;
+  @include breakpoints.below-sm { 
+    padding: 0px;
+  }
+}
+
 .messages-view {
+  position: relative;
+  height: 100%;
   @include breakpoints.below-sm {
-    margin-bottom: auto;
+    //margin-bottom: auto;
   }
 }
 

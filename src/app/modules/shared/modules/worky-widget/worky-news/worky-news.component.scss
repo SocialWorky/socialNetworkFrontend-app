@@ -1,6 +1,10 @@
 .content-news {
+    display: flex;
+    flex-direction: column;
     max-height: 480px;
-    overflow-y: hidden; /* Oculta el scroll por defecto */
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #ffffff #f0f0f0;
 
     .news-article {
         margin-bottom: 20px;
@@ -58,9 +62,5 @@
         overflow-y: auto; /* Muestra el scroll cuando se coloca el cursor sobre el widget */
     }
 
-    /* Hace el scroll más delgado */
-    scrollbar-width: thin;
 
-    /* Cambia el color del scroll */
-    scrollbar-color: #ffffff #f0f0f0;
 } 

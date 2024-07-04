@@ -5,7 +5,8 @@
 .content-navbar {
   display: flex;
   justify-content: center;
-  height: variables.$worky-navbar-height;
+  height: 80px;
+  padding: 15px;
   background-color: colors.$worky-background-header-color;
   @include breakpoints.below-sm {
     flex-direction: column;
