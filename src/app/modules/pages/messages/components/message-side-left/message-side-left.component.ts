@@ -49,7 +49,7 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
 
     this._cdr.markForCheck();
 
-    this._notificationMessageChatService.notificationMessageChat$
+    await this._notificationMessageChatService.notificationMessageChat$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
         next: (message: any) => {

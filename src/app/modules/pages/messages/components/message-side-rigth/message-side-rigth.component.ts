@@ -54,7 +54,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   ) {}
 
   async ngOnInit() {
-    this.userIdMessage = this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
+    this.userIdMessage = await this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
     this.userId = this.userIdMessage;
     if (this.isMobile) {
       if (this.userIdMessage && this.currentUser.id) {
@@ -63,7 +63,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       this._cdr.markForCheck();
     }
 
-    this._notificationMessageChatService.notificationMessageChat$
+    await this._notificationMessageChatService.notificationMessageChat$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
         next: (message: any) => {
