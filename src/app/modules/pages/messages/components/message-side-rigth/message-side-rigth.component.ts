@@ -157,7 +157,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     this.showEmojiPicker = false;
   }
 
-  sendMessage() {
+ async sendMessage() {
     if (this.newMessage.trim() === '') return;
 
     const message: CreateMessage = {
@@ -166,12 +166,12 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       type: 'text'
     };
 
-    this._messageService.createMessage(message).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._messageService.createMessage(message).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (msg) => {
         this._notificationMessageChatService.sendNotificationMessageChat(msg);
         this.newMessage = '';
         this.scrollToBottom();
-        this._cdr.detectChanges();
+        this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error sending message:', error);
@@ -200,7 +200,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
         next: (updatedMessages: Message[]) => {
           this._notificationService.sendNotification(updatedMessages);
           this.updateMessages(updatedMessages);
-          this._cdr.detectChanges();
+          this._cdr.markForCheck();
         },
         error: (error) => {
           console.error('Error marking messages as read:', error);
@@ -227,7 +227,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     if (hasChanges) {
       this.messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
       this.scrollToBottom();
-      this._cdr.detectChanges();
+      this._cdr.markForCheck();
     }
   }
 
