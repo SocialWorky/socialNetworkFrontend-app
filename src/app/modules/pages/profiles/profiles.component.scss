@@ -127,6 +127,7 @@
 .content-body-profile {
   width: 100%;
   display: flex;
+  padding-bottom: 150px;
   justify-content: center;
 
   @include breakpoints.below-sm {

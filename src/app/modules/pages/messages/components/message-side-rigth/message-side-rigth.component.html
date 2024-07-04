@@ -1,16 +1,17 @@
-<div *ngIf="isMobile" class="header-content-mobil">
-  <div class="header-content-mobil-left">
-      <i (click)="goBack()" class="material-icons back-button">arrow_back</i>
-    <span>{{ user[0].name }} {{ user[0].lastName }}</span>
+<div *ngIf="!loadMessages && userId" class="content-right-messageChat">
+  
+  <div *ngIf="isMobile && user[0]" class="header-content-mobil">
+    <div class="header-content-mobil-left">
+        <i (click)="goBack()" class="material-icons back-button">arrow_back</i>
+      <span>{{ user[0].name }} {{ user[0].lastName }}</span>
+    </div>
+    <div class="header-content-mobil-right">
+      <!-- <button >
+        <i class="material-icons">more_vert</i>
+      </button> -->
+    </div>
   </div>
-  <div class="header-content-mobil-right">
-    <!-- <button >
-      <i class="material-icons">more_vert</i>
-    </button> -->
-  </div>
-</div>
 
-<div *ngIf="!loadMessages && userId" class="content-right-message">
   <div class="content-section-wall" #messageContainer>
     <div class="messages-container">
       <ng-container *ngFor="let message of messages; let i = index">

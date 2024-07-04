@@ -3,9 +3,10 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
 .content-list {
+  height: 100%;
 
   @include breakpoints.below-sm {
-    height: 85vh;
+    //height: 85vh;
   }
 
   .title {
@@ -74,9 +75,6 @@
     justify-content: center;
     align-items: center;
     height: 200px;
-    background-color: var(--worky-color-white);
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 
     .no-messages-text {
       font-size: 1rem;
