@@ -4,6 +4,7 @@ export enum NotificationType {
   FRIEND_ACCEPTED = 'friendAccept',
   PUBLICATION = 'publication',
   LIKE = 'like',
+  MESSAGE = 'message',
   FOLLOW = 'follow',
   MENTION = 'mention',
   REPOST = 'repost',

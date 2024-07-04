@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PickerComponent } from '@ctrl/ngx-emoji-mart';
+import { PickerModule } from '@ctrl/ngx-emoji-mart';
 import { ReactiveFormsModule } from '@angular/forms';
 
 import { MaterialModule } from '../material/material.module';
@@ -21,7 +21,7 @@ import { ImageUploadModalModule } from '../image-upload-modal/image-upload-modal
     MaterialModule,
     TranslationsModule,
     WorkyButtonsModule,
-    PickerComponent,
+    PickerModule,
     ReactiveFormsModule,
     WorkyAvatarModule,
     LocationSearchModule,
