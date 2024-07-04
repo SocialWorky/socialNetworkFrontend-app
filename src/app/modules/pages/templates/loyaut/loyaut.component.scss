@@ -11,6 +11,7 @@
   overflow: hidden;
   box-sizing: border-box;
   @include breakpoints.below-md {
+    padding-top: 0px;
     flex-direction: column;
     align-items: center;
   }
@@ -38,11 +39,18 @@
   }
 }
 
-.profile-view {
+.messages-view,
+.profile-view  {
   width: 100%;
   overflow-y: scroll;
   scrollbar-width: none;
   -ms-overflow-style: none; 
+}
+
+.messages-view {
+  @include breakpoints.below-sm {
+    margin-bottom: auto;
+  }
 }
 
 .content-profile-app {

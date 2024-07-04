@@ -14,6 +14,8 @@ export class LoyautComponent implements OnInit, OnDestroy {
 
   routeUrl: string = '';
   isProfile: boolean = false;
+  isMessages: boolean = false;
+
   private routeSub: Subscription | undefined;
 
   get isMobile(): boolean {
@@ -43,11 +45,13 @@ export class LoyautComponent implements OnInit, OnDestroy {
       .subscribe((event: NavigationEnd) => {
         this.routeUrl = event.url;
         this.isProfile = this.routeUrl.includes('profile');
+        this.isMessages = this.routeUrl.includes('messages');
         this._cdr.markForCheck();
       });
 
     this.routeUrl = this._router.url;
     this.isProfile = this.routeUrl.includes('profile');
+    this.isMessages = this.routeUrl.includes('messages');
     this._cdr.markForCheck();
   }
 

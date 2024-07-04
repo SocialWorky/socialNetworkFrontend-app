@@ -102,8 +102,8 @@
           <div *ngIf="showEmojiMenu" class="emoji-menu" (click)="preventClose($event)">
             <emoji-mart
               [darkMode]="false"
-              [showPreview]="false"
-              [enableSearch]="false"
+              [showPreview]="true"
+              [enableSearch]="true"
               [perLine]="7"
               [emojiSize]="24"
               (emojiSelect)="onEmojiClick($event)">

@@ -46,6 +46,7 @@ export class StatisticsComponent  implements OnInit {
     this.getAllUsers();
     this.getCountPublications();
     this.getReportsStatusPending();
+    this._cdr.markForCheck();
   }
 
   private getAllUsers() {

@@ -2,12 +2,14 @@
 
 <div class="content-social-app" [class.content-profile-app]="isProfile" *ngIf="token">
   
-  <worky-content-left-side *ngIf="!isMobile && !isProfile"></worky-content-left-side>
+  <worky-content-left-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-left-side>
   
-  <div class="social-content-center" [class.profile-view]="isProfile">
+  <div class="social-content-center" 
+    [class.profile-view]="isProfile"
+    [class.messages-view]="isMessages">
     <router-outlet></router-outlet>
   </div>
     
-  <worky-content-right-side *ngIf="!isMobile && !isProfile"></worky-content-right-side>
+  <worky-content-right-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-right-side>
 
 </div>

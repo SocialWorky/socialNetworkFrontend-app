@@ -11,6 +11,7 @@ import { ContentRightSideComponent } from './components/content-right-side/conte
 import { ProfilesComponent } from './profiles/profiles.component';
 import { ProfileDetailComponent } from './profiles/components/profile-detail/profile-detail.component';
 import { MaterialModule } from '@shared/modules/material/material.module';
+import { PickerModule } from '@ctrl/ngx-emoji-mart';
 
 import { WorkyMenuComponentComponent } from './components/navbar/worky-menu-component/worky-menu-component.component';
 import { SideBarMenutModule } from '@shared/modules/sidebar-menu/sidebar-menu.module';
@@ -25,6 +26,9 @@ import { EditImgProfileComponent } from './profiles/components/edit-img-profile/
 import { EditInfoProfileDetailComponent } from './profiles/components/edit-info-profile/edit-info-profile.component';
 import { ContactsModule } from '@shared/modules/contacts/contacts.module';
 import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
+import { MessagesComponent } from './messages/messages.component';
+import { MessageSideLeftComponent } from './messages/components/message-side-left/message-side-left.component';
+import { MessageSideRigthComponent } from './messages/components/message-side-rigth/message-side-rigth.component';
 import { UserOnlineModule } from '@shared/modules/user-online/user-online.module';
 import { NotificationsPanelModule } from '@shared/modules/notifications-panel/notifications-panel.module';
 
@@ -32,6 +36,9 @@ import { NotificationsPanelModule } from '@shared/modules/notifications-panel/no
 @NgModule({
   declarations: [
     HomeComponent,
+    MessagesComponent,
+    MessageSideLeftComponent,
+    MessageSideRigthComponent,
     ProfilesComponent,
     LoyautComponent,
     NavbarComponent,
@@ -54,6 +61,7 @@ import { NotificationsPanelModule } from '@shared/modules/notifications-panel/no
     PublicationViewModule,
     WorkyWidgetModule,
     MaterialModule,
+    PickerModule,
     SuggetionToFollowModule,
     SideBarMenutModule,
     ContactsModule,

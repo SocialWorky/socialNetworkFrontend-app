@@ -1,0 +1,27 @@
+<div class="content-list">
+  <span class="title">Messenger</span>
+  <!-- <input type="text" class="search-input" placeholder="Search" /> -->
+
+  <div class="users" *ngIf="users.length > 0; else noMessages">
+
+    <button *ngFor="let item of users" class="button" (click)="selectUser(item.user._id)">
+      <div class="avatar-container">
+        <worky-avatar 
+          [size]="40" 
+          [img]="item.user.avatar"
+          [name]="item.user.name + ' ' + item.user.lastName">
+        </worky-avatar>
+      </div>
+      <div class="user-info">
+        <span class="user-name">{{ item.user.name }} {{ item.user.lastName }}</span>
+        <span class="last-message">{{ item.lastMessage }} &middot; {{ formatTime(item.createAt) }}</span>
+      </div>
+    </button>
+
+  </div>
+  <ng-template #noMessages>
+    <div class="no-messages">
+      <span class="no-messages-text">Aún no tienes conversaciones.</span>
+    </div>
+  </ng-template>
+</div>

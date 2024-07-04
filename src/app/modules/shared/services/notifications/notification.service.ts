@@ -31,8 +31,8 @@ export class NotificationService implements OnDestroy {
       });
   }
 
-  sendNotification(publication?: PublicationView) {
-    this.socket.emit('generalNotification', publication);
+  sendNotification(payload?: any) {
+    this.socket.emit('generalNotification', payload);
   }
 
 

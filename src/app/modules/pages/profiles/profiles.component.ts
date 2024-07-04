@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { UserService } from '@shared/services/users.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
@@ -100,6 +100,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _profileService: ProfileService,
     private _profileNotificationService: ProfileNotificationService,
     private _emailNotificationService: EmailNotificationService,
+    private _router: Router
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -321,4 +322,9 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   openWhatsApp() {
     window.open('https://wa.me/' + this.userData?.profile?.whatsapp?.number, '_blank');
   }
+
+  sendMessage(_id: string) {
+    this._router.navigate(['/messages/', _id]);
+  }
+
 }
