@@ -2,16 +2,27 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
-.container {
+.container-message-chat {
     display: flex;
     gap: 20px;
     padding-top: 2rem;
+    height: 100%;
+    @include breakpoints.below-sm {
+      padding-top: 0px;
+    }
 
-    .content-left-messages{
-        display: flex;
-        flex-direction: column;
-        width: 15rem;
-        
+    .content-left-messages {
+      display: flex;
+      flex-direction: column;
+      width: 30%;
+      height: 100%;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #f4f4f4c7;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      @include breakpoints.below-sm {
+        width: 100%;
+      }
     }
 
     .avatar-info{
@@ -55,9 +66,14 @@
     }
 
     .content-right-message{
-        width: 80%;
-        height: 800px;
-        border: 1px solid #E4E6EB;
-        border-radius: max(0px, min(8px,(100vw - 4px - 100%)* 9999)) / 8px;
+      width: 70%;
+      height: 89vh;
+      border: 1px solid #E4E6EB;
+      border-radius: max(0px, min(8px,(100vw - 4px - 100%)* 9999)) / 8px;
+
+      @include breakpoints.below-sm {
+        width: 100%;
+        border: none;
+      }
     }
 }

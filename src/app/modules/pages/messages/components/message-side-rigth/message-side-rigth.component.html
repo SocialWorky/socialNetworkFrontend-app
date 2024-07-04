@@ -1,55 +1,84 @@
-<div *ngIf="false" class="content-right-message">
-  <div class="content-section-wall">
-    <div class="grid-container">
-      <div class="responsive-item-issuing">
-        <worky-avatar [size]="50" class="profile-img"></worky-avatar>
-        <div class="issuing-user">
-          <span>Hey How are you today?</span>
+<div *ngIf="isMobile" class="header-content-mobil">
+  <div class="header-content-mobil-left">
+      <i (click)="goBack()" class="material-icons back-button">arrow_back</i>
+    <span>{{ user[0].name }} {{ user[0].lastName }}</span>
+  </div>
+  <div class="header-content-mobil-right">
+    <!-- <button >
+      <i class="material-icons">more_vert</i>
+    </button> -->
+  </div>
+</div>
+
+<div *ngIf="!loadMessages && userId" class="content-right-message">
+  <div class="content-section-wall" #messageContainer>
+    <div class="messages-container">
+      <ng-container *ngFor="let message of messages; let i = index">
+        <ng-container *ngIf="i === 0 || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)">
+          <div class="date-divider">
+            <span>{{ formatDate(message.timestamp) }}</span>
+          </div>
+        </ng-container>
+        <div [ngClass]="{'message-sent': message.senderId === currentUser.id, 'message-received': message.senderId !== currentUser.id}">
+          <worky-avatar
+            [size]="40"
+            *ngIf="user[0] && message.senderId !== currentUser.id"
+            [img]="user[0].avatar"
+            [name]="user[0].name + ' ' + user[0].lastName">
+          </worky-avatar>
+
+          <div [ngClass]="{'sent-content': message.senderId === currentUser.id, 'received-content': message.senderId !== currentUser.id}">
+            <span>{{ message.content }}</span>
+            <div class="content-footer">
+              <small>{{ formatTime(message.timestamp) }}</small>
+                <i *ngIf="message.senderId === currentUser.id && !message.isRead" class="material-icons">done</i>
+                <i *ngIf="message.senderId === currentUser.id && message.isRead" class="material-icons">done_all</i>
+            </div>
+          </div>
+
+          <worky-avatar
+            [size]="40"
+            *ngIf="message.senderId === currentUser.id"
+            [img]="currentUser.avatar"
+            [name]="currentUser.name">
+          </worky-avatar>
         </div>
-      </div>
-      <div class="responsive-item-receiving">
-        <worky-avatar [size]="40" class="profile-img"></worky-avatar>
-        <div class="receiving-user">
-          <span>I'm ok what about you?</span>
-        </div>
-      </div>
-      <div class="responsive-item-issuing">
-        <worky-avatar [size]="50" class="profile-img"></worky-avatar>
-        <div class="issuing-user">
-          <span>Hey How are you today?</span>
-        </div>
-      </div>
-      <div class="responsive-item-receiving">
-        <worky-avatar [size]="40" class="profile-img"></worky-avatar>
-        <div class="receiving-user">
-          <span>I'm ok what about you?</span>
-        </div>
-      </div>
+      </ng-container>
     </div>
   </div>
-  <div class="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4">
-    <button>
-      <i class="material-icons">attach_file</i>
-    </button>
-    <div class="flex-grow ml-4">
-      <div class="relative w-full">
-        <input
-          type="text"
-          class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
-        />
-        <button
-          class="absolute flex items-center justify-center h-full w-12 right-0 top-0 text-gray-400 hover:text-gray-600"
-        >
-          <i class="material-icons">moods</i>
-        </button>
+
+  <div class="message-input-container">
+    <div class="emoji-wrapper">
+      <button (click)="toggleEmojiPicker()">
+        <i class="material-icons">moods</i>
+      </button>
+      <div *ngIf="showEmojiPicker" class="emoji-picker-container">
+        <emoji-mart
+          [darkMode]="false"
+          [showPreview]="true"
+          [enableSearch]="true"
+          [perLine]="7"
+          [emojiSize]="24"
+          (emojiSelect)="addEmoji($event)">
+        </emoji-mart>
       </div>
     </div>
-    <div class="ml-4">
+    <div class="input-wrapper">
+      <input
+        type="text"
+        class="message-input"
+        [(ngModel)]="newMessage"
+        (focus)="markMessagesAsRead()"
+        placeholder="Escribe un mensaje"
+      />
+    </div>
+    <div>
       <worky-buttons
         type="submit"
         [theme]="WorkyButtonTheme.Accent"        
-        [width]="'100%'">
-        <span basic-button-text>Send</span>
+        [width]="'100%'"
+        (click)="sendMessage()">
+        <span basic-button-text>Enviar</span>
       </worky-buttons>
     </div>
   </div>
