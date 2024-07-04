@@ -15,7 +15,7 @@ const routes: Routes = [
       { path: 'profile', component: ProfilesComponent, pathMatch: 'full' },
       { path: 'profile/:profileId', component: ProfilesComponent, pathMatch: 'full' },
       { path: 'messages', component: MessagesComponent, pathMatch: 'full' },
-      { path: 'messages/:messagesId', component: MessagesComponent, pathMatch: 'full' },
+      { path: 'messages/:userIdMessages', component: MessagesComponent, pathMatch: 'full' },
       { path: '**', redirectTo: '', pathMatch: 'full' }
     ],
   },

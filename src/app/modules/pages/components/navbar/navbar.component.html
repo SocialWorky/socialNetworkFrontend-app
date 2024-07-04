@@ -51,6 +51,7 @@
       <worky-dropdown 
         icon="mail"
         [badgeValue]="messages > 0 ? messages : null"
+        (click)="messagesUrl()"
         [badge]=true>
       </worky-dropdown>
       <!-- Notification -->
@@ -81,6 +82,7 @@
         <worky-dropdown 
           icon="mail"
           [badgeValue]="messages > 0 ? messages : null"
+          (click)="messagesUrl()"
           [badge]=true>
         </worky-dropdown>
         <!-- Notification -->

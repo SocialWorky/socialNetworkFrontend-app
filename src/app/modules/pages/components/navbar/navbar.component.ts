@@ -159,4 +159,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
   }
 
+  messagesUrl() {
+    this._router.navigate(['/messages']);
+  }
+
 }
