@@ -75,6 +75,10 @@
                 <div class="content-name-action">
                   <h2>{{ userData.name }} {{ userData.lastName}}</h2>
 
+                  <div class="material-icons send-message-icon"
+                    (click)="sendMessage(userData._id)">chat
+                  </div>
+
                   <img *ngIf="userData.profile.whatsapp?.isViewable" 
                     class="whatsapp-icon"
                     src="assets/img/logos/whatsapp.svg" alt="whatsapp"
