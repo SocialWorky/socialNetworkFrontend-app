@@ -12,5 +12,6 @@ export const environment = {
   APIWEATHERURL: 'https://api.weatherapi.com/v1/forecast.json', // Weather API Service URL
   APIWEATHERTOKEN: '062b9c8b637b4fc3875164009242005', // Weather API Service TOKEN
   APIFILESERVICE: 'https://file-service-dev.worky.cl/', // File Service URL
+  APIMESSAGESERVICE: 'https://message-service-dev.worky.cl/api/v1', // Message Service URL
   APINOTIFICATIONCENTER: 'https://notification-center-dev.worky.cl/api/v1', // Notification Center API Service URL
 };
