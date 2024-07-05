@@ -9,12 +9,18 @@ import { Token } from '@shared/interfaces/token.interface';
 })
 export class WorkyAvatarComponent implements OnInit, OnChanges {
   token?: Token;
+
   userAvatar = '';
-  private _size = 30;
+
   imageData = '';
+
   initials = '';
+
   backgroundColor = '';
+
   fontSize: number | null = null;
+
+  private _size = 30;
 
   private readonly colors = [
     '#FF5733', '#33FF57', '#3366FF', '#FF33FF', '#9a1ba2',
@@ -22,7 +28,9 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
   ];
 
   @Input() username = '';
-  @Input() name?: string;
+
+  @Input() name?: string | null;
+
   @Input() img?: string | null;
 
   @Input()
@@ -40,9 +48,13 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.token = this._authService.getDecodedToken()!;
+
     this.username = this.token?.name || '';
+
     this.userAvatar = this.token?.avatar || '';
+
     this.loadImageUser();
+
   }
 
   ngOnChanges(): void {
@@ -58,10 +70,11 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
       } else if (this.userAvatar) {
         this.imageData = this.userAvatar;
       }
-    } else if (this.name && !this.img) {
+    } else if (this.name && !this.img && this.name.length > 2) {
       this.username = this.name;
       this.generateAvatar();
-    } else if (this.img) {
+    } 
+    if (this.img) {
       this.imageData = this.img;
     }
 
@@ -70,17 +83,21 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   private generateAvatar() {
     const canvas = document.createElement('canvas');
+
     const ctx = canvas.getContext('2d');
 
     if (ctx) {
       const scaledSize = this.size;
+
       const fontSize = this.size / 2.3;
+
       this.initials = this.getInitials(this.username);
       
       if (this.initials) {
         this.backgroundColor = this.getColor(this.initials[0]);
 
         canvas.width = scaledSize;
+
         canvas.height = scaledSize;
 
         ctx.beginPath();
