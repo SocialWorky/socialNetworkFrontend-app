@@ -16,6 +16,8 @@ import { ActivatedRoute } from '@angular/router';
 import { environment } from '@env/environment';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { NetworkService } from '@shared/services/network.service';
+import { Alerts, Position } from '@shared/enums/alerts.enum';
+import { translations } from '@translations/translations';
 
 @Component({
   selector: 'worky-home',
@@ -74,6 +76,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.connectionStatusMessage = 'You are offline';
         } else {
           this.showConnectionOverlay = false;
+          this.connectionStatusMessage = '';
         }
       },
       error: (error) => {
@@ -84,10 +87,15 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.connectionSpeed$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (speed) => {
         if (speed === 'slow') {
-          this.showConnectionOverlay = true;
-          this.connectionStatusMessage = 'Your connection is slow';
-        } else {
-          this.showConnectionOverlay = false;
+          this._alertService.showAlert(
+            'Su conexión a internet es lenta',
+            'puede experimentar problemas de carga',
+            Alerts.WARNING,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
         }
       },
       error: (error) => {
@@ -98,6 +106,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     this._notificationUsersService.loginUser();
     this.paramPublication = await this.getParamsPublication();
     if (this.paramPublication) return;
+
+    if (!navigator.onLine) {
+      this.showConnectionOverlay = true;
+      this.connectionStatusMessage = 'You are offline';
+      return;
+    }
 
     await this.loadPublications();
     this._cdr.markForCheck();
@@ -134,7 +148,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   async loadPublications() {
-    if (this.loaderPublications || !this.hasMorePublications) return;
+    if (this.loaderPublications || !this.hasMorePublications || !navigator.onLine) return;
     this.loaderPublications = true;
     try {
       const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize));

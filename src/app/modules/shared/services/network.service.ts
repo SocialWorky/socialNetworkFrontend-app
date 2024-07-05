@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -30,11 +31,11 @@ export class NetworkService {
   }
 
   get connectionStatus(): Observable<boolean> {
-    return this.connectionStatus$.asObservable();
+    return this.connectionStatus$.asObservable().pipe(debounceTime(300));
   }
 
   get connectionSpeed(): Observable<string> {
-    return this.connectionSpeed$.asObservable();
+    return this.connectionSpeed$.asObservable().pipe(debounceTime(300));
   }
 
   private async checkConnectionSpeed() {
