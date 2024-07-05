@@ -1,23 +1,21 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject, Subscription, firstValueFrom, lastValueFrom } from 'rxjs';
+import { Subject, firstValueFrom } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { Meta } from '@angular/platform-browser';
-
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { PublicationService } from '@shared/services/publication.service';
 import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
 import { AuthService } from '@auth/services/auth.service';
 import { AlertService } from '@shared/services/alert.service';
-import { Alerts, Position } from '@shared/enums/alerts.enum';
-import { translations } from '@translations/translations';
 import { LocationService } from '@shared/services/apis/location.service';
 import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.service';
 import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from '@env/environment';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
+import { NetworkService } from '@shared/services/network.service';
 
 @Component({
   selector: 'worky-home',
@@ -28,22 +26,23 @@ export class HomeComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   typePublishing = TypePublishing;
-
   publications: PublicationView[] = [];
-
   page = 1;
-
-  pageSize = 10;
-
-  loaderPublications?: boolean = false;
-
+  pageSize = 5; // Cambia esto para probar con 5 publicaciones por página
+  loaderPublications: boolean = false;
   paramPublication: boolean = false;
-
   hasMorePublications: boolean = true;
-
   urlMediaApi = environment.APIFILESERVICE;
-
   dataUser = this._authService.getDecodedToken();
+  isOnline$ = this._networkService.connectionStatus;
+  connectionSpeed$ = this._networkService.connectionSpeed;
+
+  showConnectionOverlay = false;
+  connectionStatusMessage = '';
+
+  trackById(index: number, publication: PublicationView): string {
+    return publication._id;
+  }
 
   constructor(
     private _publicationService: PublicationService,
@@ -57,6 +56,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _activatedRoute: ActivatedRoute,
     private _meta: Meta,
     private _notificationUsersService: NotificationUsersService,
+    private _networkService: NetworkService
   ) {
     this.getLocationUser();
   }
@@ -67,21 +67,46 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.isOnline$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (isOnline) => {
+        if (!isOnline) {
+          this.showConnectionOverlay = true;
+          this.connectionStatusMessage = 'You are offline';
+        } else {
+          this.showConnectionOverlay = false;
+        }
+      },
+      error: (error) => {
+        console.error('Error getting connection status', error);
+      }
+    });
+
+    this.connectionSpeed$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (speed) => {
+        if (speed === 'slow') {
+          this.showConnectionOverlay = true;
+          this.connectionStatusMessage = 'Your connection is slow';
+        } else {
+          this.showConnectionOverlay = false;
+        }
+      },
+      error: (error) => {
+        console.error('Error getting connection speed', error);
+      }
+    });
+
     this._notificationUsersService.loginUser();
     this.paramPublication = await this.getParamsPublication();
     if (this.paramPublication) return;
 
     await this.loadPublications();
-   
     this._cdr.markForCheck();
 
     this.loadSubscription();
-
     this.subscribeToNotificationComment();
   }
 
   private loadSubscription() {
-
     this._publicationService.publications$.pipe(
       distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
       takeUntil(this.destroy$)
@@ -112,7 +137,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.loaderPublications || !this.hasMorePublications) return;
     this.loaderPublications = true;
     try {
-      const newPublications = await this._publicationService.getAllPublications(this.page, this.pageSize);
+      const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize));
       const uniqueNewPublications = newPublications.filter(newPub => 
         !this.publications.some(pub => pub._id === newPub._id)
       );
@@ -132,7 +157,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
   }
 
-
   onScroll(event: any) {
     const scrollTop = event.target.scrollTop;
     const scrollHeight = event.target.scrollHeight;
@@ -148,19 +172,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     this._notificationCommentService.notificationComment$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(async (data: any) => {
-      const newCommentInPublications = await this._publicationService.getAllPublications(this.page, this.pageSize);
+      const newCommentInPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize));
       this._publicationService.updatePublications(newCommentInPublications);
       this._cdr.markForCheck();
     });
   }
-
 
   private async getParamsPublication(): Promise<boolean> {
     let result = false;
     const _idPublication = this._activatedRoute.snapshot.paramMap.get('_idPublication');
     if (_idPublication) {
       try {
-        const publication = await lastValueFrom(this._publicationService.getPublicationId(_idPublication));
+        const publication = await firstValueFrom(this._publicationService.getPublicationId(_idPublication));
         if (publication.length) {
           this.loaderPublications = false;
           this.publications = publication;
@@ -187,12 +210,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     const [latitude, longitude] = await this._locationService.getUserLocation();
     if (!latitude && !longitude) return;
 
-    const result = await firstValueFrom(this._geoLocationsService.findLocationByLatAndLng(latitude, longitude).pipe(takeUntil(this.destroy$)));
+    const result = await firstValueFrom(this._geoLocationsService.findLocationByLatAndLng(latitude, longitude));
     if (result) return;
 
-    const data = await firstValueFrom(this._geocodingService.getGeocodeLatAndLng(latitude, longitude).pipe(takeUntil(this.destroy$)));
+    const data = await firstValueFrom(this._geocodingService.getGeocodeLatAndLng(latitude, longitude));
     if (data.results && data.results.length > 0) {
-      await firstValueFrom(this._geoLocationsService.createLocations(data).pipe(takeUntil(this.destroy$)));
+      await firstValueFrom(this._geoLocationsService.createLocations(data));
     }
   }
 
@@ -230,4 +253,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
+  trackByFn(index: number, item: PublicationView) {
+    return item._id; 
+  }
 }

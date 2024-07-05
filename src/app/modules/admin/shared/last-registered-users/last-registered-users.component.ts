@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { UserService } from '@shared/services/users.service';
 import { User } from '@shared/interfaces/user.interface';
-import { Subscription } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'worky-last-registered-users',
@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
 })
 export class LastRegisteredUsersComponent  implements OnInit, OnDestroy {
 
-  private subscription: Subscription = new Subscription();
+  private unsubscribe$ = new Subject<void>();
 
   constructor(
     private _userService: UserService,
@@ -22,30 +22,33 @@ export class LastRegisteredUsersComponent  implements OnInit, OnDestroy {
   ngOnInit() {
     this.getUsers();
   }
-  private getUsers() {
-    this.subscription.add(this._userService.searchUsers(5).subscribe((data: User[]) => {
-      const filterDate = new Date('2023-01-01');
+  private async getUsers() {
+   await this._userService.searchUsers(5).pipe(takeUntil(this.unsubscribe$)).subscribe({
+      next: (data: User[]) => {
+        const filterDate = new Date('2023-01-01');
 
-      const filteredUsers = data.filter(user => {
-        const registrationDate = new Date(user.createdAt);
-        return registrationDate > filterDate;
-      });
+        const filteredUsers = data.filter(user => {
+          const registrationDate = new Date(user.createdAt);
+          return registrationDate > filterDate;
+        });
 
-      const sortedUsers = filteredUsers.sort((a, b) => {
-        const dateA = new Date(a.createdAt).getTime();
-        const dateB = new Date(b.createdAt).getTime();
-        return dateB - dateA;
-      });
+        const sortedUsers = filteredUsers.sort((a, b) => {
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateB - dateA;
+        });
 
-      this.users = sortedUsers;
-      this._cdr.markForCheck();
-    }));
+        this.users = sortedUsers;
+        this._cdr.markForCheck();
+      }
+   });
   }
 
 
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
 }

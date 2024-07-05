@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { User } from '@shared/interfaces/user.interface';
 import { UserService } from '@shared/services/users.service';
 import { PublicationService } from '@shared/services/publication.service';
@@ -14,7 +14,7 @@ import * as _ from 'lodash';
 })
 export class StatisticsComponent  implements OnInit {
 
-  private subscription: Subscription = new Subscription();
+  private unsubscribe$ = new Subject<void>();
 
   private _allUsers: User[] = [];
 
@@ -36,42 +36,43 @@ export class StatisticsComponent  implements OnInit {
   }
 
   constructor (
-    private _userService: UserService,
     private _publicationService: PublicationService,
+    private _userService: UserService,
     private _cdr: ChangeDetectorRef,
     private _reportsService: ReportsService
   ) { }
 
-  ngOnInit() {
-    this.getAllUsers();
-    this.getCountPublications();
-    this.getReportsStatusPending();
+  async ngOnInit() {
+    await this.getCountPublications();
+    await this.getReportsStatusPending();
+    await this.getAllUsers();
     this._cdr.markForCheck();
   }
 
-  private getAllUsers() {
-    this.subscription.add(this._userService.getAllUsers().subscribe((data) => {
+  private async getAllUsers() {
+    await this._userService.getAllUsers().pipe(takeUntil(this.unsubscribe$)).subscribe((data: User[]) => {
       this._allUsers = data;
       this._cdr.markForCheck();      
-    }));
+    });
   }
 
-  private getCountPublications() {
-    this.subscription.add(this._publicationService.getCountPublications().subscribe((data) => {
+  private async getCountPublications() {
+    await this._publicationService.getCountPublications().pipe(takeUntil(this.unsubscribe$)).subscribe((data) => {
       this._countPublications = data;
       this._cdr.markForCheck();
-    }));
+    });
   }
 
-  private getReportsStatusPending() {
-    this.subscription.add(this._reportsService.getReportsStatus(ReportStatus.PENDING).subscribe((data) => {
+  private async getReportsStatusPending() {
+    await this._reportsService.getReportsStatus(ReportStatus.PENDING).pipe(takeUntil(this.unsubscribe$)).subscribe((data) => {
       this._reportsStatusPending = data;
       this._cdr.markForCheck();
-    }));
+    });
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
 }

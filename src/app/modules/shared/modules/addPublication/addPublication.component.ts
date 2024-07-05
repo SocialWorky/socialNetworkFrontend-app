@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
-import { Observable, Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
+import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import {
   WorkyButtonType,
@@ -131,7 +131,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     return this.decodedToken.id;
   }
 
-  private async getUser() {
+  private getUser() {
     this._userService
       .getUserById(this.decodedToken.id)
       .pipe(takeUntil(this.unsubscribe$))
@@ -160,7 +160,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     this.showEmojiMenu = false;
   }
 
-  async onSave() {
+  onSave() {
     this.myForm.controls['authorId'].setValue(this.decodedToken.id);
     this.myForm.controls['privacy'].setValue(this.privacy);
     if (this.type === TypePublishing.POST || this.type === TypePublishing.POSTPROFILE) {
@@ -198,7 +198,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   private async handleCommentResponse(message: any, idPublication: string) {
     try {
       if (this.selectedFiles.length) {
-        const response = await this.uploadFiles('comments', message.comment._id);
+        const response = await lastValueFrom(this.uploadFiles('comments', message.comment._id));
         await this.saveFiles(response, 'comments/', message.comment._id, TypePublishing.COMMENT);
       }
 
@@ -246,7 +246,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   private async handlePublicationResponse(message: any) {
     try {
       if (this.selectedFiles.length) {
-        const response = await this.uploadFiles('publications', message.publications._id);
+        const response = await lastValueFrom(this.uploadFiles('publications', message.publications._id));
         await this.saveFiles(response, 'publications/', message.publications._id, TypePublishing.POST);
       }
 
@@ -277,10 +277,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     }
   }
 
-  private async uploadFiles(folder: string, id: string) {
-    return await lastValueFrom(
-      this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$))
-    );
+  private uploadFiles(folder: string, id: string) {
+    return this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$));
   }
 
   private async saveFiles(response: MediaFileUpload[], saveLocation: string, id: string, type: TypePublishing) {
@@ -302,16 +300,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   private async updatePublicationAndNotify(idPublication: string, comment?: any) {
-    this._publicationService.getPublicationId(idPublication).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (publication: PublicationView[]) => {
-        this._publicationService.updatePublications(publication);
-        if (comment) {
-          this.sendEmailNotificationReaction(publication[0], comment);
-          this.createNotificationAndSendComment(publication[0], comment);
-        }
-      },
-      error: console.error
-    });
+    const publication = await lastValueFrom(this._publicationService.getPublicationId(idPublication).pipe(takeUntil(this.unsubscribe$)));
+    this._publicationService.updatePublications(publication);
+    if (comment) {
+      this.sendEmailNotificationReaction(publication[0], comment);
+      this.createNotificationAndSendComment(publication[0], comment);
+    }
   }
 
   private createNotificationAndSendComment(publication: PublicationView, comment: any) {
@@ -457,7 +451,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
 
   private async updatePublications(type: TypePublishing, idUserProfile?: string) {
     try {
-      const publicationsNew = await this._publicationService.getAllPublications(1, 10, type, idUserProfile);
+      const publicationsNew = await lastValueFrom(this._publicationService.getAllPublications(1, 10, type, idUserProfile));
       this._publicationService.updatePublications(publicationsNew);
     } catch (error) {
       console.error('Error getting publications', error);

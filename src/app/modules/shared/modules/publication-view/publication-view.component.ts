@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
@@ -28,42 +28,27 @@ import * as _ from 'lodash';
   selector: 'worky-publication-view',
   templateUrl: './publication-view.component.html',
   styleUrls: ['./publication-view.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() publication!: PublicationView;
-
   @Input() indexPublication?: number;
-
   @Input() type?: TypePublishing | undefined;
-
   @Input() userProfile?: string;
 
   typePublishing = TypePublishing;
-
   typePrivacy = TypePrivacy;
-
   dataLinkActions: DropdownDataLink<any>[] = [];
-
   dataShareActions: DropdownDataLink<any>[] = [];
-
   viewCommentSection: number | null = null;
-
   viewComments: number | null = null;
-
   nameGeoLocation: string = '';
-
   urrMap: string = '';
-
   extraData: string[] = [];
-
   userRequest?: UserData;
-  
   userReceive?: UserData;
-
   routeUrl: string = '';
-
   isProfile: boolean = false;
-
   dataUser = this._authService.getDecodedToken();
 
   private destroy$ = new Subject<void>();
@@ -81,39 +66,35 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _emailNotificationService: EmailNotificationService,
     private _notificationService: NotificationService
   ) {}
+
   async ngAfterViewInit() {
     await this.getUserFriendPending();
   }
 
   async ngOnInit() {
-    await this.userReceive;
+    await this.getUserFriendPending();
     this.menuActions();
     this.menuShareActions();
     this.extraDataPublication();
     this.routeUrl = this._router.url;
-    if (this.routeUrl.includes('profile')) {
-      this.isProfile = true;
-    } else {
-      this.isProfile = false;
-    }
-    this.getUserFriendPending();
+    this.isProfile = this.routeUrl.includes('profile');
 
-    this._notificationService.notification$.pipe(
-      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (data: any) => {
-        if (data?._id === this.publication._id) {
-          this.refreshPublications(data._id);
-          this._cdr.markForCheck();
+    this._notificationService.notification$
+      .pipe(
+        distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (data: any) => {
+          if (data?._id === this.publication._id) {
+            this.refreshPublications(data._id);
+            this._cdr.markForCheck();
+          }
         }
-      }
-    });
+      });
 
     this._cdr.markForCheck();
   }
-
-
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -219,8 +200,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   async followMyFriend(_idUser: string) {
     await this._friendsService.requestFriend(_idUser).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
-       this._emailNotificationService.sendFriendRequestNotification(_idUser);
-       this.viewProfile(_idUser);
+        this._emailNotificationService.sendFriendRequestNotification(_idUser);
+        this.viewProfile(_idUser);
       },
       error: (error) => {
         console.error('Error the send request', error);
@@ -266,10 +247,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   async refreshPublications(_id?: string) {
     if (_id) {
       await this._publicationService.getPublicationId(_id).pipe(takeUntil(this.destroy$)).subscribe({
-          next: (publication: PublicationView[]) => {
-            this._publicationService.updatePublications(publication);
-            this._cdr.markForCheck();
-          }
+        next: (publication: PublicationView[]) => {
+          this._publicationService.updatePublications(publication);
+          this._cdr.markForCheck();
+        }
       });
     }
   }
@@ -278,38 +259,38 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this.openUploadModal(publication);
   }
 
-    async openUploadModal(publication: PublicationView) {
-      const dialogRef = this._dialog.open(ReportResponseComponent, {});
-      dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (result: any) => {
-        if (result) {
+  async openUploadModal(publication: PublicationView) {
+    const dialogRef = this._dialog.open(ReportResponseComponent, {});
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (result: any) => {
+      if (result) {
 
-          const loadingCreateReport = await this._loadingCtrl.create({
-            message: 'Creando reporte...',
-          });
+        const loadingCreateReport = await this._loadingCtrl.create({
+          message: 'Creando reporte...',
+        });
 
-          loadingCreateReport.present();
+        loadingCreateReport.present();
 
-          const report: ReportCreate = {
-            type: ReportType.POST,
-            _idReported: publication._id,
-            reporting_user: this.dataUser?.id!,
-            status: ReportStatus.PENDING,
-            detail_report: result,
-          };
-          await this._reportsService.createReport(report).pipe(takeUntil(this.destroy$)).subscribe({
-            next: (data) => {
-              loadingCreateReport.dismiss();
-              this._emailNotificationService.sendEmailNotificationReport(publication, result);
-              this._cdr.markForCheck();
-            },
-            error: (error) => {
-              console.error('Error creating report:', error);
-              loadingCreateReport.dismiss();
-            }
-          });
-          loadingCreateReport.dismiss();
-        }
-      });
+        const report: ReportCreate = {
+          type: ReportType.POST,
+          _idReported: publication._id,
+          reporting_user: this.dataUser?.id!,
+          status: ReportStatus.PENDING,
+          detail_report: result,
+        };
+        await this._reportsService.createReport(report).pipe(takeUntil(this.destroy$)).subscribe({
+          next: (data) => {
+            loadingCreateReport.dismiss();
+            this._emailNotificationService.sendEmailNotificationReport(publication, result);
+            this._cdr.markForCheck();
+          },
+          error: (error) => {
+            console.error('Error creating report:', error);
+            loadingCreateReport.dismiss();
+          }
+        });
+        loadingCreateReport.dismiss();
+      }
+    });
   }
 
   async deleteComment(_id: string, id_publication: string) {

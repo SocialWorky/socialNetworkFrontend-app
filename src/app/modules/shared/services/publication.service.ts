@@ -3,22 +3,17 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '@env/environment';
 import { CreatePost } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
-import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { distinctUntilChanged, catchError, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PublicationService {
   private publicationsSubject: BehaviorSubject<PublicationView[]> = new BehaviorSubject<PublicationView[]>([]);
-
   private publicationsSubjectDeleted: BehaviorSubject<PublicationView[]> = new BehaviorSubject<PublicationView[]>([]);
-
   public publicationsDeleted$: Observable<PublicationView[]> = this.publicationsSubjectDeleted.asObservable().pipe(distinctUntilChanged());
-
   public publications$: Observable<PublicationView[]> = this.publicationsSubject.asObservable().pipe(distinctUntilChanged());
-
-
   private baseUrl: string = environment.API_URL;
   private token: string = localStorage.getItem('token') || '';
 
@@ -31,7 +26,7 @@ export class PublicationService {
     });
   }
 
-  createPost(post: CreatePost) {
+  createPost(post: CreatePost): Observable<any> {
     const url = `${this.baseUrl}/publications/create`;
     const headers = this.getHeaders();
     return this.http.post(url, post, { headers });
@@ -55,21 +50,23 @@ export class PublicationService {
     return this.http.get<number>(url, { headers });
   }
 
-  private viewAll(page: number, size: number, type: string = 'all', consultId: string = '' ): Observable<PublicationView[]> {
+  private viewAll(page: number, size: number, type: string = 'all', consultId: string = ''): Observable<PublicationView[]> {
     const url = `${this.baseUrl}/publications/all?page=${page}&pageSize=${size}&type=${type}&consultId=${consultId}`;
     const headers = this.getHeaders();
     return this.http.get<PublicationView[]>(url, { headers });
   }
 
-  async getAllPublications(page: number, size: number, type?: string, consultId?: string): Promise<PublicationView[]> {
-    try {
-      const publications: PublicationView[] = await firstValueFrom(this.viewAll(page, size, type, consultId)) ?? [];
-      this.publicationsSubject.next(publications);
-      return publications;
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
+  getAllPublications(page: number, size: number, type?: string, consultId?: string): Observable<PublicationView[]> {
+    return this.viewAll(page, size, type, consultId).pipe(
+      catchError((error) => {
+        console.error(error);
+        return [];
+      }),
+      map((publications: PublicationView[]) => {
+        this.publicationsSubject.next(publications);
+        return publications;
+      })
+    );
   }
 
   updatePublications(newPublications: PublicationView[]): void {
@@ -87,5 +84,4 @@ export class PublicationService {
   getPublications(): PublicationView[] {
     return this.publicationsSubject.getValue();
   }
-
 }

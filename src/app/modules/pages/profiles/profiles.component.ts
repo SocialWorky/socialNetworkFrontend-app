@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
-import { ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Subject, Subscription, distinctUntilChanged, lastValueFrom, takeUntil } from 'rxjs';
+import { firstValueFrom, lastValueFrom, Subject, takeUntil } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import * as _ from 'lodash';
 
 import { Token } from '@shared/interfaces/token.interface';
@@ -32,59 +32,31 @@ import { EmailNotificationService } from '@shared/services/notifications/email-n
 export class ProfilesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  private unsubscribe$ = new Subject<void>();
-
   typePublishing = TypePublishing;
-
   publications: PublicationView[] = [];
-
   page = 1;
-
   pageSize = 10;
-
   WorkyButtonType = WorkyButtonType;
-
   WorkyButtonTheme = WorkyButtonTheme;
-
   paramPublication: boolean = false;
-
   loaderPublications?: boolean = false;
-
   userData: User | undefined;
-
   idUserProfile: string = '';
-
   decodedToken!: Token;
-
   isAuthenticated: boolean = false;
-
   isCurrentUser: boolean = false;
-
   dataUser = this._authService.getDecodedToken();
-
   isFriend: boolean = false;
-
   isFriendPending: { status: boolean; _id: string } = { status: false, _id: '' };
-
   idPendingFriend: string = '';
-
   selectedFiles: File[] = [];
-
   imgCoverDefault = '/assets/img/shared/drag-drop-upload-add-file.webp';
-
   selectedImage: string | undefined;
-
   cropper: Cropper | undefined;
-
   originalMimeType: string | undefined;
-
   isUploading = false;
-
   userReceives!: UserData;
-  
   userRequest!: UserData;
-
-  private profileSubscription!: Subscription;
 
   constructor(
     public _dialog: MatDialog,
@@ -114,22 +86,20 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
     this.getDataProfile();
 
-    await this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe();
+    this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe();
 
     this.getUserFriend();
     
     this.decodedToken = this._authService.getDecodedToken()!;
-
     this.isCurrentUser = this.idUserProfile === this.decodedToken.id;
-
     this.loaderPublications = true;
 
     this._publicationService.publications$.pipe(
       distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
       takeUntil(this.destroy$)
     ).subscribe({
-      next: async () => {
-        this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
+      next: (publicationsData: PublicationView[]) => {
+        this.publications = publicationsData;
         this._cdr.markForCheck();
       },
       error: (error) => {
@@ -142,25 +112,25 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this._cdr.markForCheck();
     });
 
-    this.publications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
-
+    this.loadPublications();
     this.loaderPublications = false;
-
-    this._cdr.detectChanges();
     this.subscribeToNotificationComment();
   }
 
   ngOnDestroy(): void {
-    if (this.profileSubscription) {
-      this.profileSubscription.unsubscribe();
-    }
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  async getDataProfile(): Promise<void> {
+  private async loadPublications() {
+    this.publications = await firstValueFrom(
+      this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile).pipe(takeUntil(this.destroy$))
+    );
+    this._cdr.detectChanges();
+  }
 
-    await this._userService.getUserById(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
+  private async getDataProfile(): Promise<void> {
+    this._userService.getUserById(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: User) => {
         this.userData = response;
         this._cdr.markForCheck();
@@ -171,18 +141,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     });
   }
 
-  async subscribeToNotificationComment() {
-    this._notificationCommentService.notificationComment$.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(async (data: any) => {
-      const newCommentInPublications = await this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile);
-      this._publicationService.updatePublications(newCommentInPublications);
+  private subscribeToNotificationComment() {
+    this._notificationCommentService.notificationComment$.pipe(takeUntil(this.destroy$)).subscribe(async () => {
+      this.loadPublications();
     });
   }
 
-  getUserFriend() {
-    this._userService.getUserFriends(this._authService.getDecodedToken()?.id!, this.idUserProfile).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (response) => {
+  private getUserFriend() {
+    this._userService.getUserFriends(this._authService.getDecodedToken()?.id!, this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
         this.getUserFriendPending();
       },
       error: (error) => {
@@ -191,22 +158,20 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     });
   }
 
-  getUserFriendPending(): void {
-    this._friendsService.getIsMyFriend(this._authService.getDecodedToken()?.id!, this.idUserProfile).pipe(takeUntil(this.unsubscribe$)).subscribe({
+  private getUserFriendPending(): void {
+    this._friendsService.getIsMyFriend(this._authService.getDecodedToken()?.id!, this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: FriendsStatus) => {
         this.isFriendPending.status = response?.status === 'pending';
         this.idPendingFriend = response?.id;
-        if ( response?.status === 'pending') {
+        if (response?.status === 'pending') {
           this.userReceives = response?.receiver;
           this.userRequest = response?.requester;
           this.isFriend = false;
           this._cdr.markForCheck();
-        }
-        if (response?.status === 'accepted') {
+        } else if (response?.status === 'accepted') {
           this.isFriend = true;
           this._cdr.markForCheck();
-        }
-        if (response === null) {
+        } else if (response === null) {
           this.isFriend = false;
           this._cdr.markForCheck();
         }
@@ -218,10 +183,9 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   followMyFriend(_id: string) {
-    this._friendsService.requestFriend(_id).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._friendsService.requestFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: async () => {
-        const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
-        this._publicationService.updatePublications(refreshPublications);
+        this.loadPublications();
         this.getUserFriendPending();
         this._emailNotificationService.sendFriendRequestNotification(_id);
         this._cdr.markForCheck();
@@ -233,23 +197,20 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   cancelFriendship(_id: string) {
-    this._friendsService.deleteFriend(_id).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: async (data) => {
-        const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
-        this._publicationService.updatePublications(refreshPublications);
+    this._friendsService.deleteFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: async () => {
+        this.loadPublications();
         this.getUserFriend();
         this._cdr.markForCheck();
       }
     });
-    this._cdr.markForCheck();
   }
 
   async acceptFriendship(_id: string) {
-    await this._friendsService.acceptFriendship(_id).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: async (data) => {
+    this._friendsService.acceptFriendship(_id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: async () => {
         this.getUserFriendPending();
-        const refreshPublications = await this._publicationService.getAllPublications(1, 10, TypePublishing.POSTPROFILE, this.idUserProfile);
-        this._publicationService.updatePublications(refreshPublications);
+        this.loadPublications();
         this._emailNotificationService.acceptFriendRequestNotification(this.idUserProfile);
         this._cdr.markForCheck();
       }
@@ -263,7 +224,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       }
     });
 
-    dialogRefAvatar.afterClosed().pipe(takeUntil(this.unsubscribe$)).subscribe(result => {
+    dialogRefAvatar.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       if (result && result.length > 0) {
         this.selectedFiles = result;
         const file = this.selectedFiles[0];
@@ -275,7 +236,6 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         };
         reader.readAsDataURL(file);
       }
-      
     });
   }
 
@@ -287,15 +247,13 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     const uploadLocation = 'profile-avatar';
     if (this.selectedImage) {
       const response = await lastValueFrom(
-        this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation).pipe(takeUntil(this.unsubscribe$))
+        this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation).pipe(takeUntil(this.destroy$))
       );
 
       const urlImgUpload = environment.APIFILESERVICE + uploadLocation + '/' + response[0].filename;
 
-      await this._userService.userEdit(userId, {
-        avatar: urlImgUpload,
-      }).pipe(takeUntil(this.unsubscribe$)).subscribe({
-        next: (data) => {
+      this._userService.userEdit(userId, { avatar: urlImgUpload }).pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
           this._globalEventService.updateProfileImage(urlImgUpload);
           if (this.userData) {
             this.userData.avatar = urlImgUpload;
@@ -326,5 +284,4 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   sendMessage(_id: string) {
     this._router.navigate(['/messages/', _id]);
   }
-
 }

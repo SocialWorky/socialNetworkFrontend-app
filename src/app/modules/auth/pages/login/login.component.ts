@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -40,7 +40,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild('emailInput') emailInput!: ElementRef;
 
-  private subscription: Subscription = new Subscription();
+  private unsubscribe$ = new Subject<void>();
 
   constructor(
     private _authApiService: AuthApiService,
@@ -69,19 +69,17 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
 
-    this._cdr.detectChanges();
+    this._cdr.markForCheck();
   }
 
-  ngAfterViewInit(): void {
+  async ngAfterViewInit() {
 
-    const token = this._activatedRoute.snapshot.paramMap.get('token');
-    const tokenPassword = this._activatedRoute.snapshot.paramMap.get('tokenPassword');
+    const tokenValidate = await this._activatedRoute.snapshot.paramMap.get('token');
+    const tokenPassword = await this._activatedRoute.snapshot.paramMap.get('tokenPassword');
 
-    if (token) {
-      this.validateEmailWithToken(token);
-    }
-
-    this._dialog.afterOpened.subscribe(() => {
+    if (tokenValidate) this.validateEmailWithToken(tokenValidate);
+  
+    this._dialog.afterOpened.pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
       this._dialog.openDialogs.forEach(dialog => {
         dialog.id === 'mat-mdc-dialog-1' ? dialog.close() : null;
       });
@@ -93,9 +91,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   async checkSessionGoogle() {
@@ -105,7 +102,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
           this.loginGoogle();
         }
       }
-      this._cdr.detectChanges();
+      this._cdr.markForCheck();
     }, 500);
   }
 
@@ -137,17 +134,18 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
     await loading.present();
 
-    this.subscription = this._authApiService.loginUser(credentials).subscribe({
-      next: (response: any) => {
+    await this._authApiService.loginUser(credentials).pipe(takeUntil(this.unsubscribe$)).subscribe({
+      next: async (response: any) => {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
-          const token = this._authService.getDecodedToken()!;
 
-          this._socketService.connectToWebSocket(token);
+          const tokenResponse = await this._authService.getDecodedToken()!;
+
+          this._socketService.connectToWebSocket(tokenResponse);
 
           this._notificationUsersService.loginUser();
 
-          if (token?.role === 'admin' && !this._deviceDetectionService.isMobile()) {
+          if (tokenResponse?.role === 'admin' && !this._deviceDetectionService.isMobile()) {
             this._router.navigate(['/admin']);
           } else {
             this._router.navigate(['/home']);
@@ -223,14 +221,14 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       password: await this._authService.generatePassword(),
     };
 
-    this.subscription = await this._authApiService.loginGoogle(dataGoogle).subscribe({
+    await this._authApiService.loginGoogle(dataGoogle).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (response: any) => {
 
         localStorage.setItem('token', response.token);
 
-        const userId = this._authService.getDecodedToken()?.id!;
+        const userId = await this._authService.getDecodedToken()?.id!;
 
-        this.subscription = await this._authApiService.avatarUpdate(userId, loginDataGoogle.picture, response.token).subscribe({
+        await this._authApiService.avatarUpdate(userId, loginDataGoogle.picture, response.token).pipe(takeUntil(this.unsubscribe$)).subscribe({
           next: async (response: any) => {
             if (response) {
               await this._authService.renewToken(userId);
@@ -256,13 +254,13 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     loading.dismiss();
   }
 
-  async validateEmailWithToken(token: string) {
+  async validateEmailWithToken(tokenValidate: string) {
     const loading = await this._loadingCtrl.create({
       message: translations['login.messageValidationEmailLoading'],
     });
     await loading.present();
 
-    this.subscription = this._authApiService.validateEmailWithToken(token).subscribe({
+    await this._authApiService.validateEmailWithToken(tokenValidate).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: any) => {
         if (response && response.message) {
           this._alertService.showAlert(
@@ -329,7 +327,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
     await loading.present();
 
-    this.subscription = await this._authApiService.forgotPassword(this.mailSendDataValidate).subscribe({
+    await this._authApiService.forgotPassword(this.mailSendDataValidate).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: any) => {
         if (response && response.message) {
           this._alertService.showAlert(

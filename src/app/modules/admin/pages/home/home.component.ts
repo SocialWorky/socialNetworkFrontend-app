@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'worky-admin-home',
@@ -7,7 +8,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HomeAdminComponent  implements OnInit {
 
-  constructor() { }
+  token = localStorage.getItem('token');
+
+  constructor(private _router: Router) { 
+    if (!this.token) {
+      this._router.navigate(['/login']);
+    }
+ }
 
   ngOnInit() {}
 
