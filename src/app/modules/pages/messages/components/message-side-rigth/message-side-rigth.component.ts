@@ -56,6 +56,12 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   async ngOnInit() {
     this.userIdMessage = await this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
     this.userId = this.userIdMessage;
+
+    if (this.userIdMessage && this.currentUser.id) {
+
+      this.loadMessagesWithUser(this.currentUser.id, this.userIdMessage);
+    }
+
     if (this.isMobile) {
       if (this.userIdMessage && this.currentUser.id) {
         this.loadMessagesWithUser(this.currentUser.id, this.userIdMessage);
@@ -103,6 +109,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   }
 
   private async loadMessagesWithUser(currentUserId: string, userIdMessage: string) {
+    if (userIdMessage === currentUserId) return;
     await this.getUser(userIdMessage);
     this.loadMessages = true;
     this._messageService.getConversationsWithUser(currentUserId, userIdMessage).pipe(takeUntil(this.unsubscribe$)).subscribe({
@@ -124,7 +131,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     this._user.getUserById(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (user: User) => {
         this.user = [user];
-        this._cdr.detectChanges();
+        this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading user:', error);

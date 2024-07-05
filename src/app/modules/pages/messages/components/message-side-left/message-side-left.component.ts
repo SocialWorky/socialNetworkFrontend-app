@@ -1,4 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Location } from '@angular/common';
+
 import { AuthService } from '@auth/services/auth.service';
 import { User } from '@shared/interfaces/user.interface';
 import { UserService } from '@shared/services/users.service';
@@ -39,7 +41,8 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
     private _messageService: MessageService,
     private _notificationMessageChatService: NotificationMessageChatService,
     private _deviceDetectionService: DeviceDetectionService,
-    private _router: Router
+    private _router: Router,
+    private _location: Location
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -75,8 +78,11 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
   selectUser(userId: string) {
     if (this.isMobile) {
       this._router.navigate(['/messages/', userId]);
+    }else {
+      const urlWithoutUserId = this._router.url.split('/').slice(0, 2).join('/');
+      this._location.replaceState(urlWithoutUserId);
+      this.userIdSelected.emit(userId);
     }
-    this.userIdSelected.emit(userId);
   }
   private async getUserMessages() {
     this.users = [];

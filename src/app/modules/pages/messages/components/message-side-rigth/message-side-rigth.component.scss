@@ -2,9 +2,6 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
-:host{
-  // display: block;
-}
 
 .content-right-messageChat {
   display: flex;
@@ -19,26 +16,20 @@
   @include breakpoints.below-sm {
     padding: 0px;
     border: 0px;
-    //height: 80vh;
   }
 
   .content-section-wall {
     height: 100%;
     overflow-y: auto;
-    // background-image: url('/assets/img/shared/fondo_message_chat.jpg');
-    // background-size: cover; 
-    // background-repeat: no-repeat;
-    // background-position: center; 
     scrollbar-width: thin;
     scrollbar-color: #ffffff #f0f0f0;
     @include breakpoints.below-sm {
-     height: 40vh;
+      flex: 1;
     }
     .messages-container {
       display: flex;
       flex-direction: column;
-      //height: 100%;
-      //background: #ffffffed;
+      height: 100%;
       padding: 18px;
       .sent-content,
       .received-content {
@@ -109,7 +100,7 @@
     border-radius: 1rem;
     padding: 0.5rem;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-    position: relative;
+    flex-shrink: 0;
     .emoji-wrapper {
         position: relative;
       }
@@ -147,6 +138,7 @@
   background: color.$worky-color-navy;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   color: #FFF;
+  flex-shrink: 0;
 
   .header-content-mobil-left {
     display: flex;
