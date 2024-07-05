@@ -2,8 +2,7 @@
   <span class="title">Messenger</span>
   <!-- <input type="text" class="search-input" placeholder="Search" /> -->
 
-  <div class="users" *ngIf="users.length > 0; else noMessages">
-
+  <div class="users" *ngIf="users.length > 0 && !loadUsers">
     <button *ngFor="let item of users" class="button" (click)="selectUser(item.user._id)">
       <div class="avatar-container">
         <worky-avatar 
@@ -13,15 +12,19 @@
         </worky-avatar>
       </div>
       <div class="user-info">
-        <span class="user-name">{{ item.user.name }} {{ item.user.lastName }}</span>
+        <div class="content-name-unread">
+          <span class="user-name">{{ item.user.name }} {{ item.user.lastName }}</span>
+          <div *ngIf="item.unreadMessagesCount > 0" class="unread-messages">{{ item.unreadMessagesCount }}</div>
+        </div>
         <span class="last-message">{{ item.lastMessage }} &middot; {{ formatTime(item.createAt) }}</span>
       </div>
     </button>
-
   </div>
-  <ng-template #noMessages>
-    <div class="no-messages">
-      <span class="no-messages-text">Aún no tienes conversaciones.</span>
-    </div>
-  </ng-template>
+
+  <div class="not-messages-container">
+    <div *ngIf="loadUsers" class="loader"></div>
+    <span *ngIf="loadUsers" class="no-messages-text">Buscando conversaciones...</span>
+    <span *ngIf="!loadUsers && users.length === 0" class="no-messages-text">No se encontraron conversaciones.</span>
+  </div>
+
 </div>

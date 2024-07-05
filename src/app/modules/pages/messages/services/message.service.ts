@@ -130,4 +130,16 @@ export class MessageService {
     const headers = this.getHeaders();
     return this.http.post<Message[]>(url, { chatId, senderId }, { headers });
   }
+
+  getUnreadMessagesCount(chastId:string, senderId:string): Observable<number> {
+    const url = `${this.baseUrl}/messages/unread-count/${chastId}/${senderId}`;
+    const headers = this.getHeaders();
+    return this.http.get<number>(url, { headers });
+  }
+
+  getUnreadAllMessagesCount(): Observable<number> {
+    const url = `${this.baseUrl}/messages/unread-all-count`;
+    const headers = this.getHeaders();
+    return this.http.get<number>(url, { headers });
+  }
 }

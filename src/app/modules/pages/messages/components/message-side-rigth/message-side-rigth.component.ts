@@ -1,5 +1,7 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import * as _ from 'lodash';
 
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { MessageService } from '../../services/message.service';
@@ -10,8 +12,6 @@ import { UserService } from '@shared/services/users.service';
 import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
-import { ActivatedRoute } from '@angular/router';
-import * as _ from 'lodash';
 
 @Component({
   selector: 'worky-message-side-rigth',
@@ -21,14 +21,21 @@ import * as _ from 'lodash';
 export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterViewInit, OnInit{
 
   WorkyButtonType = WorkyButtonType;
+
   WorkyButtonTheme = WorkyButtonTheme;
 
   userIdMessage: string = '';
+
   currentUser = this._authService.getDecodedToken()!;
+
   messages: Message[] = [];
+
   user: User[] = [];
+
   loadMessages = false;
+
   newMessage: string = '';
+
   showEmojiPicker: boolean = false;
 
   get isMobile(): boolean {
@@ -55,7 +62,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
   async ngOnInit() {
     this.userIdMessage = await this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
-    this.userId = this.userIdMessage;
+    if(this.userIdMessage) this.userId = this.userIdMessage;
 
     if (this.userIdMessage && this.currentUser.id) {
 
@@ -95,7 +102,8 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   ngOnChanges(changes: SimpleChanges) {
     if (changes['userId'] && !changes['userId'].isFirstChange()) {
       this.loadMessagesWithUser(this.currentUser.id, changes['userId'].currentValue);
-      this._cdr.markForCheck();
+      this._cdr.detectChanges();
+      this.scrollToBottom();
     }
   }
 
@@ -115,9 +123,9 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     this._messageService.getConversationsWithUser(currentUserId, userIdMessage).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (messages: Message[]) => {
         this.messages = messages;
-        this.scrollToBottom();
-        this.loadMessages = false;
         this._cdr.markForCheck();
+        this.loadMessages = false;
+        this.scrollToBottom();
       },
       error: (error) => {
         console.error('Error loading messages:', error);
@@ -176,6 +184,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     await this._messageService.createMessage(message).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (msg) => {
         this._notificationMessageChatService.sendNotificationMessageChat(msg);
+        this._notificationService.sendNotification();
         this.newMessage = '';
         this.scrollToBottom();
         this._cdr.markForCheck();
@@ -188,14 +197,13 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
   private scrollToBottom(): void {
     if (!this.userId || !this.messageContainer) return;
-
     setTimeout(() => {
       try {
         this.messageContainer!.nativeElement.scrollTop = this.messageContainer!.nativeElement.scrollHeight;
       } catch(err) {
         console.error('Error scrolling to bottom:', err);
       }
-    }, 500);
+    }, 1000);
   }
 
   async markMessagesAsRead() {

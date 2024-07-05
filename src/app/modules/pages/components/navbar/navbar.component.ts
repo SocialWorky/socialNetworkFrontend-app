@@ -11,6 +11,7 @@ import { SocketService } from '@shared/services/socket.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { NotificationCenterService } from '@shared/services/notificationCenter.service';
+import { MessageService } from '../../messages/services/message.service';
 
 @Component({
   selector: 'worky-navbar',
@@ -48,6 +49,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private _notificationUsersService: NotificationUsersService,
     private _notificationService: NotificationService,
     private _notificationCenterService: NotificationCenterService,
+    private _messageService: MessageService
   ) {
     this.menuProfile();
     this.token = this._authService.getDecodedToken();
@@ -64,6 +66,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       next: () => {
         setTimeout(() => {
           this.getNotification();
+          this.getUnreadMessagesCount();
         }, 1000)
       },
       error: (error) => {
@@ -72,6 +75,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
     // this.getNotification();
     this.checkAdminDataLink();
+    this.getUnreadMessagesCount();
     this._cdr.markForCheck();
   }
 
@@ -149,8 +153,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     const userId = this._authService.getDecodedToken()?.id!;
     this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {
-        this.notifications = data.filter((notification: any) => !notification.read).length; 
-        this.messages = data.filter((notification: any) => notification.type === 'message' && !notification.read).length;
+        this.notifications = data.filter((notification: any) => !notification.read).length;
         this._cdr.markForCheck();
       },
       error: (error) => {
@@ -161,6 +164,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   messagesUrl() {
     this._router.navigate(['/messages']);
+  }
+
+  getUnreadMessagesCount() {
+    this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
+      next: (data: any) => {
+        this.messages = data;
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error getting messages', error);
+      }
+    });
   }
 
 }
