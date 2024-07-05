@@ -9,7 +9,6 @@ import { AuthService } from '@auth/services/auth.service';
 import { PublicationService } from '@shared/services/publication.service';
 import { PublicationsReactions } from '@shared/interfaces/reactions.interface';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
-import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 
@@ -35,7 +34,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
 
   token = this._authService.getDecodedToken();
 
-  private mailSendNotification: MailSendValidateData = {} as MailSendValidateData;
+  unlockReactions = true;
 
   private destroy$ = new Subject<void>();
 
@@ -65,8 +64,10 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   }
 
   addReaction(reaction: CustomReactionList) {
+    this.unlockReactions = false;
     if (this.reactionUserInPublication) {
       this.editReaction(this.reactionUserInPublication._id, reaction);
+      this.unlockReactions = true;
       return;
     }
     this._reactionsService
@@ -80,31 +81,35 @@ export class ReactionsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: async () => {
           this.reactionsVisible = false;
+          this.unlockReactions = true;
           this._emailNotificationService.reactionsNotification(this.publication!, reaction);
-
-          if(this.publication?.author._id === this.token?.id) return;
 
           this.refreshPublications();
         },
         error: (err) => {
           console.error('Failed to add reaction', err);
+          this.unlockReactions = true;
         }
       });
   }
 
   deleteReaction(idReaction: string) {
+    this.unlockReactions = false;
     this._reactionsService.deleteReaction(idReaction).pipe(takeUntil(this.destroy$)).subscribe({
       next: async () => {
         this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
+        this.unlockReactions = true;
       },
       error: (err) => {
         console.error('Failed to delete reaction', err);
+        this.unlockReactions = true;
       }
     });
   }
 
   editReaction(id: string, reaction: CustomReactionList) {
+    this.unlockReactions = false;
     this._reactionsService.editReaction(id, {
       authorId: this.token?.id!,
       _idCustomReaction: reaction._id,
@@ -115,9 +120,11 @@ export class ReactionsComponent implements OnInit, OnDestroy {
       next: async () => {
         this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
+        this.unlockReactions = true;
       },
       error: (err) => {
         console.error('Failed to edit reaction', err);
+        this.unlockReactions = true;
       }
     });
   }

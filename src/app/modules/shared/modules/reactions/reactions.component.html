@@ -1,4 +1,5 @@
-<div class="reaction-container no-select-text" (mouseleave)="hideReactions()">
+<div *ngIf="!unlockReactions" class="loader"></div>
+<div *ngIf="unlockReactions" class="reaction-container no-select-text" (mouseleave)="hideReactions()">
 
   <div class="content-text-reaction no-select-text"
        (mouseenter)="showReactions()"
