@@ -98,14 +98,15 @@
       .user-basic {
         .content-name-action {
           display: flex;
-          gap: 10px;
+          align-items: center;
+          gap: 5px;
           h2 {
               @include Fonts.worky-h3;
               font-weight: bold;
               color: color.$worky-color-navy;
           }
           .send-message-icon {
-            width: 30px;
+            width: 40px;
             cursor: pointer;
           }
           .whatsapp-icon {
@@ -148,6 +149,10 @@
       margin-left: 0;
     }
   }
+}
+
+::ng-deep .cdk-global-overlay-wrapper .cdk-overlay-pane {
+  overflow: auto;
 }
 
 

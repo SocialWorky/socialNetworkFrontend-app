@@ -1,3 +1,4 @@
+import { ImageOrganizer } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
 import { ExtraData } from '../modules/addPublication/interfaces/createPost.interface';
 
 export interface PublicationView {
@@ -9,10 +10,10 @@ export interface PublicationView {
     updatedAt:   Date;
     author:      User;
     userReceiving?: User;
-    media:       any[];
+    media:       ImageOrganizer[];
     reaction:    any[];
     taggedUsers: any[];
-    comment:     any[];
+    comment:     Comment[];
     isMyFriend?: boolean;
     isFriendshipPending?: string;
 }
@@ -31,3 +32,12 @@ export interface MediaFileUpload {
   filenameThumbnail: string;
   filenameCompressed: string;
 }
+
+export interface Comment {
+  _id: string;
+  content: string;
+  createdAt: Date;
+  author: User;
+  media: ImageOrganizer[];
+}
+

@@ -61,7 +61,17 @@ export class FileUploadService {
       isPublications: type === TypePublishing.POST ? true : false,
       isComment: type === TypePublishing.COMMENT ? true : false
     };
-    return this.http.post<any>(`${urlApi}/media/create`, body, { headers });
+    const response = this.http.post<any>(`${urlApi}/media/create`, body, { headers });
+    console.log(response.pipe().subscribe({
+      next: (data) => {
+        console.log('DATA NEXT', data);
+        return data;
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    }));
+    return response;
   }
 
 }

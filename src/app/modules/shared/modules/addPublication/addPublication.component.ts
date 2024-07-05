@@ -184,7 +184,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     };
 
     this._commentService.createComment(dataComment).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: async (message: any) => {
+      next: async (message) => {
         await this.handleCommentResponse(message, idPublication);
         loadingComment.dismiss();
       },
