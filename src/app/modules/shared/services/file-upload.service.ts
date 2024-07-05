@@ -34,13 +34,28 @@ export class FileUploadService {
 
     formData.append('userId', id + '|');
     formData.append('destination', destination);
-    files.forEach(file => {
+
+    const uniqueFiles = this.getUniqueFiles(files);
+    uniqueFiles.forEach(file => {
       formData.append('files', file);
     });
 
     headers.append('Content-Type', 'multipart/form-data');
 
     return this.http.post<any>(url, formData, { headers });
+  }
+
+  private getUniqueFiles(files: File[]): File[] {
+    const uniqueFilesMap = new Map<string, File>();
+
+    files.forEach(file => {
+      const fileKey = `${file.name}-${file.size}`;
+      if (!uniqueFilesMap.has(fileKey)) {
+        uniqueFilesMap.set(fileKey, file);
+      }
+    });
+
+    return Array.from(uniqueFilesMap.values());
   }
 
   saveUrlFile(
@@ -62,15 +77,6 @@ export class FileUploadService {
       isComment: type === TypePublishing.COMMENT ? true : false
     };
     const response = this.http.post<any>(`${urlApi}/media/create`, body, { headers });
-    console.log(response.pipe().subscribe({
-      next: (data) => {
-        console.log('DATA NEXT', data);
-        return data;
-      },
-      error: (error) => {
-        console.log(error);
-      }
-    }));
     return response;
   }
 

@@ -116,6 +116,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   commentOn(index: number) {
+
     this.viewCommentSection = this.viewCommentSection === index ? -1 : index;
   }
 
