@@ -2,64 +2,65 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, O
 import { AuthService } from '@auth/services/auth.service';
 import { DropdownDataLink } from './interfaces/dataLink.interface';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
-import { Subject, Subscription, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 import { UserService } from '@shared/services/users.service';
 import { User } from '@shared/interfaces/user.interface';
 import { Token } from '@shared/interfaces/token.interface';
+import { takeUntil } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'worky-dropdown',
   templateUrl: './worky-dropdown.component.html',
   styleUrls: ['./worky-dropdown.component.scss'],
 })
-export class WorkyDropdownComponent  implements OnInit, OnDestroy{
+export class WorkyDropdownComponent implements OnInit, OnDestroy {
+  @Input() icon?: string;
+  
+  @Input() badge: boolean = false;
+  
+  @Input() badgeValue: number | null = 0;
+  
+  @Input() dataLink: DropdownDataLink<any>[] = [];
+  
+  @Input() img: string | boolean = '';
+  
+  @Input() title?: string;
+
+  @Output() linkClicked = new EventEmitter<DropdownDataLink<any>>();
 
   profileImageUrl: string | null = '';
-
+  
   user: User = {} as User;
+  
+  decodedToken: Token;
 
-  decodedToken!: Token;
-
-  private subscription: Subscription | undefined;
+  loaderAvatar = false;
 
   private unsubscribe$ = new Subject<void>();
 
-  @Input() icon: string | undefined;
-
-  @Input() badge?: boolean = false;
-
-  @Input() badgeValue?: number | null | undefined = 0;
-
-  @Input() dataLink?: DropdownDataLink<any>[] = [];
-
-  @Input() img?: string | boolean = undefined;
-
-  @Input() title?: string | undefined;
-
-  @Output() linkClicked: EventEmitter<DropdownDataLink<any>> = new EventEmitter<DropdownDataLink<any>>();
-
   constructor(
-    private _authService: AuthService,
-    private _globalEventService: GlobalEventService,
-    private _userService: UserService,
-    private _cdr: ChangeDetectorRef,
-  ) { 
-    this.decodedToken = this._authService.getDecodedToken()!;
+    private authService: AuthService,
+    private globalEventService: GlobalEventService,
+    private userService: UserService,
+    private cdr: ChangeDetectorRef
+  ) {
+    this.decodedToken = this.authService.getDecodedToken()!;
   }
 
   ngOnInit() {
-    this.getUser();
-    this.subscription = this._globalEventService.profileImage$.subscribe(newImageUrl => {
-      this.profileImageUrl = newImageUrl;
-    });
+    if(this.img === 'avatar') this.getUser();
+    this.globalEventService.profileImage$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(newImageUrl => {
+        this.profileImageUrl = newImageUrl;
+        this.cdr.markForCheck();
+      });
   }
 
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
   }
 
   handleMenuItemClick(data: DropdownDataLink<any>) {
@@ -67,16 +68,21 @@ export class WorkyDropdownComponent  implements OnInit, OnDestroy{
   }
 
   async getUser() {
-    await this._userService.getUserById(this.decodedToken.id).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (response: User) => {
+    try {
+      this.loaderAvatar = true;
+      const response = await firstValueFrom(this.userService.getUserById(this.decodedToken.id).pipe(takeUntil(this.unsubscribe$)));
+      if (response) {
         this.user = response;
         this.profileImageUrl = response.avatar;
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error(error);
-      },
-    });
+        this.loaderAvatar = false;
+        this.cdr.markForCheck();
+      } else {
+        this.loaderAvatar = false;
+        console.error('User not found');
+      }
+    } catch (error) {
+      this.loaderAvatar = false;
+      console.error(error);
+    }
   }
-
 }
