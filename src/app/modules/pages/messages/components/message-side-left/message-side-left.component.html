@@ -1,5 +1,5 @@
 <div class="content-list">
-  <span class="title">Messenger</span>
+  <span class="title">Mensajes...</span>
   <!-- <input type="text" class="search-input" placeholder="Search" /> -->
 
   <div class="users" *ngIf="users.length > 0 && !loadUsers">
@@ -21,10 +21,13 @@
     </button>
   </div>
 
-  <div class="not-messages-container">
-    <div *ngIf="loadUsers" class="loader"></div>
-    <span *ngIf="loadUsers" class="no-messages-text">Buscando conversaciones...</span>
-    <span *ngIf="!loadUsers && users.length === 0" class="no-messages-text">No se encontraron conversaciones.</span>
+  <div *ngIf="loadUsers" class="not-messages-container">
+    <div class="loader"></div>
+    <span class="no-messages-text">Buscando conversaciones...</span>
+  </div>
+
+  <div *ngIf="!loadUsers && users.length === 0" class="not-messages-container">
+    <span class="no-messages-text">No se encontraron conversaciones.</span>
   </div>
 
 </div>

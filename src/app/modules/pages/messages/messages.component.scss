@@ -89,6 +89,7 @@
     height: 100%;
     border: 1px solid #E4E6EB;
     border-radius: max(0px, min(8px,(100vw - 4px - 100%)* 9999)) / 8px;
+    align-content: center;
 
     @include breakpoints.below-sm {
       width: 100%;
