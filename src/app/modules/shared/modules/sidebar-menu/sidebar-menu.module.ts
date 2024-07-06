@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SideBarMenuComponent } from './sidebar-menu.component';
 import { WorkyAvatarModule } from '../worky-avatar/worky-avatar.module';
+import { NotificationsPanelModule } from '../notifications-panel/notifications-panel.module';
 
 
 
@@ -9,7 +10,8 @@ import { WorkyAvatarModule } from '../worky-avatar/worky-avatar.module';
   declarations: [SideBarMenuComponent],
   imports: [
     CommonModule,
-    WorkyAvatarModule
+    WorkyAvatarModule,
+    NotificationsPanelModule
   ],
   exports: [SideBarMenuComponent]
 })

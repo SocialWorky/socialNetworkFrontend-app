@@ -1,6 +1,7 @@
 
 .content-side-left {
     width: 100%;
+    padding: 16px;
     margin: 12px 5px;
     display: flex;
     flex-direction: column;
@@ -24,8 +25,7 @@
         text-decoration: none;
 
         &:hover {
-            color: #4b5563; 
-            transform: scale(1.5); 
+            color: #4b5563;  
         }
     }
 
