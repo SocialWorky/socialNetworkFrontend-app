@@ -12,6 +12,7 @@
   <a href="/messages" class="sidebar-icon">
     <i class="material-icons">message</i>
     <span class="sidebar-text">Message</span>
+    <span *ngIf="messages > 0" class="badge">{{ messages }}</span>
   </a>  
   <a href="#" class="sidebar-icon" (click)="toggleNotificationsPanel($event)">
     <i class="material-icons">notifications</i>

@@ -6,6 +6,7 @@ import { AuthService } from '@auth/services/auth.service';
 import { NotificationCenterService } from '@shared/services/notificationCenter.service';
 import { NotificationsPanelComponent } from '../notifications-panel/notifications-panel.component';
 import { NotificationService } from '@shared/services/notifications/notification.service';
+import { MessageService } from 'src/app/modules/pages/messages/services/message.service';
 
 @Component({
   selector: 'worky-sidebar-menu',
@@ -26,11 +27,14 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
 
   notifications: number = 0;
 
+  messages: number = 0;
+
   constructor(
     private _authService: AuthService,
     private _cdr: ChangeDetectorRef,
     private _notificationCenterService: NotificationCenterService,
     private _notificationService: NotificationService,
+    private _messageService: MessageService
   ) { 
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
@@ -43,12 +47,14 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
     this._notificationService.notification$.pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: () => {
         this.getNotification();
+        this.getUnreadMessagesCount();
       },
       error: (error) => {
         console.error('Error getting notifications', error);
       }
     });
     this.getNotification();
+    this.getUnreadMessagesCount();
   }
 
   ngOnDestroy() {
@@ -72,6 +78,18 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
       },
       error: (error) => {
         console.error('Error getting notifications', error);
+      }
+    });
+  }
+
+  getUnreadMessagesCount() {
+    this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
+      next: (data: any) => {
+        this.messages = data;
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error getting messages', error);
       }
     });
   }
