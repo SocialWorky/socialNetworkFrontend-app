@@ -40,7 +40,6 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
   }
 
   ngOnInit() {
-    this.getNotification();
     this._notificationService.notification$.pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: () => {
         this.getNotification();
@@ -49,6 +48,7 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
         console.error('Error getting notifications', error);
       }
     });
+    this.getNotification();
   }
 
   ngOnDestroy() {
