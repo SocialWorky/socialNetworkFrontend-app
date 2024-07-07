@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ElementRef, Renderer2 } from '@angular/core';
 import { AuthService } from '@auth/services/auth.service';
 import { DropdownDataLink } from './interfaces/dataLink.interface';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
@@ -16,26 +16,20 @@ import { firstValueFrom } from 'rxjs';
 })
 export class WorkyDropdownComponent implements OnInit, OnDestroy {
   @Input() icon?: string;
-  
   @Input() badge: boolean = false;
-  
   @Input() badgeValue: number | null = 0;
-  
   @Input() dataLink: DropdownDataLink<any>[] = [];
-  
   @Input() img: string | boolean = '';
-  
   @Input() title?: string;
 
   @Output() linkClicked = new EventEmitter<DropdownDataLink<any>>();
 
   profileImageUrl: string | null = '';
-  
   user: User = {} as User;
-  
   decodedToken: Token;
 
   loaderAvatar = false;
+  dropdownDirection: 'up' | 'down' = 'down';
 
   private unsubscribe$ = new Subject<void>();
 
@@ -43,19 +37,22 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private globalEventService: GlobalEventService,
     private userService: UserService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private elementRef: ElementRef,
+    private renderer: Renderer2
   ) {
     this.decodedToken = this.authService.getDecodedToken()!;
   }
 
   ngOnInit() {
-    if(this.img === 'avatar') this.getUser();
+    if (this.img === 'avatar') this.getUser();
     this.globalEventService.profileImage$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(newImageUrl => {
         this.profileImageUrl = newImageUrl;
         this.cdr.markForCheck();
       });
+    this.checkDropdownDirection();
   }
 
   ngOnDestroy(): void {
@@ -84,5 +81,17 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
       this.loaderAvatar = false;
       console.error(error);
     }
+  }
+
+  checkDropdownDirection() {
+    const rect = this.elementRef.nativeElement.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const threshold = 200; // distance from bottom to switch direction
+    if (windowHeight - rect.bottom < threshold) {
+      this.dropdownDirection = 'up';
+    } else {
+      this.dropdownDirection = 'down';
+    }
+    this.renderer.setAttribute(this.elementRef.nativeElement, 'data-direction', this.dropdownDirection);
   }
 }

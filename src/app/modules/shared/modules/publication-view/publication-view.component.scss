@@ -150,9 +150,9 @@
         }
 
         ::ng-deep worky-dropdown {
-          .dropdown-menu {
-            inset: 7px -26px auto auto!important;
-          }
+          // .dropdown-menu {
+          //   inset: 7px -26px auto auto!important;
+          // }
           .nav-link {
             span {
               color: colors.$worky-color-navy;
