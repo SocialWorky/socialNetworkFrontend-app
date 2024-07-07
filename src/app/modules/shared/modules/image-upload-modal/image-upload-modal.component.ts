@@ -74,7 +74,7 @@ export class ImageUploadModalComponent implements OnInit {
         image.src = e.target.result;
         image.onload = () => {
           EXIF.getData(image, () => {
-            const orientation = EXIF.getTag(image, 'Orientation');
+            const orientation = EXIF.getTag(this, 'Orientation');
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d')!;
             canvas.width = image.width;
