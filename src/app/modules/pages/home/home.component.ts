@@ -29,7 +29,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   typePublishing = TypePublishing;
   publications: PublicationView[] = [];
   page = 1;
-  pageSize = 1; // Updated to load 10 publications initially
+  pageSize = 1;
   loaderPublications: boolean = false;
   paramPublication: boolean = false;
   hasMorePublications: boolean = true;
@@ -151,7 +151,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.loaderPublications = true;
     try {
       const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize));
-      console.log('Loaded publications:', newPublications); // Debugging line
       if (newPublications.length < this.pageSize) {
         this.hasMorePublications = false;
       }
@@ -174,16 +173,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const position = event.target.scrollTop + event.target.clientHeight;
     const height = event.target.scrollHeight;
 
-    console.log('Scroll event:', {
-      position,
-      height,
-      threshold,
-      loaderPublications: this.loaderPublications,
-      hasMorePublications: this.hasMorePublications,
-    });
-
     if (position >= height - threshold && !this.loaderPublications && this.hasMorePublications) {
-      console.log('Loading more publications...');
       this.loadPublications();
     }
   }
