@@ -75,9 +75,10 @@
       />
     </div>
     <div>
-      <worky-buttons
+      <div *ngIf="sendMessagesLoader" class="loader"></div>
+      <worky-buttons *ngIf="!sendMessagesLoader"
         type="submit"
-        [theme]="WorkyButtonTheme.Accent"        
+        [theme]="WorkyButtonTheme.Accent"
         [width]="'100%'"
         (click)="sendMessage()">
         <span basic-button-text>Enviar</span>

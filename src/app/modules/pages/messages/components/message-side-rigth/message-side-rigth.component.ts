@@ -38,6 +38,8 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
   showEmojiPicker: boolean = false;
 
+  sendMessagesLoader: boolean = false;
+
   get isMobile(): boolean {
     return this._deviceDetectionService.isMobile();
   }
@@ -175,6 +177,8 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
  async sendMessage() {
     if (this.newMessage.trim() === '') return;
 
+    this.sendMessagesLoader = true;
+
     const message: CreateMessage = {
       receiverId: this.userId,
       content: this.newMessage,
@@ -187,10 +191,12 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
         this._notificationService.sendNotification();
         this.newMessage = '';
         this.scrollToBottom();
+        this.sendMessagesLoader = false;
         this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error sending message:', error);
+        this.sendMessagesLoader = false
       }
     });
   }
