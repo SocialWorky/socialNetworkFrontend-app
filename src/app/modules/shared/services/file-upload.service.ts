@@ -20,27 +20,24 @@ export class FileUploadService {
 
   private getHeaders(): HttpHeaders {
     const token = this.token;
-    const headers = new HttpHeaders({
+    return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    return headers;
   }
 
   uploadFile(files: File[], destination: string) {
-    const url = environment.APIFILESERVICE + 'upload';
+    const url = `${environment.APIFILESERVICE}upload`;
     const id = this._authService.getDecodedToken()?.id;
     const headers = this.getHeaders();
     const formData = new FormData();
 
-    formData.append('userId', id + '|');
+    formData.append('userId', `${id}|`);
     formData.append('destination', destination);
 
     const uniqueFiles = this.getUniqueFiles(files);
     uniqueFiles.forEach(file => {
       formData.append('files', file);
     });
-
-    headers.append('Content-Type', 'multipart/form-data');
 
     return this.http.post<any>(url, formData, { headers });
   }
@@ -63,7 +60,7 @@ export class FileUploadService {
     urlThumbnail: string,
     urlCompressed: string,
     _idPublications: string,
-    type:TypePublishing
+    type: TypePublishing
   ) {
     const urlApi = environment.API_URL;
     const headers = this.getHeaders();
@@ -76,8 +73,7 @@ export class FileUploadService {
       isPublications: type === TypePublishing.POST ? true : false,
       isComment: type === TypePublishing.COMMENT ? true : false
     };
-    const response = this.http.post<any>(`${urlApi}/media/create`, body, { headers });
-    return response;
-  }
 
+    return this.http.post<any>(`${urlApi}/media/create`, body, { headers });
+  }
 }
