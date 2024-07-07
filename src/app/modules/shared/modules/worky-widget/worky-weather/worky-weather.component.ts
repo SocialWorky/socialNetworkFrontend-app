@@ -1,6 +1,6 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject, interval, Subscription, firstValueFrom } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject, Subscription, interval, firstValueFrom, of } from 'rxjs';
+import { switchMap, takeUntil, catchError } from 'rxjs/operators';
 
 import { WeatherService } from './service/apiOpenWeather.service';
 import { Condition, WeatherMain } from './interfaces/dataWeather.interface';
@@ -13,179 +13,184 @@ import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.servi
   selector: 'worky-weather',
   templateUrl: './worky-weather.component.html',
   styleUrls: ['./worky-weather.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WeatherComponent implements OnInit, OnDestroy {
   WorkyButtonType = WorkyButtonType;
-
   WorkyButtonTheme = WorkyButtonTheme;
 
-  localTime: Date;
-
-  oldHour: number = 0;
-
+  localTime: Date = new Date();
   currentHour: number = 0;
-
-  i = 0;
-
-  weatherDataString: string | null;
-
-  WorkyWeatherData: WeatherMain;
-
-  public weatherData: WeatherMain = {
-    location: {
-      name: '',
-      region: '',
-      country: '',
-      lat: 0,
-      lon: 0,
-      tz_id: '',
-      localtime_epoch: 0,
-      localtime: ''
-    },
-    current: {
-      last_updated_epoch: 0,
-      last_updated: '',
-      temp_c: 0,
-      temp_f: 0,
-      is_day: 0,
-      condition: {} as Condition,
-      wind_mph: 0,
-      wind_kph: 0,
-      wind_degree: 0,
-      wind_dir: '',
-      pressure_mb: 0,
-      pressure_in: 0,
-      precip_mm: 0,
-      precip_in: 0,
-      humidity: 0,
-      cloud: 0,
-      feelslike_c: 0,
-      feelslike_f: 0,
-      vis_km: 0,
-      vis_miles: 0,
-      uv: 0,
-      gust_mph: 0,
-      gust_kph: 0
-    },
-    forecast: {
-      forecastday: []
-    }
-  };
-
+  weatherData: WeatherMain = this.getInitialWeatherData();
   city?: string;
-
-  get isUserLocationReady() {
-    return this._locationService.isUserLocationReady;
-  }
+  i: number = 0; // Definir la propiedad i
 
   private unsubscribe$ = new Subject<void>();
-
-  private timeSubscription: Subscription | undefined;
+  private timeSubscription?: Subscription;
 
   constructor(
-    private _weatherService: WeatherService,
-    private _cdr: ChangeDetectorRef,
-    private _locationService: LocationService,
-    private _geocodingService: GeocodingService,
-    private _geoLocationsService: GeoLocationsService
+    private weatherService: WeatherService,
+    private cdr: ChangeDetectorRef,
+    private locationService: LocationService,
+    private geocodingService: GeocodingService,
+    private geoLocationsService: GeoLocationsService
   ) {
-    this.localTime = new Date();
-    this.weatherDataString = localStorage.getItem('WorkyWeatherData');
-    this.WorkyWeatherData = this.weatherDataString ? JSON.parse(this.weatherDataString) : null;
+    const storedWeatherData = localStorage.getItem('WorkyWeatherData');
+    if (storedWeatherData) {
+      this.weatherData = JSON.parse(storedWeatherData);
+    }
   }
 
-  async ngOnInit(): Promise<void> {
-    const verify = await this.verifyWeatherData();
-    if (!verify) {
-      try {
-        const [latitude, longitude] = await this._locationService.getUserLocation();
-        await this.setCityFromCoordinates(latitude, longitude);
-        await this.getWeatherLatAndLng(latitude, longitude);
-      } catch (error) {
-        console.error('Error getting location or geocoding data:', error);
-      } finally {
-        this._cdr.markForCheck();
+  ngOnInit(): void {
+    this.verifyWeatherData().then(verify => {
+      if (!verify) {
+        this.updateWeatherData();
       }
-    }
-
-    this.oldHour = this.localTime.getHours();
-
-    this._cdr.markForCheck();
-
-    this.timeSubscription = interval(1000).subscribe(() => {
-
-        this.localTime = new Date();        
-        this._cdr.markForCheck()
-
-        if (this.localTime.getHours() === this.oldHour) return;
-        this.oldHour = this.localTime.getHours();
-        this.currentHour = this.localTime.getHours();
-        this._cdr.markForCheck()
     });
 
+    this.startClock();
   }
 
-  async setCityFromCoordinates(latitude: number, longitude: number): Promise<void> {
-    try {
-      const result = await firstValueFrom(this._geoLocationsService.findLocationByLatAndLng(latitude, longitude).pipe(takeUntil(this.unsubscribe$)));
-      if (!result) {
-        const data = await firstValueFrom(this._geocodingService.getGeocodeLatAndLng(latitude, longitude).pipe(takeUntil(this.unsubscribe$)));
-        if (data.results && data.results.length > 0) {
-          await firstValueFrom(this._geoLocationsService.createLocations(data).pipe(takeUntil(this.unsubscribe$)));
-          this.city = data.results[0].components.city || 'Unknown location';
-        }
-      } else {
-        this.city = result[0]?.city || null;
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+    this.timeSubscription?.unsubscribe();
+  }
+
+  private getInitialWeatherData(): WeatherMain {
+    return {
+      location: {
+        name: '',
+        region: '',
+        country: '',
+        lat: 0,
+        lon: 0,
+        tz_id: '',
+        localtime_epoch: 0,
+        localtime: ''
+      },
+      current: {
+        last_updated_epoch: 0,
+        last_updated: '',
+        temp_c: 0,
+        temp_f: 0,
+        is_day: 0,
+        condition: {} as Condition,
+        wind_mph: 0,
+        wind_kph: 0,
+        wind_degree: 0,
+        wind_dir: '',
+        pressure_mb: 0,
+        pressure_in: 0,
+        precip_mm: 0,
+        precip_in: 0,
+        humidity: 0,
+        cloud: 0,
+        feelslike_c: 0,
+        feelslike_f: 0,
+        vis_km: 0,
+        vis_miles: 0,
+        uv: 0,
+        gust_mph: 0,
+        gust_kph: 0
+      },
+      forecast: {
+        forecastday: []
       }
-      if (this.city && !this.WorkyWeatherData.location.name) {
-        await this.getWeatherLatAndLng(latitude, longitude);
+    };
+  }
+
+  private startClock(): void {
+    this.timeSubscription = interval(1000).pipe(
+      takeUntil(this.unsubscribe$)
+    ).subscribe(() => {
+      this.localTime = new Date();
+      this.currentHour = this.localTime.getHours();
+      this.cdr.markForCheck();
+    });
+  }
+
+  private async updateWeatherData(): Promise<void> {
+    try {
+      const [latitude, longitude] = await this.locationService.getUserLocation();
+      await this.setCityFromCoordinates(latitude, longitude);
+      await this.getWeatherData(latitude, longitude);
+    } catch (error) {
+      console.error('Error getting location or geocoding data:', error);
+    } finally {
+      this.cdr.markForCheck();
+    }
+  }
+
+  private async setCityFromCoordinates(latitude: number, longitude: number): Promise<void> {
+    try {
+      const location = await firstValueFrom(
+        this.geoLocationsService.findLocationByLatAndLng(latitude, longitude).pipe(
+          takeUntil(this.unsubscribe$),
+          switchMap(result => {
+            if (!result) {
+              return this.geocodingService.getGeocodeLatAndLng(latitude, longitude).pipe(
+                switchMap(data => {
+                  if (data.results && data.results.length > 0) {
+                    return this.geoLocationsService.createLocations(data).pipe(
+                      switchMap(() => of(data.results[0].components.city || 'Unknown location'))
+                    );
+                  }
+                  return of('Unknown location');
+                })
+              );
+            }
+            return of(result[0]?.city || null);
+          }),
+          catchError(error => {
+            console.error('Error getting geocoding data:', error);
+            return of('Unknown location');
+          })
+        )
+      );
+
+      this.city = location;
+      if (this.city && !this.weatherData.location.name) {
+        await this.getWeatherData(latitude, longitude);
       }
     } catch (error) {
       console.error('Error getting geocoding data:', error);
     }
   }
 
-  async getWeatherLatAndLng(lat: number, lng: number): Promise<void> {
-    if (!lat && !lng) return;
-
-    this._weatherService.getWeatherLatAndLng(lat, lng).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (data) => {
-        localStorage.setItem('WorkyWeatherData', JSON.stringify(data));
-        this.weatherDataString = localStorage.getItem('WorkyWeatherData');
-        this.weatherData = this.weatherDataString ? JSON.parse(this.weatherDataString) : null;
-
-        this.city = this.weatherData.location.name;
-        this._cdr.markForCheck();
-      },
-      error: (error) => console.error('Error fetching weather data:', error)
-    });
+  private getWeatherData(lat: number, lng: number): Promise<void> {
+    return firstValueFrom(
+      this.weatherService.getWeatherLatAndLng(lat, lng).pipe(
+        takeUntil(this.unsubscribe$),
+        switchMap(data => {
+          localStorage.setItem('WorkyWeatherData', JSON.stringify(data));
+          this.weatherData = data;
+          this.city = this.weatherData.location.name;
+          return of(void 0);
+        }),
+        catchError(error => {
+          console.error('Error fetching weather data:', error);
+          return of(void 0);
+        })
+      )
+    );
   }
 
-  async getWeatherCity(city?: string): Promise<void> {
-    if (!city) return;
+  private async verifyWeatherData(): Promise<boolean> {
+    if (!this.weatherData.forecast || this.weatherData.forecast.forecastday.length === 0) {
+      return false;
+    }
 
-    this._geocodingService.getGeocodeCity(city).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (data) => {
-        if (data.results && data.results.length > 0) {
-          this._geoLocationsService.createLocations(data).pipe(takeUntil(this.unsubscribe$)).subscribe({
-            next: () => {
-              console.log('Location created:');
-            },
-            error: (error) => console.error('Error creating location:', error)
-          });
-          this._weatherService.getWeatherCity(city).pipe(takeUntil(this.unsubscribe$)).subscribe({
-            next: (data) => {
-              localStorage.setItem('WorkyWeatherData', JSON.stringify(data));
-              this.weatherDataString = localStorage.getItem('WorkyWeatherData');
-              this.weatherData = this.weatherDataString ? JSON.parse(this.weatherDataString) : null;
-              this._cdr.markForCheck();
-            },
-            error: (error) => console.error('Error fetching weather data:', error)
-          });
-        }
-      },
-      error: (error) => console.error('Error fetching geocoding data:', error)
-    });
+    const today = this.weatherData.forecast.forecastday.map(day => day.date.toString());
+    const currentDay = this.formatDate(this.localTime);
+
+    if (today.includes(currentDay)) {
+      this.city = this.weatherData.location.name;
+      this.cdr.markForCheck();
+      return true;
+    }
+
+    return false;
   }
 
   private formatDate(date: Date): string {
@@ -195,43 +200,37 @@ export class WeatherComponent implements OnInit, OnDestroy {
     return `${year}-${month}-${day}`;
   }
 
-  async verifyWeatherData(): Promise<boolean> {
-    let verify = false;
-    if (this.WorkyWeatherData && this.WorkyWeatherData.forecast && this.WorkyWeatherData.forecast.forecastday.length > 0) {
-      const today = this.WorkyWeatherData.forecast.forecastday;
-      const currentDay = this.formatDate(this.localTime);
-
-      this.currentHour = this.localTime.getHours();
-
-      const todayDate01Formatted = today[0].date.toString();
-      const todayDate02Formatted = today[1].date.toString();
-      const todayDate03Formatted = today[2].date.toString();
-
-      if (todayDate01Formatted === currentDay || todayDate02Formatted === currentDay || todayDate03Formatted === currentDay) {
-
-        if (todayDate01Formatted === currentDay) this.i = 0;
-        if (todayDate02Formatted === currentDay) this.i = 1;
-        if (todayDate03Formatted === currentDay) this.i = 2;
-
-        this.weatherData = this.WorkyWeatherData;
-        this.city = this.weatherData.location.name;
-        this._cdr.markForCheck();
-        verify = true;
-      }
-    }
-    return verify;
-  }
-
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
-
-    if (this.timeSubscription) {
-      this.timeSubscription.unsubscribe();
-    }
-  }
-
   getWeatherIconUrl(iconUrl: string): string {
-    return `${iconUrl}?_=${this.oldHour}`;
+    return `${iconUrl}?_=${this.currentHour}`;
+  }
+
+  // Método para obtener el clima por ciudad
+  getWeatherCity(city?: string): void {
+    if (!city) return;
+
+    this.geocodingService.getGeocodeCity(city).pipe(
+      takeUntil(this.unsubscribe$),
+      switchMap(data => {
+        if (data.results && data.results.length > 0) {
+          return this.geoLocationsService.createLocations(data).pipe(
+            switchMap(() => this.weatherService.getWeatherCity(city))
+          );
+        }
+        return of(null);
+      }),
+      catchError(error => {
+        console.error('Error fetching geocoding data:', error);
+        return of(null);
+      })
+    ).subscribe({
+      next: data => {
+        if (data) {
+          localStorage.setItem('WorkyWeatherData', JSON.stringify(data));
+          this.weatherData = data;
+          this.cdr.markForCheck();
+        }
+      },
+      error: error => console.error('Error fetching weather data:', error)
+    });
   }
 }
