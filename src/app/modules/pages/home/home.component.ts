@@ -27,18 +27,29 @@ export class HomeComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   typePublishing = TypePublishing;
+  
   publications: PublicationView[] = [];
+  
   page = 1;
+  
   pageSize = 1;
+  
   loaderPublications: boolean = false;
+  
   paramPublication: boolean = false;
+  
   hasMorePublications: boolean = true;
+  
   urlMediaApi = environment.APIFILESERVICE;
+  
   dataUser = this._authService.getDecodedToken();
+  
   isOnline$ = this._networkService.connectionStatus;
+  
   connectionSpeed$ = this._networkService.connectionSpeed;
 
   showConnectionOverlay = false;
+  
   connectionStatusMessage = '';
 
   trackById(index: number, publication: PublicationView): string {

@@ -116,7 +116,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   commentOn(index: number) {
-
     this.viewCommentSection = this.viewCommentSection === index ? -1 : index;
   }
 
@@ -264,7 +263,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     const dialogRef = this._dialog.open(ReportResponseComponent, {});
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (result: any) => {
       if (result) {
-
         const loadingCreateReport = await this._loadingCtrl.create({
           message: 'Creando reporte...',
         });
