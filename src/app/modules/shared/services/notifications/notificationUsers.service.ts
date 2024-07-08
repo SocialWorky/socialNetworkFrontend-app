@@ -39,11 +39,13 @@ export class NotificationUsersService implements OnDestroy {
   }
 
   logoutUser() {
+    this.socket.emit('refreshUserStatuses');
     this.socket.emit('logoutUser');
   }
 
   loginUser() {
     this.socket.emit('loginUser');
+    this.socket.emit('refreshUserStatuses');
   }
 
   ngOnDestroy() {
