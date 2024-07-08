@@ -58,7 +58,7 @@
       <worky-dropdown 
         icon="notifications"
         [badgeValue]="notifications > 0 ? notifications : null" 
-        (click)="notificationsPanel.togglePanel()"
+        (click)="toggleNotificationsPanel()"
         [badge]=true>
       </worky-dropdown>
       <!-- Profile -->
@@ -89,7 +89,7 @@
         <worky-dropdown 
           icon="notifications"
           [badgeValue]="notifications > 0 ? notifications : null"
-          (click)="notificationsPanel.togglePanel()"
+          (click)="toggleNotificationsPanel()"
           [badge]=true>
         </worky-dropdown>
         <!-- Profile -->
@@ -103,4 +103,4 @@
   </nav>
 </div>
 
-<worky-notifications-panel #notificationsPanel ></worky-notifications-panel>
+<worky-notifications-panel></worky-notifications-panel>

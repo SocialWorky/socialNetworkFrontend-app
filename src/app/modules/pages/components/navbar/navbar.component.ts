@@ -11,6 +11,7 @@ import { SocketService } from '@shared/services/socket.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { NotificationCenterService } from '@shared/services/notificationCenter.service';
+import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service'
 import { MessageService } from '../../messages/services/message.service';
 
 @Component({
@@ -49,7 +50,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private _notificationUsersService: NotificationUsersService,
     private _notificationService: NotificationService,
     private _notificationCenterService: NotificationCenterService,
-    private _messageService: MessageService
+    private _messageService: MessageService,
+    private _notificationPanelService: NotificationPanelService
   ) {
     this.menuProfile();
     this.token = this._authService.getDecodedToken();
@@ -96,6 +98,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     if (dataUser && dataUser.role === 'admin' && !this.isMobile) {
       this.dataLinkProfile.push(link);
     }
+  }
+
+  toggleNotificationsPanel() {
+    this._notificationPanelService.togglePanel();
   }
 
   search(event: Event) {

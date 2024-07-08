@@ -14,11 +14,11 @@
     <span class="sidebar-text">Message</span>
     <span *ngIf="messages > 0" class="badge">{{ messages }}</span>
   </a>  
-  <a href="#" class="sidebar-icon" (click)="toggleNotificationsPanel($event)">
+  <a href="#" class="sidebar-icon" (click)="toggleNotificationsPanel()">
     <i class="material-icons">notifications</i>
     <span class="sidebar-text">Notifications</span>
     <span *ngIf="notifications > 0" class="badge">{{ notifications }}</span>
   </a>  
 </div>
 
-<worky-notifications-panel #notificationsPanel></worky-notifications-panel>
+<worky-notifications-panel></worky-notifications-panel>

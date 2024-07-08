@@ -4,7 +4,7 @@ import { Subject, Subscription, takeUntil } from 'rxjs';
 import { Token } from '@shared/interfaces/token.interface'
 import { AuthService } from '@auth/services/auth.service';
 import { NotificationCenterService } from '@shared/services/notificationCenter.service';
-import { NotificationsPanelComponent } from '../notifications-panel/notifications-panel.component';
+import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service'
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { MessageService } from 'src/app/modules/pages/messages/services/message.service';
 
@@ -22,9 +22,6 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
 
   isAuthenticated: boolean = false;
 
-  @ViewChild('notificationsPanel')
-  notificationsPanel!: NotificationsPanelComponent;
-
   notifications: number = 0;
 
   messages: number = 0;
@@ -34,7 +31,8 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
     private _cdr: ChangeDetectorRef,
     private _notificationCenterService: NotificationCenterService,
     private _notificationService: NotificationService,
-    private _messageService: MessageService
+    private _messageService: MessageService,
+    private _notificationPanelService: NotificationPanelService
   ) { 
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
@@ -62,11 +60,8 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
     this.unsubscribe$.complete();
   }
 
-  toggleNotificationsPanel(event: Event): void {
-    event.preventDefault(); // Evita que la página se recargue si usas un <a> con href="#"
-    if (this.notificationsPanel) {
-      this.notificationsPanel.togglePanel();
-    }
+  toggleNotificationsPanel() {
+    this._notificationPanelService.togglePanel();
   }
 
   getNotification() {

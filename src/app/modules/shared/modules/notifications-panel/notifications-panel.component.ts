@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 import { AuthService } from '@auth/services/auth.service';
 import { NotificationCenterService } from '@shared/services/notificationCenter.service';
+import { NotificationPanelService } from './services/notificationPanel.service'
 import { AdditionalDataComment, AdditionalDataLike, AdditionalDataFriendRequest, AdditionalDataFriendAccept, NotificationsData } from './interfaces/notificationsData.interface';
 import { NotificationType } from './enums/notificationsType.enum';
 import { NotificationService } from '@shared/services/notifications/notification.service';
@@ -13,7 +14,7 @@ import { NotificationService } from '@shared/services/notifications/notification
   templateUrl: './notifications-panel.component.html',
   styleUrls: ['./notifications-panel.component.scss'],
 })
-export class NotificationsPanelComponent  implements OnInit, OnDestroy {
+export class NotificationsPanelComponent implements OnInit, OnDestroy {
   isActive = false;
 
   listNotifications: NotificationsData[] = [];
@@ -32,19 +33,26 @@ export class NotificationsPanelComponent  implements OnInit, OnDestroy {
     private _cdr: ChangeDetectorRef,
     private _router: Router,
     private _notificationService: NotificationService,
+    private _notificationPanelService: NotificationPanelService,
   ) {}
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   ngOnInit() {
-    this.getNotifications();
+    this._notificationPanelService.getIsActive().pipe(takeUntil(this.destroy$)).subscribe(isActive => {
+      this.isActive = isActive;
+      if (this.isActive) {
+        this.getNotifications();
+      }
+      this._cdr.markForCheck();
+    });
   }
 
   togglePanel() {
-    this.isActive = !this.isActive;
-    if (this.isActive) this.getNotifications();
+    this._notificationPanelService.togglePanel();
   }
 
   async getNotifications() {
@@ -57,7 +65,7 @@ export class NotificationsPanelComponent  implements OnInit, OnDestroy {
           if (!notification.read) {
             this.unreadNotifications++;
           }
-          
+
           if (notification.type === this.type.COMMENT) {
             const additionalDataComment: AdditionalDataComment = JSON.parse(notification.additionalData as string);
             notification.icon = 'comment';
@@ -94,17 +102,17 @@ export class NotificationsPanelComponent  implements OnInit, OnDestroy {
             });
           }
 
-            this.formatListNotifications.sort((a, b) => {
-              if (a.read === b.read) {
-                return 0;
-              } else if (a.read && !b.read) {
-                return 1;
-              } else {
-                return -1;
-              }
-            });
+          this.formatListNotifications.sort((a, b) => {
+            if (a.read === b.read) {
+              return 0;
+            } else if (a.read && !b.read) {
+              return 1;
+            } else {
+              return -1;
+            }
+          });
 
-            this._cdr.markForCheck();
+          this._cdr.markForCheck();
         });
       },
       error: (error) => {
@@ -130,6 +138,4 @@ export class NotificationsPanelComponent  implements OnInit, OnDestroy {
       },
     });
   }
-
-
 }
