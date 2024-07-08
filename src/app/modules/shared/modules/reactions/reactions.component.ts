@@ -21,18 +21,25 @@ import { NotificationService } from '@shared/services/notifications/notification
 })
 export class ReactionsComponent implements OnInit, OnDestroy {
   reactionsVisible = false;
+  
   reactions: Array<CustomReactionList & { zoomed: boolean }> = [];
+  
   typePublishing = TypePublishing;
 
   @Input() type: TypePublishing | undefined;
+  
   @Input() userProfile?: string;
+  
   @Input() publication: PublicationView | undefined;
+  
   @Input() reactionsToPublication: PublicationsReactions[] = [];
 
   token = this._authService.getDecodedToken();
+  
   unlockReactions = true;
 
   private destroy$ = new Subject<void>();
+  
   private touchTimeout: any;
 
   get reactionUserInPublication() {

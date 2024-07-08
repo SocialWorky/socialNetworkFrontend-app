@@ -23,6 +23,7 @@ import { EmailNotificationService } from '@shared/services/notifications/email-n
 import { CommentService } from '@shared/services/comment.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import * as _ from 'lodash';
+import { Reactions } from './interfaces/reactions.interface';
 
 @Component({
   selector: 'worky-publication-view',
@@ -32,24 +33,42 @@ import * as _ from 'lodash';
 })
 export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() publication!: PublicationView;
+  
   @Input() indexPublication?: number;
+  
   @Input() type?: TypePublishing;
+  
   @Input() userProfile?: string;
 
   typePublishing = TypePublishing;
+  
   typePrivacy = TypePrivacy;
+  
   dataLinkActions: DropdownDataLink<any>[] = [];
+  
   dataShareActions: DropdownDataLink<any>[] = [];
+  
   viewCommentSection: number | null = null;
+  
   viewComments: number | null = null;
+  
   nameGeoLocation = '';
+  
   urrMap = '';
+  
   extraData: string[] = [];
+  
   userRequest?: UserData;
+  
   userReceive?: UserData;
+  
   routeUrl = '';
+  
   isProfile = false;
+  
   dataUser = this._authService.getDecodedToken();
+  
+  listReaction: string[] = [];
 
   private destroy$ = new Subject<void>();
 
@@ -88,17 +107,29 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         next: (data: any) => {
           if (data?._id === this.publication._id) {
             this.refreshPublications(data._id);
+            this.loadReactionsImg(data);
             this._cdr.markForCheck();
           }
         }
       });
-
+    this.loadReactionsImg();
     this._cdr.markForCheck();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  loadReactionsImg(publication: PublicationView = this.publication){
+    this.listReaction = [];
+    if (publication) {
+      publication.reaction.forEach((element: Reactions) => {
+        if(this.listReaction.includes(element.customReaction.emoji)) return;
+        this.listReaction.push(element.customReaction.emoji);
+        this._cdr.markForCheck();
+      });
+    }
   }
 
   extraDataPublication() {
@@ -249,6 +280,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       this._publicationService.getPublicationId(_id).pipe(takeUntil(this.destroy$)).subscribe({
         next: (publication: PublicationView[]) => {
           this._publicationService.updatePublications(publication);
+          this.loadReactionsImg(publication[0]);
           this._cdr.markForCheck();
         },
         error: (error) => {
