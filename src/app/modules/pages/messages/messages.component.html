@@ -3,7 +3,7 @@
         <worky-message-side-left (userIdSelected)="onUserIdSelected($event)"></worky-message-side-left>
     </div>
 
-    <div class="content-right-message" *ngIf="(userIdMessage && isMobile && userIsValid) || !isMobile">
+    <div class="content-right-message" *ngIf="(userIdMessage && isMobile && userIsValid) || !isMobile && (userIdConsulting || userIdMessage)">
         <worky-message-side-rigth [userId]="userIdConsulting"></worky-message-side-rigth>
     </div>
 </div>

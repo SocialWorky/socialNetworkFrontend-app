@@ -16,7 +16,8 @@
           <span class="user-name">{{ item.user.name }} {{ item.user.lastName }}</span>
           <div *ngIf="item.unreadMessagesCount > 0" class="unread-messages">{{ item.unreadMessagesCount }}</div>
         </div>
-        <span class="last-message">{{ item.lastMessage }} &middot; {{ formatTime(item.createAt) }}</span>
+        <span class="last-message">{{ item.lastMessage }} &middot; </span>
+        <span class="last-message-time">{{ formatTime(item.createAt) }}</span>
       </div>
     </button>
   </div>

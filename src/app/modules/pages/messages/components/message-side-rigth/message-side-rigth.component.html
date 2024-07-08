@@ -65,15 +65,14 @@
         </emoji-mart>
       </div>
     </div>
-    <div class="input-wrapper">
-      <input
-        type="text"
-        class="message-input"
-        [(ngModel)]="newMessage"
-        (focus)="markMessagesAsRead()"
-        placeholder="Escribe un mensaje"
-      />
-    </div>
+      <div class="input-wrapper">
+        <textarea
+          class="message-input"
+          [(ngModel)]="newMessage"
+          (focus)="markMessagesAsRead()"
+          placeholder="Escribe un mensaje"
+        ></textarea>
+      </div>
     <div>
       <div *ngIf="sendMessagesLoader" class="loader"></div>
       <worky-buttons *ngIf="!sendMessagesLoader"
