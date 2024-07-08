@@ -14,7 +14,7 @@
   </div>
 
   <div class="content-section-wall" #messageContainer>
-    <div class="messages-container" >
+    <div class="messages-container fadeIn fast">
       <ng-container *ngFor="let message of messages; let i = index">
         <ng-container *ngIf="i === 0 || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)">
           <div class="date-divider">
