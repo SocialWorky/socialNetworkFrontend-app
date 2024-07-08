@@ -1,4 +1,4 @@
-<div *ngIf="articles.length" class="container-widget content-news worky-module-container">
+<div *ngIf="!loading; else loadingTemplate" class="container-widget content-news worky-module-container">
   <div *ngFor="let article of articles" class="news-article">
     <div class="news-card">
       <img class="news-image" [src]="article.image_url" alt="Imagen de noticia" *ngIf="article.image_url">
@@ -12,6 +12,6 @@
   </div>
 </div>
 
-<div *ngIf="!articles.length">
+<ng-template #loadingTemplate>
   <div class="loader"></div>
-</div>
+</ng-template>

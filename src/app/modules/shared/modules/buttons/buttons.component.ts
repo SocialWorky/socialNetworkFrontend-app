@@ -8,58 +8,30 @@ import { WorkyButtonType, WorkyButtonTheme } from './models/worky-button-model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ButtonsComponent {
+  @Input() theme: WorkyButtonTheme = WorkyButtonTheme.Primary;
+  @Input() workyButtonType: WorkyButtonType = WorkyButtonType.Flat;
+  @Input() disabled = false;
+  @Input() width?: string;
 
-  WorkyButtonType = WorkyButtonType;
+  @Output() clickEvent = new EventEmitter<void>();
 
-  @HostBinding('class.theme-basic')
-  themeBasic = false;
-
-  @HostBinding('class.theme-primary')
-  themePrimary = true;
-
-  @HostBinding('class.theme-accent')
-  themeAccent = false;
-
-  @HostBinding('class.theme-warn')
-  themeWarn = false;
-
-  get isBasic() {
-    return this.workyButtonType === WorkyButtonType.Basic;
+  @HostBinding('class')
+  get themeClass(): string {
+    return `theme-${this.theme.toLowerCase()}`;
   }
 
-  get isOutline() {
-    return this.workyButtonType === WorkyButtonType.Outline;
+  @HostBinding('class.worky-button-disabled')
+  get isDisabled(): boolean {
+    return this.disabled;
   }
-
-  get isFlat() {
-    return this.workyButtonType === WorkyButtonType.Flat;
-  }
-
-  @Input()
-  set theme(color: WorkyButtonTheme) {
-    this.themeBasic = color === WorkyButtonTheme.Basic;
-    this.themePrimary = color === WorkyButtonTheme.Primary;
-    this.themeAccent = color === WorkyButtonTheme.Accent;
-    this.themeWarn = color === WorkyButtonTheme.Warn;
-  }
-
-  @Input()
-  workyButtonType: WorkyButtonType = WorkyButtonType.Flat;
-
-  @Input()
-  disabled = false;
-
-  // Input examples: '100%', '50%', '200px'
-  @Input()
-  width: string | undefined;
-
-  @Output()
-  clickEvent = new EventEmitter();
-
-  constructor() {}
 
   onButtonClick() {
-    this.clickEvent.emit();
+    if (!this.disabled) {
+      this.clickEvent.emit();
+    }
   }
 
+  get buttonTypeClass(): string {
+    return `worky-button-${this.workyButtonType.toLowerCase()}`;
+  }
 }

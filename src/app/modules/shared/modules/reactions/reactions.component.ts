@@ -1,5 +1,6 @@
-import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { CustomReactionsService } from '@admin/shared/manage-reactions/service/customReactions.service';
 import { CustomReactionList } from '@admin/interfaces/customReactions.interface';
@@ -16,28 +17,29 @@ import { NotificationService } from '@shared/services/notifications/notification
   selector: 'worky-reactions',
   templateUrl: './reactions.component.html',
   styleUrls: ['./reactions.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReactionsComponent implements OnInit, OnDestroy {
   reactionsVisible = false;
-
+  
   reactions: Array<CustomReactionList & { zoomed: boolean }> = [];
-
+  
   typePublishing = TypePublishing;
 
   @Input() type: TypePublishing | undefined;
-
+  
   @Input() userProfile?: string;
-
+  
   @Input() publication: PublicationView | undefined;
-
+  
   @Input() reactionsToPublication: PublicationsReactions[] = [];
 
   token = this._authService.getDecodedToken();
-
+  
   unlockReactions = true;
 
   private destroy$ = new Subject<void>();
-
+  
   private touchTimeout: any;
 
   get reactionUserInPublication() {
@@ -64,10 +66,10 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   }
 
   addReaction(reaction: CustomReactionList) {
+    this.hideReactions();
     this.unlockReactions = false;
     if (this.reactionUserInPublication) {
       this.editReaction(this.reactionUserInPublication._id, reaction);
-      this.unlockReactions = true;
       return;
     }
     this._reactionsService
@@ -94,6 +96,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   }
 
   deleteReaction(idReaction: string) {
+    this.hideReactions();
     this.unlockReactions = false;
     this._reactionsService.deleteReaction(idReaction).pipe(takeUntil(this.destroy$)).subscribe({
       next: async () => {
@@ -109,6 +112,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   }
 
   editReaction(id: string, reaction: CustomReactionList) {
+    this.hideReactions();
     this.unlockReactions = false;
     this._reactionsService.editReaction(id, {
       authorId: this.token?.id!,
@@ -160,17 +164,17 @@ export class ReactionsComponent implements OnInit, OnDestroy {
     reaction.zoomed = false;
   }
 
-  async refreshPublications() {
+  refreshPublications() {
     if (!this.publication?._id) return;
 
     this._publicationService.getPublicationId(this.publication._id).pipe(
-      takeUntil(this.destroy$),
+      takeUntil(this.destroy$)
     ).subscribe({
-      next: (publications: PublicationView[]) => {
-        this._publicationService.updatePublications(publications);
+      next: (publication: PublicationView[]) => {
+        this._publicationService.updatePublications(publication);
       },
       error: (error) => {
-        console.error(error);
+        console.error('Failed to refresh publications', error);
       }
     });
   }

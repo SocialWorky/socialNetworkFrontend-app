@@ -23,6 +23,7 @@ import { EmailNotificationService } from '@shared/services/notifications/email-n
 import { CommentService } from '@shared/services/comment.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import * as _ from 'lodash';
+import { Reactions } from './interfaces/reactions.interface';
 
 @Component({
   selector: 'worky-publication-view',
@@ -32,24 +33,42 @@ import * as _ from 'lodash';
 })
 export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() publication!: PublicationView;
+  
   @Input() indexPublication?: number;
-  @Input() type?: TypePublishing | undefined;
+  
+  @Input() type?: TypePublishing;
+  
   @Input() userProfile?: string;
 
   typePublishing = TypePublishing;
+  
   typePrivacy = TypePrivacy;
+  
   dataLinkActions: DropdownDataLink<any>[] = [];
+  
   dataShareActions: DropdownDataLink<any>[] = [];
+  
   viewCommentSection: number | null = null;
+  
   viewComments: number | null = null;
-  nameGeoLocation: string = '';
-  urrMap: string = '';
+  
+  nameGeoLocation = '';
+  
+  urrMap = '';
+  
   extraData: string[] = [];
+  
   userRequest?: UserData;
+  
   userReceive?: UserData;
-  routeUrl: string = '';
-  isProfile: boolean = false;
+  
+  routeUrl = '';
+  
+  isProfile = false;
+  
   dataUser = this._authService.getDecodedToken();
+  
+  listReaction: string[] = [];
 
   private destroy$ = new Subject<void>();
 
@@ -68,11 +87,11 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   ) {}
 
   async ngAfterViewInit() {
-    await this.getUserFriendPending();
+    this.getUserFriendPending();
   }
 
-  async ngOnInit() {
-    await this.getUserFriendPending();
+  ngOnInit() {
+    this.getUserFriendPending();
     this.menuActions();
     this.menuShareActions();
     this.extraDataPublication();
@@ -88,17 +107,29 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         next: (data: any) => {
           if (data?._id === this.publication._id) {
             this.refreshPublications(data._id);
+            this.loadReactionsImg(data);
             this._cdr.markForCheck();
           }
         }
       });
-
+    this.loadReactionsImg();
     this._cdr.markForCheck();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  loadReactionsImg(publication: PublicationView = this.publication){
+    this.listReaction = [];
+    if (publication) {
+      publication.reaction.forEach((element: Reactions) => {
+        if(this.listReaction.includes(element.customReaction.emoji)) return;
+        this.listReaction.push(element.customReaction.emoji);
+        this._cdr.markForCheck();
+      });
+    }
   }
 
   extraDataPublication() {
@@ -116,7 +147,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   commentOn(index: number) {
-
     this.viewCommentSection = this.viewCommentSection === index ? -1 : index;
   }
 
@@ -171,7 +201,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       message: translations['publicationsView.loadingDeletePublication'],
     });
 
-    loadingDeletePublication.present();
+    await loadingDeletePublication.present();
 
     this._publicationService.deletePublication(publication._id).pipe(
       takeUntil(this.destroy$)
@@ -199,7 +229,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async followMyFriend(_idUser: string) {
-    await this._friendsService.requestFriend(_idUser).pipe(takeUntil(this.destroy$)).subscribe({
+    this._friendsService.requestFriend(_idUser).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this._emailNotificationService.sendFriendRequestNotification(_idUser);
         this.viewProfile(_idUser);
@@ -218,8 +248,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     });
   }
 
-  async getUserFriendPending() {
-    await this._friendsService.getIsMyFriend(this._authService.getDecodedToken()?.id!, this.publication?.author?._id || '').pipe(takeUntil(this.destroy$)).subscribe({
+  getUserFriendPending() {
+    this._friendsService.getIsMyFriend(this.dataUser?.id!, this.publication?.author?._id || '').pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: FriendsStatus) => {
         this.userRequest = response?.requester;
         this.userReceive = response?.receiver;
@@ -245,12 +275,16 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._router.navigate(['/profile', _id]);
   }
 
-  async refreshPublications(_id?: string) {
+  refreshPublications(_id?: string) {
     if (_id) {
-      await this._publicationService.getPublicationId(_id).pipe(takeUntil(this.destroy$)).subscribe({
+      this._publicationService.getPublicationId(_id).pipe(takeUntil(this.destroy$)).subscribe({
         next: (publication: PublicationView[]) => {
           this._publicationService.updatePublications(publication);
+          this.loadReactionsImg(publication[0]);
           this._cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Failed to refresh publications', error);
         }
       });
     }
@@ -264,12 +298,11 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     const dialogRef = this._dialog.open(ReportResponseComponent, {});
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (result: any) => {
       if (result) {
-
         const loadingCreateReport = await this._loadingCtrl.create({
           message: 'Creando reporte...',
         });
 
-        loadingCreateReport.present();
+        await loadingCreateReport.present();
 
         const report: ReportCreate = {
           type: ReportType.POST,
@@ -278,7 +311,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           status: ReportStatus.PENDING,
           detail_report: result,
         };
-        await this._reportsService.createReport(report).pipe(takeUntil(this.destroy$)).subscribe({
+        this._reportsService.createReport(report).pipe(takeUntil(this.destroy$)).subscribe({
           next: (data) => {
             loadingCreateReport.dismiss();
             this._emailNotificationService.sendEmailNotificationReport(publication, result);
@@ -289,7 +322,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
             loadingCreateReport.dismiss();
           }
         });
-        loadingCreateReport.dismiss();
       }
     });
   }
@@ -299,7 +331,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       message: 'Eliminando comentario...',
     });
 
-    loadingDeleteComment.present();
+    await loadingDeleteComment.present();
 
     this._commentService.deletComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
@@ -311,6 +343,5 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         loadingDeleteComment.dismiss();
       }
     });
-    loadingDeleteComment.dismiss();
   }
 }

@@ -28,7 +28,7 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
 
   currentUser = this._authService.getDecodedToken()!;
 
-  loadUsers = false;
+  loadUsers = true;
 
   get isMobile(): boolean {
     return this._deviceDetectionService.isMobile();
@@ -46,7 +46,10 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
     private _deviceDetectionService: DeviceDetectionService,
     private _router: Router,
     private _location: Location
-  ) {}
+  ) {
+    this.currentUserId = this._authService.getDecodedToken()!.id;
+    this._cdr.markForCheck();
+  }
 
   async ngOnInit(): Promise<void> {
     this.userIdMessage = this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
@@ -71,13 +74,13 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
   }
 
   selectUser(userId: string) {
-    this.userIdSelected.emit(userId);
     if (this.isMobile) {
       this._router.navigate(['/messages/', userId]);
     } else {
       const urlWithoutUserId = this._router.url.split('/').slice(0, 2).join('/');
       this._location.replaceState(urlWithoutUserId);
     }
+    this.userIdSelected.emit(userId);
   }
 
   private getUserMessages() {

@@ -13,11 +13,9 @@ export class ImageUploadModalComponent implements OnInit {
   WorkyButtonType = WorkyButtonType;
   WorkyButtonTheme = WorkyButtonTheme;
 
-  @ViewChild('fileInput')
-  fileInput!: ElementRef;
+  @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
 
   selectedFiles: File[] = [];
-
   previews: { url: string, type: string }[] = [];
   
   @Input()
@@ -38,6 +36,10 @@ export class ImageUploadModalComponent implements OnInit {
 
   onFileSelected(event: any) {
     const files: FileList = event.target.files;
+    this.handleFiles(files);
+  }
+
+  handleFiles(files: FileList): void {
     const validFiles: File[] = [];
     const validPreviews: { url: string, type: string }[] = [];
 
@@ -45,7 +47,6 @@ export class ImageUploadModalComponent implements OnInit {
       const file = files[i];
 
       if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-        validFiles.push(file);
         const reader = new FileReader();
         reader.onload = (e: any) => {
           validPreviews.push({ url: e.target.result, type: file.type });
@@ -57,22 +58,27 @@ export class ImageUploadModalComponent implements OnInit {
           }
         };
         reader.readAsDataURL(file);
+        validFiles.push(file);
       } else {
-        this._alertService.showAlert(
-          'warning',
-          `Tipo de archivo no permitido: ${file.name}`,
-           Alerts.ERROR,
-           Position.CENTER,
-           true,
-           true,
-           'Cerrar',
-        );
+        this.showAlert('Tipo de archivo no permitido: ' + file.name);
       }
 
       if (validFiles.length + this.selectedFiles.length >= this.maxFiles) {
         break;
       }
     }
+  }
+
+  showAlert(message: string) {
+    this._alertService.showAlert(
+      'warning',
+      message,
+      Alerts.ERROR,
+      Position.CENTER,
+      true,
+      true,
+      'Cerrar',
+    );
   }
 
   closeDialog() {
@@ -89,6 +95,7 @@ export class ImageUploadModalComponent implements OnInit {
   removeFile(index: number) {
     this.selectedFiles.splice(index, 1);
     this.previews.splice(index, 1);
+    this._cdr.markForCheck();
   }
 
   onDragOver(event: DragEvent): void {
@@ -105,29 +112,5 @@ export class ImageUploadModalComponent implements OnInit {
     if (files) {
       this.handleFiles(files);
     }
-  }
-
-  private handleFiles(files: FileList): void {
-    Array.from(files).forEach(file => {
-      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.previews.push({ url: e.target.result, type: file.type });
-          this.selectedFiles.push(file);
-          this._cdr.markForCheck();
-        };
-        reader.readAsDataURL(file);
-      } else {
-        this._alertService.showAlert(
-          'warning',
-          `Tipo de archivo no permitido: ${file.name}`,
-          Alerts.ERROR,
-          Position.CENTER,
-          true,
-          true,
-          'Cerrar',
-        );
-      }
-    });
   }
 }

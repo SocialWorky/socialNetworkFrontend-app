@@ -38,6 +38,8 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
   showEmojiPicker: boolean = false;
 
+  sendMessagesLoader: boolean = false;
+
   get isMobile(): boolean {
     return this._deviceDetectionService.isMobile();
   }
@@ -65,7 +67,6 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     if(this.userIdMessage) this.userId = this.userIdMessage;
 
     if (this.userIdMessage && this.currentUser.id) {
-
       this.loadMessagesWithUser(this.currentUser.id, this.userIdMessage);
     }
 
@@ -97,12 +98,14 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
           }
         }
       });
+    this.loadMessagesWithUser(this.currentUser.id, this.userId);
+    this.markMessagesAsRead();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['userId'] && !changes['userId'].isFirstChange()) {
       this.loadMessagesWithUser(this.currentUser.id, changes['userId'].currentValue);
-      this._cdr.detectChanges();
+      this._cdr.markForCheck();
       this.scrollToBottom();
     }
   }
@@ -118,8 +121,8 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
   private async loadMessagesWithUser(currentUserId: string, userIdMessage: string) {
     if (userIdMessage === currentUserId) return;
-    await this.getUser(userIdMessage);
     this.loadMessages = true;
+    await this.getUser(userIdMessage);
     this._messageService.getConversationsWithUser(currentUserId, userIdMessage).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (messages: Message[]) => {
         this.messages = messages;
@@ -175,6 +178,8 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
  async sendMessage() {
     if (this.newMessage.trim() === '') return;
 
+    this.sendMessagesLoader = true;
+
     const message: CreateMessage = {
       receiverId: this.userId,
       content: this.newMessage,
@@ -187,10 +192,12 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
         this._notificationService.sendNotification();
         this.newMessage = '';
         this.scrollToBottom();
+        this.sendMessagesLoader = false;
         this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error sending message:', error);
+        this.sendMessagesLoader = false
       }
     });
   }
@@ -200,10 +207,11 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     setTimeout(() => {
       try {
         this.messageContainer!.nativeElement.scrollTop = this.messageContainer!.nativeElement.scrollHeight;
+        this._cdr.markForCheck();
       } catch(err) {
         console.error('Error scrolling to bottom:', err);
       }
-    }, 1000);
+    }, 1500);
   }
 
   async markMessagesAsRead() {

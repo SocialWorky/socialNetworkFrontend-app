@@ -2,35 +2,41 @@
 @use 'src/assets/styles/worky-palettes' as colors;
 
 .img-dropdown {
-    height: 40px;
+  height: 40px;
 }
 
 .dropdown-menu {
-    border-radius: var.$worky-border-radius-medium;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    top: 50px;
-    left: 0;
-    z-index: 1000;
+  border-radius: var.$worky-border-radius-medium;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+
+  &.dropdown-down {
+    top: 450px;
+  }
+
+  &.dropdown-up {
+    bottom: 50px;
+  }
 }
 
 .content-dropdow {
-    display: flex;
-    align-items: center;
-    padding: 8px 15px;
-    cursor: pointer;
-    transition: 0.3s;
-    gap: 10px;
-    &:hover {
-        color: colors.$worky-color-light;
-        background-color: map-get(colors.$worky-blue, 56);
-    }
+  display: flex;
+  align-items: center;
+  padding: 8px 15px;
+  cursor: pointer;
+  transition: 0.3s;
+  gap: 10px;
+
+  &:hover {
+    color: colors.$worky-color-light;
+    background-color: map-get(colors.$worky-blue, 56);
+  }
+
   .icon-img-dropdown {
     width: 20px;
     height: 20px;
   }
 }
-
-
 
 .badge-notification {
   position: relative;

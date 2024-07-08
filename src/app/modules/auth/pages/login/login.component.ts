@@ -145,6 +145,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
           this._notificationUsersService.loginUser();
 
+          this._cdr.markForCheck();
+
           if (tokenResponse?.role === 'admin' && !this._deviceDetectionService.isMobile()) {
             this._router.navigate(['/admin']);
           } else {
@@ -234,8 +236,9 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
               await this._authService.renewToken(userId);
               this.token = localStorage.getItem('token');
               loading.dismiss();
+              this._notificationUsersService.loginUser();
+              this._cdr.markForCheck();
               this._router.navigate(['/home']);
-              this._cdr.detectChanges();
             }
           },
           error: (e: any) => {

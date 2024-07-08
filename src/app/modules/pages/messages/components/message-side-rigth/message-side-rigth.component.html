@@ -1,3 +1,4 @@
+<div *ngIf="loadMessages" class="loader"></div>
 <div *ngIf="!loadMessages && userId" class="content-right-messageChat">
   
   <div *ngIf="isMobile && user[0]" class="header-content-mobil">
@@ -13,7 +14,7 @@
   </div>
 
   <div class="content-section-wall" #messageContainer>
-    <div class="messages-container" >
+    <div class="messages-container fadeIn fast">
       <ng-container *ngFor="let message of messages; let i = index">
         <ng-container *ngIf="i === 0 || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)">
           <div class="date-divider">
@@ -64,19 +65,19 @@
         </emoji-mart>
       </div>
     </div>
-    <div class="input-wrapper">
-      <input
-        type="text"
-        class="message-input"
-        [(ngModel)]="newMessage"
-        (focus)="markMessagesAsRead()"
-        placeholder="Escribe un mensaje"
-      />
-    </div>
+      <div class="input-wrapper">
+        <textarea
+          class="message-input"
+          [(ngModel)]="newMessage"
+          (focus)="markMessagesAsRead()"
+          placeholder="Escribe un mensaje"
+        ></textarea>
+      </div>
     <div>
-      <worky-buttons
+      <div *ngIf="sendMessagesLoader" class="loader"></div>
+      <worky-buttons *ngIf="!sendMessagesLoader"
         type="submit"
-        [theme]="WorkyButtonTheme.Accent"        
+        [theme]="WorkyButtonTheme.Accent"
         [width]="'100%'"
         (click)="sendMessage()">
         <span basic-button-text>Enviar</span>

@@ -11,10 +11,15 @@ import { distinctUntilChanged, catchError, map } from 'rxjs/operators';
 })
 export class PublicationService {
   private publicationsSubject: BehaviorSubject<PublicationView[]> = new BehaviorSubject<PublicationView[]>([]);
+  
   private publicationsSubjectDeleted: BehaviorSubject<PublicationView[]> = new BehaviorSubject<PublicationView[]>([]);
+  
   public publicationsDeleted$: Observable<PublicationView[]> = this.publicationsSubjectDeleted.asObservable().pipe(distinctUntilChanged());
+  
   public publications$: Observable<PublicationView[]> = this.publicationsSubject.asObservable().pipe(distinctUntilChanged());
+  
   private baseUrl: string = environment.API_URL;
+  
   private token: string = localStorage.getItem('token') || '';
 
   constructor(private http: HttpClient) {}

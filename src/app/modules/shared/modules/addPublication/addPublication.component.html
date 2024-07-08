@@ -117,14 +117,17 @@
     </div>
 
     <div class="publishing-footer">
-      <worky-buttons
-        type="submit"
-        [workyButtonType]="WorkyButtonType.Flat"
-        [theme]="WorkyButtonTheme.Accent"
-        [disabled]="!myForm.valid || !myForm.dirty"
-        [width]="'100%'">
-        <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
-      </worky-buttons>
+      <div>
+        <worky-buttons *ngIf="!loaderSavePublication"
+          type="submit"
+          [workyButtonType]="WorkyButtonType.Flat"
+          [theme]="WorkyButtonTheme.Accent"
+          [disabled]="!myForm.valid || !myForm.dirty"
+          [width]="'100%'">
+          <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
+        </worky-buttons>
+        <div *ngIf="loaderSavePublication" class="loader"></div>
+      </div>
     </div>
 
   </form>

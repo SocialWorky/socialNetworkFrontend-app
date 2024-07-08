@@ -125,6 +125,19 @@
         i {
           font-size: 15px;
         }
+        .reactions-img-container {
+          display: flex;
+          width: 20px;
+          height: 20px;
+          .reactions-img {
+            width: 20px;
+            height: 20px;
+            object-fit: cover;
+            position: relative;
+            margin-left: 0px;
+          }
+        }
+
       }
     }
 
@@ -150,9 +163,6 @@
         }
 
         ::ng-deep worky-dropdown {
-          .dropdown-menu {
-            inset: 7px -26px auto auto!important;
-          }
           .nav-link {
             span {
               color: colors.$worky-color-navy;

@@ -85,8 +85,11 @@
   <div class="publication-footer">
     <div class="publication-footer-content">
       <div class="publication-footer-content-item" *ngIf="publication.reaction.length">
-        <i class="material-icons">mood</i>
+        <div class="reactions-img-container" *ngFor="let emoji of listReaction; let i = index;">
+          <img class="reactions-img" [src]="emoji" style="--i: {{ i }};">
+        </div>
         <span>{{ publication.reaction.length }}</span>
+
       </div>
       <div class="publication-footer-content-item" *ngIf="publication.comment.length" (click)="viewCommentsOn(indexPublication!)">
         <span> {{ publication.comment.length }} </span>

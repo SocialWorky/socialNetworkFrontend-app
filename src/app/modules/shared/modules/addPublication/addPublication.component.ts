@@ -63,6 +63,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   decodedToken!: Token;
   isAuthenticated = false;
 
+  loaderSavePublication = false;
+
   myForm: FormGroup = this._fb.group({
     content: ['', [Validators.required, Validators.minLength(1)]],
     privacy: [''],
@@ -161,6 +163,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   onSave() {
+    this.loaderSavePublication = true;
     this.myForm.controls['authorId'].setValue(this.decodedToken.id);
     this.myForm.controls['privacy'].setValue(this.privacy);
     if (this.type === TypePublishing.POST || this.type === TypePublishing.POSTPROFILE) {
@@ -186,10 +189,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     this._commentService.createComment(dataComment).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message) => {
         await this.handleCommentResponse(message, idPublication);
+        this.loaderSavePublication = false;
         loadingComment.dismiss();
       },
       error: error => {
         console.error(error);
+        this.loaderSavePublication = false;
         loadingComment.dismiss();
       }
     });
@@ -234,10 +239,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
         await this.handlePublicationResponse(message);
+        this.loaderSavePublication = false;
         loadingPublications.dismiss();
       },
       error: error => {
         console.error(error);
+        this.loaderSavePublication = false;
         loadingPublications.dismiss();
       },
     });

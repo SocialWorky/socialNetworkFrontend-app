@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import * as _ from 'lodash';
 import { Meta } from '@angular/platform-browser';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
@@ -28,18 +27,29 @@ export class HomeComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   typePublishing = TypePublishing;
+  
   publications: PublicationView[] = [];
+  
   page = 1;
-  pageSize = 5; // Cambia esto para probar con 5 publicaciones por página
+  
+  pageSize = 1;
+  
   loaderPublications: boolean = false;
+  
   paramPublication: boolean = false;
+  
   hasMorePublications: boolean = true;
+  
   urlMediaApi = environment.APIFILESERVICE;
+  
   dataUser = this._authService.getDecodedToken();
+  
   isOnline$ = this._networkService.connectionStatus;
+  
   connectionSpeed$ = this._networkService.connectionSpeed;
 
   showConnectionOverlay = false;
+  
   connectionStatusMessage = '';
 
   trackById(index: number, publication: PublicationView): string {
@@ -122,7 +132,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private loadSubscription() {
     this._publicationService.publications$.pipe(
-      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
       takeUntil(this.destroy$)
     ).subscribe({
       next: (publicationsData: PublicationView[]) => {
@@ -134,7 +144,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
 
     this._publicationService.publicationsDeleted$.pipe(
-      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
       takeUntil(this.destroy$)
     ).subscribe({
       next: (publicationsData: PublicationView[]) => {
@@ -152,32 +162,29 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.loaderPublications = true;
     try {
       const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize));
+      if (newPublications.length < this.pageSize) {
+        this.hasMorePublications = false;
+      }
       const uniqueNewPublications = newPublications.filter(newPub => 
         !this.publications.some(pub => pub._id === newPub._id)
       );
 
-      if (uniqueNewPublications.length > 0) {
-        this.publications = [...this.publications, ...uniqueNewPublications];
-        this.page++;
-        this._cdr.markForCheck();
-      } else {
-        this.hasMorePublications = false;
-      }
+      this.publications = [...this.publications, ...uniqueNewPublications];
+      this.page++;
       this.loaderPublications = false;
+      this._cdr.markForCheck();
     } catch (error) {
       console.error('Error loading publications', error);
       this.loaderPublications = false;
     }
-    this._cdr.markForCheck();
   }
 
   onScroll(event: any) {
-    const scrollTop = event.target.scrollTop;
-    const scrollHeight = event.target.scrollHeight;
-    const offsetHeight = event.target.offsetHeight;
     const threshold = 100;
+    const position = event.target.scrollTop + event.target.clientHeight;
+    const height = event.target.scrollHeight;
 
-    if (scrollTop + offsetHeight + threshold >= scrollHeight && !this.loaderPublications && this.hasMorePublications) {
+    if (position >= height - threshold && !this.loaderPublications && this.hasMorePublications) {
       this.loadPublications();
     }
   }
@@ -234,7 +241,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private updatePublications(publicationsData: PublicationView[]) {
-    let shouldUpdate = false;
     publicationsData.forEach(newPub => {
       const index = this.publications.findIndex(pub => pub._id === newPub._id);
       if (index !== -1) {
@@ -245,29 +251,20 @@ export class HomeComponent implements OnInit, OnDestroy {
           JSON.stringify(existingPub.reaction) !== JSON.stringify(newPub.reaction)
         ) {
           this.publications[index] = newPub;
-          this._cdr.markForCheck();
-          shouldUpdate = true;
         }
       } else {
         this.publications.push(newPub);
-        shouldUpdate = true;
       }
     });
 
-    if (shouldUpdate) {
-      this.publications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    this.publications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-      this.publications.forEach(pub => {
-        if (pub.comment) {
-          pub.comment.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        }
-      });
+    this.publications.forEach(pub => {
+      if (pub.comment) {
+        pub.comment.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      }
+    });
 
-      this._cdr.markForCheck();
-    }
-  }
-
-  trackByFn(index: number, item: PublicationView) {
-    return item._id; 
+    this._cdr.markForCheck();
   }
 }
