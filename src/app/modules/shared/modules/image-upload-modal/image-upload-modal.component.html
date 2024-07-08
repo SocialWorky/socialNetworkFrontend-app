@@ -2,7 +2,7 @@
   <input #fileInput type="file" multiple accept="image/*,video/*" (change)="onFileSelected($event)" hidden>
   <div class="drag-drop-container" (click)="fileInput.click()">
     <div class="drag-drop-content">
-      <p>Arrastra tus archivos aquí o hacer click para seleccionar</p>
+      <p>Arrastra tus archivos aquí o haz click para seleccionar</p>
       <i class="material-icons">cloud_upload</i>
     </div>
     <div class="drag-drop-background"></div>
@@ -25,8 +25,7 @@
       [disabled]="!selectedFiles.length"
       (click)="upload()"
       [width]="'100%'">
-      <span basic-button-text>Seleccionar</span>
+      <span basic-button-text>Subir</span>
     </worky-buttons>
   </div>
 </div>
-

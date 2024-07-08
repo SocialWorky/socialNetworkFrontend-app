@@ -117,7 +117,8 @@
     </div>
 
     <div class="publishing-footer">
-      <worky-buttons
+      <div *ngIf="loaderSavePublication" class="loader"></div>
+      <worky-buttons *ngIf="!loaderSavePublication"
         type="submit"
         [workyButtonType]="WorkyButtonType.Flat"
         [theme]="WorkyButtonTheme.Accent"
