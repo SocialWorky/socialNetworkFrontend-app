@@ -14,9 +14,11 @@ export class CustomReactionsService {
 
   private baseUrl: string;
   private token: string;
+  private fileUrlApi: string;
 
   constructor(private http: HttpClient) {
     this.baseUrl = environment.API_URL;
+    this.fileUrlApi = environment.APIFILESERVICE;
     this.token = localStorage.getItem('token') || '';
   }
 
@@ -44,12 +46,6 @@ export class CustomReactionsService {
     const url = `${this.baseUrl}/custom-reactions/delete/${id}`;
     const headers = this.getHeaders();
     return this.http.delete<CustomReactionList>(url, { headers });
-  }
-
-  uploadFile(formData: FormData): Observable<string> {
-    const url = `${this.baseUrl}/upload`;
-    const headers = this.getHeaders();
-    return this.http.post<string>(url, formData, { headers });
   }
 
 }

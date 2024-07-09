@@ -1,13 +1,15 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
-import { Subject, Subscription, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 
 import { CustomReactionsService } from '@admin/shared/manage-reactions/service/customReactions.service';
 import { CustomReactionList } from '@admin/interfaces/customReactions.interface';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
+import { FileUploadService } from '@shared/services/file-upload.service';
+import { environment } from '@env/environment';
 
 @Component({
   selector: 'worky-manage-reactions',
@@ -15,10 +17,13 @@ import { translations } from '@translations/translations';
   styleUrls: ['./manage-reactions.component.scss'],
 })
 export class ManageReactionsComponent implements OnInit, OnDestroy {
-
   reactionForm: FormGroup;
 
   reactionsList: CustomReactionList[] = [];
+
+  urlApiFile: string = '';
+
+  loadReactionsButtons = false;
 
   public imageFile: File | null = null;
 
@@ -30,14 +35,16 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     private _alertService: AlertService,
     private _loadingCtrl: LoadingController,
     private _cdr: ChangeDetectorRef,
+    private _fileUploadService: FileUploadService,
   ) {
     this.reactionForm = this._fb.group({
       name: ['', Validators.required],
-      emoji: ['', Validators.required]
+      emoji: ['', Validators.required],
     });
   }
 
   ngOnInit() {
+    this.urlApiFile = `${environment.APIFILESERVICE}emojis/`;
     this.listReactions();
   }
 
@@ -50,16 +57,16 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     this._customReactionsService.getCustomReactionsAll().pipe(takeUntil(this.destroy$)).subscribe({
       next: (reactions: CustomReactionList[]) => {
         this.reactionsList = reactions
-          .filter(reaction => reaction.isDeleted === false)
+          .filter((reaction) => reaction.isDeleted === false)
           .map((reaction) => ({
             ...reaction,
-            zoomed: false
+            zoomed: false,
           }));
         this._cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load reactions', err);
-      }
+      },
     });
   }
 
@@ -68,28 +75,51 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     if (file) {
       this.imageFile = file;
       this.reactionForm.patchValue({
-        emoji: ''
+        emoji: '',
       });
+      this.reactionForm.get('emoji')?.clearValidators();
+      this.reactionForm.get('emoji')?.updateValueAndValidity();
+    } else {
+      this.imageFile = null;
+      this.reactionForm.get('emoji')?.setValidators([Validators.required]);
+      this.reactionForm.get('emoji')?.updateValueAndValidity();
     }
   }
 
   createCustomReaction() {
+    this.loadReactionsButtons = true;
     if (this.reactionForm.valid) {
       if (this.imageFile) {
-        this.uploadFile(this.imageFile).pipe(takeUntil(this.destroy$)).subscribe(url => {
-          this.reactionForm.patchValue({ emoji: url });
-          this.submitReaction();
+        this._fileUploadService.uploadFile([this.imageFile], 'emojis').pipe(takeUntil(this.destroy$)).subscribe({
+          next: (response) => {
+            this.reactionForm.patchValue({ emoji: this.urlApiFile + response[0].filenameCompressed });
+            this.submitReaction();
+          },
+          error: (err) => {
+            this.loadReactionsButtons = false;
+            this._cdr.markForCheck();
+
+              this._alertService.showAlert(
+                'Error',
+                'Error al subir archivo, intente de nuevo. Con otro formato o tamaño.',
+                Alerts.ERROR,
+                Position.CENTER,
+                true,
+                true,
+                translations['button.ok'],
+              );
+          },
         });
       } else {
         this.submitReaction();
       }
     } else {
       console.log('Form is invalid');
+      this.loadReactionsButtons = false;
     }
   }
 
   async submitReaction() {
-
     const loadingReaction = await this._loadingCtrl.create({
       message: 'Creating reaction...',
     });
@@ -97,47 +127,55 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     await loadingReaction.present();
 
     const reaction = this.reactionForm.value;
-    this._customReactionsService.createCustomReaction(reaction).pipe(takeUntil(this.destroy$)).subscribe(response => {
-      this._alertService.showAlert(
-        'Exito',
-        'Reaction created successfully',
-        Alerts.SUCCESS,
-        Position.CENTER,
-        true,
-        true,
-        translations['button.ok'],
-      );
+    this._customReactionsService
+      .createCustomReaction(reaction)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this._alertService.showAlert(
+            'Exito',
+            'Reaction created successfully',
+            Alerts.SUCCESS,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
 
-      this.reactionForm.reset();
-      this.imageFile = null;
-      loadingReaction.dismiss();
-      this.listReactions();
-    });
-  }
-
-  uploadFile(file: File) {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this._customReactionsService.uploadFile(formData);
+          this.reactionForm.reset();
+          this.imageFile = null;
+          this.reactionForm.get('emoji')?.setValidators([Validators.required]);
+          this.reactionForm.get('emoji')?.updateValueAndValidity();
+          loadingReaction.dismiss();
+          this.listReactions();
+          this.loadReactionsButtons = false;
+        },
+        error: (err) => {
+          console.error('Failed to create reaction', err);
+          loadingReaction.dismiss();
+          this.loadReactionsButtons = false;
+        }
+      });
   }
 
   deleteReaction(id: string) {
-    this._customReactionsService.deleteCustomReaction(id).pipe(takeUntil(this.destroy$)).subscribe({
+    this._customReactionsService
+      .deleteCustomReaction(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this._alertService.showAlert(
+            'Exito',
+            'Reaction deleted successfully',
+            Alerts.SUCCESS,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
 
-      next: (response) => {
-        this._alertService.showAlert(
-          'Exito',
-          'Reaction deleted successfully',
-          Alerts.SUCCESS,
-          Position.CENTER,
-          true,
-          true,
-          translations['button.ok'],
-        );
-
-        this.listReactions();
-      }
-
-    });
+          this.listReactions();
+        },
+      });
   }
 }
