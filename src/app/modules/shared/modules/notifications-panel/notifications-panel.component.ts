@@ -124,13 +124,16 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy {
   async goToLink(link: string, _id: string) {
     await this.markAsRead(_id);
     this._notificationService.sendNotification();
-    this._router.navigateByUrl(link);
     this.togglePanel();
+    setTimeout(() => {
+      this._router.navigateByUrl(link);
+    }, 1000);
   }
 
   async markAsRead(_id: string) {
     await this._notificationCenterService.updateNotification(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
+        console.log('Notificación marcada como leida:', response);
         this.getNotifications();
       },
       error: (error) => {
