@@ -16,19 +16,20 @@
 .reaction-popup {
   position: absolute;
   display: flex;
+  flex-wrap: nowrap;
   bottom: 100%;
-  left: 90%;
+  left: calc(70% + (var(--num-items) * 33px / 2));
   transform: translateX(-50%);
   background-color: white;
   padding: 13px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
 
   @include breakpoints.below-sm {
-    left: 130%;
+    left: calc(10% + (var(--num-items) * 33px / 2));
     bottom: 90%;
   }
-
 }
 
 .reaction {
@@ -38,7 +39,10 @@
   cursor: pointer;
   margin: 0 5px;
   transition: transform 0.3s;
-  gap: 5px;
+  @include breakpoints.below-sm {
+    width: 25px;
+    height: 25px;
+  }
 }
 
 .reaction.zoomed {
@@ -48,6 +52,10 @@
 .reaction-image {
   width: 40px;
   height: 40px;
+  @include breakpoints.below-sm {
+    width: 25px;
+    height: 25px;
+  }
 }
 
 .selected-reaction {
@@ -59,3 +67,4 @@
     height: 20px;
   }
 }
+

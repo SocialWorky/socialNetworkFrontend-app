@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -19,7 +19,9 @@ import { NotificationService } from '@shared/services/notifications/notification
   styleUrls: ['./reactions.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ReactionsComponent implements OnInit, OnDestroy {
+export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('reactionPopup') reactionPopup!: ElementRef;
+
   reactionsVisible = false;
   
   reactions: Array<CustomReactionList & { zoomed: boolean }> = [];
@@ -60,6 +62,10 @@ export class ReactionsComponent implements OnInit, OnDestroy {
     this.loadReactions();
   }
 
+  ngAfterViewInit() {
+    this.updateReactionsPopupPosition();
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -87,6 +93,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
           this._emailNotificationService.reactionsNotification(this.publication!, reaction);
 
           this.refreshPublications();
+          this.updateReactionsPopupPosition();
         },
         error: (err) => {
           console.error('Failed to add reaction', err);
@@ -103,6 +110,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
         this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
         this.unlockReactions = true;
+        this.updateReactionsPopupPosition();
       },
       error: (err) => {
         console.error('Failed to delete reaction', err);
@@ -125,6 +133,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
         this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
         this.unlockReactions = true;
+        this.updateReactionsPopupPosition();
       },
       error: (err) => {
         console.error('Failed to edit reaction', err);
@@ -143,6 +152,7 @@ export class ReactionsComponent implements OnInit, OnDestroy {
               zoomed: false
             }));
           this._cdr.markForCheck();
+          this.updateReactionsPopupPosition();
         },
         error: (err) => {
           console.error('Failed to load reactions', err);
@@ -152,10 +162,14 @@ export class ReactionsComponent implements OnInit, OnDestroy {
 
   showReactions() {
     this.reactionsVisible = true;
+    setTimeout(() => {
+      this.updateReactionsPopupPosition();
+    }, 0);
   }
 
   hideReactions() {
     this.reactionsVisible = false;
+    this.updateReactionsPopupPosition();
   }
 
   zoomIn(reaction: CustomReactionList & { zoomed: boolean }) {
@@ -190,6 +204,13 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   onTouchEnd() {
     if (this.touchTimeout) {
       clearTimeout(this.touchTimeout);
+    }
+  }
+
+  private updateReactionsPopupPosition() {
+    if (this.reactionPopup) {
+      const items = this.reactionPopup.nativeElement.children.length;
+      this.reactionPopup.nativeElement.style.setProperty('--num-items', items.toString());
     }
   }
 }

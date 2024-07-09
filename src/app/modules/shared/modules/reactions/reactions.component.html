@@ -20,7 +20,7 @@
     <div>{{ reactionUserInPublication.customReaction.name }}</div>
   </div>
 
-  <div class="reaction-popup" *ngIf="reactionsVisible">
+  <div #reactionPopup class="reaction-popup" *ngIf="reactionsVisible">
     <div class="reaction" 
          *ngFor="let reaction of reactions" 
          [class.zoomed]="reaction.zoomed" 
