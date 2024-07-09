@@ -134,19 +134,21 @@ export class ReactionsComponent implements OnInit, OnDestroy {
   }
 
   loadReactions() {
-    this._customReactionsService.getCustomReactionsAll().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (reactions: CustomReactionList[]) => {
-        this.reactions = reactions.map((reaction) => ({
-          ...reaction,
-          zoomed: false
-        }));
-        this._cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('Failed to load reactions', err);
-      }
-    });
-  }
+      this._customReactionsService.getCustomReactionsAll().pipe(takeUntil(this.destroy$)).subscribe({
+        next: (reactions: CustomReactionList[]) => {
+          this.reactions = reactions
+            .filter(reaction => reaction.isDeleted === false)
+            .map((reaction) => ({
+              ...reaction,
+              zoomed: false
+            }));
+          this._cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Failed to load reactions', err);
+        }
+      });
+    }
 
   showReactions() {
     this.reactionsVisible = true;

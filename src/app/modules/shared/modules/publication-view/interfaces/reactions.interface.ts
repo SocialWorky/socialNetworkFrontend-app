@@ -10,6 +10,10 @@ export interface CustomReaction {
   _id: string;
   name: string;
   emoji: string;
+  isDeleted: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string;
 }
 
 export interface UserReaction {

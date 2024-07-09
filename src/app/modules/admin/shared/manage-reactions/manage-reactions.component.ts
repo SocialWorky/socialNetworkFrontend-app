@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 
 import { CustomReactionsService } from '@admin/shared/manage-reactions/service/customReactions.service';
 import { CustomReactionList } from '@admin/interfaces/customReactions.interface';
@@ -20,9 +20,9 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
 
   reactionsList: CustomReactionList[] = [];
 
-  private subscriptions: Subscription = new Subscription();
+  public imageFile: File | null = null;
 
-  public imageFile: File | null = null; // Cambiado a public
+  private destroy$ = new Subject<void>();
 
   constructor(
     private _fb: FormBuilder,
@@ -42,16 +42,25 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscriptions.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   listReactions() {
-    const sub = this._customReactionsService.getCustomReactionsAll().subscribe((response: CustomReactionList[]) => {
-      this.reactionsList = response;
-      this._cdr.markForCheck();
+    this._customReactionsService.getCustomReactionsAll().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (reactions: CustomReactionList[]) => {
+        this.reactionsList = reactions
+          .filter(reaction => reaction.isDeleted === false)
+          .map((reaction) => ({
+            ...reaction,
+            zoomed: false
+          }));
+        this._cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Failed to load reactions', err);
+      }
     });
-
-    this.subscriptions.add(sub);
   }
 
   onFileChange(event: any) {
@@ -67,7 +76,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
   createCustomReaction() {
     if (this.reactionForm.valid) {
       if (this.imageFile) {
-        this.uploadFile(this.imageFile).subscribe(url => {
+        this.uploadFile(this.imageFile).pipe(takeUntil(this.destroy$)).subscribe(url => {
           this.reactionForm.patchValue({ emoji: url });
           this.submitReaction();
         });
@@ -88,7 +97,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     await loadingReaction.present();
 
     const reaction = this.reactionForm.value;
-    const sub = this._customReactionsService.createCustomReaction(reaction).subscribe(response => {
+    this._customReactionsService.createCustomReaction(reaction).pipe(takeUntil(this.destroy$)).subscribe(response => {
       this._alertService.showAlert(
         'Exito',
         'Reaction created successfully',
@@ -104,8 +113,6 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
       loadingReaction.dismiss();
       this.listReactions();
     });
-
-    this.subscriptions.add(sub);
   }
 
   uploadFile(file: File) {
@@ -115,18 +122,22 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
   }
 
   deleteReaction(id: string) {
-    this._customReactionsService.deleteCustomReaction(id).subscribe(() => {
-      this._alertService.showAlert(
-        'Exito',
-        'Reaction deleted successfully',
-        Alerts.SUCCESS,
-        Position.CENTER,
-        true,
-        true,
-        translations['button.ok'],
-      );
+    this._customReactionsService.deleteCustomReaction(id).pipe(takeUntil(this.destroy$)).subscribe({
 
-      this.listReactions();
+      next: (response) => {
+        this._alertService.showAlert(
+          'Exito',
+          'Reaction deleted successfully',
+          Alerts.SUCCESS,
+          Position.CENTER,
+          true,
+          true,
+          translations['button.ok'],
+        );
+
+        this.listReactions();
+      }
+
     });
   }
 }

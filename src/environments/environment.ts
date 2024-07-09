@@ -5,8 +5,8 @@
 export const environment = {
   PRODUCTION: false,
   BASE_URL: 'http://localhost:4200',
-  // API_URL: 'http://localhost:3000/api/v1', // Worky API Service Core
-  API_URL: 'https://backend-dev.worky.cl/api/v1', // Worky API Service Core
+  API_URL: 'http://localhost:3000/api/v1', // Worky API Service Core
+  // API_URL: 'https://backend-dev.worky.cl/api/v1', // Worky API Service Core
   CLIEN_ID_GOOGLE: '392454930418-dunulmihmuss90c042vn359mitdjjko8.apps.googleusercontent.com',
   WSURL: 'https://notifications-dev.worky.cl', // Worky-socket service
   // WSURL: 'http://localhost:3011', // Worky-socket service localhost
