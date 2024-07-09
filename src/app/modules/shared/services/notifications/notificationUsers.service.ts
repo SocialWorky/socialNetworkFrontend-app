@@ -7,14 +7,29 @@ import { catchError, takeUntil } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class NotificationUsersService implements OnDestroy {
-  private _userStatuses = new BehaviorSubject<any>([] || null);
-
+  private _userStatuses = new BehaviorSubject<any[]>([]);
   public userStatuses$ = this._userStatuses.asObservable();
 
   private _unsubscribeAll = new Subject<void>();
 
   constructor(private socket: Socket) {
+    this.initializeUserStatuses();
     this.subscribeToUserStatus();
+  }
+
+  private initializeUserStatuses() {
+    this.socket.emit('getUserStatuses');
+    this.socket.fromEvent<any[]>('initialUserStatuses')
+      .pipe(
+        takeUntil(this._unsubscribeAll),
+        catchError(error => {
+          console.error('Error receiving initial user statuses:', error);
+          throw error;
+        })
+      )
+      .subscribe((initialStatuses: any[]) => {
+        this._userStatuses.next(initialStatuses);
+      });
   }
 
   private subscribeToUserStatus() {
@@ -27,11 +42,38 @@ export class NotificationUsersService implements OnDestroy {
         })
       )
       .subscribe((data: any) => {
-        const currentStatuses = this._userStatuses.getValue();
-        const updatedStatuses = currentStatuses.filter((status: { userId: any; }) => status.userId !== data.userId);
-        updatedStatuses.push(data);
-        this._userStatuses.next(updatedStatuses);
+        this.updateUserStatus(data);
       });
+  }
+
+  private updateUserStatus(data: any) {
+    const currentStatuses = this._userStatuses.getValue();
+    const userIndex = currentStatuses.findIndex(status => status._id === data._id);
+    if (userIndex !== -1) {
+      if (data.status === 'offline') {
+        currentStatuses.splice(userIndex, 1);
+      } else {
+        currentStatuses[userIndex] = data;
+      }
+    } else {
+      if (data.status !== 'offline') {
+        currentStatuses.push(data);
+      }
+    }
+    this._userStatuses.next(currentStatuses);
+  }
+
+  addCurrentUserStatus(userStatus: any) {
+    const currentStatuses = this._userStatuses.getValue();
+    const userIndex = currentStatuses.findIndex(status => status._id === userStatus._id);
+    if (userIndex === -1) {
+      currentStatuses.push(userStatus);
+      this._userStatuses.next(currentStatuses);
+    }
+  }
+
+  getUserStatuses() {
+    return this._userStatuses.getValue();
   }
 
   refreshUserStatuses() {
@@ -39,13 +81,11 @@ export class NotificationUsersService implements OnDestroy {
   }
 
   logoutUser() {
-    this.socket.emit('refreshUserStatuses');
     this.socket.emit('logoutUser');
   }
 
   loginUser() {
     this.socket.emit('loginUser');
-    this.socket.emit('refreshUserStatuses');
   }
 
   ngOnDestroy() {

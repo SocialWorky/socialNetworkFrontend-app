@@ -17,7 +17,7 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
   private _destroy$ = new Subject<void>();
 
   usersOnline: Token[] | undefined;
-  currenUser = this._authService.getDecodedToken();
+  currentUser = this._authService.getDecodedToken();
 
   constructor(
     private _cdr: ChangeDetectorRef,
@@ -27,11 +27,13 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this._notificationUsersService.addCurrentUserStatus(this.currentUser);
+
     this._notificationUsersService.userStatuses$.pipe(
       takeUntil(this._destroy$)
     ).subscribe({
       next: (userStatuses) => {
-        this.usersOnline = userStatuses[0];
+        this.usersOnline = userStatuses;
         this._cdr.markForCheck();
       },
       error: (error) => {
