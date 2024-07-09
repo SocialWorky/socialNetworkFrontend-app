@@ -9,6 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
 import { Message } from '../../interfaces/message.interface';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { NotificationService } from '@shared/services/notifications/notification.service';
 
 @Component({
   selector: 'worky-message-side-left',
@@ -45,7 +46,8 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
     private _notificationMessageChatService: NotificationMessageChatService,
     private _deviceDetectionService: DeviceDetectionService,
     private _router: Router,
-    private _location: Location
+    private _location: Location,
+    private _notificationService: NotificationService
   ) {
     this.currentUserId = this._authService.getDecodedToken()!.id;
     this._cdr.markForCheck();
@@ -64,6 +66,16 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
           }
         }
       });
+
+    this._notificationService.notification$.pipe(takeUntil(this.unsubscribe$)).subscribe({
+      next: (data: any) => {
+        if (data && data[0]?.chatId) {
+          const userIdToUpdate = data[0].senderId === this.currentUserId ? data[0].receiverId : data[0].senderId;
+          this.loadUnreadMessagesCount(data[0].chatId, userIdToUpdate);
+          this._cdr.markForCheck();
+        }
+      }
+    });
 
     this.getUserMessages();
   }

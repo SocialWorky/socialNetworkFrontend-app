@@ -100,18 +100,28 @@
           display: flex;
           align-items: center;
           gap: 5px;
+          .send-message-button {
+            display: flex;
+            margin-left: 10px;
+            gap: 5px;
+           .whatsapp-icon {
+             width: 35px;
+             height: 35px;
+             cursor: pointer;
+            }
+          }
+           @include breakpoints.below-sm {
+            flex-direction: column;
+            align-items: flex-start;
+            .send-message-button {
+              margin: 5px 0px 5px 0px
+            }
+          }
+
           h2 {
               @include Fonts.worky-h3;
               font-weight: bold;
               color: color.$worky-color-navy;
-          }
-          .send-message-icon {
-            width: 40px;
-            cursor: pointer;
-          }
-          .whatsapp-icon {
-            width: 30px;
-            cursor: pointer;
           }
         }
 

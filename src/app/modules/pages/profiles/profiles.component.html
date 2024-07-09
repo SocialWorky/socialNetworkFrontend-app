@@ -75,15 +75,22 @@
                 <div class="content-name-action">
                   <h2>{{ userData.name }} {{ userData.lastName}}</h2>
 
-                  <div class="material-icons send-message-icon" *ngIf="idUserProfile !== dataUser?.id"
-                    (click)="sendMessage(userData._id)">chat
-                  </div>
+                  <div class="send-message-button">
+                    <worky-buttons *ngIf="idUserProfile !== dataUser?.id"
+                      [workyButtonType]="WorkyButtonType.Outline"
+                      [theme]="WorkyButtonTheme.Basic"
+                      [width]="'100%'"
+                      (click)="sendMessage(userData._id)">
+                      <span prefix-icon><i class="material-icons">chat</i></span>
+                      <span basic-button-text>Enviar Mensaje</span>
+                    </worky-buttons>
 
                   <img *ngIf="userData.profile.whatsapp?.isViewable" 
                     class="whatsapp-icon"
                     src="assets/img/logos/whatsapp.svg" alt="whatsapp"
                     (click)="openWhatsApp()">
 
+                  </div>
                 </div>    
                 <span> {{ userData.profile.legend }}</span>
                  <p>({{ userData.username }})</p>
