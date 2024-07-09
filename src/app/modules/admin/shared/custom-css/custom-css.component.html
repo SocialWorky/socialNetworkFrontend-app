@@ -22,6 +22,7 @@
     <textarea class="editor-textarea" [(ngModel)]="customCss" name="customCss" rows="10" cols="50"
       placeholder="Ingrese su CSS personalizado aquí"></textarea>
     <br />
-    <button class="editor-button" type="submit" (click)="saveCustomCss()">Guardar CSS</button>
+    <div *ngIf="customCssLoader" class="loader"></div>
+    <button *ngIf="!customCssLoader" class="editor-button" type="submit" (click)="saveCustomCss()">Guardar CSS</button>
   </form>
 </div>

@@ -33,9 +33,13 @@
       padding: 5px;
     }
     a {
-      img {
+      .worky-logo {
         width: 60px;
-        height: auto;
+        height: 60px;
+        background-image: url('../../../../../assets/img/navbar/worky-your-logo.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
         margin-top: 5px;
       }
     }
