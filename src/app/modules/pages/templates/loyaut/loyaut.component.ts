@@ -4,6 +4,7 @@ import { Subscription, filter } from 'rxjs';
 
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { AuthService } from '@auth/services/auth.service';
+import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 
 @Component({
   selector: 'worky-loyaut',
@@ -34,10 +35,12 @@ export class LoyautComponent implements OnInit, OnDestroy {
     private _deviceDetectionService: DeviceDetectionService,
     private _router: Router,
     private _cdr: ChangeDetectorRef,
-    private _authService: AuthService
+    private _authService: AuthService,
+    private _notificationUsersService: NotificationUsersService
   ) {}
 
   ngOnInit(): void {
+    this._notificationUsersService.refreshUserStatuses();
     this.routeSub = this._router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd)
