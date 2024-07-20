@@ -1,6 +1,4 @@
-// image-organizer.component.ts
-
-import { ChangeDetectorRef, Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ImageOrganizer } from './interfaces/image-organizer.interface';
 import { environment } from '@env/environment';
 
@@ -9,13 +7,33 @@ import { environment } from '@env/environment';
   templateUrl: './image-organizer.component.html',
   styleUrls: ['./image-organizer.component.scss'],
 })
-export class ImageOrganizerComponent {
+export class ImageOrganizerComponent implements OnInit {
 
-  @Input() images?: ImageOrganizer[] = [];
-
+  @Input() images: ImageOrganizer[] = [];
+  galleryItems: any[] = [];
   urlMediaApi = environment.APIFILESERVICE;
+  lightboxOpen = false;
+  currentItem: any = null;
 
-  constructor(private _cdr: ChangeDetectorRef) {}
+  ngOnInit(): void {
+    this.galleryItems = this.images.map(image => {
+      if (this.isImageUrl(image.urlCompressed)) {
+        return {
+          src: this.urlMediaApi + image.urlCompressed,
+          isImage: true,
+          isVideo: false
+        };
+      } else if (this.isVideoUrl(image.url)) {
+        return {
+          src: this.urlMediaApi + image.url,
+          isImage: false,
+          isVideo: true
+        };
+      } else {
+        return null;
+      }
+    }).filter(item => item !== null);
+  }
 
   isImageUrl(url: string): boolean {
     return /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
@@ -25,12 +43,13 @@ export class ImageOrganizerComponent {
     return /\.(mp4|ogg|webm|avi|mov)$/i.test(url);
   }
 
-  videoLoaded(event: Event): void {
-    this._cdr.markForCheck();
+  openLightbox(index: number): void {
+    this.currentItem = this.galleryItems[index];
+    this.lightboxOpen = true;
   }
 
-  openImage(image: ImageOrganizer): void {
-    window.open(this.urlMediaApi + image.urlCompressed, '_blank');
+  closeLightbox(): void {
+    this.lightboxOpen = false;
+    this.currentItem = null;
   }
-
 }
