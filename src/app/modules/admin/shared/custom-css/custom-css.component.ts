@@ -9,6 +9,15 @@ import { Subject, takeUntil } from 'rxjs';
 })
 export class CustomCssComponent implements OnDestroy {
 
+  editorOptions = {
+    theme: 'vs-dark',
+    language: 'css',
+    contextmenu: true,
+    minimap: {
+      enabled: false
+    }
+  };
+
   customCss: string = '';
 
   customCssLoader: boolean = false;

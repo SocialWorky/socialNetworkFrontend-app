@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 
 import { TemplatesComponent } from './templates/templates.component';
 import { HomeAdminComponent } from './pages/home/home.component';
@@ -35,6 +36,7 @@ import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.mod
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    MonacoEditorModule.forRoot(),
     AdminRoutingModule,
     TranslationsModule,
     WorkyAvatarModule

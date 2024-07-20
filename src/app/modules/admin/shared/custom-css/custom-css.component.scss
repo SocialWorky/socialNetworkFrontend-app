@@ -1,5 +1,7 @@
 .custom-css-editor {
-  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  width: 90%;
   margin: 0 auto;
   padding: 20px;
   background-color: #f9f9f9;
@@ -35,17 +37,13 @@
 }
 
 .editor-form {
-  display: flex;
-  flex-direction: column;
-}
+  display: block;
 
-.editor-textarea {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 14px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  resize: vertical;
+  ngx-monaco-editor {
+    min-height: 350px;
+    margin-bottom: 20px;
+  }
+
 }
 
 .editor-button {

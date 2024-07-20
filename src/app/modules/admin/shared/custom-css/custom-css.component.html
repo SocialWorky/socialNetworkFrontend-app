@@ -19,9 +19,10 @@
     </ul>
   </div>
   <form class="editor-form" (submit)="saveCustomCss()">
-    <textarea class="editor-textarea" [(ngModel)]="customCss" name="customCss" rows="10" cols="50"
-      placeholder="Ingrese su CSS personalizado aquí"></textarea>
     <br />
+
+    <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="customCss" name="customCss"></ngx-monaco-editor>
+
     <div *ngIf="customCssLoader" class="loader"></div>
     <button *ngIf="!customCssLoader" class="editor-button" type="submit" (click)="saveCustomCss()">Guardar CSS</button>
   </form>

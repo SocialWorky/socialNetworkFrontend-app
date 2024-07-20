@@ -55,6 +55,7 @@
     "ionicons": "7.4.0",
     "jwt-decode": "4.0.0",
     "lru-cache": "10.2.2",
+    "ngx-monaco-editor-v2": "^17.0.1",
     "ngx-socket-io": "4.6.1",
     "read-package-json": "7.0.1",
     "rimraf": "5.0.7",
