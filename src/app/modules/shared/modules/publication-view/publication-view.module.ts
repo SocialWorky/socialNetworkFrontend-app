@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { MarkdownModule } from 'ngx-markdown';
 
 import { PublicationViewComponent } from './publication-view.component';
 import { WorkyAvatarModule } from '../worky-avatar/worky-avatar.module';
@@ -15,20 +16,21 @@ import { MaterialModule } from '@shared/modules/material/material.module';
 import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
 
 @NgModule({
-    declarations: [PublicationViewComponent, ReportResponseComponent],
-    exports: [PublicationViewComponent],
-    imports: [
-        CommonModule,
-        WorkyAvatarModule,
-        AddPublicationModule,
-        TranslationsModule,
-        WorkyDropdownModule,
-        ImageOrganizerModule,
-        ReactionsModule,
-        RouterModule,
-        WorkyButtonsModule,
-        MaterialModule,
-        PipesSharedModule
-    ]
+  declarations: [PublicationViewComponent, ReportResponseComponent],
+  exports: [PublicationViewComponent],
+  imports: [
+    CommonModule,
+    WorkyAvatarModule,
+    AddPublicationModule,
+    TranslationsModule,
+    WorkyDropdownModule,
+    ImageOrganizerModule,
+    ReactionsModule,
+    RouterModule,
+    MarkdownModule.forRoot(),
+    WorkyButtonsModule,
+    MaterialModule,
+    PipesSharedModule,
+  ],
 })
-export class PublicationViewModule { }
+export class PublicationViewModule {}

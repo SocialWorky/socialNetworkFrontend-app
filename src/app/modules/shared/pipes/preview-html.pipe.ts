@@ -1,57 +1,25 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { environment } from '@env/environment';
+import { ContentService } from '@shared/services/preview-html.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Pipe({
   name: 'workyPreviewHtml'
 })
 export class WorkyPreviewHtmlPipe implements PipeTransform {
 
-  constructor(private http: HttpClient, private sanitizer: DomSanitizer) {}
+  constructor(private contentService: ContentService, private sanitizer: DomSanitizer) {}
 
-  transform(value: string | undefined): string | SafeHtml {
-    if (!value) return '';
+  transform(value: string | undefined): Observable<{ markdownHtml: SafeHtml, previewsHtml: SafeHtml }> {
+    if (!value) return new Observable<{ markdownHtml: SafeHtml, previewsHtml: SafeHtml }>(observer => observer.next({ markdownHtml: '', previewsHtml: '' }));
 
-    const urlPattern = /(?:https?:\/\/[\S]+)|(?:www\.[\S]+)|(?:[\w-]+\.[\w]+[\S]*[^\s.;,()])/ig;
-    const urls = value.match(urlPattern);
+    return this.contentService.processContent(value).pipe(
+      map(({ markdownHtml, previewsHtml }) => ({
+        markdownHtml: this.sanitizer.bypassSecurityTrustHtml(markdownHtml),
+        previewsHtml: this.sanitizer.bypassSecurityTrustHtml(previewsHtml)
+      }))
+    );
 
-    if (!urls || urls.length === 0) return '';
-
-    urls.forEach(url => {
-      const normalizedUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
-      this.fetchMetadata(normalizedUrl);
-    });
-
-    return this.sanitizer.bypassSecurityTrustHtml(urls.map(url => `<div class="link-preview" data-url="${url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`}" onclick="window.open('${url}', '_blank')"></div>`).join(''));
-  }
-
-
-  private fetchMetadata(url: string): void {
-    this.http.get(`${environment.API_URL}/scrape?url=${encodeURIComponent(url)}`).subscribe((metadata: any) => {
-      const linkPreviews = document.querySelectorAll(`.link-preview[data-url="${url}"]`);
-      linkPreviews.forEach(preview => {
-        const dataMeta = this.generatePreviewHTML(metadata);
-        if (dataMeta !== '') {
-          preview.innerHTML = dataMeta;
-        } else {
-          preview.remove();
-        }
-      });
-    });
-  }
-
-  private generatePreviewHTML(metadata: any): string {
-    if (!metadata || !metadata.ogTitle) return '';
-
-    return `
-      <div class="link-preview-content">
-        ${metadata.ogImage?.url ? `<img src="${metadata.ogImage.url}" alt="Preview Image">` : ''}
-        <div class="link-preview-info">
-          <h3>${metadata.ogTitle}</h3>
-          <p>${metadata.ogDescription}</p>
-        </div>
-      </div>
-    `;
   }
 }

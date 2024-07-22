@@ -72,14 +72,15 @@
 
   <div class="publication-body">
     <div class="publication-content">
-      <div class="content" [innerHTML]="publication.content | workyProcessContent"></div>
+      <div class="content markdown" *ngIf="(publication.content | workyPreviewHtml | async) as result">
+        <div [innerHTML]="result.markdownHtml"></div>
+        <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
+      </div>
     </div>
+
     <worky-image-organizer *ngIf="publication.media.length"
       [images]="publication.media">
     </worky-image-organizer>
-    <div class="publication-url-preview">
-      <div class="content" [innerHTML]="publication.content | workyPreviewHtml"></div>
-    </div>
   </div>
 
   <div class="publication-footer">

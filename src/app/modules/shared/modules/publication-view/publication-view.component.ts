@@ -25,6 +25,7 @@ import { NotificationService } from '@shared/services/notifications/notification
 import * as _ from 'lodash';
 import { Reactions } from './interfaces/reactions.interface';
 
+
 @Component({
   selector: 'worky-publication-view',
   templateUrl: './publication-view.component.html',
@@ -70,6 +71,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   
   listReaction: string[] = [];
 
+  isCodeBlock(content: string): boolean {
+    return content.trim().startsWith('```');
+  }
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -83,7 +88,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _reportsService: ReportsService,
     public _dialog: MatDialog,
     private _emailNotificationService: EmailNotificationService,
-    private _notificationService: NotificationService
+    private _notificationService: NotificationService,
   ) {}
 
   async ngAfterViewInit() {

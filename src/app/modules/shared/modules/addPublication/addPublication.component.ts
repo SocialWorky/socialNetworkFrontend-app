@@ -464,4 +464,24 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
       console.error('Error getting publications', error);
     }
   }
+
+insertText(markdown: string) {
+  const textarea = this.postTextRef.nativeElement as HTMLTextAreaElement;
+  const startPos = textarea.selectionStart;
+  const endPos = textarea.selectionEnd;
+  const selectedText = this.myForm.get('content')?.value.substring(startPos, endPos);
+
+  let newText;
+  if (selectedText) {
+    newText = this.myForm.get('content')?.value.substring(0, startPos) + markdown.replace('placeholder', selectedText) + this.myForm.get('content')?.value.substring(endPos);
+  } else {
+    newText = this.myForm.get('content')?.value.substring(0, startPos) + markdown.replace('placeholder', '') + this.myForm.get('content')?.value.substring(endPos);
+  }
+
+  this.myForm.get('content')?.setValue(newText);
+  textarea.focus();
+  textarea.selectionStart = startPos + markdown.length;
+  textarea.selectionEnd = startPos + markdown.length;
+}
+
 }

@@ -145,7 +145,7 @@
     .extra-content {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: space-between;
       margin: 5px;
       gap: 2px;
       padding: 5px;
@@ -168,35 +168,57 @@
         }
       }
 
-      .emoji-icon {
-        color: color.$worky-color-grey;
-        cursor: pointer;
-        :hover {
-          color: color.$worky-color-indigo;
-        }
-      }
-      .emoji-menu {
-        position: absolute;
-        top: 100%;
-        right: 8px;
-        z-index: 1;
-        overflow-y: auto;
-      }
-
-      .location-on {
-        color: map-get(color.$worky-red, 56);
-        cursor: pointer;
-        :hover {
-          color: map-get(color.$worky-red, 9);
+      .markdown-help {
+        display: flex;
+        align-items: center;
+        justify-content: left;
+        .extra-content-item {
+          cursor: pointer;
+          i {
+            color: color.$worky-color-grey;
+          }
+          i:hover {
+            color: color.$worky-color-indigo;
+          }
         }
       }
 
-      .file-upload {
-        color: map-get(color.$worky-green, 56);
-        cursor: pointer;
-        :hover {
-          color: map-get(color.$worky-green, 9);
+      .options-items {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+
+        .emoji-icon {
+          color: color.$worky-color-grey;
+          cursor: pointer;
+          :hover {
+            color: color.$worky-color-indigo;
+          }
         }
+        .emoji-menu {
+          position: absolute;
+          top: 100%;
+          right: 8px;
+          z-index: 1;
+          overflow-y: auto;
+        }
+
+        .location-on {
+          color: map-get(color.$worky-red, 56);
+          cursor: pointer;
+          :hover {
+            color: map-get(color.$worky-red, 9);
+          }
+        }
+
+        .file-upload {
+          color: map-get(color.$worky-green, 56);
+          cursor: pointer;
+          :hover {
+            color: map-get(color.$worky-green, 9);
+          }
+        }
+
       }
 
     }
