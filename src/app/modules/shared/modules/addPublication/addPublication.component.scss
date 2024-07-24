@@ -153,6 +153,7 @@
       border-radius: 8px;
       @include breakpoints.below-sm {
         flex-direction: column;
+        align-items: end;
       }
 
       .extra-content-item {

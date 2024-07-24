@@ -111,8 +111,8 @@ export class ContentService {
     if (youtubeMatch) {
       const videoId = youtubeMatch[1];
       const youtubeHtml = `
-        <div class="link-preview-youtube" style="width: 100%; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
-          <iframe width="100%" height="400" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
+        <div class="link-preview-youtube">
+          <iframe width="100%" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
         </div>
       `;
       return { previewHtml: youtubeHtml, isYoutube: true };
