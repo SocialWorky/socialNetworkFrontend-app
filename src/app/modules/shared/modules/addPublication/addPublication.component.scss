@@ -151,6 +151,9 @@
       padding: 5px;
       border: 1px solid color.$worky-color-greyLight;
       border-radius: 8px;
+      @include breakpoints.below-sm {
+        flex-direction: column;
+      }
 
       .extra-content-item {
 
@@ -236,9 +239,6 @@
   .publishing-footer {
     display: flex;
     justify-content: flex-end;
-    worky-buttons .worky-button {
-      height: 40px;
-    }
     .loader {
       width: 30px;
       margin-right: 25px;

@@ -12,6 +12,7 @@ export class ButtonsComponent {
   @Input() workyButtonType: WorkyButtonType = WorkyButtonType.Flat;
   @Input() disabled = false;
   @Input() width?: string;
+  @Input() height?: string;
 
   @Output() clickEvent = new EventEmitter<void>();
 

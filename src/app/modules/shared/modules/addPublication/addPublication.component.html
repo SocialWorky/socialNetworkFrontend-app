@@ -166,6 +166,7 @@
           [workyButtonType]="WorkyButtonType.Flat"
           [theme]="WorkyButtonTheme.Accent"
           [disabled]="!myForm.valid || !myForm.dirty"
+          [height]="'40px'"
           [width]="'100%'">
           <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
         </worky-buttons>
