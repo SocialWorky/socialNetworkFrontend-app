@@ -74,6 +74,7 @@
     <div class="publication-content">
       <div class="content markdown" *ngIf="(publication.content | workyPreviewHtml | async) as result">
         <div [innerHTML]="result.markdownHtml"></div>
+        <div class="publication-youtube-preview" [innerHTML]="result.youtubeHtml"></div>
         <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
       </div>
     </div>
