@@ -10,6 +10,7 @@ import { AddPublicationComponent } from './addPublication.component';
 import { WorkyAvatarModule } from '../worky-avatar/worky-avatar.module';
 import { LocationSearchModule } from '../location-search/location-search.module';
 import { ImageUploadModalModule } from '../image-upload-modal/image-upload-modal.module';
+import { GifSearchModule } from '../gif-search/gif-search.module';
 
 
 @NgModule({
@@ -25,7 +26,8 @@ import { ImageUploadModalModule } from '../image-upload-modal/image-upload-modal
     ReactiveFormsModule,
     WorkyAvatarModule,
     LocationSearchModule,
-    ImageUploadModalModule
+    ImageUploadModalModule,
+    GifSearchModule
   ],
   exports: [
     AddPublicationComponent,

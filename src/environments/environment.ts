@@ -21,6 +21,7 @@ export const environment = {
   APIMESSAGESERVICE: 'https://message-service-dev.worky.cl/api/v1', // Message Service URL
   //APINOTIFICATIONCENTER: 'http://localhost:3010/api/v1', // Notification Center API Service URL LOCAL
   APINOTIFICATIONCENTER: 'https://notification-center-dev.worky.cl/api/v1', // Notification Center API Service URL
+  GIPHYAPIKEY: '5wx4sSteE2vX1eY1oVLxuP5JONu6y4RV', // Giphy API Key
 };
 
 

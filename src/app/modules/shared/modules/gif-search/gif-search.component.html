@@ -1,0 +1,19 @@
+<div>
+  <input type="text" [formControl]="searchTerm" placeholder="Search GIFs" />
+  <div class="content-options">
+    <label>
+      <input type="radio" name="size" (click)="setImageSize('fixed_height')" checked /> Altura Fija
+    </label>
+    <label>
+      <input type="radio" name="size" (click)="setImageSize('fixed_width')" /> Anchura Fija
+    </label>
+    <label>
+      <input type="radio" name="size" (click)="setImageSize('original')" /> Original
+    </label>
+  </div>
+</div>
+<div class="gif-results">
+  <div *ngFor="let gif of gifs" (click)="selectGif(gif.images[selectedSize].url)">
+    <img [src]="gif.images[selectedSize].url" alt="GIF" class="large" />
+  </div>
+</div>

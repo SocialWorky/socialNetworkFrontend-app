@@ -223,6 +223,14 @@
           }
         }
 
+        .gif-icon {
+          color: map-get(color.$worky-red, 72);
+          cursor: pointer;
+          :hover {
+            color: map-get(color.$worky-red, 9);
+          }
+        }
+
       }
 
     }
@@ -245,4 +253,11 @@
       margin-right: 25px;
     }
   }
+
+  .gifSearch-modal-container {
+    @include breakpoints.below-sm {
+      width: 100%;
+    }
+  }
+
 }

@@ -11,7 +11,7 @@ import {
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
 import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import {
   WorkyButtonType,
   WorkyButtonTheme
@@ -39,6 +39,7 @@ import { environment } from '@env/environment';
 import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
 import { NotificationCenterService } from '@shared/services/notificationCenter.service';
 import { NotificationType } from '@shared/modules/notifications-panel/enums/notificationsType.enum';
+import { GifSearchComponent } from '../gif-search/gif-search.component';
 
 @Component({
   selector: 'worky-add-publication',
@@ -47,21 +48,36 @@ import { NotificationType } from '@shared/modules/notifications-panel/enums/noti
 })
 export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit {
   WorkyButtonType = WorkyButtonType;
+  
   WorkyButtonTheme = WorkyButtonTheme;
+  
   typePrivacy = TypePrivacy;
+  
   typePublishing = TypePublishing;
 
   user: User = {} as User;
+  
   profileImageUrl: string | null = null;
+  
   nameGeoLocation = '';
+  
   dataGeoLocation = '';
+  
   showEmojiMenu = false;
+  
   privacy = TypePrivacy.PUBLIC;
+  
   privacyFront = '';
+  
   previews: { url: string; type: string }[] = [];
+  
   selectedFiles: File[] = [];
+  
   decodedToken!: Token;
+  
   isAuthenticated = false;
+
+  showGifSearch = false;
 
   loaderSavePublication = false;
 
@@ -78,8 +94,11 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   private subscription?: Subscription;
 
   @Input() type?: TypePublishing;
+
   @Input() idPublication?: string;
+
   @Input() indexPublication?: number;
+
   @Input() idUserProfile?: string;
 
   @ViewChild('postText') postTextRef!: ElementRef;
@@ -248,6 +267,31 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
         loadingPublications.dismiss();
       },
     });
+  }
+
+  openGifSearch() {
+    const dialogConfig = new MatDialogConfig();
+
+    dialogConfig.width = '540px';
+    dialogConfig.height = '500px';
+    dialogConfig.panelClass = 'gifSearch-modal-container';
+
+    const dialogRef = this._dialog.open(GifSearchComponent, dialogConfig);
+
+    dialogRef.componentInstance.gifSelected.subscribe((gifUrl: string) => {
+      this.onGifSelected(gifUrl);
+      dialogRef.close();
+    });
+  }
+
+  toggleGifSearch() {
+    this.openGifSearch();
+  }
+
+  onGifSelected(gifUrl: string) {
+    const currentContent = this.myForm.get('content')?.value;
+    this.myForm.get('content')?.setValue(`${currentContent} ![GIF](${gifUrl})\n`);
+    this.showGifSearch = false;
   }
 
   private async handlePublicationResponse(message: any) {

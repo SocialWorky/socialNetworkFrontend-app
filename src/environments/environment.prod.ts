@@ -14,4 +14,5 @@ export const environment = {
   APIFILESERVICE: 'https://file-service-dev.worky.cl/', // File Service URL
   APIMESSAGESERVICE: 'https://message-service-dev.worky.cl/api/v1', // Message Service URL
   APINOTIFICATIONCENTER: 'https://notification-center-dev.worky.cl/api/v1', // Notification Center API Service URL
+  GIPHYAPIKEY: '5wx4sSteE2vX1eY1oVLxuP5JONu6y4RV', // Giphy API Key
 };
