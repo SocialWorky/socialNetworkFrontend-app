@@ -148,7 +148,12 @@
               class="material-icons delete-comment"
               (click)="deleteComment(comment._id, publication._id)">delete</div>
           </div>
-          <span class="comment-content">{{ comment.content }}</span>
+          <div class="comment-content markdown" *ngIf="(comment.content | workyPreviewHtml | async) as result">
+            <div [innerHTML]="result.markdownHtml"></div>
+            <div class="publication-youtube-preview" [innerHTML]="result.youtubeHtml"></div>
+            <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
+          </div>
+
           <worky-image-organizer *ngIf="comment.media.length"
             [images]="comment.media">
           </worky-image-organizer>

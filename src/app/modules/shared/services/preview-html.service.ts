@@ -22,7 +22,16 @@ export class ContentService {
       return `<code class="inline-code">${text}</code>`;
     };
     marked.setOptions({
-      renderer: renderer
+      renderer: renderer,
+      langPrefix: 'hljs ',
+      gfm: true,
+      breaks: true,
+      // Agregar la propiedad highlight usando @ts-ignore para evitar errores de TypeScript
+      // @ts-ignore
+      highlight: function(code, lang) {
+        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+        return hljs.highlight(language, code).value;
+      },
     });
   }
 

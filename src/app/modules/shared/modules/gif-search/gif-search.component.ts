@@ -12,7 +12,7 @@ import { FormControl } from '@angular/forms';
 export class GifSearchComponent {
   gifs: any[] = [];
   searchTerm: FormControl = new FormControl('');
-  selectedSize: string = 'fixed_height'; // Variable para controlar el tamaño de las imágenes
+  selectedSize: string = 'fixed_height';
 
   @Output() gifSelected = new EventEmitter<string>();
 
@@ -28,7 +28,7 @@ export class GifSearchComponent {
 
   searchGifs(term: string) {
     const apiKey = environment.GIPHYAPIKEY;
-    const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${term}&limit=10`;
+    const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${term}&limit=20`;
     return this.http.get(url);
   }
 
