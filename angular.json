@@ -11,7 +11,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@ngx-env/builder:browser",
           "options": {
             "outputPath": "www",
             "index": "src/index.html",
@@ -28,7 +28,7 @@
                 "input": "src/assets",
                 "output": "assets"
               },
-              { 
+              {
                 "glob": "**/*",
                 "input": "node_modules/monaco-editor",
                 "output": "/assets/monaco/"
@@ -45,7 +45,9 @@
               "node_modules/@ctrl/ngx-emoji-mart/picker.css",
               "node_modules/cropperjs/dist/cropper.css"
             ],
-            "scripts": ["node_modules/cropperjs/dist/cropper.js"]
+            "scripts": [
+              "node_modules/cropperjs/dist/cropper.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -84,7 +86,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "@ngx-env/builder:dev-server",
           "configurations": {
             "production": {
               "buildTarget": "app:build:production"
@@ -99,13 +101,13 @@
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "builder": "@ngx-env/builder:extract-i18n",
           "options": {
             "buildTarget": "app:build"
           }
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@ngx-env/builder:karma",
           "options": {
             "main": "src/test.ts",
             "polyfills": "src/polyfills.ts",
@@ -124,8 +126,15 @@
                 "output": "./svg"
               }
             ],
-            "styles": ["src/styles.css", "src/global.scss", "node_modules/@ctrl/ngx-emoji-mart/picker.css", "node_modules/cropperjs/dist/cropper.css"],
-            "scripts": ["node_modules/cropperjs/dist/cropper.js"]
+            "styles": [
+              "src/styles.css",
+              "src/global.scss",
+              "node_modules/@ctrl/ngx-emoji-mart/picker.css",
+              "node_modules/cropperjs/dist/cropper.css"
+            ],
+            "scripts": [
+              "node_modules/cropperjs/dist/cropper.js"
+            ]
           },
           "configurations": {
             "ci": {

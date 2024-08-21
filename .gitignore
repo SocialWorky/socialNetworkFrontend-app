@@ -68,3 +68,5 @@ testem.log
 Thumbs.db
 env.ts
 .nx/cache
+
+.env

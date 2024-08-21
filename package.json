@@ -41,6 +41,7 @@
     "@ionic/angular": "8.2.0",
     "@ionic/pwa-elements": "3.3.0",
     "@ngbracket/ngx-layout": "^17.0.1",
+    "@ngx-env/builder": "^18.0.1",
     "@ngx-translate/core": "15.0.0",
     "@ngx-translate/http-loader": "8.0.0",
     "@npmcli/package-json": "5.2.0",
