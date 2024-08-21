@@ -55,6 +55,3 @@ jobs:
           image: socialworky/worky-frontend-dev:${{ github.sha }}
         env:
           GIT_SHA: ${{ github.sha }}
-          image: socialworky/worky-frontend-dev:${{ github.sha }}
-        env:
-          GIT_SHA: ${{ github.sha }}
