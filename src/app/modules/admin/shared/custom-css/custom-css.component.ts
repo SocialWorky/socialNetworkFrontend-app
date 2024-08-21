@@ -49,7 +49,7 @@ export class CustomCssComponent implements OnDestroy {
   }
 
   async loadCustomCss() {
-    await this._configService.getConfig().subscribe((configData) => {
+    await this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       if (configData.customCss) {
         this.customCss = String(configData.customCss);
         this._cdr.markForCheck();

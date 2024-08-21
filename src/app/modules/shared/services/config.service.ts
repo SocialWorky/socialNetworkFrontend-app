@@ -4,18 +4,17 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { environment } from '../../../../environments/environment';
 import { Config } from '@shared/interfaces/config.interface';
-import { tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConfigService {
 
-  private baseUrl: string;
+  private apiUrl: string;
   private token: string;
 
   constructor(private http: HttpClient) {
-    this.baseUrl = environment.API_URL;
+    this.apiUrl = environment.API_URL;
     this.token = localStorage.getItem('token') || '';
   }
 
@@ -28,13 +27,13 @@ export class ConfigService {
   }
 
   getConfig() {
-    const url = `${this.baseUrl}/config`;
+    const url = `${this.apiUrl}/config`;
     const headers = this.getHeaders();
     return this.http.get<any>(url, { headers });
   }
 
   updateConfig(config: Config): Observable<Config> {
-    const url = `${this.baseUrl}/config`;
+    const url = `${this.apiUrl}/config`;
     const headers = this.getHeaders();
     return this.http.put<Config>(url, config, { headers });
   }

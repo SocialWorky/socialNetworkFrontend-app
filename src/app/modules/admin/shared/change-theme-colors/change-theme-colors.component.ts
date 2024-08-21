@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ConfigService } from '@shared/services/config.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'worky-admin-change-theme-colors',
@@ -9,6 +10,7 @@ import { ConfigService } from '@shared/services/config.service';
 export class ChangeThemeColorsComponent implements OnInit {
   colors: { [key: string]: string } = {};
 
+  private destroy$ = new Subject<void>();
 
   constructor(
     private _configService: ConfigService,
@@ -38,7 +40,7 @@ export class ChangeThemeColorsComponent implements OnInit {
   }
 
   async loadColorsService() {
-    await this._configService.getConfig().subscribe((configData) => {
+    await this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       localStorage.setItem('theme', configData.settings.themeColors);
       const theme = JSON.parse(configData.settings.themeColors);
       Object.keys(theme).forEach(variable => {

@@ -6,6 +6,9 @@ import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import { Translations } from './translations/translations';
 import { environment } from './environments/environment';
 import { ConfigService } from '@shared/services/config.service';
+import { Subject, takeUntil } from 'rxjs';
+
+const destroy$ = new Subject<void>();
 
 if (!navigator.geolocation) {
   console.error('Geolocation is not available');
@@ -34,7 +37,7 @@ async function loadThemeColorsFromLocalStorage() {
   const injector = appModuleRef.injector;
   const _configService = injector.get(ConfigService);
 
-  await _configService.getConfig().subscribe((configData) => {
+  await _configService.getConfig().pipe(takeUntil(destroy$)).subscribe((configData) => {
     localStorage.setItem('theme', configData.settings.themeColors);
     const theme = JSON.parse(configData.settings.themeColors);
     Object.keys(theme).forEach(variable => {
