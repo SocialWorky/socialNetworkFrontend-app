@@ -13,22 +13,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Export environment variables from .env file
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env  # Guarda el contenido del secreto ENV_FILE en un archivo .env
+          export $(grep -v '^#' .env | xargs)  # Exporta las variables de entorno
+
       - name: Build and push Docker image
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          NG_APP_BASE_URL: ${{ secrets.NG_APP_BASE_URL }}
-          NG_APP_API_URL: ${{ secrets.NG_APP_API_URL }}
-          NG_APP_CLIEN_ID_GOOGLE: ${{ secrets.NG_APP_CLIEN_ID_GOOGLE }}
-          NG_APP_WSURL: ${{ secrets.NG_APP_WSURL }}
-          NG_APP_OPENCAGEAPIKEY: ${{ secrets.NG_APP_OPENCAGEAPIKEY }}
-          NG_APP_APIGEOLOCATIONS: ${{ secrets.NG_APP_APIGEOLOCATIONS }}
-          NG_APP_APIWEATHERURL: ${{ secrets.NG_APP_APIWEATHERURL }}
-          NG_APP_APIWEATHERTOKEN: ${{ secrets.NG_APP_APIWEATHERTOKEN }}
-          NG_APP_APIFILESERVICE: ${{ secrets.NG_APP_APIFILESERVICE }}
-          NG_APP_APIMESSAGESERVICE: ${{ secrets.NG_APP_APIMESSAGESERVICE }}
-          NG_APP_APINOTIFICATIONCENTER: ${{ secrets.NG_APP_APINOTIFICATIONCENTER }}
-          NG_APP_GIPHYAPIKEY: ${{ secrets.NG_APP_GIPHYAPIKEY }}
         run: |
           echo "Iniciando la construcción y el empuje de la imagen Docker..."
           docker buildx build -t socialworky/worky-frontend-dev:${{ github.sha }} \
@@ -44,7 +37,7 @@ jobs:
             --build-arg NG_APP_APIMESSAGESERVICE=${NG_APP_APIMESSAGESERVICE} \
             --build-arg NG_APP_APINOTIFICATIONCENTER=${NG_APP_APINOTIFICATIONCENTER} \
             --build-arg NG_APP_GIPHYAPIKEY=${NG_APP_GIPHYAPIKEY} \
-            . 
+            .
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           docker push socialworky/worky-frontend-dev:${{ github.sha }}
           echo "Construcción y empuje de la imagen Docker completados."
