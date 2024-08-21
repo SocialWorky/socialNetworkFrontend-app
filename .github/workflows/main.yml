@@ -31,6 +31,20 @@ jobs:
           NG_APP_GIPHYAPIKEY: ${{ secrets.NG_APP_GIPHYAPIKEY }}
         run: |
           echo "Iniciando la construcción y el empuje de la imagen Docker..."
+          echo "Creando archivo .env para Vite..."
+          echo "NG_APP_BASE_URL=$NG_APP_BASE_URL" > .env
+          echo "NG_APP_API_URL=$NG_APP_API_URL" >> .env
+          echo "NG_APP_CLIEN_ID_GOOGLE=$NG_APP_CLIEN_ID_GOOGLE" >> .env
+          echo "NG_APP_WSURL=$NG_APP_WSURL" >> .env
+          echo "NG_APP_OPENCAGEAPIKEY=$NG_APP_OPENCAGEAPIKEY" >> .env
+          echo "NG_APP_APIGEOLOCATIONS=$NG_APP_APIGEOLOCATIONS" >> .env
+          echo "NG_APP_APIWEATHERURL=$NG_APP_APIWEATHERURL" >> .env
+          echo "NG_APP_APIWEATHERTOKEN=$NG_APP_APIWEATHERTOKEN" >> .env
+          echo "NG_APP_APIFILESERVICE=$NG_APP_APIFILESERVICE" >> .env
+          echo "NG_APP_APIMESSAGESERVICE=$NG_APP_APIMESSAGESERVICE" >> .env
+          echo "NG_APP_APINOTIFICATIONCENTER=$NG_APP_APINOTIFICATIONCENTER" >> .env
+          echo "NG_APP_GIPHYAPIKEY=$NG_APP_GIPHYAPIKEY" >> .env
+
           docker buildx build -t socialworky/worky-frontend-dev:${{ github.sha }} \
             --build-arg NG_APP_BASE_URL=${NG_APP_BASE_URL} \
             --build-arg NG_APP_API_URL=${NG_APP_API_URL} \
