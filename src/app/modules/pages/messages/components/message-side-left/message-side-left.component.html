@@ -1,0 +1,34 @@
+<div class="content-list">
+  <span class="title">Mensajes...</span>
+  <!-- <input type="text" class="search-input" placeholder="Search" /> -->
+
+  <div class="users" *ngIf="users.length > 0 && !loadUsers">
+    <button *ngFor="let item of users" class="button" (click)="selectUser(item.user._id)">
+      <div class="avatar-container">
+        <worky-avatar 
+          [size]="40" 
+          [img]="item.user.avatar"
+          [name]="item.user.name + ' ' + item.user.lastName">
+        </worky-avatar>
+      </div>
+      <div class="user-info">
+        <div class="content-name-unread">
+          <span class="user-name">{{ item.user.name }} {{ item.user.lastName }}</span>
+          <div *ngIf="item.unreadMessagesCount > 0" class="unread-messages">{{ item.unreadMessagesCount }}</div>
+        </div>
+        <span class="last-message">{{ item.lastMessage }} &middot; </span>
+        <span class="last-message-time">{{ formatTime(item.createAt) }}</span>
+      </div>
+    </button>
+  </div>
+
+  <div *ngIf="loadUsers" class="not-messages-container">
+    <div class="loader"></div>
+    <span class="no-messages-text">Buscando conversaciones...</span>
+  </div>
+
+  <div *ngIf="!loadUsers && users.length === 0" class="not-messages-container">
+    <span class="no-messages-text">No se encontraron conversaciones.</span>
+  </div>
+
+</div>

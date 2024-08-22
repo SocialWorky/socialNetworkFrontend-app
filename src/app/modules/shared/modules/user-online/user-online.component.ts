@@ -1,0 +1,53 @@
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { Token } from '@shared/interfaces/token.interface';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
+import { AuthService } from '@auth/services/auth.service';
+
+@Component({
+  selector: 'worky-user-online',
+  templateUrl: './user-online.component.html',
+  styleUrls: ['./user-online.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class UserOnlineComponent implements OnInit, OnDestroy {
+  private _destroy$ = new Subject<void>();
+
+  usersOnline: Token[] | undefined;
+  currentUser = this._authService.getDecodedToken();
+
+  constructor(
+    private _cdr: ChangeDetectorRef,
+    private _notificationUsersService: NotificationUsersService,
+    private _router: Router,
+    private _authService: AuthService
+  ) {}
+
+  ngOnInit() {
+    this._notificationUsersService.addCurrentUserStatus(this.currentUser);
+
+    this._notificationUsersService.userStatuses$.pipe(
+      takeUntil(this._destroy$)
+    ).subscribe({
+      next: (userStatuses) => {
+        this.usersOnline = userStatuses;
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error getting user statuses', error);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+
+  goToProfile(_id: string) {
+    this._router.navigate(['/profile/', _id]);
+  }
+}

@@ -1,0 +1,54 @@
+<div id="menu"
+  class="bg-gray-900 min-h-screen z-10 text-slate-300 w-64 left-0 h-screen overflow-y-scroll">
+  
+  <div id="logo" class="my-4 px-6">
+
+      <h1 class="text-lg md:text-2xl font-bold text-white">
+        {{ title }}
+      </h1>
+      <p class="text-slate-500 text-sm">{{ subTitle }}</p>
+
+  </div>
+
+  <div id="profile" class="px-6 py-10">
+    <p class="text-slate-500">{{ 'admin.sidemenu-welcome' | workyTranslations }}</p>
+    <p class="inline-flex space-x-2 items-center">
+      <span>
+         <worky-avatar [size]="40"></worky-avatar>
+      </span>
+      <span class="text-sm md:text-base font-bold"> {{ userName }} </span>
+    </p>
+  </div>
+
+  <div id="nav" class="w-full">
+
+    @for( item of menuItems; track $index  ) {
+      <a class="w-full px-2 inline-flex space-x-2 items-center border-b border-slate-700 py-3 hover:bg-white/5 transition ease-linear duration-150"
+         [routerLink]="item.path"
+         routerLinkActive="bg-blue-900">
+
+        <div class="flex flex-col pl-2">
+          <span class="text-lg font-bold leading-5 text-white">{{ item.title }}</span>
+          <span class="text-sm text-white/50 hidden md:block">{{ item.path }}</span>
+        </div>
+
+      </a>
+    }
+  </div>
+
+  <div id="nav" class="w-full bottom-0 worky-logout">
+    <a class="w-full px-2 inline-flex space-x-2 items-center border-b border-slate-700 py-3 hover:bg-white/5 transition ease-linear duration-150"
+        (click)="logout()">
+
+      <span>
+        <i class="material-icons">logout</i>
+      </span>
+
+      <div class="flex flex-col pl2">
+        <span class="text-lg font-bold leading-5 text-white">{{ 'navbar.logout' | workyTranslations }}</span>
+      </div>
+
+    </a>
+  </div>
+
+</div>

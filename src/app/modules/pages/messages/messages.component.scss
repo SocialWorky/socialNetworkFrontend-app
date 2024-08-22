@@ -1,0 +1,98 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'src/assets/styles/worky-variables' as variables;
+
+.container-message-chat {
+  display: flex;
+  flex-direction: row;
+  //justify-content: center;
+  overflow: hidden;
+  gap: 20px;
+  width: 100%;
+  height: 100%;
+  padding: 50px;
+  
+  @include breakpoints.below-sm {
+    padding: 0px;
+    flex-direction: column;
+    @media (min-height: 1000px) and (max-height: 1500px) {
+      height: 85%;
+    }
+    @media (min-height: 620px) and (max-height: 999px) {
+      height: 80%;
+    }
+    @media (min-height: 550px) and (max-height: 628px) {
+      height: 75%;
+    }
+    @media (min-height: 460px) and (max-height: 549px) {
+      height: 70%;
+    }
+  }
+
+  .content-left-messages {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #f4f4f4c7;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    @include breakpoints.below-sm {
+      width: 100%;
+    }
+  }
+
+  .avatar-info{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--worky-color-greyLight);
+      border: 1px solid #E4E6EB;
+      border-radius: max(0px, min(8px,(100vw - 4px - 100%)* 9999)) / 8px;
+      padding: 1.5rem 1rem;
+
+      .name{
+          padding-top: 0.75rem;
+          font-size: 1rem;
+          color: var(--worky-color-indigo);
+      }
+
+      .toggle{
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          margin-top: 0.45rem;
+
+          .material-icons{
+              font-size: 40px;
+          }
+
+          .text{
+              margin-left: 0.25rem;
+              font-size: 0.75rem;
+          }
+
+          &.active .material-icons {
+              color: var(--worky-color-teal); 
+          }
+          
+          &.inactive .material-icons {
+              color: var(--worky-color-red); 
+          }
+      }
+  }
+
+  .content-right-message{
+    width: 70%;
+    height: 100%;
+    border: 1px solid #E4E6EB;
+    border-radius: max(0px, min(8px,(100vw - 4px - 100%)* 9999)) / 8px;
+    align-content: center;
+
+    @include breakpoints.below-sm {
+      width: 100%;
+      border: none;
+    }
+  }
+}

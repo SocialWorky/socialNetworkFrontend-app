@@ -1,0 +1,168 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-header-profile {
+
+  .image-container {
+    width: 100%;
+    height: 250px;
+    border-radius: 0px 0px 15px 15px;
+    overflow: hidden;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+
+    @include breakpoints.below-sm {
+      height: 190px;
+      border-radius: 0px;
+      border: none;
+    }
+  }
+
+  .content {
+    display: block;
+    padding: 1rem;
+    .header {
+      display: flex;
+      .avatar-container {
+        flex: 1;
+        margin-top: -5rem;
+        position: relative;
+
+        .overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          background-color: map-get(color.$worky-navy, 9);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 1;
+          display: none;
+        }
+
+        .overlay.show {
+          display: flex;
+        }
+
+        .loading-spinner {
+          border: 4px solid rgba(255, 255, 255, 0.3);
+          border-top: 4px solid #fff;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+        .edit-icon-avatar {
+          display: flex;
+          flex-direction: row;
+          bottom: -3px;
+          left: 65px;
+          position: absolute;
+          color: color.$worky-color-light;
+          i {
+            cursor: pointer;
+            border-radius: 50%;
+            background-color: color.$worky-color-navy;
+            padding: 5px;
+            margin: 2px;
+          }
+        }
+      }
+
+      .btn-container-header {
+        width: 150px;
+        display: flex;
+        justify-content: flex-end;
+      }
+    }
+
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+      margin-left: 0.5rem;
+
+      .user-basic {
+        .content-name-action {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          .send-message-button {
+            display: flex;
+            margin-left: 10px;
+            gap: 5px;
+           .whatsapp-icon {
+             width: 35px;
+             height: 35px;
+             cursor: pointer;
+            }
+          }
+           @include breakpoints.below-sm {
+            flex-direction: column;
+            align-items: flex-start;
+            .send-message-button {
+              margin: 5px 0px 5px 0px
+            }
+          }
+
+          h2 {
+              @include Fonts.worky-h3;
+              font-weight: bold;
+              color: color.$worky-color-navy;
+          }
+        }
+
+        p {
+            font-size: 14px;
+            font-weight: medium;
+            color: map-get(color.$worky-navy, 24);
+        }
+      }
+    }
+  }
+}
+
+.content-body-profile {
+  width: 100%;
+  display: flex;
+  padding-bottom: 150px;
+  justify-content: center;
+
+  @include breakpoints.below-sm {
+    flex-direction: column;
+  }
+
+  .content-left-profile {
+    width: 40%;
+    @include breakpoints.below-sm {
+      width: 100%;
+    }
+  }
+  .content-section-wall {
+    width: 60%;
+    margin-left: 1rem;
+    @include breakpoints.below-sm {
+      width: 100%;
+      margin-left: 0;
+    }
+  }
+}
+
+::ng-deep .cdk-global-overlay-wrapper .cdk-overlay-pane {
+  overflow: auto;
+}
+
+

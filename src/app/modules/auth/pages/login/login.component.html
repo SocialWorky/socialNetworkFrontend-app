@@ -1,0 +1,81 @@
+<div class="content" *ngIf="!token">
+
+  <div class="content-login-header movil">
+    <h1 class="title-login">{{ 'login.title' | workyTranslations }}</h1>
+    <p class="subTitle-login">{{ 'login.subTitle' | workyTranslations }}</p>
+  </div>
+
+  <div class="img-login">
+    <img src="assets/img/login/worky-login.svg" alt="Login" />
+  </div>
+
+  <div class="content-login">
+    <div class="content-login-header">
+      <h1 class="title-login">{{ 'login.title' | workyTranslations }}</h1>
+      <p class="subTitle-login">{{ 'login.subTitle' | workyTranslations }}</p>
+    </div>
+
+      <div class="form-login">  
+        <div class="form-login-social">
+            <worky-buttons
+                [workyButtonType]="WorkyButtonType.Outline"
+                [theme]="WorkyButtonTheme.Accent"
+                [width]="'100%'"
+                (click)="loginGoogle()">
+                <span prefix-icon> <img src="assets/img/login/google-icon.png" alt="google">  </span>
+                <span basic-button-text>{{ 'login.signInWithGoogle' | workyTranslations }}</span>
+            </worky-buttons>
+        </div>
+
+        <div class="line-container-sign">
+            <div class="line"></div>
+            <div class="text">{{ 'login.orLoginWithEmail' | workyTranslations }}</div>
+            <div class="line"></div>
+        </div>
+
+
+        <form [formGroup]="loginForm" (ngSubmit)="login()" autocomplete="off">
+            <div class="form-input">
+                <mat-form-field class="worky-input worky-accent">
+                    <mat-label>{{ 'input.email' | workyTranslations }}</mat-label>
+                    <input type="email" formControlName="email" id="email" matInput #emailInput required>
+                    <mat-error worky-validation-error-message></mat-error>
+                </mat-form-field>
+
+                <mat-form-field class="worky-input worky-accent">
+                    <mat-label>{{ 'input.password' | workyTranslations }}</mat-label>
+                    <input type="password" formControlName="password" id="password" matInput required>
+                    <mat-error worky-validation-error-message></mat-error>
+                </mat-form-field>
+            </div>
+
+            <div class="forget-password">
+                <span (click)="forgotPassword()">{{ 'login.forgotPassword' | workyTranslations }}</span>
+            </div>
+
+
+            <div class="form-login-buttons">
+                <worky-buttons
+                    [workyButtonType]="WorkyButtonType.Flat"
+                    [theme]="WorkyButtonTheme.Accent"
+                    [width]="'100%'"
+                    type="submit">
+                    <span basic-button-text>{{ 'button.login' | workyTranslations }}</span>
+                </worky-buttons>
+
+                <worky-buttons
+                    [workyButtonType]="WorkyButtonType.Outline"
+                    [theme]="WorkyButtonTheme.Accent"
+                    [routerLink]="['/auth/register']"
+                    [width]="'100%'">
+                    <span basic-button-text>{{ 'button.signUp' | workyTranslations }}</span>
+                </worky-buttons>
+            </div>
+        </form>
+
+      </div>
+
+  </div>
+
+
+</div>

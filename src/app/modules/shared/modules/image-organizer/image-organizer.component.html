@@ -1,0 +1,34 @@
+<div class="gallery-lightbox-container" *ngIf="images && images.length > 0">
+  <div class="gallery" [class.single]="images.length === 1">
+    <ng-container *ngFor="let image of images; let i = index">
+      <div class="gallery-item" (click)="openLightbox(i)">
+        <ng-container *ngIf="isImageUrl(image.urlCompressed)">
+          <img [src]="urlMediaApi + image.urlCompressed" alt="Image">
+        </ng-container>
+        <ng-container *ngIf="isVideoUrl(image.url)">
+          <div class="video-container">
+            <video [src]="urlMediaApi + image.url" controls>
+              <source [src]="urlMediaApi + image.url" type="video/mp4">
+              Tu navegador no soporta el elemento <code>video</code>.
+            </video>
+          </div>
+        </ng-container>
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="lightbox" *ngIf="lightboxOpen" (click)="closeLightbox()">
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <span class="lightbox-close" (click)="closeLightbox()">&times;</span>
+      <ng-container *ngIf="currentItem?.isImage">
+        <img [src]="currentItem?.src" alt="Image">
+      </ng-container>
+      <ng-container *ngIf="currentItem?.isVideo">
+        <video [src]="currentItem?.src" controls autoplay>
+          <source [src]="currentItem?.src" type="video/mp4">
+          Tu navegador no soporta el elemento <code>video</code>.
+        </video>
+      </ng-container>
+    </div>
+  </div>
+</div>

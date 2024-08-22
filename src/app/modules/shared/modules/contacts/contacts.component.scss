@@ -1,0 +1,88 @@
+.container-contactos {
+    max-height: 400px;
+    overflow-y: hidden;
+
+    .conversation-header {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #1a202c;
+        text-align: start;
+        margin: 16px;
+    }
+
+    .module-divider {
+        border: none;
+        height: 1px;
+        background: #b5beca;
+        margin: 8px 0;
+    }
+    
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #d1d5db;
+        height: 4px;
+        width: 4px;
+        border-radius: 50%;
+    }
+    
+    .conversation-list {
+        margin-top: 4px;
+        overflow-y: auto;
+    }
+    
+    .conversation {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    .conversation:hover {
+        background-color: #edf2f7;
+    }
+    
+    .avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 32px;
+        width: 32px;
+        background-color: #edf2f7;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .conversation-details {
+        flex-grow: 1;
+    }
+    
+    .name {
+        font-size: 14px;
+        font-weight: bold;
+    }
+    
+    .unread-badge {
+        background-color: #fc8181;
+        color: white;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 9999px;
+        margin-top: 4px;
+    }
+    
+    &:hover {
+        overflow-y: auto; /* Muestra el scroll cuando se coloca el cursor sobre el widget */
+    }
+
+    /* Hace el scroll más delgado */
+    scrollbar-width: thin;
+
+    /* Cambia el color del scroll */
+    scrollbar-color: #ffffff #f0f0f0;
+}
+
+

@@ -1,0 +1,22 @@
+<div class="image-container">
+  <div *ngIf="cropping" class="crop-container">
+    <img #cropperImage [src]="selectedImage" alt="Crop Image">
+    <div class="edit-icon">
+      <i class="material-icons" (click)="cropImage()">crop</i>
+      <i class="material-icons" (click)="cancelCrop()">cancel</i>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!cropping">
+    <div class="preview">
+      <img *ngIf="previews[0].type === 'image'" [src]="previews[0].url" alt="Image Preview">
+      <div class="overlay" [class.show]="isUploading">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+    <div class="edit-icon" *ngIf="isCurrentUser">
+      <i class="material-icons" (click)="openUploadModal()">photo_camera</i>
+      <i *ngIf="selectedImage?.length" class="material-icons" (click)="uploadImg()">upload</i>
+    </div>
+  </ng-container>
+</div>

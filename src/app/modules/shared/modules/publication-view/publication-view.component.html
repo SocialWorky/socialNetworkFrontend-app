@@ -1,0 +1,165 @@
+<div class="content-publication-view" *ngIf="publication">
+  <div class="publication-header-actions">
+    <worky-dropdown
+      icon="more_horiz"
+      [badge]=false
+      (click)="checkDataLink(publication.author._id)"
+      [dataLink]="dataLinkActions"
+      (linkClicked)="handleActionsClicked($event, publication)">
+    </worky-dropdown>
+  </div>
+
+  <div class="publication-header">
+    <worky-avatar *ngIf="publication.author.name && publication.author.lastName"
+      [size]="40"
+      [img]="publication.author.avatar"
+      [name]="publication.author.name + ' ' + publication.author.lastName">
+    </worky-avatar>
+
+    <div class="publication-header-content">
+      <div class="user-name-content">
+        <div class="user-name" *ngIf="publication.isMyFriend || (dataUser?.id === publication.userReceiving?._id && !publication.isMyFriend) || (dataUser?.id === publication.author._id && !publication.isMyFriend); else notFriend">
+          <span (click)="viewProfile(publication.author._id)" class="name link-name">
+            {{ publication.author.name }} {{ publication.author.lastName }}
+          </span>
+          <i *ngIf="publication.userReceiving" class="material-icons">keyboard_arrow_right</i>
+          <ng-container *ngIf="publication.userReceiving">
+              <span (click)="viewProfile(publication.userReceiving._id)" class="name link-name">
+                {{ publication.userReceiving.name }} {{ publication.userReceiving.lastName }}
+              </span>
+          </ng-container>
+        </div>
+        <ng-template #notFriend>
+          <div class="content-actions-follow">
+            <span (click)="viewProfile(publication.author._id)" class="name link-name">
+              {{ publication.author.name }} {{ publication.author.lastName }}
+            </span>
+            <span class="name">
+              <ng-container *ngIf="!isProfile">
+                <i *ngIf="!publication.isMyFriend || publication.isFriendshipPending" class="material-icons">keyboard_arrow_right</i>
+                <a *ngIf="!publication.isMyFriend && (!userRequest?._id || !userReceive?._id)" class="follow-my-friend" 
+                  (click)="followMyFriend(publication.author._id)">
+                  {{ 'publicationsView.follow' | workyTranslations }}
+                </a>
+                <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending && userRequest?._id === dataUser?.id" class="follow-my-friend" 
+                  (click)="cancelFriendship(publication.isFriendshipPending!, publication.author._id)">
+                  {{ 'publicationsView.cancelRequest' | workyTranslations }}
+                </a>
+                <a *ngIf="userReceive?._id === dataUser?.id" class="follow-my-friend" 
+                  (click)="acceptFriendship(publication.isFriendshipPending!, publication.author._id)">
+                  Aceptar Amistad
+                </a>
+              </ng-container>
+            </span>
+          </div>
+        </ng-template>       
+      </div>
+      <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">está en </p><a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
+      <div class="publication-date">
+        <span>{{ publication.createdAt! | workyRelativeTime }}</span>
+        <ng-container *ngIf="publication.privacy === typePrivacy.PUBLIC">
+          <i class="material-icons">public</i>
+        </ng-container>
+        <ng-container *ngIf="publication.privacy === typePrivacy.FRIENDS">
+          <i class="material-icons">people</i>
+        </ng-container>
+        <ng-container *ngIf="publication.privacy === typePrivacy.PRIVATE">
+          <i class="material-icons">lock</i>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <div class="publication-body">
+    <div class="publication-content">
+      <div class="content markdown" *ngIf="(publication.content | workyPreviewHtml | async) as result">
+        <div [innerHTML]="result.markdownHtml"></div>
+        <div class="publication-youtube-preview" [innerHTML]="result.youtubeHtml"></div>
+        <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
+      </div>
+    </div>
+
+    <worky-image-organizer *ngIf="publication.media.length"
+      [images]="publication.media">
+    </worky-image-organizer>
+  </div>
+
+  <div class="publication-footer">
+    <div class="publication-footer-content">
+      <div class="publication-footer-content-item" *ngIf="publication.reaction.length">
+        <div class="reactions-img-container" *ngFor="let emoji of listReaction; let i = index;">
+          <img class="reactions-img" [src]="emoji" style="--i: {{ i }};">
+        </div>
+        <span>{{ publication.reaction.length }}</span>
+
+      </div>
+      <div class="publication-footer-content-item" *ngIf="publication.comment.length" (click)="viewCommentsOn(indexPublication!)">
+        <span> {{ publication.comment.length }} </span>
+        <span> {{ 'publicationsView.spanComments' | workyTranslations }} </span>
+      </div>
+    </div>
+
+    <div class="publication-footer-actions">
+      <div class="publication-footer-actions-item">
+        <worky-reactions
+          [type]="type"
+          [userProfile]="userProfile"
+          [publication]="publication"
+          [reactionsToPublication]="publication.reaction">
+        </worky-reactions>
+      </div>
+      <div class="publication-footer-actions-item no-select-text" (click)="commentOn(indexPublication!)">
+        <i class="material-icons">comment</i>
+        <span>{{ 'publicationsView.spanComment' | workyTranslations }}</span>
+      </div>
+      <div class="publication-footer-actions-item no-select-text">
+        <worky-dropdown
+          icon="share"
+          [title]="'publicationsView.spanShare' | workyTranslations"
+          [badge]=false
+          (click)="checkDataLink(publication.author._id)"
+          [dataLink]="dataShareActions"
+          (linkClicked)="handleActionsClicked($event, publication)">
+        </worky-dropdown>
+      </div>
+    </div>
+  </div>
+
+  <div class="publication-comment-on" *ngIf="viewCommentSection === indexPublication">
+    <worky-add-publication 
+      [type]="typePublishing.COMMENT"
+      [idPublication]="publication._id"
+      [indexPublication]="indexPublication">
+    </worky-add-publication>
+  </div>
+
+  <div class="publication-comment" *ngIf="viewComments === indexPublication">
+    <div class="publication-comment-item" *ngFor="let comment of publication.comment">
+      <worky-avatar 
+        [size]="30"
+        [img]="comment.author.avatar"
+        [name]="comment.author.name + ' ' + comment.author.lastName">
+      </worky-avatar>
+      <div class="publication-comment-content">
+        <div class="publication-comment-data">
+          <div class="content-name-header">
+            <span class="comment-author">{{ comment.author.name }} {{ comment.author.lastName }}</span>
+            <div *ngIf="comment.author._id === dataUser?.id"
+              class="material-icons delete-comment"
+              (click)="deleteComment(comment._id, publication._id)">delete</div>
+          </div>
+          <div class="comment-content markdown" *ngIf="(comment.content | workyPreviewHtml | async) as result">
+            <div [innerHTML]="result.markdownHtml"></div>
+            <div class="publication-youtube-preview" [innerHTML]="result.youtubeHtml"></div>
+            <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
+          </div>
+
+          <worky-image-organizer *ngIf="comment.media.length"
+            [images]="comment.media">
+          </worky-image-organizer>
+        </div>
+        <span class="comment-date">{{ comment.createdAt | workyRelativeTime }}</span>
+      </div>
+    </div>
+  </div>
+</div>

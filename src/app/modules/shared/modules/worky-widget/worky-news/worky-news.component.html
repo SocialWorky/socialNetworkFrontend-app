@@ -1,0 +1,17 @@
+<div *ngIf="!loading; else loadingTemplate" class="container-widget content-news worky-module-container">
+  <div *ngFor="let article of articles" class="news-article">
+    <div class="news-card">
+      <img class="news-image" [src]="article.image_url" alt="Imagen de noticia" *ngIf="article.image_url">
+      <div class="news-card-content">
+        <h3 class="news-title">{{ article.title }}</h3>
+        <p class="news-date">{{ article.pubDate | workyDateFormat }}</p>
+        <p class="news-description">{{ article.description }}</p>
+        <a class="news-read-more" [href]="article.link" target="_blank">Leer más</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loadingTemplate>
+  <div class="loader"></div>
+</ng-template>

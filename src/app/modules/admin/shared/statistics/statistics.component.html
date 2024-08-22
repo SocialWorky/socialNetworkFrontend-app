@@ -1,0 +1,40 @@
+<div class="grid grid-cols-12 gap-4 worky-grid-content">
+
+  <div class="col-span-12 sm:col-span-4 worky-grid">
+    <div class="p-4 relative  bg-gray-800 border border-gray-800 shadow-lg  rounded-2xl">
+
+
+      <span class="h-15 w-15 absolute bottom-4 right-3 text-green-400 material-icons">group</span> 
+
+      <div class="text-2xl text-gray-100 font-medium leading-8 mt-5">{{ allUsersLength }}</div>
+      <div class="text-sm text-gray-500">{{ 'admin.statistics.group-usersRegister' | workyTranslations }}</div>
+    </div>
+  </div>
+
+  <div class="col-span-12 sm:col-span-4 worky-grid">
+    <div class="p-4 relative  bg-gray-800 border border-gray-800 shadow-lg  rounded-2xl">
+
+      <span class="h-15 w-15 absolute bottom-4 right-3 text-blue-400 material-icons">feed</span> 
+
+      <div class="flex justify-between items-center ">
+        <i class="fab fa-behance text-xl text-gray-400"></i>
+      </div>
+      <div class="text-2xl text-gray-100 font-medium leading-8 mt-5">{{ countPublications }}</div>
+      <div class="text-sm text-gray-500">{{ 'admin.statistics.group-publicationsTitle' | workyTranslations }}</div>
+    </div>
+  </div>
+
+  <div class="col-span-12 sm:col-span-4 worky-grid">
+    <div class="p-4 relative  bg-gray-800 border border-gray-800 shadow-lg  rounded-2xl">
+
+      <span class="h-15 w-15 absolute bottom-4 right-3 text-red-400 material-icons">warning</span> 
+
+      <div class="flex justify-between items-center ">
+        <i class="fab fa-codepen text-xl text-gray-400"></i>
+      </div>
+      <div class="text-2xl text-gray-100 font-medium leading-8 mt-5">{{ ReportsStatusPendingCount }}</div>
+      <div class="text-sm text-gray-500">Publicaciones Reportadas</div>
+    </div>
+  </div>
+
+</div>

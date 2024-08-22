@@ -1,0 +1,56 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-side-left {
+    width: 100%;
+    padding: 16px;
+    margin: 12px 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: baseline;
+
+    .profile-info {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: colors.$worky-color-blue;
+        margin: 15px;
+    }
+
+    .sidebar-icon {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        margin-bottom: 1.5rem;
+        color: #9ca3af;
+        transition: color 0.3s, transform 0.3s; 
+        text-decoration: none;
+
+        &:hover {
+            color: #2e333a;  
+        }
+
+        .material-icons {
+            position: relative;
+        }
+
+        .badge {
+            margin-left: 0.5rem;
+            background: colors.$worky-color-red;
+            color: colors.$worky-color-light;
+            border-radius: 50%;
+            padding: 0.3em 0.5em;
+            font-size: 0.75em;
+            line-height: 1;
+        }
+    }
+
+    .sidebar-text {
+        margin-left: 1rem;
+        text-decoration: none;
+    }
+}
+
+

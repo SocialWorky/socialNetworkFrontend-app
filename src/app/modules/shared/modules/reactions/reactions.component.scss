@@ -1,0 +1,70 @@
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'src/assets/styles/worky-variables.scss' as variables;
+
+.reaction-container {
+  position: relative;
+  display: flex;
+
+  .content-text-reaction {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+}
+
+.reaction-popup {
+  position: absolute;
+  display: flex;
+  flex-wrap: nowrap;
+  bottom: 100%;
+  left: calc(70% + (var(--num-items) * 33px / 2));
+  transform: translateX(-50%);
+  background-color: white;
+  padding: 13px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+
+  @include breakpoints.below-sm {
+    left: calc(10% + (var(--num-items) * 33px / 2));
+    bottom: 90%;
+  }
+}
+
+.reaction {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  margin: 0 5px;
+  transition: transform 0.3s;
+  @include breakpoints.below-sm {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+.reaction.zoomed {
+  transform: scale(1.5);
+}
+
+.reaction-image {
+  width: 40px;
+  height: 40px;
+  @include breakpoints.below-sm {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+.selected-reaction {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  img {
+    width: 20px;
+    height: 20px;
+  }
+}
+

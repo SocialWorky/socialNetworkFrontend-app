@@ -1,0 +1,28 @@
+<div class="content-publications" (scroll)="onScroll($event)">
+  <div class="worky-module-container" *ngIf="!paramPublication">
+    <worky-add-publication [type]="typePublishing.POST"></worky-add-publication>
+  </div>
+
+  <div *ngIf="loaderPublications" class="loader"></div> 
+
+  <ng-container *ngFor="let publication of publications; let i = index; trackBy: trackById">
+    <div [ngClass]="{'worky-module-container': true, 'last-publication': publication === publications[publications.length - 1]}">
+      <worky-publication-view
+        [publication]="publication"
+        [type]="typePublishing.POST"
+        [indexPublication]="i">
+      </worky-publication-view>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!loaderPublications && publications.length === 0">
+    <span>{{ 'home.notPublications' | workyTranslations }}</span>
+  </ng-container>
+</div>
+
+<!-- Connection Overlay -->
+<div *ngIf="showConnectionOverlay" class="connection-overlay">
+  <div class="connection-overlay-message">
+    {{ connectionStatusMessage }}
+  </div>
+</div>

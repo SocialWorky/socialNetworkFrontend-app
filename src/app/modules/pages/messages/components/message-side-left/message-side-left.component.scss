@@ -1,0 +1,106 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-list {
+  height: 100%;
+
+  .title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--worky-color-dark);
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid var(--worky-color-greyLight);
+    border-radius: 5px;
+    font-size: 1rem;
+  }
+
+  .users {
+    display: flex;
+    flex-direction: column;
+    margin-top: 40px;
+    gap: 10px;
+
+    .button {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 10px;
+      background: map-get(color.$worky-navy, 87);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      &:hover {
+        background: map-get(color.$worky-navy, 72);
+      }
+
+      .avatar-container {
+        margin-right: 10px;
+      }
+
+      .user-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        position: relative;
+
+        .content-name-unread {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          .user-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--worky-color-dark);
+          }
+
+          .unread-messages {
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 0.25rem 0.5rem;
+            font-size: 10px;
+            font-weight: 700;
+          }
+        }
+
+        .last-message {
+          font-size: 0.88rem;
+          color: color.$worky-color-navy;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .last-message-time {
+          font-size: 0.65rem;
+          color: color.$worky-color-navy;
+          margin-left: auto;
+        }
+      }
+    }
+  }
+
+  .not-messages-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+
+    .no-messages-text {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--worky-color-greyDark);
+    }
+
+  }
+}

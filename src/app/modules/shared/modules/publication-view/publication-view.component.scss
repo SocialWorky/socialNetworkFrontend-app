@@ -1,0 +1,238 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-publication-view {
+
+  .publication-header-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 10px;
+  }
+
+  .publication-header {
+    display: flex;
+    padding: 0px 16px 16px 16px;
+    align-items: center;
+    gap: 1rem;
+    .publication-header-content {
+      width: 85%;
+      display: flex;
+      flex-direction: column;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      .user-name-content {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        .user-name {
+          display: flex;
+          align-items: center;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          gap: 5px;
+        }
+        .name {
+          width: auto;
+          display: flex;
+          align-items: center;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          font-size: variables.$worky-font-size-4;
+          color: colors.$worky-color-navy;
+          .follow-my-friend {
+            cursor: pointer;
+            color: colors.$worky-color-blue;
+            font-size: variables.$worky-font-size-3;
+            font-weight: 500;
+          }
+
+          @include breakpoints.below-md {
+
+          }
+
+         }
+
+        .link-name {
+          cursor: pointer;
+        }
+
+        .content-actions-follow {
+          display: flex;
+        }
+
+
+      }
+      .geoLocationName {
+        display: flex;
+        align-items: center;
+        font-size: variables.$worky-font-size-3;
+        color: colors.$worky-color-navy;
+        gap: 5px;
+        .is-in {
+          min-width: 50px;
+          font-weight: 700;
+        }
+        .urlLink {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          color: colors.$worky-color-blue;
+          font-weight: 500;
+        }
+      }
+      .publication-date {
+        display: flex;
+        align-items: center;
+        font-size: variables.$worky-font-size-2;
+        color: colors.$worky-color-navy;
+        gap: 5px;
+        i {
+          font-size: variables.$worky-font-size-2;
+        }
+      }
+    }
+  }
+
+  .publication-body {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    overflow: auto;
+    .publication-content {
+      padding: 16px;
+      .content {
+        overflow: hidden;
+      }
+    }
+  }
+
+  .publication-footer {
+    .publication-footer-content {
+      display: flex;
+      justify-content: space-between;
+      padding: 0px 16px 0px 16px;
+      .publication-footer-content-item {
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        gap: 0.2rem;
+        color: colors.$worky-color-navy;
+        cursor: pointer;
+        i {
+          font-size: 15px;
+        }
+        .reactions-img-container {
+          display: flex;
+          width: 20px;
+          height: 20px;
+          .reactions-img {
+            width: 20px;
+            height: 20px;
+            object-fit: cover;
+            position: relative;
+            margin-left: 0px;
+          }
+        }
+
+      }
+    }
+
+    .publication-footer-actions {
+      position: relative;
+      display: flex;
+      justify-content: space-around;
+      margin-top: 1rem;
+      border-top: 1px solid colors.$worky-color-grey;
+      border-bottom: 1px solid colors.$worky-color-grey;
+      .publication-footer-actions-item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+        padding: 8px 20px;
+        border-radius: variables.$worky-border-radius-medium;
+        color: colors.$worky-color-navy;
+        cursor: pointer;
+        &:hover {
+          color: colors.$worky-color-blue;
+          background-color: colors.$worky-color-greyLight;
+        }
+
+        ::ng-deep worky-dropdown {
+          .nav-link {
+            span {
+              color: colors.$worky-color-navy;
+            }
+            &:hover span {
+              color: colors.$worky-color-blue;
+            }
+          }
+
+        }
+
+      }
+      @include breakpoints.below-sm {
+        .publication-footer-actions-item {
+          padding: 8px 5px;
+        }
+      }
+    }
+
+  }
+
+  .publication-comment {
+    margin-top: 15px;
+    padding: 16px;
+    .publication-comment-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+      .publication-comment-content {
+         max-width: 100%;
+        .publication-comment-data {
+          padding: 0.4rem 1rem 0.4rem 1rem;
+          display: flex;
+          flex-direction: column;
+          background-color: colors.$worky-color-greyLight;
+          border-radius: 8px;
+          span {
+            font-size: variables.$worky-font-size-2;
+          }
+          .content-name-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            .comment-author {
+              color: colors.$worky-color-blue;
+            }
+            .delete-comment {
+              margin-left: 15px;
+              padding: 5px;
+              background-color: rgb(228, 228, 228);
+              border-radius: 50%;
+              cursor: pointer;
+              font-size: 15px;
+              color: rgb(166, 0, 0);
+            }
+          }
+
+        }
+        .comment-date {
+          margin-left: 5px;
+          font-size: variables.$worky-font-size-0;
+          color: colors.$worky-color-navy;
+        }
+      }
+    }
+  }
+
+  ::ng-deep worky-dropdown {
+    .nav-link span {
+      color: colors.$worky-color-navy;
+    }
+  }
+}

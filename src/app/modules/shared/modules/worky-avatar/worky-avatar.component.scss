@@ -1,0 +1,20 @@
+.avatar {
+  width: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  overflow: hidden;
+  min-width: 30px; /* Tamaño mínimo del contenedor */
+  min-height: 30px; /* Tamaño mínimo del contenedor */
+  max-width: 100px; /* Tamaño máximo del contenedor */
+  max-height: 100px; /* Tamaño máximo del contenedor */
+}
+
+.initials {
+  word-break: break-all;
+  color: white;
+  text-transform: uppercase;
+}
+
+

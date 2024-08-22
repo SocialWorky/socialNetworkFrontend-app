@@ -1,0 +1,15 @@
+<div class="custom-css-editor">
+  <h2 class="editor-title">Editor de CSS Personalizado</h2>
+  <div class="editor-info">
+    <p class="editor-description">Para sobrescribir estilos, use <code>!important</code> cuando sea necesario.</p>
+    <p class="editor-description">Ejemplo: <code>color: red !important;</code></p>
+  </div>
+  <form class="editor-form" (submit)="saveCustomCss()">
+    <br />
+
+    <ngx-monaco-editor [options]="editorOptions" [(ngModel)]="customCss" name="customCss"></ngx-monaco-editor>
+
+    <div *ngIf="customCssLoader" class="loader"></div>
+    <button *ngIf="!customCssLoader" class="editor-button" type="submit" (click)="saveCustomCss()">Guardar CSS</button>
+  </form>
+</div>

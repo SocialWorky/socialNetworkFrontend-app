@@ -1,0 +1,159 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.content-navbar {
+  display: flex;
+  justify-content: center;
+  height: 80px;
+  background-color: colors.$worky-background-header-color;
+  @include breakpoints.below-sm {
+    flex-direction: column;
+    height: auto;
+    position: relative;
+  }
+
+  .worky-navbar {
+    width: variables.$worky-app-width;
+    display: flex;
+    padding: 2px;
+    align-items: center;
+    @include breakpoints.below-sm {
+      width: 100%;
+      flex-direction: column;
+    }
+  }
+
+  .worky-brand {
+    display: flex;
+    justify-content: space-between;
+    width: 30%;
+    @include breakpoints.below-sm {
+      width: 100%;
+      padding: 5px;
+    }
+    a {
+      .worky-logo {
+        width: 60px;
+        height: 60px;
+        background-image: url('../../../../../assets/img/navbar/worky-your-logo.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        margin-top: 5px;
+      }
+    }
+    .worky-search {
+      width: 100%;
+      padding: 5px 15px;
+      align-items: center;
+      align-content: center;
+      .search-container {
+        position: relative;
+      }
+
+      .search-icon {
+        position: absolute;
+        color: colors.$worky-color-app-dark;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1;
+      }
+      .form-control {
+        padding-left: 40px;
+        border-radius: variables.$worky-border-radius-medium;
+      }
+    }
+
+    .search-results {
+      list-style: none;
+      padding: 0;
+      margin-top: 55px;
+      margin-left: 65px;
+      position: absolute;
+      background: colors.$worky-color-light;
+      width: 400px;
+      border: 1px solid colors.$worky-color-greyLight;
+      max-height: 200px;
+      border-radius: variables.$worky-border-radius-medium;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      overflow-y: auto;
+      z-index: 9999;
+      @include breakpoints.below-sm {
+        width: 98%;
+        margin-left: 0;
+        z-index: 9999;
+      }
+    }
+
+    .search-results li {
+      display: flex;
+      align-items: center;
+      font-size: variables.$worky-font-size-3;
+      color: colors.$worky-color-navy;
+      padding: 10px;
+      border-bottom: 1px solid colors.$worky-color-greyLight;
+      gap: 10px;
+    }
+
+    .search-results li:last-child {
+      border-bottom: none;
+    }
+
+    .search-results li:hover {
+      background: colors.$worky-color-greyLight;
+      cursor: pointer;
+    }
+
+  }
+
+  ::ng-deep worky-menu-component {
+    display: flex;
+    list-style: none;
+    justify-content: center;
+    width: 50%;
+    @include breakpoints.below-sm {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+  }
+
+  .worky-profile {
+    display: flex;
+    list-style: none;
+    justify-content: flex-end;
+    align-items: center;
+    align-content: center;
+    width: 20%;
+
+    ::ng-deep worky-dropdown {
+      span.material-icons {
+        font-size: variables.$worky-font-size-9;
+      }
+      .nav-link {
+        &:focus, &:hover {
+          color: map-get(colors.$worky-blue, 100);
+          span {
+            background-color: map-get(colors.$worky-blue, 72);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+          }
+        }
+      }
+    }
+    @include breakpoints.below-sm {
+      width: 100%;
+      justify-content: space-between;
+      padding: 5px;
+      z-index: 1;
+    }
+  }
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}

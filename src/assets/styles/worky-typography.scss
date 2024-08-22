@@ -1,0 +1,262 @@
+@use "./worky-variables.scss" as worky-var;
+
+
+@mixin worky-font-roboto {
+  font-family: worky-var.$worky-font-roboto;
+}
+
+@mixin worky-font-montserrat {
+  font-family: worky-var.$worky-font-montserrat;
+}
+
+@mixin worky-font-open-sans {
+  font-family: worky-var.$worky-font-open-sans;
+}
+
+@mixin worky-display-1 {
+  font-weight: worky-var.$worky-font-weight-bold;
+  font-size: worky-var.$worky-font-size-13;
+  letter-spacing: worky-var.$worky-kerning-1;
+}
+
+@mixin worky-display-2 {
+  font-weight: worky-var.$worky-font-weight-bold;
+  font-size: worky-var.$worky-font-size-12;
+  letter-spacing: worky-var.$worky-kerning-1;
+}
+
+@mixin worky-display-3 {
+  font-weight: worky-var.$worky-font-weight-bold;
+  font-size: worky-var.$worky-font-size-11;
+  letter-spacing: worky-var.$worky-kerning-1;
+}
+
+@mixin worky-h1 {
+  font-weight: worky-var.$worky-font-weight-regular;
+  font-size: worky-var.$worky-font-size-10;
+  letter-spacing: worky-var.$worky-kerning-2;
+}
+
+@mixin worky-h2 {
+  font-weight: worky-var.$worky-font-weight-regular;
+  font-size: worky-var.$worky-font-size-9;
+  letter-spacing: worky-var.$worky-kerning-5;
+}
+
+@mixin worky-h3 {
+  font-weight: worky-var.$worky-font-weight-regular;
+  font-size: worky-var.$worky-font-size-8;
+}
+
+@mixin worky-h4 {
+  font-weight: worky-var.$worky-font-weight-regular;
+  font-size: worky-var.$worky-font-size-7;
+}
+
+@mixin worky-h5 {
+  font-weight: worky-var.$worky-font-weight-regular;
+  font-size: worky-var.$worky-font-size-6;
+}
+
+@mixin worky-h6 {
+  font-weight: worky-var.$worky-font-weight-regular;
+  font-size: worky-var.$worky-font-size-5;
+  letter-spacing: worky-var.$worky-kerning-3;
+}
+
+@mixin worky-text {
+  font-weight: worky-var.$worky-font-weight-regular;
+  font-size: worky-var.$worky-font-size-4;
+}
+
+@mixin worky-small-text {
+  font-weight: worky-var.$worky-font-weight-regular;
+  font-size: worky-var.$worky-font-size-3;
+  letter-spacing: worky-var.$worky-kerning-5;
+}
+
+@mixin worky-smaller-text {
+  font-weight: worky-var.$worky-font-weight-regular;
+  font-size: worky-var.$worky-font-size-2;
+  letter-spacing: worky-var.$worky-kerning-5;
+}
+
+@mixin worky-smallest-text {
+  font-weight: worky-var.$worky-font-weight-regular;
+  font-size: worky-var.$worky-font-size-1;
+  letter-spacing: worky-var.$worky-kerning-6;
+}
+
+@mixin worky-code-text {
+  font-family: worky-var.$worky-font-family-jost;
+  font-weight: worky-var.$worky-font-weight-regular;
+  font-size: worky-var.$worky-font-size-4;
+}
+
+@mixin worky-font-bold {
+  font-weight: worky-var.$worky-font-weight-bold;
+}
+
+@mixin worky-font-semibold {
+  font-weight: worky-var.$worky-font-weight-semibold;
+}
+
+/* HTML useful styilng tools that everyone loves */
+
+.worky-font-jost {
+  font-family: worky-var.$worky-font-family-jost;
+}
+
+.worky-font-roboto {
+  @include worky-font-roboto;
+}
+
+.worky-font-montserrat {
+  @include worky-font-montserrat;
+}
+
+.worky-font-open-sans {
+  @include worky-font-open-sans;
+}
+
+strong {
+  font-weight: worky-var.$worky-font-weight-semibold;
+}
+
+.worky-line-height-120 {
+  line-height: 120%;
+}
+
+.worky-line-height-150 {
+  line-height: 150%;
+}
+
+.worky-line-height-175 {
+  line-height: 175.8%;
+}
+
+.worky-overline {
+  font-weight: worky-var.$worky-font-weight-regular;
+  font-size: worky-var.$worky-font-size-1;
+  letter-spacing: 0.015em;
+  line-height: 100%;
+  text-transform: uppercase;
+}
+
+.worky-overline-2 {
+  font-weight: worky-var.$worky-font-weight-regular;
+  font-size: worky-var.$worky-font-size-2;
+  letter-spacing: 0.015em;
+  line-height: 100%;
+}
+
+.worky-ellipsis {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.worky-display-1 {
+  @include worky-display-1;
+}
+
+.worky-display-2 {
+  @include worky-display-2;
+}
+
+.worky-display-3 {
+  @include worky-display-3;
+}
+
+h1,
+.worky-h1 {
+  @include worky-h1;
+}
+
+h2,
+.worky-h2 {
+  @include worky-h2;
+}
+
+h3,
+.worky-h3 {
+  @include worky-h3;
+}
+
+h4,
+.worky-h4 {
+  @include worky-h4;
+}
+
+h5,
+.worky-h5 {
+  @include worky-h5;
+}
+
+h6,
+.worky-h6 {
+  @include worky-h6;
+}
+
+p,
+.worky-text {
+  @include worky-text;
+}
+
+.worky-small-text {
+  @include worky-small-text;
+}
+
+.worky-smaller-text {
+  @include worky-smaller-text;
+}
+
+.worky-smallest-text {
+  @include worky-smallest-text;
+}
+
+.worky-code-text {
+  @include worky-code-text;
+}
+
+button {
+  font-family: worky-var.$worky-font-family-global;
+}
+
+.worky-font-bold {
+  font-weight: worky-var.$worky-font-weight-bold;
+}
+
+.worky-font-semibold {
+  font-weight: worky-var.$worky-font-weight-semibold;
+}
+
+.worky-font-regular {
+  font-weight: worky-var.$worky-font-weight-regular;
+}
+
+.worky-font-light {
+  font-weight: worky-var.$worky-font-weight-light;
+}
+
+/* Icons */
+
+.worky-icon-size-5 {
+  font-size: worky-var.$worky-icon-size-5;
+}
+
+.worky-icon-size-4 {
+  font-size: worky-var.$worky-icon-size-4;
+}
+
+.worky-icon-size-3 {
+  font-size: worky-var.$worky-icon-size-3;
+}
+
+.worky-icon-size-2 {
+  font-size: worky-var.$worky-icon-size-2;
+}
+
+.worky-icon-size-1 {
+  font-size: worky-var.$worky-icon-size-1;
+}

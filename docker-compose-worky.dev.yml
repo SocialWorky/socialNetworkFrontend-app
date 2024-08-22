@@ -1,0 +1,19 @@
+version: "3"
+services:
+  app:
+    image: socialworky/worky-frontend-dev:${GIT_SHA}
+    restart: always
+    container_name: worky-frontend
+    ports:
+      - ${APP_PORT}:80
+    environment:
+      API_URL: ${API_URL}
+      BASE_URL: ${BASE_URL}
+      WSURL: ${WSURL}
+      CLIEN_ID_GOOGLE: ${CLIEN_ID_GOOGLE}
+      OPENCAGEAPIKEY: ${OPENCAGEAPIKEY}
+      APIGEOLOCATIONS: ${APIGEOLOCATIONS}
+      APIWEATHERURL: ${APIWEATHERURL}
+      APIWEATHERTOKEN: ${APIWEATHERTOKEN}
+    dns:
+      - 1.1.1.1

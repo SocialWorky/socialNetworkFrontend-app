@@ -1,0 +1,12 @@
+<button mat-button
+  class="worky-button"
+  [ngStyle]="{ 'width': width, 'height': height }"
+  [ngClass]="buttonTypeClass"
+  (click)="onButtonClick()">
+  <div class="worky-button-wrapper"
+    fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="8px">
+    <ng-content select="[prefix-icon]"></ng-content>
+    <ng-content select="[basic-button-text]"></ng-content>
+    <ng-content select="[suffix-icon]"></ng-content>
+  </div>
+</button>

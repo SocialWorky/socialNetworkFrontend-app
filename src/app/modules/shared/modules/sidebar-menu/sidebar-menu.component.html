@@ -1,0 +1,24 @@
+<div class="content-side-left">
+  <a href="/profile">
+    <worky-avatar [size]="60" class="profile-img"></worky-avatar>
+  </a>
+  <div class="profile-info">
+    <span class="profile-name">{{userName}}</span>
+  </div>
+  <a href="/" class="sidebar-icon active">
+    <i class="material-icons">home</i>
+    <span class="sidebar-text">Home</span>
+  </a>  
+  <a href="/messages" class="sidebar-icon">
+    <i class="material-icons">message</i>
+    <span class="sidebar-text">Message</span>
+    <span *ngIf="messages > 0" class="badge">{{ messages }}</span>
+  </a>  
+  <a href="#" class="sidebar-icon" (click)="toggleNotificationsPanel()">
+    <i class="material-icons">notifications</i>
+    <span class="sidebar-text">Notifications</span>
+    <span *ngIf="notifications > 0" class="badge">{{ notifications }}</span>
+  </a>  
+</div>
+
+<worky-notifications-panel></worky-notifications-panel>

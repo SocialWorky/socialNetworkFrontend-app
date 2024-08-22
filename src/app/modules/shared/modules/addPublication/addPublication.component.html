@@ -1,0 +1,181 @@
+<div class="publishing-container" *ngIf="user">
+  <form [formGroup]="myForm" (ngSubmit)="onSave()" autocomplete="off">
+    <div class="publishing-header">
+
+      <ng-container *ngIf="type === typePublishing.POST || type === typePublishing.POSTPROFILE">
+        <worky-avatar *ngIf="user.name && user.lastName"
+          [size]="60" 
+          img="{{ profileImageUrl }}"
+          name="{{ user.name}} {{ user.lastName }}">
+        </worky-avatar>
+
+        <div class="user-name-content">
+          <div class="content-name-geo">
+            <span class="name"> {{ user.name }} {{ user.lastName }} </span>
+            <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">está en </p> <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span> 
+          </div>
+
+          <div class="dropdown" *ngIf="!typePublishing.POSTPROFILE || (idUserProfile === userToken && typePublishing.POSTPROFILE) || (typePublishing.POST && !idUserProfile)">
+            <div class="form-select" [innerHTML]="privacyFront"
+              data-bs-toggle="dropdown"
+              aria-expanded="false">
+            </div>
+            <ul
+              class="dropdown-menu "
+              aria-labelledby="navbarDropdownMenuLink">
+              <li>
+                <div class="dropdown-item"
+                  (click)="postPrivacy(typePrivacy.PUBLIC)">
+                  <i class="material-icons">language</i> {{ 'publishing.privacy-public' | workyTranslations }}
+                </div>
+              </li>
+
+              <li>
+                <div class="dropdown-item"
+                  (click)="postPrivacy(typePrivacy.FRIENDS)">
+                  <i class="material-icons">group</i> {{ 'publishing.privacy-friends' | workyTranslations }}
+                </div>
+              </li>
+
+              <li>
+                <div class="dropdown-item"
+                  (click)="postPrivacy(typePrivacy.PRIVATE)">
+                  <i class="material-icons">lock</i> {{ 'publishing.privacy-private' | workyTranslations }}
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </ng-container>
+
+    </div>
+
+    <div class="publishing-body" [class.comment-body]="type === typePublishing.COMMENT">
+      <div class="textarea-container">
+
+        <worky-avatar *ngIf="type === typePublishing.COMMENT && user.name && user.lastName"
+          [size]="35"
+          img="{{ profileImageUrl }}"
+          name="{{ user.name}} {{ user.lastName }}">
+        </worky-avatar>
+
+        <textarea #postText
+          class="publishing-textarea"
+          (input)="onTextareaInput()"
+          formControlName="content"
+          placeholder="{{ 
+              type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.placeholder' | workyTranslations) + ' ' + user.name + ' ' + user.lastName + '?' :
+              ('publishing.placeholderComment' | workyTranslations) + user.name + ' ' + user.lastName + '?' 
+          }}">
+        </textarea>
+
+
+      </div>
+
+      <div class="previews">
+        <div *ngFor="let preview of previews; let i = index" class="preview">
+          <img *ngIf="preview.type === 'image'" [src]="preview.url" alt="Image Preview">
+          <video *ngIf="preview.type === 'video'" [src]="preview.url" controls></video>
+          <i class="material-icons remove-button" (click)="removeFile(i)">close</i>
+        </div>
+      </div>
+
+      <div class="extra-content">
+
+        <div class="markdown-help">
+          <div class="extra-content-item"
+              matTooltip="Negrita"
+              (click)="insertText('**placeholder**')">
+            <i class="material-icons">format_bold</i>
+          </div>
+          <div class="extra-content-item"
+              matTooltip="Cursiva"
+              (click)="insertText('*placeholder*')">
+            <i class="material-icons">format_italic</i>
+          </div>
+          <div class="extra-content-item"
+              matTooltip="Tachado"
+              (click)="insertText('~~placeholder~~')">
+            <i class="material-icons">format_strikethrough</i>
+          </div>
+          <div class="extra-content-item"
+              matTooltip="Inserar Enlace"
+              (click)="insertText('[placeholder](url)')">
+            <i class="material-icons">link</i>
+          </div>
+          <div class="extra-content-item"
+              matTooltip="Insertar Imagen desde URL"
+              (click)="insertText('![placeholder](url)')">
+            <i class="material-icons">image</i>
+          </div>
+          <div class="extra-content-item"
+              matTooltip="Inserar Código"
+              (click)="insertText('```placeholder```')">
+            <i class="material-icons">code</i>
+          </div>
+          <div class="extra-content-item"
+              matTooltip="Citar Texto"
+              (click)="insertText('> placeholder')">
+            <i class="material-icons">label</i>
+          </div>
+          <div class="extra-content-item"
+              matTooltip="Listar Elementos"
+              (click)="insertText('- placeholder')">
+            <i class="material-icons">list</i>
+          </div>
+        </div>
+
+      <div class="options-items">
+        <!-- Botón para buscar GIFs -->
+        <div class="extra-content-item gif-icon" matTooltip="Buscar GIF" (click)="openGifSearch()">
+          <i class="material-icons">gif</i>
+        </div>
+
+        <!-- Otros botones y opciones -->
+        <div class="extra-content-item file-upload" matTooltip="Subir Imagen" (click)="openUploadModal()">
+          <i class="material-icons">add_photo_alternate</i>
+        </div>
+
+        <div *ngIf="type === typePublishing.POST || type === typePublishing.POSTPROFILE"
+            class="extra-content-item location-on"
+            matTooltip="Estoy Aquí"
+            (click)="openLocationSearch()">
+          <i class="material-icons">location_on</i>
+        </div>
+
+        <div class="extra-content-item emoji-icon" matTooltip="Agrega Emoji">
+          <i class="material-icons" (click)="toggleEmojiMenu()">mood</i>
+          <div *ngIf="showEmojiMenu" class="emoji-menu" (click)="preventClose($event)">
+            <emoji-mart
+              [darkMode]="false"
+              [showPreview]="true"
+              [enableSearch]="true"
+              [perLine]="7"
+              [emojiSize]="24"
+              (emojiSelect)="onEmojiClick($event)">
+            </emoji-mart>
+          </div>
+        </div>
+      </div>
+
+      </div>
+
+    </div>
+
+    <div class="publishing-footer">
+      <div>
+        <worky-buttons *ngIf="!loaderSavePublication"
+          type="submit"
+          [workyButtonType]="WorkyButtonType.Flat"
+          [theme]="WorkyButtonTheme.Accent"
+          [disabled]="!myForm.valid || !myForm.dirty"
+          [height]="'40px'"
+          [width]="'100%'">
+          <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
+        </worky-buttons>
+        <div *ngIf="loaderSavePublication" class="loader"></div>
+      </div>
+    </div>
+
+  </form>
+</div>

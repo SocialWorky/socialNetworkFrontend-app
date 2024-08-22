@@ -1,0 +1,128 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.notifications-panel {
+  position: fixed;
+  top: 0;
+  right: -500px;
+  width: 500px;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  transition: right 0.3s ease-out;
+  z-index: 1000;
+  padding: 20px;
+  @include breakpoints.below-sm {
+    width: 100%;
+    right: -100%;
+  }
+
+  &.active {
+    right: 0; /* Desplaza hacia la derecha */
+  }
+
+  .content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    .text-section {
+      span {
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+      p {
+        font-size: 1rem;
+        color: #7b7b7b;
+      }
+    }
+    i {
+      cursor: pointer;
+    }
+  }
+
+  .content-body {
+    height: 92%;
+    overflow: scroll;
+  }
+
+  .notification-item-content {
+    cursor: pointer;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: colors.$worky-color-greyLight;
+    &:hover {
+      background-color: colors.$worky-color-grey;
+    }
+
+    .notification-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      .notification-item-title {
+        font-size: 20px;
+        color: colors.$worky-color-navy;
+        font-weight: 500;
+        margin-bottom: 5px;
+      }
+
+      .notification-item-date {
+        margin-left: auto;
+        font-size: 12px;
+        color: #7b7b7b;
+      }
+    }
+
+    .notification-item-body {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      i {
+        color: colors.$worky-color-navy;
+      }
+      .content {
+        display: flex;
+        flex-direction: column;
+        span {
+          display: flex;
+          gap: 9px;
+        }
+        img {
+          width: 25px;
+          height: 25px;
+        }
+      
+      }
+    }
+  }
+
+  .notification-not-viewed {
+    background-color: map-get(colors.$worky-navy, 24);
+    color: colors.$worky-color-light;
+    &:hover {
+      background-color: map-get(colors.$worky-navy, 9);
+    }
+
+    .notification-item-body {
+      i {
+        color: colors.$worky-color-yellow;
+      }
+    }
+
+    .notification-item-header {
+
+      .notification-item-title {
+        color: colors.$worky-color-light;
+      }
+      .notification-item-date {
+        color: colors.$worky-color-light;
+      }
+    }
+
+  }
+
+
+}

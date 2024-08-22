@@ -1,0 +1,17 @@
+<worky-navbar></worky-navbar>
+
+<div class="content-social-app" 
+   [class.content-messages-app]="isMessages"
+   [class.content-profile-app]="isProfile" *ngIf="token">
+  
+    <worky-content-left-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-left-side>
+    
+    <div class="social-content-center" 
+      [class.profile-view]="isProfile"
+      [class.messages-view]="isMessages">
+      <router-outlet></router-outlet>
+    </div>
+      
+    <worky-content-right-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-right-side>
+
+</div>

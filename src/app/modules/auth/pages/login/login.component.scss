@@ -1,0 +1,144 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  @include breakpoints.below-sm {
+    height: auto;
+    padding: 20px;
+  }
+  .content {
+    width: 100%;
+    display: flex;
+    @include breakpoints.below-sm {
+      flex-direction: column;
+    }
+    .img-login {
+      width: 50%;
+      display: flex;
+      justify-content: space-around;
+      @include breakpoints.below-sm {
+        width: 100%;
+        margin-bottom: 50px;
+        img {
+          width: 70%;
+        }
+      }
+    }
+    .content-login {
+      width: 50%;
+      padding: 3%;
+
+      @include breakpoints.below-sm {
+        width: 100%;
+        padding: 0;
+      }
+
+      .form-login {
+        width: 70%;
+        display: block;
+        margin: 0 auto;
+        @include breakpoints.below-sm {
+          width: 100%;
+        }
+
+        .form-login-social {
+          margin-bottom: 50px;
+
+          worky-buttons img {
+            width: 20px;
+            height: 20px;
+          }
+        }
+
+        .line-container-sign {
+          display: flex;
+          align-items: center;
+          position: relative;
+          width: 100%;
+          margin: 0 auto;
+
+          .line {
+            flex: 1;
+            height: 1px;
+            background-color: map-get(color.$worky-navy, 24);
+          }
+
+          .text {
+            color: map-get(color.$worky-navy, 24);
+            margin: 0 10px;
+            position: relative;
+            z-index: 1;
+          }
+        }
+
+        .form-input {
+          margin-top: 50px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .forget-password {
+          display: flex;
+          cursor: pointer;
+          justify-content: flex-end;
+          margin-bottom: 20px;
+          
+          span {
+            @include Fonts.worky-text;
+            color: color.$worky-color-blue;
+          }
+        }
+
+        .form-login-buttons {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          worky-buttons {
+            margin-bottom: 10px;
+          }
+        }
+
+      }
+    }
+
+    .content-login-header {
+        margin-bottom: 5%;
+        h1 {
+          margin-block-end: 0;
+          margin-block-start: 0;
+        }
+        p {
+          @include Fonts.worky-text;
+          margin-block-end: 20px;
+          margin-block-start: 5px;
+          color: map-get(color.$worky-navy, 24)
+        }
+        @include breakpoints.below-sm {
+          display: none;
+        }
+      }
+    .content-login-header.movil {
+      display: none;
+      @include breakpoints.below-sm {
+        margin-bottom: 0;
+        display: block;
+      }
+    }
+
+  }
+
+}
+
+::ng-deep worky-buttons .worky-button {
+  height: 60px;
+  .worky-button-wrapper {
+    @include Fonts.worky-h6;
+  }
+}

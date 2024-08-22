@@ -1,0 +1,67 @@
+.custom-css-editor {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.editor-title {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.editor-info {
+  margin-bottom: 20px;
+}
+
+.editor-description {
+  margin-bottom: 10px;
+}
+
+.tag-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tag-list li {
+  margin-bottom: 5px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+}
+
+.editor-form {
+  display: block;
+
+  ngx-monaco-editor {
+    min-height: 350px;
+    margin-bottom: 20px;
+  }
+
+}
+
+.editor-button {
+  margin-top: 15px;
+  padding: 10px 16px;
+  font-size: 14px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.editor-button:hover {
+  background-color: #0056b3;
+}
+
+.editor-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

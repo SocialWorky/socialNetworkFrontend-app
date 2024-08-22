@@ -13,8 +13,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Run Node.js script
-        run: node mynodejs.cjs
+      - name: Crear archivo .env desde secretos
+        run: |
+          echo "NG_APP_BASE_URL=${{ secrets.NG_APP_BASE_URL }}" > .env
+          echo "NG_APP_API_URL=${{ secrets.NG_APP_API_URL }}" >> .env
+          echo "NG_APP_CLIEN_ID_GOOGLE=${{ secrets.NG_APP_CLIEN_ID_GOOGLE }}" >> .env
+          echo "NG_APP_WSURL=${{ secrets.NG_APP_WSURL }}" >> .env
+          echo "NG_APP_OPENCAGEAPIKEY=${{ secrets.NG_APP_OPENCAGEAPIKEY }}" >> .env
+          echo "NG_APP_APIGEOLOCATIONS=${{ secrets.NG_APP_APIGEOLOCATIONS }}" >> .env
+          echo "NG_APP_APIWEATHERURL=${{ secrets.NG_APP_APIWEATHERURL }}" >> .env
+          echo "NG_APP_APIWEATHERTOKEN=${{ secrets.NG_APP_APIWEATHERTOKEN }}" >> .env
+          echo "NG_APP_APIFILESERVICE=${{ secrets.NG_APP_APIFILESERVICE }}" >> .env
+          echo "NG_APP_APIMESSAGESERVICE=${{ secrets.NG_APP_APIMESSAGESERVICE }}" >> .env
+          echo "NG_APP_APINOTIFICATIONCENTER=${{ secrets.NG_APP_APINOTIFICATIONCENTER }}" >> .env
+          echo "NG_APP_GIPHYAPIKEY=${{ secrets.NG_APP_GIPHYAPIKEY }}" >> .env
+
+      - name: Verificar el contenido del archivo .env
+        run: |
+          echo "Contenido del archivo .env generado:"
+          cat .env  # Esto imprimirá el contenido del archivo .env en los logs de GitHub Actions
 
       - name: Build and push Docker image
         env:
@@ -30,7 +47,7 @@ jobs:
       - name: Deploy stack to Portainer
         uses: carlrygart/portainer-stack-deploy@v1
         with:
-          portainer-host: https://nas-docker.compuelec.cl
+          portainer-host: https://portainer-dev.worky.cl
           username: ${{ secrets.PORTAINER_USERNAME }}
           password: ${{ secrets.PORTAINER_PASSWORD }}
           stack-name: 'worky-frontend-dev'

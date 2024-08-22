@@ -1,0 +1,73 @@
+<div class="content-edit-detail-profile">
+  <div class="edit-profile-container">
+    <form [formGroup]="editProfileBasicDetailForm" autocomplete="off">
+      <div class="form-detail-basic">
+        <div class="form-input">
+          <mat-form-field class="worky-input worky-accent">
+            <mat-label>Name</mat-label>
+            <input type="text" formControlName="name" id="name" matInput required>
+          </mat-form-field>
+
+          <mat-form-field class="worky-input worky-accent">
+            <mat-label>Last Name</mat-label>
+            <input type="text" formControlName="lastName" id="lastName" matInput required>
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+
+    <form [formGroup]="editProfailDetailForm" autocomplete="off">
+      <div class="form-detail-basic">
+        <div class="form-input">
+          <mat-form-field class="worky-input worky-accent">
+            <mat-label>Legend</mat-label>
+            <input id="legend" type="text" formControlName="legend" matInput>
+          </mat-form-field>
+
+          <mat-form-field class="worky-input worky-accent">
+            <mat-label>Date of Birth</mat-label>
+            <input id="dateOfBirth" type="date" formControlName="dateOfBirth" matInput>
+          </mat-form-field>
+
+          <mat-form-field class="worky-input worky-accent">
+            <mat-label>Description</mat-label>
+            <textarea id="description" formControlName="description" matInput></textarea>
+          </mat-form-field>
+
+          <mat-form-field class="worky-input worky-accent">
+            <mat-label>Sex</mat-label>
+            <mat-select id="sex" formControlName="sex">
+              <mat-option value="">Select</mat-option>
+              <mat-option value="masculino">Masculino</mat-option>
+              <mat-option value="femenino">Femenino</mat-option>
+              <mat-option value="otro">Otro</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div formGroupName="whatsapp" class="whatsapp-content">
+            <mat-slide-toggle class="whatsapp-content" formControlName="isViewable">Enable WhatsApp</mat-slide-toggle>
+
+            <div *ngIf="editProfailDetailForm.get('whatsapp.isViewable')?.value">
+              <mat-form-field class="worky-input worky-accent">
+                <mat-label>WhatsApp Number</mat-label>
+                <input id="whatsappNumber" type="text" formControlName="number" matInput>
+              </mat-form-field>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </form>
+
+
+
+    <worky-buttons
+      [workyButtonType]="WorkyButtonType.Flat"
+      [theme]="WorkyButtonTheme.Basic"
+      [disabled]="!editProfileBasicDetailForm.valid"
+      [width]="'100%'"
+      (click)="onSave()">
+      <span basic-button-text>Guardar Cambios</span>
+    </worky-buttons>
+  </div>
+</div>
