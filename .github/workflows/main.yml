@@ -28,11 +28,6 @@ jobs:
           echo "NG_APP_APINOTIFICATIONCENTER=${{ secrets.NG_APP_APINOTIFICATIONCENTER }}" >> .env
           echo "NG_APP_GIPHYAPIKEY=${{ secrets.NG_APP_GIPHYAPIKEY }}" >> .env
 
-      - name: Verificar el contenido del archivo .env
-        run: |
-          echo "Contenido del archivo .env generado:"
-          cat .env  # Esto imprimirá el contenido del archivo .env en los logs de GitHub Actions
-
       - name: Build and push Docker image
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
