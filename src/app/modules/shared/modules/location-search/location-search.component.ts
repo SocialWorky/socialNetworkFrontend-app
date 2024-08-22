@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
+import { Subject, takeUntil } from 'rxjs';
+
 import { StreetMapData } from '@shared/interfaces/streetMap.interface';
 import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.service';
 import { GeocodingService } from '@shared/services/apis/geocoding.service';
-import { Subject, takeUntil } from 'rxjs';
+import { LocationService } from '@shared/services/apis/location.service';
 
 @Component({
   selector: 'worky-location-search',
@@ -20,7 +22,8 @@ export class LocationSearchComponent {
   constructor(
     private _geocodingService: GeocodingService,
     private _geoLocationsService: GeoLocationsService,
-    public dialogRef: MatDialogRef<LocationSearchComponent>
+    public dialogRef: MatDialogRef<LocationSearchComponent>,
+    private _locationService: LocationService
   ) {  }
 
   search(event: Event) {
@@ -50,8 +53,15 @@ export class LocationSearchComponent {
     }
   }
 
-  selectLocation(location: any) {
+  getCurrentLocation() {
+    this._locationService.getUserLocation().then((location) => {
+      this._geoLocationsService.findLocationByLatAndLng(location[0], location[1]).pipe(takeUntil(this.unsubscribe$)).subscribe((response: any) => {
+        this.selectLocation(response);
+      });
+    });
+  }
 
+  selectLocation(location: any) {
     if (!location._id){
       const locationData: StreetMapData = {
         results: [location],

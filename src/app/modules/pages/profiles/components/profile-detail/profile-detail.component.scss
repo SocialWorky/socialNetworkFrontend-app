@@ -2,6 +2,13 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
+:host {
+  @include breakpoints.from-sm-up {
+    position: sticky;
+    top: 5px;
+  }
+}
+
 .content-description {
   display: flex;
   flex-direction: column;

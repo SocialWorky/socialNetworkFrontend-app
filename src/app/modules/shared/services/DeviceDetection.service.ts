@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { Platform } from '@ionic/angular';
 import { Subject, fromEvent } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import * as _ from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class DeviceDetectionService implements OnDestroy {
   private destroy$: Subject<void> = new Subject<void>();
   private resizeEvent: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  private _isScreenSmallerThan600px: boolean = false;
+  private _isScreenSmallerThan700px: boolean = false;
 
   constructor(
     private readonly _platform: Platform
@@ -22,7 +23,7 @@ export class DeviceDetectionService implements OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.detectScreenSize();
-        this.resizeEvent.emit(this._isScreenSmallerThan600px);
+        this.resizeEvent.emit(this._isScreenSmallerThan700px);
       });
   }
 
@@ -32,10 +33,11 @@ export class DeviceDetectionService implements OnDestroy {
   }
 
   private detectScreenSize() {
-    this._isScreenSmallerThan600px = window.innerWidth < 600;
+    this._isScreenSmallerThan700px = window.innerWidth < 700;
   }
 
   isMobile(): boolean {
+    if(this._platform.is('tablet') || this._platform.is('ipad')) return false;
     return (
       this.isNative()
       || this.isScreenSmallerThan600px()
@@ -46,7 +48,7 @@ export class DeviceDetectionService implements OnDestroy {
   }
 
   private isScreenSmallerThan600px(): boolean {
-    return this._isScreenSmallerThan600px;
+    return this._isScreenSmallerThan700px;
   }
 
   isNative(): boolean {

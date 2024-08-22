@@ -42,7 +42,6 @@ export class GeoLocationsService {
 
   findLocationByLatAndLng(lat: number, lng: number): Observable<any> {
     const url = `${this.baseUrl}/locations/${lat}/${lng}`;
-
     return this.http.get<any>(url);
   }
 
