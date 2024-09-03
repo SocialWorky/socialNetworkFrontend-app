@@ -503,7 +503,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   private async updatePublications(type: TypePublishing, idUserProfile?: string) {
     try {
       const publicationsNew = await lastValueFrom(this._publicationService.getAllPublications(1, 10, type, idUserProfile));
-      this._publicationService.updatePublications(publicationsNew);
+      this._publicationService.updatePublications(publicationsNew.publications);
     } catch (error) {
       console.error('Error getting publications', error);
     }

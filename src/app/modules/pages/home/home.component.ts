@@ -122,15 +122,15 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.connectionStatusMessage = 'You are offline';
       return;
     }
-
+    
     await this.loadPublications();
     this._cdr.markForCheck();
 
     this.loadSubscription();
-    this.subscribeToNotificationComment();
+    this.subscribeToNotificationComment();    
   }
 
-  private loadSubscription() {
+  private async loadSubscription() {
     this._publicationService.publications$.pipe(
       distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
       takeUntil(this.destroy$)
@@ -157,15 +157,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  async loadPublications() {
+ async loadPublications() {
     if (this.loaderPublications || !this.hasMorePublications || !navigator.onLine) return;
     this.loaderPublications = true;
     try {
       const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize));
-      if (newPublications.length < this.pageSize) {
+      if (newPublications.total === this.publications.length) {
         this.hasMorePublications = false;
       }
-      const uniqueNewPublications = newPublications.filter(newPub => 
+
+      const uniqueNewPublications = newPublications.publications.filter(newPub => 
         !this.publications.some(pub => pub._id === newPub._id)
       );
 
@@ -173,6 +174,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.page++;
       this.loaderPublications = false;
       this._cdr.markForCheck();
+
     } catch (error) {
       console.error('Error loading publications', error);
       this.loaderPublications = false;
@@ -194,7 +196,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe(async (data: any) => {
       const newCommentInPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize));
-      this._publicationService.updatePublications(newCommentInPublications);
+      this._publicationService.updatePublications(newCommentInPublications.publications);
       this._cdr.markForCheck();
     });
   }
