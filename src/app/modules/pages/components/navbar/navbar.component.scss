@@ -6,6 +6,7 @@
   display: flex;
   justify-content: center;
   height: 80px;
+  //height: 8%;
   background-color: colors.$worky-background-header-color;
   @include breakpoints.below-sm {
     flex-direction: column;
