@@ -13,7 +13,7 @@ export class NotificationUsersService implements OnDestroy {
 
   private _unsubscribeAll = new Subject<void>();
 
-  private inactivityDuration = 5 * 60 * 1000; // 5 minutes
+  private inactivityDuration = 2 * 60 * 1000; // 2 minutes
   private inactivityTimeout: any;
 
   constructor(private socket: Socket) {
