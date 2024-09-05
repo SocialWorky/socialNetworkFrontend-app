@@ -1,6 +1,5 @@
 <div class="content-list">
-  <span class="title">Mensajes...</span>
-  <!-- <input type="text" class="search-input" placeholder="Search" /> -->
+  <span class="title worky-font-roboto">{{ 'messageChat.title' | workyTranslations }}</span>
 
   <div class="users" *ngIf="users.length > 0 && !loadUsers">
     <button *ngFor="let item of users" class="button" (click)="selectUser(item.user._id)">
@@ -13,22 +12,22 @@
       </div>
       <div class="user-info">
         <div class="content-name-unread">
-          <span class="user-name">{{ item.user.name }} {{ item.user.lastName }}</span>
+          <span class="user-name worky-font-roboto">{{ item.user.name }} {{ item.user.lastName }}</span>
           <div *ngIf="item.unreadMessagesCount > 0" class="unread-messages">{{ item.unreadMessagesCount }}</div>
         </div>
-        <span class="last-message">{{ item.lastMessage }} &middot; </span>
-        <span class="last-message-time">{{ formatTime(item.createAt) }}</span>
+        <span class="last-message worky-font-roboto">{{ item.lastMessage }} &middot; </span>
+        <span class="last-message-time worky-font-roboto">{{ formatTime(item.createAt) }}</span>
       </div>
     </button>
   </div>
 
   <div *ngIf="loadUsers" class="not-messages-container">
     <div class="loader"></div>
-    <span class="no-messages-text">Buscando conversaciones...</span>
+    <span class="no-messages-text worky-font-roboto">{{ 'messageChat.messageLoading' | workyTranslations }}</span>
   </div>
 
   <div *ngIf="!loadUsers && users.length === 0" class="not-messages-container">
-    <span class="no-messages-text">No se encontraron conversaciones.</span>
+    <span class="no-messages-text worky-font-roboto">{{ 'messageChat.noMessages' | workyTranslations }}</span>
   </div>
 
 </div>

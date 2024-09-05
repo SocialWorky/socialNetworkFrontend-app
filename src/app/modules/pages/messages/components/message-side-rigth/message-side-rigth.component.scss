@@ -8,9 +8,10 @@
   height: 100%;
   border-radius: 0.5rem;
   padding: 10px;
-  background: #ffffffed;
+  background-color: #dcdcdc;
   border: 1px solid var(--worky-color-light);
   position: relative;
+  overflow: hidden;
 
   .content-section-wall {
     height: 100%;
@@ -28,10 +29,11 @@
         text-align: center;
         margin: 1rem 0;
         span {
-          background: var(--worky-color-greyLight);
-          padding: 0 1rem;
-          color: var(--worky-color-dark);
+          background: map-get(color.$worky-navy, 72);
+          padding: 0.5rem 1rem;
+          color: var(--worky-color-navy);
           font-size: 0.9rem;
+          border-radius: 12px;
         }
       }
 
@@ -51,7 +53,6 @@
 
       .message-received .message-triangle {
         border-bottom-color: var(--worky-color-greyLight); /* Color del mensaje recibido */
-        //margin-left: 0px;
         left: 10px;
       }
 
@@ -163,11 +164,12 @@
   .message-input-container {
     display: flex;
     align-items: center;
-    background-color: var(--worky-color-white);
-    border-radius: 1rem;
-    padding: 0.5rem;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    background-color: var(--worky-color-light);
+    border-radius: 0.5rem;
+    padding: 0.3rem;
+    box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
+    z-index: 1;
     .emoji-wrapper {
         position: relative;
       }
@@ -180,20 +182,42 @@
       }
 
       .input-wrapper {
-        flex-grow: 1;
         display: flex;
+        flex-grow: 1;
+        border: 1px solid var(--worky-color-greyLight);
+        margin: 5px;
+        border-radius: 8px;
       }
 
       .message-input {
-        flex-grow: 1;
-        border: none;
-        border-radius: 1rem;
-        padding: 0.5rem 1rem;
-        outline: none;
         font-size: 1rem;
         background-color: var(--worky-color-greyLight);
+        width: 100%;
+        height: 40px;
+        min-height: 1.5rem;
+        max-height: 6rem;
+        resize: none;
+        overflow-y: hidden;
+        padding: 0.5rem 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
       }
   }
+}
+
+.content-right-messageChat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('../../../../../../assets/img/shared/fondo_message_chat.jpg') center/cover no-repeat;
+  opacity: 0.2; /* Ajusta la opacidad de la imagen de fondo */
+  z-index: 0; /* Asegura que el fondo esté detrás del contenido */
+  pointer-events: none; /* Evita que interfiera con el contenido */
 }
 
 .header-content-mobil {

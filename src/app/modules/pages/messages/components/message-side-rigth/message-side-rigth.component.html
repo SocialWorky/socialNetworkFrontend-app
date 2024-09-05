@@ -12,35 +12,34 @@
   <div class="content-section-wall" #messageContainer>
     <div class="messages-container fadeIn fast">
       <ng-container *ngFor="let message of messages; let i = index">
-        <!-- Mostrar la fecha cuando cambia respecto al mensaje anterior -->
+        <!-- Show the date when it changes with respect to the previous message -->
         <ng-container *ngIf="i === 0 || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)">
           <div class="date-divider">
-            <span>{{ formatDate(message.timestamp) }}</span>
+            <span class="worky-font-roboto">{{ formatDate(message.timestamp) }}</span>
           </div>
         </ng-container>
 
-        <!-- Aplicar clases de agrupación solo al primer y último mensaje del grupo del mismo usuario -->
+        <!-- Apply grouping classes only to the first and last message in the group of the same user and same date -->
         <div [ngClass]="{
           'message-sent': message.senderId === currentUser.id, 
           'message-received': message.senderId !== currentUser.id, 
-          'grouped': i > 0 && messages[i - 1].senderId === message.senderId,
-          'no-avatar': i > 0 && messages[i - 1].senderId === message.senderId,
-          'first-group': i === 0 || messages[i - 1].senderId !== message.senderId,
-          'last-group': i === messages.length - 1 || messages[i + 1].senderId !== message.senderId
+          'grouped': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
+          'no-avatar': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
+          'first-group': i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp),
+          'last-group': i === messages.length - 1 || messages[i + 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i + 1].timestamp)
         }">
-
 
           <worky-avatar
             [size]="40"
-            *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId) && message.senderId !== currentUser.id"
+            *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId !== currentUser.id"
             [img]="user[0].avatar"
             [name]="user[0].name + ' ' + user[0].lastName">
           </worky-avatar>
 
-          <div *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId) && message.senderId !== currentUser.id" class="message-triangle"></div>
+          <div *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId !== currentUser.id" class="message-triangle"></div>
 
           <div [ngClass]="{'sent-content': message.senderId === currentUser.id, 'received-content': message.senderId !== currentUser.id}">
-            <span>{{ message.content }}</span>
+            <span class="worky-font-roboto">{{ message.content }}</span>
             <div class="content-footer">
               <small>{{ formatTime(message.timestamp) }}</small>
               <i *ngIf="message.senderId === currentUser.id && !message.isRead" class="material-icons">done</i>
@@ -48,11 +47,11 @@
             </div>
           </div>
 
-          <div *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId) && message.senderId === currentUser.id" class="message-triangle"></div>
+          <div *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId === currentUser.id" class="message-triangle"></div>
 
           <worky-avatar
             [size]="40"
-            *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId) && message.senderId === currentUser.id"
+            *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId === currentUser.id"
             [img]="currentUser.avatar"
             [name]="currentUser.name">
           </worky-avatar>
@@ -81,8 +80,9 @@
       <textarea
         class="message-input"
         [(ngModel)]="newMessage"
+        (input)="autoResize($event)"
         (focus)="markMessagesAsRead()"
-        placeholder="Escribe un mensaje"
+        placeholder="{{ 'messageChat.placeholder' | workyTranslations }}"
       ></textarea>
     </div>
     <div>
@@ -92,7 +92,7 @@
         [theme]="WorkyButtonTheme.Accent"
         [width]="'100%'"
         (click)="sendMessage()">
-        <span basic-button-text>Enviar</span>
+        <span basic-button-text>{{ 'messageChat.send' | workyTranslations }}</span>
       </worky-buttons>
     </div>
   </div>
