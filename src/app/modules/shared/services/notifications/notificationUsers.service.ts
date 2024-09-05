@@ -13,7 +13,7 @@ export class NotificationUsersService implements OnDestroy {
 
   private _unsubscribeAll = new Subject<void>();
 
-  private inactivityDuration = 2 * 60 * 1000; // 2 minutes
+  private inactivityDuration = 4 * 60 * 1000; // 4 minutes
   private inactivityTimeout: any;
 
   constructor(private socket: Socket) {
@@ -59,13 +59,13 @@ export class NotificationUsersService implements OnDestroy {
       (status) => status._id === data._id
     );
     if (userIndex !== -1) {
-      if (data.status === 'offline') {
+      if (data.status === 'offLine') {
         currentStatuses.splice(userIndex, 1);
       } else {
         currentStatuses[userIndex] = data;
       }
     } else {
-      if (data.status !== 'offline') {
+      if (data.status !== 'offLine') {
         currentStatuses.push(data);
       }
     }

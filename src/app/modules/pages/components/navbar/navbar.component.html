@@ -3,13 +3,8 @@
     <!-- Left elements -->
     <div class="worky-brand">
       <!-- Brand Logo-->
-      <a href="#">
-        <div class="worky-logo"
-          height="20"
-          alt="MDB Logo"
-          loading="lazy"
-          style="margin-top: 2px;">
-        </div>
+      <a href="/" *ngIf="logoUrl !== ''">
+        <img class="worky-logo" src="{{ logoUrl }}" alt="{{ title }}" style="margin-top: 2px;" loading="lazy">
       </a>
       <!-- Search -->
       <form 

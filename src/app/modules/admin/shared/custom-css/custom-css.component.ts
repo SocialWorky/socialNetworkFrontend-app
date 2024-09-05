@@ -33,6 +33,7 @@ export class CustomCssComponent implements OnDestroy {
     await this._configService.updateConfig({ customCss: this.customCss }).pipe(takeUntil(this.destroy$)).subscribe({
       next: (data) => {
         this.customCssLoader = false;
+        this._configService.setConfig(data);
         this._cdr.markForCheck();
       },
       error: () => {

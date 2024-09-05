@@ -4,4 +4,8 @@ export interface Config {
   themeColors?: string;
   privacyPolicy?: string;
   customCss?: string;
+  contactEmail?: string;
+  faviconUrl?: string;
+  loginMethods?: string;
+
 }

@@ -18,6 +18,7 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
   private _destroy$ = new Subject<void>();
 
   usersOnline: Token[] | undefined;
+
   currentUser: Token;
 
   constructor(
@@ -46,6 +47,10 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
         console.error('Error getting user statuses', error);
       }
     });
+    this.getUserOnline();
+  }
+
+  getUserOnline() {
     this._notificationUsersService.addCurrentUserStatus(this.currentUser);
   }
 

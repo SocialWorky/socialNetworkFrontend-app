@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { ConfigService } from '@shared/services/config.service';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -7,7 +7,7 @@ import { Subject, takeUntil } from 'rxjs';
   templateUrl: './change-theme-colors.component.html',
   styleUrls: ['./change-theme-colors.component.scss']
 })
-export class ChangeThemeColorsComponent implements OnInit {
+export class ChangeThemeColorsComponent implements OnInit, OnDestroy {
   colors: { [key: string]: string } = {};
 
   private destroy$ = new Subject<void>();
@@ -16,6 +16,10 @@ export class ChangeThemeColorsComponent implements OnInit {
     private _configService: ConfigService,
     private _cdr: ChangeDetectorRef
   ) { }
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   ngOnInit() {
     this.loadCurrentColors();
@@ -58,12 +62,17 @@ export class ChangeThemeColorsComponent implements OnInit {
       localStorage.setItem('theme', JSON.stringify(theme));
       this._cdr.markForCheck();
 
-      await this._configService.updateConfig({ themeColors: JSON.stringify(theme) }).subscribe();
+      await this._configService.updateConfig({ themeColors: JSON.stringify(theme) }).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (data) => {
+          this._configService.setConfig(data);
+          this._cdr.markForCheck();
+        },
+        error: () => {
+          this._cdr.markForCheck();
+        },
+      });
     }
   }
-
-
-
 
   updateColor(event: Event, variable: string) {
     const input = event.target as HTMLInputElement;
