@@ -114,6 +114,12 @@ export const translations = {
   // HOME COMPONENT
   'home.errorGetPublications': 'Error al obtener las publicaciones: ',
   'home.notPublications': 'No hay publicaciones',
+  // MESSAGE CHAT COMPONENT
+  'messageChat.messageLoading': 'Cargando mensajes...',
+  'messageChat.title': 'Mensajes',
+  'messageChat.placeholder': 'Escribe un mensaje...',
+  'messageChat.send': 'Enviar',
+  'messageChat.noMessages': 'No hay mensajes',
   // ADD PUBLICATION COMPONENT
   'addPublication.loadingCommentMessage': 'Estamos publicando tu comentario, por favor espera un momento',
   'addPublication.loadingPublicationMessage': 'Estamos publicando tu contenido, por favor espera un momento',
