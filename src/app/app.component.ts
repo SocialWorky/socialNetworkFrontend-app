@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
-import { getTranslationsLanguage } from '../translations/translations';
-import { ConfigService } from '@shared/services/config.service';
+import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
 import { Subject, takeUntil } from 'rxjs';
+;
+import { getTranslationsLanguage } from '../translations/translations';
+import { ConfigService } from '@shared/services/config.service';
+import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 
 @Component({
   selector: 'worky-root',
@@ -19,8 +21,11 @@ export class AppComponent implements OnInit, OnDestroy {
     private _renderer: Renderer2,
     private _configService: ConfigService,
     private _titleService: Title,
-    private _cdr: ChangeDetectorRef
-  ) {}
+    private _cdr: ChangeDetectorRef,
+    private _notificationUsersService: NotificationUsersService
+  ) {
+    this._notificationUsersService.setupInactivityListeners();
+  } 
 
   ngOnInit(): void {
     this.document.body.classList.add('light-theme');

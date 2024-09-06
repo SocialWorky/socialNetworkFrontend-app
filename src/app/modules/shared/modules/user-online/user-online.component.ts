@@ -35,8 +35,8 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnInit() {
-    this._notificationUsersService.userStatuses$.pipe(
+  async ngOnInit() {
+    await this._notificationUsersService.userStatuses$.pipe(
       takeUntil(this._destroy$)
     ).subscribe({
       next: (userStatuses: Token[]) => {
@@ -50,8 +50,8 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     this.getUserOnline();
   }
 
-  getUserOnline() {
-    this._notificationUsersService.addCurrentUserStatus(this.currentUser);
+  async getUserOnline() {
+    await this._notificationUsersService.addCurrentUserStatus(this.currentUser);
   }
 
   ngOnDestroy(): void {

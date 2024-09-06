@@ -2,16 +2,16 @@
   <div class="worky-module-header">
     <div class="worky-module-title">Usuarios Online</div>
   </div>
-  <div class="users-online-container">
+  <div class="users-online-container" *ngIf="usersOnline?.length">
 
     <div class="worky-user" *ngFor="let user of usersOnline">
       <div class="content-user-online">
         <worky-avatar
-          [ngClass]="{'avatar-online': user.status === 'online', 'avatar-inactive': user.status === 'inactive'}"
+          [ngClass]="{'avatar-online': user?.status === 'online', 'avatar-inactive': user?.status === 'inactive'}"
           [size]="40"
-          [name]="user.name"
-          [img]="user.avatar"
-          (click)="goToProfile(user._id!)"
+          [name]="user?.name"
+          [img]="user?.avatar"
+          (click)="goToProfile(user?._id!)"
           class="worky-user-avatar">
         </worky-avatar>
       </div>
