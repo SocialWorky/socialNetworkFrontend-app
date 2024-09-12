@@ -2,93 +2,161 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
-
 .content-right-messageChat {
   display: flex;
   flex-direction: column;
   height: 100%;
   border-radius: 0.5rem;
   padding: 10px;
-  background: #ffffffed;
+  background-color: #dcdcdc;
   border: 1px solid var(--worky-color-light);
   position: relative;
-
-  @include breakpoints.below-sm {
-    padding: 0px;
-    border: 0px;
-  }
+  overflow: hidden;
 
   .content-section-wall {
     height: 100%;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #ffffff #f0f0f0;
-    @include breakpoints.below-sm {
-      flex: 1;
-    }
+
     .messages-container {
       display: flex;
       flex-direction: column;
       height: 100%;
       padding: 18px;
-      .sent-content,
-      .received-content {
-        max-width: 60%;
-        min-width: 150px;
-        margin: 3px 10px;
-        padding: 0.5rem 1rem;
-        border-radius: 1rem;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        position: relative;
-        display: inline-block;
-      }
-
-      small {
-        display: block;
-        font-size: 0.75rem;
-        color: var(--worky-color-greyDark);
-        text-align: right;
-      }
 
       .date-divider {
         text-align: center;
         margin: 1rem 0;
+        span {
+          background: map-get(color.$worky-navy, 72);
+          padding: 0.5rem 1rem;
+          color: var(--worky-color-navy);
+          font-size: 0.9rem;
+          border-radius: 12px;
+        }
+      }
+
+      /* Estilos para el triángulo que apunta al avatar */
+      .message-triangle {
         position: relative;
+        right: 9px;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-bottom: 10px solid #fff;
       }
 
-      .date-divider span {
-        background: var(--worky-color-greyLight);
-        padding: 0 1rem;
-        color: var(--worky-color-dark);
+      .message-sent .message-triangle {
+        border-bottom-color: var(--worky-color-indigo); /* Color del mensaje enviado */
       }
-    }
-    .message-sent {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 0.5rem;
 
-      .sent-content {
-        background-color: var(--worky-color-indigo);
-        color: var(--worky-color-light);
-        .content-footer {
-          display: flex;
-          justify-content: flex-end;
-          align-items: center;
-          gap: 0.5rem;
-          i {
-            font-size: 18px;
-          }
-        }      
+      .message-received .message-triangle {
+        border-bottom-color: var(--worky-color-greyLight); /* Color del mensaje recibido */
+        left: 10px;
       }
-    }
-    .message-received {
-      display: flex;
-      justify-content: flex-start;
-      margin-bottom: 0.5rem;
 
-      .received-content {
-        background-color: var(--worky-color-light);
-        color: var(--worky-color-dark);
+      .message-sent,
+      .message-received {
+        margin-bottom: 0.1rem;
+
+        &.grouped {
+          margin-top: 0rem;
+        }
+
+        &.no-avatar {
+          padding-left: 60px;
+          padding-right: 60px;
+        }
+
+
+        .sent-content,
+        .received-content {
+          border-radius: 1rem;
+          padding: 0.5rem 1rem;
+          display: inline-block;
+          max-width: 100%;
+          word-break: break-word;
+          box-shadow: -15px 1px 12px rgba(0, 0, 0, 0.1);
+        }
+      }
+
+      .message-sent.first-group.last-group {
+        .sent-content {
+          border-radius: 1rem 0rem 1rem 1rem;
+        }
+      }
+
+      .message-received.first-group.last-group {
+        .received-content {
+          border-radius: 0rem 1rem 1rem 1rem;
+        }
+      }
+
+      .message-sent.first-group {
+        .sent-content {
+          border-radius: 1rem 0rem 0rem 1rem;
+        }
+      }
+
+      .message-received.first-group {
+        .received-content {
+          border-radius: 0rem 1rem 0rem 0rem;
+        }
+      }
+
+      .message-received.grouped {
+        .received-content {
+          border-radius: 0rem 1rem 1rem 0rem;
+        }
+      }
+
+      .message-sent.grouped {
+        .sent-content {
+          border-radius: 1rem 0rem 0rem 1rem;
+        }
+      }
+
+      .message-sent.last-group {
+        .sent-content {
+          border-radius: 1rem 0rem 1rem 1rem;
+          margin-bottom: 15px;
+        }
+      }
+
+      .message-received.last-group {
+        .received-content {
+          border-radius: 0rem 1rem 1rem 1rem;
+          margin-bottom: 15px;
+        }
+      }
+
+      .message-sent {
+        display: flex;
+        justify-content: flex-end;
+        .sent-content {
+          background-color: var(--worky-color-indigo);
+          color: var(--worky-color-light);
+        }
+      }
+
+      .message-received {
+        display: flex;
+        justify-content: flex-start;
+        .received-content {
+          background-color: var(--worky-color-greyLight);
+          color: var(--worky-color-dark);
+        }
+      }
+
+      .content-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 0.5rem;
+        i {
+          font-size: 18px;
+        }
       }
     }
   }
@@ -96,11 +164,12 @@
   .message-input-container {
     display: flex;
     align-items: center;
-    background-color: var(--worky-color-white);
-    border-radius: 1rem;
-    padding: 0.5rem;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    background-color: var(--worky-color-light);
+    border-radius: 0.5rem;
+    padding: 0.3rem;
+    box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
+    z-index: 1;
     .emoji-wrapper {
         position: relative;
       }
@@ -113,20 +182,42 @@
       }
 
       .input-wrapper {
-        flex-grow: 1;
         display: flex;
+        flex-grow: 1;
+        border: 1px solid var(--worky-color-greyLight);
+        margin: 5px;
+        border-radius: 8px;
       }
 
       .message-input {
-        flex-grow: 1;
-        border: none;
-        border-radius: 1rem;
-        padding: 0.5rem 1rem;
-        outline: none;
         font-size: 1rem;
         background-color: var(--worky-color-greyLight);
+        width: 100%;
+        height: 40px;
+        min-height: 1.5rem;
+        max-height: 6rem;
+        resize: none;
+        overflow-y: hidden;
+        padding: 0.5rem 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
       }
   }
+}
+
+.content-right-messageChat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('../../../../../../assets/img/shared/fondo_message_chat.jpg') center/cover no-repeat;
+  opacity: 0.2; /* Ajusta la opacidad de la imagen de fondo */
+  z-index: 0; /* Asegura que el fondo esté detrás del contenido */
+  pointer-events: none; /* Evita que interfiera con el contenido */
 }
 
 .header-content-mobil {

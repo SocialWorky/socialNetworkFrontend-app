@@ -14,6 +14,7 @@ import { LastRegisteredUsersComponent } from './shared/last-registered-users/las
 import { ChangeThemeColorsComponent } from './shared/change-theme-colors/change-theme-colors.component';
 import { CustomCssComponent } from './shared/custom-css/custom-css.component';
 import { ManageReactionsComponent } from './shared/manage-reactions/manage-reactions.component';
+import { SiteConfigComponent } from './shared/site-config/site-config.component';
 
 import { AdminRoutingModule } from './admin-routing.module';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
@@ -30,7 +31,8 @@ import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.mod
     LastRegisteredUsersComponent,
     ChangeThemeColorsComponent,
     CustomCssComponent,
-    ManageReactionsComponent
+    ManageReactionsComponent,
+    SiteConfigComponent
   ],
   imports: [
     CommonModule,

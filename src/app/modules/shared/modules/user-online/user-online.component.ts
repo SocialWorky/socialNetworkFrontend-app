@@ -7,6 +7,7 @@ import { takeUntil } from 'rxjs/operators';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { AuthService } from '@auth/services/auth.service';
 
+
 @Component({
   selector: 'worky-user-online',
   templateUrl: './user-online.component.html',
@@ -17,22 +18,28 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
   private _destroy$ = new Subject<void>();
 
   usersOnline: Token[] | undefined;
-  currentUser = this._authService.getDecodedToken();
+
+  currentUser: Token;
 
   constructor(
     private _cdr: ChangeDetectorRef,
     private _notificationUsersService: NotificationUsersService,
     private _router: Router,
     private _authService: AuthService
-  ) {}
+  ) {
+    const decodedToken = this._authService.getDecodedToken();
+    if (decodedToken && typeof decodedToken === 'object' && 'id' in decodedToken) {
+      this.currentUser = decodedToken as Token;
+    } else {
+      throw new Error('Invalid token');
+    }
+  }
 
-  ngOnInit() {
-    this._notificationUsersService.addCurrentUserStatus(this.currentUser);
-
-    this._notificationUsersService.userStatuses$.pipe(
+  async ngOnInit() {
+    await this._notificationUsersService.userStatuses$.pipe(
       takeUntil(this._destroy$)
     ).subscribe({
-      next: (userStatuses) => {
+      next: (userStatuses: Token[]) => {
         this.usersOnline = userStatuses;
         this._cdr.markForCheck();
       },
@@ -40,6 +47,11 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
         console.error('Error getting user statuses', error);
       }
     });
+    this.getUserOnline();
+  }
+
+  async getUserOnline() {
+    await this._notificationUsersService.addCurrentUserStatus(this.currentUser);
   }
 
   ngOnDestroy(): void {

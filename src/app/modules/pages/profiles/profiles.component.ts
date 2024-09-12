@@ -10,7 +10,7 @@ import { UserService } from '@shared/services/users.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
-import { PublicationView } from '@shared/interfaces/publicationView.interface';
+import { Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationService } from '@shared/services/publication.service';
 import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
@@ -33,7 +33,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   typePublishing = TypePublishing;
-  publications: PublicationView[] = [];
+  publications: Publication = { publications: [], total: 0 };
   page = 1;
   pageSize = 10;
   WorkyButtonType = WorkyButtonType;
@@ -99,7 +99,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe({
       next: (publicationsData: PublicationView[]) => {
-        this.publications = publicationsData;
+        this.publications.publications = publicationsData;
         this._cdr.markForCheck();
       },
       error: (error) => {

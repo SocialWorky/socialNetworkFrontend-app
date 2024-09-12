@@ -1,8 +1,13 @@
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
 .content-publications {
-  height: 90vh;
+  height: 92vh;
   overflow-y: scroll;
   scrollbar-width: none;
-  -ms-overflow-style: none; 
+  -ms-overflow-style: none;
+  @include breakpoints.below-md {
+    height: 86vh;
+  }
 }
 
 .content-publications::-webkit-scrollbar {
@@ -10,7 +15,7 @@
 }
 
 .last-publication {
-  margin-bottom: 200px;
+  margin-bottom: 20px;
 }
 
 .connection-overlay {

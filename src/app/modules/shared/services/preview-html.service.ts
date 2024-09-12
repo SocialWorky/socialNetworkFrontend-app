@@ -1,16 +1,23 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '@env/environment';
-import { marked } from 'marked';
-import { Observable, forkJoin, of } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
+import { Observable, forkJoin, of } from 'rxjs';
+import { marked } from 'marked';
 import hljs from 'highlight.js';
+
+import { environment } from '@env/environment';
+import { Token } from '../interfaces/token.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ContentService {
+
+  private token: string;
+
   constructor(private http: HttpClient) {
+
+    this.token = localStorage.getItem('token') || '';
     // Configuración de marked para personalizar el renderizado de código
     const renderer = new marked.Renderer();
     renderer.code = (code: string, language: string | undefined) => {
@@ -35,9 +42,19 @@ export class ContentService {
     });
   }
 
-  fetchMetadata(url: string): Observable<any> {
-    return this.http.get(`${environment.API_URL}/scrape?url=${encodeURIComponent(url)}`).pipe(
-      catchError(() => of(null)) // Manejar errores de manera elegante
+  private getHeaders(): HttpHeaders {
+    const token = this.token;
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return headers;
+  }
+
+  fetchMetadata(linkUrl: string): Observable<any> {
+    const url = `${environment.API_URL}/scrape?url=${encodeURIComponent(linkUrl)}`;
+    const headers = this.getHeaders();
+    return this.http.get(url, {headers}).pipe(
+      catchError(() => of(null))
     );
   }
 

@@ -257,4 +257,10 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   goBack() {
     window.history.back();
   }
+
+  autoResize(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    textarea.style.height = '40px';
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 96)}px`;
+  }
 }

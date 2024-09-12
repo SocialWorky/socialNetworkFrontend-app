@@ -71,6 +71,10 @@ body {
   background-color: color.$worky-color-app-background;
 }
 
+img, video {
+  width: 100%;
+}
+
 .content-worky {
   display: flex;
   flex-direction: column;

@@ -1,6 +1,11 @@
 import { ImageOrganizer } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
 import { ExtraData } from '../modules/addPublication/interfaces/createPost.interface';
 
+export interface Publication {
+  publications: PublicationView[];
+  total: number;
+}
+
 export interface PublicationView {
     _id:         string;
     content:     string;

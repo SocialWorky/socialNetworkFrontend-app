@@ -13,6 +13,7 @@ import { NotificationService } from '@shared/services/notifications/notification
 import { NotificationCenterService } from '@shared/services/notificationCenter.service';
 import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service'
 import { MessageService } from '../../messages/services/message.service';
+import { ConfigService } from '@shared/services/config.service';
 
 @Component({
   selector: 'worky-navbar',
@@ -40,6 +41,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   token = this._authService.getDecodedToken();
 
+  title = 'Social Network App';
+
+  logoUrl = '';
+
   constructor(
     private _router: Router,
     private _deviceDetectionService: DeviceDetectionService,
@@ -51,7 +56,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private _notificationService: NotificationService,
     private _notificationCenterService: NotificationCenterService,
     private _messageService: MessageService,
-    private _notificationPanelService: NotificationPanelService
+    private _notificationPanelService: NotificationPanelService,
+    private _configService: ConfigService
   ) {
     this.menuProfile();
     this.token = this._authService.getDecodedToken();
@@ -76,9 +82,39 @@ export class NavbarComponent implements OnInit, OnDestroy {
       }
     });
     // this.getNotification();
+    this.suscribeToConfig();
+    this.getConfig();
     this.checkAdminDataLink();
     this.getUnreadMessagesCount();
     this._cdr.markForCheck();
+  }
+
+  getConfig() {
+    this._configService.getConfig().pipe(takeUntil(this.unsubscribe$)).subscribe({
+      next: (data: any) => {
+        this.applyConfig(data);
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error getting config', error);
+      }
+    });
+  }
+
+  suscribeToConfig() {
+    this._configService.config$.pipe(takeUntil(this.unsubscribe$)).subscribe((configData) => {
+      if (configData) {
+        this.applyConfig(configData);
+      }
+    });
+  }
+
+  applyConfig(configData: any) {
+    if (configData) {
+      this.title = configData.settings.title;
+      this.logoUrl = configData.settings.logoUrl;
+      this._cdr.markForCheck();
+    }
   }
 
   ngOnDestroy() {
