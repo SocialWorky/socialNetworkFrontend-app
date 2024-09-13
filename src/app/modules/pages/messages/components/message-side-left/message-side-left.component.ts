@@ -10,6 +10,7 @@ import { NotificationMessageChatService } from '@shared/services/notifications/n
 import { Message } from '../../interfaces/message.interface';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
+import { GlobalEventService } from '@shared/services/globalEventService.service';
 
 @Component({
   selector: 'worky-message-side-left',
@@ -47,7 +48,8 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
     private _deviceDetectionService: DeviceDetectionService,
     private _router: Router,
     private _location: Location,
-    private _notificationService: NotificationService
+    private _notificationService: NotificationService,
+    private _globalEventService: GlobalEventService
   ) {
     this.currentUserId = this._authService.getDecodedToken()!.id;
     this._cdr.markForCheck();
@@ -227,4 +229,9 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
       hour12: false
     }).format(new Date(date));
   }
+
+  sanitizeHtml(message: string): string {
+    return this._globalEventService.sanitizeHtml(message);
+  }
+
 }

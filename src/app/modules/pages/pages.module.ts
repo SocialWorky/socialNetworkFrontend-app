@@ -12,6 +12,7 @@ import { ProfilesComponent } from './profiles/profiles.component';
 import { ProfileDetailComponent } from './profiles/components/profile-detail/profile-detail.component';
 import { MaterialModule } from '@shared/modules/material/material.module';
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
+import { MarkdownModule } from 'ngx-markdown';
 
 import { WorkyMenuComponentComponent } from './components/navbar/worky-menu-component/worky-menu-component.component';
 import { SideBarMenutModule } from '@shared/modules/sidebar-menu/sidebar-menu.module';
@@ -67,7 +68,8 @@ import { NotificationsPanelModule } from '@shared/modules/notifications-panel/no
     ContactsModule,
     WorkyButtonsModule,
     UserOnlineModule,
-    NotificationsPanelModule
+    NotificationsPanelModule,
+    MarkdownModule.forRoot(),
   ]
 })
 export class PagesModule { }

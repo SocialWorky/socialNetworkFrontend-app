@@ -15,7 +15,7 @@ export class NotificationUsersService implements OnDestroy {
 
   private _unsubscribeAll = new Subject<void>();
 
-  private inactivityDuration = 4 * 60 * 1000; // 4 minutes
+  private inactivityDuration = 2 * 60 * 1000;
   private inactivityTimeout: any;
   private isInactive = false;
 

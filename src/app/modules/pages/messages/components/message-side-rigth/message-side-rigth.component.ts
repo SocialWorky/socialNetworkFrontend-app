@@ -1,7 +1,8 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import * as _ from 'lodash';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { MessageService } from '../../services/message.service';
@@ -12,13 +13,18 @@ import { UserService } from '@shared/services/users.service';
 import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { GifSearchComponent } from '@shared/modules/gif-search/gif-search.component';
+import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';
+import { FileUploadService } from '@shared/services/file-upload.service';
+import { environment } from '@env/environment';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'worky-message-side-rigth',
   templateUrl: './message-side-rigth.component.html',
   styleUrls: ['./message-side-rigth.component.scss'],
 })
-export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterViewInit, OnInit{
+export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterViewChecked, OnInit{
 
   WorkyButtonType = WorkyButtonType;
 
@@ -40,6 +46,10 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
   sendMessagesLoader: boolean = false;
 
+  plainText = 'plainText';
+
+  selectedFiles: File[] = [];
+
   get isMobile(): boolean {
     return this._deviceDetectionService.isMobile();
   }
@@ -59,7 +69,10 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     private _activatedRoute: ActivatedRoute,
     private _notificationMessageChatService: NotificationMessageChatService,
     private _notificationService: NotificationService,
-    private _deviceDetectionService: DeviceDetectionService
+    private _deviceDetectionService: DeviceDetectionService,
+    private _dialog: MatDialog,
+    private _fileUploadService: FileUploadService,
+    private _loadingCtrl: LoadingController,
   ) {}
 
   async ngOnInit() {
@@ -67,12 +80,12 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     if(this.userIdMessage) this.userId = this.userIdMessage;
 
     if (this.userIdMessage && this.currentUser.id) {
-      this.loadMessagesWithUser(this.currentUser.id, this.userIdMessage);
+      await this.loadMessagesWithUser(this.currentUser.id, this.userIdMessage);
     }
 
     if (this.isMobile) {
       if (this.userIdMessage && this.currentUser.id) {
-        this.loadMessagesWithUser(this.currentUser.id, this.userIdMessage);
+        await this.loadMessagesWithUser(this.currentUser.id, this.userIdMessage);
       }
       this._cdr.markForCheck();
     }
@@ -106,11 +119,11 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     if (changes['userId'] && !changes['userId'].isFirstChange()) {
       this.loadMessagesWithUser(this.currentUser.id, changes['userId'].currentValue);
       this._cdr.markForCheck();
-      this.scrollToBottom();
+      // this.scrollToBottom();
     }
   }
 
-  ngAfterViewInit() {
+  ngAfterViewChecked(): void {
     this.scrollToBottom();
   }
 
@@ -139,7 +152,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
   private async getUser(userId: string) {
     this.user = [];
-    this._user.getUserById(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._user.getUserById(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (user: User) => {
         this.user = [user];
         this._cdr.markForCheck();
@@ -175,14 +188,16 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     this.showEmojiPicker = false;
   }
 
- async sendMessage() {
-    if (this.newMessage.trim() === '') return;
+ async sendMessage(type: string, content?: string) {
+    if (this.newMessage.trim() === '' && type === this.plainText) return;
+
+    const messageContent = type === this.plainText ? this.newMessage : content;
 
     this.sendMessagesLoader = true;
 
     const message: CreateMessage = {
       receiverId: this.userId,
-      content: this.newMessage,
+      content: messageContent !== undefined ? messageContent : this.newMessage,
       type: 'text'
     };
 
@@ -203,15 +218,15 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   }
 
   private scrollToBottom(): void {
-    if (!this.userId || !this.messageContainer) return;
     setTimeout(() => {
-      try {
-        this.messageContainer!.nativeElement.scrollTop = this.messageContainer!.nativeElement.scrollHeight;
-        this._cdr.markForCheck();
-      } catch(err) {
-        console.error('Error scrolling to bottom:', err);
+      if (this.messageContainer) {
+        try {
+          this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
+        } catch (err) {
+          console.error('Error scrolling to bottom:', err);
+        }
       }
-    }, 1500);
+    }, 1000);
   }
 
   async markMessagesAsRead() {
@@ -263,4 +278,59 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     textarea.style.height = '40px';
     textarea.style.height = `${Math.min(textarea.scrollHeight, 96)}px`;
   }
+
+  openGifSearch() {
+    const dialogConfig = new MatDialogConfig();
+
+    dialogConfig.width = '540px';
+    dialogConfig.height = '500px';
+    dialogConfig.panelClass = 'gifSearch-modal-container';
+
+    const dialogRef = this._dialog.open(GifSearchComponent, dialogConfig);
+
+    dialogRef.componentInstance.gifSelected.subscribe((gifUrl: string) => {
+      this.sendMessagesLoader = true;
+      this.onGifSelected(gifUrl);
+      dialogRef.close();
+    });
+  }
+
+  onGifSelected(gifUrl: string) {
+    this.sendMessage('gifContent', `![GIF](${gifUrl})`);
+  }
+
+  openUploadModal() {
+    const dialogRef = this._dialog.open(ImageUploadModalComponent, {
+      data: {
+        maxFiles: 1,
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.selectedFiles = result;
+        this.uploadFiles('messages');
+      }
+    });
+  }
+
+  private async uploadFiles(folder: string) {
+    const loadingUploadImage = await this._loadingCtrl.create({
+      message: 'Subiendo imagen...',
+    });
+
+    loadingUploadImage.present();
+
+    return this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$)).subscribe({
+          next: (file) => {
+            const imagenSaved = environment.APIFILESERVICE + 'messages/' + file[0].filenameCompressed;
+            this.sendMessage('imageContent', `![Image](${imagenSaved})`);
+            loadingUploadImage.dismiss();
+          },
+          error: (error) => {
+            console.error('Error uploading files:', error);
+          }
+        });
+  }
+
 }
