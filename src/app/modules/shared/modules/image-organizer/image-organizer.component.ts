@@ -10,9 +10,13 @@ import { environment } from '@env/environment';
 export class ImageOrganizerComponent implements OnInit {
 
   @Input() images: ImageOrganizer[] = [];
+
   galleryItems: any[] = [];
+
   urlMediaApi = environment.APIFILESERVICE;
+
   lightboxOpen = false;
+
   currentItem: any = null;
 
   ngOnInit(): void {

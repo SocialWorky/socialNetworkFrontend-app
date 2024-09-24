@@ -6,29 +6,119 @@
 
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 10px;
-}
+  gap: 2px;
+  height: 450px;
 
-.gallery.single {
-  grid-template-columns: 1fr; /* Make single item occupy full width */
+  @media (max-width: 768px) {
+    height: 280px;
+  }
+
+  &.single,
+  &.two-images,
+  &.three-images,
+  &.four-images,
+  &.five-images,
+  &.more-five-images {
+    .gallery-item {
+      height: 450px;
+
+      @media (max-width: 768px) {
+        height: 280px;
+      }
+    }
+  }
+
+  &.three-images .gallery-item:nth-child(2),
+  &.three-images .gallery-item:nth-child(3),
+  &.four-images .gallery-item,
+  &.five-images .gallery-item,
+  &.more-five-images .gallery-item {
+    height: 225px;
+
+    @media (max-width: 768px) {
+      height: 140px;
+    }
+  }
 }
 
 .gallery-item {
-  position: relative;
-  width: 100%;
-  padding-top: 56.25%; /* Aspect ratio 16:9 */
-  overflow: hidden;
   cursor: pointer;
+  position: relative;
 }
 
-.gallery-item img {
+.gallery-item img,
+.gallery-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery.single {
+  grid-template-columns: 1fr;
+  grid-template-areas: "image1";
+}
+
+.gallery.two-images {
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "image1 image2";
+}
+
+.gallery.three-images {
+  grid-template-columns: 3fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas: 
+    "image1 image2"
+    "image1 image3";
+}
+
+.gallery.four-images {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  grid-template-areas: 
+    "image1 image2"
+    "image3 image4";
+}
+
+.gallery.five-images {
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  grid-template-areas: 
+    "image1 image1 image1 image2 image2 image2"
+    "image3 image3 image4 image4 image5 image5";
+}
+
+.gallery.more-five-images {
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  grid-template-areas: 
+    "image1 image1 image1 image2 image2 image2"
+    "image3 image3 image4 image4 more more";
+}
+
+.gallery-item:nth-child(1) { grid-area: image1; }
+.gallery-item:nth-child(2) { grid-area: image2; }
+.gallery-item:nth-child(3) { grid-area: image3; }
+.gallery-item:nth-child(4) { grid-area: image4; }
+.gallery-item:nth-child(5) { grid-area: image5; }
+
+.gallery.more-five-images .gallery-item:nth-child(5) {
+  grid-area: more;
+  position: relative;
+}
+
+.gallery.more-five-images .gallery-item:nth-child(5)::after {
+  content: attr(data-content);
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .video-container {
@@ -47,6 +137,7 @@
   height: 100%;
   object-fit: contain;
 }
+
 
 .lightbox {
   position: fixed;

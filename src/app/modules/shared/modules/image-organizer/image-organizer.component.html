@@ -1,10 +1,20 @@
 <div class="gallery-lightbox-container" *ngIf="images && images.length > 0">
-  <div class="gallery" [class.single]="images.length === 1">
-    <ng-container *ngFor="let image of images; let i = index">
-      <div class="gallery-item" (click)="openLightbox(i)">
+  <div class="gallery" 
+    [ngClass]="{ 
+      'single': images.length === 1,
+      'two-images': images.length === 2,
+      'three-images': images.length === 3,
+      'four-images': images.length === 4,
+      'five-images': images.length === 5,
+      'more-five-images': images.length > 5 
+    }">
+    <ng-container *ngFor="let image of images.slice(0, 5); let i = index">
+      <div class="gallery-item" (click)="openLightbox(i)" 
+          [attr.data-content]="i === 4 && images.length > 5 ? '+ ' + (images.length - 5) : ''">
         <ng-container *ngIf="isImageUrl(image.urlCompressed)">
           <img [src]="urlMediaApi + image.urlCompressed" alt="Image">
         </ng-container>
+
         <ng-container *ngIf="isVideoUrl(image.url)">
           <div class="video-container">
             <video [src]="urlMediaApi + image.url" controls>
@@ -16,6 +26,7 @@
       </div>
     </ng-container>
   </div>
+
 
   <div class="lightbox" *ngIf="lightboxOpen" (click)="closeLightbox()">
     <div class="lightbox-content" (click)="$event.stopPropagation()">
