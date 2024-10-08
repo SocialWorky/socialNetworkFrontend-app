@@ -1,0 +1,56 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;  
+
+.publication-comment {
+    margin-top: 15px;
+    padding: 16px;
+    max-height: 70vh;
+    overflow: auto;
+    @include breakpoints.below-sm {
+      max-height: 20vh;
+    }
+    .publication-comment-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+      .publication-comment-content {
+         max-width: 100%;
+        .publication-comment-data {
+          padding: 0.4rem 1rem 0.4rem 1rem;
+          display: flex;
+          flex-direction: column;
+          background-color: colors.$worky-color-greyLight;
+          border-radius: 8px;
+          span {
+            font-size: variables.$worky-font-size-2;
+          }
+          .content-name-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            .comment-author {
+              color: colors.$worky-color-blue;
+            }
+            .delete-comment {
+              margin-left: 15px;
+              padding: 5px;
+              background-color: rgb(228, 228, 228);
+              border-radius: 50%;
+              cursor: pointer;
+              font-size: 15px;
+              color: rgb(166, 0, 0);
+            }
+          }
+
+        }
+        .comment-date {
+          margin-left: 5px;
+          font-size: variables.$worky-font-size-0;
+          color: colors.$worky-color-navy;
+        }
+      }
+    }
+  }
