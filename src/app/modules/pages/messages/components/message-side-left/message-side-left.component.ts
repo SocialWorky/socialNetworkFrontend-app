@@ -98,11 +98,16 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
   }
 
   private getUserMessages() {
+    console.log('getUserMessages');
     this._messageService.getUsersWithConversations().pipe(
       takeUntil(this.unsubscribe$)
     ).subscribe({
       next: (userIds: string[]) => {
-        if (userIds.length === 0) return;
+        if (userIds.length === 0) {
+          this.loadUsers = false;
+          this._cdr.markForCheck();
+          return;
+        }
         this.loadUsers = true;
 
         const userObservables = userIds.map(userId => this.userService.getUserById(userId));

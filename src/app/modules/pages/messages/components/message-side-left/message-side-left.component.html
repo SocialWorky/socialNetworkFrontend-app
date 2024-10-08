@@ -21,7 +21,7 @@
     </button>
   </div>
 
-  <div *ngIf="loadUsers" class="not-messages-container">
+  <div *ngIf="loadUsers && !users.length" class="not-messages-container">
     <div class="loader"></div>
     <span class="no-messages-text worky-font-roboto">{{ 'messageChat.messageLoading' | workyTranslations }}</span>
   </div>
