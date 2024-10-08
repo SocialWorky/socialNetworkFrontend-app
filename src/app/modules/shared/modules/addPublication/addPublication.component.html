@@ -73,6 +73,7 @@
       </div>
 
       <div class="previews">
+        <div class="loader" *ngIf="loaderPreviews && !previews.length"></div>
         <div *ngFor="let preview of previews; let i = index" class="preview">
           <img *ngIf="preview.type === 'image'" [src]="preview.url" alt="Image Preview">
           <video *ngIf="preview.type === 'video'" [src]="preview.url" controls></video>
@@ -132,7 +133,10 @@
         </div>
 
         <!-- Otros botones y opciones -->
-        <div class="extra-content-item file-upload" matTooltip="Subir Imagen" (click)="openUploadModal()">
+        <div *ngIf="type !== typePublishing.IMAGEVIEW" 
+            class="extra-content-item file-upload"
+            matTooltip="Subir Imagen"
+            (click)="openUploadModal()">
           <i class="material-icons">add_photo_alternate</i>
         </div>
 
@@ -164,11 +168,10 @@
 
     <div class="publishing-footer">
       <div>
-        <worky-buttons *ngIf="!loaderSavePublication"
+        <worky-buttons *ngIf="!loaderSavePublication && myForm.valid || previews.length && !loaderSavePublication"
           type="submit"
           [workyButtonType]="WorkyButtonType.Flat"
           [theme]="WorkyButtonTheme.Accent"
-          [disabled]="!myForm.valid || !myForm.dirty"
           [height]="'40px'"
           [width]="'100%'">
           <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>

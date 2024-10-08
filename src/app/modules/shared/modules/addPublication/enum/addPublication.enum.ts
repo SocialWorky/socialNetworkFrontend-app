@@ -1,7 +1,8 @@
 export enum TypePublishing {
   POST = 'post',
   COMMENT = 'comment',
-  POSTPROFILE = 'postProfile'
+  POSTPROFILE = 'postProfile',
+  IMAGEVIEW = 'image-view'
 }
 
 export enum TypePrivacy {

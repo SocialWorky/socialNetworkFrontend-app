@@ -6,7 +6,8 @@ import {
   OnInit,
   OnDestroy,
   ViewChild,
-  AfterViewInit
+  AfterViewInit,
+  NgZone
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
@@ -81,6 +82,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
 
   loaderSavePublication = false;
 
+  loaderPreviews = false;
+
   myForm: FormGroup = this._fb.group({
     content: ['', [Validators.required, Validators.minLength(1)]],
     privacy: [''],
@@ -101,6 +104,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
 
   @Input() idUserProfile?: string;
 
+  @Input() idMedia?: string;
+
   @ViewChild('postText') postTextRef!: ElementRef;
 
   constructor(
@@ -117,7 +122,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     private _userService: UserService,
     private _globalEventService: GlobalEventService,
     private _emailNotificationService: EmailNotificationService,
-    private _notificationCenterService: NotificationCenterService
+    private _notificationCenterService: NotificationCenterService,
+    private _ngZone: NgZone
   ) {
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
@@ -187,7 +193,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     this.myForm.controls['privacy'].setValue(this.privacy);
     if (this.type === TypePublishing.POST || this.type === TypePublishing.POSTPROFILE) {
       this.onSavePublication();
-    } else if (this.type === TypePublishing.COMMENT) {
+    } else if (this.type === TypePublishing.COMMENT || this.type === this.typePublishing.IMAGEVIEW) {
       this.onSaveComment(this.idPublication as string);
     }
   }
@@ -202,7 +208,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     const dataComment: CreateComment = {
       content: this.myForm.controls['content'].value,
       authorId: this.decodedToken.id,
-      idPublication,
+      idPublication: this.type === this.typePublishing.COMMENT ? idPublication : null,
+      idMedia: this.type === this.typePublishing.IMAGEVIEW ? this.idMedia : null,
     };
 
     this._commentService.createComment(dataComment).pipe(takeUntil(this.unsubscribe$)).subscribe({
@@ -223,7 +230,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     try {
       if (this.selectedFiles.length) {
         const response = await lastValueFrom(this.uploadFiles('comments', message.comment._id));
-        await this.saveFiles(response, 'comments/', message.comment._id, TypePublishing.COMMENT);
+        await this.saveFiles(response, environment.APIFILESERVICE + 'comments/', message.comment._id, TypePublishing.COMMENT);
       }
 
       await this.updatePublicationAndNotify(idPublication, message.comment);
@@ -298,7 +305,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     try {
       if (this.selectedFiles.length) {
         const response = await lastValueFrom(this.uploadFiles('publications', message.publications._id));
-        await this.saveFiles(response, 'publications/', message.publications._id, TypePublishing.POST);
+        await this.saveFiles(response, environment.APIFILESERVICE + 'publications/', message.publications._id, TypePublishing.POST);
       }
 
       await this.updatePublicationAndNotify(message.publications._id);
@@ -407,6 +414,11 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   onTextareaInput() {
+    if (this.myForm.controls['content'].value.trim().length === 0) {
+      this.myForm.controls['content'].setErrors({ required: true });
+    } else {
+      this.myForm.controls['content'].setErrors(null);
+    }
     this.autoResize();
   }
 
@@ -432,7 +444,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
       width: '400px',
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.unsubscribe$)).subscribe(result => {
       if (result) {
         this.setLocationData(result);
         this._cdr.markForCheck();
@@ -454,17 +466,27 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
       }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.selectedFiles = result;
-        this.createPreviews();
-      }
+    dialogRef.afterClosed().pipe(
+      takeUntil(this.unsubscribe$)
+    ).subscribe({
+      next: (result) => {
+        this.loaderPreviews = true;
+        if (result) {
+          this.selectedFiles = result;
+          this.createPreviews();
+          this._cdr.markForCheck();
+        } else {
+          this.loaderPreviews = false;
+        }
+      },
     });
   }
 
-  private createPreviews() {
+  private async createPreviews() {
     this.previews = [];
+    let count = 0;
     this.selectedFiles.forEach(file => {
+      count++;
       const reader = new FileReader();
       reader.onload = (e: any) => {
         const fileType = file.type.split('/')[0];
@@ -475,6 +497,13 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
       };
       reader.readAsDataURL(file);
     });
+    if (count >= this.selectedFiles.length){
+      setTimeout(() => {
+        this.loaderPreviews = false;
+      }, 1500);
+    }
+
+    this._cdr.markForCheck();
   }
 
   removeFile(index: number) {
