@@ -9,6 +9,7 @@
   </div>
 
   <div class="previews">
+    <div class="loader" *ngIf="loading"></div>
     <div *ngFor="let preview of previews; let i = index" class="preview">
       <img *ngIf="preview.type.startsWith('image/')" [src]="preview.url" alt="Image Preview">
       <video *ngIf="preview.type.startsWith('video/')" [src]="preview.url" controls></video>
@@ -19,10 +20,9 @@
 
   <div class="buttons">
     <p>Archivos seleccionados {{ selectedFiles.length }} de {{ maxFiles }}</p>
-    <worky-buttons
+    <worky-buttons *ngIf="selectedFiles.length"
       [workyButtonType]="WorkyButtonType.Outline"
       [theme]="WorkyButtonTheme.Accent"
-      [disabled]="!selectedFiles.length"
       (click)="upload()"
       [width]="'100%'">
       <span basic-button-text>Subir</span>
