@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { distinctUntilChanged, Subject, takeUntil } from 'rxjs';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog  } from '@angular/material/dialog';
 import * as _ from 'lodash';
 
 import { ImageOrganizer } from '../../interfaces/image-organizer.interface';
@@ -27,6 +27,7 @@ export class MediaViewComponent  implements OnInit {
     private _deviceDetectionService: DeviceDetectionService,
     private _cdr: ChangeDetectorRef,
     private _publicationService: PublicationService,
+    private _dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: { 
       images: ImageOrganizer[],
       imageSelected: ImageOrganizer,
@@ -50,7 +51,9 @@ export class MediaViewComponent  implements OnInit {
         next: (dat: PublicationView[]) => {
           if (dat.filter((d: PublicationView) => d._id === this.data.publication._id).length > 0) {
             this.data.publication = dat.filter((d: PublicationView) => d._id === this.data.publication._id)[0];
-            this.data.images = this.data.publication.media;
+            if (!this.data.comment) {
+              this.data.images = this.data.publication.media;
+            }
             if (this.data.comment) {
               const foundComment = this.data.publication.comment.find((comment: Comment) => comment._id === this.data.comment._id);
               if (foundComment) {
@@ -71,6 +74,10 @@ export class MediaViewComponent  implements OnInit {
   onImageChanged(imageId: string) {
     this.imageSelected = imageId;
     this._cdr.detectChanges();
+  }
+
+  close(): void {
+    this._dialog.closeAll();
   }
 
 }

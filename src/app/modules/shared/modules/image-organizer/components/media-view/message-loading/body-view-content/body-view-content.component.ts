@@ -20,6 +20,8 @@ export class BodyViewContentComponent  implements OnDestroy {
 
   typeViewEnum = TypeView;
 
+  typePublishingEnum = TypePublishing;
+
   type?: TypePublishing = TypePublishing.IMAGEVIEW;
 
   dataViewContent: any;
@@ -50,7 +52,7 @@ export class BodyViewContentComponent  implements OnDestroy {
     }
     if (this.typeView === TypeView.PUBLICATION) {
       this.getCommentImageSelected();
-    }    
+    }
   }
 
   ngOnDestroy(): void {

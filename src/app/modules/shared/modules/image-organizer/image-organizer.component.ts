@@ -4,6 +4,7 @@ import { ImageOrganizer } from './interfaces/image-organizer.interface';
 import { environment } from '@env/environment';
 import { MediaViewComponent } from './components/media-view/media-view.component';
 import { PublicationView, Comment } from '@shared/interfaces/publicationView.interface';
+import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 
 @Component({
   selector: 'worky-image-organizer',
@@ -28,7 +29,14 @@ export class ImageOrganizerComponent implements OnInit {
 
   currentItem: any = null;
 
-  constructor(private _dialog: MatDialog) { }
+  get isMobile(): boolean {
+    return this._deviceDetectionService.isMobile();
+  }
+
+  constructor(
+    private _dialog: MatDialog,
+    private _deviceDetectionService: DeviceDetectionService
+  ) { }
 
   ngOnInit(): void {
 
@@ -80,9 +88,9 @@ export class ImageOrganizerComponent implements OnInit {
 
   openViewMedia(imagenSelected: ImageOrganizer): void {
     const dialogRef = this._dialog.open(MediaViewComponent, {
-      width: '95vw',
-      height: '95vh',
-      maxWidth: '95vw',
+      width: this.isMobile ? '100vw' : '95vw',
+      height: this.isMobile? '100vh' : '95vh',
+      maxWidth: this.isMobile? '100vw' : '95vw',
       panelClass: 'view-media-modal-container',
       data: {
         images: this.images,

@@ -1,6 +1,5 @@
 <div class="content-view-media-carousel">
   <div class="carousel-container">
-    <!-- Imagen principal -->
     <img [src]="imageSelected?.urlCompressed" class="main-image" alt="Selected Image" />
 
     <ng-container *ngIf="images.length > 1">
@@ -9,7 +8,6 @@
     </ng-container>
   </div>
 
-  <!-- Lista de miniaturas -->
   <div class="thumbnail-list">
     <img
       *ngFor="let image of images"

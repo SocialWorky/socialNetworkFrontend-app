@@ -8,7 +8,7 @@
     max-height: 70vh;
     overflow: auto;
     @include breakpoints.below-sm {
-      max-height: 20vh;
+      max-height: 28vh;
     }
     .publication-comment-item {
       display: flex;
@@ -37,11 +37,11 @@
             .delete-comment {
               margin-left: 15px;
               padding: 5px;
-              background-color: rgb(228, 228, 228);
+              background-color: colors.$worky-color-light;
               border-radius: 50%;
               cursor: pointer;
               font-size: 15px;
-              color: rgb(166, 0, 0);
+              color: colors.$worky-color-red;
             }
           }
 

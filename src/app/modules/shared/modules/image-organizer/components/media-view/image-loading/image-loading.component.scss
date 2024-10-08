@@ -1,10 +1,13 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+
 .content-view-media-carousel {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
   padding: 10px;
-  background-color: #000000; 
+  background-color: colors.$worky-color-black; 
 
   .carousel-container {
     position: relative;
@@ -33,7 +36,7 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background-color: rgba(198, 198, 198, 0.5);
+    background-color: colors.$worky-color-greyLight;
     color: rgb(32, 32, 32);
     border: none;
     border-radius: 50%;
@@ -76,6 +79,6 @@
   }
 
   .thumbnail-list img.active {
-    border: 2px solid #ffffffc8;
+    border: 2px solid colors.$worky-color-greyLight;
   }
 }
