@@ -80,7 +80,8 @@
     </div>
 
     <worky-image-organizer *ngIf="publication.media.length"
-      [images]="publication.media">
+      [publication]="publication"
+      type="publication">
     </worky-image-organizer>
   </div>
 
@@ -155,7 +156,9 @@
           </div>
 
           <worky-image-organizer *ngIf="comment.media.length"
-            [images]="comment.media">
+            [comment]="comment"
+            [publication]="publication"
+            type="comment">
           </worky-image-organizer>
         </div>
         <span class="comment-date">{{ comment.createdAt | workyRelativeTime }}</span>
