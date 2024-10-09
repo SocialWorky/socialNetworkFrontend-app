@@ -49,33 +49,33 @@ import { GifSearchComponent } from '../gif-search/gif-search.component';
 })
 export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit {
   WorkyButtonType = WorkyButtonType;
-  
+
   WorkyButtonTheme = WorkyButtonTheme;
-  
+
   typePrivacy = TypePrivacy;
-  
+
   typePublishing = TypePublishing;
 
   user: User = {} as User;
-  
+
   profileImageUrl: string | null = null;
-  
+
   nameGeoLocation = '';
-  
+
   dataGeoLocation = '';
-  
+
   showEmojiMenu = false;
-  
+
   privacy = TypePrivacy.PUBLIC;
-  
+
   privacyFront = '';
-  
+
   previews: { url: string; type: string }[] = [];
-  
+
   selectedFiles: File[] = [];
-  
+
   decodedToken!: Token;
-  
+
   isAuthenticated = false;
 
   showGifSearch = false;
@@ -538,23 +538,41 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     }
   }
 
-insertText(markdown: string) {
-  const textarea = this.postTextRef.nativeElement as HTMLTextAreaElement;
-  const startPos = textarea.selectionStart;
-  const endPos = textarea.selectionEnd;
-  const selectedText = this.myForm.get('content')?.value.substring(startPos, endPos);
+  insertText(markdown: string) {
+    const textarea = this.postTextRef.nativeElement as HTMLTextAreaElement;
+    const startPos = textarea.selectionStart;
+    const endPos = textarea.selectionEnd;
+    const contentValue = this.myForm.get('content')?.value || '';
+    const selectedText = contentValue.substring(startPos, endPos);
 
-  let newText;
-  if (selectedText) {
-    newText = this.myForm.get('content')?.value.substring(0, startPos) + markdown.replace('placeholder', selectedText) + this.myForm.get('content')?.value.substring(endPos);
-  } else {
-    newText = this.myForm.get('content')?.value.substring(0, startPos) + markdown.replace('placeholder', '') + this.myForm.get('content')?.value.substring(endPos);
+    let newText;
+    let cursorPos;
+
+    if (selectedText) {
+
+      newText = contentValue.substring(0, startPos)
+                + markdown.replace('placeholder', selectedText)
+                + contentValue.substring(endPos);
+      cursorPos = startPos + markdown.length;
+    } else {
+
+      const placeholderIndex = markdown.indexOf('placeholder');
+      const beforePlaceholder = markdown.substring(0, placeholderIndex);
+      const afterPlaceholder = markdown.substring(placeholderIndex + 'placeholder'.length);
+
+      newText = contentValue.substring(0, startPos)
+                + beforePlaceholder
+                + afterPlaceholder
+                + contentValue.substring(endPos);
+
+      cursorPos = startPos + beforePlaceholder.length;
+    }
+
+    this.myForm.get('content')?.setValue(newText);
+
+    textarea.focus();
+    textarea.selectionStart = cursorPos;
+    textarea.selectionEnd = cursorPos;
   }
-
-  this.myForm.get('content')?.setValue(newText);
-  textarea.focus();
-  textarea.selectionStart = startPos + markdown.length;
-  textarea.selectionEnd = startPos + markdown.length;
-}
 
 }
