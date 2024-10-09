@@ -127,7 +127,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
 
     this.loadSubscription();
-    this.subscribeToNotificationComment();    
+    this.subscribeToNotificationComment();
+    this._notificationUsersService.userActive();
   }
 
   private async loadSubscription() {

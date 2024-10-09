@@ -6,5 +6,6 @@ export interface Token {
   role: string;
   avatar: string;
   status?: string;
+  lastActivity?: Date;
   _id?: string;
 }
