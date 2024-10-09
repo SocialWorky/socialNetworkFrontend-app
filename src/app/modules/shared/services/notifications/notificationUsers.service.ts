@@ -9,12 +9,20 @@ import { Token } from '@shared/interfaces/token.interface';
 })
 export class NotificationUsersService implements OnDestroy {
   private token: Token;
+
   private _userStatuses = new BehaviorSubject<Token[]>([]);
+
   public userStatuses$ = this._userStatuses.asObservable();
+
   private _unsubscribeAll = new Subject<void>();
+
   private inactivityDuration = 5 * 60 * 1000; // 5 minutes
+
   private inactivityTimeout: any;
+
   private isInactive = false;
+
+  private userStatusMap = new Map<string, Token>();
 
   constructor(private socket: Socket, private _authService: AuthService) {
     this.token = this._authService.getDecodedToken()!;
@@ -38,22 +46,17 @@ export class NotificationUsersService implements OnDestroy {
   }
 
   private updateUserStatus(data: Token) {
-    const currentStatuses = this._userStatuses.getValue();
-    const userIndex = currentStatuses.findIndex(status => status._id === data._id);
-
-    if (data?.status === 'offLine') {
-      if (userIndex !== -1) {
-        currentStatuses.splice(userIndex, 1); // Remove offline user
-      }
-    } else {
-      if (userIndex === -1) {
-        currentStatuses.push(data); // Add new user status
+      if (data?.status === 'offLine' && data?._id !== undefined) {
+          if (this.userStatusMap.has(data._id)) {
+              this.userStatusMap.delete(data?._id);
+              this._userStatuses.next(Array.from(this.userStatusMap.values()));
+          }
       } else {
-        currentStatuses[userIndex] = data; // Update existing status
+          if (data?._id !== undefined) {
+            this.userStatusMap.set(data._id, data);
+            this._userStatuses.next(Array.from(this.userStatusMap.values()));
+          }
       }
-    }
-
-    this._userStatuses.next(currentStatuses);
   }
 
   public setupInactivityListeners() {
@@ -88,16 +91,22 @@ export class NotificationUsersService implements OnDestroy {
   private setUserInactive() {
     if (!this.isInactive) {
       this.isInactive = true;
-      this.socket.emit('userInactive', this.token);
+      this.emitUserInactive();
     }
   }
 
   private setUserActive() {
     if (this.isInactive) {
       this.isInactive = false;
-      this.socket.emit('userActive', this.token);
+      this.emitUserActive();
       this.resetInactivityTimer();
     }
+  }
+
+  public userActive() {
+    this.isInactive = false;
+    this.emitUserActive();
+    this.resetInactivityTimer();
   }
 
   public addCurrentUserStatus(userStatus: Token) {
@@ -110,20 +119,38 @@ export class NotificationUsersService implements OnDestroy {
     }
   }
 
+  private emitUserInactive() {
+    setTimeout(() => {
+      this.socket.emit('userInactive', this.token);
+    }, 3000);
+  }
+
+  private emitUserActive() {
+    setTimeout(() => {
+      this.socket.emit('userActive', this.token);
+    }, 3000);
+  }
+
   public getUserStatuses() {
     return this._userStatuses.getValue();
   }
 
   public refreshUserStatuses() {
-    this.socket.emit('refreshUserStatuses');
+    setTimeout(() => {
+      this.socket.emit('refreshUserStatuses');
+    }, 3000);
   }
 
   public logoutUser() {
-    this.socket.emit('logoutUser', this.token);
+    setTimeout(() => {
+      this.socket.emit('logoutUser', this.token);
+    }, 3000);
   }
 
   public loginUser() {
-    this.socket.emit('loginUser', this.token);
+    setTimeout(() => {
+      this.socket.emit('loginUser', this.token);
+    }, 3000);
   }
 
   ngOnDestroy() {
