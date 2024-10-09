@@ -374,7 +374,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     this._notificationCenterService.createNotification({
       userId: publication.author._id,
       type: NotificationType.COMMENT,
-      content: 'Han comentado tu publicación',
+      content: this.type === this.typePublishing.IMAGEVIEW ? translations['notification.commentPublicationImage'] : translations['notification.commentPublication'],
       link: `/publication/${publication._id}`,
       additionalData: JSON.stringify(dataNotification),
     }).pipe(takeUntil(this.unsubscribe$)).subscribe();
@@ -506,6 +506,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     this._cdr.markForCheck();
   }
 
+  replaceVariables(text: string, variables: { [key: string]: any }): string {
+    return text.replace(/{{(.*?)}}/g, (_, key) => {
+      return variables[key.trim()] || '';
+    });
+  }
+
   removeFile(index: number) {
     this.selectedFiles.splice(index, 1);
     this.previews.splice(index, 1);
@@ -516,12 +522,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
 
     this.mailSendNotification = {
       url: `${environment.BASE_URL}/publication/${publication._id}`,
-      subject: 'Han comentado tu publicación',
-      title: 'Notificación de comentario en publicación',
-      greet: 'Hola',
-      message: `El usuario ${this.user.name} ${this.user.lastName} ha comentado tu publicación`,
-      subMessage: `Su comentario fue: ${comment.content}`,
-      buttonMessage: 'Ver publicación',
+      subject: translations['email.commentPublicationSubject'],
+      title: translations['email.commentPublicationTitle'],
+      greet: translations['email.commentPublicationGreet'],
+      message: this.replaceVariables(translations['email.commentPublicationMessage'], { 'name': this.user.name, 'lastName': this.user.lastName }),
+      subMessage: this.replaceVariables(translations['email.commentPublicationSubMessage'], { 'comment': comment.content }),
+      buttonMessage: translations['email.commentPublicationButtonMessage'],
       template: TemplateEmail.NOTIFICATION,
       email: publication?.author.email,
     };

@@ -133,7 +133,6 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy {
   async markAsRead(_id: string) {
     await this._notificationCenterService.updateNotification(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
-        console.log('Notificación marcada como leida:', response);
         this.getNotifications();
       },
       error: (error) => {

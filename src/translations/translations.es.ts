@@ -104,9 +104,17 @@ export const translations = {
   'email.acceptFriendRequestMessage': 'Han aceptado tu solicitud de amistad. Ahora son amigos.',
   'email.acceptFriendRequestSubMessage': 'Solicitud de amistad aceptada de: ',
   'email.acceptFriendRequestButtonMessage': 'Ver perfil de: ',
+  // -> NOTIFICATION COMMENT PUBLICATION
+  'email.commentPublicationSubject': 'Han comentado tu publicación',
+  'email.commentPublicationTitle': 'Notificación de comentario en publicación',
+  'email.commentPublicationGreet': 'Hola',
+  'email.commentPublicationMessage': 'El usuario {{name}} {{lastName}} ha comentado tu publicación',
+  'email.commentPublicationSubMessage': 'Su comentario fue: {{comment}}',
+  'email.commentPublicationButtonMessage': 'Ver publicación',
+  // -> NOTIFICATION CENTER SERVICE
+  'notification.commentPublication': 'Han comentado tu publicación',
+  'notification.commentPublicationImage': 'Han comentado una imagen',
   // REGISTER COMPONENT
-  'register.title': 'Registro',
-  'register.subTitle': 'Complete el formulario de registro',
   'register.haveAccountLogIn': '¿Ya tienes una cuenta? Inicia sesión',
   'register.messageLoading': 'Registrando...',
   // NAVBAR COMPONENT

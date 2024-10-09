@@ -7,6 +7,7 @@ import { ImageOrganizer } from '../../interfaces/image-organizer.interface';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { Comment, PublicationView } from '@shared/interfaces/publicationView.interface';
 import { PublicationService } from '@shared/services/publication.service';
+import { NotificationService } from '@shared/services/notifications/notification.service';
 
 @Component({
   selector: 'worky-media-view',
@@ -27,6 +28,7 @@ export class MediaViewComponent  implements OnInit {
     private _deviceDetectionService: DeviceDetectionService,
     private _cdr: ChangeDetectorRef,
     private _publicationService: PublicationService,
+    private _notificationService: NotificationService,
     private _dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: { 
       images: ImageOrganizer[],
@@ -42,6 +44,11 @@ export class MediaViewComponent  implements OnInit {
   }
 
   ngOnInit() {
+    this.subscriptionPublication();
+    this.subscriptionNotification();
+  }
+
+  private subscriptionPublication(): void {
     this._publicationService.publications$
       .pipe(
         distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
@@ -66,6 +73,21 @@ export class MediaViewComponent  implements OnInit {
       });
   }
 
+  private subscriptionNotification(): void {
+    this._notificationService.notification$
+      .pipe(
+        distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (data: any) => {
+          if (data?._id === this.data.publication._id) {
+            this.subscriptionPublication();
+            this._cdr.markForCheck();
+          }
+        }
+     });
+  }
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

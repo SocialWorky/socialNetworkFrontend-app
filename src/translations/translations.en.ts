@@ -104,6 +104,16 @@ export const translations = {
   'email.acceptFriendRequestMessage': 'You have accepted a friend request. Now you are friends.',
   'email.acceptFriendRequestSubMessage': 'Friend request accepted from: ',
   'email.acceptFriendRequestButtonMessage': 'View profile of: ',
+  // -> NOTIFICATION COMMENT PUBLICATION
+  'email.commentPublicationSubject': 'Comment publication',
+  'email.commentPublicationTitle': 'Publication comment notification',
+  'email.commentPublicationGreet': 'Hello',
+  'email.commentPublicationMessage': 'The user {{name}} {{lastName}} has commented on your publication',
+  'email.commentPublicationSubMessage': 'Your comment was: {{comment}}',
+  'email.commentPublicationButtonMessage': 'View publication',
+  // -> NOTIFICATION CENTER SERVICE
+  'notification.commentPublication': 'Comment publication',
+  'notification.commentPublicationImage': 'Comment image',
   // REGISTER COMPONENT
   'register.title': 'Register',
   'register.subTitle': 'Fill out the registration form',
