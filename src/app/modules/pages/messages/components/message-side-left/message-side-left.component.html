@@ -16,7 +16,7 @@
           <div *ngIf="item.unreadMessagesCount > 0" class="unread-messages">{{ item.unreadMessagesCount }}</div>
         </div>
         <span class="last-message worky-font-roboto">{{ sanitizeHtml(item.lastMessage) }} </span>
-        <span class="last-message-time worky-font-roboto">{{ formatTime(item.createAt) }}</span>
+        <span class="last-message-time worky-font-roboto">{{ formatTimeOrElapsed(item.createAt) }}</span>
       </div>
     </button>
   </div>
