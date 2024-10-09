@@ -81,6 +81,7 @@
           [(ngModel)]="newMessage"
           (input)="autoResize($event)"
           (focus)="markMessagesAsRead()"
+          (keydown)="onKeyDown($event)"
           placeholder="{{ 'messageChat.placeholder' | workyTranslations }}"
         ></textarea>
       </div>

@@ -71,12 +71,20 @@
 
         .sent-content,
         .received-content {
+          line-height: 1.2;
           border-radius: 1rem;
           padding: 0.5rem 1rem;
           display: inline-block;
           max-width: 100%;
           word-break: break-word;
           box-shadow: -15px 1px 12px rgba(0, 0, 0, 0.1);
+          markdown {
+            display: flex;
+            flex-direction: column;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+          }
         }
       }
 

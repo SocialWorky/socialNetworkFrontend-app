@@ -119,7 +119,16 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     if (changes['userId'] && !changes['userId'].isFirstChange()) {
       this.loadMessagesWithUser(this.currentUser.id, changes['userId'].currentValue);
       this._cdr.markForCheck();
-      // this.scrollToBottom();
+      this.scrollToBottom();
+    }
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    if (!this.isMobile) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        this.sendMessage(this.plainText);
+      }
     }
   }
 
@@ -206,6 +215,12 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
         this._notificationMessageChatService.sendNotificationMessageChat(msg);
         this._notificationService.sendNotification();
         this.newMessage = '';
+
+        const textarea = document.querySelector('textarea');
+        if (textarea) {
+          textarea.style.height = '40px';
+        }
+
         this.scrollToBottom();
         this.sendMessagesLoader = false;
         this._cdr.markForCheck();
