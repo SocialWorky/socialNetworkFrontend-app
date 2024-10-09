@@ -50,8 +50,8 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     this.getUserOnline();
   }
 
-  async getUserOnline() {
-    await this._notificationUsersService.addCurrentUserStatus(this.currentUser);
+  getUserOnline() {
+    this._notificationUsersService.addCurrentUserStatus(this.currentUser);
   }
 
   ngOnDestroy(): void {

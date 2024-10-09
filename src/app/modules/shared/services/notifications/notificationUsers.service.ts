@@ -8,136 +8,121 @@ import { Token } from '@shared/interfaces/token.interface';
   providedIn: 'root',
 })
 export class NotificationUsersService implements OnDestroy {
-  token: Token;
-
+  private token: Token;
   private _userStatuses = new BehaviorSubject<Token[]>([]);
   public userStatuses$ = this._userStatuses.asObservable();
-
   private _unsubscribeAll = new Subject<void>();
-
-  private inactivityDuration = 2 * 60 * 1000;
+  private inactivityDuration = 5 * 60 * 1000; // 5 minutes
   private inactivityTimeout: any;
   private isInactive = false;
 
   constructor(private socket: Socket, private _authService: AuthService) {
     this.token = this._authService.getDecodedToken()!;
-    this.updateUserStatus(this.token);
-    this.addCurrentUserStatus(this.token);
-
-    this.socket.emit('loginUser', this.token);
-
-    this.subscribeToUserStatus();
-    this.initializeUserStatuses();
+    this.initializeUserStatus();
     this.setupInactivityListeners();
   }
 
-  private initializeUserStatuses() {
+  private initializeUserStatus() {
+    this.socket.emit('loginUser', this.token);
     this.socket.emit('getUserStatuses');
-    this.socket
-      .fromEvent<Token[]>('initialUserStatuses')
-      .subscribe((initialStatuses: Token[]) => {
-        this._userStatuses.next(initialStatuses);
-      });
-  }
+    
+    this.socket.fromEvent<Token[]>('initialUserStatuses').subscribe((initialStatuses: Token[]) => {
+      this._userStatuses.next(initialStatuses);
+    });
 
-  private subscribeToUserStatus() {
-    this.socket
-      .fromEvent<Token>('userStatus')
-      .subscribe((data: Token) => {
-        this.updateUserStatus(data);
-      });
+    this.socket.fromEvent<Token>('userStatus').subscribe((data: Token) => {
+      this.updateUserStatus(data);
+    });
+    
+    this.addCurrentUserStatus(this.token);
   }
 
   private updateUserStatus(data: Token) {
     const currentStatuses = this._userStatuses.getValue();
-    const userIndex = currentStatuses.findIndex(
-      (status) => status._id === data._id
-    );
-    if (userIndex !== -1) {
-      if (data?.status === 'offLine') {
-        currentStatuses.splice(userIndex, 1);
-      } else {
-        currentStatuses[userIndex] = data;
+    const userIndex = currentStatuses.findIndex(status => status._id === data._id);
+
+    if (data?.status === 'offLine') {
+      if (userIndex !== -1) {
+        currentStatuses.splice(userIndex, 1); // Remove offline user
       }
     } else {
-      if (data?.status !== 'offLine') {
-        currentStatuses.push(data);
+      if (userIndex === -1) {
+        currentStatuses.push(data); // Add new user status
+      } else {
+        currentStatuses[userIndex] = data; // Update existing status
       }
     }
+
     this._userStatuses.next(currentStatuses);
   }
 
-  setupInactivityListeners() {
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        this.isInactive = true;
-        this.setUserInactive();
-      } else {
-        this.isInactive = false;
-        this.setUserActive();
-      }
-    });
+  public setupInactivityListeners() {
+    document.addEventListener('visibilitychange', () => this.handleVisibilityChange());
 
-    ['mousemove', 'keydown', 'scroll', 'click'].forEach((event) => {
-      window.addEventListener(event, () => this.handleUserActivity());
-    });
+    const activityEvents = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart', 'touchmove'];
+    activityEvents.forEach(event => window.addEventListener(event, () => this.handleUserActivity(), { passive: true }));
 
     this.resetInactivityTimer();
   }
 
+  private handleVisibilityChange() {
+    if (document.hidden) {
+      this.setUserInactive();
+    } else {
+      this.setUserActive();
+    }
+  }
+
   private handleUserActivity() {
     if (!this.isInactive) {
-      this.setUserActive(); 
-      this.socket.emit('userActive', this.token);
+      this.setUserActive();
       this.resetInactivityTimer();
     }
-    this.isInactive = false;
   }
 
   private resetInactivityTimer() {
     clearTimeout(this.inactivityTimeout);
-    this.inactivityTimeout = setTimeout(() => {
-      this.setUserInactive();
-    }, this.inactivityDuration);
+    this.inactivityTimeout = setTimeout(() => this.setUserInactive(), this.inactivityDuration);
   }
 
   private setUserInactive() {
-    if (this.isInactive) {
+    if (!this.isInactive) {
+      this.isInactive = true;
       this.socket.emit('userInactive', this.token);
     }
   }
 
   private setUserActive() {
-    if (!this.isInactive) {
+    if (this.isInactive) {
+      this.isInactive = false;
       this.socket.emit('userActive', this.token);
       this.resetInactivityTimer();
     }
   }
 
-  addCurrentUserStatus(userStatus: Token) {
+  public addCurrentUserStatus(userStatus: Token) {
     const currentStatuses = this._userStatuses.getValue();
-    const userIndex = currentStatuses?.findIndex(
-      (status) => status?._id === userStatus?._id
-    );
+    const userIndex = currentStatuses.findIndex(status => status?._id === userStatus?._id);
+    
     if (userIndex === -1) {
       currentStatuses.push(userStatus);
       this._userStatuses.next(currentStatuses);
     }
   }
 
-  getUserStatuses() {
+  public getUserStatuses() {
     return this._userStatuses.getValue();
   }
 
-  refreshUserStatuses() {
+  public refreshUserStatuses() {
     this.socket.emit('refreshUserStatuses');
   }
 
-  logoutUser() {
+  public logoutUser() {
     this.socket.emit('logoutUser', this.token);
   }
 
-  loginUser() {
+  public loginUser() {
     this.socket.emit('loginUser', this.token);
   }
 
@@ -145,8 +130,8 @@ export class NotificationUsersService implements OnDestroy {
     this._unsubscribeAll.next();
     this._unsubscribeAll.complete();
     clearTimeout(this.inactivityTimeout);
-    document.removeEventListener('visibilitychange', this.handleUserActivity);
-    ['mousemove', 'keydown', 'scroll', 'click'].forEach((event) => {
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    ['mousemove', 'keydown', 'scroll', 'click', 'touchstart', 'touchmove'].forEach(event => {
       window.removeEventListener(event, this.handleUserActivity);
     });
   }
