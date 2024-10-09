@@ -24,6 +24,10 @@ export class NotificationUsersService implements OnDestroy {
 
   private userStatusMap = new Map<string, Token>();
 
+  // Batching variables
+  private batchedUpdates: Token[] = [];
+  private batchInterval: any;
+
   constructor(private socket: Socket, private _authService: AuthService) {
     this.token = this._authService.getDecodedToken()!;
     this.initializeUserStatus();
@@ -33,7 +37,7 @@ export class NotificationUsersService implements OnDestroy {
   private initializeUserStatus() {
     this.socket.emit('loginUser', this.token);
     this.socket.emit('getUserStatuses');
-    
+
     this.socket.fromEvent<Token[]>('initialUserStatuses').subscribe((initialStatuses: Token[]) => {
       this._userStatuses.next(initialStatuses);
     });
@@ -41,31 +45,74 @@ export class NotificationUsersService implements OnDestroy {
     this.socket.fromEvent<Token>('userStatus').subscribe((data: Token) => {
       this.updateUserStatus(data);
     });
-    
+
     this.addCurrentUserStatus(this.token);
   }
 
   private updateUserStatus(data: Token) {
-      if (data?.status === 'offLine' && data?._id !== undefined) {
-          if (this.userStatusMap.has(data._id)) {
-              this.userStatusMap.delete(data?._id);
-              this._userStatuses.next(Array.from(this.userStatusMap.values()));
-          }
-      } else {
-          if (data?._id !== undefined) {
-            this.userStatusMap.set(data._id, data);
-            this._userStatuses.next(Array.from(this.userStatusMap.values()));
-          }
+    if (data?.status === 'offLine' && data?._id !== undefined) {
+      if (this.userStatusMap.has(data._id)) {
+        this.userStatusMap.delete(data?._id);
+        this.sendBatchedUpdates();
       }
+    } else {
+      if (data?._id !== undefined) {
+        this.userStatusMap.set(data._id, data);
+        this.addToBatch(data);
+      }
+    }
+
+    this._userStatuses.next(Array.from(this.userStatusMap.values()));
+  }
+
+  private addToBatch(userStatus: Token) {
+    this.batchedUpdates.push(userStatus);
+
+    if (!this.batchInterval) {
+      this.batchInterval = setTimeout(() => {
+        this.sendBatchedUpdates();
+      }, 3000);
+    }
+  }
+
+  private sendBatchedUpdates() {
+    if (this.batchedUpdates.length > 0) {
+      this.socket.emit('userStatusesBatch', this.batchedUpdates);
+      this.batchedUpdates = [];
+    }
+    clearTimeout(this.batchInterval);
+    this.batchInterval = null;
   }
 
   public setupInactivityListeners() {
     document.addEventListener('visibilitychange', () => this.handleVisibilityChange());
 
     const activityEvents = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart', 'touchmove'];
-    activityEvents.forEach(event => window.addEventListener(event, () => this.handleUserActivity(), { passive: true }));
+    activityEvents.forEach(event => window.addEventListener(event, this.throttledHandleUserActivity.bind(this), { passive: true }));
 
     this.resetInactivityTimer();
+  }
+
+  private throttledHandleUserActivity: () => void = this.throttle(this.handleUserActivity.bind(this), 3000); 
+
+  private throttle(fn: () => void, limit: number) {
+    let lastFn: any;
+    let lastRan: number;
+  
+    return function (this: any, ...args: any) {
+      if (!lastRan) {
+        fn.apply(this, args);
+        lastRan = Date.now();
+      } else {
+        clearTimeout(lastFn);
+        lastFn = setTimeout(() => {
+          if ((Date.now() - lastRan) >= limit) {
+            fn.apply(this, args);
+            lastRan = Date.now();
+          }
+        }, limit - (Date.now() - lastRan));
+      }
+    };
   }
 
   private handleVisibilityChange() {
@@ -112,7 +159,7 @@ export class NotificationUsersService implements OnDestroy {
   public addCurrentUserStatus(userStatus: Token) {
     const currentStatuses = this._userStatuses.getValue();
     const userIndex = currentStatuses.findIndex(status => status?._id === userStatus?._id);
-    
+
     if (userIndex === -1) {
       currentStatuses.push(userStatus);
       this._userStatuses.next(currentStatuses);
@@ -159,7 +206,7 @@ export class NotificationUsersService implements OnDestroy {
     clearTimeout(this.inactivityTimeout);
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
     ['mousemove', 'keydown', 'scroll', 'click', 'touchstart', 'touchmove'].forEach(event => {
-      window.removeEventListener(event, this.handleUserActivity);
+      window.removeEventListener(event, this.throttledHandleUserActivity);
     });
   }
 }
