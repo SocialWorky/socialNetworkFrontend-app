@@ -97,9 +97,8 @@ export class AuthService {
   }
 
   logout() {
-    if (this.googleLoginSession) this._authGoogleService.logout();
+    this._authGoogleService.logout();
     this.clearSession();
-    this._router.navigate(['/auth']);
   }
 
   private clearSession() {
