@@ -63,7 +63,6 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.updateReactionsPopupPosition();
   }
 
   ngOnDestroy(): void {
@@ -93,7 +92,6 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
           this._emailNotificationService.reactionsNotification(this.publication!, reaction);
 
           this.refreshPublications();
-          this.updateReactionsPopupPosition();
         },
         error: (err) => {
           console.error('Failed to add reaction', err);
@@ -110,7 +108,6 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
         this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
         this.unlockReactions = true;
-        this.updateReactionsPopupPosition();
       },
       error: (err) => {
         console.error('Failed to delete reaction', err);
@@ -133,7 +130,6 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
         this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
         this.unlockReactions = true;
-        this.updateReactionsPopupPosition();
       },
       error: (err) => {
         console.error('Failed to edit reaction', err);
@@ -152,7 +148,6 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
               zoomed: false
             }));
           this._cdr.markForCheck();
-          this.updateReactionsPopupPosition();
         },
         error: (err) => {
           console.error('Failed to load reactions', err);
@@ -162,14 +157,10 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   showReactions() {
     this.reactionsVisible = true;
-    setTimeout(() => {
-      this.updateReactionsPopupPosition();
-    }, 0);
   }
 
   hideReactions() {
     this.reactionsVisible = false;
-    this.updateReactionsPopupPosition();
   }
 
   zoomIn(reaction: CustomReactionList & { zoomed: boolean }) {
@@ -204,13 +195,6 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   onTouchEnd() {
     if (this.touchTimeout) {
       clearTimeout(this.touchTimeout);
-    }
-  }
-
-  private updateReactionsPopupPosition() {
-    if (this.reactionPopup) {
-      const items = this.reactionPopup.nativeElement.children.length;
-      this.reactionPopup.nativeElement.style.setProperty('--num-items', items.toString());
     }
   }
 }
