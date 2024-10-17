@@ -35,7 +35,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   @Input()
   set size(value: number) {
-    if (value >= 30 && value <= 100) {
+    if (value >= 10 && value <= 100) {
       this._size = value;
     }
   }

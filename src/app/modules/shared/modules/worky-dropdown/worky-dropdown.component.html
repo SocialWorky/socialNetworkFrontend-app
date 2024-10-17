@@ -5,7 +5,7 @@
   <div *ngIf="img === 'avatar'">
     <div *ngIf="loaderAvatar" class="loader"></div>
     <worky-avatar *ngIf="!loaderAvatar"
-      [size]="50"
+      [size]="size ?? 50"
       [img]="profileImageUrl"
       [name]="user.name + ' ' + user.lastName">
     </worky-avatar>

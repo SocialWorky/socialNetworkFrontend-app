@@ -2,6 +2,7 @@
 @use 'src/assets/styles/worky-palettes' as colors;
 
 .tab-menu {
+    color: colors.$worky-color-light;
     font-size: variables.$worky-font-size-9;
     padding: 10px;
     &:hover {
@@ -9,4 +10,27 @@
     color: colors.$worky-color-app-primary;
     border-radius: variables.$worky-border-radius-medium;
     }
+}
+
+.nav-item {
+  display: inline-block;
+  position: relative;
+  padding-bottom: 5px;
+}
+
+.nav-item.active .tab-menu {
+  color: colors.$worky-color-light;
+  &:hover {
+    color: colors.$worky-color-app-primary;
+  }
+}
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: colors.$worky-color-light;
 }

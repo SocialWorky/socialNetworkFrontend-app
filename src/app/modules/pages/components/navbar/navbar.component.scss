@@ -21,6 +21,7 @@
     @include breakpoints.below-sm {
       width: 100%;
       flex-direction: column;
+      padding: 0px;
     }
   }
 
@@ -30,7 +31,7 @@
     width: 30%;
     @include breakpoints.below-sm {
       width: 100%;
-      padding: 5px;
+      margin: 7px 0px 0px 10px;
     }
     a {
       .worky-logo {
@@ -41,6 +42,10 @@
         background-repeat: no-repeat;
         background-position: center;
         margin-top: 5px;
+        @include breakpoints.below-sm {
+          width: 40px;
+          height: 40px;
+        }
       }
     }
     .worky-search {
@@ -114,7 +119,6 @@
     justify-content: center;
     width: 50%;
     @include breakpoints.below-sm {
-      width: 100%;
       justify-content: flex-start;
     }
 
@@ -150,10 +154,4 @@
       z-index: 1;
     }
   }
-}
-
-.sticky {
-  position: sticky;
-  top: 0;
-  z-index: 2;
 }
