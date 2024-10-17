@@ -1,0 +1,43 @@
+name: Update Myb-side
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Tag de la versión'
+        required: true
+        default: 'latest'
+
+jobs:
+  update-container:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Crear archivo .env desde secretos
+        run: |
+          echo "NG_APP_BASE_URL=${{ secrets.NG_APP_BSIDE_BASE_URL }}" > .env
+          echo "NG_APP_API_URL=${{ secrets.NG_APP_BSIDE_API_URL }}" >> .env
+          echo "NG_APP_CLIEN_ID_GOOGLE=${{ secrets.NG_APP_BSIDE_CLIEN_ID_GOOGLE }}" >> .env
+          echo "NG_APP_WSURL=${{ secrets.NG_APP_BSIDE_WSURL }}" >> .env
+          echo "NG_APP_OPENCAGEAPIKEY=${{ secrets.NG_APP_OPENCAGEAPIKEY }}" >> .env
+          echo "NG_APP_APIGEOLOCATIONS=${{ secrets.NG_APP_BSIDE_APIGEOLOCATIONS }}" >> .env
+          echo "NG_APP_APIWEATHERURL=${{ secrets.NG_APP_APIWEATHERURL }}" >> .env
+          echo "NG_APP_APIWEATHERTOKEN=${{ secrets.NG_APP_APIWEATHERTOKEN }}" >> .env
+          echo "NG_APP_APIFILESERVICE=${{ secrets.NG_APP_BSIDE_APIFILESERVICE }}" >> .env
+          echo "NG_APP_APIMESSAGESERVICE=${{ secrets.NG_APP_BSIDE_APIMESSAGESERVICE }}" >> .env
+          echo "NG_APP_APINOTIFICATIONCENTER=${{ secrets.NG_APP_BSIDE_APINOTIFICATIONCENTER }}" >> .env
+          echo "NG_APP_GIPHYAPIKEY=${{ secrets.NG_APP_GIPHYAPIKEY }}" >> .env
+
+      - name: Build and push Docker image
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo "Iniciando la construcción y el empuje de la imagen Docker..."
+          docker build -t socialworky/myb-side:${{ github.event.inputs.image_tag }} .
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          docker push socialworky/myb-side:${{ github.event.inputs.image_tag }}
+          echo "Construcción y empuje de la imagen Docker completados."
