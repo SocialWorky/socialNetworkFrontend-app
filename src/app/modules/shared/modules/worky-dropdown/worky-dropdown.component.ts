@@ -16,10 +16,17 @@ import { firstValueFrom } from 'rxjs';
 })
 export class WorkyDropdownComponent implements OnInit, OnDestroy {
   @Input() icon?: string;
+
   @Input() badge: boolean = false;
+  
   @Input() badgeValue: number | null = 0;
+  
   @Input() dataLink: DropdownDataLink<any>[] = [];
+  
   @Input() img: string | boolean = '';
+
+  @Input() size?: number = 50;
+  
   @Input() title?: string;
 
   @Output() linkClicked = new EventEmitter<DropdownDataLink<any>>();
