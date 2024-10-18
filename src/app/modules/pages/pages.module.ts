@@ -22,7 +22,6 @@ import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.mod
 import { AddPublicationModule } from '@shared/modules/addPublication/addPublication.module';
 import { WorkyWidgetModule } from '@shared/modules/worky-widget/worky-widget.module';
 import { PublicationViewModule } from '@shared/modules/publication-view/publication-view.module';
-import { SuggetionToFollowModule } from '@shared/modules/suggetion-to-follow/suggetion-to-follow.module';
 import { EditImgProfileComponent } from './profiles/components/edit-img-profile/edit-img-profile.component';
 import { EditInfoProfileDetailComponent } from './profiles/components/edit-info-profile/edit-info-profile.component';
 import { ContactsModule } from '@shared/modules/contacts/contacts.module';
@@ -63,7 +62,6 @@ import { NotificationsPanelModule } from '@shared/modules/notifications-panel/no
     WorkyWidgetModule,
     MaterialModule,
     PickerModule,
-    SuggetionToFollowModule,
     SideBarMenutModule,
     ContactsModule,
     WorkyButtonsModule,
