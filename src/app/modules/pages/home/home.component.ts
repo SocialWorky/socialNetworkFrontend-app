@@ -128,7 +128,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.loadSubscription();
     this.subscribeToNotificationComment();
-    this._notificationUsersService.userActive();
+    setTimeout(() => {
+      this._notificationUsersService.userActive();
+    }, 300);
   }
 
   private async loadSubscription() {
@@ -260,7 +262,12 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.publications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    this.publications.sort((a, b) => {
+      if (a.fixed && !b.fixed) return -1;
+      if (!a.fixed && b.fixed) return 1;
+
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
     this.publications.forEach(pub => {
       if (pub.comment) {

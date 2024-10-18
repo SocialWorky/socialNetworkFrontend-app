@@ -153,6 +153,10 @@ export const translations = {
   'publicationsView.loadingDeletePublication': 'Eliminando publicación...',
   'publicationsView.reportPublication': 'Reportar publicación',
   'publicationsView.deletePublication': 'Eliminar publicación',
+  'publicationsView.fixedPublication': 'Fijar publicación',
+  'publicationsView.unfixedPublication': 'Desfijar publicación',
+  'publicationsView.loadingFixedPublication': 'Fijando publicación...',
+  'publicationsView.loadingUnfixedPublication': 'Desfijando publicación...',
   // DATE OF PUBLICATION AND COMMENTS
   'DATE_FNS.LESS_THAN_A_MINUTE': 'hace un momento',
   'DATE_FNS.X_MINUTES': '{{count}} m',

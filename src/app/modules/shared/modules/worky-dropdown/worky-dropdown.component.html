@@ -23,7 +23,11 @@
 
 <div *ngIf="dataLink?.length" class="dropdown-menu" [ngClass]="{'dropdown-menu-end': true, 'dropdown-up': dropdownDirection === 'up', 'dropdown-down': dropdownDirection === 'down'}">
   <div class="content-dropdow" *ngFor="let data of dataLink; let dataIndex = index;" (click)="handleMenuItemClick(data)">
-    <span *ngIf="data.icon" class="material-icons">{{ data.icon }}</span>
+    <span *ngIf="data.icon"
+      class="material-icons"
+      [ngClass]="data?.color">
+      {{ data.icon }}
+    </span>
     <span *ngIf="data.img" class="icon-img-dropdown">
       <img [src]="data.img" loading="lazy" />
     </span>

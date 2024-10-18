@@ -228,29 +228,37 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
         localStorage.setItem('token', response.token);
 
-        const userId = await this._authService.getDecodedToken()?.id!;
+        const avatar = await this._authService.getDecodedToken()?.avatar;
 
-        await this._authApiService.avatarUpdate(userId, loginDataGoogle.picture, response.token).pipe(takeUntil(this.unsubscribe$)).subscribe({
-          next: async (response: any) => {
-            if (response) {
-              await this._authService.renewToken(userId);
-              this.token = localStorage.getItem('token');
+        if(!avatar) {
+          const userId = await this._authService.getDecodedToken()?.id!;
+
+          await this._authApiService.avatarUpdate(userId, loginDataGoogle.picture, response.token).pipe(takeUntil(this.unsubscribe$)).subscribe({
+            next: async (response: any) => {
+              if (response) {
+                await this._authService.renewToken(userId);
+                this.token = localStorage.getItem('token');
+                loading.dismiss();
+                this._notificationUsersService.loginUser();
+                this._cdr.markForCheck();
+                this._router.navigate(['/home']);
+              }
+            },
+            error: (e: any) => {
+              console.log(e);
               loading.dismiss();
-              this._notificationUsersService.loginUser();
-              this._cdr.markForCheck();
               this._router.navigate(['/home']);
             }
-          },
-          error: (e: any) => {
-            console.log(e);
-            loading.dismiss();
-            this._router.navigate(['/home']);
-          }
-        });
+          });
+        }
 
-          const token = this._authService.getDecodedToken()!;
-          this._socketService.connectToWebSocket(token);
-          this._notificationUsersService.loginUser();
+        const token = this._authService.getDecodedToken()!;
+        this._socketService.connectToWebSocket(token);
+        this._notificationUsersService.loginUser();
+
+        this._cdr.markForCheck();
+        this._router.navigate(['/home']);
+
       },
     });
 

@@ -98,7 +98,6 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
   }
 
   private getUserMessages() {
-    console.log('getUserMessages');
     this._messageService.getUsersWithConversations().pipe(
       takeUntil(this.unsubscribe$)
     ).subscribe({
