@@ -529,6 +529,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
       subMessage: this.replaceVariables(translations['email.commentPublicationSubMessage'], { 'comment': comment.content }),
       buttonMessage: translations['email.commentPublicationButtonMessage'],
       template: TemplateEmail.NOTIFICATION,
+      templateLogo: environment.TEMPLATE_EMAIL_LOGO,
       email: publication?.author.email,
     };
 
