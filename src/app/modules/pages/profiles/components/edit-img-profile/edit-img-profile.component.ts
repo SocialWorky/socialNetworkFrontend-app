@@ -57,7 +57,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
 
   ngAfterViewInit(): void {
     if (this.profileImage) {
-      this.previews[0].url = environment.APIFILESERVICE + this.profileImage;
+      this.previews[0].url = this.profileImage;
     }
   }
 
@@ -138,8 +138,6 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
         };
         reader.readAsDataURL(file);
 
-        console.log('isMobile', this.isMobile);
-
         if (this.isMobile) {
           setTimeout(() => {
             this.uploadImg();
@@ -149,40 +147,66 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     });
   }
 
-  async uploadImg() {
-    this.isUploading = true;
-    this._cdr.detectChanges();
+async uploadImg() {
+  this.isUploading = true;
+  this._cdr.detectChanges();
 
-    const userId = this._authService.getDecodedToken()?.id!;
-    const uploadLocation = 'profile';
-    if (this.selectedImage) {
-      const response = await lastValueFrom(
-        this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation).pipe(takeUntil(this.unsubscribe$))
-      );
+  const userId = this._authService.getDecodedToken()?.id!;
+  const uploadLocation = 'profile';
 
-      await this._profileService.updateProfile(userId, {
-        coverImage: uploadLocation + '/' + response[0].filename,
-      }).pipe(takeUntil(this.unsubscribe$)).subscribe({
-        next: (data) => {
-          this.isUploading = false; 
-          this._cdr.detectChanges();
-        },
-        error: (error) => {
-          console.error('Error updating profile', error);
-          this.isUploading = false;
-          this._cdr.detectChanges();
-        }
-      });
-
-      this.previews[0].url = environment.APIFILESERVICE + uploadLocation + '/' + response[0].filename;
-
-      await Promise.all(response);
-
-      this.selectedFiles = [];
-      this.selectedImage = undefined;
-      this._cdr.markForCheck();
-    }
+  if (this.cropper) {
+    this.cropper.destroy();
   }
+  this.cropper = new Cropper(this.imageElement?.nativeElement, {
+    aspectRatio: 1200 / 450,
+    viewMode: 1,
+    scalable: true,
+    zoomable: true,
+    responsive: true,
+    background: false,
+  });
+
+  if (this.selectedImage && this.cropper) {
+    const responseDesktop = await lastValueFrom(
+      this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation).pipe(takeUntil(this.unsubscribe$))
+    );
+
+    const croppedCanvasMobile = this.cropper.getCroppedCanvas({
+      width: this.imageElement?.nativeElement.offsetWidth,
+      height: this.imageElement?.nativeElement.offsetHeight,
+    });
+
+    this.cropper.destroy();
+
+    const croppedImageUrlMobile = croppedCanvasMobile.toDataURL(this.originalMimeType);
+    const fileMobile = this.dataURLtoFile(croppedImageUrlMobile, `${userId}-mobile`, this.originalMimeType!);
+
+    const responseMobile = await lastValueFrom(
+      this._fileUploadService.uploadFile([fileMobile], uploadLocation).pipe(takeUntil(this.unsubscribe$))
+    );
+
+    await this._profileService.updateProfile(userId, {
+      coverImage: environment.APIFILESERVICE + uploadLocation + '/' + responseDesktop[0].filename,
+      coverImageMobile: environment.APIFILESERVICE + uploadLocation + '/' + responseMobile[0].filename,
+    }).pipe(takeUntil(this.unsubscribe$)).subscribe({
+      next: (data) => {
+        this.isUploading = false;
+        this._cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error updating profile', error);
+        this.isUploading = false;
+        this._cdr.detectChanges();
+      }
+    });
+
+    this.previews[0].url = environment.APIFILESERVICE + uploadLocation + '/' + responseDesktop[0].filename;
+
+    this.selectedFiles = [];
+    this.selectedImage = undefined;
+    this._cdr.markForCheck();
+  }
+}
 
   dataURLtoFile(dataurl: string, filename: string, mimeType: string): File {
     const arr = dataurl.split(',');

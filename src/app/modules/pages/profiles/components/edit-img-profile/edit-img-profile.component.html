@@ -9,7 +9,7 @@
 
   <ng-container *ngIf="!cropping">
     <div class="preview">
-      <img *ngIf="previews[0].type === 'image'" [src]="previews[0].url" alt="Image Preview">
+      <img #imageElement *ngIf="previews[0].type === 'image'" [src]="previews[0].url" alt="Image Preview">
       <div class="overlay" [class.show]="isUploading">
         <div class="loading-spinner"></div>
       </div>
