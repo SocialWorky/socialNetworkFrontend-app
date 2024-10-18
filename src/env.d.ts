@@ -16,6 +16,7 @@ declare interface Env {
   readonly NG_APP_APIMESSAGESERVICE: string;
   readonly NG_APP_APINOTIFICATIONCENTER: string;
   readonly NG_APP_GIPHYAPIKEY: string;
+  readonly NG_APP_TEMPLATE_EMAIL_LOGO: string;
 }
 
 // Choose how to access the environment variables.

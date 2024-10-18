@@ -13,12 +13,11 @@ import { LoginData } from '@auth/interfaces/login.interface';
 import { translations } from '@translations/translations';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { AuthService } from '@auth/services/auth.service';
-import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
-import { environment } from '@env/environment';
 import { ResetPasswordModalComponent } from './reset-password-modal/reset-password-modal.component';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { SocketService } from '@shared/services/socket.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
+import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 
 @Component({
   selector: 'worky-login',
@@ -35,8 +34,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   token = localStorage.getItem('token');
 
   googleLoginSession = localStorage.getItem('googleLogin');
-
-  mailSendDataValidate: MailSendValidateData = {} as MailSendValidateData;
 
   @ViewChild('emailInput') emailInput!: ElementRef;
 
@@ -56,6 +53,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     private _deviceDetectionService: DeviceDetectionService,
     private _socketService: SocketService,
     private _notificationUsersService: NotificationUsersService,
+    private _emailNotificationService: EmailNotificationService
   ) {
     if (this.token) {
       this._router.navigate(['/home']);
@@ -322,15 +320,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/reset-password/`;
-    this.mailSendDataValidate.subject = translations['email.resetPasswordSubject'];
-    this.mailSendDataValidate.title = translations['email.resetPasswordTitle'];
-    this.mailSendDataValidate.greet = translations['email.resetPasswordGreet'];
-    this.mailSendDataValidate.message = translations['email.resetPasswordMessage'];
-    this.mailSendDataValidate.subMessage = translations['email.resetPasswordSubMessage'];
-    this.mailSendDataValidate.buttonMessage = translations['email.resetPasswordButtonMessage'];
-    this.mailSendDataValidate.template = TemplateEmail.FORGOT_PASSWORD;
-    this.mailSendDataValidate.email = email;
+    const emailResponse = await this._emailNotificationService.sendEmailToRecoverPassword(email);
 
     const loading = await this._loadingCtrl.create({
       message: translations['login.messageResetPasswordLoading'],
@@ -338,7 +328,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
     await loading.present();
 
-    await this._authApiService.forgotPassword(this.mailSendDataValidate).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._authApiService.forgotPassword(emailResponse).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: any) => {
         if (response && response.message) {
           this._alertService.showAlert(

@@ -80,6 +80,7 @@ export class EmailNotificationService {
     this.mailSendDataValidate.buttonMessage = translations['email.sendReportPublicationButtonMessage'];
     this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
     this.mailSendDataValidate.email = this.dataUser?.email;
+    this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
 
     this.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();
 
@@ -96,6 +97,7 @@ export class EmailNotificationService {
       this.mailSendDataValidate.subMessage = `${translations['email.sendFriendRequestSubMessage']} ${this.dataUser?.name}`;
       this.mailSendDataValidate.buttonMessage = `${translations['email.sendFriendRequestButtonMessage']} ${this.dataUser?.name}`;
       this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
+      this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
       this.mailSendDataValidate.email = user.email;
       
       this._centerSocketNotificationsService.senFriendRequestNotification(user);
@@ -115,6 +117,7 @@ export class EmailNotificationService {
       this.mailSendDataValidate.subMessage = `${translations['email.acceptFriendRequestSubMessage']} ${this.dataUser?.name}`;
       this.mailSendDataValidate.buttonMessage = `${translations['email.acceptFriendRequestButtonMessage']} ${this.dataUser?.name}`;
       this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
+      this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
       this.mailSendDataValidate.email = user.email;
 
       this._centerSocketNotificationsService.acceptFriendRequestNotification(user);
@@ -137,11 +140,43 @@ export class EmailNotificationService {
     this.mailSendDataValidate.buttonMessage = 'Ver publicación';
     this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
     this.mailSendDataValidate.email = publication?.author.email;
-
+    this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
     this._centerSocketNotificationsService.reactionInPublicationNotification(publication, reaction);
 
     this.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();
 
+  }
+
+  //TODO: Implementa notificacion por email para recuperar contraseña.
+  async sendEmailToRecoverPassword(email: string) {
+    this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/reset-password/`;
+    this.mailSendDataValidate.subject = translations['email.resetPasswordSubject'];
+    this.mailSendDataValidate.title = translations['email.resetPasswordTitle'];
+    this.mailSendDataValidate.greet = translations['email.resetPasswordGreet'];
+    this.mailSendDataValidate.message = translations['email.resetPasswordMessage'];
+    this.mailSendDataValidate.subMessage = translations['email.resetPasswordSubMessage'];
+    this.mailSendDataValidate.buttonMessage = translations['email.resetPasswordButtonMessage'];
+    this.mailSendDataValidate.template = TemplateEmail.FORGOT_PASSWORD;
+    this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
+    this.mailSendDataValidate.email = email;
+    return this.mailSendDataValidate;
+  }
+
+  //TODO: Implementa notificacion por email para resetear contraseña.
+  async sendEmailToResetPassword(email: string, token: string, password: string) {
+    this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/login`;
+    this.mailSendDataValidate.subject = translations['email.confirmResetPasswordSubject'];
+    this.mailSendDataValidate.title = translations['email.confirmResetPasswordTitle'];
+    this.mailSendDataValidate.greet = translations['email.confirmResetPasswordGreet'];
+    this.mailSendDataValidate.message = translations['email.confirmResetPasswordMessage'];
+    this.mailSendDataValidate.subMessage = translations['email.validateEmailSubMessage'];
+    this.mailSendDataValidate.buttonMessage = translations['email.confirmResetPasswordButtonMessage'];
+    this.mailSendDataValidate.token = token;
+    this.mailSendDataValidate.password = password;
+    this.mailSendDataValidate.template = TemplateEmail.RESET_PASSWORD;
+    this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
+    this.mailSendDataValidate.email = email;
+    return this.mailSendDataValidate;
   }
 
 }

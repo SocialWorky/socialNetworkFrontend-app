@@ -10,6 +10,7 @@ export interface MailSendValidateData {
   subMessage: string;
   buttonMessage: string;
   template: string;
+  templateLogo: string;
 }
 
 export enum TemplateEmail {

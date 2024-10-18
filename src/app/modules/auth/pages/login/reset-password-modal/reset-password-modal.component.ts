@@ -1,17 +1,16 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { LoadingController } from '@ionic/angular';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
+
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { AuthApiService } from '@auth/services/apiLogin.service';
-import { MailSendValidateData } from '@shared/interfaces/mail.interface';
-import { environment } from '@env/environment';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
-import { TemplateEmail } from '@shared/interfaces/mail.interface';
 import { AuthService } from '@auth/services/auth.service';
+import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 
 @Component({
   selector: 'worky-reset-password-modal',
@@ -21,9 +20,11 @@ import { AuthService } from '@auth/services/auth.service';
 export class ResetPasswordModalComponent implements OnInit, OnDestroy {
 
   resetPasswordForm: FormGroup = new FormGroup({});
+  
   WorkyButtonType = WorkyButtonType;
+  
   WorkyButtonTheme = WorkyButtonTheme;
-  mailSendDataValidate: MailSendValidateData = {} as MailSendValidateData;
+  
   private subscription: Subscription = new Subscription();
 
   constructor(
@@ -34,6 +35,7 @@ export class ResetPasswordModalComponent implements OnInit, OnDestroy {
     private _loadingCtrl: LoadingController,
     private _dialogRef: MatDialogRef<ResetPasswordModalComponent>,
     private _authService: AuthService,
+    private _emailNotificationService: EmailNotificationService,
   ) { }
 
   ngOnInit() {
@@ -52,17 +54,7 @@ export class ResetPasswordModalComponent implements OnInit, OnDestroy {
     const password = this.resetPasswordForm.get('password')?.value;
     const emailUser = this._authService.getUseFromToken(this.data.token).email;
 
-    this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/login`;
-    this.mailSendDataValidate.subject = translations['email.confirmResetPasswordSubject'];
-    this.mailSendDataValidate.title = translations['email.confirmResetPasswordTitle'];
-    this.mailSendDataValidate.greet = translations['email.confirmResetPasswordGreet'];
-    this.mailSendDataValidate.message = translations['email.confirmResetPasswordMessage'];
-    this.mailSendDataValidate.subMessage = translations['email.validateEmailSubMessage'];
-    this.mailSendDataValidate.buttonMessage = translations['email.confirmResetPasswordButtonMessage'];
-    this.mailSendDataValidate.token = this.data.token;
-    this.mailSendDataValidate.password = password;
-    this.mailSendDataValidate.template = TemplateEmail.RESET_PASSWORD;
-    this.mailSendDataValidate.email = emailUser;
+    const emailResponse = await this._emailNotificationService.sendEmailToResetPassword(emailUser, this.data.token, password);
 
     if (password) {
       const loading = await this._loadingCtrl.create({
@@ -70,7 +62,7 @@ export class ResetPasswordModalComponent implements OnInit, OnDestroy {
       });
       await loading.present();
 
-      this.subscription = this._authApiService.resetPassword(this.mailSendDataValidate).subscribe({
+      this.subscription = this._authApiService.resetPassword(emailResponse).subscribe({
         next: (response) => {
           if (response) {
             this._alertService.showAlert(
