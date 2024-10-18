@@ -27,6 +27,7 @@ jobs:
           echo "NG_APP_APIMESSAGESERVICE=${{ secrets.NG_APP_APIMESSAGESERVICE }}" >> .env
           echo "NG_APP_APINOTIFICATIONCENTER=${{ secrets.NG_APP_APINOTIFICATIONCENTER }}" >> .env
           echo "NG_APP_GIPHYAPIKEY=${{ secrets.NG_APP_GIPHYAPIKEY }}" >> .env
+          echo "NG_APP_TEMPLATE_EMAIL_LOGO=${{ secrets.NG_APP_TEMPLATE_EMAIL_LOGO }}" >> .env
 
       - name: Build and push Docker image
         env:
