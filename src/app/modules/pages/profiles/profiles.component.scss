@@ -12,7 +12,7 @@
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
 
     @include breakpoints.below-sm {
-      height: 190px;
+      height: 150px;
       border-radius: 0px;
       border: none;
     }

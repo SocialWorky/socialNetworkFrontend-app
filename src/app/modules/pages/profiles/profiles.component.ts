@@ -23,6 +23,7 @@ import { GlobalEventService } from '@shared/services/globalEventService.service'
 import { ProfileService } from './services/profile.service';
 import { ProfileNotificationService } from '@shared/services/notifications/profile-notification.service';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
+import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 
 @Component({
   selector: 'worky-profiles',
@@ -33,30 +34,56 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   typePublishing = TypePublishing;
+  
   publications: Publication = { publications: [], total: 0 };
+  
   page = 1;
+  
   pageSize = 10;
+  
   WorkyButtonType = WorkyButtonType;
+  
   WorkyButtonTheme = WorkyButtonTheme;
+  
   paramPublication: boolean = false;
+  
   loaderPublications?: boolean = false;
+  
   userData: User | undefined;
+  
   idUserProfile: string = '';
+  
   decodedToken!: Token;
+  
   isAuthenticated: boolean = false;
+  
   isCurrentUser: boolean = false;
+  
   dataUser = this._authService.getDecodedToken();
+  
   isFriend: boolean = false;
+  
   isFriendPending: { status: boolean; _id: string } = { status: false, _id: '' };
+  
   idPendingFriend: string = '';
+  
   selectedFiles: File[] = [];
+  
   imgCoverDefault = '/assets/img/shared/drag-drop-upload-add-file.webp';
+  
   selectedImage: string | undefined;
+  
   cropper: Cropper | undefined;
+  
   originalMimeType: string | undefined;
+  
   isUploading = false;
+  
   userReceives!: UserData;
+  
   userRequest!: UserData;
+
+  isMobile = this._deviceDetectionService.isMobile();
 
   constructor(
     public _dialog: MatDialog,
@@ -72,7 +99,8 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _profileService: ProfileService,
     private _profileNotificationService: ProfileNotificationService,
     private _emailNotificationService: EmailNotificationService,
-    private _router: Router
+    private _router: Router,
+    private _deviceDetectionService: DeviceDetectionService
   ) {}
 
   async ngOnInit(): Promise<void> {

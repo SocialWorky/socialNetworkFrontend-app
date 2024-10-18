@@ -6,7 +6,7 @@
       <div class="image-container">
           <worky-edit-img-profile 
             [isCurrentUser]="isCurrentUser"
-            [profileImage]="userData.profile.coverImage">
+            [profileImage]="isMobile ? userData.profile.coverImageMobile : userData.profile.coverImage">
           </worky-edit-img-profile>
       </div>
       <div class="content">
