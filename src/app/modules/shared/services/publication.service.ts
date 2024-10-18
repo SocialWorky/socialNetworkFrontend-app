@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '@env/environment';
 import { CreatePost } from '@shared/modules/addPublication/interfaces/createPost.interface';
-import { Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { EditPublication, Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { distinctUntilChanged, catchError, map } from 'rxjs/operators';
 
 @Injectable({
@@ -29,6 +29,11 @@ export class PublicationService {
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
+  }
+
+  private handleError(error: any) {
+    console.error('An error occurred', error);
+    return throwError(() => new Error('Something went wrong; please try again later.'));
   }
 
   createPost(post: CreatePost): Observable<any> {
@@ -71,6 +76,14 @@ export class PublicationService {
         this.publicationsSubject.next(publications.publications);
         return publications;
       })
+    );
+  }
+
+  updatePublicationById(id: string, data: EditPublication): Observable<any> {
+    const url = `${this.baseUrl}/publications/edit/${id}`;
+    const headers = this.getHeaders();
+    return this.http.put<any>(url, data, { headers }).pipe(
+      catchError(this.handleError)
     );
   }
 

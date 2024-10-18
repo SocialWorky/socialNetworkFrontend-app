@@ -1,9 +1,10 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
+import * as _ from 'lodash';
 
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePrivacy, TypePublishing } from '../addPublication/enum/addPublication.enum';
@@ -22,9 +23,8 @@ import { ReportResponseComponent } from '../publication-view/report-response/rep
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { CommentService } from '@shared/services/comment.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
-import * as _ from 'lodash';
 import { Reactions } from './interfaces/reactions.interface';
-
+import { Colors } from '@shared/interfaces/colors.enum';
 
 @Component({
   selector: 'worky-publication-view',
@@ -97,7 +97,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   ngOnInit() {
     this.getUserFriendPending();
-    this.menuActions();
     this.menuShareActions();
     this.extraDataPublication();
     this.routeUrl = this._router.url;
@@ -160,18 +159,43 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   checkDataLink(userId: string) {
-    const menuDeletePublications = { icon: 'delete', function: this.deletePublications.bind(this), title: translations['publicationsView.deletePublication'] };
+    this.dataLinkActions = [];
+    this.menuActions();
+    const menuDeletePublications = {
+      icon: 'delete',
+      function: this.deletePublications.bind(this),
+      title: translations['publicationsView.deletePublication'],
+      color: Colors.RED
+    };
+    const menuFixedPublications = {
+      icon: 'push_pin',
+      function: this.fixedPublications.bind(this),
+      title: !this.publication.fixed ? translations['publicationsView.fixedPublication'] : translations['publicationsView.unfixedPublication'],
+      color: this.publication.fixed ? Colors.RED : Colors.BLUE
+    };
 
     if (userId === this.dataUser?.id || this.dataUser?.role === RoleUser.ADMIN) {
+
+      if (this.publication.fixed) {
+        if (!this.dataLinkActions.find((element) => element.title === translations['publicationsView.unfixedPublication'])) {
+          this.dataLinkActions.push(menuFixedPublications);
+        }
+      } else {
+        if (!this.dataLinkActions.find((element) => element.title === translations['publicationsView.fixedPublication'])) {
+          this.dataLinkActions.push(menuFixedPublications);
+        }
+      }
+
       if (!this.dataLinkActions.find((element) => element.title === translations['publicationsView.deletePublication'])) {
         this.dataLinkActions.push(menuDeletePublications);
       }
     }
+    this._cdr.markForCheck();
   }
 
   menuActions() {
     this.dataLinkActions = [
-      { icon: 'report', function: this.createReport.bind(this), title: translations['publicationsView.reportPublication'] },
+      { icon: 'report', function: this.createReport.bind(this), title: translations['publicationsView.reportPublication'], color: Colors.RED },
     ];
   }
 
@@ -218,6 +242,25 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       error: (error) => {
         console.error(error);
         loadingDeletePublication.dismiss();
+      },
+    });
+  }
+
+  async fixedPublications(publication: PublicationView) {
+    const loadingFixedPublication = await this._loadingCtrl.create({
+      message: !publication.fixed ? translations['publicationsView.loadingFixedPublication'] : translations['publicationsView.loadingUnfixedPublication'],
+    });
+
+    await loadingFixedPublication.present();
+
+    this._publicationService.updatePublicationById(publication._id, { fixed: !publication.fixed }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.refreshPublications(publication._id);
+        loadingFixedPublication.dismiss();
+      },
+      error: (error) => {
+        console.error(error);
+        loadingFixedPublication.dismiss();
       },
     });
   }
@@ -287,6 +330,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           this._publicationService.updatePublications(publication);
           this.publication = publication[0];
           this.loadReactionsImg(publication[0]);
+          this.checkDataLink(publication[0]._id);
           this._cdr.markForCheck();
         },
         error: (error) => {

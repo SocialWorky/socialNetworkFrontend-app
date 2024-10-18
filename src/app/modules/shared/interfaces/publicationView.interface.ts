@@ -10,6 +10,7 @@ export interface PublicationView {
     _id:         string;
     content:     string;
     privacy:     string;
+    fixed:       boolean;
     extraData:   ExtraData;
     createdAt:   Date;
     updatedAt:   Date;
@@ -21,6 +22,13 @@ export interface PublicationView {
     comment:     Comment[];
     isMyFriend?: boolean;
     isFriendshipPending?: string;
+}
+
+export interface EditPublication {
+  fixed?: boolean;
+  content?: string;
+  privacy?: string;
+  extraData?: ExtraData;
 }
 
 export interface User {

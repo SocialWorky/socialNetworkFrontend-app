@@ -1,5 +1,6 @@
 <div class="content-publication-view" *ngIf="publication">
   <div class="publication-header-actions">
+    <div *ngIf="publication.fixed" class="material-icons fixed">push_pin</div>
     <worky-dropdown
       icon="more_horiz"
       [badge]=false

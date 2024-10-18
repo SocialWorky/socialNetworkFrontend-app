@@ -8,6 +8,12 @@
     display: flex;
     justify-content: flex-end;
     margin-right: 10px;
+    .fixed {
+      font-size: 20px;
+      color: colors.$worky-color-blue;
+      position: initial;
+      margin-top: 6px;
+    }
   }
 
   .publication-header {
