@@ -10,13 +10,13 @@ const routes: Routes = [
     path: '',
     component: LoyautComponent ,
     children: [
-      { path: '', component: HomeComponent, pathMatch: 'full'  },
-      { path: 'publication/:_idPublication', component: HomeComponent, pathMatch: 'full'},
-      { path: 'profile', component: ProfilesComponent, pathMatch: 'full' },
-      { path: 'profile/:profileId', component: ProfilesComponent, pathMatch: 'full' },
-      { path: 'messages', component: MessagesComponent, pathMatch: 'full' },
-      { path: 'messages/:userIdMessages', component: MessagesComponent, pathMatch: 'full' },
-      { path: '**', redirectTo: '', pathMatch: 'full' }
+      { path: '', component: HomeComponent, pathMatch: 'full'},
+      { path: 'publication/:_idPublication', component: HomeComponent},
+      { path: 'profile', component: ProfilesComponent},
+      { path: 'profile/:profileId', component: ProfilesComponent},
+      { path: 'messages', component: MessagesComponent},
+      { path: 'messages/:userIdMessages', component: MessagesComponent},
+      { path: '**', redirectTo: '', pathMatch: 'full'}
     ],
   },
 ];
