@@ -1,11 +1,11 @@
 <div class="nav-item" [ngClass]="{'active': isActive('/')}" >
-  <a class="nav-link" href="/">
+  <a class="nav-link" [routerLink]="['/']">
     <span class="material-icons tab-menu">home</span>
   </a>
 </div>
 
 <div class="nav-item" [ngClass]="{'active': isActive('/profile')}">
-  <a class="nav-link" href="/profile">
+  <a class="nav-link" [routerLink]="['/profile']">
     <span class="material-icons tab-menu">person</span>
   </a>
 </div>

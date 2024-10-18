@@ -3,7 +3,7 @@
     <!-- Left elements -->
     <div class="worky-brand">
       <!-- Brand Logo-->
-      <a href="/" *ngIf="logoUrl !== ''">
+      <a [routerLink]="['/']" *ngIf="logoUrl !== ''">
         <img class="worky-logo" src="{{ logoUrl }}" alt="{{ title }}" style="margin-top: 2px;" loading="lazy">
       </a>
       <!-- Search -->
