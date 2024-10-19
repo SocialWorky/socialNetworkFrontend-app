@@ -229,7 +229,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   private async handleCommentResponse(message: any, idPublication: string) {
     try {
       if (this.selectedFiles.length) {
-        const response = await lastValueFrom(this.uploadFiles('comments', message.comment._id));
+        const response = await this.uploadFiles('comments', message.comment._id);
         await this.saveFiles(response, environment.APIFILESERVICE + 'comments/', message.comment._id, TypePublishing.COMMENT);
       }
 
@@ -262,7 +262,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
       this.myForm.controls['privacy'].setValue(TypePrivacy.FRIENDS);
     }
 
-    this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
         await this.handlePublicationResponse(message);
         this.loaderSavePublication = false;
@@ -304,7 +304,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   private async handlePublicationResponse(message: any) {
     try {
       if (this.selectedFiles.length) {
-        const response = await lastValueFrom(this.uploadFiles('publications', message.publications._id));
+        const response = await this.uploadFiles('publications', message.publications._id);
         await this.saveFiles(response, environment.APIFILESERVICE + 'publications/', message.publications._id, TypePublishing.POST);
       }
 
@@ -335,8 +335,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     }
   }
 
-  private uploadFiles(folder: string, id: string) {
-    return this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$));
+  private uploadFiles(folder: string, id: string): Promise<MediaFileUpload[]> {
+    return lastValueFrom(this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$)));
   }
 
   private async saveFiles(response: MediaFileUpload[], saveLocation: string, id: string, type: TypePublishing) {
