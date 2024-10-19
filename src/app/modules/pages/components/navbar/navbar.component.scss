@@ -7,7 +7,7 @@
   justify-content: center;
   width: 100%;
   background-color: colors.$worky-background-header-color;
-  z-index: 9999;
+  z-index: 10;
   @include breakpoints.below-sm {
     flex-direction: column;
     height: auto;
