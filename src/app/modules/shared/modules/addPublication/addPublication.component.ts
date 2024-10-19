@@ -340,18 +340,22 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   private async saveFiles(response: MediaFileUpload[], saveLocation: string, id: string, type: TypePublishing) {
-    const saveFilePromises = response.map(file => {
-      return lastValueFrom(
-        this._fileUploadService.saveUrlFile(
-          saveLocation + file.filename,
-          saveLocation + file.filenameThumbnail,
-          saveLocation + file.filenameCompressed,
-          id,
-          type
-        ).pipe(takeUntil(this.unsubscribe$))
-      );
-    });
-    await Promise.all(saveFilePromises);
+    for (const file of response) {
+      try {
+        await lastValueFrom(
+          this._fileUploadService.saveUrlFile(
+            saveLocation + file.filename,
+            saveLocation + file.filenameThumbnail,
+            saveLocation + file.filenameCompressed,
+            id,
+            type
+          ).pipe(takeUntil(this.unsubscribe$))
+        );
+      } catch (error) {
+        console.error(`Error saving file ${file.filename}: ${error}`);
+      }
+    }
+
     this.selectedFiles = [];
     this.previews = [];
     this._cdr.markForCheck();
