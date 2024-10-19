@@ -64,7 +64,7 @@ $app-theme: mat.define-light-theme((
 // @import "@ionic/angular/css/flex-utils.css";
 
 
-html, body { height: 100%; }
+html, body { height: 100vh; }
 body { 
   margin: 0;
   font-family: var.$worky-font-family-global;

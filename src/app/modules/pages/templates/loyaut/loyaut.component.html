@@ -1,17 +1,19 @@
-<worky-navbar></worky-navbar>
+<div class="content-app">
+  <worky-navbar class="navbar-content"></worky-navbar>
 
-<div class="content-social-app" 
-   [class.content-messages-app]="isMessages"
-   [class.content-profile-app]="isProfile" *ngIf="token">
-  
-    <worky-content-left-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-left-side>
+  <div class="content-social-app" 
+    [class.content-messages-app]="isMessages"
+    [class.content-profile-app]="isProfile" *ngIf="token">
     
-    <div class="social-content-center" 
-      [class.profile-view]="isProfile"
-      [class.messages-view]="isMessages">
-      <router-outlet></router-outlet>
-    </div>
+      <worky-content-left-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-left-side>
       
-    <worky-content-right-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-right-side>
+      <div class="social-content-center" 
+        [class.profile-view]="isProfile"
+        [class.messages-view]="isMessages">
+        <router-outlet></router-outlet>
+      </div>
+        
+      <worky-content-right-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-right-side>
 
+  </div>
 </div>
