@@ -16,8 +16,6 @@
   }
 }
 
-
-
 .content-social-app {
   display: flex;
   justify-content: center;
@@ -73,7 +71,7 @@
   height: 100vh;
   padding-bottom: 53px;
   @include breakpoints.below-sm {
-    height: 85vh;
+    height: 84vh;
     padding: 0px;
   }
 }
