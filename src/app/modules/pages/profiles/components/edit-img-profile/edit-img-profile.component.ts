@@ -166,7 +166,7 @@ async uploadImg() {
     background: false,
   });
 
-  if (this.selectedImage && this.cropper) {
+  if (this.selectedImage || this.cropper) {
     const responseDesktop = await lastValueFrom(
       this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation).pipe(takeUntil(this.unsubscribe$))
     );
@@ -185,9 +185,12 @@ async uploadImg() {
       this._fileUploadService.uploadFile([fileMobile], uploadLocation).pipe(takeUntil(this.unsubscribe$))
     );
 
+    const coverMobile = environment.APIFILESERVICE + uploadLocation + '/' + responseMobile[0].filename;
+    const coverDesktop = environment.APIFILESERVICE + uploadLocation + '/' + responseDesktop[0].filename;
+
     await this._profileService.updateProfile(userId, {
-      coverImage: environment.APIFILESERVICE + uploadLocation + '/' + responseDesktop[0].filename,
-      coverImageMobile: environment.APIFILESERVICE + uploadLocation + '/' + responseMobile[0].filename,
+      coverImage: coverDesktop,
+      coverImageMobile: !this.isMobile ? coverMobile : coverDesktop,
     }).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data) => {
         this.isUploading = false;
