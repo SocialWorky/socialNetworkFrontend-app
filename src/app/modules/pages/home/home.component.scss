@@ -2,12 +2,16 @@
 
 .content-publications {
   height: 92vh;
+
+  @include breakpoints.below-md {
+    height: 90vh;
+  }
+}
+
+.desk-content-publications {
   overflow-y: scroll;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  @include breakpoints.below-md {
-    height: 86vh;
-  }
 }
 
 .content-publications::-webkit-scrollbar {

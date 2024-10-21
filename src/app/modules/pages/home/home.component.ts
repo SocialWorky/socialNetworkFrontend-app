@@ -17,6 +17,8 @@ import { NotificationUsersService } from '@shared/services/notifications/notific
 import { NetworkService } from '@shared/services/network.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
+import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { ScrollService } from '@shared/services/scroll.service';
 
 @Component({
   selector: 'worky-home',
@@ -52,6 +54,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   
   connectionStatusMessage = '';
 
+  get isMobile(): boolean {
+    return this._deviceDetectionService.isMobile();
+  }
+
   trackById(index: number, publication: PublicationView): string {
     return publication._id;
   }
@@ -68,7 +74,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _activatedRoute: ActivatedRoute,
     private _meta: Meta,
     private _notificationUsersService: NotificationUsersService,
-    private _networkService: NetworkService
+    private _networkService: NetworkService,
+    private _deviceDetectionService: DeviceDetectionService,
+    private _scrollService: ScrollService
   ) {
     this.getLocationUser();
   }
@@ -112,7 +120,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         console.error('Error getting connection speed', error);
       }
     });
-
     this._notificationUsersService.loginUser();
     this.paramPublication = await this.getParamsPublication();
     if (this.paramPublication) return;
@@ -124,13 +131,22 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
     
     await this.loadPublications();
-    this._cdr.markForCheck();
 
     this.loadSubscription();
+    this.scrollSubscription();
     this.subscribeToNotificationComment();
     setTimeout(() => {
       this._notificationUsersService.userActive();
     }, 300);
+    this._cdr.markForCheck();
+  }
+
+  private scrollSubscription() {
+    this._scrollService.scrollEnd$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.loadPublications();
+    });
   }
 
   private async loadSubscription() {

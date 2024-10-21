@@ -81,7 +81,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
         console.error('Error getting notifications', error);
       }
     });
-    // this.getNotification();
     this.suscribeToConfig();
     this.getConfig();
     this.checkAdminDataLink();

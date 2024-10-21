@@ -156,3 +156,10 @@
     }
   }
 }
+
+.content-navbar.sticky-content {
+  position: -webkit-sticky;
+  position: sticky;
+  top: -1px;
+  will-change: transform;
+}

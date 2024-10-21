@@ -1,4 +1,6 @@
-<div class="content-app">
+<div class="content-app"
+  [class.mobil-content-app]="isMobile"
+  (scroll)="onScroll($event)">
   <worky-navbar class="navbar-content"></worky-navbar>
 
   <div class="content-social-app" 

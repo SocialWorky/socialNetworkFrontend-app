@@ -1,4 +1,5 @@
-<div class="content-publications" (scroll)="onScroll($event)">
+<div class="content-publications" (scroll)="onScroll($event)"
+  [class.desk-content-publications]="!isMobile">
   <div class="worky-module-container" *ngIf="!paramPublication">
     <worky-add-publication [type]="typePublishing.POST"></worky-add-publication>
   </div>

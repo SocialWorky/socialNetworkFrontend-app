@@ -10,10 +10,13 @@
     flex-direction: column;
     height: 8vh;
     @include breakpoints.below-md {
-      height: 13vh;
+      display: contents;
+      height: 15vh;
     }
   }
 }
+
+
 
 .content-social-app {
   display: flex;
@@ -23,7 +26,6 @@
   box-sizing: border-box;
   max-width: variables.$worky-app-width;
   @include breakpoints.below-md {
-    height: 87vh;
     padding-top: 0px;
     flex-direction: column;
     align-items: center;
@@ -43,7 +45,7 @@
   }
 }
 
-::ng-deep .social-content-center {
+.social-content-center {
   width: variables.$worky-container-width-content;
   min-width: variables.$worky-app-min-width;
   @include breakpoints.below-md {
@@ -78,9 +80,6 @@
 .messages-view {
   position: relative;
   height: 100%;
-  @include breakpoints.below-sm {
-    //margin-bottom: auto;
-  }
 }
 
 .content-profile-app {
