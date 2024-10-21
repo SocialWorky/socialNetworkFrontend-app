@@ -15,18 +15,6 @@
   @include breakpoints.below-sm {
     padding: 0px;
     flex-direction: column;
-    @media (min-height: 1000px) and (max-height: 1500px) {
-      height: 85%;
-    }
-    @media (min-height: 620px) and (max-height: 999px) {
-      height: 80%;
-    }
-    @media (min-height: 550px) and (max-height: 628px) {
-      height: 75%;
-    }
-    @media (min-height: 460px) and (max-height: 549px) {
-      height: 70%;
-    }
   }
 
   .content-left-messages {

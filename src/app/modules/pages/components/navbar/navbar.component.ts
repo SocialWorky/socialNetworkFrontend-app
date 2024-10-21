@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 
@@ -44,6 +44,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   title = 'Social Network App';
 
   logoUrl = '';
+
+  @Input() isMessages: boolean = false;
 
   constructor(
     private _router: Router,
