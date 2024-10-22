@@ -134,7 +134,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
         reader.onload = (e: any) => {
           this.selectedImage = e.target.result;
           if (!this.isMobile) this.cropping = true;
-          this._cdr.detectChanges();
+          this._cdr.markForCheck();
         };
         reader.readAsDataURL(file);
 
@@ -170,10 +170,9 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
       const responseDesktop = await lastValueFrom(
         this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation).pipe(takeUntil(this.unsubscribe$))
       );
-
       const croppedCanvasMobile = this.cropper.getCroppedCanvas({
-        width: this.imageElement?.nativeElement.offsetWidth,
-        height: this.imageElement?.nativeElement.offsetHeight,
+        width: 620,
+        height: 190,
       });
 
       this.cropper.destroy();
@@ -203,7 +202,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
         }
       });
 
-      this.previews[0].url = this.isMobile ? coverMobile : coverDesktop;
+      this.previews[0].url = environment.APIFILESERVICE + uploadLocation + '/' + responseDesktop[0].filename;
 
       this.selectedFiles = [];
       this.selectedImage = undefined;
