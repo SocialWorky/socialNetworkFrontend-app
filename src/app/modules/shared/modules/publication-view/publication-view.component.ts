@@ -25,6 +25,7 @@ import { CommentService } from '@shared/services/comment.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { Reactions } from './interfaces/reactions.interface';
 import { Colors } from '@shared/interfaces/colors.enum';
+import { ScrollService } from '@shared/services/scroll.service';
 
 @Component({
   selector: 'worky-publication-view',
@@ -89,6 +90,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     public _dialog: MatDialog,
     private _emailNotificationService: EmailNotificationService,
     private _notificationService: NotificationService,
+    private _scrollService: ScrollService
   ) {}
 
   async ngAfterViewInit() {
@@ -257,6 +259,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       next: () => {
         this.refreshPublications(publication._id);
         loadingFixedPublication.dismiss();
+        this._scrollService.scrollToTop();
       },
       error: (error) => {
         console.error(error);

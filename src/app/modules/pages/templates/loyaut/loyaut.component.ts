@@ -67,6 +67,7 @@ export class LoyautComponent implements OnInit, OnDestroy {
   }
 
   onScroll(event: any) {
+    this._scrollService.onScroll(event);
     if(!this.isMobile) return;
     const threshold = 100;
     const position = event.target.scrollTop + event.target.clientHeight;

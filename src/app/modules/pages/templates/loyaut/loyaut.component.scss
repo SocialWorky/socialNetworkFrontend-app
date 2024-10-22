@@ -8,7 +8,7 @@
   .navbar-content {
     display: flex;
     flex-direction: column;
-    height: 8vh;
+    height: 6vh;
     @include breakpoints.below-md {
       display: contents;
       height: 15vh;
@@ -51,13 +51,13 @@
   }
 }
 
-.messages-view,
-.profile-view  {
-  width: 100%;
-  overflow-y: scroll;
-  scrollbar-width: none;
-  -ms-overflow-style: none; 
-}
+// .messages-view,
+// .profile-view  {
+//   width: 100%;
+//   overflow-y: scroll;
+//   scrollbar-width: none;
+//   -ms-overflow-style: none; 
+// }
 
 .content-messages-app {
   position: relative;

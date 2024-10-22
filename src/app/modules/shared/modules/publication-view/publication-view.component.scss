@@ -7,12 +7,16 @@
   .publication-header-actions {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     margin-right: 10px;
     .fixed {
-      font-size: 20px;
+      font-size: 16px;
       color: colors.$worky-color-blue;
+      background-color: colors.$worky-color-greyLight;
       position: initial;
-      margin-top: 6px;
+      margin-top: 4px;
+      padding: 5px;
+      border-radius: 50%;
     }
   }
 

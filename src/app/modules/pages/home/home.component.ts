@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { Meta } from '@angular/platform-browser';
@@ -53,6 +53,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   showConnectionOverlay = false;
   
   connectionStatusMessage = '';
+
+  showScrollToTopButton = false;
 
   get isMobile(): boolean {
     return this._deviceDetectionService.isMobile();
@@ -144,8 +146,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   private scrollSubscription() {
     this._scrollService.scrollEnd$.pipe(
       takeUntil(this.destroy$)
-    ).subscribe(() => {
-      this.loadPublications();
+    ).subscribe((data) => {
+      if(data === 'scrollEnd') this.loadPublications();
+      if(data === 'showScrollToTopButton') this.showScrollToTopButton = true;
+      if(data === 'hideScrollToTopButton') this.showScrollToTopButton = false;
     });
   }
 
@@ -204,6 +208,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     const threshold = 100;
     const position = event.target.scrollTop + event.target.clientHeight;
     const height = event.target.scrollHeight;
+
+    this.showScrollToTopButton = position > 3500;
 
     if (position >= height - threshold && !this.loaderPublications && this.hasMorePublications) {
       this.loadPublications();
@@ -292,5 +298,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
 
     this._cdr.markForCheck();
+  }
+
+  scrollToTop() {
+    this._scrollService.scrollToTop();
   }
 }
