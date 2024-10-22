@@ -14,13 +14,19 @@ export class ScrollService {
   }
 
   onScroll(event: any) {
-    const threshold = 1500; 
-    const scrollTop = event.target.scrollTop; 
+    const threshold = 100; 
+    const scrollTop = event.target.scrollTop;
+    const scrollHeight = event.target.scrollHeight;
+    const offsetHeight = event.target.offsetHeight;
 
-    if (scrollTop >= threshold) {
+    if (scrollTop >= 1500) {
       this.scrollEndSource.next('showScrollToTopButton');
     } else {
       this.scrollEndSource.next('hideScrollToTopButton');
+    }
+
+    if (scrollTop + offsetHeight >= scrollHeight - threshold) {
+      this.scrollEndSource.next('scrollEnd');
     }
   }
 

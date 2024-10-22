@@ -11,8 +11,9 @@
       <worky-content-left-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-left-side>
       
       <div class="social-content-center" 
-        [class.profile-view]="isProfile"
-        [class.messages-view]="isMessages">
+        [class.profile-view]="isProfile && !isMobile"
+        [class.messages-view]="isMessages"
+        (scroll)="onScroll($event)">
         <router-outlet></router-outlet>
       </div>
         

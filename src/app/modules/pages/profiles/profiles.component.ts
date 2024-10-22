@@ -24,6 +24,7 @@ import { ProfileService } from './services/profile.service';
 import { ProfileNotificationService } from '@shared/services/notifications/profile-notification.service';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { ScrollService } from '@shared/services/scroll.service';
 
 @Component({
   selector: 'worky-profiles',
@@ -35,7 +36,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   typePublishing = TypePublishing;
   
-  publications: Publication = { publications: [], total: 0 };
+  publications: PublicationView[] = [];
   
   page = 1;
   
@@ -85,6 +86,10 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   isMobile = this._deviceDetectionService.isMobile();
 
+  showScrollToTopButton = false;
+
+  hasMorePublications = true;
+
   constructor(
     public _dialog: MatDialog,
     private _authService: AuthService,
@@ -100,7 +105,8 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _profileNotificationService: ProfileNotificationService,
     private _emailNotificationService: EmailNotificationService,
     private _router: Router,
-    private _deviceDetectionService: DeviceDetectionService
+    private _deviceDetectionService: DeviceDetectionService,
+    private _scrollService: ScrollService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -122,27 +128,86 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.isCurrentUser = this.idUserProfile === this.decodedToken.id;
     this.loaderPublications = true;
 
+    this._profileNotificationService.profileUpdated$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.getDataProfile();
+      this._cdr.markForCheck();
+    });
+
+    await this.loadPublications();
+    this.loadSubscription();
+    this.loaderPublications = false;
+    this.subscribeToNotificationComment();
+    this.scrollSubscription();
+  }
+
+  private async loadSubscription() {
     this._publicationService.publications$.pipe(
-      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
       takeUntil(this.destroy$)
     ).subscribe({
       next: (publicationsData: PublicationView[]) => {
-        this.publications.publications = publicationsData;
-        this._cdr.markForCheck();
+        this.updatePublications(publicationsData);
       },
       error: (error) => {
         console.error('Error getting publications', error);
       }
     });
 
-    this._profileNotificationService.profileUpdated$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.getDataProfile();
-      this._cdr.markForCheck();
+    this._publicationService.publicationsDeleted$.pipe(
+      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (publicationsData: PublicationView[]) => {
+        this.publications = this.publications.filter(pub => !publicationsData.some(pubDeleted => pubDeleted._id === pub._id));
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error getting publications', error);
+      }
+    });
+  }
+
+  private updatePublications(publicationsData: PublicationView[]) {
+    publicationsData.forEach(newPub => {
+      const index = this.publications.findIndex(pub => pub._id === newPub._id);
+      if (index !== -1) {
+        const existingPub = this.publications[index];
+        if (
+          JSON.stringify(existingPub) !== JSON.stringify(newPub) ||
+          JSON.stringify(existingPub.comment) !== JSON.stringify(newPub.comment) ||
+          JSON.stringify(existingPub.reaction) !== JSON.stringify(newPub.reaction)
+        ) {
+          this.publications[index] = newPub;
+        }
+      } else {
+        this.publications.push(newPub);
+      }
     });
 
-    this.loadPublications();
-    this.loaderPublications = false;
-    this.subscribeToNotificationComment();
+    this.publications.sort((a, b) => {
+      if (a.fixed && !b.fixed) return -1;
+      if (!a.fixed && b.fixed) return 1;
+
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    this.publications.forEach(pub => {
+      if (pub.comment) {
+        pub.comment.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      }
+    });
+
+    this._cdr.markForCheck();
+  }
+
+  private scrollSubscription() {
+    this._scrollService.scrollEnd$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((data) => {
+      if(data === 'scrollEnd') this.loadPublications();
+      if(data === 'showScrollToTopButton') this.showScrollToTopButton = true;
+      if(data === 'hideScrollToTopButton') this.showScrollToTopButton = false;
+    });
   }
 
   ngOnDestroy(): void {
@@ -150,12 +215,30 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private async loadPublications() {
-    this.publications = await firstValueFrom(
-      this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile).pipe(takeUntil(this.destroy$))
-    );
-    this._cdr.detectChanges();
+ private async loadPublications() {
+    if (this.loaderPublications || !this.hasMorePublications || !navigator.onLine) return;
+    this.loaderPublications = true;
+    try {
+      const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile));
+      if (newPublications.total === this.publications.length) {
+        this.hasMorePublications = false;
+      }
+
+      const uniqueNewPublications = newPublications.publications.filter(newPub => 
+        !this.publications.some(pub => pub._id === newPub._id)
+      );
+
+      this.publications = [...this.publications, ...uniqueNewPublications];
+      this.page++;
+      this.loaderPublications = false;
+      this._cdr.markForCheck();
+
+    } catch (error) {
+      console.error('Error loading publications', error);
+      this.loaderPublications = false;
+    }
   }
+
 
   private async getDataProfile(): Promise<void> {
     this._userService.getUserById(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
@@ -311,5 +394,21 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   sendMessage(_id: string) {
     this._router.navigate(['/messages/', _id]);
+  }
+
+  onScroll(event: any) {
+    const threshold = 100;
+    const position = event.target.scrollTop + event.target.clientHeight;
+    const height = event.target.scrollHeight;
+
+    this.showScrollToTopButton = position > 3500;
+
+    if (position >= height - threshold && !this.loaderPublications && this.hasMorePublications) {
+      this.loadPublications();
+    }
+  }
+
+  scrollToTop() {
+    this._scrollService.scrollToTop();
   }
 }
