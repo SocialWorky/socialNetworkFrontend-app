@@ -149,7 +149,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
 
   async uploadImg() {
     this.isUploading = true;
-    this._cdr.detectChanges();
+    this._cdr.markForCheck();
 
     const userId = this._authService.getDecodedToken()?.id!;
     const uploadLocation = 'profile';
@@ -193,18 +193,19 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
       }).pipe(takeUntil(this.unsubscribe$)).subscribe({
         next: (data) => {
           this.isUploading = false;
-          this._cdr.detectChanges();
+          this._cdr.markForCheck();
         },
         error: (error) => {
           console.error('Error updating profile', error);
           this.isUploading = false;
-          this._cdr.detectChanges();
+          this._cdr.markForCheck();
         }
       });
 
       this.previews[0].url = environment.APIFILESERVICE + uploadLocation + '/' + responseDesktop[0].filename;
 
       this.selectedFiles = [];
+      this.isUploading = false;
       this.selectedImage = undefined;
       this._cdr.markForCheck();
     }
