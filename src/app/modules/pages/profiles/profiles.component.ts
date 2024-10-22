@@ -146,6 +146,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe({
       next: (publicationsData: PublicationView[]) => {
+        publicationsData = publicationsData.filter(pub => pub.author._id === this.idUserProfile);
         this.updatePublications(publicationsData);
       },
       error: (error) => {
