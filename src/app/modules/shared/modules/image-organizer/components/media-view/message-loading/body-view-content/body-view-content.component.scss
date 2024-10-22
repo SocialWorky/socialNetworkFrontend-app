@@ -3,12 +3,12 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;  
 
 .publication-comment {
-    margin-top: 15px;
-    padding: 16px;
-    max-height: 70vh;
+    margin-top: 3px;
+    padding: 10px;
+    max-height: 71vh;
     overflow: auto;
     @include breakpoints.below-sm {
-      max-height: 28vh;
+      max-height: 33vh;
     }
     .publication-comment-item {
       display: flex;

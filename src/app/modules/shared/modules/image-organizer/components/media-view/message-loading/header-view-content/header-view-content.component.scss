@@ -3,10 +3,11 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
 :host {
-  padding: 10px;
+  //padding: 10px;
 }
 
 .content-publication-view {
+  margin-top: 5px;
 
   .publication-header-actions {
     display: flex;
@@ -16,7 +17,7 @@
 
   .publication-header {
     display: flex;
-    padding: 0px 16px 16px 16px;
+    padding: 0px 5px 5px 5px;
     align-items: center;
     gap: 1rem;
     .publication-header-content {
