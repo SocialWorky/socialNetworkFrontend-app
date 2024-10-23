@@ -53,6 +53,11 @@
           text-overflow: ellipsis;
           font-size: variables.$worky-font-size-4;
           color: colors.$worky-color-navy;
+          .material-icons {
+            font-size: 10px;
+            margin: 0px 5px;
+            color: colors.$worky-color-navy;
+          }
           .follow-my-friend {
             cursor: pointer;
             color: colors.$worky-color-blue;
@@ -218,6 +223,10 @@
             justify-content: space-between;
             margin-bottom: 10px;
             .comment-author {
+              color: colors.$worky-color-blue;
+            }
+            .link-profile {
+              cursor: pointer;
               color: colors.$worky-color-blue;
             }
             .delete-comment {

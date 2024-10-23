@@ -59,7 +59,7 @@
           name="{{ user.name}} {{ user.lastName }}">
         </worky-avatar>
 
-        <textarea #postText
+        <ion-textarea #postText
           class="publishing-textarea"
           (input)="onTextareaInput()"
           formControlName="content"
@@ -67,7 +67,7 @@
               type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.placeholder' | workyTranslations) + ' ' + user.name + ' ' + user.lastName + '?' :
               ('publishing.placeholderComment' | workyTranslations) + user.name + ' ' + user.lastName + '?' 
           }}">
-        </textarea>
+        </ion-textarea>
 
       </div>
 

@@ -1,4 +1,5 @@
 export enum TypePublishing {
+  ALL= 'all',
   POST = 'post',
   COMMENT = 'comment',
   POSTPROFILE = 'postProfile',

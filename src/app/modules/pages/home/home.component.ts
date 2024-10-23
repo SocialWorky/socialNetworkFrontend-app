@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { Meta } from '@angular/platform-browser';
@@ -122,7 +122,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         console.error('Error getting connection speed', error);
       }
     });
+
     this._notificationUsersService.loginUser();
+
     this.paramPublication = await this.getParamsPublication();
     if (this.paramPublication) return;
 
@@ -133,8 +135,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
     
     await this.loadPublications();
-
+    
     this.loadSubscription();
+    
     this.scrollSubscription();
     this.subscribeToNotificationComment();
     setTimeout(() => {
@@ -160,6 +163,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (publicationsData: PublicationView[]) => {
         this.updatePublications(publicationsData);
+        this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error getting publications', error);
@@ -184,7 +188,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.loaderPublications || !this.hasMorePublications || !navigator.onLine) return;
     this.loaderPublications = true;
     try {
-      const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize));
+      const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.ALL));
       if (newPublications.total === this.publications.length) {
         this.hasMorePublications = false;
       }
