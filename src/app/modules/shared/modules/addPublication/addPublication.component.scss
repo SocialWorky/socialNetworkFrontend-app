@@ -94,11 +94,12 @@
 
       .publishing-textarea {
         width: 100%;
+        max-height: 300px;
         box-sizing: border-box;
         border-radius: 8px;
         border: 1px solid color.$worky-color-light;
         resize: none;
-        overflow: hidden;
+        overflow: auto;
         padding: 8px;
         background: color.$worky-color-greyLight;
         color: color.$worky-color-dark;
@@ -240,7 +241,7 @@
     padding: 5px;
     .textarea-container {
       textarea {
-        height: 35px!important;
+        max-height: 150px;
       }
     }
   }

@@ -413,7 +413,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
 
   autoResize() {
     const postText = this.postTextRef.nativeElement as HTMLTextAreaElement;
-    postText.style.height = 'auto';
+    postText.style.height = '35px';
     postText.style.height = `${postText.scrollHeight}px`;
   }
 
