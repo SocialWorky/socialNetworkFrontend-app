@@ -59,9 +59,11 @@
           name="{{ user.name}} {{ user.lastName }}">
         </worky-avatar>
 
-        <ion-textarea #postText
+        <ion-textarea 
+          #postTextRef [(ngModel)]="postText"
           class="publishing-textarea"
           (input)="onTextareaInput()"
+          auto-grow="true"
           formControlName="content"
           placeholder="{{ 
               type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.placeholder' | workyTranslations) + ' ' + user.name + ' ' + user.lastName + '?' :

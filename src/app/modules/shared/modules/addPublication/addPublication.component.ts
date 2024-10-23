@@ -6,11 +6,10 @@ import {
   OnInit,
   OnDestroy,
   ViewChild,
-  AfterViewInit,
   NgZone
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LoadingController } from '@ionic/angular';
+import { IonTextarea, LoadingController } from '@ionic/angular';
 import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import {
@@ -47,7 +46,7 @@ import { GifSearchComponent } from '../gif-search/gif-search.component';
   templateUrl: './addPublication.component.html',
   styleUrls: ['./addPublication.component.scss'],
 })
-export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit {
+export class AddPublicationComponent implements OnInit, OnDestroy {
   WorkyButtonType = WorkyButtonType;
 
   WorkyButtonTheme = WorkyButtonTheme;
@@ -106,7 +105,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
 
   @Input() idMedia?: string;
 
-  @ViewChild('postText') postTextRef!: ElementRef;
+  @ViewChild('postTextRef', { static: false }) postTextRef!: IonTextarea;
+  postText!: string;
 
   constructor(
     private _fb: FormBuilder,
@@ -148,10 +148,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
     this.subscription?.unsubscribe();
-  }
-
-  ngAfterViewInit() {
-    this.autoResize();
   }
 
   get userToken(): string {
@@ -237,7 +233,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
 
       if (message.message === 'Comment created successfully') {
         this.myForm.controls['content'].setValue('');
-        this.autoResize();
         this.showSuccessAlert(
           translations['addPublication.alertCreateCommentTitle'],
           translations['addPublication.alertCreateCommentMessage']
@@ -312,7 +307,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
 
       if (message.message === 'Publication created successfully') {
         this.myForm.controls['content'].setValue('');
-        this.autoResize();
         this.showSuccessAlert(
           translations['addPublication.alertCreatePublicationTitle'],
           translations['addPublication.alertCreatePublicationMessage']
@@ -411,19 +405,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     );
   }
 
-  autoResize() {
-    const postText = this.postTextRef.nativeElement as HTMLTextAreaElement;
-    postText.style.height = '35px';
-    postText.style.height = `${postText.scrollHeight}px`;
-  }
-
   onTextareaInput() {
     if (this.myForm.controls['content'].value.trim().length === 0) {
       this.myForm.controls['content'].setErrors({ required: true });
     } else {
       this.myForm.controls['content'].setErrors(null);
     }
-    this.autoResize();
   }
 
   postPrivacy(privacy: string): void {
@@ -550,40 +537,40 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   insertText(markdown: string) {
-    const textarea = this.postTextRef.nativeElement as HTMLTextAreaElement;
-    const startPos = textarea.selectionStart;
-    const endPos = textarea.selectionEnd;
-    const contentValue = this.myForm.get('content')?.value || '';
-    const selectedText = contentValue.substring(startPos, endPos);
+    const textareaValue = this.postTextRef.value || '';
+    
+    const textarea = this.postTextRef.getInputElement().then((textarea: HTMLTextAreaElement) => {
+      const startPos = textarea.selectionStart;
+      const endPos = textarea.selectionEnd;
 
-    let newText;
-    let cursorPos;
+      const selectedText = textareaValue.substring(startPos, endPos);
+      let newText;
+      let cursorPos;
 
-    if (selectedText) {
+      if (selectedText) {
+        newText = textareaValue.substring(0, startPos)
+          + markdown.replace('placeholder', selectedText)
+          + textareaValue.substring(endPos);
 
-      newText = contentValue.substring(0, startPos)
-                + markdown.replace('placeholder', selectedText)
-                + contentValue.substring(endPos);
-      cursorPos = startPos + markdown.length;
-    } else {
+        cursorPos = startPos + markdown.length;
+      } else {
+        const placeholderIndex = markdown.indexOf('placeholder');
+        const beforePlaceholder = markdown.substring(0, placeholderIndex);
+        const afterPlaceholder = markdown.substring(placeholderIndex + 'placeholder'.length);
 
-      const placeholderIndex = markdown.indexOf('placeholder');
-      const beforePlaceholder = markdown.substring(0, placeholderIndex);
-      const afterPlaceholder = markdown.substring(placeholderIndex + 'placeholder'.length);
+        newText = textareaValue.substring(0, startPos)
+          + beforePlaceholder
+          + afterPlaceholder
+          + textareaValue.substring(endPos);
 
-      newText = contentValue.substring(0, startPos)
-                + beforePlaceholder
-                + afterPlaceholder
-                + contentValue.substring(endPos);
+        cursorPos = startPos + beforePlaceholder.length;
+      }
 
-      cursorPos = startPos + beforePlaceholder.length;
-    }
+      this.myForm.get('content')?.setValue(newText);
 
-    this.myForm.get('content')?.setValue(newText);
-
-    textarea.focus();
-    textarea.selectionStart = cursorPos;
-    textarea.selectionEnd = cursorPos;
+      textarea.focus();
+      textarea.setSelectionRange(cursorPos, cursorPos);
+    });
   }
 
 }

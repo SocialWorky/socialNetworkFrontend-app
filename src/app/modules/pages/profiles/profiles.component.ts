@@ -52,7 +52,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   
   userData: User | undefined;
   
-  idUserProfile: string = '';
+  idUserProfile: string;
   
   decodedToken!: Token;
   
@@ -107,10 +107,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _router: Router,
     private _deviceDetectionService: DeviceDetectionService,
     private _scrollService: ScrollService
-  ) {}
+  ) {
+    this.idUserProfile = this._activatedRoute.snapshot.paramMap.get('profileId') || '';
+  }
 
   async ngOnInit(): Promise<void> {
-    this.idUserProfile = await this._activatedRoute.snapshot.paramMap.get('profileId') || '';
+    
     this._cdr.markForCheck();
 
     if (this.idUserProfile === '') {
@@ -118,7 +120,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this._cdr.markForCheck();
     }
 
-    this.getDataProfile();
+    await this.getDataProfile();
 
     this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe();
 
