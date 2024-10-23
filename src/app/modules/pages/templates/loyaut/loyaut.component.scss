@@ -62,7 +62,7 @@
   padding: 10px;
   overflow: hidden;
   height: 100vh;
-  //padding-bottom: 53px;
+  padding-bottom: 53px;
   @include breakpoints.below-sm {
     height: 85vh;
     padding: 0px;
