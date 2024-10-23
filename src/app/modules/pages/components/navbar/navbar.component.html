@@ -1,71 +1,72 @@
+
 <div class="content-navbar">
- <nav class="worky-navbar">
-    <!-- Left elements -->
-    <div class="worky-brand">
-      <!-- Brand Logo-->
-      <a [routerLink]="['/']" *ngIf="logoUrl !== ''">
-        <img class="worky-logo" src="{{ logoUrl }}" alt="{{ title }}" style="margin-top: 2px;" loading="lazy">
-      </a>
-      <!-- Search -->
-      <form 
-        class="worky-search"
-        (ngSubmit)="search($event)">
-        <div class="search-container">
-          <span class="material-icons search-icon">search</span>
-          <input
-            type="search"
-            class="form-control"
-            placeholder="Search"
-            [(ngModel)]="searchTerm"
-            (input)="onInputChange($event)"
-            autocomplete="off"
-            name="searchTerm"
-          />
-        </div>
-      </form>
+  <nav class="worky-navbar">
+      <!-- Left elements -->
+      <div class="worky-brand">
+        <!-- Brand Logo-->
+        <a [routerLink]="['/']" *ngIf="logoUrl !== ''">
+          <img class="worky-logo" src="{{ logoUrl }}" alt="{{ title }}" style="margin-top: 2px;" loading="lazy">
+        </a>
+        <!-- Search -->
+        <form 
+          class="worky-search"
+          (ngSubmit)="search($event)">
+          <div class="search-container">
+            <span class="material-icons search-icon">search</span>
+            <input
+              type="search"
+              class="form-control"
+              placeholder="Search"
+              [(ngModel)]="searchTerm"
+              (input)="onInputChange($event)"
+              autocomplete="off"
+              name="searchTerm"
+            />
+          </div>
+        </form>
 
-      <ul *ngIf="users.length > 0" class="search-results">
-        <li *ngFor="let user of users" (click)="viewProfile(user._id)">
-          <worky-avatar
-            [img]="user.avatar"
-            [size]="30"
-            [name]="user.name + ' ' + user.lastName"
-          ></worky-avatar>
-          {{ user.name }} {{ user.lastName }} ({{ user.username }})
-        </li>
-      </ul>
+        <ul *ngIf="users.length > 0" class="search-results">
+          <li *ngFor="let user of users" (click)="viewProfile(user._id)">
+            <worky-avatar
+              [img]="user.avatar"
+              [size]="30"
+              [name]="user.name + ' ' + user.lastName"
+            ></worky-avatar>
+            {{ user.name }} {{ user.lastName }} ({{ user.username }})
+          </li>
+        </ul>
 
-    </div>
-    <!-- Center elements -->
-    <worky-menu-component *ngIf="!isMobile"></worky-menu-component>
-    <!-- Right elements -->
+      </div>
+      <!-- Center elements -->
+      <worky-menu-component *ngIf="!isMobile"></worky-menu-component>
+      <!-- Right elements -->
 
-    <div class="worky-profile" *ngIf="!isMobile">
-      <!-- Message -->
-      <worky-dropdown 
-        icon="mail"
-        [badgeValue]="messages > 0 ? messages : null"
-        (click)="messagesUrl()"
-        [badge]=true>
-      </worky-dropdown>
-      <!-- Notification -->
-      <worky-dropdown 
-        icon="notifications"
-        [badgeValue]="notifications > 0 ? notifications : null" 
-        (click)="toggleNotificationsPanel()"
-        [badge]=true>
-      </worky-dropdown>
-      <!-- Profile -->
-      <worky-dropdown
-        [badge]=false
-        img="avatar"
-        [dataLink]="dataLinkProfile"
-        (linkClicked)="handleLinkClicked($event)">
-      </worky-dropdown>
-    </div>
+      <div class="worky-profile" *ngIf="!isMobile">
+        <!-- Message -->
+        <worky-dropdown 
+          icon="mail"
+          [badgeValue]="messages > 0 ? messages : null"
+          (click)="messagesUrl()"
+          [badge]=true>
+        </worky-dropdown>
+        <!-- Notification -->
+        <worky-dropdown 
+          icon="notifications"
+          [badgeValue]="notifications > 0 ? notifications : null" 
+          (click)="toggleNotificationsPanel()"
+          [badge]=true>
+        </worky-dropdown>
+        <!-- Profile -->
+        <worky-dropdown
+          [badge]=false
+          img="avatar"
+          [dataLink]="dataLinkProfile"
+          (linkClicked)="handleLinkClicked($event)">
+        </worky-dropdown>
+      </div>
 
 
- </nav>
+  </nav>
 </div>
 
 <div class="content-navbar" *ngIf="isMobile"
