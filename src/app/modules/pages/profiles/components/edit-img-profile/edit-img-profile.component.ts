@@ -66,7 +66,9 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     this.unsubscribe$.complete();
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.previews[0].url = this.profileImage || this.imgCoverDefault;
+  }
 
   ngAfterViewChecked() {
     if (this.cropping && this.cropperImage && !this.cropper) {
