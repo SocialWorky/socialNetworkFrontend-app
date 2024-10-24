@@ -47,7 +47,12 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       privacyPolicy: [''],
       contactEmail: [''],
       faviconUrl: [''],
-      loginMethods: [''],
+      urlSite: [''],
+      description: [''],
+      loginMethods: this._fb.group({
+        email: [false],
+        google: [false],
+      }),
     });
   }
 
@@ -62,14 +67,32 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
   getSiteConfig() {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
+      let loginMethods = { email: false, google: false };
+      
+      if (configData.settings.loginMethods) {
+        try {
+         loginMethods = JSON.parse(configData.settings.loginMethods);
+          console.log('loginMethods', loginMethods);
+
+        } catch (error) {
+          console.error('Error parsing loginMethods:', error);
+        }
+      }
+
       this.configForm.patchValue({
         logoUrl: configData.settings.logoUrl || '',
         title: configData.settings.title || '',
         privacyPolicy: configData.settings.privacyPolicy || '',
         contactEmail: configData.settings.contactEmail || '',
         faviconUrl: configData.settings.faviconUrl || '',
-        loginMethods: configData.settings.loginMethods || '',
+        urlSite: configData.settings.urlSite || '',
+        description: configData.settings.description || '',
+        loginMethods: {
+          email: JSON.parse(String(loginMethods.email)),
+          google: JSON.parse(String(loginMethods.google)),
+        },
       });
+
       this._cdr.markForCheck();
     });
   }
@@ -110,7 +133,10 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
     await loadingReaction.present();
 
-    const config = this.configForm.value;
+    const config = { ...this.configForm.value };
+
+    config.loginMethods = JSON.stringify(this.configForm.value.loginMethods);
+
     this._configService.updateConfig(config).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
         this._alertService.showAlert(

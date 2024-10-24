@@ -1,6 +1,5 @@
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-
 import { AppModule } from './app/app.module';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import { Translations } from './translations/translations';
@@ -25,7 +24,6 @@ async function initializeApp() {
   try {
     await translationsInitializer.initialize();
     await loadThemeColorsFromLocalStorage();
-
     platformBrowserDynamic().bootstrapModule(AppModule).catch(err => console.error(err));
     defineCustomElements(window);
   } catch (error) {
@@ -45,7 +43,7 @@ async function loadThemeColorsFromLocalStorage(): Promise<void> {
       document.documentElement.style.setProperty(variable, theme[variable]);
     });
 
-    if (configData.settings.siteTitle) {
+    if (configData.settings.title) {
       document.title = configData.settings.title;
     }
 
@@ -60,12 +58,51 @@ async function loadThemeColorsFromLocalStorage(): Promise<void> {
       }
     }
 
+    updateMetaTags(configData);
+
     const loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen) {
       loadingScreen.style.opacity = '0';
       setTimeout(() => loadingScreen.remove(), 500);
     }
   });
+}
+
+function updateMetaTags(configData: any) {
+  updateMetaTag('property', 'og:site_name', configData.settings.title);
+
+  updateMetaTag('property', 'og:url', configData.settings.urlSite);
+
+  updateMetaTag('property', 'og:description', configData.settings.description);
+
+  updateMetaTag('property', 'og:image', configData.settings.logoUrl);
+
+  updateFavicon(configData.settings.logoUrl);
+}
+
+function updateMetaTag(attrName: string, attrValue: string, content: string) {
+  let element: HTMLMetaElement | null = document.querySelector(`meta[${attrName}="${attrValue}"]`);
+  
+  if (element) {
+    element.setAttribute('content', content);
+  } else {
+    element = document.createElement('meta');
+    element.setAttribute(attrName, attrValue);
+    element.setAttribute('content', content);
+    document.head.appendChild(element);
+  }
+}
+
+function updateFavicon(iconUrl: string) {
+  const link: HTMLLinkElement | null = document.querySelector("link[rel*='icon']");
+  if (link) {
+    link.href = iconUrl;
+  } else {
+    const newLink = document.createElement('link');
+    newLink.rel = 'icon';
+    newLink.href = iconUrl;
+    document.head.appendChild(newLink);
+  }
 }
 
 initializeApp();

@@ -7,5 +7,6 @@ export interface Config {
   contactEmail?: string;
   faviconUrl?: string;
   loginMethods?: string;
-
+  urlSite?: string;
+  description?: string;
 }

@@ -5,6 +5,7 @@ import { Socket } from 'ngx-socket-io';
 
 import { environment } from '../../../../environments/environment';
 import { Config } from '@shared/interfaces/config.interface';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ import { Config } from '@shared/interfaces/config.interface';
 export class ConfigService {
   private apiUrl: string;
 
-  private token: string;
+  private token = localStorage.getItem('token');
 
   private configSubject = new BehaviorSubject<any>(null);
 
@@ -22,11 +23,13 @@ export class ConfigService {
 
   constructor(
     private http: HttpClient,
-    private socket: Socket
+    private socket: Socket,
+    private _router: Router
   ) {
+    this.token = localStorage.getItem('token');
+    if (!this.token) this._router.navigate(['/']);
     this.subscribeToNotification();
     this.apiUrl = environment.API_URL;
-    this.token = localStorage.getItem('token') || '';
   }
 
   private getHeaders(): HttpHeaders {
