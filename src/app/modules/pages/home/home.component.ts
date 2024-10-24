@@ -1,7 +1,10 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
 import { Meta } from '@angular/platform-browser';
+import { Title } from '@angular/platform-browser';
+
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { PublicationService } from '@shared/services/publication.service';
@@ -11,7 +14,6 @@ import { AlertService } from '@shared/services/alert.service';
 import { LocationService } from '@shared/services/apis/location.service';
 import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.service';
 import { GeocodingService } from '@shared/services/apis/geocoding.service';
-import { ActivatedRoute } from '@angular/router';
 import { environment } from '@env/environment';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { NetworkService } from '@shared/services/network.service';
@@ -19,6 +21,7 @@ import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { ScrollService } from '@shared/services/scroll.service';
+import { ConfigService } from '@shared/services/config.service';
 
 @Component({
   selector: 'worky-home',
@@ -78,8 +81,14 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _notificationUsersService: NotificationUsersService,
     private _networkService: NetworkService,
     private _deviceDetectionService: DeviceDetectionService,
-    private _scrollService: ScrollService
+    private _scrollService: ScrollService,
+    private _titleService: Title,
+    private _configService: ConfigService
   ) {
+
+    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
+      this._titleService.setTitle(configData.settings.title + ' - Home');
+    });
     this.getLocationUser();
   }
 

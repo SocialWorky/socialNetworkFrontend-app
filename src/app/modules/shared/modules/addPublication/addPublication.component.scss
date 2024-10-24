@@ -99,12 +99,15 @@
         border-radius: 8px;
         border: 1px solid color.$worky-color-light;
         resize: none;
-        overflow: auto;
         padding: 8px;
+        overflow: auto;
         background: color.$worky-color-greyLight;
         color: color.$worky-color-dark;
         @include breakpoints.below-sm {
           max-height: 200px;
+        }
+        ::ng-deep .textarea-wrapper .textarea-wrapper-inner .native-wrapper .native-textarea {
+          padding: 2px;
         }
       }
 

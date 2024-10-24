@@ -25,6 +25,7 @@ async function initializeApp() {
   try {
     await translationsInitializer.initialize();
     await loadThemeColorsFromLocalStorage();
+
     platformBrowserDynamic().bootstrapModule(AppModule).catch(err => console.error(err));
     defineCustomElements(window);
   } catch (error) {
@@ -32,7 +33,7 @@ async function initializeApp() {
   }
 }
 
-async function loadThemeColorsFromLocalStorage() {
+async function loadThemeColorsFromLocalStorage(): Promise<void> {
   const appModuleRef = await platformBrowserDynamic().bootstrapModule(AppModule);
   const injector = appModuleRef.injector;
   const _configService = injector.get(ConfigService);
@@ -43,6 +44,27 @@ async function loadThemeColorsFromLocalStorage() {
     Object.keys(theme).forEach(variable => {
       document.documentElement.style.setProperty(variable, theme[variable]);
     });
+
+    if (configData.settings.siteTitle) {
+      document.title = configData.settings.title;
+    }
+
+    if (configData.settings.logoUrl) {
+      const loadingScreen = document.getElementById('loading-screen');
+      if (loadingScreen) {
+        const imgElement = document.createElement('img');
+        imgElement.src = configData.settings.logoUrl;
+        imgElement.alt = 'Cargando...';
+        loadingScreen.innerHTML = '';
+        loadingScreen.appendChild(imgElement);
+      }
+    }
+
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+      loadingScreen.style.opacity = '0';
+      setTimeout(() => loadingScreen.remove(), 500);
+    }
   });
 }
 

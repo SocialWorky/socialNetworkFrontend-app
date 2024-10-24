@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom, lastValueFrom, Subject, takeUntil } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 import * as _ from 'lodash';
+import { Title } from '@angular/platform-browser';
 
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
@@ -25,6 +26,7 @@ import { ProfileNotificationService } from '@shared/services/notifications/profi
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { ScrollService } from '@shared/services/scroll.service';
+import { ConfigService } from '@shared/services/config.service';
 
 @Component({
   selector: 'worky-profiles',
@@ -32,8 +34,6 @@ import { ScrollService } from '@shared/services/scroll.service';
   styleUrls: ['./profiles.component.scss'],
 })
 export class ProfilesComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
-
   typePublishing = TypePublishing;
   
   publications: PublicationView[] = [];
@@ -90,6 +90,8 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   hasMorePublications = true;
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     public _dialog: MatDialog,
     private _authService: AuthService,
@@ -106,8 +108,13 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _emailNotificationService: EmailNotificationService,
     private _router: Router,
     private _deviceDetectionService: DeviceDetectionService,
-    private _scrollService: ScrollService
+    private _scrollService: ScrollService,
+    private _titleService: Title,
+    private _configService: ConfigService
   ) {
+    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
+      this._titleService.setTitle(configData.settings.title + ' - Profile');
+    });
     this.idUserProfile = this._activatedRoute.snapshot.paramMap.get('profileId') || '';
   }
 

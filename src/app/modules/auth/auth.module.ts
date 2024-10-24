@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { IonicModule } from '@ionic/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { OAuthModule } from 'angular-oauth2-oidc';
 
@@ -15,6 +16,7 @@ import { TranslationsModule } from '@shared/modules/translations/translations.mo
   declarations: [LayoutPageComponent, LoginComponent, RegisterComponent, ResetPasswordModalComponent],
   imports: [
     CommonModule,
+    IonicModule,
     FormsModule,
     ReactiveFormsModule,
     OAuthModule.forRoot(),
