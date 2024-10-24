@@ -56,6 +56,8 @@ export class RegisterComponent implements OnInit {
 
   async register() {
 
+    if(this.registerForm.invalid) return;
+
     this.registerLoading = true;
     
     const baseUrl = environment.BASE_URL;
