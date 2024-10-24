@@ -29,8 +29,6 @@ import { ConfigService } from '@shared/services/config.service';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
-
   typePublishing = TypePublishing;
   
   publications: PublicationView[] = [];
@@ -58,6 +56,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   connectionStatusMessage = '';
 
   showScrollToTopButton = false;
+
+  private destroy$ = new Subject<void>();
 
   get isMobile(): boolean {
     return this._deviceDetectionService.isMobile();

@@ -69,12 +69,13 @@ async function loadThemeColorsFromLocalStorage(): Promise<void> {
 }
 
 function updateMetaTags(configData: any) {
+  if (configData.settings.title) {
+    document.title = configData.settings.title;
+  }
+
   updateMetaTag('property', 'og:site_name', configData.settings.title);
-
   updateMetaTag('property', 'og:url', configData.settings.urlSite);
-
   updateMetaTag('property', 'og:description', configData.settings.description);
-
   updateMetaTag('property', 'og:image', configData.settings.logoUrl);
 
   updateFavicon(configData.settings.logoUrl);

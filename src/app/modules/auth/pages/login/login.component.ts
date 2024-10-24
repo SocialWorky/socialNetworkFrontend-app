@@ -18,6 +18,8 @@ import { DeviceDetectionService } from '@shared/services/DeviceDetection.service
 import { SocketService } from '@shared/services/socket.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
+import { ConfigService } from '@shared/services/config.service';
+import { MetaTagService } from '@shared/services/meta-tag.service'
 
 @Component({
   selector: 'worky-login',
@@ -34,6 +36,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   token = localStorage.getItem('token');
 
   googleLoginSession = localStorage.getItem('googleLogin');
+
+  private destroy$ = new Subject<void>();
 
   @ViewChild('emailInput') emailInput!: ElementRef;
 
@@ -53,8 +57,17 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     private _deviceDetectionService: DeviceDetectionService,
     private _socketService: SocketService,
     private _notificationUsersService: NotificationUsersService,
-    private _emailNotificationService: EmailNotificationService
+    private _emailNotificationService: EmailNotificationService,
+    private _configService: ConfigService,
+    private _metaTagService: MetaTagService
   ) {
+    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
+      const title = configData.settings.title + ' - Login';
+      const description = configData.settings.description;
+      const imageUrl = configData.settings.logoUrl;
+      const urlSite = configData.settings.urlSite;
+      this._metaTagService.updateMetaTags(title, description, imageUrl, urlSite );
+    });
     if (this.token) {
       this._router.navigate(['/home']);
     }
