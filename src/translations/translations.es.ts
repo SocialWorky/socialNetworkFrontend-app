@@ -115,6 +115,8 @@ export const translations = {
   'notification.commentPublication': 'Han comentado tu publicación',
   'notification.commentPublicationImage': 'Han comentado una imagen',
   // REGISTER COMPONENT
+  'register.title': 'Registro',
+  'register.subTitle': 'Rellene el formulario de inscripción y se parte de la comunidad',
   'register.haveAccountLogIn': '¿Ya tienes una cuenta? Inicia sesión',
   'register.messageLoading': 'Registrando...',
   // NAVBAR COMPONENT

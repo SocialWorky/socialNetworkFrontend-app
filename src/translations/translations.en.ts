@@ -116,7 +116,7 @@ export const translations = {
   'notification.commentPublicationImage': 'Comment image',
   // REGISTER COMPONENT
   'register.title': 'Register',
-  'register.subTitle': 'Fill out the registration form',
+  'register.subTitle': 'Fill in the registration form and become part of the community',
   'register.haveAccountLogIn': 'Already have an account? Log in',
   'register.messageLoading': 'Registering...',
   // NAVBAR COMPONENT
