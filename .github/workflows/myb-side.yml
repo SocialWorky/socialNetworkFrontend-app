@@ -31,6 +31,21 @@ jobs:
           echo "NG_APP_APINOTIFICATIONCENTER=${{ secrets.NG_APP_BSIDE_APINOTIFICATIONCENTER }}" >> .env
           echo "NG_APP_GIPHYAPIKEY=${{ secrets.NG_APP_GIPHYAPIKEY }}" >> .env
           echo "NG_APP_TEMPLATE_EMAIL_LOGO=${{ secrets.NG_APP_BSIDE_TEMPLATE_EMAIL_LOGO }}" >> .env
+          echo "NG_APP_META_TITLE=${{ secrets.NG_APP_BSIDE_META_TITLE }}" >> .env
+          echo "NG_APP_META_DESCRIPTION=${{ secrets.NG_APP_BSIDE_META_DESCRIPTION }}" >> .env
+          echo "NG_APP_META_KEYWORDS=${{ secrets.NG_APP_BSIDE_META_KEYWORDS }}" >> .env
+          echo "NG_APP_META_IMAGE=${{ secrets.NG_APP_BSIDE_META_IMAGE }}" >> .env
+          echo "NG_APP_META_URL=${{ secrets.NG_APP_BSIDE_META_URL }}" >> .env
+          echo "NG_APP_META_OG_SITE_NAME=${{ secrets.NG_APP_BSIDE_META_OG_SITE_NAME }}" >> .env
+          echo "NG_APP_META_OG_TITLE=${{ secrets.NG_APP_BSIDE_META_OG_TITLE }}" >> .env
+          echo "NG_APP_META_OG_DESCRIPTION=${{ secrets.NG_APP_BSIDE_META_OG_DESCRIPTION }}" >> .env
+          echo "NG_APP_META_OG_IMAGE=${{ secrets.NG_APP_BSIDE_META_OG_IMAGE }}" >> .env
+          echo "NG_APP_META_OG_URL=${{ secrets.NG_APP_BSIDE_META_OG_URL }}" >> .env
+          echo "NG_APP_META_TWITTER_CARD=${{ secrets.NG_APP_BSIDE_META_TWITTER_CARD }}" >> .env
+          echo "NG_APP_META_TWITTER_TITLE=${{ secrets.NG_APP_BSIDE_META_TWITTER_TITLE }}" >> .env
+          echo "NG_APP_META_TWITTER_DESCRIPTION=${{ secrets.NG_APP_BSIDE_META_TWITTER_DESCRIPTION }}" >> .env
+          echo "NG_APP_META_TWITTER_IMAGE=${{ secrets.NG_APP_BSIDE_META_TWITTER_IMAGE }}" >> .env
+          echo "NG_APP_META_TWITTER_URL=${{ secrets.NG_APP_BSIDE_META_TWITTER_URL }}" >> .env
 
       - name: Build and push Docker image
         env:

@@ -1,15 +1,16 @@
 {
   "name": "socialNetworkFrontend-app",
   "version": "0.0.1",
-  "author": "Ionic Framework",
-  "homepage": "https://ionicframework.com/",
+  "author": "Compuelec Soporte",
+  "homepage": "https://compuelec.cl/",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "prepare-meta": "node prepare-meta-tags.js",
+    "build": "npm run prepare-meta && ng build --prod"
   },
   "private": true,
   "dependencies": {
