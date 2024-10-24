@@ -10,7 +10,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "prepare-meta": "node prepare-meta-tags.js",
-    "build": "npm run prepare-meta && ng build"
+    "build": "ng build"
   },
   "private": true,
   "dependencies": {
