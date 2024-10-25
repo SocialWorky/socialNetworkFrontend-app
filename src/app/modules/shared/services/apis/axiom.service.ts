@@ -24,7 +24,6 @@ export class AxiomService {
       this.axiomUrl = config.services.logs.urlApi;
       this.axiomToken = config.services.logs.token;
       this.serviceEnabled = config.services.logs.enabled;
-      console.log(config);
     });
 
   }
