@@ -2,39 +2,48 @@
 @use 'src/assets/styles/worky-palettes' as colors;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
-.container-online {
-  padding: 10px;
-  .worky-module-header {
-    display: flex;
-    align-items: center;
-    margin-left: 10px;
-    .worky-module-title {
-      font-size: 1.5rem;
-      color: map-get(colors.$worky-navy, 24);
-    }
+.container-user-online {
+  background-color: map-get(colors.$worky-grey, 72);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  width: 100%;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  .user-online-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: colors.$worky-color-navy;
   }
-  .users-online-container {
+  .user-online-content {
     display: flex;
     flex-wrap: wrap;
-    margin-top: 10px;
-    gap: 2px;
-    .worky-user {
-      cursor: pointer;
-      .content-user-online {
-        display: flex;
-        align-items: center;
-        padding: 0.3rem;
-        background-color: map-get(colors.$worky-navy, 87); 
-        border-radius: 50px;
-
-        ::ng-deep worky-avatar.worky-user-avatar.avatar-online div.avatar {
-          border: 3px solid colors.$worky-color-green;
-        }
-        ::ng-deep worky-avatar.worky-user-avatar.avatar-inactive div.avatar{
-          border: 3px solid colors.$worky-color-red;
-        }
-      }
+    gap: 0.5rem;
+  }
+  .user-online-item {
+    position: relative;
+    cursor: pointer;
+    &:hover {
+      filter: brightness(85%);
     }
+    border: 1px solid colors.$worky-color-greyLight;
+    border-radius: 50%;
+    padding: 0.125rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+  .user-online-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+  }
+  .user-online-point {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 0.75rem;
+    height: 0.75rem;
+    border: 2px solid colors.$worky-color-light;
+    border-radius: 50%;
   }
 }
+
 

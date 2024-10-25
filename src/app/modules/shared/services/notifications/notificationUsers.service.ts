@@ -161,7 +161,9 @@ export class NotificationUsersService implements OnDestroy {
     const userIndex = currentStatuses.findIndex(status => status?._id === userStatus?._id);
 
     if (userIndex === -1) {
-      currentStatuses.push(userStatus);
+      if (currentStatuses.includes(userStatus)) {
+        currentStatuses.push(userStatus);
+      }
       this._userStatuses.next(currentStatuses);
     }
   }

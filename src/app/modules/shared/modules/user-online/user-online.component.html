@@ -1,21 +1,21 @@
-<div class="worky-module-container container-online">
-  <div class="worky-module-header">
-    <div class="worky-module-title">Usuarios Online</div>
-  </div>
-  <div class="users-online-container" *ngIf="usersOnline?.length">
-
-    <div class="worky-user" *ngFor="let user of usersOnline">
-      <div class="content-user-online"
-        (click)="goToProfile(user?._id!)">
+<div class="container-user-online">
+  <h3 class="user-online-title">Usuarios Online</h3>
+  <div class="user-online-content">
+    <div class="user-online-item"
+      *ngFor="let user of usersOnline" 
+      (click)="goToProfile(user?._id!)">
+        
         <worky-avatar
-          [ngClass]="{'avatar-online': user?.status === 'online', 'avatar-inactive': user?.status === 'inactive'}"
-          [size]="40"
-          [name]="user?.name"
-          [img]="user?.avatar"
-          class="worky-user-avatar">
+            [size]="35"
+            [name]="user?.name"
+            [img]="user?.avatar"
+            class="user-online-avatar">
         </worky-avatar>
-      </div>
+        
+        <span class="user-online-point"
+           [class.bg-green-color]="user?.status === 'online'"
+           [class.bg-red-color]="user?.status === 'inactive'">
+        </span>
     </div>
-
   </div>
 </div>

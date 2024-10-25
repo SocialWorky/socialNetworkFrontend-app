@@ -36,6 +36,7 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+    this.getUserOnline();
     await this._notificationUsersService.userStatuses$.pipe(
       takeUntil(this._destroy$)
     ).subscribe({
@@ -47,7 +48,6 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
         console.error('Error getting user statuses', error);
       }
     });
-    this.getUserOnline();
   }
 
   getUserOnline() {

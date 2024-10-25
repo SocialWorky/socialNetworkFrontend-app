@@ -349,6 +349,31 @@ $worky-red: (
   )
 );
 
+$worky-grey: (
+  3: color-mix(in srgb, $worky-color-grey, $worky-color-light 3%),
+  6: color-mix(in srgb, $worky-color-grey, $worky-color-light 6%),
+  7: color-mix(in srgb, $worky-color-grey, $worky-color-light 7%),
+  9: color-mix(in srgb, $worky-color-grey, $worky-color-light 9%),
+  12: color-mix(in srgb, $worky-color-grey, $worky-color-light 12%),
+  24: color-mix(in srgb, $worky-color-grey, $worky-color-light 24%),
+  56: color-mix(in srgb, $worky-color-grey, $worky-color-light 56%),
+  72: color-mix(in srgb, $worky-color-grey, $worky-color-light 72%),
+  87: color-mix(in srgb, $worky-color-grey, $worky-color-light 87%),
+  100: $worky-color-grey,
+  contrast: (
+    3: $worky-color-dark,
+    6: $worky-color-dark,
+    7: $worky-color-dark,
+    9: $worky-color-dark,
+    12: $worky-color-dark,
+    24: $worky-color-dark,
+    56: $worky-color-dark,
+    72: $worky-color-light,
+    87: $worky-color-light,
+    100: $worky-color-light,
+  )
+);
+
 /* worky App Components Colors */
 
 /* App */
