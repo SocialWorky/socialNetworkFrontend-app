@@ -22,6 +22,7 @@ import { translations } from '@translations/translations';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/config.service';
+import { AxiomService } from '@shared/services/apis/axiom.service';
 
 @Component({
   selector: 'worky-home',
@@ -83,7 +84,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _deviceDetectionService: DeviceDetectionService,
     private _scrollService: ScrollService,
     private _titleService: Title,
-    private _configService: ConfigService
+    private _configService: ConfigService,
+    private _axiomService: AxiomService
   ) {
 
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
@@ -109,6 +111,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
+        this._axiomService.sendLog({ error: error });
         console.error('Error getting connection status', error);
       }
     });
@@ -128,6 +131,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
+        this._axiomService.sendLog({ error: error });
         console.error('Error getting connection speed', error);
       }
     });
@@ -152,6 +156,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this._notificationUsersService.userActive();
     }, 300);
+    this._axiomService.sendLog({ event: 'HomeComponent loaded' });
     this._cdr.markForCheck();
   }
 
@@ -175,7 +180,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error getting publications', error);
+        this._axiomService.sendLog({ error: error });
       }
     });
 
@@ -188,7 +193,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error getting publications', error);
+        this._axiomService.sendLog({ error: error });
       }
     });
   }
@@ -212,7 +217,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this._cdr.markForCheck();
 
     } catch (error) {
-      console.error('Error loading publications', error);
+      this._axiomService.sendLog({ error: error });
       this.loaderPublications = false;
     }
   }
@@ -236,6 +241,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       const newCommentInPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize));
       this._publicationService.updatePublications(newCommentInPublications.publications);
       this._cdr.markForCheck();
+    }, (error) => {
+      this._axiomService.sendLog({ error: error });
     });
   }
 
@@ -249,7 +256,6 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.loaderPublications = false;
           this.publications = publication;
 
-          // section meta tags
           this._meta.updateTag({ property: 'og:title', content: 'worky Social Network' });
           this._meta.updateTag({ property: 'og:description', content: this.publications[0]?.content });
           this._meta.updateTag({ property: 'og:image', content: this.urlMediaApi + this.publications[0]?.media[0]?.url });
@@ -261,7 +267,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           result = false;
         }
       } catch (error) {
-        console.error('Error get publications', error);
+        this._axiomService.sendLog({ error: error });
       }
     }
     return result;

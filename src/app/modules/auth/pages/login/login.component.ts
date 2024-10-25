@@ -59,7 +59,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     private _notificationUsersService: NotificationUsersService,
     private _emailNotificationService: EmailNotificationService,
     private _configService: ConfigService,
-    private _metaTagService: MetaTagService
+    private _metaTagService: MetaTagService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       const title = configData.settings.title + ' - Login';
@@ -256,7 +256,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
               }
             },
             error: (e: any) => {
-              console.log(e);
               loading.dismiss();
               this._router.navigate(['/home']);
             }

@@ -4,7 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Socket } from 'ngx-socket-io';
 
 import { environment } from '../../../../environments/environment';
-import { Config } from '@shared/interfaces/config.interface';
+import { Config, ConfigServiceInterface } from '@shared/interfaces/config.interface';
 import { Router } from '@angular/router';
 
 @Injectable({
@@ -44,6 +44,12 @@ export class ConfigService {
     const url = `${this.apiUrl}/config`;
     const headers = this.getHeaders();
     return this.http.get<any>(url, { headers });
+  }
+
+  getConfigServices(): Observable<ConfigServiceInterface> {
+    const url = `${this.apiUrl}/config/services`;
+    const headers = this.getHeaders();
+    return this.http.get<ConfigServiceInterface>(url, { headers });
   }
 
   updateConfig(config: Config): Observable<Config> {

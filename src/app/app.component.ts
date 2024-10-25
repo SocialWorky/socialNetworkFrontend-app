@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestro
 import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
 import { Subject, takeUntil } from 'rxjs';
-;
+
 import { getTranslationsLanguage } from '../translations/translations';
 import { ConfigService } from '@shared/services/config.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
@@ -22,7 +22,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private _configService: ConfigService,
     private _titleService: Title,
     private _cdr: ChangeDetectorRef,
-    private _notificationUsersService: NotificationUsersService
+    private _notificationUsersService: NotificationUsersService,
   ) {
     this._notificationUsersService.setupInactivityListeners();
   } 

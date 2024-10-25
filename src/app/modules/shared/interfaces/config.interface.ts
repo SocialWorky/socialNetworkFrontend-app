@@ -10,3 +10,13 @@ export interface Config {
   urlSite?: string;
   description?: string;
 }
+
+export interface ConfigServiceInterface {
+  services: {
+    logs: {
+      token: string;
+      urlApi: string;
+      enabled: boolean;
+    };
+  };
+}
