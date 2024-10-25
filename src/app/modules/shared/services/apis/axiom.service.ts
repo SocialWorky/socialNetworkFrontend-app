@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import axios from 'axios';
+
 import { ConfigService } from '@shared/services/config.service';
 import { ConfigServiceInterface } from '@shared/interfaces/config.interface';
-import { Subject, takeUntil } from 'rxjs';
+import { environment } from '@env/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -29,11 +31,12 @@ export class AxiomService {
   }
 
   async sendLog(event: any): Promise<void> {
+    const app = environment.BASE_URL;
     if (!this.serviceEnabled) return;
     try {
       await axios.post(
         this.axiomUrl,
-        [event],
+        [event, { app }],
         {
           headers: {
             Authorization: `Bearer ${this.axiomToken}`,

@@ -156,7 +156,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this._notificationUsersService.userActive();
     }, 300);
-    this._axiomService.sendLog({ event: 'HomeComponent loaded' });
     this._cdr.markForCheck();
   }
 
