@@ -112,7 +112,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         this._axiomService.sendLog({ error: error });
-        console.error('Error getting connection status', error);
       }
     });
 
@@ -132,7 +131,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         this._axiomService.sendLog({ error: error });
-        console.error('Error getting connection speed', error);
       }
     });
 

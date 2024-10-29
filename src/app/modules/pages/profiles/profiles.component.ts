@@ -27,6 +27,7 @@ import { EmailNotificationService } from '@shared/services/notifications/email-n
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/config.service';
+import { AxiomService } from '@shared/services/apis/axiom.service';
 
 @Component({
   selector: 'worky-profiles',
@@ -110,7 +111,8 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _deviceDetectionService: DeviceDetectionService,
     private _scrollService: ScrollService,
     private _titleService: Title,
-    private _configService: ConfigService
+    private _configService: ConfigService,
+    private _axiomService: AxiomService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
@@ -159,7 +161,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this.updatePublications(publicationsData);
       },
       error: (error) => {
-        console.error('Error getting publications', error);
+        this._axiomService.sendLog({ error: error });
       }
     });
 
@@ -172,7 +174,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error getting publications', error);
+        this._axiomService.sendLog({ error: error });
       }
     });
   }
@@ -244,7 +246,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this._cdr.markForCheck();
 
     } catch (error) {
-      console.error('Error loading publications', error);
+      this._axiomService.sendLog({ error: error });
       this.loaderPublications = false;
     }
   }
@@ -257,7 +259,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error(error);
+        this._axiomService.sendLog({ error: error });
       },
     });
   }
@@ -274,7 +276,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this.getUserFriendPending();
       },
       error: (error) => {
-        console.error(error);
+        this._axiomService.sendLog({ error: error });
       },
     });
   }
@@ -298,7 +300,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         }
       },
       error: (error: any) => {
-        console.error(error);
+        this._axiomService.sendLog({ error: error });
       },
     });
   }
@@ -312,7 +314,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error(error);
+        this._axiomService.sendLog({ error: error });
       }
     });
   }
@@ -334,6 +336,9 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this.loadPublications();
         this._emailNotificationService.acceptFriendRequestNotification(this.idUserProfile);
         this._cdr.markForCheck();
+      },
+      error: (error) => {
+        this._axiomService.sendLog({ error: error });
       }
     });
   }
@@ -385,7 +390,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           }, 1200);
         },
         error: (error) => {
-          console.error('Error updating profile', error);
+          this._axiomService.sendLog({ error: error });
           this.isUploading = false;
           this._cdr.markForCheck();
         }
