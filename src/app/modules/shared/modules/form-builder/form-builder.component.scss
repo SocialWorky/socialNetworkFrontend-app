@@ -1,0 +1,91 @@
+/* form-builder.component.css */
+.container {
+  display: flex;
+  gap: 20px; /* Espacio entre las columnas */
+}
+
+.fields {
+  width: 30%; /* Ajusta el ancho según tus necesidades */
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+.fields div[cdkDrag] { /* Estilos para los campos disponibles */
+  border: 1px solid #ddd;
+  padding: 5px 10px;
+  margin-bottom: 5px;
+  cursor: move; /* Indicador visual de que se puede arrastrar */
+  background-color: #f0f0f0;
+}
+
+.form-preview {
+  width: 70%; /* Ajusta el ancho según tus necesidades */
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+.form-preview div[cdkDrag] { /* Estilos para los campos en la previsualización */
+  border: 1px dashed #ddd; /* Borde discontinuo para indicar la zona de colocación */
+  padding: 10px;
+  margin-bottom: 10px;
+  min-height: 30px; /* Altura mínima para que se vea la zona de colocación */
+  background-color: #fafafa;
+}
+
+/* Estilos para cuando se arrastra un elemento */
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 4px;
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+              0 8px 10px 1px rgba(0, 0, 0, 0.14),
+              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.fields .cdk-drop-list-dragging .cdk-drag {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.field-wrapper {
+  position: relative; /* Para que el panel se posicione relativo al contenedor */
+  margin-bottom: 20px; /* Espacio entre los campos */
+}
+
+.config-panel {
+  position: absolute;
+  top: 100%; /* Debajo del campo */
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  z-index: 1; /* Para que se muestre encima de otros elementos */
+}
+
+.config-panel {
+  display: flex;
+  flex-direction: column; /* Alinea los elementos verticalmente */
+  gap: 10px; /* Espacio entre los elementos */
+}
+
+.config-panel mat-form-field {
+  width: 100%; /* Ocupa todo el ancho disponible */
+  min-width: 200px;
+}
+
+.config-panel mat-form-field {
+  padding: 5px; /* Ajusta el valor según tus necesidades */
+}
+
+::ng-deep .mat-form-field-infix {
+  width: auto !important; /* Ajusta según sea necesario */
+}
+
+

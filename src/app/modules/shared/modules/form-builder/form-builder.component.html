@@ -1,0 +1,82 @@
+<div class="container">
+  <div class="fields">
+
+    <!-- Campo para seleccionar el destino -->
+    <mat-form-field>
+      <mat-label>Destino</mat-label>
+      <mat-select [(value)]="formDestination" (selectionChange)="updateFormDestination($event)">
+        <mat-option *ngFor="let destination of customFieldDestinations" [value]="destination">
+          {{ destination }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div cdkDropList #fieldsList="cdkDropList" [cdkDropListData]="availableFields"
+         [cdkDropListConnectedTo]="[formFieldsList]" (cdkDropListDropped)="drop($event)">
+      <div *ngFor="let field of availableFields" cdkDrag>
+        {{ field.label }}
+      </div>
+    </div>
+  </div>
+
+  <div class="form-preview">
+    <form [formGroup]="form">
+      <div cdkDropList #formFieldsList="cdkDropList" [cdkDropListData]="formFields"
+          [cdkDropListConnectedTo]="[fieldsList]" (cdkDropListDropped)="drop($event)">
+
+        <div *ngFor="let field of formFields; let i = index" cdkDrag class="field-wrapper">
+          <div (click)="selectField(field, i)">
+            <app-input *ngIf="field.type === enumCustomFieldType.TEXT" [field]="field" [formControlName]="field.id"></app-input>
+            <app-textarea *ngIf="field.type === enumCustomFieldType.TEXTAREA" [field]="field" [formControlName]="field.id"></app-textarea>
+            <app-select *ngIf="field.type === enumCustomFieldType.SELECT" [field]="field" [formControlName]="field.id"></app-select>
+          </div>
+
+          <!-- Mostrar solo el panel de configuración del campo seleccionado -->
+          <div *ngIf="selectedField && selectedFieldIndex === i" class="config-panel">
+            <h3>Configuración de Campo</h3>
+
+            <mat-form-field appearance="outline">
+              <mat-label>ID</mat-label>
+              <input
+                matInput
+                type="text"
+                formControlName="id"
+                placeholder="ID"
+                (change)="validateId()"
+              >
+              <mat-error *ngIf="idError">Este ID ya existe</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="custom-form-field">
+              <mat-label>Etiqueta</mat-label>
+              <input matInput type="text" formControlName="label" placeholder="Etiqueta" 
+                    (change)="updateField(selectedField, 'label', $event)">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="custom-form-field">
+              <mat-label>Placeholder</mat-label>
+              <input matInput type="text" formControlName="placeholder" placeholder="Placeholder" 
+                    (change)="updateField(selectedField, 'placeholder', $event)">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" *ngIf="selectedField?.type === 'select'" class="custom-form-field">
+              <mat-label>Opciones (separadas por coma)</mat-label>
+              <input matInput type="text" formControlName="optionsString" (blur)="updateOptions()">
+            </mat-form-field>
+
+            <button mat-raised-button color="primary" (click)="selectedField = null">Guardar</button>
+            <button mat-raised-button color="warn" (click)="deleteField()">Eliminar</button>
+          </div>
+        </div>
+
+        <div *ngIf="formFields.length === 0">
+
+          Arrastra campos aquí
+        </div>
+      </div>
+
+      <button *ngIf="hasValidField()" (click)="saveForm()" mat-raised-button color="primary">Guardar Formulario</button>
+
+    </form>
+  </div>
+</div>
