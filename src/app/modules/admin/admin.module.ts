@@ -15,10 +15,12 @@ import { ChangeThemeColorsComponent } from './shared/change-theme-colors/change-
 import { CustomCssComponent } from './shared/custom-css/custom-css.component';
 import { ManageReactionsComponent } from './shared/manage-reactions/manage-reactions.component';
 import { SiteConfigComponent } from './shared/site-config/site-config.component';
+import { AdminCustomFieldsComponent } from './shared/admin-custom-fields/admin-custom-fields.component';
 
 import { AdminRoutingModule } from './admin-routing.module';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
 import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.module';
+import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.module';
 
 
 @NgModule({
@@ -32,7 +34,8 @@ import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.mod
     ChangeThemeColorsComponent,
     CustomCssComponent,
     ManageReactionsComponent,
-    SiteConfigComponent
+    SiteConfigComponent,
+    AdminCustomFieldsComponent
   ],
   imports: [
     CommonModule,
@@ -41,7 +44,8 @@ import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.mod
     MonacoEditorModule.forRoot(),
     AdminRoutingModule,
     TranslationsModule,
-    WorkyAvatarModule
+    WorkyAvatarModule,
+    FormBuilderModule
   ],
   exports: [TemplatesComponent]
 })
