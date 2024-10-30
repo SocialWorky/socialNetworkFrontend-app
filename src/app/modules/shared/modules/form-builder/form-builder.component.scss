@@ -1,44 +1,55 @@
-/* form-builder.component.css */
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+
 .container {
   display: flex;
-  gap: 20px; /* Espacio entre las columnas */
+  gap: 20px;
 }
 
 .fields {
-  width: 30%; /* Ajusta el ancho según tus necesidades */
-  border: 1px solid #ccc;
+  width: 30%;
+  border: 1px solid colors.$worky-color-grey;
   padding: 10px;
 }
 
-.fields div[cdkDrag] { /* Estilos para los campos disponibles */
-  border: 1px solid #ddd;
-  padding: 5px 10px;
-  margin-bottom: 5px;
-  cursor: move; /* Indicador visual de que se puede arrastrar */
-  background-color: #f0f0f0;
+.cdk-drag-preview,
+.fields div[cdkDrag] {
+  display: flex;
+  cursor: move;
+  box-shadow: 0 1px 3px #0000001f, 0 1px 1px #00000024, 0 2px 1px #0003;
+  border-radius: 4px;
+  background: map-get(colors.$worky-indigo, 72);
+  height: 40px;
+  align-items: center;
+  margin-bottom: 8px;
+
+  .drag-and-drop-zone {
+    background: map-get(colors.$worky-indigo, 56);
+    height: 100%;
+    width: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    * {
+    color: #000000de;
+    }
+  }
 }
 
 .form-preview {
-  width: 70%; /* Ajusta el ancho según tus necesidades */
-  border: 1px solid #ccc;
+  width: 70%;
+  border: 1px solid colors.$worky-color-grey;
   padding: 10px;
 }
 
-.form-preview div[cdkDrag] { /* Estilos para los campos en la previsualización */
-  border: 1px dashed #ddd; /* Borde discontinuo para indicar la zona de colocación */
-  padding: 10px;
+.form-preview div[cdkDrag] {
+  border: 1px dashed colors.$worky-color-grey;
+  border-radius: 8px;
+  padding: 5px;
   margin-bottom: 10px;
-  min-height: 30px; /* Altura mínima para que se vea la zona de colocación */
-  background-color: #fafafa;
-}
-
-/* Estilos para cuando se arrastra un elemento */
-.cdk-drag-preview {
-  box-sizing: border-box;
-  border-radius: 4px;
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-              0 8px 10px 1px rgba(0, 0, 0, 0.14),
-              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  min-height: 30px;
+  background-color: map-get(colors.$worky-blue, 87);
 }
 
 .cdk-drag-placeholder {
@@ -54,8 +65,21 @@
 }
 
 .field-wrapper {
-  position: relative; /* Para que el panel se posicione relativo al contenedor */
-  margin-bottom: 20px; /* Espacio entre los campos */
+  position: relative;
+  margin-bottom: 20px;
+  .content-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    .field-item {
+        flex: auto;
+    }
+    i {
+      cursor: pointer;
+      align-items: flex-end;
+    }
+  }
 }
 
 .config-panel {
@@ -63,29 +87,29 @@
   top: 100%; /* Debajo del campo */
   left: 0;
   width: 100%;
-  background-color: white;
-  border: 1px solid #ccc;
+  background-color: colors.$worky-color-light;
+  border: 1px solid colors.$worky-color-grey;
   padding: 10px;
-  z-index: 1; /* Para que se muestre encima de otros elementos */
+  z-index: 2;
 }
 
 .config-panel {
   display: flex;
-  flex-direction: column; /* Alinea los elementos verticalmente */
-  gap: 10px; /* Espacio entre los elementos */
+  flex-direction: column;
+  gap: 10px;
 }
 
 .config-panel mat-form-field {
-  width: 100%; /* Ocupa todo el ancho disponible */
+  width: 100%;
   min-width: 200px;
 }
 
 .config-panel mat-form-field {
-  padding: 5px; /* Ajusta el valor según tus necesidades */
+  padding: 5px; 
 }
 
 ::ng-deep .mat-form-field-infix {
-  width: auto !important; /* Ajusta según sea necesario */
+  width: auto !important;
 }
 
 

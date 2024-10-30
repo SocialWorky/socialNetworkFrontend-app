@@ -45,4 +45,14 @@ export class TextareaComponent implements ControlValueAccessor, OnChanges {
   setDisabledState(isDisabled: boolean): void {
     isDisabled ? this.control.disable() : this.control.enable();
   }
+
+  // Método para comprobar visibilidad
+  get isVisible(): boolean {
+    return this.field.visible !== false; // Muestra si visible no es false
+  }
+
+  // Método para comprobar si es requerido
+  get isRequired(): boolean {
+    return this.field.required === true; // Devuelve true si requerido
+  }
 }

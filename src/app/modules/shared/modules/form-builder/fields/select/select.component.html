@@ -1,6 +1,14 @@
-    <div>
-      <label [for]="field.id">{{ field.label }}</label>
-      <select [id]="field.id" [formControl]="control">
-        <option *ngFor="let option of field?.options" [value]="option.value">{{ option.label }}</option>
-      </select>
-    </div>
+<div class="content-fields">
+  <label [for]="field.id">{{ field.label }}</label>
+  <select 
+    [id]="field.id" 
+    [formControl]="control" 
+    [required]="isRequired">
+    <option value="" disabled selected>Selecciona una opción</option>
+    <option *ngFor="let option of field?.options" [value]="option.value">{{ option.label }}</option>
+  </select>
+
+  <div *ngIf="isRequired && control.hasError('required') && control.touched" class="error">
+    Este campo es requerido.
+  </div>
+</div>

@@ -10,4 +10,8 @@ export interface Field {
   placeholder?: string; // Propiedad para el placeholder
   destination: CustomFieldDestination; // Nueva propiedad para el destino
   additionalOptions?: any; // Para almacenar opciones adicionales específicas del tipo
+  inputFormat?: string; // Para restringir el formato de entrada
+  minLength?: number; // Longitud mínima
+  maxLength?: number; // Longitud máxima
+  visible?: boolean; // Para controlar la visibilidad
 }

@@ -1,4 +1,20 @@
-    <div>
-      <label [for]="field.id">{{ field.label }}</label>
-      <textarea [id]="field.id" [formControl]="control" [placeholder]="field.placeholder"></textarea>
-    </div>
+<div class="content-fields">
+  <label [for]="field.id">{{ field.label }}</label>
+  <textarea 
+    [id]="field.id" 
+    [formControl]="control" 
+    [placeholder]="field.placeholder"
+    [required]="isRequired"
+    [attr.minlength]="field.minLength" 
+    [attr.maxlength]="field.maxLength"></textarea>
+
+  <div *ngIf="isRequired && control.hasError('required') && control.touched" class="error">
+    Este campo es requerido.
+  </div>
+  <div *ngIf="control.errors?.['minlength'] && control.touched" class="error">
+    La longitud mínima es {{ field.minLength }} caracteres.
+  </div>
+  <div *ngIf="control.errors?.['maxlength'] && control.touched" class="error">
+    La longitud máxima es {{ field.maxLength }} caracteres.
+  </div>
+</div>
