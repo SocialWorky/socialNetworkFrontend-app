@@ -47,8 +47,8 @@ export interface TextAreaOptions extends FieldOptions {
 
 export interface CustomField {
   id: string;
-  type: CustomFieldType; // Usamos el enum definido
+  type: CustomFieldType;
   label: string;
-  options?: TextOptions | SelectOptions | NumberOptions | TextAreaOptions; // Usamos las opciones específicas
-  destination: CustomFieldDestination; // Agregamos el destino
+  options?: TextOptions | SelectOptions | NumberOptions | TextAreaOptions;
+  destination: CustomFieldDestination;
 }

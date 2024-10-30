@@ -11,16 +11,26 @@
     </mat-form-field>
 
     <div class="drag-and-drop-available-fields" cdkDropList #fieldsList="cdkDropList" [cdkDropListData]="availableFields"
-         [cdkDropListConnectedTo]="[formFieldsList]" (cdkDropListDropped)="drop($event)">
+        [cdkDropListConnectedTo]="[formFieldsList]" (cdkDropListDropped)="drop($event)">
 
-      <div *ngFor="let field of availableFields" cdkDrag>
+      <div *ngFor="let field of availableFields" cdkDrag 
+          (cdkDragStarted)="onDragStart($event)" 
+          (cdkDragEnded)="onDragEnd($event)"
+          class="draggable">
+        
         <div class="drag-and-drop-zone">
           <i class="material-icons">drag_indicator</i>
         </div>
 
+        <i *ngIf="field.type === enumCustomFieldType.TEXT" class="material-icons">format_size</i>
+        <i *ngIf="field.type === enumCustomFieldType.TEXTAREA" class="material-icons">format_align_left</i>
+        <i *ngIf="field.type === enumCustomFieldType.SELECT" class="material-icons">checklist</i>
+
         {{ field.label }}
+
       </div>
     </div>
+
   </div>
 
   <div class="form-preview">
@@ -54,20 +64,17 @@
 
           </div>
 
-          <!-- Mostrar solo el panel de configuración del campo seleccionado -->
           <div *ngIf="selectedField && selectedFieldIndex === i" class="config-panel">
             <h3>Configuración de Campo</h3>
 
-            <mat-form-field class="worky-input worky-accent">
+           <mat-form-field class="worky-input worky-accent">
               <mat-label>ID</mat-label>
               <input
                 matInput
                 type="text"
                 formControlName="id"
                 placeholder="ID"
-                (blur)="validateId()"
-              >
-              <mat-error *ngIf="idError">Este ID ya existe</mat-error>
+                readonly>
             </mat-form-field>
 
             <mat-form-field class="worky-input worky-accent">

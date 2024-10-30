@@ -1,9 +1,10 @@
-import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { Component, ChangeDetectorRef, OnInit, Renderer2 } from '@angular/core';
+import { CdkDragDrop, CdkDragEnd, CdkDragStart, moveItemInArray } from '@angular/cdk/drag-drop';
 import { FormGroup, FormControl } from '@angular/forms';
+import { MatSelectChange } from '@angular/material/select';
+
 import { Field } from './interfaces/field.interface';
 import { CustomFieldType, CustomFieldDestination } from './interfaces/custom-field.interface';
-import { MatSelectChange } from '@angular/material/select';
 
 @Component({
   selector: 'worky-form-builder',
@@ -23,14 +24,16 @@ export class FormBuilderComponent implements OnInit {
     { type: CustomFieldType.TEXT, id: this.generateId(), label: 'Campo de Texto', destination: CustomFieldDestination.PROFILE },
     { type: CustomFieldType.TEXTAREA, id: this.generateId(), label: 'Área de Texto', destination: CustomFieldDestination.PROFILE },
     { type: CustomFieldType.SELECT, id: this.generateId(), label: 'Select', options: [], destination: CustomFieldDestination.PROFILE },
-    // Agregar más tipos según sea necesario
   ];
 
   formFields: Field[] = [];
 
   customFieldDestinations = Object.values(CustomFieldDestination);
 
-  constructor(private cdRef: ChangeDetectorRef) {}
+  constructor(
+    private cdRef: ChangeDetectorRef,
+    private renderer: Renderer2
+  ) {}
 
   ngOnInit() {
     this.formDestination = this.customFieldDestinations[0];
@@ -38,15 +41,23 @@ export class FormBuilderComponent implements OnInit {
       id: new FormControl(''),
       label: new FormControl(''),
       placeholder: new FormControl(''),
-      optionsString: new FormControl(''), // Para almacenar opciones separadas por comas
-      destination: new FormControl(CustomFieldDestination.PROFILE), // Valor por defecto
+      optionsString: new FormControl(''),
+      destination: new FormControl(CustomFieldDestination.PROFILE),
       additionalOptions: new FormGroup({
-        visible: new FormControl(true), // Estado por defecto
-        required: new FormControl(false), // Estado por defecto
-        minLength: new FormControl(''), // Valor por defecto
-        maxLength: new FormControl('') // Valor por defecto
-      }) // Para opciones adicionales
+        visible: new FormControl(true),
+        required: new FormControl(false),
+        minLength: new FormControl(''),
+        maxLength: new FormControl('')
+      })
     });
+  }
+
+  onDragStart(event: CdkDragStart) {
+    this.renderer.addClass(document.body, 'dragging-global');
+  }
+
+  onDragEnd(event: CdkDragEnd) {
+    this.renderer.removeClass(document.body, 'dragging-global');
   }
 
   validateId() {
@@ -66,37 +77,31 @@ export class FormBuilderComponent implements OnInit {
   updateField(field: Field, property: keyof Field, event: Event | MatSelectChange) {
       let value: any;
 
-      // Verifica si el evento es de tipo MatSelectChange
       if (event instanceof MatSelectChange) {
-        value = event.value; // Obtiene el valor directamente de MatSelectChange
+        value = event.value;
       } else {
         const input = event.target as HTMLInputElement;
-        value = input.value; // Obtiene el valor de un HTMLInputElement
+        value = input.value;
       }
 
-      // Encuentra el índice del campo que se desea actualizar
       const index = this.formFields.findIndex(f => f.id === field.id);
 
       if (index !== -1) {
         const updatedField = { ...field };
 
-        // Actualiza la propiedad correspondiente en el campo
         if (property === 'visible' || property === 'required' || property === 'minLength' || property === 'maxLength') {
-          // Actualiza el campo en las opciones adicionales
           updatedField.additionalOptions = {
             ...updatedField.additionalOptions,
             [property]: value
           };
         } else {
-          // Para propiedades generales
           updatedField[property] = value;
         }
 
-        // Actualiza el campo en el array
-        this.formFields[index] = updatedField; // Reemplaza directamente el campo actualizado
-        this.selectedField = updatedField; // Actualiza el campo seleccionado
+        this.formFields[index] = updatedField;
+        this.selectedField = updatedField;
 
-        this.cdRef.detectChanges(); // Notifica el cambio a Angular para la detección de cambios
+        this.cdRef.detectChanges();
       }
     }
 
@@ -108,13 +113,19 @@ export class FormBuilderComponent implements OnInit {
       copiedItem.id = this.generateId();
       this.form.addControl(copiedItem.id, new FormControl(''));
       event.container.data.splice(event.currentIndex, 0, copiedItem);
+      this.cdRef.detectChanges();
     }
     this.cdRef.detectChanges();
   }
 
   generateId(): string {
-    return Math.random().toString(36).substring(2, 15);
+    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+    return `_${uuid}`;
   }
+
 
   deleteField(field: Field, index: number) {
     this.form.removeControl(field.id);
@@ -124,16 +135,12 @@ export class FormBuilderComponent implements OnInit {
   }
 
   selectField(field: Field, index: number) {
-    // Verifica si el campo seleccionado es el mismo que el que se está intentando seleccionar
     if (this.selectedField && this.selectedFieldIndex === index) {
-      // Si ya está seleccionado, cerrarlo (puedes restablecer selectedField y selectedFieldIndex)
-      this.selectedField = null; // O el valor por defecto
-      this.selectedFieldIndex = -1; // O el valor por defecto
+      this.selectedField = null;
+      this.selectedFieldIndex = -1;
 
-      // También puedes resetear el formulario si es necesario
       this.form.reset();
     } else {
-      // Si no está seleccionado, abre la configuración
       this.selectedField = field;
       this.selectedFieldIndex = index;
 
@@ -160,7 +167,6 @@ export class FormBuilderComponent implements OnInit {
     const inputElement = event.target as HTMLInputElement | null;
     if (inputElement) {
       const value = inputElement.value;
-      // Realiza alguna acción con `value`
     }
   }
 
@@ -169,36 +175,33 @@ export class FormBuilderComponent implements OnInit {
   }
 
   saveForm() {
-    // Asignar el destino del formulario a cada campo
     this.formFields.forEach(field => {
       field.destination = this.formDestination; 
     });
 
-    // Mapear los campos del formulario a un formato adecuado para guardar
     const formData = this.formFields.map(field => {
       return {
         id: field.id,
         type: field.type,
         label: field.label,
         placeholder: field.placeholder,
-        options: field.options || [], // Incluye opciones para selects
+        options: field.options || [],
         destination: field.destination,
         additionalOptions: {
-          required: field.additionalOptions?.required || false, // Obtener el valor requerido
-          visible: field.additionalOptions?.visible || true, // Obtener el estado visible
-          minLength: field.additionalOptions?.minLength || null, // Obtener longitud mínima
-          maxLength: field.additionalOptions?.maxLength || null // Obtener longitud máxima
+          required: field.additionalOptions?.required || false,
+          visible: field.additionalOptions?.visible || true,
+          minLength: field.additionalOptions?.minLength || null,
+          maxLength: field.additionalOptions?.maxLength || null
         }
       };
     });
 
-    // Imprimir los datos del formulario en la consola
     console.log('Formulario guardado:', formData);
   }
 
   hasValidField(): boolean {
     return this.formFields.length > 0 && this.formFields.some(field => {
-      return field.label && field.id; // Ajusta según tus criterios de validación
+      return field.label && field.id; 
     });
   }
 }

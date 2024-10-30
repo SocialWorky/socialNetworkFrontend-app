@@ -15,13 +15,14 @@
 .cdk-drag-preview,
 .fields div[cdkDrag] {
   display: flex;
-  cursor: move;
   box-shadow: 0 1px 3px #0000001f, 0 1px 1px #00000024, 0 2px 1px #0003;
   border-radius: 4px;
   background: map-get(colors.$worky-indigo, 72);
   height: 40px;
   align-items: center;
   margin-bottom: 8px;
+  gap: 2px;
+  
 
   .drag-and-drop-zone {
     background: map-get(colors.$worky-indigo, 56);
@@ -112,4 +113,10 @@
   width: auto !important;
 }
 
+.draggable {
+  cursor: grab;
+}
 
+.draggable:active {
+  cursor: grabbing !important;
+}
