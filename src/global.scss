@@ -400,6 +400,10 @@ img, video {
   color: color.$worky-color-navy;
 }
 
+.white-color {
+  color: color.$worky-color-light;
+}
+
 .bg-red-color {
   background-color: color.$worky-color-red;
 }
@@ -448,5 +452,45 @@ img, video {
   &:hover {
     background-color: color.$worky-color-navy;
     color: color.$worky-color-light;
+  }
+}
+
+.content-fields {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px;
+  gap: 10px;
+  label {
+    font-size: 1rem;
+    color: color.$worky-color-navy;
+  }
+  input {
+    flex: auto;
+    padding: 10px;
+    border: 1px solid color.$worky-color-navy;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    color: color.$worky-color-navy;
+  }
+  select {
+    flex: auto;
+    padding: 10px;
+    border: 1px solid color.$worky-color-navy;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    color: color.$worky-color-navy;
+  }
+  textarea {
+    flex: auto;
+    padding: 10px;
+    border: 1px solid color.$worky-color-navy;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    color: color.$worky-color-navy;
   }
 }
