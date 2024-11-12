@@ -2,11 +2,15 @@ import { CustomField, CustomFieldDestination, CustomFieldType } from './custom-f
 
 export interface Field {
   id: string;
+  index?: number;
+  idName: string;
   type: CustomFieldType;
   label?: string;
+  isActive?: boolean;
   value?: any;
   options?: any[];
   required?: boolean;
+  optionsString?: any[];
   placeholder?: string;
   destination: CustomFieldDestination;
   additionalOptions?: any;

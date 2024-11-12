@@ -4,7 +4,7 @@
     <mat-form-field class="worky-input worky-accent">
       <mat-label>Destino</mat-label>
       <mat-select [(value)]="formDestination" (selectionChange)="updateFormDestination($event)">
-        <mat-option *ngFor="let destination of customFieldDestinations" [value]="destination">
+        <mat-option *ngFor="let destination of customFieldDestinations" [value]="destination" (click)="getFields()">
           {{ destination }}
         </mat-option>
       </mat-select>
@@ -68,13 +68,13 @@
             <h3>Configuración de Campo</h3>
 
            <mat-form-field class="worky-input worky-accent">
-              <mat-label>ID</mat-label>
+              <mat-label>Id Name</mat-label>
               <input
                 matInput
                 type="text"
-                formControlName="id"
-                placeholder="ID"
-                readonly>
+                formControlName="idName"
+                placeholder="IDName"
+                (change)="updateField(selectedField, 'idName', $event)">
             </mat-form-field>
 
             <mat-form-field class="worky-input worky-accent">
@@ -129,7 +129,7 @@
               <input matInput type="text" formControlName="optionsString" (blur)="updateOptions()">
             </mat-form-field>
 
-            <button mat-raised-button color="primary" (click)="selectedField = null">Guardar</button>
+            <button mat-raised-button color="primary" (click)="updateFieldOptions(field, i)">Guardar</button>
           </div>
 
         </div>

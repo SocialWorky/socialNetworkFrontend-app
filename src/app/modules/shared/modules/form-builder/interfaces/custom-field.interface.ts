@@ -1,5 +1,3 @@
-// custom-field.interface.ts
-
 export enum CustomFieldType {
   TEXT = 'text',
   LIST = 'list',
@@ -19,6 +17,7 @@ export interface FieldOptions {
   required?: boolean;
   placeholder?: string;
   defaultValue?: any;
+  visible?: boolean;
 }
 
 export interface TextOptions extends FieldOptions {
@@ -46,7 +45,8 @@ export interface TextAreaOptions extends FieldOptions {
 }
 
 export interface CustomField {
-  id: string;
+  index: number;
+  idName: string;
   type: CustomFieldType;
   label: string;
   options?: TextOptions | SelectOptions | NumberOptions | TextAreaOptions;
