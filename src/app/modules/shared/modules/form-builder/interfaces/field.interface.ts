@@ -9,6 +9,7 @@ export interface Field {
   isActive?: boolean;
   value?: any;
   options?: any[];
+  multiSelect?: boolean;
   required?: boolean;
   optionsString?: any[];
   placeholder?: string;

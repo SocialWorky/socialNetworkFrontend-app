@@ -1,4 +1,5 @@
-.error {
-  color: red; // Cambia el color según tu diseño
-  font-size: 0.9em;
+:host {
+  mat-form-field {
+    width: 100%;
+  }
 }

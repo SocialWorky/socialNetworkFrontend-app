@@ -4,7 +4,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 import { MatSelectChange } from '@angular/material/select';
 
 import { Field } from './interfaces/field.interface';
-import { CustomFieldType, CustomFieldDestination, CustomField, TextOptions, SelectOptions, NumberOptions, TextAreaOptions } from './interfaces/custom-field.interface';
+import { CustomFieldType, CustomFieldDestination, CustomField} from './interfaces/custom-field.interface';
 import { CustomFieldService } from '@shared/services/custom-field.service';
 import { map, Subject, takeUntil } from 'rxjs';
 import { options } from 'marked';
@@ -51,11 +51,12 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
       id: new FormControl(''),
       idName: new FormControl(''),
       label: new FormControl(''),
-      isActive: new FormControl(true),
+      isActive: new FormControl(false),
       placeholder: new FormControl(''),
       optionsString: new FormControl(''),
       destination: new FormControl(CustomFieldDestination.PROFILE),
       additionalOptions: new FormGroup({
+        multiSelect: new FormControl(false),
         visible: new FormControl(true),
         required: new FormControl(false),
         minLength: new FormControl(0),
@@ -94,6 +95,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
         optionsString: field.options.choices ? field.options.choices.map((o: { label: any; }) => o.label).join(', ') : '',
         destination: field.destination || CustomFieldDestination.PROFILE,
         additionalOptions: {
+          multiSelect: field.options.multiSelect || false,
           visible: field.options?.visible || true,
           required: field.options?.required || false,
           minLength: field.options?.minLength || 0,
@@ -113,6 +115,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
           placeholder: field.options?.placeholder,
           destination: field.destination,
           additionalOptions: {
+            multiSelect: field.options?.multiSelect,
             visible: field.options?.visible,
             required: field.options?.required,
             minLength: field.options?.minLength,
@@ -147,13 +150,14 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
     this.idError = this.formFields.some(field => field.id === this.selectedField?.id && field !== this.selectedField);
   }
 
-  updateOptions() {
-    if (this.selectedField && this.selectedField.type === CustomFieldType.SELECT) {
-      const optionsArray = this.form.get('optionsString')?.value.split(',').map((option: string) => option.trim()) || [];
-      this.selectedField.options = optionsArray.map((option: any) => ({
-        label: option,
-        value: option
-      }));
+  updateOptions(): void {
+    const optionsString = this.form.get('optionsString')?.value;
+    if (optionsString && this.selectedField) {
+      this.selectedField.options = optionsString.split(',').map((opt: string) => ({ label: opt.trim(), value: opt.trim() }));
+      const optionsControl = this.form.get('optionsString');
+      if (optionsControl && this.selectedField.options) {
+        optionsControl.setValue(this.selectedField.options.map(opt => opt.label).join(', '));
+      }
     }
   }
 
@@ -172,7 +176,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
     if (index !== -1) {
       const updatedField = { ...field };
 
-      if (property === 'visible' || property === 'required') {
+      if (property === 'visible' || property === 'required' || property === 'multiSelect') {
         updatedField.additionalOptions = {
           ...updatedField.additionalOptions,
           [property]: value
@@ -199,11 +203,12 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
     } else {
       const copiedItem: Field = { ...event.previousContainer.data[event.previousIndex] };
       copiedItem.id = this.generateId();
+      copiedItem.isActive = false;
       this.form.addControl(copiedItem.id, new FormControl(''));
       event.container.data.splice(event.currentIndex, 0, copiedItem);
-      this._cdr.markForCheck();
+      // this._cdr.markForCheck();
     }
-    this._cdr.markForCheck();
+    this.saveForm();
   }
 
   generateId(): string {
@@ -214,15 +219,16 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
     return `_${uuid}`;
   }
 
+  isIdValidLocalId(id: string): boolean {
+    return id.startsWith('_');
+  }
+
   deleteField(field: Field, index: number) {
     this._customFieldService.deleteCustomField(field.id).pipe(takeUntil(this.destroy$)).subscribe();
     this.form.removeControl(field.id);
     this.formFields.splice(index, 1);
     this.selectedField = null;
     this.selectedFieldIndex = null;
-    setTimeout(() => {
-      this.getFields();
-    }, 100);
   }
 
   selectField(field: Field, index: number) {
@@ -243,6 +249,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
         optionsString: field.options && Array.isArray(field.options) ? field.options.map((o: { label: any; }) => o.label).join(', ') : '',
         destination: field.destination || CustomFieldDestination.PROFILE,
         additionalOptions: {
+          multiSelect: field.additionalOptions?.multiSelect || false,
           visible: field.additionalOptions?.visible || true,
           required: field.additionalOptions?.required || false,
           minLength: field.additionalOptions?.minLength || 0,
@@ -285,6 +292,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
         options: field.options || [],
         destination: field.destination,
         additionalOptions: {
+          multiSelect: field.additionalOptions?.multiSelect || false,
           required: field.additionalOptions?.required || false,
           visible: field.additionalOptions?.visible || true,
           minLength: field.additionalOptions?.minLength || 0,
@@ -301,6 +309,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
         label: field.label || '',
         isActive: field.isActive,
         options: {
+          multiSelect: field.additionalOptions.multiSelect,
           required: field.additionalOptions.required,
           placeholder: field.placeholder,
           minLength: field.additionalOptions.minLength,
@@ -312,13 +321,13 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
       };
     });
 
-    dataFields.forEach(field => {
+    dataFields.forEach(async field => {
       if(field.isActive) {
         this.updateIndexFields();
         return
       }
       field.isActive = true;
-      this._customFieldService.createCustomField(field).pipe(takeUntil(this.destroy$)).subscribe({
+       await this._customFieldService.createCustomField(field).pipe(takeUntil(this.destroy$)).subscribe({
         next: () => {
           //this.getFields();
         },
@@ -329,12 +338,14 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
     });
     setTimeout(() => {
       this.getFields();
-    }, 100);
+    }, 400);
   }
 
   updateIndexFields() {
     this.formFields.forEach((field, index) => {
       field.index = index;
+
+      if(this.isIdValidLocalId(field.id)) return;
 
       const updateField: CustomField = {
         index: index,
@@ -342,15 +353,18 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
         type: this.formFields[index].type,
         label: this.formFields[index].label || '',
         options: {
-          required: this.formFields[index].additionalOptions.required,
-          placeholder: this.formFields[index].placeholder,
-          minLength: this.formFields[index].additionalOptions.minLength || 0,
-          maxLength: this.formFields[index].additionalOptions.maxLength || 50,
-          visible: this.formFields[index].additionalOptions.visible,
-          choices: this.formFields[index].options || [],
+          multiSelect: this.formFields[index].additionalOptions?.multiSelect,
+          required: this.formFields[index].additionalOptions?.required,
+          placeholder: this.formFields[index]?.placeholder,
+          minLength: this.formFields[index].additionalOptions?.minLength || 0,
+          maxLength: this.formFields[index].additionalOptions?.maxLength || 50,
+          visible: this.formFields[index].additionalOptions?.visible || true,
+          choices: this.formFields[index]?.options || [],
         },
         destination: this.formFields[index].destination,
       };
+
+      console.log('updateField', updateField);
 
       this._customFieldService.updateCustomField(field.id, updateField).pipe(takeUntil(this.destroy$)).subscribe();
     });

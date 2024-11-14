@@ -4,7 +4,7 @@
     <mat-form-field class="worky-input worky-accent">
       <mat-label>Destino</mat-label>
       <mat-select [(value)]="formDestination" (selectionChange)="updateFormDestination($event)">
-        <mat-option *ngFor="let destination of customFieldDestinations" [value]="destination" (click)="getFields()">
+        <mat-option *ngFor="let destination of customFieldDestinations" [value]="destination" (click)="getFields">
           {{ destination }}
         </mat-option>
       </mat-select>
@@ -120,6 +120,15 @@
                   <mat-label>Máximo de caracteres</mat-label>
                   <input matInput type="number" formControlName="maxLength" placeholder="Máximo de caracteres" 
                         (change)="updateField(selectedField, 'maxLength', $event)">
+                </mat-form-field>
+
+                <mat-form-field *ngIf="selectedField?.type == 'select'" 
+                  class="worky-input worky-accent">
+                  <mat-label>Multi-Selección</mat-label>
+                  <mat-select formControlName="multiSelect" (selectionChange)="updateField(selectedField, 'multiSelect', $event)">
+                    <mat-option [value]="true">Sí</mat-option>
+                    <mat-option [value]="false">No</mat-option>
+                  </mat-select>
                 </mat-form-field>
 
             </div>

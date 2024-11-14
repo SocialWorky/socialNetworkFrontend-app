@@ -43,13 +43,11 @@ export class InputComponent implements ControlValueAccessor, OnChanges {
     isDisabled ? this.control.disable() : this.control.enable();
   }
 
-  // Método para comprobar visibilidad
   get isVisible(): boolean {
-    return this.field.visible !== false; // Muestra si visible no es false
+    return this.field.additionalOptions.visible !== false;
   }
 
-  // Método para comprobar si es requerido
   get isRequired(): boolean {
-    return this.field.required === true; // Devuelve true si requerido
+    return this.field.additionalOptions.required === true;
   }
 }

@@ -14,6 +14,7 @@ export enum CustomFieldDestination {
 }
 
 export interface FieldOptions {
+  multiSelect?: boolean;
   required?: boolean;
   placeholder?: string;
   defaultValue?: any;
@@ -49,6 +50,6 @@ export interface CustomField {
   idName: string;
   type: CustomFieldType;
   label: string;
-  options?: TextOptions | SelectOptions | NumberOptions | TextAreaOptions;
+  options?: FieldOptions | TextOptions | SelectOptions | NumberOptions | TextAreaOptions;
   destination: CustomFieldDestination;
 }

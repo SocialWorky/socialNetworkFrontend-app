@@ -25,13 +25,15 @@ export class SelectComponent implements ControlValueAccessor, OnChanges {
 
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['field']) {
+    if (changes['field'] && this.field.value !== this.control.value) {
       this.control.setValue(this.field.value || '');
-    }
+   }
   }
 
   writeValue(value: string): void {
-    this.control.setValue(value);
+    if (value !== undefined) {
+      this.control.setValue(value, { emitEvent: false });
+    }
   }
 
   registerOnChange(fn: any): void {
