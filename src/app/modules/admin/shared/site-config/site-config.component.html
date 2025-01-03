@@ -81,6 +81,31 @@
 
             </div> <!-- Cierre del formGroupName para loginMethods -->
 
+            <div formGroupName="services">
+              <div formGroupName="logs">
+                <h3 class="text-xl font-semibold mb-2">API para Log</h3>
+
+                <div class="flex items-center mb-4">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                      <input class="sr-only peer"
+                        type="checkbox" 
+                        id="enabled"
+                        formControlName="enabled">
+                      <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-indigo-500"></div>
+                      <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-full"></div>
+                  </label>
+                  <label for="enabled" class="ml-2 text-sm font-medium text-gray-300">Habilitado</label>
+                </div>
+
+                <label for="urlApi" class="block text-sm font-medium text-gray-300 mb-2">URL API:</label>
+                <input formControlName="urlApi" id="urlApi" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+
+
+                <label for="token" class="block text-sm font-medium text-gray-300 mb-2">TOKEN API:</label>
+                <input formControlName="token" id="token" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+              </div>
+            </div>
+
           </div>
 
         </div>

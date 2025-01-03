@@ -102,8 +102,8 @@ export class AuthService {
   }
 
   private clearSession() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('googleLogin');
+    localStorage.clear();
+    sessionStorage.clear();
     this.router.navigate(['/auth']);
   }
 }

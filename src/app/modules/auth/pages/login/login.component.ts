@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { async, last, Subject, takeUntil } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -19,7 +19,7 @@ import { SocketService } from '@shared/services/socket.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { ConfigService } from '@shared/services/config.service';
-import { MetaTagService } from '@shared/services/meta-tag.service'
+import { MetaTagService } from '@shared/services/meta-tag.service';
 
 @Component({
   selector: 'worky-login',
@@ -36,6 +36,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   token = localStorage.getItem('token');
 
   googleLoginSession = localStorage.getItem('googleLogin');
+
+  private readonly storageThreshold = 24 * 60 * 60 * 1000; // 24 hours
 
   private destroy$ = new Subject<void>();
 
@@ -74,6 +76,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
+    this.chechLastLogin();
     this.checkSessionGoogle();
     this.loginForm = this._formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
@@ -104,6 +107,21 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+  }
+
+  private chechLastLogin() {
+    const lastLogin = localStorage.getItem('lastLogin');
+    if (lastLogin) {
+      const lastLoginDate = new Date(lastLogin);
+      const currentDate = new Date();
+      const difference = currentDate.getTime() - lastLoginDate.getTime();
+      if (difference > this.storageThreshold) {
+        localStorage.clear();
+        sessionStorage.clear();
+      } else {
+        localStorage.setItem('lastLogin', new Date().toISOString());
+      }
+    }
   }
 
   async checkSessionGoogle() {
@@ -149,6 +167,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       next: async (response: any) => {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
+
+          localStorage.setItem('lastLogin', new Date().toISOString());
 
           const tokenResponse = await this._authService.getDecodedToken()!;
 
@@ -224,6 +244,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     localStorage.setItem('googleLogin', JSON.stringify(loginDataGoogle));
+
+    localStorage.setItem('lastLogin', new Date().toISOString());
 
     const dataGoogle = {
       token: sessionStorage.getItem('id_token') || '',
