@@ -2,13 +2,13 @@
     <div class="w-full overflow-hidden rounded-lg shadow-xs">
       <div class="w-full overflow-x-auto">
 
-        <div class="text-xs text-center font-semibold tracking-wide text-left text-gray-500 border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800 p-2">
+        <div class="content-header-title">
           <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ 'admin.lastRegisteredUsers-title' | workyTranslations }}</h2>
         </div>
 
         <table class="w-full">
           <thead>
-            <tr class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
+            <tr class="header-tr">
               <th class="px-4 py-3">{{ 'admin.lastRegisteredUsers-user' | workyTranslations }}</th>
               <th class="px-4 py-3">{{ 'admin.lastRegisteredUsers-status' | workyTranslations }}</th>
               <th class="px-4 py-3">{{ 'admin.lastRegisteredUsers-email' | workyTranslations }}</th>
@@ -19,7 +19,7 @@
 
             @for(user of users; track $index) {
 
-              <tr class="bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 text-gray-700 dark:text-gray-400">
+              <tr class="body-tr">
                 <td class="px-4 py-3">
                   <div class="flex items-center text-sm">
 
