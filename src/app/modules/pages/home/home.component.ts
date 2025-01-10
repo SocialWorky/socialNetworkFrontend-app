@@ -23,6 +23,7 @@ import { DeviceDetectionService } from '@shared/services/DeviceDetection.service
 import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/config.service';
 import { AxiomService } from '@shared/services/apis/axiom.service';
+import { AxiomType } from '@shared/interfaces/axiom.enum';
 
 @Component({
   selector: 'worky-home',
@@ -94,67 +95,96 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.getLocationUser();
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  async ngOnInit() {
-    this.isOnline$.pipe(takeUntil(this.destroy$)).subscribe({
-      next: (isOnline) => {
-        if (!isOnline) {
-          this.showConnectionOverlay = true;
-          this.connectionStatusMessage = 'You are offline';
-        } else {
-          this.showConnectionOverlay = false;
-          this.connectionStatusMessage = '';
-        }
-      },
-      error: (error) => {
-        this._axiomService.sendLog({ error: error });
-      }
-    });
-
-    this.connectionSpeed$.pipe(takeUntil(this.destroy$)).subscribe({
-      next: (speed) => {
-        if (speed === 'slow') {
-          this._alertService.showAlert(
-            'Su conexión a internet es lenta',
-            'puede experimentar problemas de carga',
-            Alerts.WARNING,
-            Position.CENTER,
-            true,
-            true,
-            translations['button.ok'],
-          );
-        }
-      },
-      error: (error) => {
-        this._axiomService.sendLog({ error: error });
-      }
-    });
-
+  async ngOnInit(): Promise<void> {
+    this.observeConnectionStatus();
+    this.observeConnectionSpeed();
     this._notificationUsersService.loginUser();
 
     this.paramPublication = await this.getParamsPublication();
     if (this.paramPublication) return;
 
     if (!navigator.onLine) {
-      this.showConnectionOverlay = true;
-      this.connectionStatusMessage = 'You are offline';
+      this.handleOfflineStatus();
       return;
     }
-    
+
     await this.loadPublications();
-    
+
     this.loadSubscription();
-    
     this.scrollSubscription();
     this.subscribeToNotificationComment();
+
     setTimeout(() => {
       this._notificationUsersService.userActive();
     }, 300);
+
     this._cdr.markForCheck();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private observeConnectionStatus(): void {
+    this.isOnline$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (isOnline) => {
+        this.updateConnectionStatus(isOnline);
+      },
+      error: (error) => {
+        this.logError('Error verificando estado online', error);
+      },
+    });
+  }
+
+  private updateConnectionStatus(isOnline: boolean): void {
+    this.showConnectionOverlay = !isOnline;
+    this.connectionStatusMessage = isOnline ? '' : 'You are offline';
+  }
+
+  private observeConnectionSpeed(): void {
+    this.connectionSpeed$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (speed) => {
+        if (speed === 'slow') {
+          this.handleSlowConnection();
+        }
+      },
+      error: (error) => {
+        this.logError('Error verificando velocidad de conexión', error);
+      },
+    });
+  }
+
+  private handleSlowConnection(): void {
+    this._alertService.showAlert(
+      'Su conexión a internet es lenta',
+      'puede experimentar problemas de carga',
+      Alerts.WARNING,
+      Position.CENTER,
+      true,
+      true,
+      'Aceptar'
+    );
+    this._axiomService.sendLog({
+      message: 'Conexión lenta del usuario',
+      component: 'HomeComponent',
+      type: AxiomType.INFO,
+      info: this.dataUser,
+    });
+  }
+
+  private handleOfflineStatus(): void {
+    this.showConnectionOverlay = true;
+    this.connectionStatusMessage = 'You are offline';
+  }
+
+  private logError(message: string, error: any): void {
+    this._axiomService.sendLog({
+      message,
+      component: 'HomeComponent',
+      type: AxiomType.ERROR,
+      error,
+    });
   }
 
   private scrollSubscription() {
@@ -177,7 +207,12 @@ export class HomeComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        this._axiomService.sendLog({ error: error });
+        this._axiomService.sendLog({ 
+          message: 'Error en suscripción de publicaciones',
+          component: 'HomeComponent',
+          type: AxiomType.ERROR,
+          error: error 
+        });
       }
     });
 
@@ -190,7 +225,12 @@ export class HomeComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        this._axiomService.sendLog({ error: error });
+        this._axiomService.sendLog({ 
+          message: 'Error en suscripción de eliminar publicación',
+          component: 'HomeComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       }
     });
   }
@@ -214,7 +254,12 @@ export class HomeComponent implements OnInit, OnDestroy {
       this._cdr.markForCheck();
 
     } catch (error) {
-      this._axiomService.sendLog({ error: error });
+      this._axiomService.sendLog({
+        message: 'Error en cargar publicaciones',
+        component: 'HomeComponent',
+        type: AxiomType.ERROR,
+        error: error
+      });
       this.loaderPublications = false;
     }
   }
@@ -239,7 +284,12 @@ export class HomeComponent implements OnInit, OnDestroy {
       this._publicationService.updatePublications(newCommentInPublications.publications);
       this._cdr.markForCheck();
     }, (error) => {
-      this._axiomService.sendLog({ error: error });
+      this._axiomService.sendLog({
+        message: 'Error en suscripción de notificaciones de comentarios',
+        component: 'HomeComponent',
+        type: AxiomType.ERROR,
+        error: error
+      });
     });
   }
 
@@ -264,7 +314,12 @@ export class HomeComponent implements OnInit, OnDestroy {
           result = false;
         }
       } catch (error) {
-        this._axiomService.sendLog({ error: error });
+        this._axiomService.sendLog({
+          message:'Error al cargar publicación por id',
+          component: 'HomeComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       }
     }
     return result;

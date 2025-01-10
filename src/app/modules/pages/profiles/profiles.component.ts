@@ -28,6 +28,7 @@ import { DeviceDetectionService } from '@shared/services/DeviceDetection.service
 import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/config.service';
 import { AxiomService } from '@shared/services/apis/axiom.service';
+import { AxiomType } from '@shared/interfaces/axiom.enum';
 
 @Component({
   selector: 'worky-profiles',
@@ -161,7 +162,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this.updatePublications(publicationsData);
       },
       error: (error) => {
-        this._axiomService.sendLog({ error: error });
+        this._axiomService.sendLog({
+          message: 'Error al cargar las publicaciones',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       }
     });
 
@@ -174,7 +180,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        this._axiomService.sendLog({ error: error });
+        this._axiomService.sendLog({
+          message: 'Error al actualizar las publicaciones eliminadas',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       }
     });
   }
@@ -246,7 +257,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this._cdr.markForCheck();
 
     } catch (error) {
-      this._axiomService.sendLog({ error: error });
+      this._axiomService.sendLog({
+        message: 'Error al cargar las publicaciones',
+        component: 'ProfilesComponent',
+        type: AxiomType.ERROR,
+        error: error
+      });
       this.loaderPublications = false;
     }
   }
@@ -259,7 +275,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        this._axiomService.sendLog({ error: error });
+        this._axiomService.sendLog({
+          message: 'Error al cargar el perfil',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       },
     });
   }
@@ -276,7 +297,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this.getUserFriendPending();
       },
       error: (error) => {
-        this._axiomService.sendLog({ error: error });
+        this._axiomService.sendLog({
+          message: 'Error al cargar los amigos',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       },
     });
   }
@@ -300,7 +326,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         }
       },
       error: (error: any) => {
-        this._axiomService.sendLog({ error: error });
+        this._axiomService.sendLog({
+          message: 'Error al cargar los amigos pendientes',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       },
     });
   }
@@ -314,7 +345,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        this._axiomService.sendLog({ error: error });
+        this._axiomService.sendLog({
+          message: 'Error al solicitar amistad',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       }
     });
   }
@@ -338,7 +374,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        this._axiomService.sendLog({ error: error });
+        this._axiomService.sendLog({
+          message: 'Error al aceptar la amistad',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       }
     });
   }
@@ -390,7 +431,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           }, 1200);
         },
         error: (error) => {
-          this._axiomService.sendLog({ error: error });
+          this._axiomService.sendLog({
+            message: 'Error al subir la imagen de perfil',
+            component: 'ProfilesComponent',
+            type: AxiomType.ERROR,
+            error: error
+          });
           this.isUploading = false;
           this._cdr.markForCheck();
         }
