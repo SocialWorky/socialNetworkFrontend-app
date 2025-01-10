@@ -6,7 +6,7 @@ import { marked } from 'marked';
 import hljs from 'highlight.js';
 
 import { environment } from '@env/environment';
-import { Token } from '../interfaces/token.interface';
+// import { Token } from '../interfaces/token.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +22,7 @@ export class ContentService {
     const renderer = new marked.Renderer();
     renderer.code = (code: string, language: string | undefined) => {
       const validLanguage = language && hljs.getLanguage(language) ? language : 'plaintext';
-      const highlighted = hljs.highlight(validLanguage, code).value;
+      const highlighted = hljs.highlight(code, { language: validLanguage }).value;
       return `<pre><code class="hljs ${validLanguage}">${highlighted}</code></pre>`;
     };
     renderer.codespan = (text: string) => {
@@ -37,7 +37,7 @@ export class ContentService {
       // @ts-ignore
       highlight: function(code, lang) {
         const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-        return hljs.highlight(language, code).value;
+        return hljs.highlight(code, { language }).value;
       },
     });
   }
