@@ -20,6 +20,7 @@ import { NotificationUsersService } from '@shared/services/notifications/notific
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { ConfigService } from '@shared/services/config.service';
 import { MetaTagService } from '@shared/services/meta-tag.service';
+import { LoginMethods } from './interfaces/login.interface';
 
 @Component({
   selector: 'worky-login',
@@ -36,6 +37,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   token = localStorage.getItem('token');
 
   googleLoginSession = localStorage.getItem('googleLogin');
+
+  loginMethods: LoginMethods | undefined;
 
   private readonly storageThreshold = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -68,6 +71,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       const description = configData.settings.description;
       const imageUrl = configData.settings.logoUrl;
       const urlSite = configData.settings.urlSite;
+      this.loginMethods = JSON.parse(configData.settings.loginMethods);
       this._metaTagService.updateMetaTags(title, description, imageUrl, urlSite );
     });
     if (this.token) {
