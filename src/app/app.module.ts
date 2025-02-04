@@ -2,13 +2,14 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouteReuseStrategy } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { AuthModule } from '@auth/auth.module';
 import { environment } from '@env/environment';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+import { AuthInterceptor } from './auth.interceptor';
 
 const config: SocketIoConfig = {
   url: environment.WSURL, 
@@ -28,6 +29,11 @@ const config: SocketIoConfig = {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: Window, useValue: window },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true,
+    },
   ],
   bootstrap: [AppComponent],
 })
