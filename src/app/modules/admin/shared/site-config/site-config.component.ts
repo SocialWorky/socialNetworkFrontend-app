@@ -49,6 +49,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       faviconUrl: [''],
       urlSite: [''],
       description: [''],
+      invitationCode: [false],
       loginMethods: this._fb.group({
         email: [false],
         google: [false],
@@ -79,7 +80,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       if (configData.settings.loginMethods) {
         try {
          loginMethods = JSON.parse(configData.settings.loginMethods);
-          console.log('loginMethods', loginMethods);
 
         } catch (error) {
           console.error('Error parsing loginMethods:', error);
@@ -94,6 +94,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
         faviconUrl: configData.settings.faviconUrl || '',
         urlSite: configData.settings.urlSite || '',
         description: configData.settings.description || '',
+        invitationCode: configData.settings.invitationCode || false,
         loginMethods: {
           email: JSON.parse(String(loginMethods.email)),
           google: JSON.parse(String(loginMethods.google)),

@@ -9,6 +9,7 @@ export interface Config {
   loginMethods?: string;
   urlSite?: string;
   description?: string;
+  invitationCode?: boolean;
 }
 
 export interface ConfigServiceInterface {
