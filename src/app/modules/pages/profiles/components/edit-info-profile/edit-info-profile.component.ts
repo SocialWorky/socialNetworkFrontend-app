@@ -2,6 +2,7 @@ import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { ChangeDetectorRef } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Subject, takeUntil } from 'rxjs';
 
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { ProfileService } from '../../services/profile.service';
@@ -17,12 +18,16 @@ import { LoadingController } from '@ionic/angular';
 })
 export class EditInfoProfileDetailComponent implements OnInit {
   WorkyButtonType = WorkyButtonType;
+
   WorkyButtonTheme = WorkyButtonTheme;
 
   userData: User = {} as User;
 
   editProfileBasicDetailForm: FormGroup;
+
   editProfailDetailForm: FormGroup;
+
+  private unsubscribe$ = new Subject<void>();
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public dataUser: { userData: User },
@@ -62,64 +67,74 @@ export class EditInfoProfileDetailComponent implements OnInit {
   toggleWhatsApp() {
     const isViewable = this.editProfailDetailForm.get('whatsapp.isViewable')?.value;
     if (isViewable) {
-      isViewable.valueChanges.subscribe((value: any) => {
-        console.log('Toggle value:', value);
-      });
+      isViewable.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe();
     }
   }
 
   async onSave() {
-
-    if (this.editProfileBasicDetailForm.invalid) {
+    if (this.editProfileBasicDetailForm.invalid || this.editProfailDetailForm.invalid) {
       return;
     }
 
-    const loadingProfile = await this._loadingCtrl.create({
-      message: 'Editando perfil...',
-    });
+    try {
+      const loadingProfile = await this._loadingCtrl.create({
+        message: 'Editando perfil...',
+      });
+      await loadingProfile.present();
+      const dataBasicProfile = this.prepareBasicProfileData();
+      const dataProfile = this.prepareDetailedProfileData();
+      await this.updateUserData(dataBasicProfile);
+      await this.updateUserProfile(dataProfile);
+      this._dialogRef.close('saved');
+    } catch (error) {
+      console.error('Error al guardar los cambios:', error);
+    } finally {
+      await this.dismissLoading();
+    }
+  }
 
-    await loadingProfile.present();
-
-    const dataBasicProfile = {
+  private prepareBasicProfileData(): any {
+    return {
       name: this.editProfileBasicDetailForm.controls['name'].value,
       lastName: this.editProfileBasicDetailForm.controls['lastName'].value,
+    };
+  }
+
+  private prepareDetailedProfileData(): any {
+    const controls = this.editProfailDetailForm.controls;
+
+    const legend = controls['legend'].value || null;
+    const dateOfBirth = controls['dateOfBirth'].value || null;
+    const description = controls['description'].value || null;
+    const sex = controls['sex'].value || null;
+
+    const whatsapp = {
+      number: controls['whatsapp'].get('number')?.value || null,
+      isViewable: controls['whatsapp'].get('isViewable')?.value || null,
+    };
+
+    return {
+      legend,
+      dateOfBirth,
+      description,
+      sex,
+      whatsapp,
+    };
+  }
+
+  private async updateUserData(data: any): Promise<void> {
+    await this._userService.userEdit(this.userData._id, data).pipe(takeUntil(this.unsubscribe$)).toPromise();
+  }
+
+  private async updateUserProfile(data: any): Promise<void> {
+    await this._profileService.updateProfile(this.userData._id, data).pipe(takeUntil(this.unsubscribe$)).toPromise();
+  }
+
+  private async dismissLoading(): Promise<void> {
+    const loadingProfile = await this._loadingCtrl.getTop();
+    if (loadingProfile) {
+      await loadingProfile.dismiss();
     }
-
-    if (this.editProfailDetailForm.controls['legend'].value === '') {
-      this.editProfailDetailForm.controls['legend'].setValue('null');
-    }
-
-    if (this.editProfailDetailForm.controls['dateOfBirth'].value === '') {
-      this.editProfailDetailForm.controls['dateOfBirth'].setValue('null');
-    }
-
-    if (this.editProfailDetailForm.controls['description'].value === '') {
-      this.editProfailDetailForm.controls['description'].setValue('null');
-    }
-
-    if (this.editProfailDetailForm.controls['sex'].value === '') {
-      this.editProfailDetailForm.controls['sex'].setValue('null');
-    }
-
-    const dataProfile = {
-      legend: this.editProfailDetailForm.controls['legend'].value,
-      dateOfBirth: this.editProfailDetailForm.controls['dateOfBirth'].value,
-      description: this.editProfailDetailForm.controls['description'].value,
-      sex: this.editProfailDetailForm.controls['sex'].value,
-      whatsapp: {
-        number: this.editProfailDetailForm.controls['whatsapp'].get('number')?.value,
-        isViewable: this.editProfailDetailForm.controls['whatsapp'].get('isViewable')?.value,
-      }
-    }
-
-    await this._userService.userEdit(this.userData._id, dataBasicProfile).subscribe((res) => {
-      this._profileService.updateProfile(this.userData._id, dataProfile).subscribe((res) => {
-        this._dialogRef.close('saved');
-        loadingProfile.dismiss();
-      });
-    });
-
-    loadingProfile.dismiss();
   }
 
   loadBasicDetail() {
