@@ -22,6 +22,7 @@ export class InputComponent implements ControlValueAccessor, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['field']) {
+      this.field.additionalOptions = this.field.additionalOptions || {}; 
       this.control.setValue(this.field.value || '');
     }
   }
@@ -43,11 +44,12 @@ export class InputComponent implements ControlValueAccessor, OnChanges {
     isDisabled ? this.control.disable() : this.control.enable();
   }
 
-  get isVisible(): boolean {
-    return this.field.additionalOptions.visible !== false;
+  get isRequired(): boolean {
+    return this.field.additionalOptions?.required === true || false;
   }
 
-  get isRequired(): boolean {
-    return this.field.additionalOptions.required === true;
+  get isVisible(): boolean {
+    return this.field.additionalOptions?.visible !== false || true;
   }
+
 }

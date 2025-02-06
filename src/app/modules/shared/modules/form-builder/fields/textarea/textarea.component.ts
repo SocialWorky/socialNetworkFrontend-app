@@ -1,5 +1,5 @@
 // src/app/form-builder/fields/textarea.component.ts
-import { Component, Input, SimpleChanges, forwardRef, OnChanges } from '@angular/core';
+import { Component, Input, SimpleChanges, forwardRef, OnChanges, OnInit } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormControl } from '@angular/forms';
 import { Field } from '../../interfaces/field.interface';
 
@@ -15,12 +15,19 @@ import { Field } from '../../interfaces/field.interface';
     }
   ]
 })
-export class TextareaComponent implements ControlValueAccessor, OnChanges {
+export class TextareaComponent implements ControlValueAccessor, OnChanges, OnInit {
   @Input() field!: Field;
   control = new FormControl('');
 
+  ngOnInit(): void {
+    if (this.field && !this.field.additionalOptions) {
+      this.field.additionalOptions = {};
+    }
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['field']) {
+      this.field.additionalOptions = this.field.additionalOptions || {};
       this.control.setValue(this.field.value || '');
     }
   }
@@ -45,11 +52,11 @@ export class TextareaComponent implements ControlValueAccessor, OnChanges {
     isDisabled ? this.control.disable() : this.control.enable();
   }
 
-  get isVisible(): boolean {
-    return this.field.additionalOptions.visible !== false;
+  get isRequired(): boolean {
+    return this.field.additionalOptions?.required === true || false;
   }
 
-  get isRequired(): boolean {
-    return this.field.additionalOptions.required === true;
+  get isVisible(): boolean {
+    return this.field.additionalOptions?.visible !== false || true;
   }
 }

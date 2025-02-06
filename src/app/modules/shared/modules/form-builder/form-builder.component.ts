@@ -206,7 +206,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
       copiedItem.isActive = false;
       this.form.addControl(copiedItem.id, new FormControl(''));
       event.container.data.splice(event.currentIndex, 0, copiedItem);
-      // this._cdr.markForCheck();
+      this._cdr.markForCheck();
     }
     this.saveForm();
   }
@@ -270,6 +270,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
 
   updateFormDestination(event: MatSelectChange) {
     this.formDestination = event.value;
+    this.getFields();
   }
 
   saveForm() {
@@ -329,7 +330,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
       field.isActive = true;
        await this._customFieldService.createCustomField(field).pipe(takeUntil(this.destroy$)).subscribe({
         next: () => {
-          //this.getFields();
+          this.getFields();
         },
         error: (error) => {
           console.error('Error al guardar formulario:', error);
@@ -364,7 +365,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
         destination: this.formFields[index].destination,
       };
 
-      console.log('updateField', updateField);
+      //console.log('updateField', updateField);
 
       this._customFieldService.updateCustomField(field.id, updateField).pipe(takeUntil(this.destroy$)).subscribe();
     });

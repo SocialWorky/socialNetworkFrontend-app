@@ -3,12 +3,11 @@
   
   <mat-select 
     [formControl]="control"
-    [multiple]="field.additionalOptions.multiSelect"
-    [placeholder]="field.additionalOptions.multiSelect ? 'Selecciona una o varias opciones' : 'Selecciona una opción'"
-    [required]="isRequired">
+    [multiple]="field.additionalOptions?.multiSelect ?? false"
+    [placeholder]="(field.additionalOptions?.multiSelect ?? false) ? 'Selecciona una o varias opciones' : 'Selecciona una opción'">
     
     <!-- Mensaje de opción predeterminada, solo si no es multiSelect -->
-    <mat-option *ngIf="!field.additionalOptions.multiSelect" value="" disabled>
+    <mat-option *ngIf="!(field.additionalOptions?.multiSelect ?? false)" value="" disabled>
       Selecciona una opción
     </mat-option>
     
@@ -17,7 +16,6 @@
       {{ option.label }}
     </mat-option>
   </mat-select>
-
   <!-- Mensaje de error -->
   <mat-error *ngIf="isRequired && control.hasError('required') && control.touched">
     Este campo es requerido.

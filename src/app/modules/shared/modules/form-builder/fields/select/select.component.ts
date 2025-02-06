@@ -1,5 +1,5 @@
 // src/app/form-builder/fields/select.component.ts
-import { Component, Input, OnChanges, SimpleChanges, forwardRef } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormControl } from '@angular/forms';
 import { Field } from '../../interfaces/field.interface';
 
@@ -15,7 +15,7 @@ import { Field } from '../../interfaces/field.interface';
     }
   ]
 })
-export class SelectComponent implements ControlValueAccessor, OnChanges {
+export class SelectComponent implements ControlValueAccessor, OnChanges, OnInit {
   @Input() field!: Field;
   control = new FormControl('');
 
@@ -23,11 +23,17 @@ export class SelectComponent implements ControlValueAccessor, OnChanges {
   onChange: any = () => { };
   onTouched: any = () => { };
 
+  ngOnInit(): void {
+    if (this.field && !this.field.additionalOptions) {
+      this.field.additionalOptions = {};
+    }
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['field'] && this.field.value !== this.control.value) {
+    if (changes['field']) {
+      this.field.additionalOptions = this.field.additionalOptions || {};
       this.control.setValue(this.field.value || '');
-   }
+    }
   }
 
   writeValue(value: string): void {
@@ -49,13 +55,11 @@ export class SelectComponent implements ControlValueAccessor, OnChanges {
     isDisabled ? this.control.disable() : this.control.enable();
   }
 
-  // Método para comprobar visibilidad
   get isVisible(): boolean {
-    return this.field.visible !== false; // Muestra si visible no es false
+    return this.field.additionalOptions?.visible !== false || true;
   }
 
-  // Método para comprobar si es requerido
   get isRequired(): boolean {
-    return this.field.required === true; // Devuelve true si requerido
+    return this.field.additionalOptions?.required === true || false;
   }
 }
