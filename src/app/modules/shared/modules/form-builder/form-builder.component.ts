@@ -2,12 +2,11 @@ import { Component, ChangeDetectorRef, OnInit, Renderer2, OnDestroy } from '@ang
 import { CdkDragDrop, CdkDragEnd, CdkDragStart, moveItemInArray } from '@angular/cdk/drag-drop';
 import { FormGroup, FormControl } from '@angular/forms';
 import { MatSelectChange } from '@angular/material/select';
+import { map, Subject, takeUntil } from 'rxjs';
 
 import { Field } from './interfaces/field.interface';
 import { CustomFieldType, CustomFieldDestination, CustomField} from './interfaces/custom-field.interface';
 import { CustomFieldService } from '@shared/services/custom-field.service';
-import { map, Subject, takeUntil } from 'rxjs';
-import { options } from 'marked';
 
 @Component({
   selector: 'worky-form-builder',
@@ -83,25 +82,25 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
       map((fields: any) => fields.filter((field: Field) => field.destination === this.formDestination))
     ).subscribe(filteredFields => {
       filteredFields.forEach((field: any) => {
-      this.form.addControl(field.id, new FormControl(''));
+        this.form.addControl(field.id, new FormControl(''));
 
-      this.form.patchValue({
-        id: field.id,
-        index: field.index,
-        idName: field.idName,
-        label: field.label || '',
-        isActive: field.isActive,
-        placeholder: field.options.placeholder,
-        optionsString: field.options.choices ? field.options.choices.map((o: { label: any; }) => o.label).join(', ') : '',
-        destination: field.destination || CustomFieldDestination.PROFILE,
-        additionalOptions: {
-          multiSelect: field.options.multiSelect || false,
-          visible: field.options?.visible || true,
-          required: field.options?.required || false,
-          minLength: field.options?.minLength || 0,
-          maxLength: field.options?.maxLength || 50
-        }
-      });
+        this.form.patchValue({
+          id: field.id,
+          index: field.index,
+          idName: field.idName,
+          label: field.label || '',
+          isActive: field.isActive,
+          placeholder: field.options.placeholder,
+          optionsString: field.options.choices ? field.options.choices.map((o: { label: any; }) => o.label).join(', ') : '',
+          destination: field.destination || CustomFieldDestination.PROFILE,
+          additionalOptions: {
+            multiSelect: field.options.multiSelect || false,
+            visible: field.options?.visible || true,
+            required: field.options?.required || false,
+            minLength: field.options?.minLength || 0,
+            maxLength: field.options?.maxLength || 50
+          }
+        });
 
         this.formFields.push({
           id: field.id,
@@ -115,11 +114,11 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
           placeholder: field.options?.placeholder,
           destination: field.destination,
           additionalOptions: {
-            multiSelect: field.options?.multiSelect,
-            visible: field.options?.visible,
-            required: field.options?.required,
-            minLength: field.options?.minLength,
-            maxLength: field.options?.maxLength
+            multiSelect: field.options?.multiSelect || false,
+            visible: field.options?.visible || true,
+            required: field.options?.required || false,
+            minLength: field.options?.minLength || 0,
+            maxLength: field.options?.maxLength || 50
           }
         });
 
@@ -162,6 +161,17 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
   }
 
   updateField(field: Field, property: keyof Field, event: Event | MatSelectChange) {
+
+    if (!field.additionalOptions) {
+      field.additionalOptions = {
+        multiSelect: false,
+        visible: true,
+        required: false,
+        minLength: 0,
+        maxLength: 50
+      };
+    }
+
     let value: any;
 
     if (event instanceof MatSelectChange) {
@@ -201,9 +211,18 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
-      const copiedItem: Field = { ...event.previousContainer.data[event.previousIndex] };
-      copiedItem.id = this.generateId();
-      copiedItem.isActive = false;
+      const copiedItem: Field = { 
+        ...event.previousContainer.data[event.previousIndex],
+        id: this.generateId(),
+        isActive: false,
+        additionalOptions: event.previousContainer.data[event.previousIndex].additionalOptions || {
+          multiSelect: false,
+          visible: true,
+          required: false,
+          minLength: 0,
+          maxLength: 50
+        }
+      };
       this.form.addControl(copiedItem.id, new FormControl(''));
       event.container.data.splice(event.currentIndex, 0, copiedItem);
       this._cdr.markForCheck();
@@ -232,6 +251,17 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
   }
 
   selectField(field: Field, index: number) {
+
+    if (!field.additionalOptions) {
+      field.additionalOptions = {
+        multiSelect: false,
+        visible: true,
+        required: false,
+        minLength: 0,
+        maxLength: 50
+      };
+    }
+
     if (this.selectedField && this.selectedFieldIndex === index) {
       this.selectedField = null;
       this.selectedFieldIndex = -1;
@@ -364,8 +394,6 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
         },
         destination: this.formFields[index].destination,
       };
-
-      //console.log('updateField', updateField);
 
       this._customFieldService.updateCustomField(field.id, updateField).pipe(takeUntil(this.destroy$)).subscribe();
     });
