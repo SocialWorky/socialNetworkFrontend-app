@@ -47,6 +47,12 @@
                             <input type="password" formControlName="password" id="password" matInput required>
                         <mat-error worky-validation-error-message></mat-error>
                     </mat-form-field>
+
+                    <mat-form-field *ngIf="invitationCode" class="worky-input worky-accent">
+                        <mat-label>{{ 'input.invitationCode' | workyTranslations }}</mat-label>
+                            <input type="invitationCode" formControlName="invitationCode" id="invitationCode" matInput required>
+                        <mat-error worky-validation-error-message></mat-error>
+                    </mat-form-field>
                 </div>
 
                 <div class="have-account">

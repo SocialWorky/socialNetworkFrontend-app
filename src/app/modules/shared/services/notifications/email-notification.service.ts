@@ -19,20 +19,11 @@ import { CenterSocketNotificationsService } from '@shared/services/notifications
 export class EmailNotificationService {
   private baseUrl: string;
 
-  private token: string;
-
   private mailSendDataValidate: MailSendValidateData = {} as MailSendValidateData;
 
   private destroy$ = new Subject<void>();
 
   dataUser = this._authService.getDecodedToken();
-
-  private getHeaders(token: string): HttpHeaders {
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-    return headers;
-  }
 
   constructor(
     private http: HttpClient,
@@ -41,7 +32,6 @@ export class EmailNotificationService {
     private _centerSocketNotificationsService: CenterSocketNotificationsService
   ) {
     this.baseUrl = environment.API_URL;
-    this.token = localStorage.getItem('token') || '';
   }
 
   ngOnDestroy() {
@@ -51,8 +41,12 @@ export class EmailNotificationService {
 
   sendNotification(data: MailSendValidateData) {
     const url = `${this.baseUrl}/email/sendNotification`;
-    const headers = this.getHeaders(this.token);
-    return this.http.post(url, data, { headers });
+    return this.http.post(url, data);
+  }
+
+  private sendEmailNotification(data: MailSendValidateData) {
+    const url = `${this.baseUrl}/email/sendEmail`;
+    return this.http.post(url, data);
   }
 
   private async userById(_idUser: string): Promise<User>{
@@ -84,6 +78,31 @@ export class EmailNotificationService {
 
     this.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();
 
+  }
+
+  sendGeneralEmailing(
+      email: string,
+      subject: string,
+      title: string,
+      greet: string,
+      message: string, 
+      subMessage: string, 
+      buttonMessage: string,
+      urlSlug: string,
+      template: TemplateEmail = TemplateEmail.EMAIL
+    ) {
+    this.mailSendDataValidate.url = `${environment.BASE_URL}/${urlSlug}`;
+    this.mailSendDataValidate.subject = subject;
+    this.mailSendDataValidate.title = title;
+    this.mailSendDataValidate.greet = greet;
+    this.mailSendDataValidate.message = message;
+    this.mailSendDataValidate.subMessage = subMessage;
+    this.mailSendDataValidate.buttonMessage = buttonMessage;
+    this.mailSendDataValidate.template = template;
+    this.mailSendDataValidate.email = email;
+    this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
+
+    this.sendEmailNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();
   }
 
   //TODO: Implementa notificaciones por email y sistema -> solicitud de amistad.

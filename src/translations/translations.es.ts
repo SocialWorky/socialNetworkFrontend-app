@@ -26,6 +26,7 @@ export const translations = {
   'input.name': 'Nombre',
   'input.lastname': 'Apellido',
   'input.username': 'Nombre de usuario',
+  'input.invitationCode': 'Código de invitación',
   // BUTTONS
   'button.login': 'Iniciar sesión',
   'button.signUp': 'Registrarse',
@@ -53,6 +54,7 @@ export const translations = {
   'alert.message_error_send_email': 'Nos complace informarte que tu registro ha sido completado con éxito. <br> Sin embargo, hemos detectado un problema técnico con el envío del correo electrónico de validación de cuenta. <br> No te preocupes, tu registro ya está activo. En los próximos minutos recibirás un nuevo correo electrónico con el enlace para validar tu cuenta.',
   'alert.title_success_register': 'Registro exitoso',
   'alert.message_success_register': 'Tu registro ha sido exitoso, recibirás un correo para validar tu cuenta',
+  'alert.registerInvalidInvitationCode': 'El código de invitación o el Email no es válido',
   // -> RESET PASSWORD
   'alert.title_reset_password_message': 'Envio exitoso',
   'alert.message_reset_password_message': 'Se ha enviado un correo electrónico con las instrucciones para restablecer tu contraseña',
@@ -64,11 +66,13 @@ export const translations = {
   'alert.error_input_email_message': 'Introduce tu correo electrónico',
   // EMAIL MESSAGES
   'email.validateEmailSubject': 'Valida tu correo',
-  'email.validateEmailTitle': 'Bienvenido a Worky',
+  'email.validateEmailTitle': 'Bienvenido a',
   'email.validateEmailGreet': 'Hola',
   'email.validateEmailMessage': 'Para validar tu correo, haz clic en el botón de abajo',
   'email.validateEmailSubMessage': 'Si no te has registrado, ignora este correo',
   'email.validateEmailButtonMessage': 'Validar correo',
+  'email.validateEmailMessageRegistered': 'Tu correo ha sido validado correctamente',
+  'email.validateEmailMessageRegisteredSubMessage': 'Ya puedes iniciar sesión',
   // -> RESET PASSWORD
   'email.resetPasswordSubject': 'Restablece tu contraseña',
   'email.resetPasswordTitle': 'Restablece tu contraseña',

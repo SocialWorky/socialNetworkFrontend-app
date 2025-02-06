@@ -9,4 +9,5 @@ export interface RegisterData {
   password: string;
   role: RoleUser;
   mailDataValidate?: MailSendValidateData;
+  invitationCode?: string;
 }
