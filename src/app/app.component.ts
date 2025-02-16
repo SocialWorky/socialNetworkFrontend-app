@@ -4,7 +4,7 @@ import { Title } from '@angular/platform-browser';
 import { Subject, takeUntil } from 'rxjs';
 
 import { getTranslationsLanguage } from '../translations/translations';
-import { ConfigService } from '@shared/services/config.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 
 @Component({

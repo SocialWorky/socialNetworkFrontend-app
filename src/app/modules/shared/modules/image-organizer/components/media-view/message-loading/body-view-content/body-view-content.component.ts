@@ -5,9 +5,9 @@ import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 import { PublicationView, Comment } from '@shared/interfaces/publicationView.interface';
 import { ImageOrganizer, TypeView } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
-import { CommentService } from '@shared/services/comment.service';
+import { CommentService } from '@shared/services/core-apis/comment.service';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
-import { PublicationService } from '@shared/services/publication.service';
+import { PublicationService } from '@shared/services/core-apis/publication.service';
 
 @Component({
   selector: 'worky-body-view-content',

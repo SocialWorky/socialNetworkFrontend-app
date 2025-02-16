@@ -18,7 +18,7 @@ import { DeviceDetectionService } from '@shared/services/DeviceDetection.service
 import { SocketService } from '@shared/services/socket.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
-import { ConfigService } from '@shared/services/config.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
 import { MetaTagService } from '@shared/services/meta-tag.service';
 import { LoginMethods } from './interfaces/login.interface';
 

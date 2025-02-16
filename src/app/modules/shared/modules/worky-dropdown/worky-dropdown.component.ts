@@ -3,7 +3,7 @@ import { AuthService } from '@auth/services/auth.service';
 import { DropdownDataLink } from './interfaces/dataLink.interface';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { Subject } from 'rxjs';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 import { User } from '@shared/interfaces/user.interface';
 import { Token } from '@shared/interfaces/token.interface';
 import { takeUntil } from 'rxjs/operators';

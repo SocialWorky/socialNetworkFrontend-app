@@ -11,16 +11,8 @@ import { environment } from '@env/environment';
 })
 export class UserService {
   private baseUrl = environment.API_URL;
-  private token = localStorage.getItem('token');
 
   constructor(private http: HttpClient) {}
-
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-  }
 
   private handleError(error: any) {
     console.error('An error occurred', error);
@@ -29,56 +21,49 @@ export class UserService {
 
   searchUsers(limit?: number): Observable<User[]> {
     const url = `${this.baseUrl}/user?limit=${limit}`;
-    const headers = this.getHeaders();
-    return this.http.get<User[]>(url, { headers }).pipe(
+    return this.http.get<User[]>(url).pipe(
       catchError(this.handleError)
     );
   }
 
   getAllUsers(): Observable<User[]> {
     const url = `${this.baseUrl}/user`;
-    const headers = this.getHeaders();
-    return this.http.get<User[]>(url, { headers }).pipe(
+    return this.http.get<User[]>(url).pipe(
       catchError(this.handleError)
     );
   }
 
   getUserByName(name: string): Observable<User> {
     const url = `${this.baseUrl}/user/username/${name}`;
-    const headers = this.getHeaders();
-    return this.http.get<User>(url, { headers }).pipe(
+    return this.http.get<User>(url).pipe(
       catchError(this.handleError)
     );
   }
 
   getUserById(id: string): Observable<User> {
     const url = `${this.baseUrl}/user/${id}`;
-    const headers = this.getHeaders();
-    return this.http.get<User>(url, { headers }).pipe(
+    return this.http.get<User>(url).pipe(
       catchError(this.handleError)
     );
   }
 
   userEdit(id: string, data: any): Observable<User> {
     const url = `${this.baseUrl}/user/edit/${id}`;
-    const headers = this.getHeaders();
-    return this.http.put<User>(url, data, { headers }).pipe(
+    return this.http.put<User>(url, data).pipe(
       catchError(this.handleError)
     );
   }
 
   getUserFriends(_id: string, _idRequest: string): Observable<boolean> {
     const url = `${this.baseUrl}/user/friends/${_id}/${_idRequest}`;
-    const headers = this.getHeaders();
-    return this.http.get<boolean>(url, { headers }).pipe(
+    return this.http.get<boolean>(url).pipe(
       catchError(this.handleError)
     );
   }
 
   getFriendsPending(_id: string, _idRequest: string): Observable<{ status: boolean; _id: string }> {
     const url = `${this.baseUrl}/user/pending-friend/${_id}/${_idRequest}`;
-    const headers = this.getHeaders();
-    return this.http.get<{ status: boolean; _id: string }>(url, { headers }).pipe(
+    return this.http.get<{ status: boolean; _id: string }>(url).pipe(
       catchError(this.handleError)
     );
   }

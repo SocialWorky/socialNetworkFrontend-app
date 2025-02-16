@@ -3,7 +3,7 @@ import { BehaviorSubject, catchError, Observable, Subject, takeUntil, tap } from
 import { HttpClient } from '@angular/common/http';
 import { Socket } from 'ngx-socket-io';
 
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 import { Config, ConfigServiceInterface } from '@shared/interfaces/config.interface';
 import { Router } from '@angular/router';
 
@@ -22,7 +22,6 @@ export class ConfigService {
   constructor(
     private http: HttpClient,
     private socket: Socket,
-    private _router: Router
   ) {
     this.subscribeToNotification();
     this.apiUrl = environment.API_URL;

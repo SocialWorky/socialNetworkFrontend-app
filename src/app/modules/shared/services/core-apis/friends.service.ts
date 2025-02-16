@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '@env/environment';
@@ -12,25 +12,14 @@ import { FriendsStatus } from '@shared/interfaces/friend.interface';
 export class FriendsService {
 
   private baseUrl: string;
-  private token: string;
 
   constructor(private http: HttpClient, private _authService: AuthService) {
     this.baseUrl = environment.API_URL;
-    this.token = localStorage.getItem('token') || '';
-  }
-
-  private getHeaders(): HttpHeaders {
-    const token = this.token;
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-    return headers;
   }
 
   getIsMyFriend(_id: string, friendId: string): Observable<FriendsStatus> {
     const url = `${this.baseUrl}/friends/isfriend/${_id}/${friendId}`;
-    const headers = this.getHeaders();
-    return this.http.get<FriendsStatus>(url, { headers });
+    return this.http.get<FriendsStatus>(url);
   }
 
   requestFriend(friendId: string): Observable<any> {
@@ -40,19 +29,16 @@ export class FriendsService {
       receiverId: friendId
     };
     const url = `${this.baseUrl}/friends/request`;
-    const headers = this.getHeaders();
-    return this.http.post(url, body, { headers });
+    return this.http.post(url, body);
   }
 
   deleteFriend(id: string): Observable<any> {
     const url = `${this.baseUrl}/friends/${id}`;
-    const headers = this.getHeaders();
-    return this.http.delete(url, { headers });
+    return this.http.delete(url);
   }
 
   acceptFriendship(id: string): Observable<any> {
     const url = `${this.baseUrl}/friends/accept/${id}`;
-    const headers = this.getHeaders();
-    return this.http.put(url, {}, { headers });
+    return this.http.put(url, {});
   }
 }

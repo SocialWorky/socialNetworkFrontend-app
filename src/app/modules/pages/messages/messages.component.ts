@@ -5,9 +5,9 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
-import { ConfigService } from '@shared/services/config.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 
 @Component({
   selector: 'worky-messages',

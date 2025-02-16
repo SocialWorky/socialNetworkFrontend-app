@@ -3,7 +3,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 
 import { AuthService } from '@auth/services/auth.service';
-import { NotificationCenterService } from '@shared/services/notificationCenter.service';
+import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationPanelService } from './services/notificationPanel.service'
 import { AdditionalDataComment, AdditionalDataLike, AdditionalDataFriendRequest, AdditionalDataFriendAccept, NotificationsData } from './interfaces/notificationsData.interface';
 import { NotificationType } from './enums/notificationsType.enum';

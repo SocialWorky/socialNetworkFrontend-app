@@ -1,9 +1,9 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { User } from '@shared/interfaces/user.interface';
-import { UserService } from '@shared/services/users.service';
-import { PublicationService } from '@shared/services/publication.service';
-import { ReportsService } from '@shared/services/reports.service';
+import { UserService } from '@shared/services/core-apis/users.service';
+import { PublicationService } from '@shared/services/core-apis/publication.service';
+import { ReportsService } from '@shared/services/core-apis/reports.service';
 import { ReportStatus } from '@shared/enums/report.enum';
 import * as _ from 'lodash';
 

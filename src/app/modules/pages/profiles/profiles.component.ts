@@ -7,18 +7,18 @@ import { Title } from '@angular/platform-browser';
 
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
-import { PublicationService } from '@shared/services/publication.service';
+import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
-import { FriendsService } from '@shared/services/friends.service';
+import { FriendsService } from '@shared/services/core-apis/friends.service';
 import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
 import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';
-import { FileUploadService } from '@shared/services/file-upload.service';
+import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
 import { environment } from '@env/environment';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { ProfileService } from './services/profile.service';
@@ -26,7 +26,7 @@ import { ProfileNotificationService } from '@shared/services/notifications/profi
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { ScrollService } from '@shared/services/scroll.service';
-import { ConfigService } from '@shared/services/config.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
 import { AxiomService } from '@shared/services/apis/axiom.service';
 import { AxiomType } from '@shared/interfaces/axiom.enum';
 

@@ -4,7 +4,7 @@ import { AppModule } from './app/app.module';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import { Translations } from './translations/translations';
 import { environment } from './environments/environment';
-import { ConfigService } from '@shared/services/config.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
 import { Subject, takeUntil } from 'rxjs';
 
 const destroy$ = new Subject<void>();

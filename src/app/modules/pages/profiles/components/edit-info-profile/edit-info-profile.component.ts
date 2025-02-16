@@ -7,7 +7,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { ProfileService } from '../../services/profile.service';
 import { User } from '@shared/interfaces/user.interface';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 import { LoadingController } from '@ionic/angular';
 
 @Component({

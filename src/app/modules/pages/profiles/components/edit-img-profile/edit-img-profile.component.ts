@@ -4,7 +4,7 @@ import { Subject, lastValueFrom, takeUntil } from 'rxjs';
 import Cropper from 'cropperjs';
 
 import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';
-import { FileUploadService } from '@shared/services/file-upload.service';
+import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
 import { ProfileService } from '../../services/profile.service';
 import { AuthService } from '@auth/services/auth.service';
 import { environment } from '@env/environment';

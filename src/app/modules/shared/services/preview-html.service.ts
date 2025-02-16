@@ -6,18 +6,13 @@ import { marked } from 'marked';
 import hljs from 'highlight.js';
 
 import { environment } from '@env/environment';
-// import { Token } from '../interfaces/token.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ContentService {
 
-  private token: string;
-
   constructor(private http: HttpClient) {
-
-    this.token = localStorage.getItem('token') || '';
     // Configuración de marked para personalizar el renderizado de código
     const renderer = new marked.Renderer();
     renderer.code = (code: string, language: string | undefined) => {
@@ -42,18 +37,9 @@ export class ContentService {
     });
   }
 
-  private getHeaders(): HttpHeaders {
-    const token = this.token;
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-    return headers;
-  }
-
   fetchMetadata(linkUrl: string): Observable<any> {
     const url = `${environment.API_URL}/scrape?url=${encodeURIComponent(linkUrl)}`;
-    const headers = this.getHeaders();
-    return this.http.get(url, {headers}).pipe(
+    return this.http.get(url).pipe(
       catchError(() => of(null))
     );
   }

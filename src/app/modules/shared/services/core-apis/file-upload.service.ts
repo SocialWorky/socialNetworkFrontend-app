@@ -9,26 +9,14 @@ import { TypePublishing } from '@shared/modules/addPublication/enum/addPublicati
 })
 export class FileUploadService {
 
-  private token: string;
-
   constructor(
     private http: HttpClient,
     private _authService: AuthService
-  ) {
-    this.token = localStorage.getItem('token') || '';
-  }
-
-  private getHeaders(): HttpHeaders {
-    const token = this.token;
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-  }
+  ) {}
 
   uploadFile(files: File[], destination: string) {
     const url = `${environment.APIFILESERVICE}upload`;
     const id = this._authService.getDecodedToken()?.id;
-    const headers = this.getHeaders();
     const formData = new FormData();
 
     formData.append('userId', `${id}|`);
@@ -39,7 +27,7 @@ export class FileUploadService {
       formData.append('files', file);
     });
 
-    return this.http.post<any>(url, formData, { headers });
+    return this.http.post<any>(url, formData);
   }
 
   private getUniqueFiles(files: File[]): File[] {
@@ -63,7 +51,6 @@ export class FileUploadService {
     type: TypePublishing
   ) {
     const urlApi = environment.API_URL;
-    const headers = this.getHeaders();
 
     const body = {
       url: url,
@@ -74,6 +61,6 @@ export class FileUploadService {
       isComment: type === TypePublishing.COMMENT ? true : false
     };
 
-    return this.http.post<any>(`${urlApi}/media/create`, body, { headers });
+    return this.http.post<any>(`${urlApi}/media/create`, body);
   }
 }

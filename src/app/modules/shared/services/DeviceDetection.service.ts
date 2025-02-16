@@ -11,6 +11,7 @@ import * as _ from 'lodash';
 export class DeviceDetectionService implements OnDestroy {
 
   private destroy$: Subject<void> = new Subject<void>();
+
   private resizeEvent: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   private _isScreenSmallerThan700px: boolean = false;

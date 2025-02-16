@@ -13,7 +13,7 @@ import { translations } from '@translations/translations';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { TemplateEmail } from '@shared/interfaces/mail.interface';
 import { Subject, takeUntil } from 'rxjs';
-import { ConfigService } from '@shared/services/config.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
 
 @Component({
   selector: 'worky-register',

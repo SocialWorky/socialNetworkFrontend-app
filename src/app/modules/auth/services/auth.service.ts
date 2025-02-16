@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { Token } from '../../shared/interfaces/token.interface';
 import { AuthGoogleService } from './auth-google.service';
-import { UserService } from '../../shared/services/users.service';
+import { UserService } from '../../shared/services/core-apis/users.service';
 
 @Injectable({
   providedIn: 'root'

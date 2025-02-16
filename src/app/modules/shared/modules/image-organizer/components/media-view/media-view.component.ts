@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { ImageOrganizer } from '../../interfaces/image-organizer.interface';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { Comment, PublicationView } from '@shared/interfaces/publicationView.interface';
-import { PublicationService } from '@shared/services/publication.service';
+import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 
 @Component({

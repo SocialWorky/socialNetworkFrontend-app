@@ -3,7 +3,7 @@ import { Location } from '@angular/common';
 import { forkJoin, Subject, takeUntil } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 import { User } from '@shared/interfaces/user.interface';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 import { MessageService } from '../../services/message.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';

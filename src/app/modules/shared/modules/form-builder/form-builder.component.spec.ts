@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { FormBuilderComponent } from './form-builder.component';
-import { CustomFieldService } from '@shared/services/custom-field.service';
+import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { of, throwError } from 'rxjs';

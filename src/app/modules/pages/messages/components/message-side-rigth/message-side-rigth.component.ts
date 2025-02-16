@@ -9,13 +9,13 @@ import { MessageService } from '../../services/message.service';
 import { AuthService } from '@auth/services/auth.service';
 import { CreateMessage, Message } from '../../interfaces/message.interface';
 import { User } from '@shared/interfaces/user.interface';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { GifSearchComponent } from '@shared/modules/gif-search/gif-search.component';
 import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';
-import { FileUploadService } from '@shared/services/file-upload.service';
+import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
 import { environment } from '@env/environment';
 import { LoadingController } from '@ionic/angular';
 

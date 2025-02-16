@@ -17,8 +17,8 @@ import {
   WorkyButtonTheme
 } from '@shared/modules/buttons/models/worky-button-model';
 import { AuthService } from '@auth/services/auth.service';
-import { PublicationService } from '@shared/services/publication.service';
-import { CommentService } from '@shared/services/comment.service';
+import { PublicationService } from '@shared/services/core-apis/publication.service';
+import { CommentService } from '@shared/services/core-apis/comment.service';
 import { translations } from '@translations/translations';
 import { TypePublishing, TypePrivacy } from './enum/addPublication.enum';
 import { Token } from '@shared/interfaces/token.interface';
@@ -29,15 +29,15 @@ import { NotificationCommentService } from '@shared/services/notifications/notif
 import { LocationSearchComponent } from '../location-search/location-search.component';
 import { ExtraData } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { ImageUploadModalComponent } from '../image-upload-modal/image-upload-modal.component';
-import { FileUploadService } from '@shared/services/file-upload.service';
+import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
 import { MediaFileUpload, PublicationView } from '@shared/interfaces/publicationView.interface';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { User } from '@shared/interfaces/user.interface';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { environment } from '@env/environment';
 import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
-import { NotificationCenterService } from '@shared/services/notificationCenter.service';
+import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationType } from '@shared/modules/notifications-panel/enums/notificationsType.enum';
 import { GifSearchComponent } from '../gif-search/gif-search.component';
 

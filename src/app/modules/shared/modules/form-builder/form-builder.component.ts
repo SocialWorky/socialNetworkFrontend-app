@@ -6,7 +6,7 @@ import { map, Subject, takeUntil } from 'rxjs';
 
 import { Field } from './interfaces/field.interface';
 import { CustomFieldType, CustomFieldDestination, CustomField} from './interfaces/custom-field.interface';
-import { CustomFieldService } from '@shared/services/custom-field.service';
+import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
 
 @Component({
   selector: 'worky-form-builder',

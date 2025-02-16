@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import axios from 'axios';
 
-import { ConfigService } from '@shared/services/config.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
 import { ConfigServiceInterface } from '@shared/interfaces/config.interface';
 import { environment } from '@env/environment';
 import { AxiomLog } from '@shared/interfaces/axiom.interface';

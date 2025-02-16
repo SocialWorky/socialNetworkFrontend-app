@@ -3,8 +3,8 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 
-import { ConfigService } from '@shared/services/config.service';
-import { FileUploadService } from '@shared/services/file-upload.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
+import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
 import { environment } from '@env/environment';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';

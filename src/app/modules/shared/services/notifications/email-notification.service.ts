@@ -6,7 +6,7 @@ import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.int
 import { translations } from '@translations/translations';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { AuthService } from '@auth/services/auth.service';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 import { Subject, takeUntil } from 'rxjs';
 import { User } from '@shared/interfaces/user.interface';
 import { CustomReactionList } from '@admin/interfaces/customReactions.interface';

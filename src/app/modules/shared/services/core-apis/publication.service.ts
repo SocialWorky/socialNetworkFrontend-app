@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
 import { CreatePost } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { EditPublication, Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
@@ -19,17 +19,8 @@ export class PublicationService {
   public publications$: Observable<PublicationView[]> = this.publicationsSubject.asObservable().pipe(distinctUntilChanged());
   
   private baseUrl: string = environment.API_URL;
-  
-  private token: string = localStorage.getItem('token') || '';
 
   constructor(private http: HttpClient) {}
-
-  private getHeaders(): HttpHeaders {
-    const token = this.token;
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-  }
 
   private handleError(error: any) {
     console.error('An error occurred', error);
@@ -38,32 +29,27 @@ export class PublicationService {
 
   createPost(post: CreatePost): Observable<any> {
     const url = `${this.baseUrl}/publications/create`;
-    const headers = this.getHeaders();
-    return this.http.post(url, post, { headers });
+    return this.http.post(url, post);
   }
 
   getPublicationId(id: string): Observable<PublicationView[]> {
     const url = `${this.baseUrl}/publications/${id}`;
-    const headers = this.getHeaders();
-    return this.http.get<PublicationView[]>(url, { headers });
+    return this.http.get<PublicationView[]>(url);
   }
 
   deletePublication(id: string): Observable<any> {
     const url = `${this.baseUrl}/publications/delete/${id}`;
-    const headers = this.getHeaders();
-    return this.http.delete(url, { headers });
+    return this.http.delete(url);
   }
 
   getCountPublications(): Observable<number> {
     const url = `${this.baseUrl}/publications/count`;
-    const headers = this.getHeaders();
-    return this.http.get<number>(url, { headers });
+    return this.http.get<number>(url);
   }
 
   private viewAll(page: number, size: number, type: string = 'all', consultId: string = ''): Observable<Publication> {
     const url = `${this.baseUrl}/publications/all?page=${page}&pageSize=${size}&type=${type}&consultId=${consultId}`;
-    const headers = this.getHeaders();
-    return this.http.get<Publication>(url, { headers });
+    return this.http.get<Publication>(url);
   }
 
   getAllPublications(page: number, size: number, type?: string, consultId?: string): Observable<Publication> {
@@ -81,8 +67,7 @@ export class PublicationService {
 
   updatePublicationById(id: string, data: EditPublication): Observable<any> {
     const url = `${this.baseUrl}/publications/edit/${id}`;
-    const headers = this.getHeaders();
-    return this.http.put<any>(url, data, { headers }).pipe(
+    return this.http.put<any>(url, data).pipe(
       catchError(this.handleError)
     );
   }

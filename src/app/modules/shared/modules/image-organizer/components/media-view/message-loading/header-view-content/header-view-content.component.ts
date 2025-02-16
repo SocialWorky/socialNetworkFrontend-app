@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { TypePrivacy, TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { Reactions } from '@shared/modules/publication-view/interfaces/reactions.interface';
 import { NotificationService } from '@shared/services/notifications/notification.service';
-import { PublicationService } from '@shared/services/publication.service';
+import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { ImageOrganizer, TypeView } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
 
 @Component({

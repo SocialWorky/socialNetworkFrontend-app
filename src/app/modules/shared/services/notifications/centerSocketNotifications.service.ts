@@ -3,7 +3,7 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { User } from '@shared/interfaces/user.interface';
 import { NotificationType } from '@shared/modules/notifications-panel/enums/notificationsType.enum';
-import { NotificationCenterService } from '@shared/services/notificationCenter.service';
+import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { AuthService } from '@auth/services/auth.service';
 import { NotificationService } from './notification.service';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';

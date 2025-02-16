@@ -5,7 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { EditInfoProfileDetailComponent } from '../edit-info-profile/edit-info-profile.component';
 import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 
 @Component({
   selector: 'worky-profile-detail',
