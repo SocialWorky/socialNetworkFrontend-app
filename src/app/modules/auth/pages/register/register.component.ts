@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
 
@@ -45,9 +45,11 @@ export class RegisterComponent implements OnInit {
     private _alertService: AlertService,
     private _loadingCtrl: LoadingController,
     private _configService: ConfigService,
+    private _cdr: ChangeDetectorRef,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.unsubscribe$)).subscribe((configData) => {
       this.invitationCode = configData.settings.invitationCode;
+      this._cdr.markForCheck();
     });
   }
 

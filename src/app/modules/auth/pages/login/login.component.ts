@@ -73,6 +73,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       const urlSite = configData.settings.urlSite;
       this.loginMethods = JSON.parse(configData.settings.loginMethods);
       this._metaTagService.updateMetaTags(title, description, imageUrl, urlSite );
+      this._cdr.markForCheck();
     });
     if (this.token) {
       this._router.navigate(['/home']);
