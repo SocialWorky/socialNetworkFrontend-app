@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular
 import { PublicationView, Comment } from '@shared/interfaces/publicationView.interface';
 import { distinctUntilChanged, Subject, takeUntil } from 'rxjs';
 import * as _ from 'lodash';
+import { WritableSignal } from '@angular/core';
 
 import { TypePrivacy, TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { Reactions } from '@shared/modules/publication-view/interfaces/reactions.interface';
@@ -28,11 +29,18 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
 
   @Input() images: ImageOrganizer[] = [];
 
-  @Input() publication?: PublicationView;
+  @Input() set publication(value: WritableSignal<PublicationView[]>) {
+    this.currentPublication = value()[0];
+  }
 
-  @Input() typeView?: string = TypeView.PUBLICATION;
+  @Input() set comment(value: WritableSignal<Comment[]>) {
+    this.currentComment = value()[0];
+  }
 
-  @Input() comment?: Comment;
+  @Input() typeView?: string;
+
+  currentPublication?: PublicationView;
+  currentComment?: Comment;
 
   private destroy$ = new Subject<void>();
 
@@ -43,7 +51,7 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    this.typeView === TypeView.COMMENT ? this.contentView = this.comment : this.contentView = this.publication;
+    this.typeView === TypeView.COMMENT ? this.contentView = this.currentComment : this.contentView = this.currentPublication;
 
     this._notificationService.notification$
       .pipe(
@@ -52,7 +60,7 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (data: any) => {
-          if (this.publication && data?._id === this.publication._id) {
+          if (this.currentPublication && data?._id === this.currentPublication._id) {
             this.refreshPublications(data._id);
             this.loadReactionsImg(data);
             this._cdr.detectChanges();
@@ -67,7 +75,7 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  loadReactionsImg(publication: PublicationView = this.publication!){
+  loadReactionsImg(publication: PublicationView = this.currentPublication!){
     this.listReaction = [];
     if (publication) {
       publication.reaction.forEach((element: Reactions) => {
@@ -83,7 +91,7 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
       this._publicationService.getPublicationId(_id).pipe(takeUntil(this.destroy$)).subscribe({
         next: (publication: PublicationView[]) => {
           this._publicationService.updatePublications(publication);
-          this.publication = publication[0];
+          this.currentPublication = publication[0];
           this.loadReactionsImg(publication[0]);
           this._cdr.markForCheck();
         },

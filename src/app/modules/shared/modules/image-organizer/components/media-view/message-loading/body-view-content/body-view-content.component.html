@@ -12,7 +12,7 @@
             <span class="comment-author">{{ comment.author.name }} {{ comment.author.lastName }}</span>
             <div *ngIf="comment.author._id === dataUser?.id"
               class="material-icons delete-comment"
-              (click)="deleteComment(comment._id, publication?._id!)">delete</div>
+              (click)="deleteComment(comment._id, currentPublicationId)">delete</div>
           </div>
           <div class="comment-content markdown" *ngIf="(comment.content | workyPreviewHtml | async) as result">
             <div [innerHTML]="result.markdownHtml"></div>
@@ -22,7 +22,7 @@
 
           <worky-image-organizer *ngIf="comment.media?.length"
             [comment]="comment"
-            [publication]="publication"
+            [publication]="currentPublication"
             type="comment">
           </worky-image-organizer>
         </div>
@@ -33,9 +33,9 @@
 
   <div class="content-add-comment">
     <worky-add-publication
-      [type]="publication?.comment?.length && this.images.length === 1 && typeView === typeViewEnum.PUBLICATION ? typePublishingEnum.COMMENT : typePublishingEnum.IMAGEVIEW"
+      [type]="currentPublication?.comment?.length && images.length === 1 && typeView === typeViewEnum.PUBLICATION ? typePublishingEnum.COMMENT : typePublishingEnum.IMAGEVIEW"
       [idMedia]="imageSelected"
-      [idPublication]="publication?._id">
+      [idPublication]="currentPublicationId">
     </worky-add-publication>
   </div>
 

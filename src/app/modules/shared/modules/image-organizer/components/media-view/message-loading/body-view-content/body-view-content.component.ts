@@ -1,6 +1,6 @@
-import { ChangeDetectorRef, Component, Input, OnDestroy, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, signal, SimpleChanges } from '@angular/core';
 import { LoadingController } from '@ionic/angular';
-import { Subject, takeUntil } from 'rxjs';
+import { catchError, filter, of, Subject, switchMap, takeUntil } from 'rxjs';
 
 import { AuthService } from '@auth/services/auth.service';
 import { PublicationView, Comment } from '@shared/interfaces/publicationView.interface';
@@ -8,6 +8,9 @@ import { ImageOrganizer, TypeView } from '@shared/modules/image-organizer/interf
 import { CommentService } from '@shared/services/core-apis/comment.service';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
+import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
+import { AxiomService } from '@shared/services/apis/axiom.service';
+import { AxiomType } from '@shared/interfaces/axiom.enum';
 
 @Component({
   selector: 'worky-body-view-content',
@@ -30,9 +33,9 @@ export class BodyViewContentComponent  implements OnDestroy {
 
   @Input() imageSelected?: string;
 
-  @Input() publication?: PublicationView;
+  @Input() publications? = signal<PublicationView[]>([]);
 
-  @Input() comment?: Comment;
+  @Input() comment? = signal<Comment[]>([]);
 
   @Input() typeView?: string = TypeView.PUBLICATION;
 
@@ -44,7 +47,11 @@ export class BodyViewContentComponent  implements OnDestroy {
     private _commentService: CommentService,
     private _cdr: ChangeDetectorRef,
     private _publicationService: PublicationService,
-  ) { }
+    private _axiomService: AxiomService,
+    private _notificationPublicationService: NotificationPublicationService,
+  ) { 
+    this.subscribeToNotificationUpdatePublication();
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (this.typeView === TypeView.COMMENT) {
@@ -83,8 +90,66 @@ export class BodyViewContentComponent  implements OnDestroy {
     });
   }
 
+    private async subscribeToNotificationUpdatePublication() {
+    this._notificationPublicationService.notificationUpdatePublication$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((data: PublicationView[]) => !!data?.[0]?._id),
+        switchMap((data: PublicationView[]) => {
+          const notification = data[0];
+          return this._publicationService.getPublicationId(notification._id).pipe(
+            catchError((error) => {
+              this._axiomService.sendLog({
+                message: 'Error al obtener publicación actualizada',
+                component: 'BodyViewContentComponent',
+                type: AxiomType.ERROR,
+                error: error,
+              });
+              return of([]);
+            })
+          );
+        }),
+        filter((publication: PublicationView[]) => publication.length > 0),
+      )
+      .subscribe({
+        next: (publication: PublicationView[]) => {
+          const updatedPublication = publication[0];
+
+          if(this.typeView === TypeView.PUBLICATION && this.publications){
+            const publicationsCurrent = this.publications();
+            if (publicationsCurrent) {
+              const updatedPublications = publicationsCurrent.map(pub =>
+                pub._id === updatedPublication._id ? updatedPublication : pub
+              );
+              this.publications.set(updatedPublications);
+            }
+          } else if (this.typeView === TypeView.COMMENT && this.comment) {
+            const commentCurrent = this.comment();
+            if (commentCurrent) {
+              const updatedComment = commentCurrent.map(com =>
+                com._id === updatedPublication._id ? updatedPublication : com
+              );
+              this.comment.set(updatedComment);
+            }
+          } 
+
+
+          this._cdr.markForCheck(); // Marcar para detección de cambios
+        },
+        error: (error) => {
+          this._axiomService.sendLog({
+            message: 'Error en suscripción de notificaciones de actualizar publicaciones',
+            component: 'HomeComponent',
+            type: AxiomType.ERROR,
+            error: error,
+          });
+        },
+      });
+  }
+
   getCommentImageSelected() {
-    for (const media of this.publication?.media || []) {
+    const currentPublication = this.publications?.()[0];
+    for (const media of currentPublication?.media || []) {
       if (media._id === this.imageSelected) {
         return media.comments;
       }
@@ -93,7 +158,8 @@ export class BodyViewContentComponent  implements OnDestroy {
   }
 
   getCommentImageCommentSelected() {
-    for (const media of this.comment?.media || []) {
+    const currentComment = this.comment?.()[0];
+    for (const media of currentComment?.media || []) {
       if (media._id === this.imageSelected) {
         return media.comments;
       }
@@ -102,25 +168,35 @@ export class BodyViewContentComponent  implements OnDestroy {
   }
 
   shouldShowComments(): boolean {
-    return ((this.publication?.comment?.length ?? 0) > 0 && this.images.length === 1 && this.typeView === this.typeViewEnum.PUBLICATION) ||
-          ((this.publication?.media?.length ?? 0) > 0 && this.images.length > 1 && this.typeView === this.typeViewEnum.PUBLICATION) ||
-          ((this.comment?.media?.length ?? 0) > 0 && this.typeView === this.typeViewEnum.COMMENT);
+    const currentPublication = this.publications?.()[0];
+    return ((currentPublication?.comment?.length ?? 0) > 0 && this.images.length === 1 && this.typeView === this.typeViewEnum.PUBLICATION) ||
+           ((currentPublication?.media?.length ?? 0) > 0 && this.images.length > 1 && this.typeView === this.typeViewEnum.PUBLICATION) ||
+           ((this.comment?.()[0]?.media?.length ?? 0) > 0 && this.typeView === this.typeViewEnum.COMMENT);
   }
 
   getComments() {
-    if (this.publication?.comment?.length && this.images.length === 1 && this.typeView === this.typeViewEnum.PUBLICATION) {
-      return this.publication?.comment;
+    const currentPublication = this.publications?.()[0];
+    if (currentPublication?.comment?.length && this.images.length === 1 && this.typeView === this.typeViewEnum.PUBLICATION) {
+      return currentPublication.comment;
     }
     
-    if (this.publication?.media?.length && this.images.length > 1 && this.typeView === this.typeViewEnum.PUBLICATION) {
+    if (currentPublication?.media?.length && this.images.length > 1 && this.typeView === this.typeViewEnum.PUBLICATION) {
       return this.getCommentImageSelected();
     }
 
-    if (this.comment?.media?.length && this.typeView === this.typeViewEnum.COMMENT) {
+    if (this.comment?.()[0]?.media?.length && this.typeView === this.typeViewEnum.COMMENT) {
       return this.getCommentImageCommentSelected();
     }
 
     return [];
+  }
+
+  get currentPublication(): PublicationView | undefined {
+    return this.publications?.()[0];
+  }
+
+  get currentPublicationId(): string {
+    return this.currentPublication?._id || '';
   }
 
 }

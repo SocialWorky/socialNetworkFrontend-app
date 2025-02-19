@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ImageOrganizer } from './interfaces/image-organizer.interface';
 import { environment } from '@env/environment';
@@ -10,6 +10,7 @@ import { DeviceDetectionService } from '@shared/services/DeviceDetection.service
   selector: 'worky-image-organizer',
   templateUrl: './image-organizer.component.html',
   styleUrls: ['./image-organizer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ImageOrganizerComponent implements OnInit {
 

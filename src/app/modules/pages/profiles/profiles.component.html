@@ -122,7 +122,7 @@
 
       <div *ngIf="loaderPublications" class="loader"></div> 
 
-      @for(publication of publications; track publication; let i = $index ) {
+      @for(publication of publicationsProfile(); track publication; let i = $index ) {
         <div class="worky-module-container"
           [attr.id]="i === 0 ? 'first-publication' : null">
           <worky-publication-view

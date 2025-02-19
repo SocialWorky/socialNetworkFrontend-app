@@ -365,9 +365,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   private createNotificationAndSendComment(publication: PublicationView, comment: any) {
-    if (this.userToken === publication.author._id) return;
 
     const dataNotification = this.createNotificationData(publication, comment);
+
+    this._notificationCommentService.sendNotificationComment(dataNotification);
+
+    if (this.userToken === publication.author._id) return;
 
     this._notificationCenterService.createNotification({
       userId: publication.author._id,
@@ -377,7 +380,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       additionalData: JSON.stringify(dataNotification),
     }).pipe(takeUntil(this.unsubscribe$)).subscribe();
 
-    this._notificationCommentService.sendNotificationComment(dataNotification);
+
   }
 
   private createNotificationData(publication: PublicationView, comment: any) {

@@ -16,7 +16,7 @@
         [class.profile-view]="isProfile && !isMobile"
         [class.messages-view]="isMessages"
         (scroll)="onScroll($event)">
-        <router-outlet></router-outlet>
+        <router-outlet/>
       </div>
         
       <worky-content-right-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-right-side>

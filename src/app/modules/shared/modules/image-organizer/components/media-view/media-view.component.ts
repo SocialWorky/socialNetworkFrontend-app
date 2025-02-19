@@ -44,34 +44,34 @@ export class MediaViewComponent  implements OnInit {
   }
 
   ngOnInit() {
-    this.subscriptionPublication();
+    //this.subscriptionPublication();
     this.subscriptionNotification();
   }
 
-  private subscriptionPublication(): void {
-    this._publicationService.publications$
-      .pipe(
-        distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
-        takeUntil(this.destroy$)
-      )
-      .subscribe({
-        next: (dat: PublicationView[]) => {
-          if (dat.filter((d: PublicationView) => d._id === this.data.publication._id).length > 0) {
-            this.data.publication = dat.filter((d: PublicationView) => d._id === this.data.publication._id)[0];
-            if (!this.data.comment) {
-              this.data.images = this.data.publication.media;
-            }
-            if (this.data.comment) {
-              const foundComment = this.data.publication.comment.find((comment: Comment) => comment._id === this.data.comment._id);
-              if (foundComment) {
-                this.data.comment = foundComment;
-              }
-            }
-            this._cdr.markForCheck();
-          }
-        }
-      });
-  }
+  // private subscriptionPublication(): void {
+  //   this._publicationService.publications$
+  //     .pipe(
+  //       distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+  //       takeUntil(this.destroy$)
+  //     )
+  //     .subscribe({
+  //       next: (dat: PublicationView[]) => {
+  //         if (dat.filter((d: PublicationView) => d._id === this.data.publication._id).length > 0) {
+  //           this.data.publication = dat.filter((d: PublicationView) => d._id === this.data.publication._id)[0];
+  //           if (!this.data.comment) {
+  //             this.data.images = this.data.publication.media;
+  //           }
+  //           if (this.data.comment) {
+  //             const foundComment = this.data.publication.comment.find((comment: Comment) => comment._id === this.data.comment._id);
+  //             if (foundComment) {
+  //               this.data.comment = foundComment;
+  //             }
+  //           }
+  //           this._cdr.markForCheck();
+  //         }
+  //       }
+  //     });
+  // }
 
   private subscriptionNotification(): void {
     this._notificationService.notification$
@@ -82,7 +82,7 @@ export class MediaViewComponent  implements OnInit {
       .subscribe({
         next: (data: any) => {
           if (data?._id === this.data.publication._id) {
-            this.subscriptionPublication();
+            //this.subscriptionPublication();
             this._cdr.markForCheck();
           }
         }

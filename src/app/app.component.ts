@@ -68,7 +68,7 @@ export class AppComponent implements OnInit, OnDestroy {
     const logoUrl = configData.settings.logoUrl || 'assets/img/navbar/worky-your-logo.png';
     this.updateFavicon(logoUrl);
 
-    this._cdr.markForCheck();
+    //this._cdr.markForCheck();
   }
 
   updateFavicon(logoUrl: string) {

@@ -1,6 +1,6 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject, firstValueFrom } from 'rxjs';
-import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Subject, firstValueFrom, of, Observable } from 'rxjs';
+import { catchError, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { Meta } from '@angular/platform-browser';
 import { Title } from '@angular/platform-browser';
@@ -24,6 +24,8 @@ import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { AxiomService } from '@shared/services/apis/axiom.service';
 import { AxiomType } from '@shared/interfaces/axiom.enum';
+import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
+import { NotificationNewPublication, NotificationUpdatePublication } from '@shared/interfaces/notificationPublication.interface';
 
 @Component({
   selector: 'worky-home',
@@ -33,11 +35,11 @@ import { AxiomType } from '@shared/interfaces/axiom.enum';
 export class HomeComponent implements OnInit, OnDestroy {
   typePublishing = TypePublishing;
   
-  publications: PublicationView[] = [];
+  publications = signal<PublicationView[]>([]);
   
   page = 1;
   
-  pageSize = 1;
+  pageSize = 10;
   
   loaderPublications: boolean = false;
   
@@ -86,7 +88,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _scrollService: ScrollService,
     private _titleService: Title,
     private _configService: ConfigService,
-    private _axiomService: AxiomService
+    private _axiomService: AxiomService,
+    private _notificationPublicationService: NotificationPublicationService
   ) {
 
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
@@ -96,29 +99,22 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    this.observeConnectionStatus();
-    this.observeConnectionSpeed();
     this._notificationUsersService.loginUser();
 
     this.paramPublication = await this.getParamsPublication();
     if (this.paramPublication) return;
 
-    if (!navigator.onLine) {
-      this.handleOfflineStatus();
-      return;
-    }
-
     await this.loadPublications();
 
-    this.loadSubscription();
+    this.subscribeToNotificationNewPublication();
+    this.subscribeToNotificationDeletePublication();
+    this.subscribeToNotificationUpdatePublication();
     this.scrollSubscription();
     this.subscribeToNotificationComment();
 
     setTimeout(() => {
       this._notificationUsersService.userActive();
     }, 300);
-
-    this._cdr.markForCheck();
   }
 
   ngOnDestroy(): void {
@@ -126,66 +122,66 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private observeConnectionStatus(): void {
-    this.isOnline$.pipe(takeUntil(this.destroy$)).subscribe({
-      next: (isOnline) => {
-        this.updateConnectionStatus(isOnline);
-      },
-      error: (error) => {
-        this.logError('Error verificando estado online', error);
-      },
-    });
-  }
+  // private observeConnectionStatus(): void {
+  //   this.isOnline$.pipe(takeUntil(this.destroy$)).subscribe({
+  //     next: (isOnline) => {
+  //       this.updateConnectionStatus(isOnline);
+  //     },
+  //     error: (error) => {
+  //       this.logError('Error verificando estado online', error);
+  //     },
+  //   });
+  // }
 
-  private updateConnectionStatus(isOnline: boolean): void {
-    this.showConnectionOverlay = !isOnline;
-    this.connectionStatusMessage = isOnline ? '' : 'You are offline';
-  }
+  // private updateConnectionStatus(isOnline: boolean): void {
+  //   this.showConnectionOverlay = !isOnline;
+  //   this.connectionStatusMessage = isOnline ? '' : 'You are offline';
+  // }
 
-  private observeConnectionSpeed(): void {
-    this.connectionSpeed$.pipe(takeUntil(this.destroy$)).subscribe({
-      next: (speed) => {
-        if (speed === 'slow') {
-          this.handleSlowConnection();
-        }
-      },
-      error: (error) => {
-        this.logError('Error verificando velocidad de conexión', error);
-      },
-    });
-  }
+  // private observeConnectionSpeed(): void {
+  //   this.connectionSpeed$.pipe(takeUntil(this.destroy$)).subscribe({
+  //     next: (speed) => {
+  //       if (speed === 'slow') {
+  //         this.handleSlowConnection();
+  //       }
+  //     },
+  //     error: (error) => {
+  //       this.logError('Error verificando velocidad de conexión', error);
+  //     },
+  //   });
+  // }
 
-  private handleSlowConnection(): void {
-    this._alertService.showAlert(
-      'Su conexión a internet es lenta',
-      'puede experimentar problemas de carga',
-      Alerts.WARNING,
-      Position.CENTER,
-      true,
-      true,
-      'Aceptar'
-    );
-    this._axiomService.sendLog({
-      message: 'Conexión lenta del usuario',
-      component: 'HomeComponent',
-      type: AxiomType.INFO,
-      info: this.dataUser,
-    });
-  }
+  // private handleSlowConnection(): void {
+  //   this._alertService.showAlert(
+  //     'Su conexión a internet es lenta',
+  //     'puede experimentar problemas de carga',
+  //     Alerts.WARNING,
+  //     Position.CENTER,
+  //     true,
+  //     true,
+  //     'Aceptar'
+  //   );
+  //   this._axiomService.sendLog({
+  //     message: 'Conexión lenta del usuario',
+  //     component: 'HomeComponent',
+  //     type: AxiomType.INFO,
+  //     info: this.dataUser,
+  //   });
+  // }
 
-  private handleOfflineStatus(): void {
-    this.showConnectionOverlay = true;
-    this.connectionStatusMessage = 'You are offline';
-  }
+  // private handleOfflineStatus(): void {
+  //   this.showConnectionOverlay = true;
+  //   this.connectionStatusMessage = 'You are offline';
+  // }
 
-  private logError(message: string, error: any): void {
-    this._axiomService.sendLog({
-      message,
-      component: 'HomeComponent',
-      type: AxiomType.ERROR,
-      error,
-    });
-  }
+  // private logError(message: string, error: any): void {
+  //   this._axiomService.sendLog({
+  //     message,
+  //     component: 'HomeComponent',
+  //     type: AxiomType.ERROR,
+  //     error,
+  //   });
+  // }
 
   private scrollSubscription() {
     this._scrollService.scrollEnd$.pipe(
@@ -197,61 +193,23 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  private async loadSubscription() {
-    this._publicationService.publications$.pipe(
-      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (publicationsData: PublicationView[]) => {
-        this.updatePublications(publicationsData);
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        this._axiomService.sendLog({ 
-          message: 'Error en suscripción de publicaciones',
-          component: 'HomeComponent',
-          type: AxiomType.ERROR,
-          error: error 
-        });
-      }
-    });
+  private async loadPublications() {
+    if (this.loaderPublications || !this.hasMorePublications) return;
 
-    this._publicationService.publicationsDeleted$.pipe(
-      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (publicationsData: PublicationView[]) => {
-        this.publications = this.publications.filter(pub => !publicationsData.some(pubDeleted => pubDeleted._id === pub._id));
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        this._axiomService.sendLog({ 
-          message: 'Error en suscripción de eliminar publicación',
-          component: 'HomeComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
-      }
-    });
-  }
-
- async loadPublications() {
-    if (this.loaderPublications || !this.hasMorePublications || !navigator.onLine) return;
     this.loaderPublications = true;
     try {
       const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.ALL));
-      if (newPublications.total === this.publications.length) {
+      
+      this.publications.update((current: PublicationView[]) => [...current, ...newPublications.publications]);
+
+      if (this.publications().length >= newPublications.total) {
         this.hasMorePublications = false;
       }
 
-      const uniqueNewPublications = newPublications.publications.filter(newPub => 
-        !this.publications.some(pub => pub._id === newPub._id)
-      );
-
-      this.publications = [...this.publications, ...uniqueNewPublications];
       this.page++;
       this.loaderPublications = false;
       this._cdr.markForCheck();
+
 
     } catch (error) {
       this._axiomService.sendLog({
@@ -276,20 +234,136 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  async subscribeToNotificationComment() {
-    this._notificationCommentService.notificationComment$.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(async (data: any) => {
-      const newCommentInPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize));
-      this._publicationService.updatePublications(newCommentInPublications.publications);
-      this._cdr.markForCheck();
-    }, (error) => {
-      this._axiomService.sendLog({
-        message: 'Error en suscripción de notificaciones de comentarios',
-        component: 'HomeComponent',
-        type: AxiomType.ERROR,
-        error: error
+  private async subscribeToNotificationNewPublication() {
+    this._notificationPublicationService.notificationNewPublication$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async (notifications: NotificationNewPublication[]) => {
+          const notification = notifications[0];
+          if (notification?.publications._id) {
+            const publicationsCurrent = this.publications();
+            this._publicationService.getPublicationId(notification.publications._id)
+              .pipe(takeUntil(this.destroy$))
+              .subscribe({
+                next: (publication: PublicationView[]) => {
+                  if (!publication.length) return;
+                  publicationsCurrent.unshift(publication[0]);
+                  this.publications.set(publicationsCurrent);
+                  this._cdr.markForCheck();
+                }
+              });
+          }
+        },
+        error: (error) => {
+          this._axiomService.sendLog({
+            message: 'Error en suscripción de notificaciones de nuevas publicaciones',
+            component: 'HomeComponent',
+            type: AxiomType.ERROR,
+            error: error
+          });
+        }
       });
+  }
+
+  private async subscribeToNotificationDeletePublication() {
+    this._notificationPublicationService.notificationDeletePublication$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async (notifications: {_id: string}[]) => {
+          const notification = notifications[0];
+          if (notification?._id) {
+            const publicationsCurrent = this.publications();
+            const index = publicationsCurrent.findIndex(pub => pub._id === notification._id);
+            if (index !== -1) {
+              publicationsCurrent.splice(index, 1);
+              this.publications.set(publicationsCurrent);
+              this._cdr.markForCheck();
+            }
+          }
+        },
+        error: (error) => {
+          this._axiomService.sendLog({
+            message: 'Error en suscripción de notificaciones de eliminar publicaciones',
+            component: 'HomeComponent',
+            type: AxiomType.ERROR,
+            error: error
+          });
+        }
+      });
+  }
+
+  private async subscribeToNotificationUpdatePublication() {
+    this._notificationPublicationService.notificationUpdatePublication$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((data: PublicationView[]) => !!data?.[0]?._id),
+        switchMap((data: PublicationView[]) => {
+          const notification = data[0];
+          return this._publicationService.getPublicationId(notification._id).pipe(
+            catchError((error) => {
+              this._axiomService.sendLog({
+                message: 'Error al obtener publicación actualizada',
+                component: 'HomeComponent',
+                type: AxiomType.ERROR,
+                error: error,
+              });
+              return of([]);
+            })
+          );
+        }),
+        filter((publication: PublicationView[]) => publication.length > 0),
+      )
+      .subscribe({
+        next: (publication: PublicationView[]) => {
+          const updatedPublication = publication[0];
+          const publicationsCurrent = this.publications();
+
+          // Crear un nuevo array sin modificar el original directamente
+          const updatedPublications = publicationsCurrent.map(pub =>
+            pub._id === updatedPublication._id ? updatedPublication : pub
+          );
+
+          this.publications.set(updatedPublications); // Actualizar la señal
+          this._cdr.markForCheck(); // Marcar para detección de cambios
+        },
+        error: (error) => {
+          this._axiomService.sendLog({
+            message: 'Error en suscripción de notificaciones de actualizar publicaciones',
+            component: 'HomeComponent',
+            type: AxiomType.ERROR,
+            error: error,
+          });
+        },
+      });
+  }
+
+  private async subscribeToNotificationComment() {
+    this._notificationCommentService.notificationComment$
+     .pipe(takeUntil(this.destroy$))
+     .subscribe({
+      next: async (data: any) => {
+        if (data.postId) {
+          const publicationsCurrent = this.publications();
+          this._publicationService.getPublicationId(data.postId).pipe(takeUntil(this.destroy$)).subscribe({
+            next: (publication: PublicationView[]) => {
+              const index = publicationsCurrent.findIndex(pub => pub._id === publication[0]._id);
+              if (index !== -1) {
+                publicationsCurrent[index] = publication[0];
+                this.publications.set(publicationsCurrent);
+                this._cdr.markForCheck();
+              }
+            },
+          });
+        }
+      },
+      error: (error) => {
+        this._axiomService.sendLog({
+          message: 'Error en suscripción de notificaciones de comentarios',
+          component: 'HomeComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
+      }
     });
   }
 
@@ -301,12 +375,11 @@ export class HomeComponent implements OnInit, OnDestroy {
         const publication = await firstValueFrom(this._publicationService.getPublicationId(_idPublication));
         if (publication.length) {
           this.loaderPublications = false;
-          this.publications = publication;
-
-          this._meta.updateTag({ property: 'og:title', content: 'worky Social Network' });
-          this._meta.updateTag({ property: 'og:description', content: this.publications[0]?.content });
-          this._meta.updateTag({ property: 'og:image', content: this.urlMediaApi + this.publications[0]?.media[0]?.url });
-          this._meta.addTag({ name: 'robots', content: 'index, follow' });
+          this.publications.set(publication);
+          // this._meta.updateTag({ property: 'og:title', content: 'worky Social Network' });
+          // this._meta.updateTag({ property: 'og:description', content: this.publications.get()[0]?.description });
+          // this._meta.updateTag({ property: 'og:image', content: this.urlMediaApi + this.publications.get()[0]?.media[0]?.url });
+          // this._meta.addTag({ name: 'robots', content: 'index, follow' });
 
           this._cdr.markForCheck();
           result = true;
@@ -336,39 +409,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (data.results && data.results.length > 0) {
       await firstValueFrom(this._geoLocationsService.createLocations(data));
     }
-  }
-
-  private updatePublications(publicationsData: PublicationView[]) {
-    publicationsData.forEach(newPub => {
-      const index = this.publications.findIndex(pub => pub._id === newPub._id);
-      if (index !== -1) {
-        const existingPub = this.publications[index];
-        if (
-          JSON.stringify(existingPub) !== JSON.stringify(newPub) ||
-          JSON.stringify(existingPub.comment) !== JSON.stringify(newPub.comment) ||
-          JSON.stringify(existingPub.reaction) !== JSON.stringify(newPub.reaction)
-        ) {
-          this.publications[index] = newPub;
-        }
-      } else {
-        this.publications.push(newPub);
-      }
-    });
-
-    this.publications.sort((a, b) => {
-      if (a.fixed && !b.fixed) return -1;
-      if (!a.fixed && b.fixed) return 1;
-
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-
-    this.publications.forEach(pub => {
-      if (pub.comment) {
-        pub.comment.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      }
-    });
-
-    this._cdr.markForCheck();
   }
 
   scrollToTop() {

@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { firstValueFrom, lastValueFrom, Subject, takeUntil } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { firstValueFrom, lastValueFrom, of, Subject, takeUntil } from 'rxjs';
+import { catchError, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { Title } from '@angular/platform-browser';
 
@@ -29,6 +29,8 @@ import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { AxiomService } from '@shared/services/apis/axiom.service';
 import { AxiomType } from '@shared/interfaces/axiom.enum';
+import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
+import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
 
 @Component({
   selector: 'worky-profiles',
@@ -38,7 +40,7 @@ import { AxiomType } from '@shared/interfaces/axiom.enum';
 export class ProfilesComponent implements OnInit, OnDestroy {
   typePublishing = TypePublishing;
   
-  publications: PublicationView[] = [];
+  publicationsProfile = signal<PublicationView[]>([]);
   
   page = 1;
   
@@ -50,7 +52,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   
   paramPublication: boolean = false;
   
-  loaderPublications?: boolean = false;
+  loaderPublications: boolean = false;
   
   userData: User | undefined;
   
@@ -113,7 +115,8 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _scrollService: ScrollService,
     private _titleService: Title,
     private _configService: ConfigService,
-    private _axiomService: AxiomService
+    private _axiomService: AxiomService,
+    private _notificationPublicationService: NotificationPublicationService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
@@ -123,8 +126,6 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     
-    this._cdr.markForCheck();
-
     if (this.idUserProfile === '') {
       this.idUserProfile = this._authService.getDecodedToken()?.id!;
       this._cdr.markForCheck();
@@ -138,89 +139,20 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     
     this.decodedToken = this._authService.getDecodedToken()!;
     this.isCurrentUser = this.idUserProfile === this.decodedToken.id;
-    this.loaderPublications = true;
+
+    await this.loadPublications();
+    this.loaderPublications = false;
+
+    this.subscribeToNotificationNewPublication();
+    this.subscribeToNotificationDeletePublication();
+    this.subscribeToNotificationUpdatePublication();
+    this.subscribeToNotificationComment();
+    this.scrollSubscription();
 
     this._profileNotificationService.profileUpdated$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.getDataProfile();
       this._cdr.markForCheck();
     });
-
-    await this.loadPublications();
-    this.loadSubscription();
-    this.loaderPublications = false;
-    this.subscribeToNotificationComment();
-    this.scrollSubscription();
-  }
-
-  private async loadSubscription() {
-    this._publicationService.publications$.pipe(
-      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (publicationsData: PublicationView[]) => {
-        publicationsData = publicationsData.filter(pub => pub.author._id === this.idUserProfile || pub.userReceiving?._id === this.idUserProfile);
-        this.updatePublications(publicationsData);
-      },
-      error: (error) => {
-        this._axiomService.sendLog({
-          message: 'Error al cargar las publicaciones',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
-      }
-    });
-
-    this._publicationService.publicationsDeleted$.pipe(
-      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (publicationsData: PublicationView[]) => {
-        this.publications = this.publications.filter(pub => !publicationsData.some(pubDeleted => pubDeleted._id === pub._id));
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        this._axiomService.sendLog({
-          message: 'Error al actualizar las publicaciones eliminadas',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
-      }
-    });
-  }
-
-  private updatePublications(publicationsData: PublicationView[]) {
-    publicationsData.forEach(newPub => {
-      const index = this.publications.findIndex(pub => pub._id === newPub._id);
-      if (index !== -1) {
-        const existingPub = this.publications[index];
-        if (
-          JSON.stringify(existingPub) !== JSON.stringify(newPub) ||
-          JSON.stringify(existingPub.comment) !== JSON.stringify(newPub.comment) ||
-          JSON.stringify(existingPub.reaction) !== JSON.stringify(newPub.reaction)
-        ) {
-          this.publications[index] = newPub;
-        }
-      } else {
-        this.publications.push(newPub);
-      }
-    });
-
-    this.publications.sort((a, b) => {
-      if (a.fixed && !b.fixed) return -1;
-      if (!a.fixed && b.fixed) return 1;
-
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-
-    this.publications.forEach(pub => {
-      if (pub.comment) {
-        pub.comment.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      }
-    });
-
-    this._cdr.markForCheck();
   }
 
   private scrollSubscription() {
@@ -238,20 +170,20 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
- private async loadPublications() {
-    if (this.loaderPublications || !this.hasMorePublications || !navigator.onLine) return;
+  private async loadPublications() {
+
+    if (this.loaderPublications || !this.hasMorePublications) return;
     this.loaderPublications = true;
     try {
+
       const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile));
-      if (newPublications.total === this.publications.length) {
+
+      this.publicationsProfile.update((current: PublicationView[]) => [...current, ...newPublications.publications]);
+
+      if (this.publicationsProfile().length >= newPublications.total) {
         this.hasMorePublications = false;
       }
 
-      const uniqueNewPublications = newPublications.publications.filter(newPub => 
-        !this.publications.some(pub => pub._id === newPub._id)
-      );
-
-      this.publications = [...this.publications, ...uniqueNewPublications];
       this.page++;
       this.loaderPublications = false;
       this._cdr.markForCheck();
@@ -285,11 +217,139 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     });
   }
 
-  private subscribeToNotificationComment() {
-    this._notificationCommentService.notificationComment$.pipe(takeUntil(this.destroy$)).subscribe(async () => {
-      this.loadPublications();
+  private async subscribeToNotificationNewPublication() {
+    this._notificationPublicationService.notificationNewPublication$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async (notifications: NotificationNewPublication[]) => {
+          const notification = notifications[0];
+          if (notification?.publications._id) {
+            const publicationsCurrent = this.publicationsProfile();
+            this._publicationService.getPublicationId(notification.publications._id)
+              .pipe(takeUntil(this.destroy$))
+              .subscribe({
+                next: (publication: PublicationView[]) => {
+                  if (!publication.length) return;
+                  publicationsCurrent.unshift(publication[0]);
+                  this.publicationsProfile.set(publicationsCurrent);
+                  this._cdr.markForCheck();
+                }
+              });
+          }
+        },
+        error: (error) => {
+          this._axiomService.sendLog({
+            message: 'Error en suscripción de notificaciones de nuevas publicaciones',
+            component: 'ProfilesComponent',
+            type: AxiomType.ERROR,
+            error: error
+          });
+        }
+      });
+  }
+
+  private async subscribeToNotificationDeletePublication() {
+    this._notificationPublicationService.notificationDeletePublication$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async (notifications: {_id: string}[]) => {
+          const notification = notifications[0];
+          if (notification?._id) {
+            const publicationsCurrent = this.publicationsProfile();
+            const index = publicationsCurrent.findIndex(pub => pub._id === notification._id);
+            if (index !== -1) {
+              publicationsCurrent.splice(index, 1);
+              this.publicationsProfile.set(publicationsCurrent);
+              this._cdr.markForCheck();
+            }
+          }
+        },
+        error: (error) => {
+          this._axiomService.sendLog({
+            message: 'Error en suscripción de notificaciones de eliminar publicaciones',
+            component: 'ProfilesComponent',
+            type: AxiomType.ERROR,
+            error: error
+          });
+        }
+      });
+  }
+
+  private async subscribeToNotificationUpdatePublication() {
+    this._notificationPublicationService.notificationUpdatePublication$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((data: PublicationView[]) => !!data?.[0]?._id),
+        switchMap((data: PublicationView[]) => {
+          const notification = data[0];
+          return this._publicationService.getPublicationId(notification._id).pipe(
+            catchError((error) => {
+              this._axiomService.sendLog({
+                message: 'Error al obtener publicación actualizada',
+                component: 'ProfilesComponent',
+                type: AxiomType.ERROR,
+                error: error,
+              });
+              return of([]);
+            })
+          );
+        }),
+        filter((publication: PublicationView[]) => publication.length > 0),
+      )
+      .subscribe({
+        next: (publication: PublicationView[]) => {
+          const updatedPublication = publication[0];
+          const publicationsCurrent = this.publicationsProfile();
+
+          // Crear un nuevo array sin modificar el original directamente
+          const updatedPublications = publicationsCurrent.map(pub =>
+            pub._id === updatedPublication._id ? updatedPublication : pub
+          );
+
+          this.publicationsProfile.set(updatedPublications); // Actualizar la señal
+          this._cdr.markForCheck(); // Marcar para detección de cambios
+        },
+        error: (error) => {
+          this._axiomService.sendLog({
+            message: 'Error en suscripción de notificaciones de actualizar publicaciones',
+            component: 'ProfilesComponent',
+            type: AxiomType.ERROR,
+            error: error,
+          });
+        },
+      });
+  }
+
+  private async subscribeToNotificationComment() {
+    this._notificationCommentService.notificationComment$
+     .pipe(takeUntil(this.destroy$))
+     .subscribe({
+      next: async (data: any) => {
+        if (data.postId) {
+          const publicationsCurrent = this.publicationsProfile();
+          this._publicationService.getPublicationId(data.postId).pipe(takeUntil(this.destroy$)).subscribe({
+            next: (publication: PublicationView[]) => {
+              const index = publicationsCurrent.findIndex(pub => pub._id === publication[0]._id);
+              if (index !== -1) {
+                publicationsCurrent[index] = publication[0];
+                this.publicationsProfile.set(publicationsCurrent);
+                this._cdr.markForCheck();
+              }
+            },
+          });
+        }
+      },
+      error: (error) => {
+        this._axiomService.sendLog({
+          message: 'Error en suscripción de notificaciones de comentarios',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
+      }
     });
   }
+
 
   private getUserFriend() {
     this._userService.getUserFriends(this._authService.getDecodedToken()?.id!, this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
