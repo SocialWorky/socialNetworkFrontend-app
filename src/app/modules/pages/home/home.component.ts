@@ -236,23 +236,46 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private async subscribeToNotificationNewPublication() {
     this._notificationPublicationService.notificationNewPublication$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((notifications: NotificationNewPublication[]) => !!notifications?.[0]?.publications?._id)
+      )
       .subscribe({
         next: async (notifications: NotificationNewPublication[]) => {
           const notification = notifications[0];
-          if (notification?.publications._id) {
-            const publicationsCurrent = this.publications();
-            this._publicationService.getPublicationId(notification.publications._id)
-              .pipe(takeUntil(this.destroy$))
-              .subscribe({
-                next: (publication: PublicationView[]) => {
-                  if (!publication.length) return;
-                  publicationsCurrent.unshift(publication[0]);
-                  this.publications.set(publicationsCurrent);
-                  this._cdr.markForCheck();
-                }
-              });
-          }
+          const publicationsCurrent = this.publications();
+
+          this._publicationService.getPublicationId(notification.publications._id)
+            .pipe(
+              takeUntil(this.destroy$),
+              filter((publication: PublicationView[]) => !!publication && publication.length > 0)
+            )
+            .subscribe({
+              next: (publication: PublicationView[]) => {
+                if (!publication.length) return;
+                const newPublication = publication[0];
+
+                const fixedPublications = publicationsCurrent.filter(pub => pub.fixed);
+                const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed);
+
+                const updatedPublications = [
+                  ...fixedPublications,
+                  newPublication,
+                  ...nonFixedPublications
+                ];
+
+                this.publications.set(updatedPublications);
+                this._cdr.markForCheck();
+              },
+              error: (error) => {
+                this._axiomService.sendLog({
+                  message: 'Error al obtener nueva publicación',
+                  component: 'HomeComponent',
+                  type: AxiomType.ERROR,
+                  error: error
+                });
+              }
+            });
         },
         error: (error) => {
           this._axiomService.sendLog({
@@ -307,24 +330,37 @@ export class HomeComponent implements OnInit, OnDestroy {
                 type: AxiomType.ERROR,
                 error: error,
               });
-              return of([]);
+              return of([]); 
             })
           );
         }),
-        filter((publication: PublicationView[]) => publication.length > 0),
+        filter((publication: PublicationView[]) => publication.length > 0)
       )
       .subscribe({
         next: (publication: PublicationView[]) => {
           const updatedPublication = publication[0];
           const publicationsCurrent = this.publications();
 
-          // Crear un nuevo array sin modificar el original directamente
-          const updatedPublications = publicationsCurrent.map(pub =>
-            pub._id === updatedPublication._id ? updatedPublication : pub
-          );
+          const fixedPublications = publicationsCurrent.filter(pub => pub.fixed && pub._id !== updatedPublication._id);
+          const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed && pub._id !== updatedPublication._id);
 
-          this.publications.set(updatedPublications); // Actualizar la señal
-          this._cdr.markForCheck(); // Marcar para detección de cambios
+          let updatedPublications: PublicationView[];
+
+          if (updatedPublication.fixed) {
+            updatedPublications = [
+              updatedPublication,
+              ...fixedPublications,
+              ...nonFixedPublications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            ];
+          } else {
+            updatedPublications = [
+              ...fixedPublications,
+              ...nonFixedPublications.concat(updatedPublication).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            ];
+          }
+
+          this.publications.set(updatedPublications);
+          this._cdr.markForCheck();
         },
         error: (error) => {
           this._axiomService.sendLog({
@@ -333,7 +369,7 @@ export class HomeComponent implements OnInit, OnDestroy {
             type: AxiomType.ERROR,
             error: error,
           });
-        },
+        }
       });
   }
 

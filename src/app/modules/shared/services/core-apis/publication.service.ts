@@ -38,7 +38,6 @@ export class PublicationService {
     return throwError(() => new Error('Something went wrong; please try again later.'));
   }
 
-  // Crear una nueva publicación
   createPost(post: CreatePost): Observable<any> {
     const url = `${this.baseUrl}/publications/create`;
     return this.http.post(url, post).pipe(
@@ -50,13 +49,11 @@ export class PublicationService {
     );
   }
 
-  // Obtener una publicación por ID
   getPublicationId(id: string): Observable<PublicationView[]> {
     const url = `${this.baseUrl}/publications/${id}`;
     return this.http.get<PublicationView[]>(url);
   }
 
-  // Eliminar una publicación
   deletePublication(id: string): Observable<any> {
     const url = `${this.baseUrl}/publications/delete/${id}`;
     const response = this.http.delete(url).pipe(
@@ -70,13 +67,11 @@ export class PublicationService {
     return response;
   }
 
-  // Contar el número total de publicaciones
   getCountPublications(): Observable<number> {
     const url = `${this.baseUrl}/publications/count`;
     return this.http.get<number>(url);
   }
 
-  // Obtener todas las publicaciones
   getAllPublications(page: number, size: number, type: string = 'all', consultId: string = ''): Observable<Publication> {
     const url = `${this.baseUrl}/publications/all?page=${page}&pageSize=${size}&type=${type}&consultId=${consultId}`;
     return this.http.get<Publication>(url).pipe(
@@ -85,34 +80,28 @@ export class PublicationService {
         return [];
       }),
       map((publicationsResponse: Publication) => {
-        //this.publications.set(publicationsResponse.publications);
         return publicationsResponse;
       })
     );
   }
 
-  // Actualizar una publicación por ID
   updatePublicationById(id: string, data: EditPublication): Observable<any> {
     const url = `${this.baseUrl}/publications/edit/${id}`;
     const response = this.http.put<any>(url, data).pipe(
       catchError(this.handleError)
     );
     this._notificationPublicationService.sendNotificationUpdatePublication(response);
-    console.log('response update publication: ', response);
     return response;
   }
 
-  // Actualizar las publicaciones activas
   updatePublications(newPublications: PublicationView[]): void {
     this._notificationPublicationService.sendNotificationUpdatePublication(newPublications);
   }
 
-  // Actualizar las publicaciones eliminadas
   updatePublicationsDeleted(newPublications: PublicationView[]): void {
     this.publicationsDeleted.set(newPublications);
   }
 
-  // Limpiar las publicaciones activas
   cleanPublications(): void {
     this.publications.set([]);
   }

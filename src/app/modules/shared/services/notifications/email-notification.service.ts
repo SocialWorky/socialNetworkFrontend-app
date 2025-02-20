@@ -32,6 +32,7 @@ export class EmailNotificationService {
     private _centerSocketNotificationsService: CenterSocketNotificationsService
   ) {
     this.baseUrl = environment.API_URL;
+    this.dataUser = this._authService.getDecodedToken();
   }
 
   ngOnDestroy() {
@@ -160,6 +161,7 @@ export class EmailNotificationService {
     this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
     this.mailSendDataValidate.email = publication?.author.email;
     this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
+
     this._centerSocketNotificationsService.reactionInPublicationNotification(publication, reaction);
 
     this.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();
