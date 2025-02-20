@@ -140,19 +140,22 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.decodedToken = this._authService.getDecodedToken()!;
     this.isCurrentUser = this.idUserProfile === this.decodedToken.id;
 
-    await this.loadPublications();
-    this.loaderPublications = false;
-
     this.subscribeToNotificationNewPublication();
     this.subscribeToNotificationDeletePublication();
     this.subscribeToNotificationUpdatePublication();
     this.subscribeToNotificationComment();
     this.scrollSubscription();
 
+    this.publicationsProfile.set([]);
+    await this.loadPublications();
+    this.loaderPublications = false;
+
     this._profileNotificationService.profileUpdated$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.getDataProfile();
       this._cdr.markForCheck();
     });
+
+
   }
 
   private scrollSubscription() {
@@ -179,7 +182,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile));
 
       this.publicationsProfile.update((current: PublicationView[]) => [...current, ...newPublications.publications]);
-
+      
       if (this.publicationsProfile().length >= newPublications.total) {
         this.hasMorePublications = false;
       }
@@ -235,7 +238,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
             )
             .subscribe({
               next: (publication: PublicationView[]) => {
-                if (!publication.length) return;
+                if (!publication.length && publication[0].author._id !== this.userData?._id) return;
                 const newPublication = publication[0];
 
                 const fixedPublications = publicationsCurrent.filter(pub => pub.fixed);
@@ -321,6 +324,9 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (publication: PublicationView[]) => {
+
+          if (publication[0].author._id !== this.userData?._id) return;
+
           const updatedPublication = publication[0];
           const publicationsCurrent = this.publicationsProfile();
 
