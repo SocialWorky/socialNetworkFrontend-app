@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
 import { ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
+import { TooltipsOnboardingService } from '@shared/services/tooltips-onboarding.service';
 
 import { MaterialModule } from '../material/material.module';
 import { TranslationsModule } from '../translations/translations.module';
@@ -34,6 +35,9 @@ import { GifSearchModule } from '../gif-search/gif-search.module';
   exports: [
     AddPublicationComponent,
     ReactiveFormsModule
+  ],
+  providers: [
+    TooltipsOnboardingService
   ]
 })
 export class AddPublicationModule { }

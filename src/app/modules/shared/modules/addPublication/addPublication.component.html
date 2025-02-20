@@ -1,4 +1,4 @@
-<div class="publishing-container" *ngIf="user">
+<div id="publishing-container" class="publishing-container" *ngIf="user">
   <form [formGroup]="myForm" (ngSubmit)="onSave()" autocomplete="off">
     <div class="publishing-header">
 
@@ -51,7 +51,7 @@
     </div>
 
     <div class="publishing-body" [class.comment-body]="type === typePublishing.COMMENT">
-      <div class="textarea-container">
+      <div id="textarea-container" class="textarea-container">
 
         <worky-avatar *ngIf="type === typePublishing.COMMENT && user.name && user.lastName"
           [size]="35"
@@ -129,7 +129,7 @@
 
       <div class="options-items">
         <!-- Botón para buscar GIFs -->
-        <div class="extra-content-item gif-icon" matTooltip="Buscar GIF" (click)="openGifSearch()">
+        <div id="gif-icon" class="extra-content-item gif-icon" matTooltip="Buscar GIF" (click)="openGifSearch()">
           <i class="material-icons">gif</i>
         </div>
 

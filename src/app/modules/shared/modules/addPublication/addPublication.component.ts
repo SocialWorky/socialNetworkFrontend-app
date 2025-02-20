@@ -40,6 +40,7 @@ import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.int
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationType } from '@shared/modules/notifications-panel/enums/notificationsType.enum';
 import { GifSearchComponent } from '../gif-search/gif-search.component';
+import { TooltipsOnboardingService } from '@shared/services/tooltips-onboarding.service';
 
 @Component({
   selector: 'worky-add-publication',
@@ -123,7 +124,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _globalEventService: GlobalEventService,
     private _emailNotificationService: EmailNotificationService,
     private _notificationCenterService: NotificationCenterService,
-    private _ngZone: NgZone
+    private _ngZone: NgZone,
+    private _tooltipsOnboardingService: TooltipsOnboardingService,
   ) {
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
@@ -142,6 +144,10 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
           this.updatePublications(TypePublishing.POSTPROFILE, this.idUserProfile);
         }
       });
+      setTimeout(() => {
+        this.startOnboarding();
+      }
+      , 1000);
   }
 
   ngOnDestroy(): void {
@@ -149,6 +155,58 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this.unsubscribe$.complete();
     this.subscription?.unsubscribe();
   }
+
+  startOnboarding() {
+    const steps = [
+      {
+        element: '.textarea-container',
+        popover: {
+          title: 'Bienvenido',
+          description: 'Este es el primer paso del tutorial. Aquí puedes publicar contenido.',
+        },
+      },
+      {
+        element: '.gif-icon',
+        popover: {
+          title: 'Buscador de GIFs',
+          description: 'Aquí puedes buscar GIFs para añadir a tu publicación.',
+        },
+      },
+      {
+        element: '.file-upload',
+        popover: {
+          title: 'Subir Imganes',
+          description: 'Puedes subir archivos de imagen para añadir a tu publicación.',
+        },
+      },
+      {
+        element: '.location-on',
+        popover: {
+          title: 'Ubicación',
+          description: 'Puedes añadir la ubicación de tu publicación.',
+          //side: 'right',
+        },
+      },
+      {
+        element: '.emoji-icon',
+        popover: {
+          title: 'Emojis',
+          description: 'Puedes añadir emojis a tu publicación.',
+          //side: 'right',
+        },
+      },
+      {
+        element: '.markdown-help',
+        popover: {
+          title: 'Markdown',
+          description: 'Puedes ver una guía rápida de Markdown para dar formato a tu publicación.',
+          //side: 'right',
+        },
+      }
+    ];
+
+    this._tooltipsOnboardingService.start(steps);
+  } 
 
   get userToken(): string {
     return this.decodedToken.id;

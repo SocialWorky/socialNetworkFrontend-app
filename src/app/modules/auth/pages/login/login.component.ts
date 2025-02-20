@@ -177,6 +177,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
           const tokenResponse = await this._authService.getDecodedToken()!;
 
+          localStorage.setItem('isTooltipActive', tokenResponse.isTooltipActive.toString());
+
           this._socketService.connectToWebSocket(tokenResponse);
 
           this._notificationUsersService.loginUser();
