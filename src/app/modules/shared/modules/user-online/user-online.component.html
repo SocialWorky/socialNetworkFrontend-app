@@ -2,7 +2,7 @@
   <h3 class="user-online-title">Usuarios Online</h3>
   <div class="user-online-content">
     <div class="user-online-item"
-      *ngFor="let user of usersOnline" 
+      *ngFor="let user of usersOnline()" 
       (click)="goToProfile(user?._id!)">
         
         <worky-avatar

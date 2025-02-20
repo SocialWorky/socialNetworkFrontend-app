@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Token } from '@shared/interfaces/token.interface';
 import { Subject } from 'rxjs';
@@ -17,7 +17,7 @@ import { AuthService } from '@auth/services/auth.service';
 export class UserOnlineComponent implements OnInit, OnDestroy {
   private _destroy$ = new Subject<void>();
 
-  usersOnline: Token[] | undefined;
+  usersOnline = signal<Token[]>([]);
 
   currentUser: Token;
 
@@ -40,7 +40,7 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
       takeUntil(this._destroy$)
     ).subscribe({
       next: (userStatuses: Token[]) => {
-        this.usersOnline = userStatuses;
+        this.usersOnline.set(userStatuses);
         this._cdr.markForCheck();
       },
       error: (error) => {
