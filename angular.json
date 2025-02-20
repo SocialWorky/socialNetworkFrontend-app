@@ -43,10 +43,12 @@
               "src/styles.css",
               "src/global.scss",
               "node_modules/@ctrl/ngx-emoji-mart/picker.css",
-              "node_modules/cropperjs/dist/cropper.css"
+              "node_modules/cropperjs/dist/cropper.css",
+              "node_modules/driver.js/dist/driver.css"
             ],
             "scripts": [
-              "node_modules/cropperjs/dist/cropper.js"
+              "node_modules/cropperjs/dist/cropper.js",
+              "node_modules/driver.js/dist/driver.js.iife.js"
             ]
           },
           "configurations": {
@@ -130,10 +132,12 @@
               "src/styles.css",
               "src/global.scss",
               "node_modules/@ctrl/ngx-emoji-mart/picker.css",
-              "node_modules/cropperjs/dist/cropper.css"
+              "node_modules/cropperjs/dist/cropper.css",
+              "node_modules/driver.js/dist/driver.css"
             ],
             "scripts": [
-              "node_modules/cropperjs/dist/cropper.js"
+              "node_modules/cropperjs/dist/cropper.js",
+              "node_modules/driver.js/dist/driver.js.iife.js"
             ]
           },
           "configurations": {
