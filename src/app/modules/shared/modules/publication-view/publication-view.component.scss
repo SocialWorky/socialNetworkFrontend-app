@@ -14,10 +14,24 @@
       color: colors.$worky-color-blue;
       background-color: colors.$worky-color-greyLight;
       position: initial;
-      margin-top: 4px;
-      padding: 5px;
+      margin-top: 7px;
+      padding: 7px;
       border-radius: 50%;
     }
+
+    ::ng-deep worky-dropdown {
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      margin-top: 7px;
+      margin-left: 5px;
+
+      &:hover {
+        background-color: colors.$worky-color-greyLight;
+      }
+    }
+
   }
 
   .publication-header {
