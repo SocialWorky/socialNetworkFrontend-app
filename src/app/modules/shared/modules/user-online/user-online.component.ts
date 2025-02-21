@@ -36,9 +36,11 @@ export class UserOnlineComponent implements OnInit, AfterViewInit, OnDestroy {
   }
   ngAfterViewInit(): void {
     this.getUserOnline();
+    this._cdr.markForCheck();
   }
 
   async ngOnInit() {
+    this.getUserOnline();
     await this._notificationUsersService.userStatuses$.pipe(
       takeUntil(this._destroy$)
     ).subscribe({
@@ -50,7 +52,6 @@ export class UserOnlineComponent implements OnInit, AfterViewInit, OnDestroy {
         console.error('Error getting user statuses', error);
       }
     });
-    this.getUserOnline();
     this._cdr.markForCheck();
   }
 

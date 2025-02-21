@@ -132,21 +132,21 @@
     align-content: center;
     width: 20%;
 
-    ::ng-deep worky-dropdown {
-      span.material-icons {
-        font-size: variables.$worky-font-size-9;
-      }
-      .nav-link {
-        &:focus, &:hover {
-          color: map-get(colors.$worky-blue, 100);
-          span {
-            background-color: map-get(colors.$worky-blue, 72);
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-          }
-        }
+    .item-navbar-actions {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: map-get(colors.$worky-navy, 24);
+      border-radius: 50%;
+      margin: 4px;
+
+      &:focus, &:hover {
+        background: map-get(colors.$worky-navy, 56);
       }
     }
+
     @include breakpoints.below-sm {
       width: 100%;
       justify-content: space-between;
@@ -154,6 +154,18 @@
       z-index: 1;
     }
   }
+
+  ::ng-deep worky-dropdown.item-navbar-actions {
+    span.material-icons {
+      font-size: variables.$worky-font-size-9;
+    }
+    div.nav-link {
+      &:focus, &:hover {
+        color: colors.$worky-color-greyLight;
+      }
+    }
+  }
+
 }
 
 .content-navbar.sticky-content {

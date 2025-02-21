@@ -43,14 +43,14 @@
 
       <div class="worky-profile" *ngIf="!isMobile">
         <!-- Message -->
-        <worky-dropdown 
+        <worky-dropdown class="item-navbar-actions"
           icon="mail"
           [badgeValue]="messages > 0 ? messages : null"
           (click)="messagesUrl()"
           [badge]=true>
         </worky-dropdown>
         <!-- Notification -->
-        <worky-dropdown 
+        <worky-dropdown class="item-navbar-actions"
           icon="notifications"
           [badgeValue]="notifications > 0 ? notifications : null" 
           (click)="toggleNotificationsPanel()"
