@@ -26,6 +26,13 @@ export class AuthService {
     if (token) {
       const decodedToken: any = jwtDecode(token);
       const currentTime = Math.floor(Date.now() / 1000);
+
+      const currentUser = this._userService.getUserById(decodedToken._id);
+      if (!currentUser) {
+        this.clearSession();
+        return false;
+      }
+
       if (decodedToken && decodedToken.exp && (decodedToken.exp > currentTime)) {
         return true;
       } else {

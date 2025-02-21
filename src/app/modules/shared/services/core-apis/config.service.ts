@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, catchError, Observable, Subject, takeUntil, tap } from 'rxjs';
+import { BehaviorSubject, catchError, Observable, Subject, takeUntil, tap, map } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Socket } from 'ngx-socket-io';
 
 import { environment } from '../../../../../environments/environment';
 import { Config, ConfigServiceInterface } from '@shared/interfaces/config.interface';
-import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -64,4 +63,15 @@ export class ConfigService {
         this.configSubject.next(data);
       });
   }
+  getLoginMethods(): Observable<{ email: boolean, google: boolean }> {
+    return this.getConfig().pipe(
+      map(config => {
+        if (config?.settings?.loginMethods) {
+          return JSON.parse(config.settings.loginMethods);
+        }
+        return { email: false, google: false };
+      })
+    );
+  }
+
 }

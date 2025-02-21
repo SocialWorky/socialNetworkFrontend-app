@@ -1,14 +1,31 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { AuthConfig, OAuthService } from 'angular-oauth2-oidc'
-import { environment } from '../../../../environments/environment';
+import { environment } from '@env/environment';
+import { ConfigService } from '@shared/services/core-apis/config.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthGoogleService {
+export class AuthGoogleService implements OnDestroy {
 
-  constructor(private oauthService: OAuthService) {
-    this.initLogin();
+  private _destroy$ = new Subject<void>();
+
+  constructor(
+    private oauthService: OAuthService,
+    private _configService: ConfigService
+  ) {
+    this._configService.getLoginMethods()
+    .pipe(takeUntil(this._destroy$))
+    .subscribe(methods => {
+      if (methods.google) {
+        this.initLogin();
+      }
+    });
+  }
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 
   initLogin() {
