@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Token } from '@shared/interfaces/token.interface';
 import { Subject } from 'rxjs';
@@ -14,7 +14,7 @@ import { AuthService } from '@auth/services/auth.service';
   styleUrls: ['./user-online.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UserOnlineComponent implements OnInit, OnDestroy {
+export class UserOnlineComponent implements OnInit, AfterViewInit, OnDestroy {
   private _destroy$ = new Subject<void>();
 
   usersOnline = signal<Token[]>([]);
@@ -34,6 +34,9 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
       throw new Error('Invalid token');
     }
   }
+  ngAfterViewInit(): void {
+    this.getUserOnline();
+  }
 
   async ngOnInit() {
     await this._notificationUsersService.userStatuses$.pipe(
@@ -51,7 +54,7 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
   }
 
-  getUserOnline() {
+  private getUserOnline() {
     this._notificationUsersService.addCurrentUserStatus(this.currentUser);
   }
 
