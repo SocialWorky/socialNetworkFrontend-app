@@ -214,11 +214,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         linkUrl: `https://twitter.com/intent/tweet?url=${url}`,
         title: 'Twitter'
       },
-      {
-        img: 'assets/img/logos/linkedin.svg',
-        linkUrl: `https://www.linkedin.com/shareArticle?url=${url}`,
-        title: 'Linkedin'
-      },
+      // TODO: Uncomment when the linkedin share is ready
+      // {
+      //   img: 'assets/img/logos/linkedin.svg',
+      //   linkUrl: `https://www.linkedin.com/shareArticle?url=${url}`,
+      //   title: 'Linkedin'
+      // },
       {
         img: 'assets/img/logos/whatsapp.svg',
         linkUrl: `whatsapp://send?text=${url}`,

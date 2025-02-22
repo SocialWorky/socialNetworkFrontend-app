@@ -8,7 +8,7 @@
   .navbar-content {
     display: flex;
     flex-direction: column;
-    height: 6vh;
+    height: 7vh;
     @include breakpoints.below-md {
       display: contents;
       height: 15vh;
@@ -19,7 +19,7 @@
 .content-social-app {
   display: flex;
   justify-content: center;
-  height: 94vh;
+  height: 93vh;
   margin: auto;
   box-sizing: border-box;
   max-width: variables.$worky-app-width;
