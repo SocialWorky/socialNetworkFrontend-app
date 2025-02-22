@@ -1,6 +1,8 @@
 <div class="content-view-media-carousel">
   <div class="carousel-container">
-    <img [src]="imageSelected?.urlCompressed" class="main-image" alt="Selected Image" />
+    <img *ngIf="imageSelected"
+      (click)="openImage(imageSelected)"
+      [src]="imageSelected.urlCompressed" class="main-image" alt="Selected Image" />
 
     <ng-container *ngIf="images.length > 1">
       <button (click)="previousImage()" class="nav-button prev-button"><span class="material-icons">keyboard_arrow_left</span></button>

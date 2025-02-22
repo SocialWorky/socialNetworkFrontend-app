@@ -62,4 +62,10 @@ export class ImageLoadingComponent implements OnInit, OnChanges {
     this.currentIndex = this.images.indexOf(image);
     this.imageChanged.emit(this.imageSelected._id);
   }
+
+  openImage(image: ImageOrganizer) {
+    window
+      .open(image?.url, '_blank')
+      ?.focus(); 
+  }
 }
