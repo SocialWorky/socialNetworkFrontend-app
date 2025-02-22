@@ -240,68 +240,55 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     const loading = await this._loadingCtrl.create({
       message: translations['login.messageLoading'],
     });
-
     await loading.present();
 
-    const loginDataGoogle: any = this._authGoogleService.getProfile();
+    try {
+      const loginDataGoogle: any = this._authGoogleService.getProfile();
+      if (!loginDataGoogle) {
+        await this._authGoogleService.login();
+        return;
+      }
 
-    if (!loginDataGoogle) {
-      await this._authGoogleService.login();
-      return;
+      localStorage.setItem('googleLogin', JSON.stringify(loginDataGoogle));
+      localStorage.setItem('lastLogin', new Date().toISOString());
+
+      const dataGoogle = {
+        token: sessionStorage.getItem('id_token') || '',
+        username: await this._authService.generateUserName(
+          loginDataGoogle.email,
+          loginDataGoogle.given_name,
+          loginDataGoogle.family_name
+        ),
+        name: loginDataGoogle.given_name,
+        lastName: loginDataGoogle.family_name,
+        email: loginDataGoogle.email,
+        password: await this._authService.generatePassword(),
+      };
+
+      const response = await this._authApiService.loginGoogle(dataGoogle).toPromise() as { token: string };
+      localStorage.setItem('token', response?.token);
+
+      const tokenResponse = this._authService.getDecodedToken()!;
+      localStorage.setItem('isTooltipActive', tokenResponse.isTooltipActive.toString());
+
+      if (!tokenResponse.avatar) {
+        const userId = tokenResponse.id!;
+        await this._authApiService
+          .avatarUpdate(userId, loginDataGoogle.picture, response?.token)
+          .toPromise();
+        await this._authService.renewToken(userId);
+      }
+
+      this._socketService.connectToWebSocket(tokenResponse);
+      this._notificationUsersService.loginUser();
+
+      this._cdr.markForCheck();
+      this._router.navigate(['/home']);
+    } catch (error) {
+      console.error('Error during Google login:', error);
+    } finally {
+      loading.dismiss();
     }
-
-    localStorage.setItem('googleLogin', JSON.stringify(loginDataGoogle));
-
-    localStorage.setItem('lastLogin', new Date().toISOString());
-
-    const dataGoogle = {
-      token: sessionStorage.getItem('id_token') || '',
-      username: await this._authService.generateUserName(loginDataGoogle.email, loginDataGoogle.given_name, loginDataGoogle.family_name),
-      name: loginDataGoogle.given_name,
-      lastName: loginDataGoogle.family_name,
-      email: loginDataGoogle.email,
-      password: await this._authService.generatePassword(),
-    };
-
-    await this._authApiService.loginGoogle(dataGoogle).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: async (response: any) => {
-
-        localStorage.setItem('token', response.token);
-
-        const avatar = await this._authService.getDecodedToken()?.avatar;
-
-        if(!avatar) {
-          const userId = await this._authService.getDecodedToken()?.id!;
-
-          await this._authApiService.avatarUpdate(userId, loginDataGoogle.picture, response.token).pipe(takeUntil(this.unsubscribe$)).subscribe({
-            next: async (response: any) => {
-              if (response) {
-                await this._authService.renewToken(userId);
-                this.token = localStorage.getItem('token');
-                loading.dismiss();
-                this._notificationUsersService.loginUser();
-                this._cdr.markForCheck();
-                this._router.navigate(['/home']);
-              }
-            },
-            error: (e: any) => {
-              loading.dismiss();
-              this._router.navigate(['/home']);
-            }
-          });
-        }
-
-        const token = this._authService.getDecodedToken()!;
-        this._socketService.connectToWebSocket(token);
-        this._notificationUsersService.loginUser();
-
-        this._cdr.markForCheck();
-        this._router.navigate(['/home']);
-
-      },
-    });
-
-    loading.dismiss();
   }
 
   async validateEmailWithToken(tokenValidate: string) {

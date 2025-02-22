@@ -34,18 +34,22 @@ export class TooltipsOnboardingService {
 
     if (!isTooltipActive || isTooltipActive === 'false') return;
 
-    this.driverObj = driver({
-      animate: true,
-      allowClose: false,
-      showProgress: true,
-      doneBtnText: 'Finalizar',
-      nextBtnText: 'Siguiente',
-      prevBtnText: 'Anterior',
-      steps: steps,
-      onDestroyed: () => this.onDone(),
-    });
-    this.driverObj.highlight(steps);
-    this.driverObj.drive(0);
+    setTimeout(() => {
+
+      this.driverObj = driver({
+        animate: true,
+        allowClose: false,
+        showProgress: true,
+        doneBtnText: 'Finalizar',
+        nextBtnText: 'Siguiente',
+        prevBtnText: 'Anterior',
+        steps: steps,
+        onDestroyed: () => this.onDone(),
+      });
+      this.driverObj.highlight(steps);
+      this.driverObj.drive(0);
+
+    }, 1000);
 
   }
 
