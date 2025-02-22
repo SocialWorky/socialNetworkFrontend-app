@@ -29,7 +29,7 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   
   @Input() title?: string;
 
-  @Input() isFilled: boolean = false;
+  @Input() isFilled?: boolean = false;
 
   @Output() linkClicked = new EventEmitter<DropdownDataLink<any>>();
 
