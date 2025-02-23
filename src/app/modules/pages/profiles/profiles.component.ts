@@ -39,53 +39,53 @@ import { NotificationNewPublication } from '@shared/interfaces/notificationPubli
 })
 export class ProfilesComponent implements OnInit, OnDestroy {
   typePublishing = TypePublishing;
-  
+
   publicationsProfile = signal<PublicationView[]>([]);
-  
+
   page = 1;
-  
+
   pageSize = 10;
-  
+
   WorkyButtonType = WorkyButtonType;
-  
+
   WorkyButtonTheme = WorkyButtonTheme;
-  
+
   paramPublication: boolean = false;
-  
+
   loaderPublications: boolean = false;
-  
+
   userData: User | undefined;
-  
+
   idUserProfile: string;
-  
+
   decodedToken!: Token;
-  
+
   isAuthenticated: boolean = false;
-  
+
   isCurrentUser: boolean = false;
-  
+
   dataUser = this._authService.getDecodedToken();
-  
+
   isFriend: boolean = false;
-  
+
   isFriendPending: { status: boolean; _id: string } = { status: false, _id: '' };
-  
+
   idPendingFriend: string = '';
-  
+
   selectedFiles: File[] = [];
-  
+
   imgCoverDefault = '/assets/img/shared/drag-drop-upload-add-file.webp';
-  
+
   selectedImage: string | undefined;
-  
+
   cropper: Cropper | undefined;
-  
+
   originalMimeType: string | undefined;
-  
+
   isUploading = false;
-  
+
   userReceives!: UserData;
-  
+
   userRequest!: UserData;
 
   isMobile = this._deviceDetectionService.isMobile();
@@ -125,7 +125,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    
+
     if (this.idUserProfile === '') {
       this.idUserProfile = this._authService.getDecodedToken()?.id!;
       this._cdr.markForCheck();
@@ -136,7 +136,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe();
 
     this.getUserFriend();
-    
+
     this.decodedToken = this._authService.getDecodedToken()!;
     this.isCurrentUser = this.idUserProfile === this.decodedToken.id;
 
@@ -182,7 +182,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile));
 
       this.publicationsProfile.update((current: PublicationView[]) => [...current, ...newPublications.publications]);
-      
+
       if (this.publicationsProfile().length >= newPublications.total) {
         this.hasMorePublications = false;
       }
@@ -234,11 +234,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           this._publicationService.getPublicationId(notification.publications._id)
             .pipe(
               takeUntil(this.destroy$),
-              filter((publication: PublicationView[]) => !!publication && publication.length > 0)
+              filter((publication: PublicationView[]) => {
+                return !!publication &&
+                       publication.length > 0 &&
+                       publication[0].author._id === this.idUserProfile ||
+                       publication[0].userReceiving?._id === this.idUserProfile;
+              })
             )
             .subscribe({
               next: (publication: PublicationView[]) => {
-                if (!publication.length && publication[0].author._id !== this.userData?._id) return;
                 const newPublication = publication[0];
 
                 const fixedPublications = publicationsCurrent.filter(pub => pub.fixed);
@@ -316,7 +320,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
                 type: AxiomType.ERROR,
                 error: error,
               });
-              return of([]); 
+              return of([]);
             })
           );
         }),
