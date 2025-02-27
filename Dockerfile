@@ -17,7 +17,6 @@ WORKDIR /app
 COPY .env .env
 COPY --from=dev-deps /app/node_modules ./node_modules
 COPY src src
-RUN printenv NG_APP_META_IMAGE
 RUN mkdir -p src/assets/icons/
 RUN chmod -R 777 src/assets/icons/
 RUN npm run generate-icons
