@@ -23,61 +23,65 @@ if (environment.PRODUCTION) {
 async function initializeApp() {
   try {
     await translationsInitializer.initialize();
-    await loadThemeColorsFromLocalStorage();
-    platformBrowserDynamic().bootstrapModule(AppModule).catch(err => console.error(err));
-    defineCustomElements(window);
-  } catch (error) {
-    console.error('Error initializing translations:', error);
-  }
-}
 
-async function loadThemeColorsFromLocalStorage(): Promise<void> {
-  const appModuleRef = await platformBrowserDynamic().bootstrapModule(AppModule);
-  const injector = appModuleRef.injector;
-  const _configService = injector.get(ConfigService);
-
-  await _configService.getConfig().pipe(takeUntil(destroy$)).subscribe((configData) => {
-    localStorage.setItem('theme', configData.settings.themeColors);
-    const theme = JSON.parse(configData.settings.themeColors);
-    Object.keys(theme).forEach(variable => {
-      document.documentElement.style.setProperty(variable, theme[variable]);
-    });
-
-    if (configData.settings.title) {
-      document.title = configData.settings.title;
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme) {
+      const theme = JSON.parse(storedTheme);
+      Object.keys(theme).forEach(variable => {
+        document.documentElement.style.setProperty(variable, theme[variable]);
+      });
     }
 
-    if (configData.settings.logoUrl) {
+    const appModuleRef = await platformBrowserDynamic().bootstrapModule(AppModule);
+    defineCustomElements(window);
+
+    const injector = appModuleRef.injector;
+    const _configService = injector.get(ConfigService);
+
+    _configService.getConfig().pipe(takeUntil(destroy$)).subscribe((configData) => {
+      localStorage.setItem('theme', configData.settings.themeColors);
+
+      const theme = JSON.parse(configData.settings.themeColors);
+      Object.keys(theme).forEach(variable => {
+        document.documentElement.style.setProperty(variable, theme[variable]);
+      });
+
+      if (configData.settings.title) {
+        document.title = configData.settings.title;
+      }
+
+      if (configData.settings.logoUrl) {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          const imgElement = document.createElement('img');
+          imgElement.src = configData.settings.logoUrl;
+          imgElement.alt = 'Cargando...';
+          loadingScreen.innerHTML = '';
+          loadingScreen.appendChild(imgElement);
+        }
+      }
+
+      updateMetaTags(configData);
+
       const loadingScreen = document.getElementById('loading-screen');
       if (loadingScreen) {
-        const imgElement = document.createElement('img');
-        imgElement.src = configData.settings.logoUrl;
-        imgElement.alt = 'Cargando...';
-        loadingScreen.innerHTML = '';
-        loadingScreen.appendChild(imgElement);
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => loadingScreen.remove(), 500);
       }
-    }
-
-    updateMetaTags(configData);
-
-    const loadingScreen = document.getElementById('loading-screen');
-    if (loadingScreen) {
-      loadingScreen.style.opacity = '0';
-      setTimeout(() => loadingScreen.remove(), 500);
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Error initializing the application:', error);
+  }
 }
 
 function updateMetaTags(configData: any) {
   if (configData.settings.title) {
     document.title = configData.settings.title;
   }
-
   updateMetaTag('property', 'og:site_name', configData.settings.title);
   updateMetaTag('property', 'og:url', configData.settings.urlSite);
   updateMetaTag('property', 'og:description', configData.settings.description);
   updateMetaTag('property', 'og:image', configData.settings.logoUrl);
-
   updateFavicon(configData.settings.logoUrl);
 }
 
