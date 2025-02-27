@@ -15,11 +15,13 @@ import { NotificationUsersService } from '@shared/services/notifications/notific
 })
 export class AppComponent implements OnInit, OnDestroy {
 
-  deferredPrompt: any; 
+  deferredPrompt: any;
 
   showInstallPrompt = false;
 
   private destroy$ = new Subject<void>();
+
+  private isPromptHandled = false;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -31,7 +33,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private alertController: AlertController
   ) {
     this._notificationUsersService.setupInactivityListeners();
-  } 
+  }
 
   ngOnInit(): void {
     this.document.body.classList.add('light-theme');
@@ -51,13 +53,18 @@ export class AppComponent implements OnInit, OnDestroy {
 
   setupInstallPrompt() {
     window.addEventListener('beforeinstallprompt', (event) => {
+      if (this.isPromptHandled) return;
       event.preventDefault();
       this.deferredPrompt = event;
       this.showInstallAlert();
+      this.isPromptHandled = true;
     });
   }
 
   async showInstallAlert() {
+    if (this.showInstallPrompt) return;
+    this.showInstallPrompt = true;
+
     const alert = await this.alertController.create({
       header: 'Instalar Aplicación',
       message: '¿Deseas instalar esta aplicación en tu dispositivo?',
@@ -65,12 +72,15 @@ export class AppComponent implements OnInit, OnDestroy {
         {
           text: 'Cancelar',
           role: 'cancel',
-          handler: () => {},
+          handler: () => {
+            this.showInstallPrompt = false;
+          },
         },
         {
           text: 'Instalar',
           handler: () => {
             this.installPWA();
+            this.showInstallPrompt = false;
           },
         },
       ],
@@ -119,7 +129,8 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   updateFavicon(logoUrl: string) {
-    const link: HTMLLinkElement = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    const link: HTMLLinkElement =
+      document.querySelector("link[rel*='icon']") || document.createElement('link');
     link.type = 'image/png';
     link.rel = 'icon';
     link.href = logoUrl;
