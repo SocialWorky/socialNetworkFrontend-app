@@ -25,7 +25,7 @@ async function generateIcons(imageUrl, outputDir) {
     }
 
     for (const size of iconSizes) {
-      const outputPath = path.join(outputDir, `icon-${size}x${size}.png`);
+      const outputPath = path.join(outputDir, `icon-${process.env.NG_APP_PWA_NAME}-${size}x${size}.png`);
       console.log(`Generando ícono: ${outputPath}`);
 
       await sharp(imageBuffer)
