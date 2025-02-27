@@ -33,6 +33,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private alertController: AlertController
   ) {
     this._notificationUsersService.setupInactivityListeners();
+    this.setupInstallPrompt();
   }
 
   ngOnInit(): void {
@@ -43,7 +44,6 @@ export class AppComponent implements OnInit, OnDestroy {
       getTranslationsLanguage()
     );
     this.applyCustomConfig();
-    this.setupInstallPrompt();
   }
 
   ngOnDestroy() {
@@ -124,8 +124,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
     const logoUrl = configData.settings.logoUrl || 'assets/img/navbar/worky-your-logo.png';
     this.updateFavicon(logoUrl);
-
-    this._cdr.markForCheck();
   }
 
   updateFavicon(logoUrl: string) {
