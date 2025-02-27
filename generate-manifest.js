@@ -6,7 +6,7 @@ const manifest = {
   short_name: process.env.NG_APP_PWA_SHORT_NAME,
   start_url: "/",
   display: "standalone",
-  background_color: process.env.NG_APP_PWA_BACKGROUND_COLOR,
+  background_color: process.env.NG_APP_PWA_BACKGROUND_COLOR, 
   theme_color: process.env.NG_APP_PWA_THEME_COLOR,
   icons: [
     {
