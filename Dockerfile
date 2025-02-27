@@ -9,10 +9,7 @@ WORKDIR /app
 COPY .env .env
 COPY --from=dev-deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run generate-icons
-RUN npm run generate-manifest
-RUN npm run prepare-meta
-RUN npm run build --prod
+RUN npm run pwa
 
 FROM node:22.1.0-alpine3.18 AS prod-deps
 WORKDIR /app
