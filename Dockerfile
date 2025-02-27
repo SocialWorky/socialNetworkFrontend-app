@@ -17,7 +17,8 @@ WORKDIR /app
 COPY .env .env
 COPY --from=dev-deps /app/node_modules ./node_modules
 COPY src src
-RUN mkdir -p src/assets/icons/ && npm run generate-icons
+RUN mkdir -p src/assets/icons/
+RUN npm run generate-icons
 
 FROM node:22.1.0-alpine3.18 AS prod-deps
 WORKDIR /app
