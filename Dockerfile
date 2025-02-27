@@ -19,6 +19,7 @@ COPY src src
 RUN mkdir -p src/assets/icons/ && chmod -R 777 src/assets/icons/
 RUN apk add --no-cache vips-dev build-base --update-cache --repository https://alpine.global.ssl.fastly.net/alpine/v3.10/community/
 RUN npm install axios sharp
+RUN echo "NG_APP_META_IMAGE: $NG_APP_META_IMAGE"
 RUN npm run generate-icons
 
 FROM node:22.1.0-alpine3.18 AS prod-deps
