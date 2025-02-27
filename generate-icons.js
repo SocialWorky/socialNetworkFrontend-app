@@ -41,7 +41,7 @@ async function generateIcons(imageUrl, outputDir) {
 }
 
 require('dotenv').config();
-const ICON_URL = process.env.NG_APP_META_IMAGE;
+const ICON_URL = process.env.NG_APP_META_IMAGE || 'src/assets/icons/icon-512x512.png';
 const OUTPUT_DIR = path.join(__dirname, 'src', 'assets', 'icons');
 
 if (!ICON_URL) {
