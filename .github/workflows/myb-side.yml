@@ -51,13 +51,23 @@ jobs:
           echo "NG_APP_PWA_THEME_COLOR=${{ secrets.NG_APP_BSIDE_PWA_THEME_COLOR }}" >> .env
           echo "NG_APP_PWA_BACKGROUND_COLOR=${{ secrets.NG_APP_BSIDE_PWA_BACKGROUND_COLOR }}" >> .env
 
+      - name: Instalar herramientas de compilación
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3
+
+      - name: Verificar variables de entorno
+        run: |
+          echo "Variables de entorno cargadas:"
+          cat .env
+
       - name: Build and push Docker image
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           echo "Iniciando la construcción y el empuje de la imagen Docker..."
-          docker build -t socialworky/myb-side:${{ github.event.inputs.image_tag }} .
+          docker build --no-cache -t socialworky/myb-side:${{ github.event.inputs.image_tag }} .
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           docker push socialworky/myb-side:${{ github.event.inputs.image_tag }}
           echo "Construcción y empuje de la imagen Docker completados."

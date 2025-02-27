@@ -1,5 +1,4 @@
 name: Update Container on Portainer
-
 on:
   push:
     branches:
@@ -8,7 +7,6 @@ on:
 jobs:
   update-container:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -48,13 +46,23 @@ jobs:
           echo "NG_APP_PWA_THEME_COLOR=${{ secrets.NG_APP_PWA_THEME_COLOR }}" >> .env
           echo "NG_APP_PWA_BACKGROUND_COLOR=${{ secrets.NG_APP_PWA_BACKGROUND_COLOR }}" >> .env
 
+      - name: Instalar herramientas de compilación
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3
+
+      - name: Verificar variables de entorno
+        run: |
+          echo "Variables de entorno cargadas:"
+          cat .env
+
       - name: Build and push Docker image
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           echo "Iniciando la construcción y el empuje de la imagen Docker..."
-          docker build -t socialworky/worky-frontend-dev:${{ github.sha }} .
+          docker build --no-cache -t socialworky/worky-frontend-dev:${{ github.sha }} .
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           docker push socialworky/worky-frontend-dev:${{ github.sha }}
           echo "Construcción y empuje de la imagen Docker completados."
@@ -70,3 +78,4 @@ jobs:
           image: socialworky/worky-frontend-dev:${{ github.sha }}
         env:
           GIT_SHA: ${{ github.sha }}
+          
