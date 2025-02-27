@@ -7,8 +7,9 @@ import {
   HttpResponse,
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { environment } from '@env/environment';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -18,14 +19,22 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    const token = localStorage.getItem('token');
 
-    if (token) {
-      request = request.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const apiUrls = [
+      environment.API_URL,
+    ];
+
+    const isApiRequest = apiUrls.some((url) => request.url.startsWith(url));
+
+    if (isApiRequest) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        request = request.clone({
+          setHeaders: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
     }
 
     return next.handle(request).pipe(

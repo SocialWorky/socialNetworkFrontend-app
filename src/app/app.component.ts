@@ -51,7 +51,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   setupInstallPrompt() {
     window.addEventListener('beforeinstallprompt', (event) => {
-      console.log('beforeinstallprompt event triggered');
       event.preventDefault();
       this.deferredPrompt = event;
       this.showInstallAlert();
@@ -66,9 +65,7 @@ export class AppComponent implements OnInit, OnDestroy {
         {
           text: 'Cancelar',
           role: 'cancel',
-          handler: () => {
-            console.log('Instalación cancelada');
-          },
+          handler: () => {},
         },
         {
           text: 'Instalar',
