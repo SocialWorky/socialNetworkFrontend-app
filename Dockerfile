@@ -16,7 +16,7 @@ WORKDIR /app
 COPY .env .env
 #COPY package.json package-lock.json ./
 COPY --from=dev-deps /app/node_modules ./node_modules
-#COPY . .
+COPY . .
 RUN mkdir -p src/assets/icons/ && chmod -R 777 src/assets/icons/
 RUN apk add --no-cache vips-dev build-base --update-cache --repository https://alpine.global.ssl.fastly.net/alpine/v3.10/community/
 RUN npm install axios sharp
