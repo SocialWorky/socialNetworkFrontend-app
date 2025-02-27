@@ -30,6 +30,7 @@ COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/www ./www
 
 FROM nginx:alpine
+RUN mkdir -p /usr/share/nginx/html/assets/icons/
 COPY --from=generate-icons /app/src/assets/icons /usr/share/nginx/html/assets/icons
 COPY --from=prod /app/www /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
