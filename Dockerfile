@@ -9,7 +9,6 @@ WORKDIR /app
 COPY .env .env
 COPY --from=dev-deps /app/node_modules ./node_modules
 COPY . .
-RUN mkdir -p src/assets/icons/
 RUN npm run prepare-meta && npm run generate-manifest && npm run build --prod
 
 FROM node:22.1.0-alpine3.18 AS generate-icons
@@ -17,8 +16,8 @@ WORKDIR /app
 COPY .env .env
 COPY --from=dev-deps /app/node_modules ./node_modules
 COPY src src
-RUN mkdir -p src/assets/icons/
-RUN chmod -R 777 src/assets/icons/
+RUN mkdir -p src/assets/icons/ && chmod -R 777 src/assets/icons/
+RUN npm install axios sharp
 RUN npm run generate-icons
 
 FROM node:22.1.0-alpine3.18 AS prod-deps
