@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
+import { AlertController } from '@ionic/angular';
 import { Subject, takeUntil } from 'rxjs';
 
 import { getTranslationsLanguage } from '../translations/translations';
@@ -14,6 +15,10 @@ import { NotificationUsersService } from '@shared/services/notifications/notific
 })
 export class AppComponent implements OnInit, OnDestroy {
 
+  deferredPrompt: any; 
+
+  showInstallPrompt = false;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -23,8 +28,10 @@ export class AppComponent implements OnInit, OnDestroy {
     private _titleService: Title,
     private _cdr: ChangeDetectorRef,
     private _notificationUsersService: NotificationUsersService,
+    private alertController: AlertController
   ) {
     this._notificationUsersService.setupInactivityListeners();
+    this.setupInstallPrompt();
   } 
 
   ngOnInit(): void {
@@ -40,6 +47,49 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  setupInstallPrompt() {
+    window.addEventListener('beforeinstallprompt', (event) => {
+      console.log('beforeinstallprompt event triggered');
+      event.preventDefault();
+      this.deferredPrompt = event;
+      this.showInstallAlert();
+    });
+  }
+
+  async showInstallAlert() {
+    const alert = await this.alertController.create({
+      header: 'Instalar Aplicación',
+      message: '¿Deseas instalar esta aplicación en tu dispositivo?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {
+            console.log('Instalación cancelada');
+          },
+        },
+        {
+          text: 'Instalar',
+          handler: () => {
+            this.installPWA();
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  installPWA() {
+    if (this.deferredPrompt) {
+      this.deferredPrompt.prompt();
+      this.deferredPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === 'accepted') {}
+        this.deferredPrompt = null;
+      });
+    }
   }
 
   applyCustomConfig() {
@@ -68,7 +118,7 @@ export class AppComponent implements OnInit, OnDestroy {
     const logoUrl = configData.settings.logoUrl || 'assets/img/navbar/worky-your-logo.png';
     this.updateFavicon(logoUrl);
 
-    //this._cdr.markForCheck();
+    this._cdr.markForCheck();
   }
 
   updateFavicon(logoUrl: string) {

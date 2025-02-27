@@ -37,6 +37,11 @@
                 "glob": "**/*.svg",
                 "input": "node_modules/ionicons/dist/ionicons/svg",
                 "output": "./svg"
+              },
+              {
+                "glob": "manifest.json",
+                "input": "src",
+                "output": "/"
               }
             ],
             "styles": [
@@ -49,7 +54,9 @@
             "scripts": [
               "node_modules/cropperjs/dist/cropper.js",
               "node_modules/driver.js/dist/driver.js.iife.js"
-            ]
+            ],
+            "serviceWorker": true,
+            "ngswConfigPath": "ngsw-config.json"
           },
           "configurations": {
             "production": {

@@ -46,6 +46,10 @@ jobs:
           echo "NG_APP_META_TWITTER_DESCRIPTION=${{ secrets.NG_APP_BSIDE_META_TWITTER_DESCRIPTION }}" >> .env
           echo "NG_APP_META_TWITTER_IMAGE=${{ secrets.NG_APP_BSIDE_META_TWITTER_IMAGE }}" >> .env
           echo "NG_APP_META_TWITTER_URL=${{ secrets.NG_APP_BSIDE_META_TWITTER_URL }}" >> .env
+          echo "NG_APP_PWA_NAME=${{ secrets.NG_APP_BSIDE_PWA_NAME }}" >> .env
+          echo "NG_APP_PWA_SHORT_NAME=${{ secrets.NG_APP_BSIDE_PWA_SHORT_NAME }}" >> .env
+          echo "NG_APP_PWA_THEME_COLOR=${{ secrets.NG_APP_BSIDE_PWA_THEME_COLOR }}" >> .env
+          echo "NG_APP_PWA_BACKGROUND_COLOR=${{ secrets.NG_APP_BSIDE_PWA_BACKGROUND_COLOR }}" >> .env
 
       - name: Build and push Docker image
         env:

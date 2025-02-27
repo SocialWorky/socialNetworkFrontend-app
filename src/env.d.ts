@@ -32,6 +32,10 @@ declare interface Env {
   readonly NG_APP_META_TWITTER_TITLE: string;
   readonly NG_APP_META_TWITTER_DESCRIPTION: string;
   readonly NG_APP_META_TWITTER_IMAGE: string;
+  readonly NG_APP_PWA_NAME: string;
+  readonly NG_APP_PWA_SHORT_NAME: string;
+  readonly NG_APP_PWA_BACKGROUND_COLOR: string;
+  readonly NG_APP_PWA_THEME_COLOR: string;
 }
 
 // Choose how to access the environment variables.
