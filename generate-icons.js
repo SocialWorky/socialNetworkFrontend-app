@@ -4,6 +4,9 @@ const path = require('path');
 const axios = require('axios');
 const sharp = require('sharp');
 
+console.log("Iniciando script generate-icons...");
+console.log("Variable NG_APP_META_IMAGE:", process.env.NG_APP_META_IMAGE);
+
 const iconSizes = [
   72, 96, 128, 144, 152, 192, 384, 512
 ];
@@ -41,7 +44,7 @@ async function generateIcons(imageUrl, outputDir) {
 }
 
 require('dotenv').config();
-const ICON_URL = process.env.NG_APP_META_IMAGE || 'src/assets/icons/icon-512x512.png';
+const ICON_URL = process.env.NG_APP_META_IMAGE;
 const OUTPUT_DIR = path.join(__dirname, 'src', 'assets', 'icons');
 
 if (!ICON_URL) {
