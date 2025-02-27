@@ -30,11 +30,6 @@ const manifest = {
       type: "image/png"
     },
     {
-      src: "assets/icons/icon-152x152.png",
-      sizes: "152x152",
-      type: "image/png"
-    },
-    {
       src: "assets/icons/icon-192x192.png",
       sizes: "192x192",
       type: "image/png"

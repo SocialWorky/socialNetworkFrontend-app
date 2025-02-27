@@ -4,9 +4,6 @@ const path = require('path');
 const axios = require('axios');
 const sharp = require('sharp');
 
-console.log("Iniciando script generate-icons...");
-console.log("Variable NG_APP_META_IMAGE:", process.env.NG_APP_META_IMAGE);
-
 const iconSizes = [
   72, 96, 128, 144, 152, 192, 384, 512
 ];
