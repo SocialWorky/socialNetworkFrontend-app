@@ -9,6 +9,7 @@ WORKDIR /app
 COPY .env .env
 COPY --from=dev-deps /app/node_modules ./node_modules
 COPY . .
+RUN mkdir -p src/assets/icons/
 RUN npm run pwa
 
 FROM node:22.1.0-alpine3.18 AS prod-deps
