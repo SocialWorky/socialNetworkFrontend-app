@@ -35,9 +35,10 @@ export class EmailNotificationService {
     this.dataUser = this._authService.getDecodedToken();
   }
 
-  ngOnDestroy() {
+  async ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    this.dataUser = await this._authService.getDecodedToken();
   }
 
   sendNotification(data: MailSendValidateData) {
@@ -86,8 +87,8 @@ export class EmailNotificationService {
       subject: string,
       title: string,
       greet: string,
-      message: string, 
-      subMessage: string, 
+      message: string,
+      subMessage: string,
       buttonMessage: string,
       urlSlug: string,
       template: TemplateEmail = TemplateEmail.EMAIL
@@ -119,7 +120,7 @@ export class EmailNotificationService {
       this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
       this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
       this.mailSendDataValidate.email = user.email;
-      
+
       this._centerSocketNotificationsService.senFriendRequestNotification(user);
 
       this.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();

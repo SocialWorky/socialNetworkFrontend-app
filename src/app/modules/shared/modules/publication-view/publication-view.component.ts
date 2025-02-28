@@ -35,41 +35,41 @@ import { ScrollService } from '@shared/services/scroll.service';
 })
 export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() publication!: PublicationView;
-  
+
   @Input() indexPublication?: number;
-  
+
   @Input() type?: TypePublishing;
-  
+
   @Input() userProfile?: string;
 
   typePublishing = TypePublishing;
-  
+
   typePrivacy = TypePrivacy;
-  
+
   dataLinkActions: DropdownDataLink<any>[] = [];
-  
+
   dataShareActions: DropdownDataLink<any>[] = [];
-  
+
   viewCommentSection: number | null = null;
-  
+
   viewComments: number | null = null;
-  
+
   nameGeoLocation = '';
-  
+
   urrMap = '';
-  
+
   extraData: string[] = [];
-  
+
   userRequest?: UserData;
-  
+
   userReceive?: UserData;
-  
+
   routeUrl = '';
-  
+
   isProfile = false;
-  
+
   dataUser = this._authService.getDecodedToken();
-  
+
   listReaction: string[] = [];
 
   isCodeBlock(content: string): boolean {
@@ -331,6 +331,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     if (_id) {
       this._publicationService.getPublicationId(_id).pipe(takeUntil(this.destroy$)).subscribe({
         next: (publication: PublicationView[]) => {
+          if (!publication.length) {
+            return;
+          }
           this._publicationService.updatePublications(publication);
           this.publication = publication[0];
           this.loadReactionsImg(publication[0]);
