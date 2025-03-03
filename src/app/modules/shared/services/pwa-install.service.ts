@@ -2,6 +2,9 @@ import { Injectable, NgZone } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Subject } from 'rxjs';
 
+import { AlertService } from './alert.service';
+import { Alerts, Position } from './../enums/alerts.enum';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -12,7 +15,11 @@ export class PwaInstallService {
   private installStatusSubject = new Subject<'installed' | 'dismissed'>();
   installStatus$ = this.installStatusSubject.asObservable();
 
-  constructor(private ngZone: NgZone, private alertController: AlertController) {
+  constructor(
+    private ngZone: NgZone,
+    private alertController: AlertController,
+    private _alertService: AlertService
+  ) {
     this.setupInstallPrompt();
     this.setupDisplayModeListener();
     this.checkInitialInstallState();
@@ -82,6 +89,7 @@ export class PwaInstallService {
 
   async showInstallPrompt(header: string, message: string) {
     if (!this.deferredPrompt || this.isAppInstalled()) {
+      this._alertService.showAlert('App ya Instalada', 'Se detecto que ya cuentas con la App instalada', Alerts.INFO, Position.CENTER, false, true, 'Aceptar');
       return;
     }
 

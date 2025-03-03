@@ -87,6 +87,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         console.error('Error getting notifications', error);
       }
     });
+
     this.subscribeToConfig();
     this.checkPwaInstall();
     this.getConfig();
@@ -147,15 +148,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   private checkPwaInstall() {
-    this._pwaInstallService.installStatus$.pipe(takeUntil(this.unsubscribe$)).subscribe((status) => {
-      if (status === 'installed') {
-        this.removeDataLinkProfile('Instalar App');
-      } else if (status === 'dismissed') {
-        const link = { icon: 'download', function: this.installPWA.bind(this),  title: 'Instalar App'}
-        this.dataLinkProfile.unshift(link);
-      }
-    });
-
     if (!this._pwaInstallService.isAppInstalled()) {
       const link = { icon: 'download', function: this.installPWA.bind(this),  title: 'Instalar App'}
       this.dataLinkProfile.unshift(link);
