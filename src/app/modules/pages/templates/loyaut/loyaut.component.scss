@@ -10,8 +10,8 @@
   "main" 94vh;
   @include breakpoints.below-md {
     grid-template:
-    "header" 10vh
-    "main" 90vh;
+    "header" 14vh
+    "main" 86vh;
   }
 
   .navbar-content {
