@@ -14,6 +14,7 @@ import { NotificationCenterService } from '@shared/services/core-apis/notificati
 import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service'
 import { MessageService } from '../../messages/services/message.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
+import { PwaInstallService } from '@shared/services/pwa-install.service';
 
 @Component({
   selector: 'worky-navbar',
@@ -45,6 +46,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   logoUrl = '';
 
+  pwaInstalled = false;
+
   @Input() isMessages: boolean = false;
 
   constructor(
@@ -59,7 +62,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private _notificationCenterService: NotificationCenterService,
     private _messageService: MessageService,
     private _notificationPanelService: NotificationPanelService,
-    private _configService: ConfigService
+    private _configService: ConfigService,
+    private _pwaInstallService: PwaInstallService
   ) {
     this.menuProfile();
     this.token = this._authService.getDecodedToken();
@@ -83,7 +87,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
         console.error('Error getting notifications', error);
       }
     });
-    this.suscribeToConfig();
+    this.subscribeToConfig();
+    this.checkPwaInstall();
     this.getConfig();
     this.checkAdminDataLink();
     this.getUnreadMessagesCount();
@@ -102,7 +107,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
   }
 
-  suscribeToConfig() {
+  private subscribeToConfig() {
     this._configService.config$.pipe(takeUntil(this.unsubscribe$)).subscribe((configData) => {
       if (configData) {
         this.applyConfig(configData);
@@ -110,7 +115,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
   }
 
-  applyConfig(configData: any) {
+  private removeDataLinkProfile(item: string) {
+    this.dataLinkProfile = this.dataLinkProfile.filter((link) => link.title !== item);
+  }
+
+  private applyConfig(configData: any) {
     if (configData) {
       this.title = configData.settings.title;
       this.logoUrl = configData.settings.logoUrl;
@@ -123,18 +132,41 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.unsubscribe$.complete();
   }
 
-  logoutUser() {
+  private logoutUser() {
    this._notificationUsersService.logoutUser();
    this._authService.logout();
   }
 
-  checkAdminDataLink() {
+  private checkAdminDataLink() {
     const dataUser = this._authService.getDecodedToken();
     const link = { icon: 'settings', link: '/admin',  title: 'Administración'}
 
     if (dataUser && dataUser.role === 'admin' && !this.isMobile) {
-      this.dataLinkProfile.push(link);
+      this.dataLinkProfile.unshift(link);
     }
+  }
+
+  private checkPwaInstall() {
+    this._pwaInstallService.installStatus$.pipe(takeUntil(this.unsubscribe$)).subscribe((status) => {
+      if (status === 'installed') {
+        this.removeDataLinkProfile('Instalar App');
+      } else if (status === 'dismissed') {
+        const link = { icon: 'download', function: this.installPWA.bind(this),  title: 'Instalar App'}
+        this.dataLinkProfile.unshift(link);
+      }
+    });
+
+    if (!this._pwaInstallService.isAppInstalled()) {
+      const link = { icon: 'download', function: this.installPWA.bind(this),  title: 'Instalar App'}
+      this.dataLinkProfile.unshift(link);
+    }
+  }
+
+  private installPWA() {
+    this._pwaInstallService.showInstallPrompt(
+       '🎉 ¡Bienvenido!',
+       'Instala nuestra app para una mejor experiencia.'
+     );
   }
 
   toggleNotificationsPanel() {
@@ -169,8 +201,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   menuProfile() {
   this.dataLinkProfile = [
-    // { link: '/auth/login',  title: 'Perfil' },
-    // { link: '/settings',  title: 'Configuración' },
     { icon: 'logout', function: this.logoutUser.bind(this),  title: translations['navbar.logout']},
   ];
 }

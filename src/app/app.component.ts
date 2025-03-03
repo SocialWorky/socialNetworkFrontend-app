@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
-import { AlertController } from '@ionic/angular';
 import { Subject, takeUntil } from 'rxjs';
 
 import { getTranslationsLanguage } from '../translations/translations';
@@ -30,10 +29,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private _titleService: Title,
     private _cdr: ChangeDetectorRef,
     private _notificationUsersService: NotificationUsersService,
-    private alertController: AlertController
   ) {
     this._notificationUsersService.setupInactivityListeners();
-    this.setupInstallPrompt();
   }
 
   ngOnInit(): void {
@@ -49,54 +46,6 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  setupInstallPrompt() {
-    window.addEventListener('beforeinstallprompt', (event) => {
-      if (this.isPromptHandled) return;
-      event.preventDefault();
-      this.deferredPrompt = event;
-      this.showInstallAlert();
-      this.isPromptHandled = true;
-    });
-  }
-
-  async showInstallAlert() {
-    if (this.showInstallPrompt) return;
-    this.showInstallPrompt = true;
-
-    const alert = await this.alertController.create({
-      header: 'Instalar Aplicación',
-      message: '¿Deseas instalar esta aplicación en tu dispositivo?',
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-          handler: () => {
-            this.showInstallPrompt = false;
-          },
-        },
-        {
-          text: 'Instalar',
-          handler: () => {
-            this.installPWA();
-            this.showInstallPrompt = false;
-          },
-        },
-      ],
-    });
-
-    await alert.present();
-  }
-
-  installPWA() {
-    if (this.deferredPrompt) {
-      this.deferredPrompt.prompt();
-      this.deferredPrompt.userChoice.then((choiceResult: any) => {
-        if (choiceResult.outcome === 'accepted') {}
-        this.deferredPrompt = null;
-      });
-    }
   }
 
   applyCustomConfig() {
