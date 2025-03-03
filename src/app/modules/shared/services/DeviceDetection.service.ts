@@ -38,17 +38,17 @@ export class DeviceDetectionService implements OnDestroy {
   }
 
   isMobile(): boolean {
-    if(this._platform.is('tablet') || this._platform.is('ipad')) return false;
+    //if(this._platform.is('tablet') || this._platform.is('ipad')) return false;
     return (
       this.isNative()
-      || this.isScreenSmallerThan600px()
+      || this.isScreenSmallerThan700px()
       || this._platform.is('ios')
       || this._platform.is('iphone')
       || this._platform.is('android')
     );
   }
 
-  private isScreenSmallerThan600px(): boolean {
+  private isScreenSmallerThan700px(): boolean {
     return this._isScreenSmallerThan700px;
   }
 

@@ -25,6 +25,10 @@ export class ScrollService {
       this.scrollEndSource.next('hideScrollToTopButton');
     }
 
+    if (scrollTop >= 50) {
+      this.scrollEndSource.next('showNavbar');
+    }
+
     if (scrollTop + offsetHeight >= scrollHeight - threshold) {
       this.scrollEndSource.next('scrollEnd');
     }

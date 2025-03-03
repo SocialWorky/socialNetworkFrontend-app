@@ -169,9 +169,10 @@
 }
 
 .content-navbar.sticky-content {
-  position: -webkit-sticky;
-  position: sticky;
-  top: -1px;
   z-index: 9;
   will-change: transform;
+}
+
+.scrolledTop {
+  position: absolute;
 }

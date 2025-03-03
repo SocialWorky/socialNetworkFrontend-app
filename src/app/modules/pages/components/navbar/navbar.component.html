@@ -71,9 +71,10 @@
 </div>
 
 <div class="content-navbar" *ngIf="isMobile"
-  [class.sticky-content]="!isMessages">
+  [class.sticky-content]="!isMessages"
+  [class.scrolledTop]="scrolledTop">
   <nav class="worky-navbar">
-      <div class="worky-profile ">
+      <div class="worky-profile">
         <worky-menu-component></worky-menu-component>
         <!-- Message -->
         <worky-dropdown 

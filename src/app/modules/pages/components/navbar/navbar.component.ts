@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input,  AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 
@@ -15,13 +15,14 @@ import { NotificationPanelService } from '@shared/modules/notifications-panel/se
 import { MessageService } from '../../messages/services/message.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { PwaInstallService } from '@shared/services/pwa-install.service';
+import { ScrollService } from '@shared/services/scroll.service';
 
 @Component({
   selector: 'worky-navbar',
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
-export class NavbarComponent implements OnInit, OnDestroy {
+export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   private unsubscribe$ = new Subject<void>();
 
   googleLoginSession = localStorage.getItem('googleLogin');
@@ -48,7 +49,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   pwaInstalled = false;
 
+  scrolledTop = false;
+
   @Input() isMessages: boolean = false;
+
 
   constructor(
     private _router: Router,
@@ -63,7 +67,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private _messageService: MessageService,
     private _notificationPanelService: NotificationPanelService,
     private _configService: ConfigService,
-    private _pwaInstallService: PwaInstallService
+    private _pwaInstallService: PwaInstallService,
+    private _scrollService: ScrollService
   ) {
     this.menuProfile();
     this.token = this._authService.getDecodedToken();
@@ -87,13 +92,24 @@ export class NavbarComponent implements OnInit, OnDestroy {
         console.error('Error getting notifications', error);
       }
     });
-
     this.subscribeToConfig();
     this.checkPwaInstall();
     this.getConfig();
     this.checkAdminDataLink();
     this.getUnreadMessagesCount();
     this._cdr.markForCheck();
+  }
+
+
+  ngAfterViewInit(): void {
+    this._scrollService.scrollEnd$.pipe(takeUntil(this.unsubscribe$)).subscribe((event) => {
+      if (event === 'showNavbar') {
+        this.scrolledTop = true;
+      } else {
+        this.scrolledTop = false
+      }
+
+    });
   }
 
   getConfig() {
