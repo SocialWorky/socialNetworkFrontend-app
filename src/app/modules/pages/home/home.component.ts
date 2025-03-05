@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal } from '@angular/core';
-import { Subject, firstValueFrom, of, Observable } from 'rxjs';
-import { catchError, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
+import { Subject, firstValueFrom, of, Observable, fromEvent } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { Meta } from '@angular/platform-browser';
 import { Title } from '@angular/platform-browser';

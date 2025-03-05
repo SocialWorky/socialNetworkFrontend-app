@@ -4,11 +4,12 @@
 .content-app {
   width: 100vw;
   min-height: 100vh;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   grid-template:
   "header" 6vh
   "main" 94vh;
-  @include breakpoints.below-md {
+  @include breakpoints.below-sm {
     grid-template:
     "header" 14vh
     "main" 86vh;
@@ -18,8 +19,10 @@
     display: flex;
     flex-direction: column;
     grid-area: header;
-    @include breakpoints.below-md {
+    width: 100vw;
+    @include breakpoints.below-sm {
       grid-area: header;
+      //max-height: 122px;
     }
   }
 }
@@ -32,7 +35,8 @@
   margin-right: auto;
   box-sizing: border-box;
   max-width: variables.$worky-app-width;
-  @include breakpoints.below-md {
+  @include breakpoints.below-sm {
+    width: 100vw;
     margin: inherit;
     padding-top: 0px;
     flex-direction: column;
@@ -49,16 +53,18 @@
   overflow-y: scroll;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  @include breakpoints.below-md {
+  @include breakpoints.below-sm {
     display: none;
   }
 }
 
 .social-content-center {
   width: variables.$worky-container-width-content;
+  height: 94vh;
   min-width: variables.$worky-app-min-width;
-  @include breakpoints.below-md {
-    width: 100%;
+  @include breakpoints.below-sm {
+    height: 90vh;
+    width: 100vw;
   }
 }
 
@@ -70,6 +76,7 @@
   justify-content: flex-start;
   margin: inherit;
   max-width: 100%;
+  width: 100vw;
   padding: 10px;
   overflow: hidden;
 }
@@ -85,6 +92,8 @@
   grid-area: main;
   flex-direction: column;
   justify-content: flex-start;
+  width: 100vw;
+  flex-grow: 1;
 }
 
 .messages-view,

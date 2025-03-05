@@ -6,6 +6,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { getTranslationsLanguage } from '../translations/translations';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
+import { LoadingService } from '@shared/services/loading.service';
 
 @Component({
   selector: 'worky-root',
@@ -29,6 +30,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private _titleService: Title,
     private _cdr: ChangeDetectorRef,
     private _notificationUsersService: NotificationUsersService,
+    private _loadingService: LoadingService
   ) {
     this._notificationUsersService.setupInactivityListeners();
   }
@@ -41,6 +43,10 @@ export class AppComponent implements OnInit, OnDestroy {
       getTranslationsLanguage()
     );
     this.applyCustomConfig();
+    setTimeout(() => {
+      this._loadingService.setLoading(false);
+      document.getElementById('loading-screen')?.remove();
+    }, 3000);
   }
 
   ngOnDestroy() {

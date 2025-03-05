@@ -105,7 +105,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     this._scrollService.scrollEnd$.pipe(takeUntil(this.unsubscribe$)).subscribe((event) => {
       if (event === 'showNavbar') {
         this.scrolledTop = true;
-      } else {
+      } else if (event === 'hideNavbar') {
         this.scrolledTop = false
       }
 
