@@ -77,8 +77,12 @@
   margin: inherit;
   max-width: 100%;
   width: 100vw;
+  height: 94vh;
   padding: 10px;
   overflow: hidden;
+  @include breakpoints.below-sm {
+    height: 87vh;
+  }
 }
 
 .messages-view {
