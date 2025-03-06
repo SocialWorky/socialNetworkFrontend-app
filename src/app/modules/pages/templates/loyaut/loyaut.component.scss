@@ -25,7 +25,7 @@
 
 .content-social-app {
   display: flex;
-  //justify-content: center;
+  justify-content: center;
   grid-area: main;
   margin-left: auto;
   margin-right: auto;
@@ -55,7 +55,6 @@
 }
 
 .social-content-center {
-  display: flex;
   width: variables.$worky-container-width-content;
   grid-area: main;
   height: 94vh;
@@ -74,7 +73,7 @@
   justify-content: flex-start;
   margin: inherit;
   max-width: 100%;
-  width: 100vw;
+  width: 100%;
   height: 94vh;
   padding: 10px;
   overflow: hidden;
