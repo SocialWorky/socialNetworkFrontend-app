@@ -42,6 +42,7 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    if(!this._authService.isAuthenticated()) return;
     this._notificationPanelService.getIsActive().pipe(takeUntil(this.destroy$)).subscribe(isActive => {
       this.isActive = isActive;
       if (this.isActive) {

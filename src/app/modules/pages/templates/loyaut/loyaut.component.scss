@@ -43,6 +43,7 @@
 ::ng-deep worky-content-left-side,
 ::ng-deep worky-content-right-side {
   width: variables.$worky-container-width-sidebar;
+  height: 94vh;
   padding: 5px;
   display: block;
   justify-content: space-around;

@@ -16,6 +16,7 @@ import { MessageService } from '../../messages/services/message.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { PwaInstallService } from '@shared/services/pwa-install.service';
 import { ScrollService } from '@shared/services/scroll.service';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
   selector: 'worky-navbar',
@@ -41,7 +42,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   users: any[] = [];
 
-  token = this._authService.getDecodedToken();
+  token: Token | null = null;
 
   title = 'Social Network App';
 
@@ -71,6 +72,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     private _scrollService: ScrollService
   ) {
     this.menuProfile();
+    if (!this._authService.isAuthenticated()) return;
     this.token = this._authService.getDecodedToken();
     this._socketService.connectToWebSocket(this.token!);
   }
@@ -155,6 +157,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private checkAdminDataLink() {
+    if (!this._authService.isAuthenticated()) return;
     const dataUser = this._authService.getDecodedToken();
     const link = { icon: 'settings', link: '/admin',  title: 'Administración'}
 
@@ -231,6 +234,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getNotification() {
+    if (!this._authService.isAuthenticated()) return;
     const userId = this._authService.getDecodedToken()?.id!;
     this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {

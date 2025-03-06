@@ -7,6 +7,8 @@ import { getTranslationsLanguage } from '../translations/translations';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { LoadingService } from '@shared/services/loading.service';
+import { AuthService } from '@auth/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'worky-root',
@@ -28,9 +30,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private _renderer: Renderer2,
     private _configService: ConfigService,
     private _titleService: Title,
-    private _cdr: ChangeDetectorRef,
     private _notificationUsersService: NotificationUsersService,
-    private _loadingService: LoadingService
+    private _loadingService: LoadingService,
   ) {
     this._notificationUsersService.setupInactivityListeners();
   }

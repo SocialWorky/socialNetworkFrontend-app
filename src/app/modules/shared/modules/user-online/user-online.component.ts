@@ -19,7 +19,7 @@ export class UserOnlineComponent implements OnInit, AfterViewInit, OnDestroy {
 
   usersOnline = signal<Token[]>([]);
 
-  currentUser: Token;
+  currentUser: Token | null = null;
 
   constructor(
     private _cdr: ChangeDetectorRef,
@@ -27,6 +27,7 @@ export class UserOnlineComponent implements OnInit, AfterViewInit, OnDestroy {
     private _router: Router,
     private _authService: AuthService
   ) {
+    if(!this._authService.isAuthenticated()) return;
     const decodedToken = this._authService.getDecodedToken();
     if (decodedToken && typeof decodedToken === 'object' && 'id' in decodedToken) {
       this.currentUser = decodedToken as Token;
@@ -56,7 +57,7 @@ export class UserOnlineComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private getUserOnline() {
-    this._notificationUsersService.addCurrentUserStatus(this.currentUser);
+    this._notificationUsersService.addCurrentUserStatus(this.currentUser!);
   }
 
   ngOnDestroy(): void {

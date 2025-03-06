@@ -22,6 +22,8 @@ export class AuthInterceptor implements HttpInterceptor {
 
     const apiUrls = [
       environment.API_URL,
+      environment.APIFILESERVICE,
+      environment.APIMESSAGESERVICE,
     ];
 
     const isApiRequest = apiUrls.some((url) => request.url.startsWith(url));

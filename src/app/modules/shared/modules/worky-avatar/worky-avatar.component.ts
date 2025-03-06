@@ -47,6 +47,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
   constructor(private _authService: AuthService, private _cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
+    if(!this._authService.isAuthenticated()) return;
     this.token = this._authService.getDecodedToken()!;
 
     this.username = this.token?.name || '';

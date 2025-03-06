@@ -26,6 +26,7 @@ import { AxiomService } from '@shared/services/apis/axiom.service';
 import { AxiomType } from '@shared/interfaces/axiom.enum';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { NotificationNewPublication, NotificationUpdatePublication } from '@shared/interfaces/notificationPublication.interface';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
   selector: 'worky-home',
@@ -49,7 +50,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   
   urlMediaApi = environment.APIFILESERVICE;
   
-  dataUser = this._authService.getDecodedToken();
+  dataUser: Token | null = null;
   
   isOnline$ = this._networkService.connectionStatus;
   
@@ -91,7 +92,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _axiomService: AxiomService,
     private _notificationPublicationService: NotificationPublicationService
   ) {
-
+    if (!this._authService.isAuthenticated()) return;
+    this.dataUser = this._authService.getDecodedToken();
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Home');
     });

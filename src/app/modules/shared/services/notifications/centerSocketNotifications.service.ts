@@ -8,6 +8,7 @@ import { AuthService } from '@auth/services/auth.service';
 import { NotificationService } from './notification.service';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { CustomReaction } from '@shared/interfaces/reactions.interface';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ import { CustomReaction } from '@shared/interfaces/reactions.interface';
 
 export class CenterSocketNotificationsService {
 
-  userToken = this._authService.getDecodedToken()!;
+  userToken: Token | null = null;
 
   private destroy$ = new Subject<void>();
 
@@ -23,9 +24,14 @@ export class CenterSocketNotificationsService {
     private _notificationCenterService: NotificationCenterService,
     private _authService: AuthService,
     private _notificationService: NotificationService
-  ) { }
+  ) { 
+    if(!this._authService.isAuthenticated()) return;
+    this.userToken = this._authService.getDecodedToken();
+  }
 
   senFriendRequestNotification(user: User) {
+
+    if (!this.userToken) return;
 
     const dataNotification = {
       sendUserId: this.userToken.id,
@@ -46,6 +52,8 @@ export class CenterSocketNotificationsService {
   }
 
   acceptFriendRequestNotification(user: User) {
+
+    if (!this.userToken) return;
     
     const dataNotification = {
       acceptUserId: this.userToken.id,
@@ -66,6 +74,9 @@ export class CenterSocketNotificationsService {
   }
 
   reactionInPublicationNotification(publication: PublicationView, reaction: CustomReaction) {
+
+    if (!this.userToken) return;
+
     const dataNotification = {
       name: reaction.name,
       emoji: reaction.emoji,

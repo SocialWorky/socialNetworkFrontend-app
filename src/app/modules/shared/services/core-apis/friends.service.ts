@@ -11,9 +11,10 @@ import { FriendsStatus } from '@shared/interfaces/friend.interface';
 })
 export class FriendsService {
 
-  private baseUrl: string;
+  private baseUrl: string | undefined;
 
   constructor(private http: HttpClient, private _authService: AuthService) {
+    if(!this._authService.isAuthenticated()) return;
     this.baseUrl = environment.API_URL;
   }
 

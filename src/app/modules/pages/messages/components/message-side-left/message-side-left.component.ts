@@ -11,6 +11,7 @@ import { Message } from '../../interfaces/message.interface';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
   selector: 'worky-message-side-left',
@@ -28,7 +29,7 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
 
   unreadMessagesCount = 0;
 
-  currentUser = this._authService.getDecodedToken()!;
+  currentUser: Token | null = null;
 
   loadUsers = true;
 
@@ -51,12 +52,15 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
     private _notificationService: NotificationService,
     private _globalEventService: GlobalEventService
   ) {
-    this.currentUserId = this._authService.getDecodedToken()!.id;
+    if (!this._authService.isAuthenticated()) return;
+    this.currentUser = this._authService.getDecodedToken();
+    this.currentUserId = this._authService.getDecodedToken()?.id || '';
     this._cdr.markForCheck();
   }
 
   async ngOnInit(): Promise<void> {
     this.userIdMessage = this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
+    if (!this._authService.isAuthenticated()) return;
     this.currentUserId = this._authService.getDecodedToken()!.id;
 
     this._notificationMessageChatService.notificationMessageChat$

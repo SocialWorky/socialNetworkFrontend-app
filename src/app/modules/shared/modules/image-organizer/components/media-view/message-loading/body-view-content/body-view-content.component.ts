@@ -11,6 +11,7 @@ import { PublicationService } from '@shared/services/core-apis/publication.servi
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { AxiomService } from '@shared/services/apis/axiom.service';
 import { AxiomType } from '@shared/interfaces/axiom.enum';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
   selector: 'worky-body-view-content',
@@ -19,7 +20,7 @@ import { AxiomType } from '@shared/interfaces/axiom.enum';
 })
 export class BodyViewContentComponent  implements OnDestroy {
 
-  dataUser = this._authService.getDecodedToken();
+  dataUser: Token | null = null;
 
   typeViewEnum = TypeView;
 
@@ -50,6 +51,8 @@ export class BodyViewContentComponent  implements OnDestroy {
     private _axiomService: AxiomService,
     private _notificationPublicationService: NotificationPublicationService,
   ) { 
+    if(!this._authService.isAuthenticated()) return;
+    this.dataUser = this._authService.getDecodedToken();
     this.subscribeToNotificationUpdatePublication();
   }
 

@@ -12,6 +12,7 @@ import { PublicationsReactions } from '@shared/interfaces/reactions.interface';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { NotificationService } from '@shared/services/notifications/notification.service';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
   selector: 'worky-reactions',
@@ -36,7 +37,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @Input() reactionsToPublication: PublicationsReactions[] = [];
 
-  token = this._authService.getDecodedToken();
+  token: Token | null = this._authService.getDecodedToken();
 
   unlockReactions = true;
 
@@ -59,6 +60,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngOnInit() {
+    if(!this._authService.isAuthenticated()) return;
     this.loadReactions();
   }
 
@@ -89,6 +91,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
         next: async () => {
           this.reactionsVisible = false;
           this.unlockReactions = true;
+          this._notificationService.sendNotification(this.publication);
           this._emailNotificationService.reactionsNotification(this.publication!, reaction);
 
           this.refreshPublications();

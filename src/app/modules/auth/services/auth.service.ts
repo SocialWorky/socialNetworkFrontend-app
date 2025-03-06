@@ -30,16 +30,19 @@ export class AuthService {
       const currentUser = this._userService.getUserById(decodedToken._id);
       if (!currentUser) {
         this.clearSession();
+        this._router.navigate(['/auth/login']);
         return false;
       }
 
       if (decodedToken && decodedToken.exp && (decodedToken.exp > currentTime)) {
         return true;
       } else {
+        this._router.navigate(['/auth/login']);
         this.clearSession();
         return false;
       }
     } else {
+      this._router.navigate(['/auth/login']);
       return false;
     }
   }
@@ -60,11 +63,13 @@ export class AuthService {
 
   getDecodedToken(): Token | null {
     const token = localStorage.getItem('token');
-    if (token) {
-      return jwtDecode(token);
-    } else {
+    if (!token) {
+      this._router.navigate(['/auth/login']);
+      this.clearSession();
       return null;
     }
+    return jwtDecode(token);
+
   }
 
   getUseFromToken(token: string): Token {

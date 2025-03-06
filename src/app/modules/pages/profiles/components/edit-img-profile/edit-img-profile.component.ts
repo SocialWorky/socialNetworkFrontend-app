@@ -67,6 +67,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
   }
 
   ngOnInit(): void {
+    this._authService.getDecodedToken();
     this.previews[0].url = this.profileImage || this.imgCoverDefault;
   }
 

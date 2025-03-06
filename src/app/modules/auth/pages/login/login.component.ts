@@ -81,7 +81,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
-    this.chechLastLogin();
+    this.checkLastLogin();
     this.checkSessionGoogle();
     this.loginForm = this._formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
@@ -114,7 +114,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     this.unsubscribe$.complete();
   }
 
-  private chechLastLogin() {
+  private checkLastLogin() {
     const lastLogin = localStorage.getItem('lastLogin');
     if (lastLogin) {
       const lastLoginDate = new Date(lastLogin);
@@ -174,6 +174,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
           localStorage.setItem('token', response.token);
 
           localStorage.setItem('lastLogin', new Date().toISOString());
+
+          if (!this._authService.isAuthenticated()) return;
 
           const tokenResponse = await this._authService.getDecodedToken()!;
 
@@ -268,7 +270,10 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       const response = await this._authApiService.loginGoogle(dataGoogle).toPromise() as { token: string };
       localStorage.setItem('token', response?.token);
 
+      if (!this._authService.isAuthenticated()) return;
+
       const tokenResponse = this._authService.getDecodedToken()!;
+
       localStorage.setItem('isTooltipActive', tokenResponse.isTooltipActive.toString());
 
       if (!tokenResponse.avatar) {

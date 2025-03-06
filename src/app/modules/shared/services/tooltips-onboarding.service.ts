@@ -54,6 +54,7 @@ export class TooltipsOnboardingService {
   }
 
   private onDone() {
+    if(!this._authService.isAuthenticated()) return;
     localStorage.setItem('isTooltipActive', 'false');
     const userId = this._authService.getDecodedToken()?.id!;
     this._userService.userEdit(userId, { isTooltipActive: false }).pipe(takeUntil(this.destroy$)).subscribe({});

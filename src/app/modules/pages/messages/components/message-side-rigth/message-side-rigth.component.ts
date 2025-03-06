@@ -18,6 +18,7 @@ import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/im
 import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
 import { environment } from '@env/environment';
 import { LoadingController } from '@ionic/angular';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
   selector: 'worky-message-side-rigth',
@@ -32,7 +33,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
   userIdMessage: string = '';
 
-  currentUser = this._authService.getDecodedToken()!;
+  currentUser: Token | null = this._authService.getDecodedToken();
 
   messages: Message[] = [];
 
@@ -73,19 +74,23 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     private _dialog: MatDialog,
     private _fileUploadService: FileUploadService,
     private _loadingCtrl: LoadingController,
-  ) {}
+  ) {
+    if (!this._authService.isAuthenticated()) return;
+    this.currentUser = this._authService.getDecodedToken();
+  }
 
   async ngOnInit() {
+    if (!this._authService.isAuthenticated()) return;
     this.userIdMessage = await this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
     if(this.userIdMessage) this.userId = this.userIdMessage;
 
-    if (this.userIdMessage && this.currentUser.id) {
-      await this.loadMessagesWithUser(this.currentUser.id, this.userIdMessage);
+    if (this.userIdMessage && this.currentUser!.id) {
+      await this.loadMessagesWithUser(this.currentUser!.id, this.userIdMessage);
     }
 
     if (this.isMobile) {
-      if (this.userIdMessage && this.currentUser.id) {
-        await this.loadMessagesWithUser(this.currentUser.id, this.userIdMessage);
+      if (this.userIdMessage && this.currentUser!.id) {
+        await this.loadMessagesWithUser(this.currentUser!.id, this.userIdMessage);
       }
       this._cdr.markForCheck();
     }
@@ -111,13 +116,13 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
           }
         }
       });
-    this.loadMessagesWithUser(this.currentUser.id, this.userId);
+    this.loadMessagesWithUser(this.currentUser!.id, this.userId);
     this.markMessagesAsRead();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['userId'] && !changes['userId'].isFirstChange()) {
-      this.loadMessagesWithUser(this.currentUser.id, changes['userId'].currentValue);
+      this.loadMessagesWithUser(this.currentUser!.id, changes['userId'].currentValue);
       this._cdr.markForCheck();
       this.scrollToBottom();
     }

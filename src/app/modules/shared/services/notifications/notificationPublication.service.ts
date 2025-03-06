@@ -1,9 +1,10 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { NotificationNewPublication, NotificationUpdatePublication } from '@shared/interfaces/notificationPublication.interface';
+import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
+import { NotificationService } from './notification.service';
 
 
 @Injectable({

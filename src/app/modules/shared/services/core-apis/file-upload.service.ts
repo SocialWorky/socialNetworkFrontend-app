@@ -12,7 +12,9 @@ export class FileUploadService {
   constructor(
     private http: HttpClient,
     private _authService: AuthService
-  ) {}
+  ) {
+    if(!this._authService.isAuthenticated()) return;
+  }
 
   uploadFile(files: File[], destination: string) {
     const url = `${environment.APIFILESERVICE}upload`;

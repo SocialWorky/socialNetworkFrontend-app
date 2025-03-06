@@ -64,7 +64,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   isCurrentUser: boolean = false;
 
-  dataUser = this._authService.getDecodedToken();
+  dataUser: Token | null = null;
 
   isFriend: boolean = false;
 
@@ -125,7 +125,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-
+    this._authService.isAuthenticated();
     if (this.idUserProfile === '') {
       this.idUserProfile = this._authService.getDecodedToken()?.id!;
       this._cdr.markForCheck();

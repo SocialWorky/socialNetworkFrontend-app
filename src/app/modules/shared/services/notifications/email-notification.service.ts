@@ -11,19 +11,20 @@ import { Subject, takeUntil } from 'rxjs';
 import { User } from '@shared/interfaces/user.interface';
 import { CustomReactionList } from '@admin/interfaces/customReactions.interface';
 import { CenterSocketNotificationsService } from '@shared/services/notifications/centerSocketNotifications.service';
+import { Token } from '@shared/interfaces/token.interface';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class EmailNotificationService {
-  private baseUrl: string;
+  private baseUrl: string | undefined;
 
   private mailSendDataValidate: MailSendValidateData = {} as MailSendValidateData;
 
   private destroy$ = new Subject<void>();
 
-  dataUser = this._authService.getDecodedToken();
+  dataUser: Token | null = null;
 
   constructor(
     private http: HttpClient,
@@ -31,6 +32,7 @@ export class EmailNotificationService {
     private _userService: UserService,
     private _centerSocketNotificationsService: CenterSocketNotificationsService
   ) {
+    if(!this._authService.isAuthenticated()) return;
     this.baseUrl = environment.API_URL;
     this.dataUser = this._authService.getDecodedToken();
   }

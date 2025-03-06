@@ -25,6 +25,7 @@ export class LoyautComponent implements OnInit, OnDestroy {
   }
 
   get token() {
+    this._authService.getDecodedToken();
     return this._authService.getDecodedToken();
   }
 
@@ -42,6 +43,7 @@ export class LoyautComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this._authService.getDecodedToken();
     this._notificationUsersService.refreshUserStatuses();
     this.routeSub = this._router.events
       .pipe(

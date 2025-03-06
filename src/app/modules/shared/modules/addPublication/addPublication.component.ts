@@ -74,7 +74,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   selectedFiles: File[] = [];
 
-  decodedToken!: Token;
+  decodedToken: Token = this._authService.getDecodedToken()!;
 
   isAuthenticated = false;
 

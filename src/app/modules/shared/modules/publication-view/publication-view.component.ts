@@ -26,6 +26,7 @@ import { NotificationService } from '@shared/services/notifications/notification
 import { Reactions } from './interfaces/reactions.interface';
 import { Colors } from '@shared/interfaces/colors.enum';
 import { ScrollService } from '@shared/services/scroll.service';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
   selector: 'worky-publication-view',
@@ -68,7 +69,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   isProfile = false;
 
-  dataUser = this._authService.getDecodedToken();
+  dataUser: Token | null = null;
 
   listReaction: string[] = [];
 
@@ -98,6 +99,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   ngOnInit() {
+    if(!this._authService.isAuthenticated()) return;
+    this.dataUser = this._authService.getDecodedToken();
     this.getUserFriendPending();
     this.menuShareActions();
     this.extraDataPublication();

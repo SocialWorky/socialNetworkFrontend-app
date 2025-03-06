@@ -8,7 +8,7 @@ import { Token } from '@shared/interfaces/token.interface';
   providedIn: 'root',
 })
 export class NotificationUsersService implements OnDestroy {
-  private token: Token;
+  private token: Token | null = null;
 
   private _userStatuses = new BehaviorSubject<Token[]>([]);
 
@@ -29,7 +29,8 @@ export class NotificationUsersService implements OnDestroy {
   private batchInterval: any;
 
   constructor(private socket: Socket, private _authService: AuthService) {
-    this.token = this._authService.getDecodedToken()!;
+    if(!this._authService.isAuthenticated()) return;
+    this.token = this._authService.getDecodedToken();
     this.initializeUserStatus();
     this.setupInactivityListeners();
   }
@@ -46,11 +47,13 @@ export class NotificationUsersService implements OnDestroy {
       this.updateUserStatus(data);
     });
 
-    this.addCurrentUserStatus(this.token);
+    if (this.token) {
+      this.addCurrentUserStatus(this.token);
+    }
   }
 
   private updateUserStatus(data: Token) {
-    if (data?.status === 'offLine' && data?._id !== undefined) {
+    if (data.status === 'offLine' && data._id !== undefined) {
       if (this.userStatusMap.has(data._id)) {
         this.userStatusMap.delete(data?._id);
         this.sendBatchedUpdates();
