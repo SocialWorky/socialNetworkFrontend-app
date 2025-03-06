@@ -46,7 +46,7 @@ export class AppComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this._loadingService.setLoading(false);
       document.getElementById('loading-screen')?.remove();
-    }, 3000);
+    }, 4000);
   }
 
   ngOnDestroy() {

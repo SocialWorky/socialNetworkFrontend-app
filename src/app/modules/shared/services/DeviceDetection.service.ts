@@ -38,7 +38,7 @@ export class DeviceDetectionService implements OnDestroy {
   }
 
   isMobile(): boolean {
-    //if(this._platform.is('tablet') || this._platform.is('ipad')) return false;
+    if(this._platform.is('tablet') || this._platform.is('ipad') || !this.isScreenSmallerThan700px()) return false;
     return (
       this.isNative()
       || this.isScreenSmallerThan700px()
@@ -46,6 +46,10 @@ export class DeviceDetectionService implements OnDestroy {
       || this._platform.is('iphone')
       || this._platform.is('android')
     );
+  }
+
+  isTablet(): boolean {
+    return this._platform.is('tablet') || this._platform.is('ipad');
   }
 
   private isScreenSmallerThan700px(): boolean {

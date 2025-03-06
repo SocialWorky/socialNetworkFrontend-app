@@ -41,7 +41,7 @@ export class ScrollService {
   scrollToTop() {
     const element = document.getElementById('first-publication');
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      element.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
   }
 

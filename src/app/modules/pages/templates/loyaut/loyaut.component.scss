@@ -20,16 +20,12 @@
     flex-direction: column;
     grid-area: header;
     width: 100vw;
-    @include breakpoints.below-sm {
-      grid-area: header;
-      //max-height: 122px;
-    }
   }
 }
 
 .content-social-app {
   display: flex;
-  justify-content: center;
+  //justify-content: center;
   grid-area: main;
   margin-left: auto;
   margin-right: auto;
@@ -59,7 +55,9 @@
 }
 
 .social-content-center {
+  display: flex;
   width: variables.$worky-container-width-content;
+  grid-area: main;
   height: 94vh;
   min-width: variables.$worky-app-min-width;
   @include breakpoints.below-sm {
