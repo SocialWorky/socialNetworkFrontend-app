@@ -150,12 +150,16 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     if (userIdMessage === currentUserId) return;
     this.loadMessages = true;
     await this.getUser(userIdMessage);
-    this._messageService.getConversationsWithUser(currentUserId, userIdMessage).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._messageService.getConversationsWithUser(currentUserId, userIdMessage)
+      .pipe(
+        takeUntil(this.unsubscribe$)
+       )
+      .subscribe({
       next: (messages: Message[]) => {
         this.messages = messages;
+        this.scrollToBottom();
         this._cdr.markForCheck();
         this.loadMessages = false;
-        this.scrollToBottom();
       },
       error: (error) => {
         console.error('Error loading messages:', error);
@@ -246,7 +250,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
           console.error('Error scrolling to bottom:', err);
         }
       }
-    }, 1000);
+    }, 2000);
   }
 
   async markMessagesAsRead() {

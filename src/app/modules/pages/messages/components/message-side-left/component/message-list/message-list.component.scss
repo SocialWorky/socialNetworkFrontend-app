@@ -1,0 +1,9 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+.users {
+    display: flex;
+    flex-direction: column;
+    margin-top: 40px;
+  }

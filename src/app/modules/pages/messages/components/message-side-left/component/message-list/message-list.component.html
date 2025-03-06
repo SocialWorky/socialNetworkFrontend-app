@@ -1,0 +1,7 @@
+<div class="users" *ngIf="users$ | async as users">
+  <worky-user-list-item
+    *ngFor="let user of users"
+    [user]="user"
+    (userSelected)="selectUser($event)">
+  </worky-user-list-item>
+</div>

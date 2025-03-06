@@ -30,6 +30,8 @@ import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
 import { MessagesComponent } from './messages/messages.component';
 import { MessageSideLeftComponent } from './messages/components/message-side-left/message-side-left.component';
 import { MessageSideRigthComponent } from './messages/components/message-side-rigth/message-side-rigth.component';
+import { UserListItemComponent } from './messages/components/message-side-left/component/user-list-item/user-list-item.component';
+import { MessageListComponent } from './messages/components/message-side-left/component/message-list/message-list.component';
 import { UserOnlineModule } from '@shared/modules/user-online/user-online.module';
 import { NotificationsPanelModule } from '@shared/modules/notifications-panel/notifications-panel.module';
 
@@ -40,6 +42,8 @@ import { NotificationsPanelModule } from '@shared/modules/notifications-panel/no
     MessagesComponent,
     MessageSideLeftComponent,
     MessageSideRigthComponent,
+    UserListItemComponent,
+    MessageListComponent,
     ProfilesComponent,
     LoyautComponent,
     NavbarComponent,

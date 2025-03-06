@@ -1,0 +1,69 @@
+@use 'src/assets/styles/worky-typography.scss' as Fonts;
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+
+
+.button {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid var(--worky-color-grey);
+  cursor: pointer;
+  text-align: left;
+  &:hover {
+    background: map-get(color.$worky-navy, 87);
+  }
+
+  .avatar-container {
+    margin-right: 10px;
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    position: relative;
+
+    .content-name-unread {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      .user-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--worky-color-blue);
+      }
+
+      .unread-messages {
+        background-color: red;
+        color: white;
+        border-radius: 50%;
+        padding: 0.25rem 0.5rem;
+        font-size: 10px;
+        font-weight: 700;
+      }
+    }
+
+    .last-message {
+      font-size: 0.88rem;
+      color: color.$worky-color-navy;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .last-message-time {
+      font-size: 0.65rem;
+      color: color.$worky-color-navy;
+      margin-left: auto;
+    }
+  }
+}
+
+.button:first-child {
+  border-top: 1px solid var(--worky-color-grey);
+}
+

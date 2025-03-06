@@ -9,19 +9,9 @@ import { CreateMessage, Message, UpdateMessage } from '../interfaces/message.int
 })
 export class MessageService {
   private baseUrl: string;
-  private token: string;
 
   constructor(private http: HttpClient) {
     this.baseUrl = environment.APIMESSAGESERVICE;
-    this.token = localStorage.getItem('token') || '';
-  }
-
-  private getHeaders(): HttpHeaders {
-    const token = this.token;
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
-    return headers;
   }
 
   /**
@@ -30,8 +20,7 @@ export class MessageService {
    */
   getUsersWithConversations(): Observable<string[]> {
     const url = `${this.baseUrl}/messages/users`;
-    const headers = this.getHeaders();
-    return this.http.get<string[]>(url, { headers });
+    return this.http.get<string[]>(url);
   }
 
   /**
@@ -42,8 +31,7 @@ export class MessageService {
    */
   getConversationsWithUser(currentUserId: string, otherUserId: string): Observable<Message[]> {
     const url = `${this.baseUrl}/messages/conversations/${otherUserId}`;
-    const headers = this.getHeaders();
-    return this.http.get<Message[]>(url, { headers });
+    return this.http.get<Message[]>(url);
   }
 
   /**
@@ -53,8 +41,7 @@ export class MessageService {
    */
   getLastConversationWithUser(otherUserId: string): Observable<Message> {
     const url = `${this.baseUrl}/messages/conversations/${otherUserId}/last`;
-    const headers = this.getHeaders();
-    return this.http.get<Message>(url, { headers });
+    return this.http.get<Message>(url);
   }
 
   /**
@@ -64,8 +51,7 @@ export class MessageService {
    */
   countConversationsWithUser(otherUserId: string): Observable<number> {
     const url = `${this.baseUrl}/messages/conversations/${otherUserId}/count`;
-    const headers = this.getHeaders();
-    return this.http.get<number>(url, { headers });
+    return this.http.get<number>(url);
   }
 
   /**
@@ -76,8 +62,7 @@ export class MessageService {
    */
   getConversationsByDate(startDate: string, endDate: string): Observable<Message[]> {
     const url = `${this.baseUrl}/messages/conversations/date?startDate=${startDate}&endDate=${endDate}`;
-    const headers = this.getHeaders();
-    return this.http.get<Message[]>(url, { headers });
+    return this.http.get<Message[]>(url);
   }
 
   /**
@@ -87,8 +72,7 @@ export class MessageService {
    */
   createMessage(createMessage: CreateMessage): Observable<Message> {
     const url = `${this.baseUrl}/messages`;
-    const headers = this.getHeaders();
-    return this.http.post<Message>(url, createMessage, { headers });
+    return this.http.post<Message>(url, createMessage);
   }
 
   /**
@@ -98,8 +82,7 @@ export class MessageService {
    */
   updateMessageStatus(messageId: string): Observable<Message> {
     const url = `${this.baseUrl}/messages/${messageId}/read`;
-    const headers = this.getHeaders();
-    return this.http.put<Message>(url, {}, { headers });
+    return this.http.put<Message>(url, {});
   }
 
   /**
@@ -110,8 +93,7 @@ export class MessageService {
    */
   updateMessage(messageId: string, updateMessage: UpdateMessage): Observable<Message> {
     const url = `${this.baseUrl}/messages/${messageId}`;
-    const headers = this.getHeaders();
-    return this.http.put<Message>(url, updateMessage, { headers });
+    return this.http.put<Message>(url, updateMessage);
   }
 
   /**
@@ -121,25 +103,21 @@ export class MessageService {
    */
   deleteMessage(messageId: string): Observable<void> {
     const url = `${this.baseUrl}/messages/${messageId}`;
-    const headers = this.getHeaders();
-    return this.http.delete<void>(url, { headers });
+    return this.http.delete<void>(url);
   }
 
   markMessagesAsRead(chatId: string, senderId: string): Observable<Message[]> {
     const url = `${this.baseUrl}/messages/mark-as-read`;
-    const headers = this.getHeaders();
-    return this.http.post<Message[]>(url, { chatId, senderId }, { headers });
+    return this.http.post<Message[]>(url, { chatId, senderId });
   }
 
   getUnreadMessagesCount(chastId:string, senderId:string): Observable<number> {
     const url = `${this.baseUrl}/messages/unread-count/${chastId}/${senderId}`;
-    const headers = this.getHeaders();
-    return this.http.get<number>(url, { headers });
+    return this.http.get<number>(url);
   }
 
   getUnreadAllMessagesCount(): Observable<number> {
     const url = `${this.baseUrl}/messages/unread-all-count`;
-    const headers = this.getHeaders();
-    return this.http.get<number>(url, { headers });
+    return this.http.get<number>(url);
   }
 }
