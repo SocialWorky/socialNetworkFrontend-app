@@ -4,6 +4,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { CacheService } from '../cache.service';
+import { shareReplay, distinctUntilChanged, debounceTime } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,11 @@ export class NotificationUsersService implements OnDestroy {
 
   private _userStatuses = new BehaviorSubject<Token[]>([]);
 
-  public userStatuses$ = this._userStatuses.asObservable();
+  public userStatuses$ = this._userStatuses.asObservable().pipe(
+    distinctUntilChanged(),
+    debounceTime(300),
+    shareReplay(1)
+  );
 
   private _unsubscribeAll = new Subject<void>();
 

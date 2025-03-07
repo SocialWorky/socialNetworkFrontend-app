@@ -2,12 +2,11 @@ import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, O
 import { Router } from '@angular/router';
 import { Token } from '@shared/interfaces/token.interface';
 import { Subject, interval } from 'rxjs';
-import { takeUntil, catchError, switchMap, startWith } from 'rxjs/operators';
-
+import { takeUntil, catchError, switchMap, startWith, distinctUntilChanged, debounceTime } from 'rxjs/operators';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { AuthService } from '@auth/services/auth.service';
 import { UtilityService } from '@shared/services/utility.service';
-
+import { computed, effect } from '@angular/core';
 
 @Component({
   selector: 'worky-user-online',
@@ -28,6 +27,14 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
 
   currentUser: Token | null = null;
 
+  filteredUsers = computed(() => {
+    return this.usersOnline().filter(user => user.status !== 'offLine');
+  });
+
+  onlineCount = computed(() => {
+    return this.filteredUsers().length;
+  });
+
   constructor(
     private _cdr: ChangeDetectorRef,
     private _notificationUsersService: NotificationUsersService,
@@ -35,10 +42,17 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     private _authService: AuthService,
     private _utilityService: UtilityService
   ) {
-    this.initializeCurrentUser();
+    this.checkAndInitializeUser();
+
+    effect(() => {
+      const users = this.filteredUsers();
+      if (users.length > 0) {
+        this._cdr.detectChanges();
+      }
+    });
   }
 
-  private initializeCurrentUser(): void {
+  private checkAndInitializeUser(): void {
     if (!this._authService.isAuthenticated()) {
       this._router.navigate(['/login']);
       return;
@@ -66,17 +80,20 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     interval(this.REFRESH_INTERVAL).pipe(
       startWith(0),
       switchMap(() => this._notificationUsersService.userStatuses$),
+      distinctUntilChanged((prev: Token[], curr: Token[]) =>
+        JSON.stringify(prev) === JSON.stringify(curr)
+      ),
+      debounceTime(300),
       catchError((error) => {
         this.error.set('Failed to fetch online users');
         console.error('Error fetching user statuses:', error);
         return [];
       }),
       takeUntil(this._destroy$)
-    ).subscribe((userStatuses) => {
+    ).subscribe((userStatuses: Token[]) => {
       this.usersOnline.set(userStatuses);
       this.isLoading.set(false);
       this.error.set(null);
-      this._cdr.markForCheck();
     });
 
     this.getUserOnline();
