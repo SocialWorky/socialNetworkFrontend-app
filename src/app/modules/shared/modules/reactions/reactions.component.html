@@ -1,5 +1,5 @@
 <div *ngIf="!unlockReactions" class="loader"></div>
-<div class="reaction-container-wrapper" 
+<div class="reaction-container-wrapper"
   (mouseleave)="hideReactions()"
   (mouseenter)="showReactions()"
   (touchstart)="onTouchStart()"
@@ -13,7 +13,7 @@
     </div>
 
     <div *ngIf="reactionUserInPublication"
-        class="selected-reaction no-select-text" 
+        class="selected-reaction no-select-text"
         (mouseenter)="showReactions()"
         (click)="deleteReaction(reactionUserInPublication._id)"
         (touchstart)="onTouchStart()"
@@ -22,13 +22,13 @@
       <div>{{ reactionUserInPublication.customReaction.name }}</div>
     </div>
 
-    <div #reactionPopup 
+    <div #reactionPopup
       class="reaction-popup"
       [ngClass]="{'reaction-popup-visible': reactionsVisible}">
-      <div class="reaction" 
-          *ngFor="let reaction of reactions" 
-          [class.zoomed]="reaction.zoomed" 
-          (mouseenter)="zoomIn(reaction)" 
+      <div class="reaction"
+          *ngFor="let reaction of reactions"
+          [class.zoomed]="reaction.zoomed"
+          (mouseenter)="zoomIn(reaction)"
           (mouseleave)="zoomOut(reaction)"
           [matTooltip]="reaction.name"
           matTooltipPosition="above"

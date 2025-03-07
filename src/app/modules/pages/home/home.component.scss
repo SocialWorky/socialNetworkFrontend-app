@@ -2,7 +2,7 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 
 .content-publications {
-  height: 92vh;
+  height: 94vh;
 
   @include breakpoints.below-md {
     height: 90vh;
