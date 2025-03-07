@@ -3,6 +3,7 @@ import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
+import { CacheService } from '../cache.service';
 
 @Injectable({
   providedIn: 'root',
@@ -24,23 +25,40 @@ export class NotificationUsersService implements OnDestroy {
 
   private userStatusMap = new Map<string, Token>();
 
+  private readonly CACHE_KEY = 'online_users';
+
   // Batching variables
   private batchedUpdates: Token[] = [];
   private batchInterval: any;
 
-  constructor(private socket: Socket, private _authService: AuthService) {
+  constructor(
+    private socket: Socket,
+    private _authService: AuthService,
+    private _cacheService: CacheService
+  ) {
     if(!this._authService.isAuthenticated()) return;
     this.token = this._authService.getDecodedToken();
     this.initializeUserStatus();
     this.setupInactivityListeners();
   }
 
+  private readonly CACHE_DURATION = 30000; // 30 seconds cache
+
   private initializeUserStatus() {
+    // Check cache first
+    const cachedStatuses = this._cacheService.getItem<Token[]>(this.CACHE_KEY);
+    if (cachedStatuses && Array.isArray(cachedStatuses)) {
+      this._userStatuses.next(cachedStatuses);
+      this.userStatusMap = new Map(cachedStatuses.map(user => [user._id!, user]));
+    }
+
     this.socket.emit('loginUser', this.token);
     this.socket.emit('getUserStatuses');
 
     this.socket.fromEvent<Token[]>('initialUserStatuses').subscribe((initialStatuses: Token[]) => {
       this._userStatuses.next(initialStatuses);
+      this._cacheService.setItem(this.CACHE_KEY, initialStatuses);
+      this.userStatusMap = new Map(initialStatuses.map(user => [user._id!, user]));
     });
 
     this.socket.fromEvent<Token>('userStatus').subscribe((data: Token) => {
@@ -55,17 +73,19 @@ export class NotificationUsersService implements OnDestroy {
   private updateUserStatus(data: Token) {
     if (data.status === 'offLine' && data._id !== undefined) {
       if (this.userStatusMap.has(data._id)) {
-        this.userStatusMap.delete(data?._id);
+        this.userStatusMap.delete(data._id);
         this.sendBatchedUpdates();
       }
     } else {
-      if (data?._id !== undefined) {
+      if (data._id !== undefined) {
         this.userStatusMap.set(data._id, data);
         this.addToBatch(data);
       }
     }
 
-    this._userStatuses.next(Array.from(this.userStatusMap.values()));
+    const updatedStatuses = Array.from(this.userStatusMap.values());
+    this._userStatuses.next(updatedStatuses);
+    this._cacheService.setItem<Token[]>(this.CACHE_KEY, updatedStatuses, this.CACHE_DURATION);
   }
 
   private addToBatch(userStatus: Token) {
@@ -96,12 +116,12 @@ export class NotificationUsersService implements OnDestroy {
     this.resetInactivityTimer();
   }
 
-  private throttledHandleUserActivity: () => void = this.throttle(this.handleUserActivity.bind(this), 3000); 
+  private throttledHandleUserActivity: () => void = this.throttle(this.handleUserActivity.bind(this), 3000);
 
   private throttle(fn: () => void, limit: number) {
     let lastFn: any;
     let lastRan: number;
-  
+
     return function (this: any, ...args: any) {
       if (!lastRan) {
         fn.apply(this, args);
@@ -213,5 +233,6 @@ export class NotificationUsersService implements OnDestroy {
     ['mousemove', 'keydown', 'scroll', 'click', 'touchstart', 'touchmove'].forEach(event => {
       window.removeEventListener(event, this.throttledHandleUserActivity);
     });
+    this._cacheService.removeItem(this.CACHE_KEY);
   }
 }
