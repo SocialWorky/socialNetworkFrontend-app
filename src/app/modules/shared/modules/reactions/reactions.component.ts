@@ -111,6 +111,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
         this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
         this.unlockReactions = true;
+        this.hideReactions();
       },
       error: (err) => {
         console.error('Failed to delete reaction', err);
