@@ -8,17 +8,52 @@
   padding: 0.75rem;
   width: 100%;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
   .user-online-title {
     font-size: 1.125rem;
     font-weight: 600;
     margin-bottom: 0.75rem;
     color: colors.$worky-color-navy;
   }
+
+  .user-online-loading {
+    text-align: center;
+    padding: 1rem;
+    color: colors.$worky-color-navy;
+
+    .loading-spinner {
+      display: inline-block;
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-right: 0.5rem;
+      border: 2px solid map-get(colors.$worky-grey, 72);
+      border-top: 2px solid colors.$worky-color-navy;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+
+  // New error state
+  .user-online-error {
+    text-align: center;
+    padding: 1rem;
+    color: colors.$worky-color-red;
+    font-size: 0.875rem;
+  }
+
+  .user-online-empty {
+    text-align: center;
+    padding: 1rem;
+    color: colors.$worky-color-navy;
+    font-size: 0.875rem;
+  }
+
   .user-online-content {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
   }
+
   .user-online-item {
     position: relative;
     cursor: pointer;
@@ -30,11 +65,13 @@
     padding: 0.125rem;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   }
+
   .user-online-avatar {
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 50%;
   }
+
   .user-online-point {
     position: absolute;
     bottom: 0;
@@ -44,6 +81,19 @@
     border: 2px solid colors.$worky-color-light;
     border-radius: 50%;
   }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.bg-green-color {
+  background-color: colors.$worky-color-green;
+}
+
+.bg-red-color {
+  background-color: colors.$worky-color-red;
 }
 
 

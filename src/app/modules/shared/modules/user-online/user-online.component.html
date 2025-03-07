@@ -1,21 +1,41 @@
 <div class="container-user-online">
   <h3 class="user-online-title">Usuarios Online</h3>
-  <div class="user-online-content">
-    <div class="user-online-item"
-      *ngFor="let user of usersOnline()" 
-      (click)="goToProfile(user?._id!)">
-        
-        <worky-avatar
-            [size]="35"
-            [name]="user?.name"
-            [img]="user?.avatar"
-            class="user-online-avatar">
-        </worky-avatar>
-        
-        <span class="user-online-point"
-           [class.bg-green-color]="user?.status === 'online'"
-           [class.bg-red-color]="user?.status === 'inactive'">
-        </span>
+
+  @if (isLoading()) {
+    <div class="user-online-loading">
+      <div class="loader"></div>
     </div>
-  </div>
+  }
+
+  @if (error()) {
+    <div class="user-online-error">
+      {{ error() }}
+    </div>
+  }
+
+  @if (!isLoading() && !error() && usersOnline().length) {
+    <div class="user-online-content">
+      @for (user of usersOnline(); track user._id) {
+        <div class="user-online-item" (click)="goToProfile(user._id!)">
+          <worky-avatar
+              [size]="35"
+              [name]="user.name"
+              [img]="user.avatar"
+              class="user-online-avatar">
+          </worky-avatar>
+
+          <span class="user-online-point"
+             [class.bg-green-color]="user.status === 'online'"
+             [class.bg-red-color]="user.status === 'inactive'">
+          </span>
+        </div>
+      }
+
+      @empty {
+        <div class="user-online-empty">
+          No hay usuarios conectados
+        </div>
+      }
+    </div>
+  }
 </div>

@@ -1,11 +1,12 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Token } from '@shared/interfaces/token.interface';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, interval } from 'rxjs';
+import { takeUntil, catchError, switchMap, startWith } from 'rxjs/operators';
 
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { AuthService } from '@auth/services/auth.service';
+import { UtilityService } from '@shared/services/utility.service';
 
 
 @Component({
@@ -14,10 +15,16 @@ import { AuthService } from '@auth/services/auth.service';
   styleUrls: ['./user-online.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UserOnlineComponent implements OnInit, AfterViewInit, OnDestroy {
-  private _destroy$ = new Subject<void>();
+export class UserOnlineComponent implements OnInit, OnDestroy {
+  private readonly _destroy$ = new Subject<void>();
+
+  private readonly REFRESH_INTERVAL = 30000;
 
   usersOnline = signal<Token[]>([]);
+
+  isLoading = signal<boolean>(false);
+
+  error = signal<string | null>(null);
 
   currentUser: Token | null = null;
 
@@ -25,39 +32,65 @@ export class UserOnlineComponent implements OnInit, AfterViewInit, OnDestroy {
     private _cdr: ChangeDetectorRef,
     private _notificationUsersService: NotificationUsersService,
     private _router: Router,
-    private _authService: AuthService
+    private _authService: AuthService,
+    private _utilityService: UtilityService
   ) {
-    if(!this._authService.isAuthenticated()) return;
-    const decodedToken = this._authService.getDecodedToken();
-    if (decodedToken && typeof decodedToken === 'object' && 'id' in decodedToken) {
-      this.currentUser = decodedToken as Token;
-    } else {
-      throw new Error('Invalid token');
-    }
+    this.initializeCurrentUser();
   }
-  ngAfterViewInit(): void {
-    this.getUserOnline();
-    this._cdr.markForCheck();
+
+  private initializeCurrentUser(): void {
+    if (!this._authService.isAuthenticated()) {
+      this._router.navigate(['/login']);
+      return;
+    }
+
+    try {
+      const decodedToken = this._authService.getDecodedToken();
+      if (decodedToken && typeof decodedToken === 'object' && 'id' in decodedToken) {
+        this.currentUser = decodedToken as Token;
+      } else {
+        throw new Error('Invalid token format');
+      }
+    } catch (error) {
+      console.error('Error initializing user:', error);
+      this._authService.logout();
+      this._router.navigate(['/login']);
+    }
   }
 
   async ngOnInit() {
-    this.getUserOnline();
-    await this._notificationUsersService.userStatuses$.pipe(
+    this.isLoading.set(true);
+    await this._utilityService.sleep(1000);
+    if (!this.currentUser) return;
+
+    interval(this.REFRESH_INTERVAL).pipe(
+      startWith(0),
+      switchMap(() => this._notificationUsersService.userStatuses$),
+      catchError((error) => {
+        this.error.set('Failed to fetch online users');
+        console.error('Error fetching user statuses:', error);
+        return [];
+      }),
       takeUntil(this._destroy$)
-    ).subscribe({
-      next: (userStatuses: Token[]) => {
-        this.usersOnline.set(userStatuses);
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Error getting user statuses', error);
-      }
+    ).subscribe((userStatuses) => {
+      this.usersOnline.set(userStatuses);
+      this.isLoading.set(false);
+      this.error.set(null);
+      this._cdr.markForCheck();
     });
-    this._cdr.markForCheck();
+
+    this.getUserOnline();
   }
 
-  private getUserOnline() {
-    this._notificationUsersService.addCurrentUserStatus(this.currentUser!);
+  private getUserOnline(): void {
+    if (!this.currentUser) return;
+
+    try {
+      this._notificationUsersService.addCurrentUserStatus(this.currentUser);
+    } catch (error) {
+      console.error('Error adding user status:', error);
+      this.error.set('Failed to update user status');
+    }
   }
 
   ngOnDestroy(): void {
