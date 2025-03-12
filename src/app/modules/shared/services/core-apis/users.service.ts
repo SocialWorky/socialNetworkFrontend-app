@@ -61,6 +61,13 @@ export class UserService {
     );
   }
 
+  getMyFriends(_id: string): Observable<User[]> {
+    const url = `${this.baseUrl}/user/myfriends/${_id}`;
+    return this.http.get<User[]>(url).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   getFriendsPending(_id: string, _idRequest: string): Observable<{ status: boolean; _id: string }> {
     const url = `${this.baseUrl}/user/pending-friend/${_id}/${_idRequest}`;
     return this.http.get<{ status: boolean; _id: string }>(url).pipe(

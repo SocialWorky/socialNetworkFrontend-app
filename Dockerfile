@@ -35,6 +35,10 @@ FROM nginx:alpine
 RUN mkdir -p /usr/share/nginx/html/assets/icons/
 COPY --from=generate-icons /app/src/assets/icons /usr/share/nginx/html/assets/icons
 COPY --from=prod /app/www /usr/share/nginx/html
+
+RUN chmod -R 755 /usr/share/nginx/html && \
+    chown -R nginx:nginx /usr/share/nginx/html
+
 COPY nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
