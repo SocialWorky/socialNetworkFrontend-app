@@ -1,24 +1,31 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import * as _ from 'lodash';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { MessageService } from '../../services/message.service';
 import { AuthService } from '@auth/services/auth.service';
 import { CreateMessage, Message } from '../../interfaces/message.interface';
 import { User } from '@shared/interfaces/user.interface';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { GifSearchComponent } from '@shared/modules/gif-search/gif-search.component';
+import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';
+import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
+import { environment } from '@env/environment';
+import { LoadingController } from '@ionic/angular';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
   selector: 'worky-message-side-rigth',
   templateUrl: './message-side-rigth.component.html',
   styleUrls: ['./message-side-rigth.component.scss'],
 })
-export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterViewInit, OnInit{
+export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterViewChecked, OnInit{
 
   WorkyButtonType = WorkyButtonType;
 
@@ -26,7 +33,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
   userIdMessage: string = '';
 
-  currentUser = this._authService.getDecodedToken()!;
+  currentUser: Token | null = this._authService.getDecodedToken();
 
   messages: Message[] = [];
 
@@ -39,6 +46,10 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   showEmojiPicker: boolean = false;
 
   sendMessagesLoader: boolean = false;
+
+  plainText = 'plainText';
+
+  selectedFiles: File[] = [];
 
   get isMobile(): boolean {
     return this._deviceDetectionService.isMobile();
@@ -59,20 +70,27 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     private _activatedRoute: ActivatedRoute,
     private _notificationMessageChatService: NotificationMessageChatService,
     private _notificationService: NotificationService,
-    private _deviceDetectionService: DeviceDetectionService
-  ) {}
+    private _deviceDetectionService: DeviceDetectionService,
+    private _dialog: MatDialog,
+    private _fileUploadService: FileUploadService,
+    private _loadingCtrl: LoadingController,
+  ) {
+    if (!this._authService.isAuthenticated()) return;
+    this.currentUser = this._authService.getDecodedToken();
+  }
 
   async ngOnInit() {
+    if (!this._authService.isAuthenticated()) return;
     this.userIdMessage = await this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
     if(this.userIdMessage) this.userId = this.userIdMessage;
 
-    if (this.userIdMessage && this.currentUser.id) {
-      this.loadMessagesWithUser(this.currentUser.id, this.userIdMessage);
+    if (this.userIdMessage && this.currentUser!.id) {
+      await this.loadMessagesWithUser(this.currentUser!.id, this.userIdMessage);
     }
 
     if (this.isMobile) {
-      if (this.userIdMessage && this.currentUser.id) {
-        this.loadMessagesWithUser(this.currentUser.id, this.userIdMessage);
+      if (this.userIdMessage && this.currentUser!.id) {
+        await this.loadMessagesWithUser(this.currentUser!.id, this.userIdMessage);
       }
       this._cdr.markForCheck();
     }
@@ -98,19 +116,28 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
           }
         }
       });
-    this.loadMessagesWithUser(this.currentUser.id, this.userId);
+    this.loadMessagesWithUser(this.currentUser!.id, this.userId);
     this.markMessagesAsRead();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['userId'] && !changes['userId'].isFirstChange()) {
-      this.loadMessagesWithUser(this.currentUser.id, changes['userId'].currentValue);
+      this.loadMessagesWithUser(this.currentUser!.id, changes['userId'].currentValue);
       this._cdr.markForCheck();
       this.scrollToBottom();
     }
   }
 
-  ngAfterViewInit() {
+  onKeyDown(event: KeyboardEvent): void {
+    if (!this.isMobile) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        this.sendMessage(this.plainText);
+      }
+    }
+  }
+
+  ngAfterViewChecked(): void {
     this.scrollToBottom();
   }
 
@@ -123,12 +150,16 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     if (userIdMessage === currentUserId) return;
     this.loadMessages = true;
     await this.getUser(userIdMessage);
-    this._messageService.getConversationsWithUser(currentUserId, userIdMessage).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._messageService.getConversationsWithUser(currentUserId, userIdMessage)
+      .pipe(
+        takeUntil(this.unsubscribe$)
+       )
+      .subscribe({
       next: (messages: Message[]) => {
         this.messages = messages;
+        this.scrollToBottom();
         this._cdr.markForCheck();
         this.loadMessages = false;
-        this.scrollToBottom();
       },
       error: (error) => {
         console.error('Error loading messages:', error);
@@ -139,7 +170,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
   private async getUser(userId: string) {
     this.user = [];
-    this._user.getUserById(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._user.getUserById(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (user: User) => {
         this.user = [user];
         this._cdr.markForCheck();
@@ -175,14 +206,16 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     this.showEmojiPicker = false;
   }
 
- async sendMessage() {
-    if (this.newMessage.trim() === '') return;
+ async sendMessage(type: string, content?: string) {
+    if (this.newMessage.trim() === '' && type === this.plainText) return;
+
+    const messageContent = type === this.plainText ? this.newMessage : content;
 
     this.sendMessagesLoader = true;
 
     const message: CreateMessage = {
       receiverId: this.userId,
-      content: this.newMessage,
+      content: messageContent !== undefined ? messageContent : this.newMessage,
       type: 'text'
     };
 
@@ -191,6 +224,12 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
         this._notificationMessageChatService.sendNotificationMessageChat(msg);
         this._notificationService.sendNotification();
         this.newMessage = '';
+
+        const textarea = document.querySelector('textarea');
+        if (textarea) {
+          textarea.style.height = '40px';
+        }
+
         this.scrollToBottom();
         this.sendMessagesLoader = false;
         this._cdr.markForCheck();
@@ -203,15 +242,15 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   }
 
   private scrollToBottom(): void {
-    if (!this.userId || !this.messageContainer) return;
     setTimeout(() => {
-      try {
-        this.messageContainer!.nativeElement.scrollTop = this.messageContainer!.nativeElement.scrollHeight;
-        this._cdr.markForCheck();
-      } catch(err) {
-        console.error('Error scrolling to bottom:', err);
+      if (this.messageContainer) {
+        try {
+          this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
+        } catch (err) {
+          console.error('Error scrolling to bottom:', err);
+        }
       }
-    }, 1500);
+    }, 2000);
   }
 
   async markMessagesAsRead() {
@@ -263,4 +302,59 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     textarea.style.height = '40px';
     textarea.style.height = `${Math.min(textarea.scrollHeight, 96)}px`;
   }
+
+  openGifSearch() {
+    const dialogConfig = new MatDialogConfig();
+
+    dialogConfig.width = '540px';
+    dialogConfig.height = '500px';
+    dialogConfig.panelClass = 'gifSearch-modal-container';
+
+    const dialogRef = this._dialog.open(GifSearchComponent, dialogConfig);
+
+    dialogRef.componentInstance.gifSelected.subscribe((gifUrl: string) => {
+      this.sendMessagesLoader = true;
+      this.onGifSelected(gifUrl);
+      dialogRef.close();
+    });
+  }
+
+  onGifSelected(gifUrl: string) {
+    this.sendMessage('gifContent', `![GIF](${gifUrl})`);
+  }
+
+  openUploadModal() {
+    const dialogRef = this._dialog.open(ImageUploadModalComponent, {
+      data: {
+        maxFiles: 1,
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.selectedFiles = result;
+        this.uploadFiles('messages');
+      }
+    });
+  }
+
+  private async uploadFiles(folder: string) {
+    const loadingUploadImage = await this._loadingCtrl.create({
+      message: 'Subiendo imagen...',
+    });
+
+    loadingUploadImage.present();
+
+    return this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$)).subscribe({
+          next: (file) => {
+            const imagenSaved = environment.APIFILESERVICE + 'messages/' + file[0].filenameCompressed;
+            this.sendMessage('imageContent', `![Image](${imagenSaved})`);
+            loadingUploadImage.dismiss();
+          },
+          error: (error) => {
+            console.error('Error uploading files:', error);
+          }
+        });
+  }
+
 }

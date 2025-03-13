@@ -1,15 +1,13 @@
 import { Component, OnInit, ChangeDetectorRef, Output, EventEmitter, OnDestroy } from '@angular/core';
-import { Location } from '@angular/common';
 import { forkJoin, Subject, takeUntil } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 import { User } from '@shared/interfaces/user.interface';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 import { MessageService } from '../../services/message.service';
-import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
 import { Message } from '../../interfaces/message.interface';
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
+import { MessageStateService } from '../../services/message-state.service';
 
 @Component({
   selector: 'worky-message-side-left',
@@ -19,212 +17,131 @@ import { NotificationService } from '@shared/services/notifications/notification
 export class MessageSideLeftComponent implements OnInit, OnDestroy {
   @Output() userIdSelected = new EventEmitter<string>();
 
-  users: Array<{ user: User, lastMessage: string, createAt: Date, unreadMessagesCount: number }> = [];
+  users$!: any;
 
-  currentUserId: string = '';
-
-  userIdMessage: string = '';
-
-  unreadMessagesCount = 0;
-
-  currentUser = this._authService.getDecodedToken()!;
+  usersMessages: any[] = [];
 
   loadUsers = true;
 
-  get isMobile(): boolean {
-    return this._deviceDetectionService.isMobile();
-  }
-
-  private unsubscribe$ = new Subject<void>();
+  private _unsubscribe$ = new Subject<void>();
 
   constructor(
-    private userService: UserService,
+    private _messageStateService: MessageStateService,
     private _authService: AuthService,
-    private _cdr: ChangeDetectorRef,
-    private _activatedRoute: ActivatedRoute,
     private _messageService: MessageService,
+    private _notificationService: NotificationService,
+    private _userService: UserService,
     private _notificationMessageChatService: NotificationMessageChatService,
-    private _deviceDetectionService: DeviceDetectionService,
-    private _router: Router,
-    private _location: Location,
-    private _notificationService: NotificationService
-  ) {
-    this.currentUserId = this._authService.getDecodedToken()!.id;
-    this._cdr.markForCheck();
-  }
+    private _cdr: ChangeDetectorRef
+  ) {}
 
-  async ngOnInit(): Promise<void> {
-    this.userIdMessage = this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
-    this.currentUserId = this._authService.getDecodedToken()!.id;
+  ngOnInit(): void {
+    if (!this._authService.isAuthenticated()) return;
+
+    this.users$ = this._messageStateService.usersWithConversations$;
+
+    this.users$.pipe(takeUntil(this._unsubscribe$)).subscribe((users: any) => {
+      this.usersMessages = users;
+    });
+
+    this.loadUsersWithConversations();
 
     this._notificationMessageChatService.notificationMessageChat$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe({
-        next: (message: any) => {
-          if (message.senderId === this.currentUserId || message.receiverId === this.currentUserId) {
-            this.updateUserMessage(message);
-          }
+      .pipe(takeUntil(this._unsubscribe$))
+      .subscribe((message: any) => {
+        if (message.senderId === this._authService.getDecodedToken()?.id || message.receiverId === this._authService.getDecodedToken()?.id) {
+          this.updateUserMessage(message);
         }
       });
 
-    this._notificationService.notification$.pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._notificationService.notification$.pipe(takeUntil(this._unsubscribe$)).subscribe({
       next: (data: any) => {
         if (data && data[0]?.chatId) {
-          const userIdToUpdate = data[0].senderId === this.currentUserId ? data[0].receiverId : data[0].senderId;
-          this.loadUnreadMessagesCount(data[0].chatId, userIdToUpdate);
-          this._cdr.markForCheck();
+          const userIdToUpdate = data[0].senderId === this._authService.getDecodedToken()?.id ? data[0].receiverId : data[0].senderId;
+          this._userService.getUserById(userIdToUpdate).pipe(takeUntil(this._unsubscribe$)).subscribe((user: User) => {
+            if (user) {
+              this.loadUnreadMessagesCount(data[0].chatId, data[0].content, user);
+            }
+          });
         }
-      }
+      },
     });
-
-    this.getUserMessages();
   }
 
-  ngOnDestroy() {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
+  ngOnDestroy(): void {
+    this._unsubscribe$.next();
+    this._unsubscribe$.complete();
   }
 
-  selectUser(userId: string) {
-    if (this.isMobile) {
-      this._router.navigate(['/messages/', userId]);
-    } else {
-      const urlWithoutUserId = this._router.url.split('/').slice(0, 2).join('/');
-      this._location.replaceState(urlWithoutUserId);
-    }
-    this.userIdSelected.emit(userId);
-  }
-
-  private getUserMessages() {
-    this._messageService.getUsersWithConversations().pipe(
-      takeUntil(this.unsubscribe$)
-    ).subscribe({
+  private loadUsersWithConversations(): void {
+    this._messageService.getUsersWithConversations().subscribe({
       next: (userIds: string[]) => {
-        if (userIds.length === 0) return;
-        this.loadUsers = true;
 
-        const userObservables = userIds.map(userId => this.userService.getUserById(userId));
+        if (userIds.length === 0) {
+          this.loadUsers = false;
+          this._cdr.markForCheck();
+          return;
+        }
+
+        const userObservables = userIds.map(userId => this._userService.getUserById(userId));
         const messageObservables = userIds.map(userId => this._messageService.getLastConversationWithUser(userId));
 
-        forkJoin(userObservables).pipe(takeUntil(this.unsubscribe$)).subscribe({
-          next: (users: User[]) => {
-            forkJoin(messageObservables).pipe(takeUntil(this.unsubscribe$)).subscribe({
-              next: (messages: Message[]) => {
-                this.users = users.map((user, index) => ({
+        forkJoin([forkJoin(userObservables), forkJoin(messageObservables)]).subscribe({
+          next: ([users, messages]: [User[], Message[]]) => {
+            const unreadMessagesObservables = users.map((user, index) =>
+              this._messageService.getUnreadMessagesCount(messages[index].chatId, user._id)
+            );
+
+            forkJoin(unreadMessagesObservables).subscribe({
+              next: (unreadCounts: number[]) => {
+                const updatedUsers = users.map((user, index) => ({
                   user,
                   lastMessage: messages[index].content,
                   createAt: messages[index].timestamp,
-                  unreadMessagesCount: 0
+                  unreadMessagesCount: unreadCounts[index],
                 }));
 
-                this.loadUnreadMessagesCounts(userIds, messages.map(msg => msg.chatId));
+                this._messageStateService.updateUsersWithConversations(updatedUsers);
                 this.loadUsers = false;
                 this._cdr.markForCheck();
               },
-              error: (e: any) => {
-                console.error('Error fetching last messages', e);
-              }
+              error: (error: any) => console.error('Error fetching unread messages counts', error),
             });
           },
-          error: (e: any) => {
-            console.error('Error fetching users', e);
-          }
+          error: (error: any) => console.error('Error fetching users or messages', error),
         });
       },
-      error: (e: any) => {
-        console.error('Error fetching users with conversations', e);
-      }
+      error: (error: any) => console.error('Error fetching users with conversations', error),
     });
   }
 
-  private updateUserMessage(message: any) {
-    const userIdToUpdate = message.senderId === this.currentUserId ? message.receiverId : message.senderId;
-    const userIndex = this.users.findIndex(u => u.user._id === userIdToUpdate);
+  private updateUserMessage(message: any): void {
+    const userIdToUpdate = message.senderId === this._authService.getDecodedToken()?.id ? message.receiverId : message.senderId;
 
-    if (userIndex !== -1) {
-      // Update the last message and unread count
-      this._messageService.getLastConversationWithUser(userIdToUpdate).pipe(takeUntil(this.unsubscribe$)).subscribe({
-        next: (lastMessage: Message) => {
-          this.users[userIndex].lastMessage = lastMessage.content;
-          this.users[userIndex].createAt = lastMessage.timestamp;
-          this.loadUnreadMessagesCount(lastMessage.chatId, userIdToUpdate);
-          this._cdr.markForCheck();
-        },
-        error: (e: any) => {
-          console.error('Error fetching last message', e);
-        }
-      });
-    } else {
-      // If the user is not in the list, add them
-      this.userService.getUserById(userIdToUpdate).pipe(takeUntil(this.unsubscribe$)).subscribe({
-        next: (user: User) => {
-          this._messageService.getLastConversationWithUser(userIdToUpdate).pipe(takeUntil(this.unsubscribe$)).subscribe({
-            next: (lastMessage: Message) => {
-              this.users.push({
-                user,
-                lastMessage: lastMessage.content,
-                createAt: lastMessage.timestamp,
-                unreadMessagesCount: 0
-              });
-              this.loadUnreadMessagesCount(lastMessage.chatId, userIdToUpdate);
-              this._cdr.markForCheck();
-            },
-            error: (e: any) => {
-              console.error('Error fetching last message', e);
-            }
-          });
-        },
-        error: (e: any) => {
-          console.error('Error fetching user', e);
-        }
-      });
-    }
-  }
+    this._messageService.getLastConversationWithUser(userIdToUpdate).subscribe({
+      next: (lastMessage: Message) => {
 
-  private loadUnreadMessagesCounts(userIds: string[], chatIds: string[]) {
-    const unreadMessagesObservables = userIds.map((userId, index) => this._messageService.getUnreadMessagesCount(chatIds[index], userId));
-
-    forkJoin(unreadMessagesObservables).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (unreadCounts: number[]) => {
-        unreadCounts.forEach((count, index) => {
-          this.users[index].unreadMessagesCount = count;
+        this._userService.getUserById(userIdToUpdate).pipe(takeUntil(this._unsubscribe$)).subscribe({
+          next: (user: User) => {
+            this._messageService.getUnreadMessagesCount(lastMessage.chatId, user._id).pipe(takeUntil(this._unsubscribe$)).subscribe({
+              next: (unreadMessagesCount: number) => {
+                this._messageStateService.addUserOrUpdate(user, lastMessage.content, lastMessage.timestamp, unreadMessagesCount);
+              },
+              error: (error: any) => console.error('Error fetching unread messages count', error),
+            });
+          },
+          error: (error: any) => console.error('Error fetching user', error),
         });
-        this._cdr.markForCheck();
       },
-      error: (e: any) => {
-        console.error('Error fetching unread messages counts', e);
-      }
+      error: (error: any) => console.error('Error fetching last message', error),
     });
   }
 
-  private loadUnreadMessagesCount(chatId: string, userId: string) {
-    this._messageService.getUnreadMessagesCount(chatId, userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
+  private loadUnreadMessagesCount(chatId: string, lastMessage: string, user: User): void {
+    this._messageService.getUnreadMessagesCount(chatId, user._id).pipe(takeUntil(this._unsubscribe$)).subscribe({
       next: (unreadMessagesCount: number) => {
-        const userIndex = this.users.findIndex(u => u.user._id === userId);
-        if (userIndex !== -1) {
-          this.users[userIndex].unreadMessagesCount = unreadMessagesCount;
-          this._cdr.markForCheck();
-        }
+        this._messageStateService.addUserOrUpdate(user, lastMessage, new Date(), unreadMessagesCount);
       },
-      error: (e: any) => {
-        console.error('Error fetching unread messages count', e);
-      }
     });
-  }
-
-  formatDate(date: Date): string {
-    return new Intl.DateTimeFormat('es-CL', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }).format(new Date(date));
-  }
-
-  formatTime(date: Date): string {
-    return new Intl.DateTimeFormat('es-CL', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    }).format(new Date(date));
   }
 }

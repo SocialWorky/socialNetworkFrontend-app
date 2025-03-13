@@ -1,0 +1,71 @@
+<div class="bg-gray-900 text-white py-12">
+    <div class="max-w-lg mx-auto bg-gray-800 p-8 rounded-lg shadow-lg">
+        <h2 class="text-3xl font-semibold mb-6">Crear Nueva Invitación</h2>
+        <form [formGroup]="invitationsForm" (ngSubmit)="createInvitations()">
+            <div class="mb-6">
+                <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Email:</label>
+                <input formControlName="email" id="email" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                <div *ngIf="invitationsForm.controls['email'].invalid && invitationsForm.controls['email'].touched" class="text-red-500 text-sm mt-2">El email es requerido.</div>
+            </div>
+            <div class="mt-6">
+                <div *ngIf="loadInvitationsButtons" class="loader"></div>
+                <button *ngIf="!loadInvitationsButtons" type="submit" [disabled]="invitationsForm.invalid" class="w-full bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600">Enviar Invitación</button>
+            </div>
+        </form>
+    </div>
+
+
+  <div class="mt-4 mx-4">
+    <div class="w-full overflow-hidden rounded-lg shadow-xs">
+      <div class="w-full overflow-x-auto">
+
+        <div class="content-header-title">
+          <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Invitaciones Enviadas</h2>
+        </div>
+
+        <table class="w-full">
+          <thead>
+            <tr class="header-tr">
+              <th class="px-4 py-3">ID</th>
+              <th class="px-4 py-3">CODIGO</th>
+              <th class="px-4 py-3">EMAIL</th>
+              <th class="px-4 py-3">FECHA ENVIO</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+
+            @for(invitation of listInvitationsCode; track $index) {
+
+              <tr class="body-tr">
+                <td class="px-4 py-3">
+                  <div class="flex items-center text-sm">
+                      <p class="font-semibold">{{ invitation._id }}</p>
+                  </div>
+                </td>
+
+                <td class="px-4 py-3 text-xs">
+                  <span class="px-2 py-1 font-semibold leading-tight text-green-700  rounded-full dark:text-green-100"> 
+                    {{ invitation.code  }} </span>
+                </td>
+
+                <td class="px-4 py-3 text-sm">
+                  <span> {{ invitation.email }} </span>
+                </td>
+
+                <td class="px-4 py-3 text-sm">{{ invitation.createdAt | date }}</td>
+              </tr>
+
+            }
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+

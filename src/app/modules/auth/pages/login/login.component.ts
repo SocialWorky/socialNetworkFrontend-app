@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { async, last, Subject, takeUntil } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -13,12 +13,14 @@ import { LoginData } from '@auth/interfaces/login.interface';
 import { translations } from '@translations/translations';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { AuthService } from '@auth/services/auth.service';
-import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
-import { environment } from '@env/environment';
 import { ResetPasswordModalComponent } from './reset-password-modal/reset-password-modal.component';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { SocketService } from '@shared/services/socket.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
+import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
+import { MetaTagService } from '@shared/services/meta-tag.service';
+import { LoginMethods } from './interfaces/login.interface';
 
 @Component({
   selector: 'worky-login',
@@ -36,7 +38,11 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
   googleLoginSession = localStorage.getItem('googleLogin');
 
-  mailSendDataValidate: MailSendValidateData = {} as MailSendValidateData;
+  loginMethods: LoginMethods | undefined;
+
+  private readonly storageThreshold = 24 * 60 * 60 * 1000; // 24 hours
+
+  private destroy$ = new Subject<void>();
 
   @ViewChild('emailInput') emailInput!: ElementRef;
 
@@ -56,13 +62,26 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     private _deviceDetectionService: DeviceDetectionService,
     private _socketService: SocketService,
     private _notificationUsersService: NotificationUsersService,
+    private _emailNotificationService: EmailNotificationService,
+    private _configService: ConfigService,
+    private _metaTagService: MetaTagService,
   ) {
+    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
+      const title = configData.settings.title + ' - Login';
+      const description = configData.settings.description;
+      const imageUrl = configData.settings.logoUrl;
+      const urlSite = configData.settings.urlSite;
+      this.loginMethods = JSON.parse(configData.settings.loginMethods);
+      this._metaTagService.updateMetaTags(title, description, imageUrl, urlSite );
+      this._cdr.markForCheck();
+    });
     if (this.token) {
       this._router.navigate(['/home']);
     }
   }
 
   ngOnInit() {
+    this.checkLastLogin();
     this.checkSessionGoogle();
     this.loginForm = this._formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
@@ -93,6 +112,21 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+  }
+
+  private checkLastLogin() {
+    const lastLogin = localStorage.getItem('lastLogin');
+    if (lastLogin) {
+      const lastLoginDate = new Date(lastLogin);
+      const currentDate = new Date();
+      const difference = currentDate.getTime() - lastLoginDate.getTime();
+      if (difference > this.storageThreshold) {
+        localStorage.clear();
+        sessionStorage.clear();
+      } else {
+        localStorage.setItem('lastLogin', new Date().toISOString());
+      }
+    }
   }
 
   async checkSessionGoogle() {
@@ -139,7 +173,13 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
 
+          localStorage.setItem('lastLogin', new Date().toISOString());
+
+          if (!this._authService.isAuthenticated()) return;
+
           const tokenResponse = await this._authService.getDecodedToken()!;
+
+          localStorage.setItem('isTooltipActive', tokenResponse.isTooltipActive.toString());
 
           this._socketService.connectToWebSocket(tokenResponse);
 
@@ -202,59 +242,58 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     const loading = await this._loadingCtrl.create({
       message: translations['login.messageLoading'],
     });
-
     await loading.present();
 
-    const loginDataGoogle: any = this._authGoogleService.getProfile();
+    try {
+      const loginDataGoogle: any = this._authGoogleService.getProfile();
+      if (!loginDataGoogle) {
+        await this._authGoogleService.login();
+        return;
+      }
 
-    if (!loginDataGoogle) {
-      await this._authGoogleService.login();
-      return;
+      localStorage.setItem('googleLogin', JSON.stringify(loginDataGoogle));
+      localStorage.setItem('lastLogin', new Date().toISOString());
+
+      const dataGoogle = {
+        token: sessionStorage.getItem('id_token') || '',
+        username: await this._authService.generateUserName(
+          loginDataGoogle.email,
+          loginDataGoogle.given_name,
+          loginDataGoogle.family_name
+        ),
+        name: loginDataGoogle.given_name,
+        lastName: loginDataGoogle.family_name,
+        email: loginDataGoogle.email,
+        password: await this._authService.generatePassword(),
+      };
+
+      const response = await this._authApiService.loginGoogle(dataGoogle).toPromise() as { token: string };
+      localStorage.setItem('token', response?.token);
+
+      if (!this._authService.isAuthenticated()) return;
+
+      const tokenResponse = this._authService.getDecodedToken()!;
+
+      localStorage.setItem('isTooltipActive', tokenResponse.isTooltipActive.toString());
+
+      if (!tokenResponse.avatar) {
+        const userId = tokenResponse.id!;
+        await this._authApiService
+          .avatarUpdate(userId, loginDataGoogle.picture, response?.token)
+          .toPromise();
+        await this._authService.renewToken(userId);
+      }
+
+      this._socketService.connectToWebSocket(tokenResponse);
+      this._notificationUsersService.loginUser();
+
+      this._cdr.markForCheck();
+      this._router.navigate(['/home']);
+    } catch (error) {
+      console.error('Error during Google login:', error);
+    } finally {
+      loading.dismiss();
     }
-
-    localStorage.setItem('googleLogin', JSON.stringify(loginDataGoogle));
-
-    const dataGoogle = {
-      token: sessionStorage.getItem('id_token') || '',
-      username: await this._authService.generateUserName(loginDataGoogle.email, loginDataGoogle.given_name, loginDataGoogle.family_name),
-      name: loginDataGoogle.given_name,
-      lastName: loginDataGoogle.family_name,
-      email: loginDataGoogle.email,
-      password: await this._authService.generatePassword(),
-    };
-
-    await this._authApiService.loginGoogle(dataGoogle).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: async (response: any) => {
-
-        localStorage.setItem('token', response.token);
-
-        const userId = await this._authService.getDecodedToken()?.id!;
-
-        await this._authApiService.avatarUpdate(userId, loginDataGoogle.picture, response.token).pipe(takeUntil(this.unsubscribe$)).subscribe({
-          next: async (response: any) => {
-            if (response) {
-              await this._authService.renewToken(userId);
-              this.token = localStorage.getItem('token');
-              loading.dismiss();
-              this._notificationUsersService.loginUser();
-              this._cdr.markForCheck();
-              this._router.navigate(['/home']);
-            }
-          },
-          error: (e: any) => {
-            console.log(e);
-            loading.dismiss();
-            this._router.navigate(['/home']);
-          }
-        });
-
-          const token = this._authService.getDecodedToken()!;
-          this._socketService.connectToWebSocket(token);
-          this._notificationUsersService.loginUser();
-      },
-    });
-
-    loading.dismiss();
   }
 
   async validateEmailWithToken(tokenValidate: string) {
@@ -314,15 +353,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/reset-password/`;
-    this.mailSendDataValidate.subject = translations['email.resetPasswordSubject'];
-    this.mailSendDataValidate.title = translations['email.resetPasswordTitle'];
-    this.mailSendDataValidate.greet = translations['email.resetPasswordGreet'];
-    this.mailSendDataValidate.message = translations['email.resetPasswordMessage'];
-    this.mailSendDataValidate.subMessage = translations['email.resetPasswordSubMessage'];
-    this.mailSendDataValidate.buttonMessage = translations['email.resetPasswordButtonMessage'];
-    this.mailSendDataValidate.template = TemplateEmail.FORGOT_PASSWORD;
-    this.mailSendDataValidate.email = email;
+    const emailResponse = await this._emailNotificationService.sendEmailToRecoverPassword(email);
 
     const loading = await this._loadingCtrl.create({
       message: translations['login.messageResetPasswordLoading'],
@@ -330,7 +361,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
     await loading.present();
 
-    await this._authApiService.forgotPassword(this.mailSendDataValidate).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._authApiService.forgotPassword(emailResponse).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: any) => {
         if (response && response.message) {
           this._alertService.showAlert(

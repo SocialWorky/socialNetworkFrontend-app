@@ -6,33 +6,25 @@ import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.int
 import { translations } from '@translations/translations';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { AuthService } from '@auth/services/auth.service';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 import { Subject, takeUntil } from 'rxjs';
 import { User } from '@shared/interfaces/user.interface';
 import { CustomReactionList } from '@admin/interfaces/customReactions.interface';
 import { CenterSocketNotificationsService } from '@shared/services/notifications/centerSocketNotifications.service';
+import { Token } from '@shared/interfaces/token.interface';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class EmailNotificationService {
-  private baseUrl: string;
-
-  private token: string;
+  private baseUrl: string | undefined;
 
   private mailSendDataValidate: MailSendValidateData = {} as MailSendValidateData;
 
   private destroy$ = new Subject<void>();
 
-  dataUser = this._authService.getDecodedToken();
-
-  private getHeaders(token: string): HttpHeaders {
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-    return headers;
-  }
+  dataUser: Token | null = null;
 
   constructor(
     private http: HttpClient,
@@ -40,19 +32,25 @@ export class EmailNotificationService {
     private _userService: UserService,
     private _centerSocketNotificationsService: CenterSocketNotificationsService
   ) {
+    if(!this._authService.isAuthenticated()) return;
     this.baseUrl = environment.API_URL;
-    this.token = localStorage.getItem('token') || '';
+    this.dataUser = this._authService.getDecodedToken();
   }
 
-  ngOnDestroy() {
+  async ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    this.dataUser = await this._authService.getDecodedToken();
   }
 
   sendNotification(data: MailSendValidateData) {
     const url = `${this.baseUrl}/email/sendNotification`;
-    const headers = this.getHeaders(this.token);
-    return this.http.post(url, data, { headers });
+    return this.http.post(url, data);
+  }
+
+  private sendEmailNotification(data: MailSendValidateData) {
+    const url = `${this.baseUrl}/email/sendEmail`;
+    return this.http.post(url, data);
   }
 
   private async userById(_idUser: string): Promise<User>{
@@ -80,9 +78,35 @@ export class EmailNotificationService {
     this.mailSendDataValidate.buttonMessage = translations['email.sendReportPublicationButtonMessage'];
     this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
     this.mailSendDataValidate.email = this.dataUser?.email;
+    this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
 
     this.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();
 
+  }
+
+  sendGeneralEmailing(
+      email: string,
+      subject: string,
+      title: string,
+      greet: string,
+      message: string,
+      subMessage: string,
+      buttonMessage: string,
+      urlSlug: string,
+      template: TemplateEmail = TemplateEmail.EMAIL
+    ) {
+    this.mailSendDataValidate.url = `${environment.BASE_URL}/${urlSlug}`;
+    this.mailSendDataValidate.subject = subject;
+    this.mailSendDataValidate.title = title;
+    this.mailSendDataValidate.greet = greet;
+    this.mailSendDataValidate.message = message;
+    this.mailSendDataValidate.subMessage = subMessage;
+    this.mailSendDataValidate.buttonMessage = buttonMessage;
+    this.mailSendDataValidate.template = template;
+    this.mailSendDataValidate.email = email;
+    this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
+
+    this.sendEmailNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();
   }
 
   //TODO: Implementa notificaciones por email y sistema -> solicitud de amistad.
@@ -96,8 +120,9 @@ export class EmailNotificationService {
       this.mailSendDataValidate.subMessage = `${translations['email.sendFriendRequestSubMessage']} ${this.dataUser?.name}`;
       this.mailSendDataValidate.buttonMessage = `${translations['email.sendFriendRequestButtonMessage']} ${this.dataUser?.name}`;
       this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
+      this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
       this.mailSendDataValidate.email = user.email;
-      
+
       this._centerSocketNotificationsService.senFriendRequestNotification(user);
 
       this.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();
@@ -115,6 +140,7 @@ export class EmailNotificationService {
       this.mailSendDataValidate.subMessage = `${translations['email.acceptFriendRequestSubMessage']} ${this.dataUser?.name}`;
       this.mailSendDataValidate.buttonMessage = `${translations['email.acceptFriendRequestButtonMessage']} ${this.dataUser?.name}`;
       this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
+      this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
       this.mailSendDataValidate.email = user.email;
 
       this._centerSocketNotificationsService.acceptFriendRequestNotification(user);
@@ -137,11 +163,44 @@ export class EmailNotificationService {
     this.mailSendDataValidate.buttonMessage = 'Ver publicación';
     this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
     this.mailSendDataValidate.email = publication?.author.email;
+    this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
 
     this._centerSocketNotificationsService.reactionInPublicationNotification(publication, reaction);
 
     this.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();
 
+  }
+
+  //TODO: Implementa notificacion por email para recuperar contraseña.
+  async sendEmailToRecoverPassword(email: string) {
+    this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/reset-password/`;
+    this.mailSendDataValidate.subject = translations['email.resetPasswordSubject'];
+    this.mailSendDataValidate.title = translations['email.resetPasswordTitle'];
+    this.mailSendDataValidate.greet = translations['email.resetPasswordGreet'];
+    this.mailSendDataValidate.message = translations['email.resetPasswordMessage'];
+    this.mailSendDataValidate.subMessage = translations['email.resetPasswordSubMessage'];
+    this.mailSendDataValidate.buttonMessage = translations['email.resetPasswordButtonMessage'];
+    this.mailSendDataValidate.template = TemplateEmail.FORGOT_PASSWORD;
+    this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
+    this.mailSendDataValidate.email = email;
+    return this.mailSendDataValidate;
+  }
+
+  //TODO: Implementa notificacion por email para resetear contraseña.
+  async sendEmailToResetPassword(email: string, token: string, password: string) {
+    this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/login`;
+    this.mailSendDataValidate.subject = translations['email.confirmResetPasswordSubject'];
+    this.mailSendDataValidate.title = translations['email.confirmResetPasswordTitle'];
+    this.mailSendDataValidate.greet = translations['email.confirmResetPasswordGreet'];
+    this.mailSendDataValidate.message = translations['email.confirmResetPasswordMessage'];
+    this.mailSendDataValidate.subMessage = translations['email.validateEmailSubMessage'];
+    this.mailSendDataValidate.buttonMessage = translations['email.confirmResetPasswordButtonMessage'];
+    this.mailSendDataValidate.token = token;
+    this.mailSendDataValidate.password = password;
+    this.mailSendDataValidate.template = TemplateEmail.RESET_PASSWORD;
+    this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
+    this.mailSendDataValidate.email = email;
+    return this.mailSendDataValidate;
   }
 
 }

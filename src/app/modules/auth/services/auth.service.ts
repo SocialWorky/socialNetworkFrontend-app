@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { Token } from '../../shared/interfaces/token.interface';
 import { AuthGoogleService } from './auth-google.service';
-import { UserService } from '../../shared/services/users.service';
+import { UserService } from '../../shared/services/core-apis/users.service';
 
 @Injectable({
   providedIn: 'root'
@@ -26,13 +26,23 @@ export class AuthService {
     if (token) {
       const decodedToken: any = jwtDecode(token);
       const currentTime = Math.floor(Date.now() / 1000);
+
+      const currentUser = this._userService.getUserById(decodedToken._id);
+      if (!currentUser) {
+        this.clearSession();
+        this._router.navigate(['/auth/login']);
+        return false;
+      }
+
       if (decodedToken && decodedToken.exp && (decodedToken.exp > currentTime)) {
         return true;
       } else {
+        this._router.navigate(['/auth/login']);
         this.clearSession();
         return false;
       }
     } else {
+      this._router.navigate(['/auth/login']);
       return false;
     }
   }
@@ -53,11 +63,13 @@ export class AuthService {
 
   getDecodedToken(): Token | null {
     const token = localStorage.getItem('token');
-    if (token) {
-      return jwtDecode(token);
-    } else {
+    if (!token) {
+      this._router.navigate(['/auth/login']);
+      this.clearSession();
       return null;
     }
+    return jwtDecode(token);
+
   }
 
   getUseFromToken(token: string): Token {
@@ -97,14 +109,13 @@ export class AuthService {
   }
 
   logout() {
-    if (this.googleLoginSession) this._authGoogleService.logout();
+    this._authGoogleService.logout();
     this.clearSession();
-    this._router.navigate(['/auth']);
   }
 
   private clearSession() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('googleLogin');
+    localStorage.clear();
+    sessionStorage.clear();
     this.router.navigate(['/auth']);
   }
 }

@@ -2,10 +2,13 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestro
 import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
 import { Subject, takeUntil } from 'rxjs';
-;
+
 import { getTranslationsLanguage } from '../translations/translations';
-import { ConfigService } from '@shared/services/config.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
+import { LoadingService } from '@shared/services/loading.service';
+import { AuthService } from '@auth/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'worky-root',
@@ -14,18 +17,24 @@ import { NotificationUsersService } from '@shared/services/notifications/notific
 })
 export class AppComponent implements OnInit, OnDestroy {
 
+  deferredPrompt: any;
+
+  showInstallPrompt = false;
+
   private destroy$ = new Subject<void>();
+
+  private isPromptHandled = false;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private _renderer: Renderer2,
     private _configService: ConfigService,
     private _titleService: Title,
-    private _cdr: ChangeDetectorRef,
-    private _notificationUsersService: NotificationUsersService
+    private _notificationUsersService: NotificationUsersService,
+    private _loadingService: LoadingService,
   ) {
     this._notificationUsersService.setupInactivityListeners();
-  } 
+  }
 
   ngOnInit(): void {
     this.document.body.classList.add('light-theme');
@@ -35,6 +44,10 @@ export class AppComponent implements OnInit, OnDestroy {
       getTranslationsLanguage()
     );
     this.applyCustomConfig();
+    setTimeout(() => {
+      this._loadingService.setLoading(false);
+      document.getElementById('loading-screen')?.remove();
+    }, 4000);
   }
 
   ngOnDestroy() {
@@ -67,12 +80,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
     const logoUrl = configData.settings.logoUrl || 'assets/img/navbar/worky-your-logo.png';
     this.updateFavicon(logoUrl);
-
-    this._cdr.markForCheck();
   }
 
   updateFavicon(logoUrl: string) {
-    const link: HTMLLinkElement = document.querySelector("link[rel*='icon']") || document.createElement('link');
+    const link: HTMLLinkElement =
+      document.querySelector("link[rel*='icon']") || document.createElement('link');
     link.type = 'image/png';
     link.rel = 'icon';
     link.href = logoUrl;

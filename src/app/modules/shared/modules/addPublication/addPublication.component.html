@@ -1,4 +1,4 @@
-<div class="publishing-container" *ngIf="user">
+<div id="publishing-container" class="publishing-container" *ngIf="user">
   <form [formGroup]="myForm" (ngSubmit)="onSave()" autocomplete="off">
     <div class="publishing-header">
 
@@ -51,7 +51,7 @@
     </div>
 
     <div class="publishing-body" [class.comment-body]="type === typePublishing.COMMENT">
-      <div class="textarea-container">
+      <div id="textarea-container" class="textarea-container">
 
         <worky-avatar *ngIf="type === typePublishing.COMMENT && user.name && user.lastName"
           [size]="35"
@@ -59,20 +59,22 @@
           name="{{ user.name}} {{ user.lastName }}">
         </worky-avatar>
 
-        <textarea #postText
+        <ion-textarea 
+          #postTextRef [(ngModel)]="postText"
           class="publishing-textarea"
           (input)="onTextareaInput()"
+          auto-grow="true"
           formControlName="content"
           placeholder="{{ 
               type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.placeholder' | workyTranslations) + ' ' + user.name + ' ' + user.lastName + '?' :
               ('publishing.placeholderComment' | workyTranslations) + user.name + ' ' + user.lastName + '?' 
           }}">
-        </textarea>
-
+        </ion-textarea>
 
       </div>
 
       <div class="previews">
+        <div class="loader" *ngIf="loaderPreviews && !previews.length"></div>
         <div *ngFor="let preview of previews; let i = index" class="preview">
           <img *ngIf="preview.type === 'image'" [src]="preview.url" alt="Image Preview">
           <video *ngIf="preview.type === 'video'" [src]="preview.url" controls></video>
@@ -127,12 +129,15 @@
 
       <div class="options-items">
         <!-- Botón para buscar GIFs -->
-        <div class="extra-content-item gif-icon" matTooltip="Buscar GIF" (click)="openGifSearch()">
+        <div id="gif-icon" class="extra-content-item gif-icon" matTooltip="Buscar GIF" (click)="openGifSearch()">
           <i class="material-icons">gif</i>
         </div>
 
         <!-- Otros botones y opciones -->
-        <div class="extra-content-item file-upload" matTooltip="Subir Imagen" (click)="openUploadModal()">
+        <div *ngIf="type !== typePublishing.IMAGEVIEW" 
+            class="extra-content-item file-upload"
+            matTooltip="Subir Imagen"
+            (click)="openUploadModal()">
           <i class="material-icons">add_photo_alternate</i>
         </div>
 
@@ -164,11 +169,10 @@
 
     <div class="publishing-footer">
       <div>
-        <worky-buttons *ngIf="!loaderSavePublication"
+        <worky-buttons *ngIf="!loaderSavePublication && myForm.valid || previews.length && !loaderSavePublication"
           type="submit"
           [workyButtonType]="WorkyButtonType.Flat"
           [theme]="WorkyButtonTheme.Accent"
-          [disabled]="!myForm.valid || !myForm.dirty"
           [height]="'40px'"
           [width]="'100%'">
           <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>

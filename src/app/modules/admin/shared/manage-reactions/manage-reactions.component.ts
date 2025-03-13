@@ -8,7 +8,7 @@ import { CustomReactionList } from '@admin/interfaces/customReactions.interface'
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
-import { FileUploadService } from '@shared/services/file-upload.service';
+import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
 import { environment } from '@env/environment';
 
 @Component({

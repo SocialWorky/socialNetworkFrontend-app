@@ -1,10 +1,11 @@
-<div class="content-publications" (scroll)="onScroll($event)">
-  <div class="worky-module-container" *ngIf="!paramPublication">
+<div class="content-publications" (scroll)="onScroll($event)"
+  [class.desk-content-publications]="!isMobile">
+  <div id="container-add-publications" class="worky-module-container" *ngIf="!paramPublication">
     <worky-add-publication [type]="typePublishing.POST"></worky-add-publication>
   </div>
-
-  <ng-container *ngFor="let publication of publications; let i = index; trackBy: trackById">
-    <div [ngClass]="{'worky-module-container': true, 'last-publication': publication === publications[publications.length - 1]}">
+  <ng-container *ngFor="let publication of publications(); let i = index; trackBy: trackById">
+    <div [ngClass]="{'worky-module-container': true, 'last-publication': i === publications.length - 1}"
+      [attr.id]="i === 0 ? 'first-publication' : null">
       <worky-publication-view
         [publication]="publication"
         [type]="typePublishing.POST"
@@ -13,9 +14,16 @@
     </div>
   </ng-container>
 
+  <button 
+    *ngIf="showScrollToTopButton"
+    (click)="scrollToTop()"
+    class="floating-button">
+    <i class="material-icons">arrow_upward</i>
+  </button>
+
   <div *ngIf="loaderPublications" class="loader"></div> 
 
-  <ng-container *ngIf="!loaderPublications && publications.length === 0">
+  <ng-container *ngIf="!loaderPublications && publications().length === 0">
     <span>{{ 'home.notPublications' | workyTranslations }}</span>
   </ng-container>
 </div>

@@ -1,28 +1,36 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { firstValueFrom, lastValueFrom, Subject, takeUntil } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { firstValueFrom, lastValueFrom, of, Subject, takeUntil } from 'rxjs';
+import { catchError, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
 import * as _ from 'lodash';
+import { Title } from '@angular/platform-browser';
 
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
-import { PublicationService } from '@shared/services/publication.service';
+import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
-import { FriendsService } from '@shared/services/friends.service';
+import { FriendsService } from '@shared/services/core-apis/friends.service';
 import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
 import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';
-import { FileUploadService } from '@shared/services/file-upload.service';
+import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
 import { environment } from '@env/environment';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { ProfileService } from './services/profile.service';
 import { ProfileNotificationService } from '@shared/services/notifications/profile-notification.service';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
+import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { ScrollService } from '@shared/services/scroll.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
+import { AxiomService } from '@shared/services/apis/axiom.service';
+import { AxiomType } from '@shared/interfaces/axiom.enum';
+import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
+import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
 
 @Component({
   selector: 'worky-profiles',
@@ -30,33 +38,63 @@ import { EmailNotificationService } from '@shared/services/notifications/email-n
   styleUrls: ['./profiles.component.scss'],
 })
 export class ProfilesComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
-
   typePublishing = TypePublishing;
-  publications: Publication = { publications: [], total: 0 };
+
+  publicationsProfile = signal<PublicationView[]>([]);
+
   page = 1;
+
   pageSize = 10;
+
   WorkyButtonType = WorkyButtonType;
+
   WorkyButtonTheme = WorkyButtonTheme;
+
   paramPublication: boolean = false;
-  loaderPublications?: boolean = false;
+
+  loaderPublications: boolean = false;
+
   userData: User | undefined;
-  idUserProfile: string = '';
+
+  idUserProfile: string;
+
   decodedToken!: Token;
+
   isAuthenticated: boolean = false;
+
   isCurrentUser: boolean = false;
-  dataUser = this._authService.getDecodedToken();
+
+  dataUser: Token | null = null;
+
   isFriend: boolean = false;
+
   isFriendPending: { status: boolean; _id: string } = { status: false, _id: '' };
+
   idPendingFriend: string = '';
+
   selectedFiles: File[] = [];
+
   imgCoverDefault = '/assets/img/shared/drag-drop-upload-add-file.webp';
+
   selectedImage: string | undefined;
+
   cropper: Cropper | undefined;
+
   originalMimeType: string | undefined;
+
   isUploading = false;
+
   userReceives!: UserData;
+
   userRequest!: UserData;
+
+  isMobile = this._deviceDetectionService.isMobile();
+
+  showScrollToTopButton = false;
+
+  hasMorePublications = true;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     public _dialog: MatDialog,
@@ -72,49 +110,62 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _profileService: ProfileService,
     private _profileNotificationService: ProfileNotificationService,
     private _emailNotificationService: EmailNotificationService,
-    private _router: Router
-  ) {}
+    private _router: Router,
+    private _deviceDetectionService: DeviceDetectionService,
+    private _scrollService: ScrollService,
+    private _titleService: Title,
+    private _configService: ConfigService,
+    private _axiomService: AxiomService,
+    private _notificationPublicationService: NotificationPublicationService
+  ) {
+    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
+      this._titleService.setTitle(configData.settings.title + ' - Profile');
+    });
+    this.idUserProfile = this._activatedRoute.snapshot.paramMap.get('profileId') || '';
+  }
 
   async ngOnInit(): Promise<void> {
-    this.idUserProfile = await this._activatedRoute.snapshot.paramMap.get('profileId') || '';
-    this._cdr.markForCheck();
-
+    this._authService.isAuthenticated();
     if (this.idUserProfile === '') {
       this.idUserProfile = this._authService.getDecodedToken()?.id!;
       this._cdr.markForCheck();
     }
 
-    this.getDataProfile();
+    await this.getDataProfile();
 
     this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe();
 
     this.getUserFriend();
-    
+
     this.decodedToken = this._authService.getDecodedToken()!;
     this.isCurrentUser = this.idUserProfile === this.decodedToken.id;
-    this.loaderPublications = true;
 
-    this._publicationService.publications$.pipe(
-      distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (publicationsData: PublicationView[]) => {
-        this.publications.publications = publicationsData;
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Error getting publications', error);
-      }
-    });
+    this.subscribeToNotificationNewPublication();
+    this.subscribeToNotificationDeletePublication();
+    this.subscribeToNotificationUpdatePublication();
+    this.subscribeToNotificationComment();
+    this.scrollSubscription();
+
+    this.publicationsProfile.set([]);
+    await this.loadPublications();
+    this.loaderPublications = false;
 
     this._profileNotificationService.profileUpdated$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.getDataProfile();
       this._cdr.markForCheck();
     });
 
-    this.loadPublications();
-    this.loaderPublications = false;
-    this.subscribeToNotificationComment();
+
+  }
+
+  private scrollSubscription() {
+    this._scrollService.scrollEnd$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((data) => {
+      if(data === 'scrollEnd') this.loadPublications();
+      if(data === 'showScrollToTopButton') this.showScrollToTopButton = true;
+      if(data === 'hideScrollToTopButton') this.showScrollToTopButton = false;
+    });
   }
 
   ngOnDestroy(): void {
@@ -123,11 +174,34 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   private async loadPublications() {
-    this.publications = await firstValueFrom(
-      this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile).pipe(takeUntil(this.destroy$))
-    );
-    this._cdr.detectChanges();
+
+    if (this.loaderPublications || !this.hasMorePublications) return;
+    this.loaderPublications = true;
+    try {
+
+      const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile));
+
+      this.publicationsProfile.update((current: PublicationView[]) => [...current, ...newPublications.publications]);
+
+      if (this.publicationsProfile().length >= newPublications.total) {
+        this.hasMorePublications = false;
+      }
+
+      this.page++;
+      this.loaderPublications = false;
+      this._cdr.markForCheck();
+
+    } catch (error) {
+      this._axiomService.sendLog({
+        message: 'Error al cargar las publicaciones',
+        component: 'ProfilesComponent',
+        type: AxiomType.ERROR,
+        error: error
+      });
+      this.loaderPublications = false;
+    }
   }
+
 
   private async getDataProfile(): Promise<void> {
     this._userService.getUserById(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
@@ -136,16 +210,192 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error(error);
+        this._axiomService.sendLog({
+          message: 'Error al cargar el perfil',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       },
     });
   }
 
-  private subscribeToNotificationComment() {
-    this._notificationCommentService.notificationComment$.pipe(takeUntil(this.destroy$)).subscribe(async () => {
-      this.loadPublications();
+  private async subscribeToNotificationNewPublication() {
+    this._notificationPublicationService.notificationNewPublication$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((notifications: NotificationNewPublication[]) => !!notifications?.[0]?.publications?._id)
+      )
+      .subscribe({
+        next: async (notifications: NotificationNewPublication[]) => {
+          const notification = notifications[0];
+          const publicationsCurrent = this.publicationsProfile();
+
+          this._publicationService.getPublicationId(notification.publications._id)
+            .pipe(
+              takeUntil(this.destroy$),
+              filter((publication: PublicationView[]) => {
+                return !!publication &&
+                       publication.length > 0 &&
+                       publication[0].author._id === this.idUserProfile ||
+                       publication[0].userReceiving?._id === this.idUserProfile;
+              })
+            )
+            .subscribe({
+              next: (publication: PublicationView[]) => {
+                const newPublication = publication[0];
+
+                const fixedPublications = publicationsCurrent.filter(pub => pub.fixed);
+                const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed);
+
+                const updatedPublications = [
+                  ...fixedPublications,
+                  newPublication,
+                  ...nonFixedPublications
+                ];
+
+                this.publicationsProfile.set(updatedPublications);
+                this._cdr.markForCheck();
+              },
+              error: (error) => {
+                this._axiomService.sendLog({
+                  message: 'Error al obtener nueva publicación',
+                  component: 'ProfilesComponent',
+                  type: AxiomType.ERROR,
+                  error: error
+                });
+              }
+            });
+        },
+        error: (error) => {
+          this._axiomService.sendLog({
+            message: 'Error en suscripción de notificaciones de nuevas publicaciones',
+            component: 'ProfilesComponent',
+            type: AxiomType.ERROR,
+            error: error
+          });
+        }
+      });
+  }
+
+  private async subscribeToNotificationDeletePublication() {
+    this._notificationPublicationService.notificationDeletePublication$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: async (notifications: {_id: string}[]) => {
+          const notification = notifications[0];
+          if (notification?._id) {
+            const publicationsCurrent = this.publicationsProfile();
+            const index = publicationsCurrent.findIndex(pub => pub._id === notification._id);
+            if (index !== -1) {
+              publicationsCurrent.splice(index, 1);
+              this.publicationsProfile.set(publicationsCurrent);
+              this._cdr.markForCheck();
+            }
+          }
+        },
+        error: (error) => {
+          this._axiomService.sendLog({
+            message: 'Error en suscripción de notificaciones de eliminar publicaciones',
+            component: 'ProfilesComponent',
+            type: AxiomType.ERROR,
+            error: error
+          });
+        }
+      });
+  }
+
+  private async subscribeToNotificationUpdatePublication() {
+    this._notificationPublicationService.notificationUpdatePublication$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((data: PublicationView[]) => !!data?.[0]?._id),
+        switchMap((data: PublicationView[]) => {
+          const notification = data[0];
+          return this._publicationService.getPublicationId(notification._id).pipe(
+            catchError((error) => {
+              this._axiomService.sendLog({
+                message: 'Error al obtener publicación actualizada',
+                component: 'HomeComponent',
+                type: AxiomType.ERROR,
+                error: error,
+              });
+              return of([]);
+            })
+          );
+        }),
+        filter((publication: PublicationView[]) => publication.length > 0)
+      )
+      .subscribe({
+        next: (publication: PublicationView[]) => {
+
+          if (publication[0].author._id !== this.userData?._id) return;
+
+          const updatedPublication = publication[0];
+          const publicationsCurrent = this.publicationsProfile();
+
+          const fixedPublications = publicationsCurrent.filter(pub => pub.fixed && pub._id !== updatedPublication._id);
+          const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed && pub._id !== updatedPublication._id);
+
+          let updatedPublications: PublicationView[];
+
+          if (updatedPublication.fixed) {
+            updatedPublications = [
+              updatedPublication,
+              ...fixedPublications,
+              ...nonFixedPublications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            ];
+          } else {
+            updatedPublications = [
+              ...fixedPublications,
+              ...nonFixedPublications.concat(updatedPublication).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            ];
+          }
+
+          this.publicationsProfile.set(updatedPublications);
+          this._cdr.markForCheck();
+        },
+        error: (error) => {
+          this._axiomService.sendLog({
+            message: 'Error en suscripción de notificaciones de actualizar publicaciones',
+            component: 'HomeComponent',
+            type: AxiomType.ERROR,
+            error: error,
+          });
+        }
+      });
+  }
+
+  private async subscribeToNotificationComment() {
+    this._notificationCommentService.notificationComment$
+     .pipe(takeUntil(this.destroy$))
+     .subscribe({
+      next: async (data: any) => {
+        if (data.postId) {
+          const publicationsCurrent = this.publicationsProfile();
+          this._publicationService.getPublicationId(data.postId).pipe(takeUntil(this.destroy$)).subscribe({
+            next: (publication: PublicationView[]) => {
+              const index = publicationsCurrent.findIndex(pub => pub._id === publication[0]._id);
+              if (index !== -1) {
+                publicationsCurrent[index] = publication[0];
+                this.publicationsProfile.set(publicationsCurrent);
+                this._cdr.markForCheck();
+              }
+            },
+          });
+        }
+      },
+      error: (error) => {
+        this._axiomService.sendLog({
+          message: 'Error en suscripción de notificaciones de comentarios',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
+      }
     });
   }
+
 
   private getUserFriend() {
     this._userService.getUserFriends(this._authService.getDecodedToken()?.id!, this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
@@ -153,7 +403,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this.getUserFriendPending();
       },
       error: (error) => {
-        console.error(error);
+        this._axiomService.sendLog({
+          message: 'Error al cargar los amigos',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       },
     });
   }
@@ -177,7 +432,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         }
       },
       error: (error: any) => {
-        console.error(error);
+        this._axiomService.sendLog({
+          message: 'Error al cargar los amigos pendientes',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       },
     });
   }
@@ -191,7 +451,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error(error);
+        this._axiomService.sendLog({
+          message: 'Error al solicitar amistad',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       }
     });
   }
@@ -213,6 +478,14 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this.loadPublications();
         this._emailNotificationService.acceptFriendRequestNotification(this.idUserProfile);
         this._cdr.markForCheck();
+      },
+      error: (error) => {
+        this._axiomService.sendLog({
+          message: 'Error al aceptar la amistad',
+          component: 'ProfilesComponent',
+          type: AxiomType.ERROR,
+          error: error
+        });
       }
     });
   }
@@ -264,7 +537,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           }, 1200);
         },
         error: (error) => {
-          console.error('Error updating profile', error);
+          this._axiomService.sendLog({
+            message: 'Error al subir la imagen de perfil',
+            component: 'ProfilesComponent',
+            type: AxiomType.ERROR,
+            error: error
+          });
           this.isUploading = false;
           this._cdr.markForCheck();
         }
@@ -283,5 +561,21 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   sendMessage(_id: string) {
     this._router.navigate(['/messages/', _id]);
+  }
+
+  onScroll(event: any) {
+    const threshold = 100;
+    const position = event.target.scrollTop + event.target.clientHeight;
+    const height = event.target.scrollHeight;
+
+    this.showScrollToTopButton = position > 3500;
+
+    if (position >= height - threshold && !this.loaderPublications && this.hasMorePublications) {
+      this.loadPublications();
+    }
+  }
+
+  scrollToTop() {
+    this._scrollService.scrollToTop();
   }
 }

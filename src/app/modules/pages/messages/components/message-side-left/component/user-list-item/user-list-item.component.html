@@ -1,0 +1,17 @@
+<button class="button" (click)="userSelected.emit(user.user._id)">
+  <div class="avatar-container">
+    <worky-avatar 
+      [size]="40" 
+      [img]="user.user.avatar"
+      [name]="user.user.name + ' ' + user.user.lastName">
+    </worky-avatar>
+  </div>
+  <div class="user-info">
+    <div class="content-name-unread">
+      <span class="user-name worky-font-roboto">{{ user.user.name }} {{ user.user.lastName }}</span>
+      <div *ngIf="user.unreadMessagesCount > 0" class="unread-messages">{{ user.unreadMessagesCount }}</div>
+    </div>
+    <span class="last-message worky-font-roboto">{{ sanitizeHtml(user.lastMessage) }}</span>
+    <span class="last-message-time worky-font-roboto">{{ formatTimeOrElapsed(user.createAt) }}</span>
+  </div>
+</button>

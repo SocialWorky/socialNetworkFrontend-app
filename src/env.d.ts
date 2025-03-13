@@ -16,6 +16,26 @@ declare interface Env {
   readonly NG_APP_APIMESSAGESERVICE: string;
   readonly NG_APP_APINOTIFICATIONCENTER: string;
   readonly NG_APP_GIPHYAPIKEY: string;
+  readonly NG_APP_TEMPLATE_EMAIL_LOGO: string;
+  readonly NG_APP_META_TITLE: string;
+  readonly NG_APP_META_DESCRIPTION: string;
+  readonly NG_APP_META_KEYWORDS: string;
+  readonly NG_APP_META_IMAGE: string;
+  readonly NG_APP_META_URL: string;
+  readonly NG_APP_META_OG_SITE_NAME: string;
+  readonly NG_APP_META_OG_URL: string;
+  readonly NG_APP_META_OG_TITLE: string;
+  readonly NG_APP_META_OG_DESCRIPTION: string;
+  readonly NG_APP_META_OG_IMAGE: string;
+  readonly NG_APP_META_TWITTER_CARD: string;
+  readonly NG_APP_META_TWITTER_URL: string;
+  readonly NG_APP_META_TWITTER_TITLE: string;
+  readonly NG_APP_META_TWITTER_DESCRIPTION: string;
+  readonly NG_APP_META_TWITTER_IMAGE: string;
+  readonly NG_APP_PWA_NAME: string;
+  readonly NG_APP_PWA_SHORT_NAME: string;
+  readonly NG_APP_PWA_BACKGROUND_COLOR: string;
+  readonly NG_APP_PWA_THEME_COLOR: string;
 }
 
 // Choose how to access the environment variables.

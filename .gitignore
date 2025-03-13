@@ -8,6 +8,8 @@
 *.tmp.*
 UserInterfaceState.xcuserstate
 $RECYCLE.BIN/
+src/manifest.json
+src/assets/icons/*
 
 *.log
 log.txt

@@ -1,0 +1,122 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+
+.container {
+  display: flex;
+  gap: 20px;
+}
+
+.fields {
+  width: 30%;
+  border: 1px solid colors.$worky-color-grey;
+  padding: 10px;
+}
+
+.cdk-drag-preview,
+.fields div[cdkDrag] {
+  display: flex;
+  box-shadow: 0 1px 3px #0000001f, 0 1px 1px #00000024, 0 2px 1px #0003;
+  border-radius: 4px;
+  background: map-get(colors.$worky-indigo, 72);
+  height: 40px;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 2px;
+  
+
+  .drag-and-drop-zone {
+    background: map-get(colors.$worky-indigo, 56);
+    height: 100%;
+    width: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    * {
+    color: #000000de;
+    }
+  }
+}
+
+.form-preview {
+  width: 70%;
+  border: 1px solid colors.$worky-color-grey;
+  padding: 10px;
+}
+
+.form-preview div[cdkDrag] {
+  border: 1px dashed colors.$worky-color-grey;
+  border-radius: 8px;
+  padding: 5px;
+  margin-bottom: 10px;
+  min-height: 30px;
+  background-color: map-get(colors.$worky-blue, 87);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.fields .cdk-drop-list-dragging .cdk-drag {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.field-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+  .content-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    .field-item {
+        flex: auto;
+    }
+    i {
+      cursor: pointer;
+      align-items: flex-end;
+    }
+  }
+}
+
+.config-panel {
+  position: absolute;
+  top: 100%; /* Debajo del campo */
+  left: 0;
+  width: 100%;
+  background-color: colors.$worky-color-light;
+  border: 1px solid colors.$worky-color-grey;
+  padding: 10px;
+  z-index: 2;
+}
+
+.config-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.config-panel mat-form-field {
+  width: 100%;
+  min-width: 200px;
+}
+
+.config-panel mat-form-field {
+  padding: 5px; 
+}
+
+::ng-deep .mat-form-field-infix {
+  width: auto !important;
+}
+
+.draggable {
+  cursor: grab;
+}
+
+.draggable:active {
+  cursor: grabbing !important;
+}

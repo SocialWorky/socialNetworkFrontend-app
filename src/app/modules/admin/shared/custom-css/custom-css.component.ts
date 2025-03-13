@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
-import { ConfigService } from '@shared/services/config.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({

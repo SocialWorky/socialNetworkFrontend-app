@@ -16,7 +16,7 @@
     </div>
 
       <div class="form-login">  
-        <div class="form-login-social">
+        <div *ngIf="loginMethods?.google" class="form-login-social">
             <worky-buttons
                 [workyButtonType]="WorkyButtonType.Outline"
                 [theme]="WorkyButtonTheme.Accent"
@@ -27,7 +27,7 @@
             </worky-buttons>
         </div>
 
-        <div class="line-container-sign">
+        <div *ngIf="loginMethods?.google" class="line-container-sign">
             <div class="line"></div>
             <div class="text">{{ 'login.orLoginWithEmail' | workyTranslations }}</div>
             <div class="line"></div>

@@ -1,5 +1,4 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';

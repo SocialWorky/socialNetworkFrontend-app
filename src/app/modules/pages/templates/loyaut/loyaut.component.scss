@@ -1,22 +1,38 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
-:host {
-  width: 100%;
-  height: 100%;
+.content-app {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  grid-template:
+  "header" 6vh
+  "main" 94vh;
+  @include breakpoints.below-sm {
+    grid-template:
+    "header" 14vh
+    "main" 86vh;
+  }
+
+  .navbar-content {
+    display: flex;
+    flex-direction: column;
+    grid-area: header;
+    width: 100vw;
+  }
 }
 
 .content-social-app {
   display: flex;
   justify-content: center;
-  height: 92vh;
-  margin: auto;
+  grid-area: main;
   box-sizing: border-box;
   max-width: variables.$worky-app-width;
-  max-height: 92vh;
-  overflow: hidden;
-  @include breakpoints.below-md {
-    height: 86vh;
+  @include breakpoints.below-sm {
+    width: 100vw;
+    margin: inherit;
     padding-top: 0px;
     flex-direction: column;
     align-items: center;
@@ -26,56 +42,65 @@
 ::ng-deep worky-content-left-side,
 ::ng-deep worky-content-right-side {
   width: variables.$worky-container-width-sidebar;
+  height: 94vh;
+  padding: 5px;
   display: block;
   justify-content: space-around;
   overflow-y: scroll;
   scrollbar-width: none;
-  -ms-overflow-style: none; 
-  @include breakpoints.below-md {
+  -ms-overflow-style: none;
+  @include breakpoints.below-sm {
     display: none;
   }
 }
 
-::ng-deep .social-content-center {
+.social-content-center {
   width: variables.$worky-container-width-content;
+  grid-area: main;
+  height: 94vh;
   min-width: variables.$worky-app-min-width;
-  @include breakpoints.below-md {
-    width: 100%;
+  @include breakpoints.below-sm {
+    height: 90vh;
+    width: 100vw;
   }
-}
-
-.messages-view,
-.profile-view  {
-  width: 100%;
-  overflow-y: scroll;
-  scrollbar-width: none;
-  -ms-overflow-style: none; 
 }
 
 .content-messages-app {
   position: relative;
   display: flex;
+  grid-area: main;
   flex-direction: column;
   justify-content: flex-start;
-  max-width: variables.$worky-app-width;
-  max-height: 100%;
+  margin: inherit;
+  max-width: 100%;
+  width: 100%;
+  height: 94vh;
   padding: 10px;
   overflow: hidden;
-  height: 100%;
-  padding-bottom: 53px;
-  @include breakpoints.below-sm { 
-    padding: 0px;
+  @include breakpoints.below-sm {
+    height: 87vh;
   }
 }
 
 .messages-view {
   position: relative;
   height: 100%;
-  @include breakpoints.below-sm {
-    //margin-bottom: auto;
-  }
 }
 
 .content-profile-app {
-  padding-top: 0px;
+  position: relative;
+  display: flex;
+  grid-area: main;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100vw;
+  flex-grow: 1;
+}
+
+.messages-view,
+.profile-view {
+  width: 100%;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }

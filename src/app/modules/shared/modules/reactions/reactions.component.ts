@@ -5,13 +5,14 @@ import { takeUntil } from 'rxjs/operators';
 import { CustomReactionsService } from '@admin/shared/manage-reactions/service/customReactions.service';
 import { CustomReactionList } from '@admin/interfaces/customReactions.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
-import { ReactionsService } from '@shared/services/reactions.service';
+import { ReactionsService } from '@shared/services/core-apis/reactions.service';
 import { AuthService } from '@auth/services/auth.service';
-import { PublicationService } from '@shared/services/publication.service';
+import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { PublicationsReactions } from '@shared/interfaces/reactions.interface';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { NotificationService } from '@shared/services/notifications/notification.service';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
   selector: 'worky-reactions',
@@ -23,25 +24,25 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('reactionPopup') reactionPopup!: ElementRef;
 
   reactionsVisible = false;
-  
+
   reactions: Array<CustomReactionList & { zoomed: boolean }> = [];
-  
+
   typePublishing = TypePublishing;
 
   @Input() type: TypePublishing | undefined;
-  
+
   @Input() userProfile?: string;
-  
+
   @Input() publication: PublicationView | undefined;
-  
+
   @Input() reactionsToPublication: PublicationsReactions[] = [];
 
-  token = this._authService.getDecodedToken();
-  
+  token: Token | null = this._authService.getDecodedToken();
+
   unlockReactions = true;
 
   private destroy$ = new Subject<void>();
-  
+
   private touchTimeout: any;
 
   get reactionUserInPublication() {
@@ -59,11 +60,11 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngOnInit() {
+    if(!this._authService.isAuthenticated()) return;
     this.loadReactions();
   }
 
   ngAfterViewInit() {
-    this.updateReactionsPopupPosition();
   }
 
   ngOnDestroy(): void {
@@ -90,10 +91,10 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
         next: async () => {
           this.reactionsVisible = false;
           this.unlockReactions = true;
+          this._notificationService.sendNotification(this.publication);
           this._emailNotificationService.reactionsNotification(this.publication!, reaction);
 
           this.refreshPublications();
-          this.updateReactionsPopupPosition();
         },
         error: (err) => {
           console.error('Failed to add reaction', err);
@@ -110,7 +111,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
         this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
         this.unlockReactions = true;
-        this.updateReactionsPopupPosition();
+        this.hideReactions();
       },
       error: (err) => {
         console.error('Failed to delete reaction', err);
@@ -133,7 +134,6 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
         this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
         this.unlockReactions = true;
-        this.updateReactionsPopupPosition();
       },
       error: (err) => {
         console.error('Failed to edit reaction', err);
@@ -152,7 +152,6 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
               zoomed: false
             }));
           this._cdr.markForCheck();
-          this.updateReactionsPopupPosition();
         },
         error: (err) => {
           console.error('Failed to load reactions', err);
@@ -162,14 +161,10 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   showReactions() {
     this.reactionsVisible = true;
-    setTimeout(() => {
-      this.updateReactionsPopupPosition();
-    }, 0);
   }
 
   hideReactions() {
     this.reactionsVisible = false;
-    this.updateReactionsPopupPosition();
   }
 
   zoomIn(reaction: CustomReactionList & { zoomed: boolean }) {
@@ -204,13 +199,6 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   onTouchEnd() {
     if (this.touchTimeout) {
       clearTimeout(this.touchTimeout);
-    }
-  }
-
-  private updateReactionsPopupPosition() {
-    if (this.reactionPopup) {
-      const items = this.reactionPopup.nativeElement.children.length;
-      this.reactionPopup.nativeElement.style.setProperty('--num-items', items.toString());
     }
   }
 }

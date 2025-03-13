@@ -37,7 +37,6 @@
         }
       }
 
-      /* Estilos para el triángulo que apunta al avatar */
       .message-triangle {
         position: relative;
         right: 9px;
@@ -48,11 +47,11 @@
       }
 
       .message-sent .message-triangle {
-        border-bottom-color: var(--worky-color-indigo); /* Color del mensaje enviado */
+        border-bottom-color: var(--worky-color-indigo);
       }
 
       .message-received .message-triangle {
-        border-bottom-color: var(--worky-color-greyLight); /* Color del mensaje recibido */
+        border-bottom-color: var(--worky-color-greyLight);
         left: 10px;
       }
 
@@ -72,12 +71,20 @@
 
         .sent-content,
         .received-content {
+          line-height: 1.2;
           border-radius: 1rem;
           padding: 0.5rem 1rem;
           display: inline-block;
           max-width: 100%;
           word-break: break-word;
           box-shadow: -15px 1px 12px rgba(0, 0, 0, 0.1);
+          markdown {
+            display: flex;
+            flex-direction: column;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+          }
         }
       }
 
@@ -161,25 +168,28 @@
     }
   }
 
-  .message-input-container {
+  .emoji-picker-container {
+    position: absolute;
+    bottom: 110px;
+    z-index: 1;
+  }
+
+  .message-footer-container {
     display: flex;
     align-items: center;
+    flex-direction: column;
     background-color: var(--worky-color-light);
     border-radius: 0.5rem;
     padding: 0.3rem;
     box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0;
     z-index: 1;
-    .emoji-wrapper {
-        position: relative;
-      }
 
-      .emoji-picker-container {
-        position: absolute;
-        bottom: 50px;
-        left: 0;
-        z-index: 1000;
-      }
+
+    .message-input-container {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      flex-shrink: 0;
 
       .input-wrapper {
         display: flex;
@@ -204,6 +214,22 @@
         font-size: 1rem;
         box-sizing: border-box;
       }
+
+    }
+
+    .content-footer-bar {
+      display: flex;
+      width: 100%;
+      padding: 3px 10px 3px 10px;
+      gap: 10px;
+      cursor: pointer;
+      color: color.$worky-color-navy;
+
+      .emoji-wrapper {
+        position: relative;
+      }
+
+    }
   }
 }
 
@@ -215,9 +241,9 @@
   width: 100%;
   height: 100%;
   background: url('../../../../../../assets/img/shared/fondo_message_chat.jpg') center/cover no-repeat;
-  opacity: 0.2; /* Ajusta la opacidad de la imagen de fondo */
-  z-index: 0; /* Asegura que el fondo esté detrás del contenido */
-  pointer-events: none; /* Evita que interfiera con el contenido */
+  opacity: 0.2;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .header-content-mobil {

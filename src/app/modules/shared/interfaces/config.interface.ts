@@ -7,5 +7,17 @@ export interface Config {
   contactEmail?: string;
   faviconUrl?: string;
   loginMethods?: string;
+  urlSite?: string;
+  description?: string;
+  invitationCode?: boolean;
+}
 
+export interface ConfigServiceInterface {
+  services: {
+    logs: {
+      token: string;
+      urlApi: string;
+      enabled: boolean;
+    };
+  };
 }

@@ -1,12 +1,12 @@
 <div *ngIf="!userData" class="loader"></div> 
 
-<div *ngIf="userData" >
+<div *ngIf="userData">
 
   <div class="content-header-profile">
       <div class="image-container">
           <worky-edit-img-profile 
             [isCurrentUser]="isCurrentUser"
-            [profileImage]="userData.profile.coverImage">
+            [profileImage]="isMobile ? userData.profile.coverImageMobile : userData.profile.coverImage">
           </worky-edit-img-profile>
       </div>
       <div class="content">
@@ -102,40 +102,51 @@
 
   <div class="content-body-profile">
 
-      <div class="content-left-profile">
-        <worky-profile-detail *ngIf="userData"
-          [isCurrentUser]="isCurrentUser"
-          [userData]="userData">
-        </worky-profile-detail>
+    <div class="content-left-profile">
+      <worky-profile-detail *ngIf="userData"
+        [isCurrentUser]="isCurrentUser"
+        [userData]="userData">
+      </worky-profile-detail>
+    </div>
+
+    <div class="content-section-wall">
+
+      <div *ngIf="(isFriend && !isFriendPending.status) || isCurrentUser" class="worky-module-container">
+
+        <worky-add-publication
+          [type]="typePublishing.POSTPROFILE"
+          [idUserProfile]="idUserProfile">
+        </worky-add-publication>
+
       </div>
 
-      <div class="content-section-wall">
+      <div *ngIf="loaderPublications" class="loader"></div> 
 
-        <div *ngIf="(isFriend && !isFriendPending.status) || isCurrentUser" class="worky-module-container">
-
-          <worky-add-publication
-            [type]="typePublishing.POSTPROFILE"
-            [idUserProfile]="idUserProfile">
-          </worky-add-publication>
-
+      @for(publication of publicationsProfile(); track publication; let i = $index ) {
+        <div class="worky-module-container"
+          [attr.id]="i === 0 ? 'first-publication' : null">
+          <worky-publication-view
+          [publication]="publication"
+          [type]="typePublishing.POSTPROFILE"
+          [userProfile]="idUserProfile"
+          [indexPublication]="i">
+          </worky-publication-view>
         </div>
+      } @empty {
+      <span *ngIf="!loaderPublications">{{ 'home.notPublications' | workyTranslations }}</span> 
+      }   
 
-        <div *ngIf="loaderPublications" class="loader"></div> 
+    </div>
 
-        @for(publication of publications.publications; track publication; let i = $index ) {
-          <div class="worky-module-container">
-            <worky-publication-view
-            [publication]="publication"
-            [type]="typePublishing.POSTPROFILE"
-            [userProfile]="idUserProfile"
-            [indexPublication]="i">
-            </worky-publication-view>
-          </div>
-        } @empty {
-        <span *ngIf="!loaderPublications">{{ 'home.notPublications' | workyTranslations }}</span> 
-        }
-      
-      </div>
   </div>
+
+  <button 
+    *ngIf="showScrollToTopButton"
+    (click)="scrollToTop()"
+    class="floating-button">
+    <i class="material-icons">arrow_upward</i>
+  </button>
+
+  <div *ngIf="loaderPublications" class="loader"></div>  
 
 </div>

@@ -4,27 +4,29 @@ import { Subject } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
+import * as _ from 'lodash';
 
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePrivacy, TypePublishing } from '../addPublication/enum/addPublication.enum';
 import { DropdownDataLink } from '../worky-dropdown/interfaces/dataLink.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { RoleUser } from '@auth/models/roleUser.enum';
-import { PublicationService } from '@shared/services/publication.service';
+import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { environment } from '@env/environment';
-import { FriendsService } from '@shared/services/friends.service';
+import { FriendsService } from '@shared/services/core-apis/friends.service';
 import { translations } from '@translations/translations';
 import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
-import { ReportsService } from '@shared/services/reports.service';
+import { ReportsService } from '@shared/services/core-apis/reports.service';
 import { ReportCreate } from '@shared/interfaces/report.interface';
 import { ReportType, ReportStatus } from '@shared/enums/report.enum';
 import { ReportResponseComponent } from '../publication-view/report-response/report-response.component';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
-import { CommentService } from '@shared/services/comment.service';
+import { CommentService } from '@shared/services/core-apis/comment.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
-import * as _ from 'lodash';
 import { Reactions } from './interfaces/reactions.interface';
-
+import { Colors } from '@shared/interfaces/colors.enum';
+import { ScrollService } from '@shared/services/scroll.service';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
   selector: 'worky-publication-view',
@@ -34,41 +36,41 @@ import { Reactions } from './interfaces/reactions.interface';
 })
 export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() publication!: PublicationView;
-  
+
   @Input() indexPublication?: number;
-  
+
   @Input() type?: TypePublishing;
-  
+
   @Input() userProfile?: string;
 
   typePublishing = TypePublishing;
-  
+
   typePrivacy = TypePrivacy;
-  
+
   dataLinkActions: DropdownDataLink<any>[] = [];
-  
+
   dataShareActions: DropdownDataLink<any>[] = [];
-  
+
   viewCommentSection: number | null = null;
-  
+
   viewComments: number | null = null;
-  
+
   nameGeoLocation = '';
-  
+
   urrMap = '';
-  
+
   extraData: string[] = [];
-  
+
   userRequest?: UserData;
-  
+
   userReceive?: UserData;
-  
+
   routeUrl = '';
-  
+
   isProfile = false;
-  
-  dataUser = this._authService.getDecodedToken();
-  
+
+  dataUser: Token | null = null;
+
   listReaction: string[] = [];
 
   isCodeBlock(content: string): boolean {
@@ -89,6 +91,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     public _dialog: MatDialog,
     private _emailNotificationService: EmailNotificationService,
     private _notificationService: NotificationService,
+    private _scrollService: ScrollService
   ) {}
 
   async ngAfterViewInit() {
@@ -96,8 +99,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   ngOnInit() {
+    if(!this._authService.isAuthenticated()) return;
+    this.dataUser = this._authService.getDecodedToken();
     this.getUserFriendPending();
-    this.menuActions();
     this.menuShareActions();
     this.extraDataPublication();
     this.routeUrl = this._router.url;
@@ -160,18 +164,43 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   checkDataLink(userId: string) {
-    const menuDeletePublications = { icon: 'delete', function: this.deletePublications.bind(this), title: translations['publicationsView.deletePublication'] };
+    this.dataLinkActions = [];
+    this.menuActions();
+    const menuDeletePublications = {
+      icon: 'delete',
+      function: this.deletePublications.bind(this),
+      title: translations['publicationsView.deletePublication'],
+      color: Colors.RED
+    };
+    const menuFixedPublications = {
+      icon: 'push_pin',
+      function: this.fixedPublications.bind(this),
+      title: !this.publication.fixed ? translations['publicationsView.fixedPublication'] : translations['publicationsView.unfixedPublication'],
+      color: this.publication.fixed ? Colors.RED : Colors.BLUE
+    };
 
     if (userId === this.dataUser?.id || this.dataUser?.role === RoleUser.ADMIN) {
+
+      if (this.publication.fixed) {
+        if (!this.dataLinkActions.find((element) => element.title === translations['publicationsView.unfixedPublication'])) {
+          this.dataLinkActions.push(menuFixedPublications);
+        }
+      } else {
+        if (!this.dataLinkActions.find((element) => element.title === translations['publicationsView.fixedPublication'])) {
+          this.dataLinkActions.push(menuFixedPublications);
+        }
+      }
+
       if (!this.dataLinkActions.find((element) => element.title === translations['publicationsView.deletePublication'])) {
         this.dataLinkActions.push(menuDeletePublications);
       }
     }
+    this._cdr.markForCheck();
   }
 
   menuActions() {
     this.dataLinkActions = [
-      { icon: 'report', function: this.createReport.bind(this), title: translations['publicationsView.reportPublication'] },
+      { icon: 'report', function: this.createReport.bind(this), title: translations['publicationsView.reportPublication'], color: Colors.RED },
     ];
   }
 
@@ -188,11 +217,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         linkUrl: `https://twitter.com/intent/tweet?url=${url}`,
         title: 'Twitter'
       },
-      {
-        img: 'assets/img/logos/linkedin.svg',
-        linkUrl: `https://www.linkedin.com/shareArticle?url=${url}`,
-        title: 'Linkedin'
-      },
+      // TODO: Uncomment when the linkedin share is ready
+      // {
+      //   img: 'assets/img/logos/linkedin.svg',
+      //   linkUrl: `https://www.linkedin.com/shareArticle?url=${url}`,
+      //   title: 'Linkedin'
+      // },
       {
         img: 'assets/img/logos/whatsapp.svg',
         linkUrl: `whatsapp://send?text=${url}`,
@@ -218,6 +248,26 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       error: (error) => {
         console.error(error);
         loadingDeletePublication.dismiss();
+      },
+    });
+  }
+
+  async fixedPublications(publication: PublicationView) {
+    const loadingFixedPublication = await this._loadingCtrl.create({
+      message: !publication.fixed ? translations['publicationsView.loadingFixedPublication'] : translations['publicationsView.loadingUnfixedPublication'],
+    });
+
+    await loadingFixedPublication.present();
+
+    this._publicationService.updatePublicationById(publication._id, { fixed: !publication.fixed }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.refreshPublications(publication._id);
+        loadingFixedPublication.dismiss();
+        this._scrollService.scrollToTop();
+      },
+      error: (error) => {
+        console.error(error);
+        loadingFixedPublication.dismiss();
       },
     });
   }
@@ -284,8 +334,13 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     if (_id) {
       this._publicationService.getPublicationId(_id).pipe(takeUntil(this.destroy$)).subscribe({
         next: (publication: PublicationView[]) => {
+          if (!publication.length) {
+            return;
+          }
           this._publicationService.updatePublications(publication);
+          this.publication = publication[0];
           this.loadReactionsImg(publication[0]);
+          this.checkDataLink(publication[0]._id);
           this._cdr.markForCheck();
         },
         error: (error) => {

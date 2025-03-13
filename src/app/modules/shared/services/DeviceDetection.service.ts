@@ -11,6 +11,7 @@ import * as _ from 'lodash';
 export class DeviceDetectionService implements OnDestroy {
 
   private destroy$: Subject<void> = new Subject<void>();
+
   private resizeEvent: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   private _isScreenSmallerThan700px: boolean = false;
@@ -37,17 +38,21 @@ export class DeviceDetectionService implements OnDestroy {
   }
 
   isMobile(): boolean {
-    if(this._platform.is('tablet') || this._platform.is('ipad')) return false;
+    if(this._platform.is('tablet') || this._platform.is('ipad') || !this.isScreenSmallerThan700px()) return false;
     return (
       this.isNative()
-      || this.isScreenSmallerThan600px()
+      || this.isScreenSmallerThan700px()
       || this._platform.is('ios')
       || this._platform.is('iphone')
       || this._platform.is('android')
     );
   }
 
-  private isScreenSmallerThan600px(): boolean {
+  isTablet(): boolean {
+    return this._platform.is('tablet') || this._platform.is('ipad');
+  }
+
+  private isScreenSmallerThan700px(): boolean {
     return this._isScreenSmallerThan700px;
   }
 

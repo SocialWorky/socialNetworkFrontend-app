@@ -1,9 +1,13 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+
 import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
+import { ConfigService } from '@shared/services/core-apis/config.service';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 
 @Component({
   selector: 'worky-messages',
@@ -30,13 +34,20 @@ export class MessagesComponent implements OnInit {
     return this._deviceDetectionService.isMobile();
   }
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private _authService: AuthService,
     private _cdr: ChangeDetectorRef,
     private _activatedRoute: ActivatedRoute,
     private _deviceDetectionService: DeviceDetectionService,
-    private _userService: UserService
+    private _userService: UserService,
+    private _titleService: Title,
+    private _configService: ConfigService
    ) { 
+    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
+      this._titleService.setTitle(configData.settings.title + ' - Messages');
+    });
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
       this.decodedToken = this._authService.getDecodedToken()!;
@@ -44,20 +55,25 @@ export class MessagesComponent implements OnInit {
     }
   }
 
- async ngOnInit() {
-    this.userIdMessage = await this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
+  async ngOnInit() {
+      this.userIdMessage = await this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
 
-    if(!this.userIdMessage) return;
+      if(!this.userIdMessage) return;
 
-    this._userService.getUserById(this.userIdMessage).subscribe({
-      next: (user) => {
-        if (user) {
-          this.userIsValid = true;
-          this._cdr.markForCheck();
+      this._userService.getUserById(this.userIdMessage).subscribe({
+        next: (user) => {
+          if (user) {
+            this.userIsValid = true;
+            this._cdr.markForCheck();
+          }
         }
-      }
-    });
- }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   onUserIdSelected(userId: string) {
     this.userIdConsulting = userId;

@@ -64,7 +64,13 @@ $app-theme: mat.define-light-theme((
 // @import "@ionic/angular/css/flex-utils.css";
 
 
-html, body { height: 100%; }
+html, body { 
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  width: 100%;
+  height: 100vh; 
+}
 body { 
   margin: 0;
   font-family: var.$worky-font-family-global;
@@ -81,7 +87,7 @@ img, video {
   justify-content: flex-start;
   position: relative;
   width: 100%;
-  height: 100% !important;
+  height: 100vh !important;
   overflow: hidden;
 }
 
@@ -112,6 +118,11 @@ img, video {
   -webkit-animation-name: fadeIn;
   animation-name: fadeIn;
 }
+
+.filled {
+  font-variation-settings: 'FILL' 1;
+}
+
 
  .worky-input {
     .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mat-mdc-floating-label {
@@ -198,6 +209,105 @@ img, video {
   }
 
   .worky-input.worky-basic {
+    .mdc-text-field--focused {
+      border: 1px solid color.$worky-color-navy;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-navy;
+      }
+    }
+    .mdc-text-field--invalid {
+      border: 1px solid color.$worky-color-red;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-red;
+      }
+    }
+  }
+
+  .worky-textarea {
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mat-mdc-floating-label {
+      top: calc(var(--mat-form-field-container-height) / 2);
+      background-color: color.$worky-color-light;
+    }
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-floating-label--float-above {
+      top: calc(var(--mat-form-field-container-height) / 4);
+    }
+    .mdc-line-ripple {
+      display: none;
+    }
+    .mat-mdc-text-field-wrapper {
+      width: 100%;
+      border: 1px solid color.$worky-color-navy;
+      border-radius: 8px;
+    }
+    .mdc-text-field {
+      overflow: visible;
+      .mat-mdc-form-field-focus-overlay {
+        background-color: color.$worky-color-light;
+      }
+    }
+    .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+      background-color: color.$worky-color-light;
+    }
+    .mat-mdc-text-field-wrapper:hover .mat-mdc-form-field-focus-overlay {
+      background-color: color.$worky-color-light;
+    }
+    .mat-mdc-form-field.mat-focused:not(:focus) .mat-mdc-form-field-focus-overlay {
+      background-color: color.$worky-color-light;
+    }
+    .mat-mdc-form-field.mat-focused .mat-mdc-form-field-focus-overlay {
+      background-color: color.$worky-color-light;
+    }
+    .mat-mdc-text-field--focused {
+      border-color: color.$worky-color-blue;
+    }
+  }
+
+  .worky-textarea.worky-accent {
+    .mdc-text-field--focused {
+      border: 1px solid color.$worky-color-blue;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-blue;
+      }
+    }
+    .mdc-text-field--invalid {
+      border: 1px solid color.$worky-color-red;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-red;
+      }
+    }
+  }
+
+  .worky-textarea.worky-warn {
+    .mdc-text-field--focused {
+      border: 1px solid color.$worky-color-red;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-red;
+      }
+    }
+    .mdc-text-field--invalid {
+      border: 1px solid color.$worky-color-red;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-red;
+      }
+    }
+  }
+
+  .worky-textarea.worky-primary {
+    .mdc-text-field--focused {
+      border: 1px solid color.$worky-color-teal;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-teal;
+      }
+    }
+    .mdc-text-field--invalid {
+      border: 1px solid color.$worky-color-red;
+      .mat-mdc-floating-label.mdc-floating-label {
+        color: color.$worky-color-red;
+      }
+    }
+  }
+
+  .worky-textarea.worky-basic {
     .mdc-text-field--focused {
       border: 1px solid color.$worky-color-navy;
       .mat-mdc-floating-label.mdc-floating-label {
@@ -372,4 +482,123 @@ img, video {
   iframe {
     height: 300px;
   }
+}
+
+.red-color {
+  color: color.$worky-color-red;
+}
+
+.green-color {
+  color: color.$worky-color-green;
+}
+
+.blue-color {
+  color: color.$worky-color-blue;
+}
+
+.yellow-color {
+  color: color.$worky-color-yellow;
+}
+
+.navy-color {
+  color: color.$worky-color-navy;
+}
+
+.white-color {
+  color: color.$worky-color-light;
+}
+
+.bg-red-color {
+  background-color: color.$worky-color-red;
+}
+
+.bg-green-color {
+  background-color: color.$worky-color-green;
+}
+
+.bg-blue-color {
+  background-color: color.$worky-color-blue;
+}
+
+.bg-yellow-color {
+  background-color: color.$worky-color-yellow;
+}
+
+.bg-navy-color {
+  background-color: color.$worky-color-navy;
+}
+
+
+.mobil-content-app {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.floating-button {
+  position: fixed;
+  bottom: 60px;
+  right: 20px;
+  background-color: color.$worky-color-light;
+  color: color.$worky-color-navy;
+  border: solid 1px color.$worky-color-navy;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s;
+  z-index: 1000;
+  &:hover {
+    background-color: color.$worky-color-navy;
+    color: color.$worky-color-light;
+  }
+}
+
+.content-fields {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px;
+  gap: 10px;
+  label {
+    font-size: 1rem;
+    color: color.$worky-color-navy;
+  }
+  input {
+    flex: auto;
+    padding: 10px;
+    border: 1px solid color.$worky-color-navy;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    color: color.$worky-color-navy;
+  }
+  select {
+    flex: auto;
+    padding: 10px;
+    border: 1px solid color.$worky-color-navy;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    color: color.$worky-color-navy;
+  }
+  textarea {
+    flex: auto;
+    padding: 10px;
+    border: 1px solid color.$worky-color-navy;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    color: color.$worky-color-navy;
+  }
+}
+
+.dragging-global {
+  cursor: grabbing !important;
 }

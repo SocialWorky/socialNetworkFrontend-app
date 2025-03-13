@@ -7,7 +7,31 @@
   .publication-header-actions {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     margin-right: 10px;
+    .fixed {
+      font-size: 16px;
+      color: colors.$worky-color-blue;
+      background-color: colors.$worky-color-greyLight;
+      position: initial;
+      margin-top: 7px;
+      padding: 7px;
+      border-radius: 50%;
+    }
+
+    ::ng-deep worky-dropdown {
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      margin-top: 7px;
+      margin-left: 5px;
+
+      &:hover {
+        background-color: colors.$worky-color-greyLight;
+      }
+    }
+
   }
 
   .publication-header {
@@ -43,6 +67,11 @@
           text-overflow: ellipsis;
           font-size: variables.$worky-font-size-4;
           color: colors.$worky-color-navy;
+          .material-icons {
+            font-size: 10px;
+            margin: 0px 5px;
+            color: colors.$worky-color-navy;
+          }
           .follow-my-friend {
             cursor: pointer;
             color: colors.$worky-color-blue;
@@ -208,6 +237,10 @@
             justify-content: space-between;
             margin-bottom: 10px;
             .comment-author {
+              color: colors.$worky-color-blue;
+            }
+            .link-profile {
+              cursor: pointer;
               color: colors.$worky-color-blue;
             }
             .delete-comment {

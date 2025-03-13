@@ -1,5 +1,7 @@
 <div class="content-publication-view" *ngIf="publication">
-  <div class="publication-header-actions">
+  <div class="publication-header-actions"
+    (mouseenter)="checkDataLink(publication.author._id)">
+    <div *ngIf="publication.fixed" class="material-icons fixed">push_pin</div>
     <worky-dropdown
       icon="more_horiz"
       [badge]=false
@@ -29,30 +31,38 @@
               </span>
           </ng-container>
         </div>
+
         <ng-template #notFriend>
           <div class="content-actions-follow">
             <span (click)="viewProfile(publication.author._id)" class="name link-name">
               {{ publication.author.name }} {{ publication.author.lastName }}
             </span>
+
             <span class="name">
               <ng-container *ngIf="!isProfile">
-                <i *ngIf="!publication.isMyFriend || publication.isFriendshipPending" class="material-icons">keyboard_arrow_right</i>
+                <i *ngIf="!publication.isMyFriend || publication.isFriendshipPending" class="material-icons">fiber_manual_record</i>
+
                 <a *ngIf="!publication.isMyFriend && (!userRequest?._id || !userReceive?._id)" class="follow-my-friend" 
                   (click)="followMyFriend(publication.author._id)">
                   {{ 'publicationsView.follow' | workyTranslations }}
                 </a>
+
                 <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending && userRequest?._id === dataUser?.id" class="follow-my-friend" 
                   (click)="cancelFriendship(publication.isFriendshipPending!, publication.author._id)">
                   {{ 'publicationsView.cancelRequest' | workyTranslations }}
                 </a>
+
                 <a *ngIf="userReceive?._id === dataUser?.id" class="follow-my-friend" 
                   (click)="acceptFriendship(publication.isFriendshipPending!, publication.author._id)">
                   Aceptar Amistad
                 </a>
+
               </ng-container>
             </span>
+
           </div>
-        </ng-template>       
+        </ng-template>    
+
       </div>
       <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">está en </p><a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
       <div class="publication-date">
@@ -80,7 +90,8 @@
     </div>
 
     <worky-image-organizer *ngIf="publication.media.length"
-      [images]="publication.media">
+      [publication]="publication"
+      type="publication">
     </worky-image-organizer>
   </div>
 
@@ -143,7 +154,11 @@
       <div class="publication-comment-content">
         <div class="publication-comment-data">
           <div class="content-name-header">
-            <span class="comment-author">{{ comment.author.name }} {{ comment.author.lastName }}</span>
+            <span class="comment-author"
+              [class.link-profile]="comment.author._id !== dataUser?.id"
+              [routerLink]="comment.author._id !== dataUser?.id ? ['/profile/'+ comment.author._id] : null">
+              {{ comment.author.name }} {{ comment.author.lastName }}
+            </span>
             <div *ngIf="comment.author._id === dataUser?.id"
               class="material-icons delete-comment"
               (click)="deleteComment(comment._id, publication._id)">delete</div>
@@ -155,7 +170,9 @@
           </div>
 
           <worky-image-organizer *ngIf="comment.media.length"
-            [images]="comment.media">
+            [comment]="comment"
+            [publication]="publication"
+            type="comment">
           </worky-image-organizer>
         </div>
         <span class="comment-date">{{ comment.createdAt | workyRelativeTime }}</span>

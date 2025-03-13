@@ -5,14 +5,14 @@
   <div *ngIf="img === 'avatar'">
     <div *ngIf="loaderAvatar" class="loader"></div>
     <worky-avatar *ngIf="!loaderAvatar"
-      [size]="50"
+      [size]="size ?? 50"
       [img]="profileImageUrl"
       [name]="user.name + ' ' + user.lastName">
     </worky-avatar>
   </div>
 
   <ng-container>
-    <span class="material-icons" [class.mover-icono]="badgeValue">{{ icon }}</span>
+    <span class="material-symbols-rounded" [ngClass]="{'filled': isFilled}" [class.mover-icono]="badgeValue">{{ icon }}</span>
     <span *ngIf="badge && badgeValue" class="badge rounded-pill badge-notification bg-danger">
       {{ badgeValue }}
     </span>
@@ -23,7 +23,12 @@
 
 <div *ngIf="dataLink?.length" class="dropdown-menu" [ngClass]="{'dropdown-menu-end': true, 'dropdown-up': dropdownDirection === 'up', 'dropdown-down': dropdownDirection === 'down'}">
   <div class="content-dropdow" *ngFor="let data of dataLink; let dataIndex = index;" (click)="handleMenuItemClick(data)">
-    <span *ngIf="data.icon" class="material-icons">{{ data.icon }}</span>
+    <span *ngIf="data.icon"
+      class="material-symbols-rounded"
+      [ngClass]="{'filled': isFilled}"
+      [ngClass]="data?.color">
+      {{ data.icon }}
+    </span>
     <span *ngIf="data.img" class="icon-img-dropdown">
       <img [src]="data.img" loading="lazy" />
     </span>

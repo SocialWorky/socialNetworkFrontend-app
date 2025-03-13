@@ -1,0 +1,162 @@
+<div class="container">
+  <div class="fields">
+
+    <mat-form-field class="worky-input worky-accent">
+      <mat-label>Destino</mat-label>
+      <mat-select [(value)]="formDestination" (selectionChange)="updateFormDestination($event)">
+        <mat-option *ngFor="let destination of customFieldDestinations" [value]="destination" (click)="getFields">
+          {{ destination }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div class="drag-and-drop-available-fields" cdkDropList #fieldsList="cdkDropList" [cdkDropListData]="availableFields"
+        [cdkDropListConnectedTo]="[formFieldsList]" (cdkDropListDropped)="drop($event)">
+
+      <div *ngFor="let field of availableFields" cdkDrag 
+          (cdkDragStarted)="onDragStart($event)" 
+          (cdkDragEnded)="onDragEnd($event)"
+          class="draggable">
+        
+        <div class="drag-and-drop-zone">
+          <i class="material-icons">drag_indicator</i>
+        </div>
+
+        <i *ngIf="field.type === enumCustomFieldType.TEXT" class="material-icons">format_size</i>
+        <i *ngIf="field.type === enumCustomFieldType.TEXTAREA" class="material-icons">format_align_left</i>
+        <i *ngIf="field.type === enumCustomFieldType.SELECT" class="material-icons">checklist</i>
+
+        {{ field.label }}
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="form-preview">
+    <form [formGroup]="form">
+      <div cdkDropList #formFieldsList="cdkDropList" [cdkDropListData]="formFields"
+          [cdkDropListConnectedTo]="[fieldsList]" (cdkDropListDropped)="drop($event)">
+
+        <div *ngFor="let field of formFields; let i = index" cdkDrag class="field-wrapper">
+          <div class="content-field">
+
+            <app-input *ngIf="field.type === enumCustomFieldType.TEXT"
+              class="field-item"
+              [field]="field" 
+              [formControlName]="field.id">
+            </app-input>
+
+            <app-textarea *ngIf="field.type === enumCustomFieldType.TEXTAREA"
+              class="field-item"
+              [field]="field" 
+              [formControlName]="field.id">
+            </app-textarea>
+
+            <app-select *ngIf="field.type === enumCustomFieldType.SELECT" 
+              class="field-item"
+              [field]="field" 
+              [formControlName]="field.id">
+            </app-select>
+
+            <i class="material-icons navy-color" (click)="selectField(field, i)">settings</i>
+            <i class="material-icons red-color" (click)="deleteField(field, i)">delete</i>
+
+          </div>
+
+          <div *ngIf="selectedField && selectedFieldIndex === i" class="config-panel">
+            <h3>Configuración de Campo</h3>
+
+           <mat-form-field class="worky-input worky-accent">
+              <mat-label>Id Name</mat-label>
+              <input
+                matInput
+                type="text"
+                formControlName="idName"
+                placeholder="IDName"
+                (change)="updateField(selectedField, 'idName', $event)">
+            </mat-form-field>
+
+            <mat-form-field class="worky-input worky-accent">
+              <mat-label>Etiqueta</mat-label>
+              <input matInput type="text" formControlName="label" placeholder="Etiqueta" 
+                    (change)="updateField(selectedField, 'label', $event)">
+            </mat-form-field>
+
+            <mat-form-field *ngIf="selectedField?.type !== 'select'" 
+              class="worky-input worky-accent">
+              <mat-label>Placeholder</mat-label>
+              <input matInput type="text" formControlName="placeholder" placeholder="Placeholder" 
+                    (change)="updateField(selectedField, 'placeholder', $event)">
+            </mat-form-field>
+
+            <div formGroupName="additionalOptions">
+
+                <mat-form-field class="worky-input worky-accent">
+                  <mat-label>Visible</mat-label>
+                  <mat-select formControlName="visible" (selectionChange)="updateField(selectedField, 'visible', $event)">
+                    <mat-option [value]="true">Sí</mat-option>
+                    <mat-option [value]="false">No</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field class="worky-input worky-accent">
+                  <mat-label>Requerido</mat-label>
+                  <mat-select formControlName="required" (selectionChange)="updateField(selectedField, 'required', $event)">
+                    <mat-option [value]="true">Sí</mat-option>
+                    <mat-option [value]="false">No</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field *ngIf="selectedField?.type !== 'select'" 
+                  class="worky-input worky-accent">
+                  <mat-label>Mínimo de caracteres</mat-label>
+                  <input matInput type="number" formControlName="minLength" placeholder="Mínimo de caracteres" 
+                        (change)="updateField(selectedField, 'minLength', $event)">
+                </mat-form-field>
+
+                <mat-form-field *ngIf="selectedField?.type !== 'select'"  
+                  class="worky-input worky-accent">
+                  <mat-label>Máximo de caracteres</mat-label>
+                  <input matInput type="number" formControlName="maxLength" placeholder="Máximo de caracteres" 
+                        (change)="updateField(selectedField, 'maxLength', $event)">
+                </mat-form-field>
+
+                <mat-form-field *ngIf="selectedField?.type == 'select'" 
+                  class="worky-input worky-accent">
+                  <mat-label>Multi-Selección</mat-label>
+                  <mat-select formControlName="multiSelect" (selectionChange)="updateField(selectedField, 'multiSelect', $event)">
+                    <mat-option [value]="true">Sí</mat-option>
+                    <mat-option [value]="false">No</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+            </div>
+
+            <mat-form-field *ngIf="selectedField?.type === 'select'" class="worky-input worky-accent">
+              <mat-label>Opciones (separadas por coma)</mat-label>
+              <input matInput type="text" formControlName="optionsString" (blur)="updateOptions()">
+            </mat-form-field>
+
+            <button mat-raised-button color="primary" (click)="updateFieldOptions(field, i)">Guardar</button>
+          </div>
+
+        </div>
+
+        <div *ngIf="formFields.length === 0">
+          <img class="empty-image"
+            src="assets/img/shared/dd-cover.png"
+            alt="empty">
+        </div>
+      </div>
+
+      <button *ngIf="hasValidField()"
+        class=""
+        (click)="saveForm()" 
+        mat-raised-button>
+        Guardar Formulario
+      </button>
+
+    </form>
+  </div>
+</div>

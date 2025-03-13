@@ -1,0 +1,24 @@
+<mat-form-field appearance="fill" class="worky-textarea worky-accent">
+  <mat-label>{{ field.label }}</mat-label>
+  
+  <textarea 
+    matInput
+    [id]="field.id" 
+    [formControl]="control" 
+    [placeholder]="field.placeholder || ''"
+    [required]="isRequired"
+    [attr.minlength]="field.minLength" 
+    [attr.maxlength]="field.maxLength">
+  </textarea>
+  
+  <!-- Mensajes de error con `mat-error` -->
+  <mat-error *ngIf="isRequired && control.hasError('required') && control.touched">
+    Este campo es requerido.
+  </mat-error>
+  <mat-error *ngIf="control.hasError('minlength') && control.touched">
+    La longitud mínima es {{ field.minLength }} caracteres.
+  </mat-error>
+  <mat-error *ngIf="control.hasError('maxlength') && control.touched">
+    La longitud máxima es {{ field.maxLength }} caracteres.
+  </mat-error>
+</mat-form-field>

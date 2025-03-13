@@ -10,6 +10,7 @@ export interface MailSendValidateData {
   subMessage: string;
   buttonMessage: string;
   template: string;
+  templateLogo: string;
 }
 
 export enum TemplateEmail {
@@ -17,5 +18,6 @@ export enum TemplateEmail {
   FORGOT_PASSWORD = 'forgot-password',
   VALIDATE_EMAIL = 'forgot-password',
   WELCOME = 'welcome',
-  NOTIFICATION = 'notification'
+  NOTIFICATION = 'notification',
+  EMAIL = 'email'
 }

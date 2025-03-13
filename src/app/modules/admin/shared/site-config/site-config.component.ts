@@ -3,8 +3,8 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 
-import { ConfigService } from '@shared/services/config.service';
-import { FileUploadService } from '@shared/services/file-upload.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
+import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
 import { environment } from '@env/environment';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
@@ -47,7 +47,20 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       privacyPolicy: [''],
       contactEmail: [''],
       faviconUrl: [''],
-      loginMethods: [''],
+      urlSite: [''],
+      description: [''],
+      invitationCode: [false],
+      loginMethods: this._fb.group({
+        email: [false],
+        google: [false],
+      }),
+      services: this._fb.group({
+        logs: this._fb.group({
+          enabled: [false],
+          urlApi: [''],
+          token: [''],
+        }),
+      }),
     });
   }
 
@@ -62,16 +75,49 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
   getSiteConfig() {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
+      let loginMethods = { email: false, google: false };
+      
+      if (configData.settings.loginMethods) {
+        try {
+         loginMethods = JSON.parse(configData.settings.loginMethods);
+
+        } catch (error) {
+          console.error('Error parsing loginMethods:', error);
+        }
+      }
+
       this.configForm.patchValue({
         logoUrl: configData.settings.logoUrl || '',
         title: configData.settings.title || '',
         privacyPolicy: configData.settings.privacyPolicy || '',
         contactEmail: configData.settings.contactEmail || '',
         faviconUrl: configData.settings.faviconUrl || '',
-        loginMethods: configData.settings.loginMethods || '',
+        urlSite: configData.settings.urlSite || '',
+        description: configData.settings.description || '',
+        invitationCode: configData.settings.invitationCode || false,
+        loginMethods: {
+          email: JSON.parse(String(loginMethods.email)),
+          google: JSON.parse(String(loginMethods.google)),
+        },
       });
+
       this._cdr.markForCheck();
     });
+
+    this._configService.getConfigServices().pipe(takeUntil(this.destroy$)).subscribe((configServices) => {
+      this.configForm.patchValue({
+        services: {
+          logs: {
+            enabled: configServices.services.logs.enabled || false,
+            urlApi: configServices.services.logs.urlApi || '',
+            token: configServices.services.logs.token || '',
+          },
+        },
+      });
+
+      this._cdr.markForCheck();
+    });
+
   }
 
   updateConfig() {
@@ -110,7 +156,10 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
     await loadingReaction.present();
 
-    const config = this.configForm.value;
+    const config = { ...this.configForm.value };
+
+    config.loginMethods = JSON.stringify(this.configForm.value.loginMethods);
+
     this._configService.updateConfig(config).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
         this._alertService.showAlert(

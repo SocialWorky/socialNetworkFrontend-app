@@ -26,6 +26,7 @@ export const translations = {
   'input.name': 'Name',
   'input.lastname': 'Lastname',
   'input.username': 'Username',
+  'input.invitationCode': 'Invitation code',
   // BUTTONS
   'button.login': 'Login',
   'button.signUp': 'Sign up',
@@ -53,6 +54,7 @@ export const translations = {
   'alert.message_error_send_email': 'We are pleased to inform you that your registration has been successfully completed. <br> However, we have detected a technical problem with sending the account validation email. <br> Do not worry, your registration is already active. In the next few minutes you will receive a new email with the link to validate your account.',
   'alert.title_success_register': 'Successful registration',
   'alert.message_success_register': 'Your registration was successful, you will receive an email to validate your account',
+  'alert.registerInvalidInvitationCode': 'The invitation code is invalid',
   // -> RESET PASSWORD
   'alert.title_reset_password_message': 'Successful shipment',
   'alert.message_reset_password_message': 'An email has been sent with the instructions to reset your password',
@@ -64,11 +66,13 @@ export const translations = {
   'alert.error_input_email_message': 'Enter your email',
   // EMAIL MESSAGES
   'email.validateEmailSubject': 'Validate your email',
-  'email.validateEmailTitle': 'Welcome to Worky',
+  'email.validateEmailTitle': 'Welcome to',
   'email.validateEmailGreet': 'Hello',
   'email.validateEmailMessage': 'To validate your email, click the button below',
   'email.validateEmailSubMessage': 'If you did not register, ignore this email',
   'email.validateEmailButtonMessage': 'Validate email',
+  'email.validateEmailMessageRegistered': 'Your email has been validated',
+  'email.validateEmailMessageRegisteredSubMessage': 'You can now log in',
   // -> RESET PASSWORD
   'email.resetPasswordSubject': 'Reset your password',
   'email.resetPasswordTitle': 'Reset your password',
@@ -104,9 +108,19 @@ export const translations = {
   'email.acceptFriendRequestMessage': 'You have accepted a friend request. Now you are friends.',
   'email.acceptFriendRequestSubMessage': 'Friend request accepted from: ',
   'email.acceptFriendRequestButtonMessage': 'View profile of: ',
+  // -> NOTIFICATION COMMENT PUBLICATION
+  'email.commentPublicationSubject': 'Comment publication',
+  'email.commentPublicationTitle': 'Publication comment notification',
+  'email.commentPublicationGreet': 'Hello',
+  'email.commentPublicationMessage': 'The user {{name}} {{lastName}} has commented on your publication',
+  'email.commentPublicationSubMessage': 'Your comment was: {{comment}}',
+  'email.commentPublicationButtonMessage': 'View publication',
+  // -> NOTIFICATION CENTER SERVICE
+  'notification.commentPublication': 'Comment publication',
+  'notification.commentPublicationImage': 'Comment image',
   // REGISTER COMPONENT
   'register.title': 'Register',
-  'register.subTitle': 'Fill out the registration form',
+  'register.subTitle': 'Fill in the registration form and become part of the community',
   'register.haveAccountLogIn': 'Already have an account? Log in',
   'register.messageLoading': 'Registering...',
   // NAVBAR COMPONENT
@@ -145,6 +159,10 @@ export const translations = {
   'publicationsView.loadingDeletePublication': 'Deleting publication...',
   'publicationsView.reportPublication': 'Report publication',
   'publicationsView.deletePublication': 'Delete publication',
+  'publicationsView.fixedPublication': 'Fixed publication',
+  'publicationsView.unfixedPublication': 'Unfixed publication',
+  'publicationsView.loadingFixedPublication': 'Fixing publication...',
+  'publicationsView.loadingUnfixedPublication': 'Unfixing publication...',
   // DATE OF PUBLICATION AND COMMENTS
   'DATE_FNS.LESS_THAN_A_MINUTE': 'less than a minute ago',
   'DATE_FNS.X_MINUTES': '{{count}} minutes ago',

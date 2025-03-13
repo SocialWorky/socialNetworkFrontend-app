@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input,  AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 
@@ -6,21 +6,24 @@ import { translations } from '@translations/translations'
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { AuthService } from '@auth/services/auth.service';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 import { SocketService } from '@shared/services/socket.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
-import { NotificationCenterService } from '@shared/services/notificationCenter.service';
+import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service'
 import { MessageService } from '../../messages/services/message.service';
-import { ConfigService } from '@shared/services/config.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
+import { PwaInstallService } from '@shared/services/pwa-install.service';
+import { ScrollService } from '@shared/services/scroll.service';
+import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
   selector: 'worky-navbar',
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
-export class NavbarComponent implements OnInit, OnDestroy {
+export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   private unsubscribe$ = new Subject<void>();
 
   googleLoginSession = localStorage.getItem('googleLogin');
@@ -39,11 +42,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   users: any[] = [];
 
-  token = this._authService.getDecodedToken();
+  token: Token | null = null;
 
   title = 'Social Network App';
 
   logoUrl = '';
+
+  pwaInstalled = false;
+
+  scrolledTop = false;
+
+  @Input() isMessages: boolean = false;
+
 
   constructor(
     private _router: Router,
@@ -57,9 +67,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private _notificationCenterService: NotificationCenterService,
     private _messageService: MessageService,
     private _notificationPanelService: NotificationPanelService,
-    private _configService: ConfigService
+    private _configService: ConfigService,
+    private _pwaInstallService: PwaInstallService,
+    private _scrollService: ScrollService
   ) {
     this.menuProfile();
+    if (!this._authService.isAuthenticated()) return;
     this.token = this._authService.getDecodedToken();
     this._socketService.connectToWebSocket(this.token!);
   }
@@ -81,12 +94,24 @@ export class NavbarComponent implements OnInit, OnDestroy {
         console.error('Error getting notifications', error);
       }
     });
-    // this.getNotification();
-    this.suscribeToConfig();
+    this.subscribeToConfig();
+    this.checkPwaInstall();
     this.getConfig();
     this.checkAdminDataLink();
     this.getUnreadMessagesCount();
     this._cdr.markForCheck();
+  }
+
+
+  ngAfterViewInit(): void {
+    this._scrollService.scrollEnd$.pipe(takeUntil(this.unsubscribe$)).subscribe((event) => {
+      if (event === 'showNavbar') {
+        this.scrolledTop = true;
+      } else if (event === 'hideNavbar') {
+        this.scrolledTop = false
+      }
+
+    });
   }
 
   getConfig() {
@@ -101,7 +126,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
   }
 
-  suscribeToConfig() {
+  private subscribeToConfig() {
     this._configService.config$.pipe(takeUntil(this.unsubscribe$)).subscribe((configData) => {
       if (configData) {
         this.applyConfig(configData);
@@ -109,7 +134,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
   }
 
-  applyConfig(configData: any) {
+  private removeDataLinkProfile(item: string) {
+    this.dataLinkProfile = this.dataLinkProfile.filter((link) => link.title !== item);
+  }
+
+  private applyConfig(configData: any) {
     if (configData) {
       this.title = configData.settings.title;
       this.logoUrl = configData.settings.logoUrl;
@@ -122,18 +151,33 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.unsubscribe$.complete();
   }
 
-  logoutUser() {
+  private logoutUser() {
    this._notificationUsersService.logoutUser();
    this._authService.logout();
   }
 
-  checkAdminDataLink() {
+  private checkAdminDataLink() {
+    if (!this._authService.isAuthenticated()) return;
     const dataUser = this._authService.getDecodedToken();
     const link = { icon: 'settings', link: '/admin',  title: 'Administración'}
 
     if (dataUser && dataUser.role === 'admin' && !this.isMobile) {
-      this.dataLinkProfile.push(link);
+      this.dataLinkProfile.unshift(link);
     }
+  }
+
+  private checkPwaInstall() {
+    if (!this._pwaInstallService.isAppInstalled()) {
+      const link = { icon: 'download', function: this.installPWA.bind(this),  title: 'Instalar App'}
+      this.dataLinkProfile.unshift(link);
+    }
+  }
+
+  private installPWA() {
+    this._pwaInstallService.showInstallPrompt(
+       '🎉 ¡Bienvenido!',
+       'Instala nuestra app para una mejor experiencia.'
+     );
   }
 
   toggleNotificationsPanel() {
@@ -168,8 +212,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   menuProfile() {
   this.dataLinkProfile = [
-    // { link: '/auth/login',  title: 'Perfil' },
-    // { link: '/settings',  title: 'Configuración' },
     { icon: 'logout', function: this.logoutUser.bind(this),  title: translations['navbar.logout']},
   ];
 }
@@ -192,6 +234,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   getNotification() {
+    if (!this._authService.isAuthenticated()) return;
     const userId = this._authService.getDecodedToken()?.id!;
     this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {

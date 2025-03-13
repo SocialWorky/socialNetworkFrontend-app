@@ -2,9 +2,25 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 @use 'src/assets/styles/worky-variables.scss' as variables;
 
+.reaction-container-wrapper {
+  position: relative;
+}
+
+.reaction-container-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  right: -15px;
+  bottom: -15px;
+  z-index: 1;
+  pointer-events: auto; 
+}
+
 .reaction-container {
   position: relative;
   display: flex;
+  z-index: 2;
 
   .content-text-reaction {
     display: flex;
@@ -17,19 +33,27 @@
   position: absolute;
   display: flex;
   flex-wrap: nowrap;
-  bottom: 100%;
-  left: calc(70% + (var(--num-items) * 33px / 2));
-  transform: translateX(-50%);
-  background-color: white;
+  bottom: 120%;
+  left: -10px;
+  background-color: color.$worky-color-light;
   padding: 13px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid color.$worky-color-greyLight;
+  border-radius: 25px;
+  box-shadow: 9px 8px 12px rgba(0, 0, 0, 0.3);
   overflow-x: auto;
-
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.9);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
   @include breakpoints.below-sm {
-    left: calc(10% + (var(--num-items) * 33px / 2));
     bottom: 90%;
   }
+}
+
+.reaction-popup-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
 }
 
 .reaction {
@@ -38,7 +62,7 @@
   height: 40px;
   cursor: pointer;
   margin: 0 5px;
-  transition: transform 0.3s;
+  transition: transform 0.3s ease-in-out;
   @include breakpoints.below-sm {
     width: 25px;
     height: 25px;
@@ -52,6 +76,7 @@
 .reaction-image {
   width: 40px;
   height: 40px;
+  transition: transform 0.3s ease-in-out;
   @include breakpoints.below-sm {
     width: 25px;
     height: 25px;

@@ -17,6 +17,16 @@
           </div>
 
           <div class="mb-6">
+            <label for="urlSite" class="block text-sm font-medium text-gray-300 mb-2">Url del Sitio:</label>
+            <input formControlName="urlSite" id="urlSite" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+          </div>
+
+          <div class="mb-6">
+            <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Descripción de la app:</label>
+            <textarea formControlName="description" id="description" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" rows="5"></textarea>
+          </div>
+
+          <div class="mb-6">
             <label for="privacyPolicy" class="block text-sm font-medium text-gray-300 mb-2">Política de Privacidad:</label>
             <textarea formControlName="privacyPolicy" id="privacyPolicy" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" rows="5"></textarea>
           </div>
@@ -39,6 +49,80 @@
             <label for="image" class="block text-sm font-medium text-gray-300 mb-2">O subir Logo:</label>
             <input id="image" type="file" (change)="onFileChange($event)" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
           </div>
+
+          <!-- Métodos de inicio de sesión -->
+          <div class="mb-6">
+            <h3 class="text-xl font-semibold mb-2">Métodos de inicio de sesión</h3>
+            
+            <div formGroupName="loginMethods">
+              <div class="flex items-center mb-4">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                      <input class="sr-only peer"
+                        type="checkbox" 
+                        id="email"
+                        formControlName="email">
+                      <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-indigo-500"></div>
+                      <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-full"></div>
+                  </label>
+                  <label for="emailLogin" class="ml-2 text-sm font-medium text-gray-300">Iniciar sesión con Email</label>
+              </div>
+
+              <div class="flex items-center mb-4">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                      <input class="sr-only peer"
+                        type="checkbox" 
+                        id="google"
+                        formControlName="google">
+                      <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-indigo-500"></div>
+                      <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-full"></div>
+                  </label>
+                  <label for="emailLogin" class="ml-2 text-sm font-medium text-gray-300">Iniciar sesión con Google</label>
+              </div>
+
+            </div> <!-- Cierre del formGroupName para loginMethods -->
+
+            <h3 class="text-xl font-semibold mb-2">Registro de usuarios</h3>
+
+            <div class="flex items-center mb-4">
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input class="sr-only peer"
+                      type="checkbox" 
+                      id="invitationCode"
+                      formControlName="invitationCode">
+                    <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-indigo-500"></div>
+                    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-full"></div>
+                </label>
+                <label for="invitationCode" class="ml-2 text-sm font-medium text-gray-300">Registro con Codigo</label>
+            </div>
+
+
+            <div formGroupName="services">
+              <div formGroupName="logs">
+                <h3 class="text-xl font-semibold mb-2">API para Log</h3>
+
+                <div class="flex items-center mb-4">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                      <input class="sr-only peer"
+                        type="checkbox" 
+                        id="enabled"
+                        formControlName="enabled">
+                      <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-indigo-500"></div>
+                      <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-full"></div>
+                  </label>
+                  <label for="enabled" class="ml-2 text-sm font-medium text-gray-300">Habilitado</label>
+                </div>
+
+                <label for="urlApi" class="block text-sm font-medium text-gray-300 mb-2">URL API:</label>
+                <input formControlName="urlApi" id="urlApi" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+
+
+                <label for="token" class="block text-sm font-medium text-gray-300 mb-2">TOKEN API:</label>
+                <input formControlName="token" id="token" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+              </div>
+            </div>
+
+          </div>
+
         </div>
       </div>
 
@@ -46,6 +130,7 @@
         <div *ngIf="loadUpdateConfigButtons" class="loader"></div>
         <button *ngIf="!loadUpdateConfigButtons" type="submit" class="w-full bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600">Actualizar</button>
       </div>
+
     </form>
 
     <div>
@@ -56,5 +141,3 @@
 
   </div>
 </div>
-
-

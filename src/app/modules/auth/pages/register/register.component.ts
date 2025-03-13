@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
 
@@ -13,6 +13,7 @@ import { translations } from '@translations/translations';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { TemplateEmail } from '@shared/interfaces/mail.interface';
 import { Subject, takeUntil } from 'rxjs';
+import { ConfigService } from '@shared/services/core-apis/config.service';
 
 @Component({
   selector: 'worky-register',
@@ -30,6 +31,8 @@ export class RegisterComponent implements OnInit {
 
   mailDataValidate: MailSendValidateData = {} as MailSendValidateData;
 
+  invitationCode = false;
+
   private unsubscribe$ = new Subject<void>();
 
   @ViewChild('emailInput') emailInput!: ElementRef;
@@ -41,7 +44,14 @@ export class RegisterComponent implements OnInit {
     private _authApiRegisterService: AuthApiRegisterService,
     private _alertService: AlertService,
     private _loadingCtrl: LoadingController,
-  ) {}
+    private _configService: ConfigService,
+    private _cdr: ChangeDetectorRef,
+  ) {
+    this._configService.getConfig().pipe(takeUntil(this.unsubscribe$)).subscribe((configData) => {
+      this.invitationCode = configData.settings.invitationCode;
+      this._cdr.markForCheck();
+    });
+  }
 
   ngOnInit() {
     this.registerForm = this._formBuilder.group({
@@ -50,11 +60,14 @@ export class RegisterComponent implements OnInit {
       username: ['', [Validators.required, Validators.minLength(4)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+      invitationCode: [this.invitationCode ? ['', [Validators.required]] : ''],
       role: [RoleUser.USER],
     });
   }
 
   async register() {
+
+    if(this.registerForm.invalid) return;
 
     this.registerLoading = true;
     
@@ -66,12 +79,13 @@ export class RegisterComponent implements OnInit {
 
     this.mailDataValidate.url = `${baseUrl}/auth/validate/`;
     this.mailDataValidate.subject = translations['email.validateEmailSubject'];
-    this.mailDataValidate.title = translations['email.validateEmailTitle'];
+    this.mailDataValidate.title = `${translations['email.validateEmailTitle']} ${environment.META_TITLE}`;
     this.mailDataValidate.greet = translations['email.validateEmailGreet'];
-    this.mailDataValidate.message = translations['email.validateEmailMessage'];
     this.mailDataValidate.subMessage = translations['email.validateEmailSubMessage'];
-    this.mailDataValidate.buttonMessage = translations['email.validateEmailButtonMessage'];
     this.mailDataValidate.template = TemplateEmail.WELCOME;
+    this.mailDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
+    this.mailDataValidate.buttonMessage = this.invitationCode ? translations['email.validateEmailMessageRegisteredSubMessage'] : translations['email.validateEmailButtonMessage'];
+    this.mailDataValidate.message = this.invitationCode ? translations['email.validateEmailMessageRegistered'] : translations['email.validateEmailMessage'];
 
     const body = this.registerForm.value as RegisterData;
     body.mailDataValidate = this.mailDataValidate;
@@ -141,6 +155,23 @@ export class RegisterComponent implements OnInit {
             ['/auth/login'],
           );
         }
+        if (e.error.message === 'Invalid invitation code') {
+          this.registerForm.get('invitationCode')?.setErrors({ invalidInvitationCode: true });
+          this.registerForm.get('invitationCode')?.reset;
+          this.registerLoading = false;
+
+          this._alertService.showAlert(
+            translations['alert.title_error_register'],
+            translations['alert.registerInvalidInvitationCode'],
+            Alerts.ERROR,
+            Position.CENTER,
+            true,
+            true,
+            translations['button.ok'],
+          );
+          loading.dismiss();
+        }
+
         this.registerLoading = false;
         loading.dismiss();
       }     

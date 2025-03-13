@@ -35,7 +35,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   @Input()
   set size(value: number) {
-    if (value >= 30 && value <= 100) {
+    if (value >= 10 && value <= 100) {
       this._size = value;
     }
   }
@@ -47,6 +47,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
   constructor(private _authService: AuthService, private _cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
+    if(!this._authService.isAuthenticated()) return;
     this.token = this._authService.getDecodedToken()!;
 
     this.username = this.token?.name || '';

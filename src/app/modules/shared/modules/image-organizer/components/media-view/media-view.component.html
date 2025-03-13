@@ -1,0 +1,25 @@
+<div class="content-view-media"
+  [ngClass]="{ 
+    'mobil': isMobile,
+    'desktop': !isMobile,
+   }">
+
+  <worky-image-loading
+    [images]="data.images"
+    [imageSelected]="data.imageSelected"
+    (imageChanged)="onImageChanged($event)">
+  </worky-image-loading>
+
+  <worky-message-loading *ngIf="data"
+    [images]="data.images"
+    [imgSelected]="imageSelected"
+    [comment]="data.comment"
+    [publication]="data.publication"
+    [type]="data.type">
+  </worky-message-loading>
+
+  <div class="close-btn">
+    <i class="material-icons" (click)="close()">close</i>
+  </div>
+
+</div>

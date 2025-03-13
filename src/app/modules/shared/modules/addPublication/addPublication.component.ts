@@ -6,10 +6,10 @@ import {
   OnInit,
   OnDestroy,
   ViewChild,
-  AfterViewInit
+  NgZone
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LoadingController } from '@ionic/angular';
+import { IonTextarea, LoadingController } from '@ionic/angular';
 import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import {
@@ -17,8 +17,8 @@ import {
   WorkyButtonTheme
 } from '@shared/modules/buttons/models/worky-button-model';
 import { AuthService } from '@auth/services/auth.service';
-import { PublicationService } from '@shared/services/publication.service';
-import { CommentService } from '@shared/services/comment.service';
+import { PublicationService } from '@shared/services/core-apis/publication.service';
+import { CommentService } from '@shared/services/core-apis/comment.service';
 import { translations } from '@translations/translations';
 import { TypePublishing, TypePrivacy } from './enum/addPublication.enum';
 import { Token } from '@shared/interfaces/token.interface';
@@ -29,57 +29,60 @@ import { NotificationCommentService } from '@shared/services/notifications/notif
 import { LocationSearchComponent } from '../location-search/location-search.component';
 import { ExtraData } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { ImageUploadModalComponent } from '../image-upload-modal/image-upload-modal.component';
-import { FileUploadService } from '@shared/services/file-upload.service';
+import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
 import { MediaFileUpload, PublicationView } from '@shared/interfaces/publicationView.interface';
-import { UserService } from '@shared/services/users.service';
+import { UserService } from '@shared/services/core-apis/users.service';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { User } from '@shared/interfaces/user.interface';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { environment } from '@env/environment';
 import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
-import { NotificationCenterService } from '@shared/services/notificationCenter.service';
+import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationType } from '@shared/modules/notifications-panel/enums/notificationsType.enum';
 import { GifSearchComponent } from '../gif-search/gif-search.component';
+import { TooltipsOnboardingService } from '@shared/services/tooltips-onboarding.service';
 
 @Component({
   selector: 'worky-add-publication',
   templateUrl: './addPublication.component.html',
   styleUrls: ['./addPublication.component.scss'],
 })
-export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit {
+export class AddPublicationComponent implements OnInit, OnDestroy {
   WorkyButtonType = WorkyButtonType;
-  
+
   WorkyButtonTheme = WorkyButtonTheme;
-  
+
   typePrivacy = TypePrivacy;
-  
+
   typePublishing = TypePublishing;
 
   user: User = {} as User;
-  
+
   profileImageUrl: string | null = null;
-  
+
   nameGeoLocation = '';
-  
+
   dataGeoLocation = '';
-  
+
   showEmojiMenu = false;
-  
+
   privacy = TypePrivacy.PUBLIC;
-  
+
   privacyFront = '';
-  
+
   previews: { url: string; type: string }[] = [];
-  
+
   selectedFiles: File[] = [];
-  
-  decodedToken!: Token;
-  
+
+  decodedToken: Token = this._authService.getDecodedToken()!;
+
   isAuthenticated = false;
 
   showGifSearch = false;
 
   loaderSavePublication = false;
+
+  loaderPreviews = false;
 
   myForm: FormGroup = this._fb.group({
     content: ['', [Validators.required, Validators.minLength(1)]],
@@ -101,7 +104,10 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
 
   @Input() idUserProfile?: string;
 
-  @ViewChild('postText') postTextRef!: ElementRef;
+  @Input() idMedia?: string;
+
+  @ViewChild('postTextRef', { static: false }) postTextRef!: IonTextarea;
+  postText!: string;
 
   constructor(
     private _fb: FormBuilder,
@@ -117,7 +123,9 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     private _userService: UserService,
     private _globalEventService: GlobalEventService,
     private _emailNotificationService: EmailNotificationService,
-    private _notificationCenterService: NotificationCenterService
+    private _notificationCenterService: NotificationCenterService,
+    private _ngZone: NgZone,
+    private _tooltipsOnboardingService: TooltipsOnboardingService,
   ) {
     this.isAuthenticated = this._authService.isAuthenticated();
     if (this.isAuthenticated) {
@@ -136,6 +144,10 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
           this.updatePublications(TypePublishing.POSTPROFILE, this.idUserProfile);
         }
       });
+      setTimeout(() => {
+        this.startOnboarding();
+      }
+      , 1000);
   }
 
   ngOnDestroy(): void {
@@ -144,9 +156,57 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     this.subscription?.unsubscribe();
   }
 
-  ngAfterViewInit() {
-    this.autoResize();
-  }
+  startOnboarding() {
+    const steps = [
+      {
+        element: '.textarea-container',
+        popover: {
+          title: 'Bienvenido',
+          description: 'Este es el primer paso del tutorial. Aquí puedes publicar contenido.',
+        },
+      },
+      {
+        element: '.gif-icon',
+        popover: {
+          title: 'Buscador de GIFs',
+          description: 'Aquí puedes buscar GIFs para añadir a tu publicación.',
+        },
+      },
+      {
+        element: '.file-upload',
+        popover: {
+          title: 'Subir Imganes',
+          description: 'Puedes subir archivos de imagen para añadir a tu publicación.',
+        },
+      },
+      {
+        element: '.location-on',
+        popover: {
+          title: 'Ubicación',
+          description: 'Puedes añadir la ubicación de tu publicación.',
+          //side: 'right',
+        },
+      },
+      {
+        element: '.emoji-icon',
+        popover: {
+          title: 'Emojis',
+          description: 'Puedes añadir emojis a tu publicación.',
+          //side: 'right',
+        },
+      },
+      {
+        element: '.markdown-help',
+        popover: {
+          title: 'Markdown',
+          description: 'Puedes ver una guía rápida de Markdown para dar formato a tu publicación.',
+          //side: 'right',
+        },
+      }
+    ];
+
+    this._tooltipsOnboardingService.start(steps);
+  } 
 
   get userToken(): string {
     return this.decodedToken.id;
@@ -187,7 +247,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     this.myForm.controls['privacy'].setValue(this.privacy);
     if (this.type === TypePublishing.POST || this.type === TypePublishing.POSTPROFILE) {
       this.onSavePublication();
-    } else if (this.type === TypePublishing.COMMENT) {
+    } else if (this.type === TypePublishing.COMMENT || this.type === this.typePublishing.IMAGEVIEW) {
       this.onSaveComment(this.idPublication as string);
     }
   }
@@ -202,7 +262,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     const dataComment: CreateComment = {
       content: this.myForm.controls['content'].value,
       authorId: this.decodedToken.id,
-      idPublication,
+      idPublication: this.type === this.typePublishing.COMMENT ? idPublication : null,
+      idMedia: this.type === this.typePublishing.IMAGEVIEW ? this.idMedia : null,
     };
 
     this._commentService.createComment(dataComment).pipe(takeUntil(this.unsubscribe$)).subscribe({
@@ -222,15 +283,14 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   private async handleCommentResponse(message: any, idPublication: string) {
     try {
       if (this.selectedFiles.length) {
-        const response = await lastValueFrom(this.uploadFiles('comments', message.comment._id));
-        await this.saveFiles(response, 'comments/', message.comment._id, TypePublishing.COMMENT);
+        const response = await this.uploadFiles('comments', message.comment._id);
+        await this.saveFiles(response, environment.APIFILESERVICE + 'comments/', message.comment._id, TypePublishing.COMMENT);
       }
 
       await this.updatePublicationAndNotify(idPublication, message.comment);
 
       if (message.message === 'Comment created successfully') {
         this.myForm.controls['content'].setValue('');
-        this.autoResize();
         this.showSuccessAlert(
           translations['addPublication.alertCreateCommentTitle'],
           translations['addPublication.alertCreateCommentMessage']
@@ -255,7 +315,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
       this.myForm.controls['privacy'].setValue(TypePrivacy.FRIENDS);
     }
 
-    this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
         await this.handlePublicationResponse(message);
         this.loaderSavePublication = false;
@@ -297,15 +357,14 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   private async handlePublicationResponse(message: any) {
     try {
       if (this.selectedFiles.length) {
-        const response = await lastValueFrom(this.uploadFiles('publications', message.publications._id));
-        await this.saveFiles(response, 'publications/', message.publications._id, TypePublishing.POST);
+        const response = await this.uploadFiles('publications', message.publications._id);
+        await this.saveFiles(response, environment.APIFILESERVICE + 'publications/', message.publications._id, TypePublishing.POST);
       }
 
       await this.updatePublicationAndNotify(message.publications._id);
 
       if (message.message === 'Publication created successfully') {
         this.myForm.controls['content'].setValue('');
-        this.autoResize();
         this.showSuccessAlert(
           translations['addPublication.alertCreatePublicationTitle'],
           translations['addPublication.alertCreatePublicationMessage']
@@ -328,23 +387,27 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     }
   }
 
-  private uploadFiles(folder: string, id: string) {
-    return this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$));
+  private uploadFiles(folder: string, id: string): Promise<MediaFileUpload[]> {
+    return lastValueFrom(this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$)));
   }
 
   private async saveFiles(response: MediaFileUpload[], saveLocation: string, id: string, type: TypePublishing) {
-    const saveFilePromises = response.map(file => {
-      return lastValueFrom(
-        this._fileUploadService.saveUrlFile(
-          saveLocation + file.filename,
-          saveLocation + file.filenameThumbnail,
-          saveLocation + file.filenameCompressed,
-          id,
-          type
-        ).pipe(takeUntil(this.unsubscribe$))
-      );
-    });
-    await Promise.all(saveFilePromises);
+    for (const file of response) {
+      try {
+        await lastValueFrom(
+          this._fileUploadService.saveUrlFile(
+            saveLocation + file.filename,
+            saveLocation + file.filenameThumbnail,
+            saveLocation + file.filenameCompressed,
+            id,
+            type
+          ).pipe(takeUntil(this.unsubscribe$))
+        );
+      } catch (error) {
+        console.error(`Error saving file ${file.filename}: ${error}`);
+      }
+    }
+
     this.selectedFiles = [];
     this.previews = [];
     this._cdr.markForCheck();
@@ -360,19 +423,22 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
   }
 
   private createNotificationAndSendComment(publication: PublicationView, comment: any) {
-    if (this.userToken === publication.author._id) return;
 
     const dataNotification = this.createNotificationData(publication, comment);
+
+    this._notificationCommentService.sendNotificationComment(dataNotification);
+
+    if (this.userToken === publication.author._id) return;
 
     this._notificationCenterService.createNotification({
       userId: publication.author._id,
       type: NotificationType.COMMENT,
-      content: 'Han comentado tu publicación',
+      content: this.type === this.typePublishing.IMAGEVIEW ? translations['notification.commentPublicationImage'] : translations['notification.commentPublication'],
       link: `/publication/${publication._id}`,
       additionalData: JSON.stringify(dataNotification),
     }).pipe(takeUntil(this.unsubscribe$)).subscribe();
 
-    this._notificationCommentService.sendNotificationComment(dataNotification);
+
   }
 
   private createNotificationData(publication: PublicationView, comment: any) {
@@ -400,14 +466,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     );
   }
 
-  autoResize() {
-    const postText = this.postTextRef.nativeElement as HTMLTextAreaElement;
-    postText.style.height = 'auto';
-    postText.style.height = `${postText.scrollHeight}px`;
-  }
-
   onTextareaInput() {
-    this.autoResize();
+    if (this.myForm.controls['content'].value.trim().length === 0) {
+      this.myForm.controls['content'].setErrors({ required: true });
+    } else {
+      this.myForm.controls['content'].setErrors(null);
+    }
   }
 
   postPrivacy(privacy: string): void {
@@ -432,7 +496,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
       width: '400px',
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.unsubscribe$)).subscribe(result => {
       if (result) {
         this.setLocationData(result);
         this._cdr.markForCheck();
@@ -454,17 +518,27 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
       }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.selectedFiles = result;
-        this.createPreviews();
-      }
+    dialogRef.afterClosed().pipe(
+      takeUntil(this.unsubscribe$)
+    ).subscribe({
+      next: (result) => {
+        this.loaderPreviews = true;
+        if (result) {
+          this.selectedFiles = result;
+          this.createPreviews();
+          this._cdr.markForCheck();
+        } else {
+          this.loaderPreviews = false;
+        }
+      },
     });
   }
 
-  private createPreviews() {
+  private async createPreviews() {
     this.previews = [];
+    let count = 0;
     this.selectedFiles.forEach(file => {
+      count++;
       const reader = new FileReader();
       reader.onload = (e: any) => {
         const fileType = file.type.split('/')[0];
@@ -474,6 +548,19 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
         });
       };
       reader.readAsDataURL(file);
+    });
+    if (count >= this.selectedFiles.length){
+      setTimeout(() => {
+        this.loaderPreviews = false;
+      }, 1500);
+    }
+
+    this._cdr.markForCheck();
+  }
+
+  replaceVariables(text: string, variables: { [key: string]: any }): string {
+    return text.replace(/{{(.*?)}}/g, (_, key) => {
+      return variables[key.trim()] || '';
     });
   }
 
@@ -487,13 +574,14 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
 
     this.mailSendNotification = {
       url: `${environment.BASE_URL}/publication/${publication._id}`,
-      subject: 'Han comentado tu publicación',
-      title: 'Notificación de comentario en publicación',
-      greet: 'Hola',
-      message: `El usuario ${this.user.name} ${this.user.lastName} ha comentado tu publicación`,
-      subMessage: `Su comentario fue: ${comment.content}`,
-      buttonMessage: 'Ver publicación',
+      subject: translations['email.commentPublicationSubject'],
+      title: translations['email.commentPublicationTitle'],
+      greet: translations['email.commentPublicationGreet'],
+      message: this.replaceVariables(translations['email.commentPublicationMessage'], { 'name': this.user.name, 'lastName': this.user.lastName }),
+      subMessage: this.replaceVariables(translations['email.commentPublicationSubMessage'], { 'comment': comment.content }),
+      buttonMessage: translations['email.commentPublicationButtonMessage'],
       template: TemplateEmail.NOTIFICATION,
+      templateLogo: environment.TEMPLATE_EMAIL_LOGO,
       email: publication?.author.email,
     };
 
@@ -509,23 +597,41 @@ export class AddPublicationComponent implements OnInit, OnDestroy, AfterViewInit
     }
   }
 
-insertText(markdown: string) {
-  const textarea = this.postTextRef.nativeElement as HTMLTextAreaElement;
-  const startPos = textarea.selectionStart;
-  const endPos = textarea.selectionEnd;
-  const selectedText = this.myForm.get('content')?.value.substring(startPos, endPos);
+  insertText(markdown: string) {
+    const textareaValue = this.postTextRef.value || '';
+    
+    const textarea = this.postTextRef.getInputElement().then((textarea: HTMLTextAreaElement) => {
+      const startPos = textarea.selectionStart;
+      const endPos = textarea.selectionEnd;
 
-  let newText;
-  if (selectedText) {
-    newText = this.myForm.get('content')?.value.substring(0, startPos) + markdown.replace('placeholder', selectedText) + this.myForm.get('content')?.value.substring(endPos);
-  } else {
-    newText = this.myForm.get('content')?.value.substring(0, startPos) + markdown.replace('placeholder', '') + this.myForm.get('content')?.value.substring(endPos);
+      const selectedText = textareaValue.substring(startPos, endPos);
+      let newText;
+      let cursorPos;
+
+      if (selectedText) {
+        newText = textareaValue.substring(0, startPos)
+          + markdown.replace('placeholder', selectedText)
+          + textareaValue.substring(endPos);
+
+        cursorPos = startPos + markdown.length;
+      } else {
+        const placeholderIndex = markdown.indexOf('placeholder');
+        const beforePlaceholder = markdown.substring(0, placeholderIndex);
+        const afterPlaceholder = markdown.substring(placeholderIndex + 'placeholder'.length);
+
+        newText = textareaValue.substring(0, startPos)
+          + beforePlaceholder
+          + afterPlaceholder
+          + textareaValue.substring(endPos);
+
+        cursorPos = startPos + beforePlaceholder.length;
+      }
+
+      this.myForm.get('content')?.setValue(newText);
+
+      textarea.focus();
+      textarea.setSelectionRange(cursorPos, cursorPos);
+    });
   }
-
-  this.myForm.get('content')?.setValue(newText);
-  textarea.focus();
-  textarea.selectionStart = startPos + markdown.length;
-  textarea.selectionEnd = startPos + markdown.length;
-}
 
 }

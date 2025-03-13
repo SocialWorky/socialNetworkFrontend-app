@@ -1,13 +1,18 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'src/assets/styles/worky-palettes.scss' as color;
 
 .content-publications {
-  height: 92vh;
+  height: 94vh;
+
+  @include breakpoints.below-md {
+    height: 90vh;
+  }
+}
+
+.desk-content-publications {
   overflow-y: scroll;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  @include breakpoints.below-md {
-    height: 86vh;
-  }
 }
 
 .content-publications::-webkit-scrollbar {
@@ -39,3 +44,6 @@
   border-radius: 0.5rem;
 }
 
+.material-icons {
+  font-size: 24px;
+}

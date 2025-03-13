@@ -1,7 +1,7 @@
 <div *ngIf="loadMessages" class="loader"></div>
-<div *ngIf="!loadMessages && userId" class="content-right-messageChat">
+<div *ngIf="!loadMessages && userId && user[0]" class="content-right-messageChat">
   
-  <div *ngIf="isMobile && user[0]" class="header-content-mobil">
+  <div *ngIf="isMobile" class="header-content-mobil">
     <div class="header-content-mobil-left">
       <i (click)="goBack()" class="material-icons back-button">arrow_back</i>
       <span>{{ user[0].name }} {{ user[0].lastName }}</span>
@@ -21,8 +21,8 @@
 
         <!-- Apply grouping classes only to the first and last message in the group of the same user and same date -->
         <div [ngClass]="{
-          'message-sent': message.senderId === currentUser.id, 
-          'message-received': message.senderId !== currentUser.id, 
+          'message-sent': message.senderId === currentUser?.id, 
+          'message-received': message.senderId !== currentUser?.id, 
           'grouped': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
           'no-avatar': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
           'first-group': i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp),
@@ -31,69 +31,90 @@
 
           <worky-avatar
             [size]="40"
-            *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId !== currentUser.id"
+            *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId !== currentUser?.id"
             [img]="user[0].avatar"
             [name]="user[0].name + ' ' + user[0].lastName">
           </worky-avatar>
 
-          <div *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId !== currentUser.id" class="message-triangle"></div>
+          <div *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId !== currentUser?.id" class="message-triangle"></div>
 
-          <div [ngClass]="{'sent-content': message.senderId === currentUser.id, 'received-content': message.senderId !== currentUser.id}">
-            <span class="worky-font-roboto">{{ message.content }}</span>
+          <div [ngClass]="{'sent-content': message.senderId === currentUser?.id, 'received-content': message.senderId !== currentUser?.id}">
+            <markdown class="worky-font-roboto">{{ message.content }}</markdown>
             <div class="content-footer">
               <small>{{ formatTime(message.timestamp) }}</small>
-              <i *ngIf="message.senderId === currentUser.id && !message.isRead" class="material-icons">done</i>
-              <i *ngIf="message.senderId === currentUser.id && message.isRead" class="material-icons">done_all</i>
+              <i *ngIf="message.senderId === currentUser?.id && !message.isRead" class="material-icons">done</i>
+              <i *ngIf="message.senderId === currentUser?.id && message.isRead" class="material-icons">done_all</i>
             </div>
           </div>
 
-          <div *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId === currentUser.id" class="message-triangle"></div>
+          <div *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId === currentUser?.id" class="message-triangle"></div>
 
           <worky-avatar
             [size]="40"
-            *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId === currentUser.id"
-            [img]="currentUser.avatar"
-            [name]="currentUser.name">
+            *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId === currentUser?.id"
+            [img]="currentUser?.avatar"
+            [name]="currentUser?.name">
           </worky-avatar>
         </div>
       </ng-container>
     </div>
   </div>
 
-  <div class="message-input-container">
-    <div class="emoji-wrapper">
-      <button (click)="toggleEmojiPicker()">
-        <i class="material-icons">moods</i>
-      </button>
-      <div *ngIf="showEmojiPicker" class="emoji-picker-container">
-        <emoji-mart
-          [darkMode]="false"
-          [showPreview]="true"
-          [enableSearch]="true"
-          [perLine]="7"
-          [emojiSize]="24"
-          (emojiSelect)="addEmoji($event)">
-        </emoji-mart>
+  <div *ngIf="showEmojiPicker" class="emoji-picker-container">
+    <emoji-mart
+      [darkMode]="false"
+      [showPreview]="true"
+      [enableSearch]="true"
+      [perLine]="7"
+      [emojiSize]="24"
+      (emojiSelect)="addEmoji($event)">
+    </emoji-mart>
+  </div>
+
+  <div class="message-footer-container">
+
+    <div class="message-input-container">
+
+      <div class="input-wrapper">
+        <textarea
+          class="message-input"
+          [(ngModel)]="newMessage"
+          (input)="autoResize($event)"
+          (focus)="markMessagesAsRead()"
+          (keydown)="onKeyDown($event)"
+          placeholder="{{ 'messageChat.placeholder' | workyTranslations }}"
+        ></textarea>
       </div>
+
+      <div>
+        <div *ngIf="sendMessagesLoader" class="loader"></div>
+        <worky-buttons *ngIf="!sendMessagesLoader"
+          type="submit"
+          [theme]="WorkyButtonTheme.Accent"
+          [width]="'100%'"
+          (click)="sendMessage(plainText)">
+          <span basic-button-text>{{ 'messageChat.send' | workyTranslations }}</span>
+        </worky-buttons>
+      </div>
+
     </div>
-    <div class="input-wrapper">
-      <textarea
-        class="message-input"
-        [(ngModel)]="newMessage"
-        (input)="autoResize($event)"
-        (focus)="markMessagesAsRead()"
-        placeholder="{{ 'messageChat.placeholder' | workyTranslations }}"
-      ></textarea>
+
+    <div class="content-footer-bar">
+
+        <div class="extra-content-item gif-icon" matTooltip="Buscar GIF" (click)="openGifSearch()">
+          <i class="material-icons">gif</i>
+        </div>
+
+        <div class="extra-content-item file-upload" matTooltip="Subir Imagen" (click)="openUploadModal()">
+          <i class="material-icons">add_photo_alternate</i>
+        </div>
+
+      <div class="emoji-wrapper"
+        (click)="toggleEmojiPicker()">
+        <i class="material-icons">moods</i>
+      </div>
+
     </div>
-    <div>
-      <div *ngIf="sendMessagesLoader" class="loader"></div>
-      <worky-buttons *ngIf="!sendMessagesLoader"
-        type="submit"
-        [theme]="WorkyButtonTheme.Accent"
-        [width]="'100%'"
-        (click)="sendMessage()">
-        <span basic-button-text>{{ 'messageChat.send' | workyTranslations }}</span>
-      </worky-buttons>
-    </div>
+
   </div>
 </div>

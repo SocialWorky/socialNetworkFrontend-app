@@ -1,0 +1,69 @@
+<div class="content-publication-view" *ngIf="contentView">
+  <div class="publication-header">
+    <worky-avatar *ngIf="contentView.author.name && contentView.author.lastName"
+      [size]="40"
+      [img]="contentView.author.avatar"
+      [name]="contentView.author.name + ' ' + contentView.author.lastName">
+    </worky-avatar>
+
+    <div class="publication-header-content">
+      <div class="user-name-content">
+        <div class="user-name">
+          <span class="name link-name">
+            {{ contentView.author.name }} {{ contentView.author.lastName }}
+          </span>
+          <i *ngIf="contentView.userReceiving" class="material-icons">keyboard_arrow_right</i>
+          <ng-container *ngIf="contentView.userReceiving">
+              <span class="name link-name">
+                {{ contentView.userReceiving.name }} {{ contentView.userReceiving.lastName }}
+              </span>
+          </ng-container>
+        </div>   
+      </div>
+
+      <div class="publication-date">
+        <span>{{ contentView.createdAt! | workyRelativeTime }}</span>
+        <ng-container *ngIf="contentView.privacy === typePrivacy.PUBLIC">
+          <i class="material-icons">public</i>
+        </ng-container>
+        <ng-container *ngIf="contentView.privacy === typePrivacy.FRIENDS">
+          <i class="material-icons">people</i>
+        </ng-container>
+        <ng-container *ngIf="contentView.privacy === typePrivacy.PRIVATE">
+          <i class="material-icons">lock</i>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <div class="publication-body" *ngIf="images.length === 1 && typeView === typeViewEnum.PUBLICATION">
+    <div class="publication-content">
+      <div class="content markdown" *ngIf="(contentView.content | workyPreviewHtml | async) as result">
+        <div class="publication-markdown-view" [innerHTML]="result.markdownHtml"></div>
+        <div class="publication-youtube-preview" [innerHTML]="result.youtubeHtml"></div>
+        <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="publication-footer" *ngIf="images.length === 1 && typeView === typeViewEnum.PUBLICATION">
+    <div class="publication-footer-content">
+      <div class="publication-footer-content-item" *ngIf="contentView.reaction.length">
+        <div class="reactions-img-container" *ngFor="let emoji of listReaction; let i = index;">
+          <img class="reactions-img" [src]="emoji" style="--i: {{ i }};">
+        </div>
+        <span>{{ contentView.reaction.length }}</span>
+      </div>
+    </div>
+
+    <div class="publication-footer-actions">
+      <div class="publication-footer-actions-item">
+        <worky-reactions
+          [type]="type"
+          [publication]="contentView"
+          [reactionsToPublication]="contentView.reaction">
+        </worky-reactions>
+      </div>
+    </div>
+  </div>
+</div>

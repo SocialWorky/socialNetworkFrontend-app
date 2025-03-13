@@ -11,11 +11,15 @@ import { Alerts, Position } from '@shared/enums/alerts.enum';
 })
 export class ImageUploadModalComponent implements OnInit {
   WorkyButtonType = WorkyButtonType;
+
   WorkyButtonTheme = WorkyButtonTheme;
+
+  loading = false;
 
   @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
 
   selectedFiles: File[] = [];
+
   previews: { url: string, type: string }[] = [];
   
   @Input()
@@ -35,6 +39,8 @@ export class ImageUploadModalComponent implements OnInit {
   ngOnInit(): void {}
 
   onFileSelected(event: any) {
+    this.loading = true;
+    this._cdr.detectChanges();
     const files: FileList = event.target.files;
     this.handleFiles(files);
   }
@@ -61,12 +67,15 @@ export class ImageUploadModalComponent implements OnInit {
         validFiles.push(file);
       } else {
         this.showAlert('Tipo de archivo no permitido: ' + file.name);
+        this.loading = false;
       }
 
       if (validFiles.length + this.selectedFiles.length >= this.maxFiles) {
+        this.loading = false;
         break;
       }
     }
+    this.loading = false;
   }
 
   showAlert(message: string) {
@@ -99,14 +108,20 @@ export class ImageUploadModalComponent implements OnInit {
   }
 
   onDragOver(event: DragEvent): void {
+    this.loading = true;
+    this._cdr.markForCheck();
     event.preventDefault();
   }
 
   onDragLeave(event: DragEvent): void {
+    this.loading = false;
+    this._cdr.markForCheck();
     event.preventDefault();
   }
 
   onDrop(event: DragEvent): void {
+    this.loading = true;
+    this._cdr.markForCheck();
     event.preventDefault();
     const files = event.dataTransfer?.files;
     if (files) {

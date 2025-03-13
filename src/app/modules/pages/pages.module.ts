@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
@@ -12,6 +13,7 @@ import { ProfilesComponent } from './profiles/profiles.component';
 import { ProfileDetailComponent } from './profiles/components/profile-detail/profile-detail.component';
 import { MaterialModule } from '@shared/modules/material/material.module';
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
+import { MarkdownModule } from 'ngx-markdown';
 
 import { WorkyMenuComponentComponent } from './components/navbar/worky-menu-component/worky-menu-component.component';
 import { SideBarMenutModule } from '@shared/modules/sidebar-menu/sidebar-menu.module';
@@ -21,7 +23,6 @@ import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.mod
 import { AddPublicationModule } from '@shared/modules/addPublication/addPublication.module';
 import { WorkyWidgetModule } from '@shared/modules/worky-widget/worky-widget.module';
 import { PublicationViewModule } from '@shared/modules/publication-view/publication-view.module';
-import { SuggetionToFollowModule } from '@shared/modules/suggetion-to-follow/suggetion-to-follow.module';
 import { EditImgProfileComponent } from './profiles/components/edit-img-profile/edit-img-profile.component';
 import { EditInfoProfileDetailComponent } from './profiles/components/edit-info-profile/edit-info-profile.component';
 import { ContactsModule } from '@shared/modules/contacts/contacts.module';
@@ -29,6 +30,8 @@ import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
 import { MessagesComponent } from './messages/messages.component';
 import { MessageSideLeftComponent } from './messages/components/message-side-left/message-side-left.component';
 import { MessageSideRigthComponent } from './messages/components/message-side-rigth/message-side-rigth.component';
+import { UserListItemComponent } from './messages/components/message-side-left/component/user-list-item/user-list-item.component';
+import { MessageListComponent } from './messages/components/message-side-left/component/message-list/message-list.component';
 import { UserOnlineModule } from '@shared/modules/user-online/user-online.module';
 import { NotificationsPanelModule } from '@shared/modules/notifications-panel/notifications-panel.module';
 
@@ -39,6 +42,8 @@ import { NotificationsPanelModule } from '@shared/modules/notifications-panel/no
     MessagesComponent,
     MessageSideLeftComponent,
     MessageSideRigthComponent,
+    UserListItemComponent,
+    MessageListComponent,
     ProfilesComponent,
     LoyautComponent,
     NavbarComponent,
@@ -51,6 +56,7 @@ import { NotificationsPanelModule } from '@shared/modules/notifications-panel/no
   ],
   imports: [
     CommonModule,
+    IonicModule,
     FormsModule,
     ReactiveFormsModule,
     PagesRoutingModule,
@@ -62,12 +68,12 @@ import { NotificationsPanelModule } from '@shared/modules/notifications-panel/no
     WorkyWidgetModule,
     MaterialModule,
     PickerModule,
-    SuggetionToFollowModule,
     SideBarMenutModule,
     ContactsModule,
     WorkyButtonsModule,
     UserOnlineModule,
-    NotificationsPanelModule
+    NotificationsPanelModule,
+    MarkdownModule.forRoot(),
   ]
 })
 export class PagesModule { }

@@ -94,14 +94,21 @@
 
       .publishing-textarea {
         width: 100%;
+        max-height: 500px;
         box-sizing: border-box;
         border-radius: 8px;
         border: 1px solid color.$worky-color-light;
         resize: none;
-        overflow: hidden;
         padding: 8px;
+        overflow: auto;
         background: color.$worky-color-greyLight;
         color: color.$worky-color-dark;
+        @include breakpoints.below-sm {
+          max-height: 200px;
+        }
+        ::ng-deep .textarea-wrapper .textarea-wrapper-inner .native-wrapper .native-textarea {
+          padding: 2px;
+        }
       }
 
       .publishing-textarea:focus {
@@ -240,7 +247,7 @@
     padding: 5px;
     .textarea-container {
       textarea {
-        height: 35px!important;
+        max-height: 150px;
       }
     }
   }

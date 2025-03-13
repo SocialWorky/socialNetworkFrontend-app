@@ -5,6 +5,7 @@ import { Subscription, filter } from 'rxjs';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { AuthService } from '@auth/services/auth.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
+import { ScrollService } from '@shared/services/scroll.service';
 
 @Component({
   selector: 'worky-loyaut',
@@ -24,6 +25,7 @@ export class LoyautComponent implements OnInit, OnDestroy {
   }
 
   get token() {
+    this._authService.getDecodedToken();
     return this._authService.getDecodedToken();
   }
 
@@ -36,10 +38,12 @@ export class LoyautComponent implements OnInit, OnDestroy {
     private _router: Router,
     private _cdr: ChangeDetectorRef,
     private _authService: AuthService,
-    private _notificationUsersService: NotificationUsersService
+    private _notificationUsersService: NotificationUsersService,
+    private _scrollService: ScrollService
   ) {}
 
   ngOnInit(): void {
+    this._authService.getDecodedToken();
     this._notificationUsersService.refreshUserStatuses();
     this.routeSub = this._router.events
       .pipe(
@@ -61,6 +65,18 @@ export class LoyautComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.routeSub) {
       this.routeSub.unsubscribe();
+    }
+  }
+
+  onScroll(event: any) {
+    this._scrollService.onScroll(event);
+    if(!this.isMobile) return;
+    const threshold = 100;
+    const position = event.target.scrollTop + event.target.clientHeight;
+    const height = event.target.scrollHeight;
+
+    if (position >= height - threshold) {
+      this._scrollService.notifyScrollEnd();
     }
   }
 }

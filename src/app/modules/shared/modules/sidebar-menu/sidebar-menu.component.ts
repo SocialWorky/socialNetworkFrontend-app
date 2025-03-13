@@ -1,9 +1,9 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Subject, Subscription, takeUntil } from 'rxjs';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 
 import { Token } from '@shared/interfaces/token.interface'
 import { AuthService } from '@auth/services/auth.service';
-import { NotificationCenterService } from '@shared/services/notificationCenter.service';
+import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service'
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { MessageService } from 'src/app/modules/pages/messages/services/message.service';

@@ -4,12 +4,12 @@
       <div class="form-detail-basic">
         <div class="form-input">
           <mat-form-field class="worky-input worky-accent">
-            <mat-label>Name</mat-label>
+            <mat-label>Nombre</mat-label>
             <input type="text" formControlName="name" id="name" matInput required>
           </mat-form-field>
 
           <mat-form-field class="worky-input worky-accent">
-            <mat-label>Last Name</mat-label>
+            <mat-label>Apellido</mat-label>
             <input type="text" formControlName="lastName" id="lastName" matInput required>
           </mat-form-field>
         </div>
@@ -20,22 +20,22 @@
       <div class="form-detail-basic">
         <div class="form-input">
           <mat-form-field class="worky-input worky-accent">
-            <mat-label>Legend</mat-label>
+            <mat-label>Leyenda</mat-label>
             <input id="legend" type="text" formControlName="legend" matInput>
           </mat-form-field>
 
           <mat-form-field class="worky-input worky-accent">
-            <mat-label>Date of Birth</mat-label>
+            <mat-label>Fecha de Cumpleaño</mat-label>
             <input id="dateOfBirth" type="date" formControlName="dateOfBirth" matInput>
           </mat-form-field>
 
           <mat-form-field class="worky-input worky-accent">
-            <mat-label>Description</mat-label>
+            <mat-label>Descripción</mat-label>
             <textarea id="description" formControlName="description" matInput></textarea>
           </mat-form-field>
 
           <mat-form-field class="worky-input worky-accent">
-            <mat-label>Sex</mat-label>
+            <mat-label>Sexo</mat-label>
             <mat-select id="sex" formControlName="sex">
               <mat-option value="">Select</mat-option>
               <mat-option value="masculino">Masculino</mat-option>
@@ -45,11 +45,11 @@
           </mat-form-field>
 
           <div formGroupName="whatsapp" class="whatsapp-content">
-            <mat-slide-toggle class="whatsapp-content" formControlName="isViewable">Enable WhatsApp</mat-slide-toggle>
+            <mat-slide-toggle class="whatsapp-content" formControlName="isViewable">Habilitar WhatsApp</mat-slide-toggle>
 
             <div *ngIf="editProfailDetailForm.get('whatsapp.isViewable')?.value">
               <mat-form-field class="worky-input worky-accent">
-                <mat-label>WhatsApp Number</mat-label>
+                <mat-label>Numero de WhatsApp</mat-label>
                 <input id="whatsappNumber" type="text" formControlName="number" matInput>
               </mat-form-field>
             </div>
@@ -58,8 +58,6 @@
         </div>
       </div>
     </form>
-
-
 
     <worky-buttons
       [workyButtonType]="WorkyButtonType.Flat"
