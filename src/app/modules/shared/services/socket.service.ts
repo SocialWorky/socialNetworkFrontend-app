@@ -6,11 +6,10 @@ import { Socket } from 'ngx-socket-io';
   providedIn: 'root'
 })
 export class SocketService {
-
-  userToken;
+  userToken: string;
 
   constructor(private socket: Socket) {
-    this.userToken = localStorage.getItem('token');
+    this.userToken = localStorage.getItem('token')!;
   }
 
   connectToWebSocket(token: Token) {
@@ -21,11 +20,15 @@ export class SocketService {
 
     this.socket.ioSocket.io.opts.query = queryObject;
     this.socket.ioSocket.auth = { token: this.userToken };
+    this.socket.ioSocket.io.opts.extraHeaders = {
+      Authorization: `Bearer ${this.userToken}`,
+    };
 
     this.socket.connect();
   }
 
   disconnectWebSocket() {
     this.socket.disconnect();
+    console.log('WebSocket disconnected');
   }
 }
