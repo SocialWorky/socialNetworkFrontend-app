@@ -6,19 +6,21 @@ import { Socket } from 'ngx-socket-io';
   providedIn: 'root'
 })
 export class SocketService {
-  constructor(private socket: Socket) { }
+
+  userToken;
+
+  constructor(private socket: Socket) {
+    this.userToken = localStorage.getItem('token');
+  }
 
   connectToWebSocket(token: Token) {
     const queryObject = {
-      id: token.id,
-      name: token.name,
-      role: token.role,
-      avatar: token.avatar,
-      email: token.email,
-      username: token.username,
+      status: 'online',
+      lastActivity: new Date(),
     };
 
     this.socket.ioSocket.io.opts.query = queryObject;
+    this.socket.ioSocket.auth = { token: this.userToken };
 
     this.socket.connect();
   }

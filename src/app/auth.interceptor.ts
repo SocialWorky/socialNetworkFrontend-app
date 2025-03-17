@@ -4,7 +4,6 @@ import {
   HttpInterceptor,
   HttpHandler,
   HttpRequest,
-  HttpResponse,
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -24,6 +23,7 @@ export class AuthInterceptor implements HttpInterceptor {
       environment.API_URL,
       environment.APIFILESERVICE,
       environment.APIMESSAGESERVICE,
+      environment.APINOTIFICATIONCENTER,
     ];
 
     const isApiRequest = apiUrls.some((url) => request.url.startsWith(url));
