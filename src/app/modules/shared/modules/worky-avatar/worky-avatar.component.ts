@@ -39,16 +39,16 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
       this._size = value;
     }
   }
-  
+
   get size(): number {
     return this._size;
   }
 
   constructor(private _authService: AuthService, private _cdr: ChangeDetectorRef) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     if(!this._authService.isAuthenticated()) return;
-    this.token = this._authService.getDecodedToken()!;
+    this.token = await this._authService.getDecodedToken()!;
 
     this.username = this.token?.name || '';
 
@@ -69,17 +69,36 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
       if (this.username && !this.userAvatar) {
         this.generateAvatar();
       } else if (this.userAvatar) {
-        this.imageData = this.userAvatar;
+        this.validateAndSetImage(this.userAvatar);
       }
     } else if (this.name && !this.img && this.name.length > 2) {
       this.username = this.name;
       this.generateAvatar();
-    } 
+    }
+
     if (this.img) {
-      this.imageData = this.img;
+      this.validateAndSetImage(this.img);
     }
 
     this._cdr.markForCheck();
+  }
+
+  private validateAndSetImage(imageUrl: string): void {
+    const img = new Image();
+    img.src = imageUrl;
+
+    img.onload = () => {
+      this.imageData = imageUrl;
+    };
+
+    img.onerror = () => {
+      this.generateAvatar();
+    };
+  }
+
+  onImageError(): void {
+    this.imageData = '';
+    this.generateAvatar();
   }
 
   private generateAvatar() {
@@ -93,7 +112,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
       const fontSize = this.size / 2.3;
 
       this.initials = this.getInitials(this.username);
-      
+
       if (this.initials) {
         this.backgroundColor = this.getColor(this.initials[0]);
 

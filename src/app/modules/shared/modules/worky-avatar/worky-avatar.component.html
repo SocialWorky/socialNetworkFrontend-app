@@ -1,3 +1,17 @@
 <div class="avatar">
-  <img [src]="imageData" alt="Avatar" [style.width.px]="size" [style.height.px]="size" [style.max-width]="'none'">
+  <img
+    *ngIf="imageData"
+    [src]="imageData"
+    alt="Avatar"
+    [style.width.px]="size"
+    [style.height.px]="size"
+    (error)="onImageError()"
+  />
+
+  <div
+    *ngIf="!imageData"
+    class="avatar-initials"
+  >
+    {{ initials }}
+  </div>
 </div>
