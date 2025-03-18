@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 import { TemplatesComponent } from './templates/templates.component';
 import { HomeAdminComponent } from './pages/home/home.component';
@@ -17,6 +18,7 @@ import { ManageReactionsComponent } from './shared/manage-reactions/manage-react
 import { SiteConfigComponent } from './shared/site-config/site-config.component';
 import { AdminCustomFieldsComponent } from './shared/admin-custom-fields/admin-custom-fields.component';
 import { InvitationsCodeComponent } from './shared/invitations-code/invitations-code.component';
+import { LogComponent } from './shared/log/log.component';
 
 import { AdminRoutingModule } from './admin-routing.module';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
@@ -37,18 +39,20 @@ import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.mod
     ManageReactionsComponent,
     SiteConfigComponent,
     AdminCustomFieldsComponent,
-    InvitationsCodeComponent
+    InvitationsCodeComponent,
+    LogComponent,
   ],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     MonacoEditorModule.forRoot(),
+    NgxJsonViewerModule,
     AdminRoutingModule,
     TranslationsModule,
     WorkyAvatarModule,
     FormBuilderModule
   ],
-  exports: [TemplatesComponent]
+  exports: [TemplatesComponent],
 })
 export class AdminModule { }

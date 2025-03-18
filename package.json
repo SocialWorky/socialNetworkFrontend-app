@@ -68,6 +68,7 @@
     "lru-cache": "10.2.2",
     "marked": "^12.0.2",
     "ngx-drag-drop": "^17.0.0",
+    "ngx-json-viewer": "^3.2.1",
     "ngx-markdown": "^17.2.1",
     "ngx-monaco-editor-v2": "^17.0.1",
     "ngx-socket-io": "4.6.1",

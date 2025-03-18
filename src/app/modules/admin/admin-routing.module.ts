@@ -2,12 +2,12 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { TemplatesComponent } from './templates/templates.component';
 import { HomeAdminComponent } from '@admin/pages/home/home.component';
-import { ChangeThemeComponent } from './pages/change-theme/change-theme.component';
 import { CustomCssComponent } from './shared/custom-css/custom-css.component';
 import { ManageReactionsComponent } from './shared/manage-reactions/manage-reactions.component';
 import { SiteConfigComponent } from './shared/site-config/site-config.component';
 import { AdminCustomFieldsComponent } from './shared/admin-custom-fields/admin-custom-fields.component';
 import { InvitationsCodeComponent } from './shared/invitations-code/invitations-code.component';
+import { LogComponent } from './shared/log/log.component';
 
 export const routes: Routes = [
   {
@@ -15,7 +15,7 @@ export const routes: Routes = [
     component: TemplatesComponent,
     children: [
       { title: 'Ir al Muro', path: 'publications', redirectTo: '../' },
-      { title: 'Estadísticas', path: 'home', component: HomeAdminComponent },
+      { title: 'Métricas', path: 'home', component: HomeAdminComponent },
       {
         title: 'Configuraciones',
         path: '',
@@ -27,6 +27,7 @@ export const routes: Routes = [
           { title: 'Invitaciones', path: 'invitations-code', component: InvitationsCodeComponent },
         ],
       },
+      { title: 'Logs', path: 'logs', component: LogComponent },
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ],
   },

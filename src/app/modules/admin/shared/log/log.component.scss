@@ -1,0 +1,65 @@
+.logs-container {
+    height: 98vh;
+    background-color: rgba(0, 0, 0, 0.87);
+    overflow-y: auto;
+    width: 100%;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 0!important;
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.8);
+    }
+  }
+.log-item {
+    background-color: rgba(0, 0, 0, 0.87);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    color: #fff;
+  }
+
+::ng-deep .ngx-json-viewer {
+    .segment .segment-main .segment-key {
+      color: #2288ee !important;
+    }
+
+    .segment-type-string > .segment-main > .segment-value {
+      color: rgba(255,255,255,0.8) !important;
+    }
+
+    .segment-type-null > .segment-main > .segment-value {
+      background-color: transparent !important;
+    }
+  }
+
+  .content-json-viewer {
+    position: relative;
+  }
+
+.metadata-content {
+    background-color: rgba(0, 0, 0, 0.87);
+    overflow-y: auto;
+    width: 100%;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 20px 0px !important;
+
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    ::ng-deep .mat-stroked-button {
+      min-width: 0 !important;
+    }
+
+    button {
+      position: absolute;
+      top: 10px;
+      right: 26px;
+      padding: 0;
+      color: rgba(255, 255, 255, 1);
+      cursor: pointer;
+      border: none;
+    }
+
+  }
