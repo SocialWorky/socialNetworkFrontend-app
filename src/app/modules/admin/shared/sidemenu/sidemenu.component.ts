@@ -17,11 +17,18 @@ export class SidemenuComponent  implements OnInit {
 
   userName: string = 'Admin';
 
-  public menuItems = routes
-    .map((route) => route.children ?? [])
-    .flat()
-    .filter((route) => route && route.path)
-    .filter((route) => !route.path?.includes(':'));
+  expandedMenus: { [key: string]: boolean } = {};
+
+  menuItems = routes
+    .flatMap((route) => route.children ?? [])
+    .filter((route) => route)
+    .map((route) => ({
+      ...route,
+      children: route.children
+        ? route.children.filter((child) => child.path && !child.path.includes(':'))
+        : null,
+    }))
+    .filter((route) => route.children || (route.path && !route.path.includes(':')));
 
   constructor(private _authService: AuthService) { }
 
@@ -34,5 +41,10 @@ export class SidemenuComponent  implements OnInit {
   logout() {
     this._authService.logout();
   }
+
+  toggleMenu(menuTitle: string): void {
+    this.expandedMenus[menuTitle] = !this.expandedMenus[menuTitle];
+  }
+
 
 }

@@ -3,3 +3,18 @@
     cursor: pointer;
   }
 }
+
+/* Rotación de la flecha */
+.rotate-90 {
+  transform: rotate(90deg);
+}
+
+/* Espaciado para los submenús */
+.pl-4 {
+  padding-left: 1rem;
+}
+
+/* Cursor pointer para elementos clicables */
+.cursor-pointer {
+  cursor: pointer;
+}

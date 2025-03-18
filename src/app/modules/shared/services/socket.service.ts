@@ -29,6 +29,5 @@ export class SocketService {
 
   disconnectWebSocket() {
     this.socket.disconnect();
-    console.log('WebSocket disconnected');
   }
 }
