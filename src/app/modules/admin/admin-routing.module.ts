@@ -14,6 +14,7 @@ export const routes: Routes = [
     path: '',
     component: TemplatesComponent,
     children: [
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
       { title: 'Ir al Muro', path: 'publications', redirectTo: '../' },
       { title: 'Métricas', path: 'home', component: HomeAdminComponent },
       {
@@ -28,7 +29,6 @@ export const routes: Routes = [
         ],
       },
       { title: 'Logs', path: 'logs', component: LogComponent },
-      { path: '', redirectTo: 'home', pathMatch: 'full' },
     ],
   },
 ];
