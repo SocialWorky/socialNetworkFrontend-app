@@ -7,8 +7,7 @@ import { getTranslationsLanguage } from '../translations/translations';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { LoadingService } from '@shared/services/loading.service';
-import { AuthService } from '@auth/services/auth.service';
-import { Router } from '@angular/router';
+import { SocketService } from '@shared/services/socket.service';
 
 @Component({
   selector: 'worky-root',
@@ -23,8 +22,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  private isPromptHandled = false;
-
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private _renderer: Renderer2,
@@ -32,6 +29,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private _titleService: Title,
     private _notificationUsersService: NotificationUsersService,
     private _loadingService: LoadingService,
+    private _socketService: SocketService,
   ) {
     this._notificationUsersService.setupInactivityListeners();
   }
@@ -48,6 +46,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this._loadingService.setLoading(false);
       document.getElementById('loading-screen')?.remove();
     }, 4000);
+    this._socketService.connectToWebSocket();
   }
 
   ngOnDestroy() {

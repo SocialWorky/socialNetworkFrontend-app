@@ -1,33 +1,52 @@
 import { Injectable } from '@angular/core';
-import { Token } from '@shared/interfaces/token.interface';
 import { Socket } from 'ngx-socket-io';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SocketService {
-  userToken: string;
+  constructor(private socket: Socket) {}
 
-  constructor(private socket: Socket) {
-    this.userToken = localStorage.getItem('token')!;
-  }
-
-  connectToWebSocket(token: Token) {
-    const queryObject = {
-      status: 'online',
-      lastActivity: new Date(),
-    };
-
-    this.socket.ioSocket.io.opts.query = queryObject;
-    this.socket.ioSocket.auth = { token: this.userToken };
-    this.socket.ioSocket.io.opts.extraHeaders = {
-      Authorization: `Bearer ${this.userToken}`,
-    };
-
+  connectToWebSocket() {
+    if (this.socket.ioSocket.connected) {
+      return;
+    }
     this.socket.connect();
   }
 
   disconnectWebSocket() {
-    this.socket.disconnect();
+    if (this.socket.ioSocket.connected) {
+      this.socket.disconnect();
+    } else {
+      return;
+    }
+  }
+
+  updateToken(newToken: string) {
+    if(!newToken || newToken === '' || newToken === undefined) return
+    //localStorage.setItem('token', newToken);
+
+    if (this.socket.ioSocket.connected) {
+      this.socket.disconnect();
+    }
+
+    this.socket.ioSocket.io.opts.auth = { token: newToken };
+    this.socket.ioSocket.io.opts.query = { token: newToken };
+
+    this.socket.connect();
+  }
+
+  emitEvent(event: string, data: any) {
+    this.socket.emit(event, data);
+  }
+
+  listenEvent(event: string, callback: (data: any) => void) {
+    this.socket.on(event, callback);
+  }
+
+  socketError() {
+    this.socket.on('connect_error', (error: any) => {
+      console.log('Error de conexión:', error);
+    });
   }
 }

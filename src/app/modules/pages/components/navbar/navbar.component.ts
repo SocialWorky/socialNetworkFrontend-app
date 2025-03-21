@@ -7,7 +7,6 @@ import { DeviceDetectionService } from '@shared/services/DeviceDetection.service
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { UserService } from '@shared/services/core-apis/users.service';
-import { SocketService } from '@shared/services/socket.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
@@ -61,7 +60,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     private _cdr: ChangeDetectorRef,
     private _authService: AuthService,
     private _userService: UserService,
-    private _socketService: SocketService,
     private _notificationUsersService: NotificationUsersService,
     private _notificationService: NotificationService,
     private _notificationCenterService: NotificationCenterService,
@@ -73,8 +71,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {
     this.menuProfile();
     if (!this._authService.isAuthenticated()) return;
-    this.token = this._authService.getDecodedToken();
-    this._socketService.connectToWebSocket(this.token!);
   }
 
   ngOnInit() {
@@ -132,10 +128,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
         this.applyConfig(configData);
       }
     });
-  }
-
-  private removeDataLinkProfile(item: string) {
-    this.dataLinkProfile = this.dataLinkProfile.filter((link) => link.title !== item);
   }
 
   private applyConfig(configData: any) {

@@ -13,8 +13,13 @@ import { AuthInterceptor } from './auth.interceptor';
 import { ServiceWorkerModule } from '@angular/service-worker';
 
 const config: SocketIoConfig = {
-  url: environment.WSURL, 
-  options: {},
+  url: environment.WSURL,
+  options: {
+    transports: ['websocket'],
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+  },
 };
 @NgModule({
   declarations: [AppComponent],
@@ -28,9 +33,7 @@ const config: SocketIoConfig = {
     SocketIoModule.forRoot(config),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
-      // Register the ServiceWorker as soon as the application is stable
-      // or after 30 seconds (whichever comes first).
-      registrationStrategy: 'registerWhenStable:30000'
+      registrationStrategy: 'registerWhenStable:30000',
     }),
   ],
   providers: [

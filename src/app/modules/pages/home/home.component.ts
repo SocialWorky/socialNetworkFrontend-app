@@ -35,29 +35,29 @@ import { Token } from '@shared/interfaces/token.interface';
 })
 export class HomeComponent implements OnInit, OnDestroy {
   typePublishing = TypePublishing;
-  
+
   publications = signal<PublicationView[]>([]);
-  
+
   page = 1;
-  
+
   pageSize = 10;
-  
+
   loaderPublications: boolean = false;
-  
+
   paramPublication: boolean = false;
-  
+
   hasMorePublications: boolean = true;
-  
+
   urlMediaApi = environment.APIFILESERVICE;
-  
+
   dataUser: Token | null = null;
-  
+
   isOnline$ = this._networkService.connectionStatus;
-  
+
   connectionSpeed$ = this._networkService.connectionSpeed;
 
   showConnectionOverlay = false;
-  
+
   connectionStatusMessage = '';
 
   showScrollToTopButton = false;
@@ -92,7 +92,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _axiomService: AxiomService,
     private _notificationPublicationService: NotificationPublicationService
   ) {
-    if (!this._authService.isAuthenticated()) return;
+    this._authService.isAuthenticated();
     this.dataUser = this._authService.getDecodedToken();
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Home');
@@ -201,7 +201,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.loaderPublications = true;
     try {
       const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.ALL));
-      
+
       this.publications.update((current: PublicationView[]) => [...current, ...newPublications.publications]);
 
       if (this.publications().length >= newPublications.total) {
@@ -332,7 +332,7 @@ export class HomeComponent implements OnInit, OnDestroy {
                 type: AxiomType.ERROR,
                 error: error,
               });
-              return of([]); 
+              return of([]);
             })
           );
         }),

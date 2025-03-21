@@ -76,7 +76,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
   getSiteConfig() {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       let loginMethods = { email: false, google: false };
-      
+
       if (configData.settings.loginMethods) {
         try {
          loginMethods = JSON.parse(configData.settings.loginMethods);
@@ -176,6 +176,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
         loadingReaction.dismiss();
         this.loadUpdateConfigButtons = false;
+        this._cdr.markForCheck();
       },
       error: () => {
         loadingReaction.dismiss();

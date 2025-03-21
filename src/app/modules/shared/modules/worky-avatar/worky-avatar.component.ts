@@ -50,8 +50,6 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
     if(!this._authService.isAuthenticated()) return;
     this.token = await this._authService.getDecodedToken()!;
 
-    this.username = this.token?.name || '';
-
     this.userAvatar = this.token?.avatar || '';
 
     this.loadImageUser();
@@ -111,7 +109,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
       const fontSize = this.size / 2.3;
 
-      this.initials = this.getInitials(this.username);
+      this.initials = this.getInitials(this.name || this.username)
 
       if (this.initials) {
         this.backgroundColor = this.getColor(this.initials[0]);

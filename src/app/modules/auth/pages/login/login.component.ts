@@ -97,7 +97,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     const tokenPassword = await this._activatedRoute.snapshot.paramMap.get('tokenPassword');
 
     if (tokenValidate) this.validateEmailWithToken(tokenValidate);
-  
+
     this._dialog.afterOpened.pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
       this._dialog.openDialogs.forEach(dialog => {
         dialog.id === 'mat-mdc-dialog-1' ? dialog.close() : null;
@@ -181,7 +181,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
           localStorage.setItem('isTooltipActive', tokenResponse.isTooltipActive.toString());
 
-          this._socketService.connectToWebSocket(tokenResponse);
+          this._socketService.updateToken(localStorage.getItem('token')!);
+          this._socketService.emitEvent('loginUser', localStorage.getItem('token'));
 
           this._notificationUsersService.loginUser();
 
@@ -284,7 +285,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
         await this._authService.renewToken(userId);
       }
 
-      this._socketService.connectToWebSocket(tokenResponse);
+      //this._socketService.updateToken(localStorage.getItem('token')!);
+      this._socketService.emitEvent('loginUser', localStorage.getItem('token'));
       this._notificationUsersService.loginUser();
 
       this._cdr.markForCheck();
@@ -415,7 +417,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       data: { token },
     });
     this._cdr.markForCheck();
-    
+
     dialogRef.afterClosed().subscribe(result => {
       this.closeResetPasswordModal();
     });

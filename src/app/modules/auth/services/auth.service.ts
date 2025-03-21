@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { jwtDecode } from 'jwt-decode';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { environment } from 'src/environments/environment';
+
+import { environment } from '@env/environment';
 import { Token } from '../../shared/interfaces/token.interface';
 import { AuthGoogleService } from './auth-google.service';
 import { UserService } from '../../shared/services/core-apis/users.service';
@@ -18,12 +19,12 @@ export class AuthService {
     private http: HttpClient,
     private _authGoogleService: AuthGoogleService,
     private _router: Router,
-    private _userService: UserService
+    private _userService: UserService,
   ) {}
 
   isAuthenticated(): boolean {
     const token = localStorage.getItem('token');
-    if (token) {
+    if (token && token !== 'undefined') {
       const decodedToken: any = jwtDecode(token);
       const currentTime = Math.floor(Date.now() / 1000);
 
@@ -42,7 +43,7 @@ export class AuthService {
         return false;
       }
     } else {
-      this._router.navigate(['/auth/login']);
+      this.clearSession();
       return false;
     }
   }
@@ -63,7 +64,7 @@ export class AuthService {
 
   getDecodedToken(): Token | null {
     const token = localStorage.getItem('token');
-    if (!token) {
+    if (!token || token === 'undefined') {
       this._router.navigate(['/auth/login']);
       this.clearSession();
       return null;
@@ -113,7 +114,7 @@ export class AuthService {
     this.clearSession();
   }
 
-  private clearSession() {
+  clearSession() {
     localStorage.clear();
     sessionStorage.clear();
     this.router.navigate(['/auth']);

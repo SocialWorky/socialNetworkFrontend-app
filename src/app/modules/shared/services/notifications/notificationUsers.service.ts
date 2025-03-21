@@ -1,16 +1,19 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
+import { shareReplay, distinctUntilChanged, debounceTime } from 'rxjs/operators';
 import { BehaviorSubject, Subject } from 'rxjs';
+
 import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { CacheService } from '../cache.service';
-import { shareReplay, distinctUntilChanged, debounceTime } from 'rxjs/operators';
+import { SocketService } from '../socket.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NotificationUsersService implements OnDestroy {
-  private token: Token | null = null;
+
+  private _decodeToken!: Token;
 
   private _userStatuses = new BehaviorSubject<Token[]>([]);
 
@@ -39,10 +42,14 @@ export class NotificationUsersService implements OnDestroy {
   constructor(
     private socket: Socket,
     private _authService: AuthService,
-    private _cacheService: CacheService
+    private _cacheService: CacheService,
+    private _socketService: SocketService
   ) {
-    if(!this._authService.isAuthenticated()) return;
-    this.token = this._authService.getDecodedToken();
+    if(!this._authService.isAuthenticated()) {
+      this._authService.clearSession();
+    };
+    this._decodeToken = this._authService.getDecodedToken()!;
+
     this.initializeUserStatus();
     this.setupInactivityListeners();
   }
@@ -57,7 +64,8 @@ export class NotificationUsersService implements OnDestroy {
       this.userStatusMap = new Map(cachedStatuses.map(user => [user._id!, user]));
     }
 
-    this.socket.emit('loginUser', this.token);
+    this.socket.emit('loginUser', localStorage.getItem('token'));
+
     this.socket.emit('getUserStatuses');
 
     this.socket.fromEvent<Token[]>('initialUserStatuses').subscribe((initialStatuses: Token[]) => {
@@ -70,8 +78,8 @@ export class NotificationUsersService implements OnDestroy {
       this.updateUserStatus(data);
     });
 
-    if (this.token) {
-      this.addCurrentUserStatus(this.token);
+    if (this._decodeToken) {
+      this.addCurrentUserStatus(this._decodeToken);
     }
   }
 
@@ -198,13 +206,17 @@ export class NotificationUsersService implements OnDestroy {
 
   private emitUserInactive() {
     setTimeout(() => {
-      this.socket.emit('userInactive', this.token);
+      if(!localStorage.getItem('token')) return;
+      this._socketService.updateToken(localStorage.getItem('token')!);
+      this._socketService.emitEvent('userInactive', localStorage.getItem('token'));
     }, 3000);
   }
 
   private emitUserActive() {
     setTimeout(() => {
-      this.socket.emit('userActive', this.token);
+      if(!localStorage.getItem('token')) return;
+      this._socketService.updateToken(localStorage.getItem('token')!);
+      this._socketService.emitEvent('userActive', localStorage.getItem('token'));
     }, 3000);
   }
 
@@ -214,19 +226,22 @@ export class NotificationUsersService implements OnDestroy {
 
   public refreshUserStatuses() {
     setTimeout(() => {
-      this.socket.emit('refreshUserStatuses');
+      if(!localStorage.getItem('token')) return;
+      this._socketService.updateToken(localStorage.getItem('token')!);
+      this._socketService.emitEvent('refreshUserStatuses', localStorage.getItem('token'));
     }, 3000);
   }
 
   public logoutUser() {
-    setTimeout(() => {
-      this.socket.emit('logoutUser', this.token);
-    }, 3000);
+    if(!localStorage.getItem('token')) return;
+    this._socketService.emitEvent('logoutUser', localStorage.getItem('token'));
   }
 
   public loginUser() {
     setTimeout(() => {
-      this.socket.emit('loginUser', this.token);
+      if(!localStorage.getItem('token')) return;
+      this._socketService.updateToken(localStorage.getItem('token')!);
+      this._socketService.emitEvent('loginUser', localStorage.getItem('token'));
     }, 3000);
   }
 
