@@ -24,7 +24,6 @@ export class SocketService {
 
   updateToken(newToken: string) {
     if(!newToken || newToken === '' || newToken === undefined) return
-    //localStorage.setItem('token', newToken);
 
     if (this.socket.ioSocket.connected) {
       this.socket.disconnect();
