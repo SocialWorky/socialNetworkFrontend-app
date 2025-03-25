@@ -9,8 +9,6 @@ import { CommentService } from '@shared/services/core-apis/comment.service';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
-import { AxiomService } from '@shared/services/apis/axiom.service';
-import { AxiomType } from '@shared/interfaces/axiom.enum';
 import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
@@ -49,9 +47,8 @@ export class BodyViewContentComponent  implements OnDestroy {
     private _commentService: CommentService,
     private _cdr: ChangeDetectorRef,
     private _publicationService: PublicationService,
-    private _axiomService: AxiomService,
     private _notificationPublicationService: NotificationPublicationService,
-  ) { 
+  ) {
     if(!this._authService.isAuthenticated()) return;
     this.dataUser = this._authService.getDecodedToken();
     this.subscribeToNotificationUpdatePublication();
@@ -103,12 +100,7 @@ export class BodyViewContentComponent  implements OnDestroy {
           const notification = data[0];
           return this._publicationService.getPublicationId(notification._id).pipe(
             catchError((error) => {
-              this._axiomService.sendLog({
-                message: 'Error al obtener publicación actualizada',
-                component: 'BodyViewContentComponent',
-                type: AxiomType.ERROR,
-                error: error,
-              });
+              console.error('Error fetching publication:', error);
               return of([]);
             })
           );
@@ -135,18 +127,13 @@ export class BodyViewContentComponent  implements OnDestroy {
               );
               this.comment.set(updatedComment);
             }
-          } 
+          }
 
 
-          this._cdr.markForCheck(); // Marcar para detección de cambios
+          this._cdr.markForCheck();
         },
         error: (error) => {
-          this._axiomService.sendLog({
-            message: 'Error en suscripción de notificaciones de actualizar publicaciones',
-            component: 'HomeComponent',
-            type: AxiomType.ERROR,
-            error: error,
-          });
+          console.error('Error updating publication:', error);
         },
       });
   }
@@ -183,7 +170,7 @@ export class BodyViewContentComponent  implements OnDestroy {
     if (currentPublication?.comment?.length && this.images.length === 1 && this.typeView === this.typeViewEnum.PUBLICATION) {
       return currentPublication.comment;
     }
-    
+
     if (currentPublication?.media?.length && this.images.length > 1 && this.typeView === this.typeViewEnum.PUBLICATION) {
       return this.getCommentImageSelected();
     }

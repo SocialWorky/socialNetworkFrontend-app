@@ -14,10 +14,11 @@ export interface Config {
 
 export interface ConfigServiceInterface {
   services: {
-    logs: {
-      token: string;
-      urlApi: string;
-      enabled: boolean;
-    };
+    // Deprecated
+    // logs: {
+    //   token: string;
+    //   urlApi: string;
+    //   enabled: boolean;
+    // };
   };
 }

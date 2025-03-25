@@ -55,13 +55,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
         email: [false],
         google: [false],
       }),
-      services: this._fb.group({
-        logs: this._fb.group({
-          enabled: [false],
-          urlApi: [''],
-          token: [''],
-        }),
-      }),
     });
   }
 
@@ -104,21 +97,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
       this._cdr.markForCheck();
     });
-
-    this._configService.getConfigServices().pipe(takeUntil(this.destroy$)).subscribe((configServices) => {
-      this.configForm.patchValue({
-        services: {
-          logs: {
-            enabled: configServices.services.logs.enabled || false,
-            urlApi: configServices.services.logs.urlApi || '',
-            token: configServices.services.logs.token || '',
-          },
-        },
-      });
-
-      this._cdr.markForCheck();
-    });
-
   }
 
   updateConfig() {
