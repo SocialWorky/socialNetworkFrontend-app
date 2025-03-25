@@ -18,9 +18,10 @@ import { ScrollService } from '@shared/services/scroll.service';
 import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
-  selector: 'worky-navbar',
-  templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.scss'],
+    selector: 'worky-navbar',
+    templateUrl: './navbar.component.html',
+    styleUrls: ['./navbar.component.scss'],
+    standalone: false
 })
 export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   private unsubscribe$ = new Subject<void>();

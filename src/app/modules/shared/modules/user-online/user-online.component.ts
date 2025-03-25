@@ -7,10 +7,11 @@ import { takeUntil, catchError, switchMap, startWith, distinctUntilChanged, debo
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { AuthService } from '@auth/services/auth.service';
 @Component({
-  selector: 'worky-user-online',
-  templateUrl: './user-online.component.html',
-  styleUrls: ['./user-online.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'worky-user-online',
+    templateUrl: './user-online.component.html',
+    styleUrls: ['./user-online.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class UserOnlineComponent implements OnInit, OnDestroy {
   private readonly _destroy$ = new Subject<void>();

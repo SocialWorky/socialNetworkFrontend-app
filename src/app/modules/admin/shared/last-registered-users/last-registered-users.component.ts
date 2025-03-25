@@ -4,9 +4,10 @@ import { User } from '@shared/interfaces/user.interface';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
-  selector: 'worky-last-registered-users',
-  templateUrl: './last-registered-users.component.html',
-  styleUrls: ['./last-registered-users.component.css'],
+    selector: 'worky-last-registered-users',
+    templateUrl: './last-registered-users.component.html',
+    styleUrls: ['./last-registered-users.component.css'],
+    standalone: false
 })
 export class LastRegisteredUsersComponent  implements OnInit, OnDestroy {
 

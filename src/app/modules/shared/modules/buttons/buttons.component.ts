@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, EventEmitter, HostBinding, Input, O
 import { WorkyButtonType, WorkyButtonTheme } from './models/worky-button-model';
 
 @Component({
-  selector: 'worky-buttons',
-  templateUrl: './buttons.component.html',
-  styleUrls: ['./buttons.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'worky-buttons',
+    templateUrl: './buttons.component.html',
+    styleUrls: ['./buttons.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ButtonsComponent {
   @Input() theme: WorkyButtonTheme = WorkyButtonTheme.Primary;

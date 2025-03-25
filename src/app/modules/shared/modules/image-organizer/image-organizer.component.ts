@@ -7,10 +7,11 @@ import { PublicationView, Comment } from '@shared/interfaces/publicationView.int
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 
 @Component({
-  selector: 'worky-image-organizer',
-  templateUrl: './image-organizer.component.html',
-  styleUrls: ['./image-organizer.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'worky-image-organizer',
+    templateUrl: './image-organizer.component.html',
+    styleUrls: ['./image-organizer.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ImageOrganizerComponent implements OnInit {
 

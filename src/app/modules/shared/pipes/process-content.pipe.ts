@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Pipe({
-  name: 'workyProcessContent'
+    name: 'workyProcessContent',
+    standalone: false
 })
 export class WorkyProcessContentPipe implements PipeTransform {
 

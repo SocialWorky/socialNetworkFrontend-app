@@ -15,10 +15,11 @@ import { NotificationService } from '@shared/services/notifications/notification
 import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
-  selector: 'worky-reactions',
-  templateUrl: './reactions.component.html',
-  styleUrls: ['./reactions.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'worky-reactions',
+    templateUrl: './reactions.component.html',
+    styleUrls: ['./reactions.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('reactionPopup') reactionPopup!: ElementRef;

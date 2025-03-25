@@ -4,7 +4,7 @@
     <mat-form-field class="worky-input worky-accent">
       <mat-label>Destino</mat-label>
       <mat-select [(value)]="formDestination" (selectionChange)="updateFormDestination($event)">
-        <mat-option *ngFor="let destination of customFieldDestinations" [value]="destination" (click)="getFields">
+        <mat-option *ngFor="let destination of customFieldDestinations" [value]="destination" (click)="getFields()">
           {{ destination }}
         </mat-option>
       </mat-select>
@@ -13,11 +13,11 @@
     <div class="drag-and-drop-available-fields" cdkDropList #fieldsList="cdkDropList" [cdkDropListData]="availableFields"
         [cdkDropListConnectedTo]="[formFieldsList]" (cdkDropListDropped)="drop($event)">
 
-      <div *ngFor="let field of availableFields" cdkDrag 
-          (cdkDragStarted)="onDragStart($event)" 
+      <div *ngFor="let field of availableFields" cdkDrag
+          (cdkDragStarted)="onDragStart($event)"
           (cdkDragEnded)="onDragEnd($event)"
           class="draggable">
-        
+
         <div class="drag-and-drop-zone">
           <i class="material-icons">drag_indicator</i>
         </div>
@@ -43,19 +43,19 @@
 
             <app-input *ngIf="field.type === enumCustomFieldType.TEXT"
               class="field-item"
-              [field]="field" 
+              [field]="field"
               [formControlName]="field.id">
             </app-input>
 
             <app-textarea *ngIf="field.type === enumCustomFieldType.TEXTAREA"
               class="field-item"
-              [field]="field" 
+              [field]="field"
               [formControlName]="field.id">
             </app-textarea>
 
-            <app-select *ngIf="field.type === enumCustomFieldType.SELECT" 
+            <app-select *ngIf="field.type === enumCustomFieldType.SELECT"
               class="field-item"
-              [field]="field" 
+              [field]="field"
               [formControlName]="field.id">
             </app-select>
 
@@ -79,14 +79,14 @@
 
             <mat-form-field class="worky-input worky-accent">
               <mat-label>Etiqueta</mat-label>
-              <input matInput type="text" formControlName="label" placeholder="Etiqueta" 
+              <input matInput type="text" formControlName="label" placeholder="Etiqueta"
                     (change)="updateField(selectedField, 'label', $event)">
             </mat-form-field>
 
-            <mat-form-field *ngIf="selectedField?.type !== 'select'" 
+            <mat-form-field *ngIf="selectedField?.type !== 'select'"
               class="worky-input worky-accent">
               <mat-label>Placeholder</mat-label>
-              <input matInput type="text" formControlName="placeholder" placeholder="Placeholder" 
+              <input matInput type="text" formControlName="placeholder" placeholder="Placeholder"
                     (change)="updateField(selectedField, 'placeholder', $event)">
             </mat-form-field>
 
@@ -108,21 +108,21 @@
                   </mat-select>
                 </mat-form-field>
 
-                <mat-form-field *ngIf="selectedField?.type !== 'select'" 
+                <mat-form-field *ngIf="selectedField?.type !== 'select'"
                   class="worky-input worky-accent">
                   <mat-label>Mínimo de caracteres</mat-label>
-                  <input matInput type="number" formControlName="minLength" placeholder="Mínimo de caracteres" 
+                  <input matInput type="number" formControlName="minLength" placeholder="Mínimo de caracteres"
                         (change)="updateField(selectedField, 'minLength', $event)">
                 </mat-form-field>
 
-                <mat-form-field *ngIf="selectedField?.type !== 'select'"  
+                <mat-form-field *ngIf="selectedField?.type !== 'select'"
                   class="worky-input worky-accent">
                   <mat-label>Máximo de caracteres</mat-label>
-                  <input matInput type="number" formControlName="maxLength" placeholder="Máximo de caracteres" 
+                  <input matInput type="number" formControlName="maxLength" placeholder="Máximo de caracteres"
                         (change)="updateField(selectedField, 'maxLength', $event)">
                 </mat-form-field>
 
-                <mat-form-field *ngIf="selectedField?.type == 'select'" 
+                <mat-form-field *ngIf="selectedField?.type == 'select'"
                   class="worky-input worky-accent">
                   <mat-label>Multi-Selección</mat-label>
                   <mat-select formControlName="multiSelect" (selectionChange)="updateField(selectedField, 'multiSelect', $event)">
@@ -152,7 +152,7 @@
 
       <button *ngIf="hasValidField()"
         class=""
-        (click)="saveForm()" 
+        (click)="saveForm()"
         mat-raised-button>
         Guardar Formulario
       </button>

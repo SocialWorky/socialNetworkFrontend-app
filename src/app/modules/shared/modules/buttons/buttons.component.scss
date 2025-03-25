@@ -1,7 +1,7 @@
-@import 'src/assets/styles/worky-palettes.scss';
-@import 'src/assets/styles/worky-typography.scss';
+@use 'src/assets/styles/worky-palettes.scss';
+@use 'src/assets/styles/worky-typography.scss';
 
-:host {  
+:host {
   .worky-button {
     max-width: 100%;
     border-radius: 8px;

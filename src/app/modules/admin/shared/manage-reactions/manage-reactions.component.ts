@@ -12,9 +12,10 @@ import { FileUploadService } from '@shared/services/core-apis/file-upload.servic
 import { environment } from '@env/environment';
 
 @Component({
-  selector: 'worky-manage-reactions',
-  templateUrl: './manage-reactions.component.html',
-  styleUrls: ['./manage-reactions.component.scss'],
+    selector: 'worky-manage-reactions',
+    templateUrl: './manage-reactions.component.html',
+    styleUrls: ['./manage-reactions.component.scss'],
+    standalone: false
 })
 export class ManageReactionsComponent implements OnInit, OnDestroy {
   reactionForm: FormGroup;
@@ -105,7 +106,6 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
                 Alerts.ERROR,
                 Position.CENTER,
                 true,
-                true,
                 translations['button.ok'],
               );
           },
@@ -138,7 +138,6 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
             Alerts.SUCCESS,
             Position.CENTER,
             true,
-            true,
             translations['button.ok'],
           );
 
@@ -169,7 +168,6 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
             'Reaction deleted successfully',
             Alerts.SUCCESS,
             Position.CENTER,
-            true,
             true,
             translations['button.ok'],
           );

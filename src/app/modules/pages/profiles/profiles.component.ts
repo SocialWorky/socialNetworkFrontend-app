@@ -33,9 +33,10 @@ import { NotificationPublicationService } from '@shared/services/notifications/n
 import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
 
 @Component({
-  selector: 'worky-profiles',
-  templateUrl: './profiles.component.html',
-  styleUrls: ['./profiles.component.scss'],
+    selector: 'worky-profiles',
+    templateUrl: './profiles.component.html',
+    styleUrls: ['./profiles.component.scss'],
+    standalone: false
 })
 export class ProfilesComponent implements OnInit, OnDestroy {
   typePublishing = TypePublishing;

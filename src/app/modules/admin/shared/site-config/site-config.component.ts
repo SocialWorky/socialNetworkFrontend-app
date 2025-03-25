@@ -11,9 +11,10 @@ import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
 
 @Component({
-  selector: 'worky-site-config',
-  templateUrl: './site-config.component.html',
-  styleUrls: ['./site-config.component.scss'],
+    selector: 'worky-site-config',
+    templateUrl: './site-config.component.html',
+    styleUrls: ['./site-config.component.scss'],
+    standalone: false
 })
 export class SiteConfigComponent implements OnInit, OnDestroy {
 
@@ -138,7 +139,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
               Alerts.ERROR,
               Position.CENTER,
               true,
-              true,
               translations['button.ok']
             );
           }
@@ -167,7 +167,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
           'Configuración actualizada correctamente',
           Alerts.SUCCESS,
           Position.CENTER,
-          true,
           true,
           translations['button.ok']
         );

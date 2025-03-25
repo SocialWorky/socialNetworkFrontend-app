@@ -10,9 +10,10 @@ import { DeviceDetectionService } from '@shared/services/DeviceDetection.service
 import { UserService } from '@shared/services/core-apis/users.service';
 
 @Component({
-  selector: 'worky-messages',
-  templateUrl: './messages.component.html',
-  styleUrls: ['./messages.component.scss'],
+    selector: 'worky-messages',
+    templateUrl: './messages.component.html',
+    styleUrls: ['./messages.component.scss'],
+    standalone: false
 })
 export class MessagesComponent implements OnInit {
 

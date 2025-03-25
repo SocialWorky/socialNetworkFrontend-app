@@ -5,9 +5,10 @@ import { AuthService } from '@auth/services/auth.service';
 import { translations } from '@translations/translations';
 
 @Component({
-  selector: 'worky-admin-sidemenu',
-  templateUrl: './sidemenu.component.html',
-  styleUrls: ['./sidemenu.component.scss'],
+    selector: 'worky-admin-sidemenu',
+    templateUrl: './sidemenu.component.html',
+    styleUrls: ['./sidemenu.component.scss'],
+    standalone: false
 })
 export class SidemenuComponent  implements OnInit {
 

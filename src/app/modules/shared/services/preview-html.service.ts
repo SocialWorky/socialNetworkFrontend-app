@@ -15,12 +15,12 @@ export class ContentService {
   constructor(private http: HttpClient) {
     // Configuración de marked para personalizar el renderizado de código
     const renderer = new marked.Renderer();
-    renderer.code = (code: string, language: string | undefined) => {
-      const validLanguage = language && hljs.getLanguage(language) ? language : 'plaintext';
-      const highlighted = hljs.highlight(code, { language: validLanguage }).value;
+    renderer.code = ({ text, lang, escaped }: { text: string; lang?: string; escaped?: boolean }) => {
+      const validLanguage = lang && hljs.getLanguage(lang) ? lang : 'plaintext';
+      const highlighted = hljs.highlight(text, { language: validLanguage }).value;
       return `<pre><code class="hljs ${validLanguage}">${highlighted}</code></pre>`;
     };
-    renderer.codespan = (text: string) => {
+    renderer.codespan = ({ text }: { text: string }) => {
       return `<code class="inline-code">${text}</code>`;
     };
     marked.setOptions({
@@ -119,7 +119,7 @@ export class ContentService {
     // Detectar si es un enlace de YouTube
     const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i;
     const youtubeMatch = url.match(youtubeRegex);
-    
+
     if (youtubeMatch) {
       const videoId = youtubeMatch[1];
       const youtubeHtml = `

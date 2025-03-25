@@ -29,9 +29,10 @@ import { NotificationNewPublication, NotificationUpdatePublication } from '@shar
 import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
-  selector: 'worky-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
+    selector: 'worky-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.scss'],
+    standalone: false
 })
 export class HomeComponent implements OnInit, OnDestroy {
   typePublishing = TypePublishing;

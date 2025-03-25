@@ -5,9 +5,10 @@ import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 
 @Component({
-  selector: 'worky-image-upload-modal',
-  templateUrl: './image-upload-modal.component.html',
-  styleUrls: ['./image-upload-modal.component.scss']
+    selector: 'worky-image-upload-modal',
+    templateUrl: './image-upload-modal.component.html',
+    styleUrls: ['./image-upload-modal.component.scss'],
+    standalone: false
 })
 export class ImageUploadModalComponent implements OnInit {
   WorkyButtonType = WorkyButtonType;
@@ -21,7 +22,7 @@ export class ImageUploadModalComponent implements OnInit {
   selectedFiles: File[] = [];
 
   previews: { url: string, type: string }[] = [];
-  
+
   @Input()
   maxFiles: number = 10;
 
@@ -84,7 +85,6 @@ export class ImageUploadModalComponent implements OnInit {
       message,
       Alerts.ERROR,
       Position.CENTER,
-      true,
       true,
       'Cerrar',
     );

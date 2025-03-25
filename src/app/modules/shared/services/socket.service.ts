@@ -29,7 +29,7 @@ export class SocketService {
       this.socket.disconnect();
     }
 
-    this.socket.ioSocket.io.opts.auth = { token: newToken };
+this.socket.ioSocket.io.opts.extraHeaders = { Authorization: `Bearer ${newToken}` };
     this.socket.ioSocket.io.opts.query = { token: newToken };
 
     this.socket.connect();

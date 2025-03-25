@@ -13,18 +13,19 @@ import { AuthService } from '@auth/services/auth.service';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 
 @Component({
-  selector: 'worky-reset-password-modal',
-  templateUrl: './reset-password-modal.component.html',
-  styleUrls: ['./reset-password-modal.component.scss'],
+    selector: 'worky-reset-password-modal',
+    templateUrl: './reset-password-modal.component.html',
+    styleUrls: ['./reset-password-modal.component.scss'],
+    standalone: false
 })
 export class ResetPasswordModalComponent implements OnInit, OnDestroy {
 
   resetPasswordForm: FormGroup = new FormGroup({});
-  
+
   WorkyButtonType = WorkyButtonType;
-  
+
   WorkyButtonTheme = WorkyButtonTheme;
-  
+
   private subscription: Subscription = new Subscription();
 
   constructor(
@@ -71,7 +72,6 @@ export class ResetPasswordModalComponent implements OnInit, OnDestroy {
               Alerts.SUCCESS,
               Position.CENTER,
               true,
-              true,
               translations['button.ok'],
               ['/auth/login'],
             );
@@ -85,7 +85,6 @@ export class ResetPasswordModalComponent implements OnInit, OnDestroy {
             translations['resetPassword.alertErrorResetPasswordMessage'],
             Alerts.ERROR,
             Position.CENTER,
-            true,
             true,
             translations['button.ok']
           );

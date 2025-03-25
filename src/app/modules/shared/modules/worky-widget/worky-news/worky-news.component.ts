@@ -5,10 +5,11 @@ import { of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 
 @Component({
-  selector: 'worky-news',
-  templateUrl: './worky-news.component.html',
-  styleUrls: ['./worky-news.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'worky-news',
+    templateUrl: './worky-news.component.html',
+    styleUrls: ['./worky-news.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class WorkyNewsComponent implements OnInit {
   articles: NewsArticle[] = [];

@@ -7,9 +7,10 @@ import { EmailNotificationService } from '@shared/services/notifications/email-n
 import { environment } from '@env/environment';
 
 @Component({
-  selector: 'worky-invitations-code',
-  templateUrl: './invitations-code.component.html',
-  styleUrls: ['./invitations-code.component.css'],
+    selector: 'worky-invitations-code',
+    templateUrl: './invitations-code.component.html',
+    styleUrls: ['./invitations-code.component.css'],
+    standalone: false
 })
 export class InvitationsCodeComponent  implements OnInit {
 

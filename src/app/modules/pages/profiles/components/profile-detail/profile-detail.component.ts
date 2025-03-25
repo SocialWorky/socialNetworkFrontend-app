@@ -8,9 +8,10 @@ import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/model
 import { UserService } from '@shared/services/core-apis/users.service';
 
 @Component({
-  selector: 'worky-profile-detail',
-  templateUrl: './profile-detail.component.html',
-  styleUrls: ['./profile-detail.component.scss'],
+    selector: 'worky-profile-detail',
+    templateUrl: './profile-detail.component.html',
+    styleUrls: ['./profile-detail.component.scss'],
+    standalone: false
 })
 export class ProfileDetailComponent  implements OnInit {
 

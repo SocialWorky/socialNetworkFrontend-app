@@ -21,9 +21,10 @@ import { LoadingController } from '@ionic/angular';
 import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
-  selector: 'worky-message-side-rigth',
-  templateUrl: './message-side-rigth.component.html',
-  styleUrls: ['./message-side-rigth.component.scss'],
+    selector: 'worky-message-side-rigth',
+    templateUrl: './message-side-rigth.component.html',
+    styleUrls: ['./message-side-rigth.component.scss'],
+    standalone: false
 })
 export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterViewChecked, OnInit{
 

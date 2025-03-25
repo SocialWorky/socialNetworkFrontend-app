@@ -3,9 +3,10 @@ import { ImageOrganizer } from '../../../interfaces/image-organizer.interface';
 import { environment } from '@env/environment';
 
 @Component({
-  selector: 'worky-image-loading',
-  templateUrl: './image-loading.component.html',
-  styleUrls: ['./image-loading.component.scss'],
+    selector: 'worky-image-loading',
+    templateUrl: './image-loading.component.html',
+    styleUrls: ['./image-loading.component.scss'],
+    standalone: false
 })
 export class ImageLoadingComponent implements OnInit, OnChanges {
 

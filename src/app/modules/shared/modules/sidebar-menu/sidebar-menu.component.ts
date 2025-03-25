@@ -9,9 +9,10 @@ import { NotificationService } from '@shared/services/notifications/notification
 import { MessageService } from 'src/app/modules/pages/messages/services/message.service';
 
 @Component({
-  selector: 'worky-sidebar-menu',
-  templateUrl: './sidebar-menu.component.html',
-  styleUrls: ['./sidebar-menu.component.scss'],
+    selector: 'worky-sidebar-menu',
+    templateUrl: './sidebar-menu.component.html',
+    styleUrls: ['./sidebar-menu.component.scss'],
+    standalone: false
 })
 export class SideBarMenuComponent implements OnInit, OnDestroy{
   private unsubscribe$ = new Subject<void>();

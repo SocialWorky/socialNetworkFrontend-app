@@ -29,10 +29,11 @@ import { ScrollService } from '@shared/services/scroll.service';
 import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
-  selector: 'worky-publication-view',
-  templateUrl: './publication-view.component.html',
-  styleUrls: ['./publication-view.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'worky-publication-view',
+    templateUrl: './publication-view.component.html',
+    styleUrls: ['./publication-view.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() publication!: PublicationView;

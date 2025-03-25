@@ -10,10 +10,11 @@ import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.service';
 
 @Component({
-  selector: 'worky-weather',
-  templateUrl: './worky-weather.component.html',
-  styleUrls: ['./worky-weather.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'worky-weather',
+    templateUrl: './worky-weather.component.html',
+    styleUrls: ['./worky-weather.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class WeatherComponent implements OnInit, OnDestroy {
   WorkyButtonType = WorkyButtonType;

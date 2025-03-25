@@ -10,9 +10,10 @@ import { LoadingService } from '@shared/services/loading.service';
 import { SocketService } from '@shared/services/socket.service';
 
 @Component({
-  selector: 'worky-root',
-  templateUrl: 'app.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'worky-root',
+    templateUrl: 'app.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class AppComponent implements OnInit, OnDestroy {
 

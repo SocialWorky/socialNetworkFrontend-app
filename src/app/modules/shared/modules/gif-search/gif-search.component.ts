@@ -5,9 +5,10 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 
 @Component({
-  selector: 'app-gif-search',
-  templateUrl: './gif-search.component.html',
-  styleUrls: ['./gif-search.component.scss']
+    selector: 'app-gif-search',
+    templateUrl: './gif-search.component.html',
+    styleUrls: ['./gif-search.component.scss'],
+    standalone: false
 })
 export class GifSearchComponent {
   gifs: any[] = [];

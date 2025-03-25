@@ -3,7 +3,8 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { translations } from 'src/translations/translations';
 
 @Pipe({
-  name: 'workyRelativeTime'
+    name: 'workyRelativeTime',
+    standalone: false
 })
 export class WorkyRelativeTimePipe implements PipeTransform {
 

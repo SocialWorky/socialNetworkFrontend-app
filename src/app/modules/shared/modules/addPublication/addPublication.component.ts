@@ -43,9 +43,10 @@ import { GifSearchComponent } from '../gif-search/gif-search.component';
 import { TooltipsOnboardingService } from '@shared/services/tooltips-onboarding.service';
 
 @Component({
-  selector: 'worky-add-publication',
-  templateUrl: './addPublication.component.html',
-  styleUrls: ['./addPublication.component.scss'],
+    selector: 'worky-add-publication',
+    templateUrl: './addPublication.component.html',
+    styleUrls: ['./addPublication.component.scss'],
+    standalone: false
 })
 export class AddPublicationComponent implements OnInit, OnDestroy {
   WorkyButtonType = WorkyButtonType;
@@ -206,7 +207,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     ];
 
     this._tooltipsOnboardingService.start(steps);
-  } 
+  }
 
   get userToken(): string {
     return this.decodedToken.id;
@@ -461,7 +462,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       Alerts.SUCCESS,
       Position.CENTER,
       true,
-      true,
       translations['button.ok'],
     );
   }
@@ -599,7 +599,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   insertText(markdown: string) {
     const textareaValue = this.postTextRef.value || '';
-    
+
     const textarea = this.postTextRef.getInputElement().then((textarea: HTMLTextAreaElement) => {
       const startPos = textarea.selectionStart;
       const endPos = textarea.selectionEnd;

@@ -14,9 +14,10 @@ import { AxiomType } from '@shared/interfaces/axiom.enum';
 import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
-  selector: 'worky-body-view-content',
-  templateUrl: './body-view-content.component.html',
-  styleUrls: ['./body-view-content.component.scss'],
+    selector: 'worky-body-view-content',
+    templateUrl: './body-view-content.component.html',
+    styleUrls: ['./body-view-content.component.scss'],
+    standalone: false
 })
 export class BodyViewContentComponent  implements OnDestroy {
 
