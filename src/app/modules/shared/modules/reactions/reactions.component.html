@@ -32,6 +32,7 @@
           (mouseleave)="zoomOut(reaction)"
           [matTooltip]="reaction.name"
           matTooltipPosition="above"
+          matTooltipClass="reaction-tooltip"
           (click)="addReaction(reaction)">
         <img class="reaction-image" [src]="reaction.emoji" [alt]="reaction.name">
       </div>
