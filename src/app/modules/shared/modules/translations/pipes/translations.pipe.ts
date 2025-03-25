@@ -20,7 +20,10 @@ export const linkTranslationArguments = (key: string, args: any[]): string => {
   });
 };
 
-@Pipe({ name: 'workyTranslations' })
+@Pipe({
+    name: 'workyTranslations',
+    standalone: false
+})
 export class TranslationsPipe implements PipeTransform {
   transform(value: string, type?: string, ...args: any[]): string {
     switch (type) {

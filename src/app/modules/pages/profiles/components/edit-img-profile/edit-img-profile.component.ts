@@ -11,9 +11,10 @@ import { environment } from '@env/environment';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 
 @Component({
-  selector: 'worky-edit-img-profile',
-  templateUrl: './edit-img-profile.component.html',
-  styleUrls: ['./edit-img-profile.component.scss'],
+    selector: 'worky-edit-img-profile',
+    templateUrl: './edit-img-profile.component.html',
+    styleUrls: ['./edit-img-profile.component.scss'],
+    standalone: false
 })
 export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDestroy, AfterViewInit {
   private unsubscribe$ = new Subject<void>();

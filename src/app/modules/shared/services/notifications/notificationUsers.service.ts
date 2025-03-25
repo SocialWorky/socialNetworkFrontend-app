@@ -68,13 +68,13 @@ export class NotificationUsersService implements OnDestroy {
 
     this.socket.emit('getUserStatuses');
 
-    this.socket.fromEvent<Token[]>('initialUserStatuses').subscribe((initialStatuses: Token[]) => {
+    this.socket.fromEvent<Token[], 'initialUserStatuses'>('initialUserStatuses').subscribe((initialStatuses: Token[]) => {
       this._userStatuses.next(initialStatuses);
       this._cacheService.setItem(this.CACHE_KEY, initialStatuses);
       this.userStatusMap = new Map(initialStatuses.map(user => [user._id!, user]));
     });
 
-    this.socket.fromEvent<Token>('userStatus').subscribe((data: Token) => {
+    this.socket.fromEvent<Token, 'userStatus'>('userStatus').subscribe((data: Token) => {
       this.updateUserStatus(data);
     });
 

@@ -4,9 +4,10 @@ import { ImageOrganizer } from '@shared/modules/image-organizer/interfaces/image
 import { signal } from '@angular/core';
 
 @Component({
-  selector: 'worky-message-loading',
-  templateUrl: './message-loading.component.html',
-  styleUrls: ['./message-loading.component.scss'],
+    selector: 'worky-message-loading',
+    templateUrl: './message-loading.component.html',
+    styleUrls: ['./message-loading.component.scss'],
+    standalone: false
 })
 export class MessageLoadingComponent  implements OnChanges {
 

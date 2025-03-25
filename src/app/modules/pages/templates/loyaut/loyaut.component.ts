@@ -8,9 +8,10 @@ import { NotificationUsersService } from '@shared/services/notifications/notific
 import { ScrollService } from '@shared/services/scroll.service';
 
 @Component({
-  selector: 'worky-loyaut',
-  templateUrl: './loyaut.component.html',
-  styleUrls: ['./loyaut.component.scss'],
+    selector: 'worky-loyaut',
+    templateUrl: './loyaut.component.html',
+    styleUrls: ['./loyaut.component.scss'],
+    standalone: false
 })
 export class LoyautComponent implements OnInit, OnDestroy {
 

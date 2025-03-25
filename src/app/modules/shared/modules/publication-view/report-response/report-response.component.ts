@@ -4,9 +4,10 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 
 @Component({
-  selector: 'worky-report-response',
-  templateUrl: './report-response.component.html',
-  styleUrls: ['./report-response.component.scss'],
+    selector: 'worky-report-response',
+    templateUrl: './report-response.component.html',
+    styleUrls: ['./report-response.component.scss'],
+    standalone: false
 })
 export class ReportResponseComponent  implements OnInit {
 

@@ -1,8 +1,7 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal } from '@angular/core';
-import { Subject, firstValueFrom, of, Observable, fromEvent } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, filter, switchMap, takeUntil } from 'rxjs/operators';
+import { Subject, firstValueFrom, of } from 'rxjs';
+import { catchError, filter, switchMap, takeUntil } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
-import { Meta } from '@angular/platform-browser';
 import { Title } from '@angular/platform-browser';
 
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
@@ -10,28 +9,25 @@ import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
 import { AuthService } from '@auth/services/auth.service';
-import { AlertService } from '@shared/services/alert.service';
 import { LocationService } from '@shared/services/apis/location.service';
 import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.service';
 import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { environment } from '@env/environment';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { NetworkService } from '@shared/services/network.service';
-import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
-import { AxiomService } from '@shared/services/apis/axiom.service';
-import { AxiomType } from '@shared/interfaces/axiom.enum';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
-import { NotificationNewPublication, NotificationUpdatePublication } from '@shared/interfaces/notificationPublication.interface';
+import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
 import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
-  selector: 'worky-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
+    selector: 'worky-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.scss'],
+    standalone: false
 })
 export class HomeComponent implements OnInit, OnDestroy {
   typePublishing = TypePublishing;
@@ -77,19 +73,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _cdr: ChangeDetectorRef,
     private _notificationCommentService: NotificationCommentService,
     private _authService: AuthService,
-    private _alertService: AlertService,
     private _locationService: LocationService,
     private _geoLocationsService: GeoLocationsService,
     private _geocodingService: GeocodingService,
     private _activatedRoute: ActivatedRoute,
-    private _meta: Meta,
     private _notificationUsersService: NotificationUsersService,
     private _networkService: NetworkService,
     private _deviceDetectionService: DeviceDetectionService,
     private _scrollService: ScrollService,
     private _titleService: Title,
     private _configService: ConfigService,
-    private _axiomService: AxiomService,
     private _notificationPublicationService: NotificationPublicationService
   ) {
     this._authService.isAuthenticated();
@@ -214,12 +207,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
 
     } catch (error) {
-      this._axiomService.sendLog({
-        message: 'Error en cargar publicaciones',
-        component: 'HomeComponent',
-        type: AxiomType.ERROR,
-        error: error
-      });
+      console.error('Error al cargar las publicaciones:', error);
       this.loaderPublications = false;
     }
   }
@@ -270,22 +258,12 @@ export class HomeComponent implements OnInit, OnDestroy {
                 this._cdr.markForCheck();
               },
               error: (error) => {
-                this._axiomService.sendLog({
-                  message: 'Error al obtener nueva publicación',
-                  component: 'HomeComponent',
-                  type: AxiomType.ERROR,
-                  error: error
-                });
+                console.error('Error al obtener la publicación:', error);
               }
             });
         },
         error: (error) => {
-          this._axiomService.sendLog({
-            message: 'Error en suscripción de notificaciones de nuevas publicaciones',
-            component: 'HomeComponent',
-            type: AxiomType.ERROR,
-            error: error
-          });
+          console.error('Error en la suscripción de notificaciones de nuevas publicaciones:', error);
         }
       });
   }
@@ -307,12 +285,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          this._axiomService.sendLog({
-            message: 'Error en suscripción de notificaciones de eliminar publicaciones',
-            component: 'HomeComponent',
-            type: AxiomType.ERROR,
-            error: error
-          });
+          console.error('Error en la suscripción de notificaciones de eliminar publicaciones:', error);
         }
       });
   }
@@ -326,12 +299,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           const notification = data[0];
           return this._publicationService.getPublicationId(notification._id).pipe(
             catchError((error) => {
-              this._axiomService.sendLog({
-                message: 'Error al obtener publicación actualizada',
-                component: 'HomeComponent',
-                type: AxiomType.ERROR,
-                error: error,
-              });
+              console.error('Error al obtener la publicación:', error);
               return of([]);
             })
           );
@@ -365,12 +333,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         },
         error: (error) => {
-          this._axiomService.sendLog({
-            message: 'Error en suscripción de notificaciones de actualizar publicaciones',
-            component: 'HomeComponent',
-            type: AxiomType.ERROR,
-            error: error,
-          });
+          console.error('Error en la suscripción de notificaciones de actualizar publicaciones:', error);
         }
       });
   }
@@ -395,12 +358,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        this._axiomService.sendLog({
-          message: 'Error en suscripción de notificaciones de comentarios',
-          component: 'HomeComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+        console.error('Error en la suscripción de notificaciones de comentarios:', error);
       }
     });
   }
@@ -425,12 +383,8 @@ export class HomeComponent implements OnInit, OnDestroy {
           result = false;
         }
       } catch (error) {
-        this._axiomService.sendLog({
-          message:'Error al cargar publicación por id',
-          component: 'HomeComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+        console.error('Error al obtener la publicación:', error);
+        result = false;
       }
     }
     return result;

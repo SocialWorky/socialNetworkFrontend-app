@@ -6,9 +6,10 @@ import { GenericSnackbarService } from '@shared/services/generic-snackbar.servic
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
-  selector: 'worky-log',
-  templateUrl: './log.component.html',
-  styleUrls: ['./log.component.scss']
+    selector: 'worky-log',
+    templateUrl: './log.component.html',
+    styleUrls: ['./log.component.scss'],
+    standalone: false
 })
 export class LogComponent implements OnInit {
 

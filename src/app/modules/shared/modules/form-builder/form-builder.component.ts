@@ -9,9 +9,10 @@ import { CustomFieldType, CustomFieldDestination, CustomField} from './interface
 import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
 
 @Component({
-  selector: 'worky-form-builder',
-  templateUrl: './form-builder.component.html',
-  styleUrls: ['./form-builder.component.scss']
+    selector: 'worky-form-builder',
+    templateUrl: './form-builder.component.html',
+    styleUrls: ['./form-builder.component.scss'],
+    standalone: false
 })
 export class FormBuilderComponent implements OnInit, OnDestroy {
   form: FormGroup = new FormGroup({});

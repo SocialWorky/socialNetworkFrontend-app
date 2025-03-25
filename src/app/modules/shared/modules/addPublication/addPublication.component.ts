@@ -43,9 +43,10 @@ import { GifSearchComponent } from '../gif-search/gif-search.component';
 import { TooltipsOnboardingService } from '@shared/services/tooltips-onboarding.service';
 
 @Component({
-  selector: 'worky-add-publication',
-  templateUrl: './addPublication.component.html',
-  styleUrls: ['./addPublication.component.scss'],
+    selector: 'worky-add-publication',
+    templateUrl: './addPublication.component.html',
+    styleUrls: ['./addPublication.component.scss'],
+    standalone: false
 })
 export class AddPublicationComponent implements OnInit, OnDestroy {
   WorkyButtonType = WorkyButtonType;
@@ -140,8 +141,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(newImageUrl => {
         this.profileImageUrl = newImageUrl;
-        if (this.type === TypePublishing.POSTPROFILE) {
-          this.updatePublications(TypePublishing.POSTPROFILE, this.idUserProfile);
+        if (this.type === TypePublishing.POST_PROFILE) {
+          this.updatePublications(TypePublishing.POST_PROFILE, this.idUserProfile);
         }
       });
       setTimeout(() => {
@@ -206,7 +207,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     ];
 
     this._tooltipsOnboardingService.start(steps);
-  } 
+  }
 
   get userToken(): string {
     return this.decodedToken.id;
@@ -245,9 +246,9 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this.loaderSavePublication = true;
     this.myForm.controls['authorId'].setValue(this.decodedToken.id);
     this.myForm.controls['privacy'].setValue(this.privacy);
-    if (this.type === TypePublishing.POST || this.type === TypePublishing.POSTPROFILE) {
+    if (this.type === TypePublishing.POST || this.type === TypePublishing.POST_PROFILE) {
       this.onSavePublication();
-    } else if (this.type === TypePublishing.COMMENT || this.type === this.typePublishing.IMAGEVIEW) {
+    } else if (this.type === TypePublishing.COMMENT || this.type === this.typePublishing.IMAGE_VIEW) {
       this.onSaveComment(this.idPublication as string);
     }
   }
@@ -263,7 +264,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       content: this.myForm.controls['content'].value,
       authorId: this.decodedToken.id,
       idPublication: this.type === this.typePublishing.COMMENT ? idPublication : null,
-      idMedia: this.type === this.typePublishing.IMAGEVIEW ? this.idMedia : null,
+      idMedia: this.type === this.typePublishing.IMAGE_VIEW ? this.idMedia : null,
     };
 
     this._commentService.createComment(dataComment).pipe(takeUntil(this.unsubscribe$)).subscribe({
@@ -310,7 +311,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
     this.setExtraData();
 
-    if (this.type === TypePublishing.POSTPROFILE && this.idUserProfile !== this.decodedToken.id) {
+    if (this.type === TypePublishing.POST_PROFILE && this.idUserProfile !== this.decodedToken.id) {
       this.myForm.controls['userReceivingId'].setValue(this.idUserProfile);
       this.myForm.controls['privacy'].setValue(TypePrivacy.FRIENDS);
     }
@@ -433,7 +434,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this._notificationCenterService.createNotification({
       userId: publication.author._id,
       type: NotificationType.COMMENT,
-      content: this.type === this.typePublishing.IMAGEVIEW ? translations['notification.commentPublicationImage'] : translations['notification.commentPublication'],
+      content: this.type === this.typePublishing.IMAGE_VIEW ? translations['notification.commentPublicationImage'] : translations['notification.commentPublication'],
       link: `/publication/${publication._id}`,
       additionalData: JSON.stringify(dataNotification),
     }).pipe(takeUntil(this.unsubscribe$)).subscribe();
@@ -460,7 +461,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       message,
       Alerts.SUCCESS,
       Position.CENTER,
-      true,
       true,
       translations['button.ok'],
     );
@@ -514,7 +514,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   openUploadModal() {
     const dialogRef = this._dialog.open(ImageUploadModalComponent, {
       data: {
-        maxFiles: this.type === TypePublishing.POST || this.type === TypePublishing.POSTPROFILE ? 10 : 1,
+        maxFiles: this.type === TypePublishing.POST || this.type === TypePublishing.POST_PROFILE ? 10 : 1,
       }
     });
 
@@ -599,7 +599,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   insertText(markdown: string) {
     const textareaValue = this.postTextRef.value || '';
-    
+
     const textarea = this.postTextRef.getInputElement().then((textarea: HTMLTextAreaElement) => {
       const startPos = textarea.selectionStart;
       const endPos = textarea.selectionEnd;

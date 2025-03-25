@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'workyDateFormat'
+    name: 'workyDateFormat',
+    standalone: false
 })
 export class WorkyDateFormatPipe implements PipeTransform {
   transform(value: string | Date): string {

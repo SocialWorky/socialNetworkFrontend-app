@@ -16,9 +16,10 @@ import { Subject, takeUntil } from 'rxjs';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 
 @Component({
-  selector: 'worky-register',
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss'],
+    selector: 'worky-register',
+    templateUrl: './register.component.html',
+    styleUrls: ['./register.component.scss'],
+    standalone: false
 })
 export class RegisterComponent implements OnInit {
   registerLoading: boolean = false;
@@ -70,7 +71,7 @@ export class RegisterComponent implements OnInit {
     if(this.registerForm.invalid) return;
 
     this.registerLoading = true;
-    
+
     const baseUrl = environment.BASE_URL;
 
     const loading = await this._loadingCtrl.create({
@@ -102,7 +103,6 @@ export class RegisterComponent implements OnInit {
           Alerts.SUCCESS,
           Position.CENTER,
           true,
-          true,
           translations['button.ok'],
           ['/auth/login'],
         );
@@ -121,7 +121,6 @@ export class RegisterComponent implements OnInit {
             Alerts.ERROR,
             Position.CENTER,
             true,
-            true,
             translations['button.ok'],
           );
           loading.dismiss();
@@ -138,7 +137,6 @@ export class RegisterComponent implements OnInit {
             Alerts.ERROR,
             Position.CENTER,
             true,
-            true,
             translations['button.ok'],
           );
           loading.dismiss();
@@ -149,7 +147,6 @@ export class RegisterComponent implements OnInit {
             translations['alert.message_error_send_email'],
             Alerts.INFO,
             Position.CENTER,
-            true,
             true,
             translations['button.ok'],
             ['/auth/login'],
@@ -166,7 +163,6 @@ export class RegisterComponent implements OnInit {
             Alerts.ERROR,
             Position.CENTER,
             true,
-            true,
             translations['button.ok'],
           );
           loading.dismiss();
@@ -174,7 +170,7 @@ export class RegisterComponent implements OnInit {
 
         this.registerLoading = false;
         loading.dismiss();
-      }     
+      }
     });
   }
 }

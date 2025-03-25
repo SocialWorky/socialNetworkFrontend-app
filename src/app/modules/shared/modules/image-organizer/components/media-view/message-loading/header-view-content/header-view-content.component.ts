@@ -11,9 +11,10 @@ import { PublicationService } from '@shared/services/core-apis/publication.servi
 import { ImageOrganizer, TypeView } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
 
 @Component({
-  selector: 'worky-header-view-content',
-  templateUrl: './header-view-content.component.html',
-  styleUrls: ['./header-view-content.component.scss'],
+    selector: 'worky-header-view-content',
+    templateUrl: './header-view-content.component.html',
+    styleUrls: ['./header-view-content.component.scss'],
+    standalone: false
 })
 export class HeaderViewContentComponent  implements OnInit, OnDestroy {
 
@@ -21,7 +22,7 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
 
   typeViewEnum = TypeView;
 
-  type?: TypePublishing = TypePublishing.IMAGEVIEW;
+  type?: TypePublishing = TypePublishing.IMAGE_VIEW;
 
   listReaction: string[] = [];
 

@@ -10,9 +10,10 @@ import { PublicationService } from '@shared/services/core-apis/publication.servi
 import { NotificationService } from '@shared/services/notifications/notification.service';
 
 @Component({
-  selector: 'worky-media-view',
-  templateUrl: './media-view.component.html',
-  styleUrls: ['./media-view.component.scss'],
+    selector: 'worky-media-view',
+    templateUrl: './media-view.component.html',
+    styleUrls: ['./media-view.component.scss'],
+    standalone: false
 })
 export class MediaViewComponent  implements OnInit {
 

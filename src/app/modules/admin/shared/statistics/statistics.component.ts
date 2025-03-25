@@ -8,9 +8,10 @@ import { ReportStatus } from '@shared/enums/report.enum';
 import * as _ from 'lodash';
 
 @Component({
-  selector: 'worky-admin-statistics',
-  templateUrl: './statistics.component.html',
-  styleUrls: ['./statistics.component.scss'],
+    selector: 'worky-admin-statistics',
+    templateUrl: './statistics.component.html',
+    styleUrls: ['./statistics.component.scss'],
+    standalone: false
 })
 export class StatisticsComponent  implements OnInit {
 

@@ -24,7 +24,7 @@ export const translations = {
   'input.email': 'Email',
   'input.password': 'Password',
   'input.name': 'Name',
-  'input.lastname': 'Lastname',
+  'input.lastName': 'Last name',
   'input.username': 'Username',
   'input.invitationCode': 'Invitation code',
   // BUTTONS
@@ -172,9 +172,9 @@ export const translations = {
   'DATE_FNS.X_YEARS': '{{count}} years ago',
   'DATE_FNS.UNKNOWN': 'some time ago',
   // ADMIN MODULE
-  'admin.sidemenu-title': 'Worky',
-  'admin.sidemenu-subTitle': 'Admin panel',
-  'admin.sidemenu-welcome': 'Welcome:',
+  'admin.sideMenu-title': 'Worky',
+  'admin.sideMenu-subTitle': 'Admin panel',
+  'admin.sideMenu-welcome': 'Welcome:',
   'admin.statistics.group-usersRegister': 'Registered Users',
   'admin.statistics.group-publicationsTitle': 'Publications',
   'admin.statistics.group-usersReport': 'Reported Users',

@@ -14,7 +14,7 @@
   right: -15px;
   bottom: -15px;
   z-index: 1;
-  pointer-events: auto; 
+  pointer-events: auto;
 }
 
 .reaction-container {
@@ -48,6 +48,14 @@
   @include breakpoints.below-sm {
     bottom: 90%;
   }
+}
+
+::ng-deep .reaction-tooltip {
+  padding: 2px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  color: color.$worky-color-light;
+  background-color: map-get(color.$worky-navy, 12);
 }
 
 .reaction-popup-visible {

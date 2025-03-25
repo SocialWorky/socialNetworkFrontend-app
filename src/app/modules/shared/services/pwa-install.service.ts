@@ -89,7 +89,7 @@ export class PwaInstallService {
 
   async showInstallPrompt(header: string, message: string) {
     if (!this.deferredPrompt || this.isAppInstalled()) {
-      this._alertService.showAlert('App ya Instalada', 'Se detecto que ya cuentas con la App instalada', Alerts.INFO, Position.CENTER, false, true, 'Aceptar');
+      this._alertService.showAlert('App ya Instalada', 'Se detecto que ya cuentas con la App instalada', Alerts.INFO, Position.CENTER, true, 'Aceptar');
       return;
     }
 

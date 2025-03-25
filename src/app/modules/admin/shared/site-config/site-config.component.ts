@@ -11,9 +11,10 @@ import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
 
 @Component({
-  selector: 'worky-site-config',
-  templateUrl: './site-config.component.html',
-  styleUrls: ['./site-config.component.scss'],
+    selector: 'worky-site-config',
+    templateUrl: './site-config.component.html',
+    styleUrls: ['./site-config.component.scss'],
+    standalone: false
 })
 export class SiteConfigComponent implements OnInit, OnDestroy {
 
@@ -53,13 +54,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       loginMethods: this._fb.group({
         email: [false],
         google: [false],
-      }),
-      services: this._fb.group({
-        logs: this._fb.group({
-          enabled: [false],
-          urlApi: [''],
-          token: [''],
-        }),
       }),
     });
   }
@@ -103,21 +97,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
       this._cdr.markForCheck();
     });
-
-    this._configService.getConfigServices().pipe(takeUntil(this.destroy$)).subscribe((configServices) => {
-      this.configForm.patchValue({
-        services: {
-          logs: {
-            enabled: configServices.services.logs.enabled || false,
-            urlApi: configServices.services.logs.urlApi || '',
-            token: configServices.services.logs.token || '',
-          },
-        },
-      });
-
-      this._cdr.markForCheck();
-    });
-
   }
 
   updateConfig() {
@@ -137,7 +116,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
               'Error al subir archivo, intente de nuevo.',
               Alerts.ERROR,
               Position.CENTER,
-              true,
               true,
               translations['button.ok']
             );
@@ -167,7 +145,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
           'Configuración actualizada correctamente',
           Alerts.SUCCESS,
           Position.CENTER,
-          true,
           true,
           translations['button.ok']
         );

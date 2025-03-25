@@ -5,7 +5,8 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Pipe({
-  name: 'workyPreviewHtml'
+    name: 'workyPreviewHtml',
+    standalone: false
 })
 export class WorkyPreviewHtmlPipe implements PipeTransform {
 

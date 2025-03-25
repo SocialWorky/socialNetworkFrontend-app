@@ -3,9 +3,10 @@ import { ConfigService } from '@shared/services/core-apis/config.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
-  selector: 'worky-custom-css',
-  templateUrl: './custom-css.component.html',
-  styleUrls: ['./custom-css.component.scss'],
+    selector: 'worky-custom-css',
+    templateUrl: './custom-css.component.html',
+    styleUrls: ['./custom-css.component.scss'],
+    standalone: false
 })
 export class CustomCssComponent implements OnDestroy {
 

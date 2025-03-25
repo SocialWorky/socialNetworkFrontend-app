@@ -4,7 +4,6 @@ import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
-import { NotificationService } from './notification.service';
 
 
 @Injectable({
@@ -23,14 +22,14 @@ export class NotificationPublicationService implements OnDestroy {
 
     constructor(
       private socket: Socket,
-    ) { 
+    ) {
       this.subscribeToNotificationNewPublication();
       this.subscribeToNotificationDeletePublication();
       this.subscribeToNotificationUpdatePublication();
     }
 
     private subscribeToNotificationNewPublication() {
-      this.socket.fromEvent<NotificationNewPublication>('newPublication')
+      this.socket.fromEvent<NotificationNewPublication, 'newPublication'>('newPublication')
         .pipe(
           takeUntil(this._unsubscribeAll),
           catchError(error => {
@@ -45,7 +44,7 @@ export class NotificationPublicationService implements OnDestroy {
     }
 
     private subscribeToNotificationDeletePublication() {
-      this.socket.fromEvent<{_id: string}>('deletePublication')
+      this.socket.fromEvent<{_id: string}, 'deletePublication'>('deletePublication')
         .pipe(
           takeUntil(this._unsubscribeAll),
           catchError(error => {
@@ -60,7 +59,7 @@ export class NotificationPublicationService implements OnDestroy {
     }
 
     private subscribeToNotificationUpdatePublication() {
-      this.socket.fromEvent<PublicationView[]>('updatePublication')
+      this.socket.fromEvent<PublicationView[], 'updatePublication'>('updatePublication')
         .pipe(
           takeUntil(this._unsubscribeAll),
           catchError(error => {

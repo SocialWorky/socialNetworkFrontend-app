@@ -10,9 +10,10 @@ import { NotificationType } from './enums/notificationsType.enum';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 
 @Component({
-  selector: 'worky-notifications-panel',
-  templateUrl: './notifications-panel.component.html',
-  styleUrls: ['./notifications-panel.component.scss'],
+    selector: 'worky-notifications-panel',
+    templateUrl: './notifications-panel.component.html',
+    styleUrls: ['./notifications-panel.component.scss'],
+    standalone: false
 })
 export class NotificationsPanelComponent implements OnInit, OnDestroy {
   isActive = false;

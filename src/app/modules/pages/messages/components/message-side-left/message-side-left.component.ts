@@ -10,9 +10,10 @@ import { NotificationService } from '@shared/services/notifications/notification
 import { MessageStateService } from '../../services/message-state.service';
 
 @Component({
-  selector: 'worky-message-side-left',
-  templateUrl: './message-side-left.component.html',
-  styleUrls: ['./message-side-left.component.scss'],
+    selector: 'worky-message-side-left',
+    templateUrl: './message-side-left.component.html',
+    styleUrls: ['./message-side-left.component.scss'],
+    standalone: false
 })
 export class MessageSideLeftComponent implements OnInit, OnDestroy {
   @Output() userIdSelected = new EventEmitter<string>();

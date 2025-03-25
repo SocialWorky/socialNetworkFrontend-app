@@ -3,9 +3,10 @@ import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
-  selector: 'worky-avatar',
-  templateUrl: './worky-avatar.component.html',
-  styleUrls: ['./worky-avatar.component.scss'],
+    selector: 'worky-avatar',
+    templateUrl: './worky-avatar.component.html',
+    styleUrls: ['./worky-avatar.component.scss'],
+    standalone: false
 })
 export class WorkyAvatarComponent implements OnInit, OnChanges {
   token?: Token;

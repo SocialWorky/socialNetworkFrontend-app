@@ -7,9 +7,10 @@ import { DeviceDetectionService } from "@shared/services/DeviceDetection.service
 import { Router } from "@angular/router";
 
 @Component({
-  selector: 'worky-message-list',
-  templateUrl: './message-list.component.html',
-  styleUrls: ['./message-list.component.scss'],
+    selector: 'worky-message-list',
+    templateUrl: './message-list.component.html',
+    styleUrls: ['./message-list.component.scss'],
+    standalone: false
 })
 export class MessageListComponent implements OnInit {
 

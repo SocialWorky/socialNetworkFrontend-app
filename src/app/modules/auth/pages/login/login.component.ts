@@ -23,9 +23,10 @@ import { MetaTagService } from '@shared/services/meta-tag.service';
 import { LoginMethods } from './interfaces/login.interface';
 
 @Component({
-  selector: 'worky-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
+    selector: 'worky-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
+    standalone: false
 })
 export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   loginForm: FormGroup = new FormGroup({});
@@ -151,7 +152,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
         Alerts.ERROR,
         Position.CENTER,
         true,
-        true,
         translations['button.ok'],
       );
       return;
@@ -203,7 +203,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             Alerts.ERROR,
             Position.CENTER,
             true,
-            true,
             translations['button.ok'],
           );
           loading.dismiss();
@@ -215,7 +214,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             Alerts.ERROR,
             Position.CENTER,
             true,
-            true,
             translations['button.ok'],
           );
           loading.dismiss();
@@ -226,7 +224,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             translations['alert.message_error_server'],
             Alerts.ERROR,
             Position.CENTER,
-            true,
             true,
             translations['button.ok'],
           );
@@ -313,7 +310,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             Alerts.SUCCESS,
             Position.CENTER,
             true,
-            true,
             translations['button.ok'],
           );
         }
@@ -324,7 +320,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
           translations['alert.message_emailValidated_error'],
           Alerts.ERROR,
           Position.CENTER,
-          true,
           true,
           translations['button.ok'],
         );
@@ -349,7 +344,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
         Alerts.ERROR,
         Position.CENTER,
         true,
-        true,
         translations['button.ok'],
       );
       return;
@@ -372,7 +366,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             Alerts.SUCCESS,
             Position.CENTER,
             true,
-            true,
             translations['button.ok'],
           );
         }
@@ -388,7 +381,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             Alerts.ERROR,
             Position.CENTER,
             true,
-            true,
             translations['button.ok'],
           );
           loading.dismiss();
@@ -399,7 +391,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             translations['alert.error_send_email_message_reset_password'],
             Alerts.ERROR,
             Position.CENTER,
-            true,
             true,
             translations['button.ok'],
           );

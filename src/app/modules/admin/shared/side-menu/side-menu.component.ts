@@ -5,15 +5,16 @@ import { AuthService } from '@auth/services/auth.service';
 import { translations } from '@translations/translations';
 
 @Component({
-  selector: 'worky-admin-sidemenu',
-  templateUrl: './sidemenu.component.html',
-  styleUrls: ['./sidemenu.component.scss'],
+    selector: 'worky-admin-side-menu',
+    templateUrl: './side-menu.component.html',
+    styleUrls: ['./side-menu.component.scss'],
+    standalone: false
 })
-export class SidemenuComponent  implements OnInit {
+export class SideMenuComponent  implements OnInit {
 
-  title: string = translations['admin.sidemenu-title'];
+  title: string = translations['admin.sideMenu-title'];
 
-  subTitle: string = translations['admin.sidemenu-subTitle'];
+  subTitle: string = translations['admin.sideMenu-subTitle'];
 
   userName: string = 'Admin';
 

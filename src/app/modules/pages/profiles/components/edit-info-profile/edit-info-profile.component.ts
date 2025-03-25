@@ -11,10 +11,11 @@ import { UserService } from '@shared/services/core-apis/users.service';
 import { LoadingController } from '@ionic/angular';
 
 @Component({
-  selector: 'worky-edit-info-profile',
-  templateUrl: './edit-info-profile.component.html',
-  styleUrls: ['./edit-info-profile.component.scss'],
-  encapsulation: ViewEncapsulation.None
+    selector: 'worky-edit-info-profile',
+    templateUrl: './edit-info-profile.component.html',
+    styleUrls: ['./edit-info-profile.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class EditInfoProfileDetailComponent implements OnInit {
   WorkyButtonType = WorkyButtonType;

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom, lastValueFrom, of, Subject, takeUntil } from 'rxjs';
-import { catchError, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
+import { catchError, filter, switchMap } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { Title } from '@angular/platform-browser';
 
@@ -11,7 +11,7 @@ import { UserService } from '@shared/services/core-apis/users.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
-import { Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
+import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
@@ -27,15 +27,14 @@ import { EmailNotificationService } from '@shared/services/notifications/email-n
 import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
 import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
-import { AxiomService } from '@shared/services/apis/axiom.service';
-import { AxiomType } from '@shared/interfaces/axiom.enum';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
 
 @Component({
-  selector: 'worky-profiles',
-  templateUrl: './profiles.component.html',
-  styleUrls: ['./profiles.component.scss'],
+    selector: 'worky-profiles',
+    templateUrl: './profiles.component.html',
+    styleUrls: ['./profiles.component.scss'],
+    standalone: false
 })
 export class ProfilesComponent implements OnInit, OnDestroy {
   typePublishing = TypePublishing;
@@ -115,7 +114,6 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _scrollService: ScrollService,
     private _titleService: Title,
     private _configService: ConfigService,
-    private _axiomService: AxiomService,
     private _notificationPublicationService: NotificationPublicationService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
@@ -179,7 +177,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.loaderPublications = true;
     try {
 
-      const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile));
+      const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POST_PROFILE, this.idUserProfile));
 
       this.publicationsProfile.update((current: PublicationView[]) => [...current, ...newPublications.publications]);
 
@@ -192,12 +190,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this._cdr.markForCheck();
 
     } catch (error) {
-      this._axiomService.sendLog({
-        message: 'Error al cargar las publicaciones',
-        component: 'ProfilesComponent',
-        type: AxiomType.ERROR,
-        error: error
-      });
+      console.error('Error al cargar las publicaciones:', error);
       this.loaderPublications = false;
     }
   }
@@ -210,12 +203,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        this._axiomService.sendLog({
-          message: 'Error al cargar el perfil',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+        console.error('Error al obtener los datos del perfil:', error);
       },
     });
   }
@@ -258,22 +246,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
                 this._cdr.markForCheck();
               },
               error: (error) => {
-                this._axiomService.sendLog({
-                  message: 'Error al obtener nueva publicación',
-                  component: 'ProfilesComponent',
-                  type: AxiomType.ERROR,
-                  error: error
-                });
+               console.error('Error al obtener la publicación:', error);
               }
             });
         },
         error: (error) => {
-          this._axiomService.sendLog({
-            message: 'Error en suscripción de notificaciones de nuevas publicaciones',
-            component: 'ProfilesComponent',
-            type: AxiomType.ERROR,
-            error: error
-          });
+          console.error('Error en suscripción de notificaciones de nuevas publicaciones', error);
         }
       });
   }
@@ -295,12 +273,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          this._axiomService.sendLog({
-            message: 'Error en suscripción de notificaciones de eliminar publicaciones',
-            component: 'ProfilesComponent',
-            type: AxiomType.ERROR,
-            error: error
-          });
+          console.error('Error en suscripción de notificaciones de eliminar publicaciones', error);
         }
       });
   }
@@ -314,12 +287,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           const notification = data[0];
           return this._publicationService.getPublicationId(notification._id).pipe(
             catchError((error) => {
-              this._axiomService.sendLog({
-                message: 'Error al obtener publicación actualizada',
-                component: 'HomeComponent',
-                type: AxiomType.ERROR,
-                error: error,
-              });
+              console.error('Error al obtener la publicación:', error);
               return of([]);
             })
           );
@@ -356,12 +324,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         },
         error: (error) => {
-          this._axiomService.sendLog({
-            message: 'Error en suscripción de notificaciones de actualizar publicaciones',
-            component: 'HomeComponent',
-            type: AxiomType.ERROR,
-            error: error,
-          });
+          console.error('Error en suscripción de notificaciones de actualizar publicaciones', error);
         }
       });
   }
@@ -386,12 +349,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        this._axiomService.sendLog({
-          message: 'Error en suscripción de notificaciones de comentarios',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+       console.error('Error en suscripción de notificaciones de comentarios', error);
       }
     });
   }
@@ -403,12 +361,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this.getUserFriendPending();
       },
       error: (error) => {
-        this._axiomService.sendLog({
-          message: 'Error al cargar los amigos',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+        console.error('Error al obtener los amigos:', error);
       },
     });
   }
@@ -432,12 +385,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         }
       },
       error: (error: any) => {
-        this._axiomService.sendLog({
-          message: 'Error al cargar los amigos pendientes',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+        console.error('Error al obtener el estado de la solicitud de amistad:', error);
       },
     });
   }
@@ -451,12 +399,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        this._axiomService.sendLog({
-          message: 'Error al solicitar amistad',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+        console.error('Error al enviar la solicitud de amistad:', error);
       }
     });
   }
@@ -480,12 +423,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        this._axiomService.sendLog({
-          message: 'Error al aceptar la amistad',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+        console.error('Error al aceptar la solicitud de amistad:', error);
       }
     });
   }
@@ -537,12 +475,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           }, 1200);
         },
         error: (error) => {
-          this._axiomService.sendLog({
-            message: 'Error al subir la imagen de perfil',
-            component: 'ProfilesComponent',
-            type: AxiomType.ERROR,
-            error: error
-          });
+          console.error('Error al actualizar la imagen de perfil:', error);
           this.isUploading = false;
           this._cdr.markForCheck();
         }

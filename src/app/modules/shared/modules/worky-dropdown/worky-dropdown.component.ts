@@ -10,9 +10,10 @@ import { takeUntil } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
-  selector: 'worky-dropdown',
-  templateUrl: './worky-dropdown.component.html',
-  styleUrls: ['./worky-dropdown.component.scss'],
+    selector: 'worky-dropdown',
+    templateUrl: './worky-dropdown.component.html',
+    styleUrls: ['./worky-dropdown.component.scss'],
+    standalone: false
 })
 export class WorkyDropdownComponent implements OnInit, OnDestroy {
   @Input() icon?: string;

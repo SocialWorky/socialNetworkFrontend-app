@@ -9,7 +9,7 @@ import { TemplatesComponent } from './templates/templates.component';
 import { HomeAdminComponent } from './pages/home/home.component';
 import { ChangeThemeComponent } from './pages/change-theme/change-theme.component';
 
-import { SidemenuComponent } from './shared/sidemenu/sidemenu.component';
+import { SideMenuComponent } from './shared/side-menu/side-menu.component';
 import { StatisticsComponent } from './shared/statistics/statistics.component';
 import { LastRegisteredUsersComponent } from './shared/last-registered-users/last-registered-users.component';
 import { ChangeThemeColorsComponent } from './shared/change-theme-colors/change-theme-colors.component';
@@ -29,7 +29,7 @@ import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.mod
 @NgModule({
   declarations: [
     TemplatesComponent,
-    SidemenuComponent,
+    SideMenuComponent,
     HomeAdminComponent,
     ChangeThemeComponent,
     StatisticsComponent,

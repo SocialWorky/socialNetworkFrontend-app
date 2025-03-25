@@ -3,9 +3,10 @@ import { ConfigService } from '@shared/services/core-apis/config.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
-  selector: 'worky-admin-change-theme-colors',
-  templateUrl: './change-theme-colors.component.html',
-  styleUrls: ['./change-theme-colors.component.scss']
+    selector: 'worky-admin-change-theme-colors',
+    templateUrl: './change-theme-colors.component.html',
+    styleUrls: ['./change-theme-colors.component.scss'],
+    standalone: false
 })
 export class ChangeThemeColorsComponent implements OnInit, OnDestroy {
   colors: { [key: string]: string } = {};
