@@ -49,6 +49,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   async ngOnInit() {
     if(!this._authService.isAuthenticated()) return;
+
     this.token = await this._authService.getDecodedToken()!;
 
     this.userAvatar = this.token?.avatar || '';
@@ -65,7 +66,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
     this.img = this.img === 'null' ? null : this.img;
 
     if (!this.name && !this.img) {
-      if (this.username && !this.userAvatar) {
+      if (this.name && !this.userAvatar) {
         this.generateAvatar();
       } else if (this.userAvatar) {
         this.validateAndSetImage(this.userAvatar);
@@ -88,6 +89,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
     img.onload = () => {
       this.imageData = imageUrl;
+      this._cdr.markForCheck();
     };
 
     img.onerror = () => {
