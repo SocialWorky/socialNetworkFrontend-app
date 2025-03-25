@@ -1,5 +1,6 @@
 @use 'src/assets/styles/worky-variables.scss' as var;
 @use 'src/assets/styles/worky-palettes' as colors;
+@use 'sass:map';
 
 .img-dropdown {
   height: 40px;
@@ -19,7 +20,7 @@
   }
 }
 
-.content-dropdow {
+.content-drop-dow {
   display: flex;
   align-items: center;
   padding: 8px 15px;
@@ -29,7 +30,7 @@
 
   &:hover {
     color: colors.$worky-color-light;
-    background-color: map-get(colors.$worky-blue, 56);
+    background-color: map.get(colors.$worky-blue, 56);
   }
 
   .icon-img-dropdown {

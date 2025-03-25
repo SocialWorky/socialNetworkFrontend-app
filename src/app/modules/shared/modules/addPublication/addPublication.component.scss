@@ -1,7 +1,7 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 @use 'src/assets/styles/worky-variables.scss' as variables;
-
+@use 'sass:map';
 
 .publishing-container {
   padding: 16px;
@@ -164,16 +164,14 @@
       }
 
       .extra-content-item {
-
+        display: flex;
+        border-radius: 50%;
+        padding: 2px;
         @include breakpoints.below-sm {
           .material-icons {
             font-size: 35px;
           }
         }
-
-        display: flex;
-        border-radius: 50%;
-        padding: 2px;
         &:hover {
           background: color.$worky-color-greyLight;
         }
@@ -215,26 +213,26 @@
         }
 
         .location-on {
-          color: map-get(color.$worky-red, 56);
+          color: map.get(color.$worky-red, 56);
           cursor: pointer;
           :hover {
-            color: map-get(color.$worky-red, 9);
+            color: map.get(color.$worky-red, 9);
           }
         }
 
         .file-upload {
-          color: map-get(color.$worky-green, 56);
+          color: map.get(color.$worky-green, 56);
           cursor: pointer;
           :hover {
-            color: map-get(color.$worky-green, 9);
+            color: map.get(color.$worky-green, 9);
           }
         }
 
         .gif-icon {
-          color: map-get(color.$worky-red, 72);
+          color: map.get(color.$worky-red, 72);
           cursor: pointer;
           :hover {
-            color: map-get(color.$worky-red, 9);
+            color: map.get(color.$worky-red, 9);
           }
         }
 

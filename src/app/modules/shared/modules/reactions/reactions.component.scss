@@ -1,6 +1,7 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 @use 'src/assets/styles/worky-variables.scss' as variables;
+@use 'sass:map';
 
 .reaction-container-wrapper {
   position: relative;
@@ -55,7 +56,7 @@
   margin-bottom: 10px;
   border-radius: 12px;
   color: color.$worky-color-light;
-  background-color: map-get(color.$worky-navy, 12);
+  background-color: map.get(color.$worky-navy, 12);
 }
 
 .reaction-popup-visible {

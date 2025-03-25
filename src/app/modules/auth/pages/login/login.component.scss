@@ -1,7 +1,7 @@
 @use 'src/assets/styles/worky-typography.scss' as Fonts;
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
-
+@use 'sass:map';
 
 :host {
   display: flex;
@@ -66,11 +66,11 @@
           .line {
             flex: 1;
             height: 1px;
-            background-color: map-get(color.$worky-navy, 24);
+            background-color: map.get(color.$worky-navy, 24);
           }
 
           .text {
-            color: map-get(color.$worky-navy, 24);
+            color: map.get(color.$worky-navy, 24);
             margin: 0 10px;
             position: relative;
             z-index: 1;
@@ -89,7 +89,7 @@
           cursor: pointer;
           justify-content: flex-end;
           margin-bottom: 20px;
-          
+
           span {
             @include Fonts.worky-text;
             color: color.$worky-color-blue;
@@ -118,7 +118,7 @@
           @include Fonts.worky-text;
           margin-block-end: 20px;
           margin-block-start: 5px;
-          color: map-get(color.$worky-navy, 24)
+          color: map.get(color.$worky-navy, 24)
         }
         @include breakpoints.below-sm {
           display: none;

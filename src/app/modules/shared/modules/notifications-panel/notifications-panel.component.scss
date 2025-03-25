@@ -1,6 +1,7 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-palettes' as colors;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'sass:map';
 
 .notifications-panel {
   position: fixed;
@@ -94,16 +95,16 @@
           width: 25px;
           height: 25px;
         }
-      
+
       }
     }
   }
 
   .notification-not-viewed {
-    background-color: map-get(colors.$worky-navy, 24);
+    background-color: map.get(colors.$worky-navy, 24);
     color: colors.$worky-color-light;
     &:hover {
-      background-color: map-get(colors.$worky-navy, 9);
+      background-color: map.get(colors.$worky-navy, 9);
     }
 
     .notification-item-body {

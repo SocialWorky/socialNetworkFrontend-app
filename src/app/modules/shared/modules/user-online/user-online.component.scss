@@ -1,9 +1,10 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-palettes' as colors;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'sass:map';
 
 .container-user-online {
-  background-color: map-get(colors.$worky-grey, 72);
+  background-color: map.get(colors.$worky-grey, 72);
   border-radius: 0.5rem;
   padding: 0.75rem;
   width: 100%;
@@ -26,7 +27,7 @@
       width: 1.25rem;
       height: 1.25rem;
       margin-right: 0.5rem;
-      border: 2px solid map-get(colors.$worky-grey, 72);
+      border: 2px solid map.get(colors.$worky-grey, 72);
       border-top: 2px solid colors.$worky-color-navy;
       border-radius: 50%;
       animation: spin 1s linear infinite;

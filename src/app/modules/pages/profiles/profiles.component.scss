@@ -1,6 +1,7 @@
 @use 'src/assets/styles/worky-typography.scss' as Fonts;
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'sass:map';
 
 .content-header-profile {
 
@@ -35,7 +36,7 @@
           width: 100px;
           height: 100px;
           border-radius: 50%;
-          background-color: map-get(color.$worky-navy, 9);
+          background-color: map.get(color.$worky-navy, 9);
           display: flex;
           justify-content: center;
           align-items: center;
@@ -128,7 +129,7 @@
         p {
             font-size: 14px;
             font-weight: medium;
-            color: map-get(color.$worky-navy, 24);
+            color: map.get(color.$worky-navy, 24);
         }
       }
     }

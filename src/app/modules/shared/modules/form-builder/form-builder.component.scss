@@ -1,5 +1,6 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-palettes' as colors;
+@use 'sass:map';
 
 .container {
   display: flex;
@@ -17,15 +18,15 @@
   display: flex;
   box-shadow: 0 1px 3px #0000001f, 0 1px 1px #00000024, 0 2px 1px #0003;
   border-radius: 4px;
-  background: map-get(colors.$worky-indigo, 72);
+  background: map.get(colors.$worky-indigo, 72);
   height: 40px;
   align-items: center;
   margin-bottom: 8px;
   gap: 2px;
-  
+
 
   .drag-and-drop-zone {
-    background: map-get(colors.$worky-indigo, 56);
+    background: map.get(colors.$worky-indigo, 56);
     height: 100%;
     width: 24px;
     display: flex;
@@ -50,7 +51,7 @@
   padding: 5px;
   margin-bottom: 10px;
   min-height: 30px;
-  background-color: map-get(colors.$worky-blue, 87);
+  background-color: map.get(colors.$worky-blue, 87);
 }
 
 .cdk-drag-placeholder {
@@ -106,7 +107,7 @@
 }
 
 .config-panel mat-form-field {
-  padding: 5px; 
+  padding: 5px;
 }
 
 ::ng-deep .mat-form-field-infix {

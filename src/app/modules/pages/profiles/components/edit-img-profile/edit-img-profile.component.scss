@@ -1,6 +1,7 @@
 @use 'src/assets/styles/worky-typography.scss' as Fonts;
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'sass:map';
 
 .image-container {
   display: flex;
@@ -53,7 +54,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: map-get(color.$worky-navy, 9);
+        background-color: map.get(color.$worky-navy, 9);
         display: flex;
         justify-content: center;
         align-items: center;

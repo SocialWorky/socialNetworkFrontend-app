@@ -1,5 +1,6 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-typography.scss' as typography;
+@use 'sass:map';
 
 :host {
   .worky-button {
@@ -36,73 +37,73 @@
 
 :host-context(.theme-basic) {
   .worky-button-basic {
-    color: map-get(color.$worky-navy, 100);
+    color: map.get(color.$worky-navy, 100);
   }
   .worky-button-outline {
-    color: map-get(color.$worky-navy, 100);
-    border: 1px solid map-get(color.$worky-navy, 100);
+    color: map.get(color.$worky-navy, 100);
+    border: 1px solid map.get(color.$worky-navy, 100);
   }
   .worky-button-flat {
     color: color.$worky-color-light;
-    background-color: map-get(color.$worky-navy, 100);
+    background-color: map.get(color.$worky-navy, 100);
   }
   .worky-button-disabled {
-    color: map-get(color.$worky-navy, 72);
-    background-color: map-get(color.$worky-navy, 24);
+    color: map.get(color.$worky-navy, 72);
+    background-color: map.get(color.$worky-navy, 24);
   }
 }
 
 :host-context(.theme-primary) {
   .worky-button-basic {
-    color: map-get(color.$worky-teal, 100);
+    color: map.get(color.$worky-teal, 100);
   }
   .worky-button-outline {
-    color: map-get(color.$worky-teal, 100);
-    border: 1px solid map-get(color.$worky-teal, 100);
+    color: map.get(color.$worky-teal, 100);
+    border: 1px solid map.get(color.$worky-teal, 100);
   }
   .worky-button-flat {
     color: color.$worky-color-light;
-    background-color: map-get(color.$worky-teal, 100);
+    background-color: map.get(color.$worky-teal, 100);
   }
   .worky-button-disabled {
-    color: map-get(color.$worky-teal, 72);
-    background-color: map-get(color.$worky-teal, 24);
+    color: map.get(color.$worky-teal, 72);
+    background-color: map.get(color.$worky-teal, 24);
   }
 }
 
 :host-context(.theme-accent) {
   .worky-button-basic {
-    color: map-get(color.$worky-blue, 100);
+    color: map.get(color.$worky-blue, 100);
   }
   .worky-button-outline {
-    color: map-get(color.$worky-blue, 100);
-    border: 1px solid map-get(color.$worky-blue, 100);
+    color: map.get(color.$worky-blue, 100);
+    border: 1px solid map.get(color.$worky-blue, 100);
   }
   .worky-button-flat {
     color: color.$worky-color-light;
-    background-color: map-get(color.$worky-blue, 100);
+    background-color: map.get(color.$worky-blue, 100);
   }
   .worky-button-disabled {
-    color: map-get(color.$worky-blue, 72);
-    background-color: map-get(color.$worky-blue, 24);
+    color: map.get(color.$worky-blue, 72);
+    background-color: map.get(color.$worky-blue, 24);
   }
 }
 
 :host-context(.theme-warn) {
   .worky-button-basic {
-    color: map-get(color.$worky-magenta, 100);
+    color: map.get(color.$worky-magenta, 100);
   }
   .worky-button-outline {
-    color: map-get(color.$worky-magenta, 100);
-    border: 1px solid map-get(color.$worky-magenta, 100);
+    color: map.get(color.$worky-magenta, 100);
+    border: 1px solid map.get(color.$worky-magenta, 100);
   }
   .worky-button-flat {
     color: color.$worky-color-light;
-    background-color: map-get(color.$worky-magenta, 100);
+    background-color: map.get(color.$worky-magenta, 100);
   }
   .worky-button-disabled {
-    color: map-get(color.$worky-magenta, 72);
-    background-color: map-get(color.$worky-magenta, 24);
+    color: map.get(color.$worky-magenta, 72);
+    background-color: map.get(color.$worky-magenta, 24);
   }
 }
 

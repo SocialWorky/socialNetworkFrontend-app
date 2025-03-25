@@ -1,6 +1,7 @@
 @use 'src/assets/styles/worky-typography.scss' as Fonts;
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'sass:map';
 
 .content-right-messageChat {
   display: flex;
@@ -29,7 +30,7 @@
         text-align: center;
         margin: 1rem 0;
         span {
-          background: map-get(color.$worky-navy, 72);
+          background: map.get(color.$worky-navy, 72);
           padding: 0.5rem 1rem;
           color: var(--worky-color-navy);
           font-size: 0.9rem;
