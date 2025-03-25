@@ -2,7 +2,6 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal } from '@angula
 import { Subject, firstValueFrom, of } from 'rxjs';
 import { catchError, filter, switchMap, takeUntil } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
-import { Meta } from '@angular/platform-browser';
 import { Title } from '@angular/platform-browser';
 
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
@@ -10,7 +9,6 @@ import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
 import { AuthService } from '@auth/services/auth.service';
-import { AlertService } from '@shared/services/alert.service';
 import { LocationService } from '@shared/services/apis/location.service';
 import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.service';
 import { GeocodingService } from '@shared/services/apis/geocoding.service';

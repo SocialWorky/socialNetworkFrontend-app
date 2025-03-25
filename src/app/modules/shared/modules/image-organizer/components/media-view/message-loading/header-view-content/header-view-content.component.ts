@@ -22,7 +22,7 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
 
   typeViewEnum = TypeView;
 
-  type?: TypePublishing = TypePublishing.IMAGEVIEW;
+  type?: TypePublishing = TypePublishing.IMAGE_VIEW;
 
   listReaction: string[] = [];
 

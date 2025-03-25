@@ -1,10 +1,10 @@
-<div *ngIf="!userData" class="loader"></div> 
+<div *ngIf="!userData" class="loader"></div>
 
 <div *ngIf="userData">
 
   <div class="content-header-profile">
       <div class="image-container">
-          <worky-edit-img-profile 
+          <worky-edit-img-profile
             [isCurrentUser]="isCurrentUser"
             [profileImage]="isMobile ? userData.profile.coverImageMobile : userData.profile.coverImage">
           </worky-edit-img-profile>
@@ -85,13 +85,13 @@
                       <span basic-button-text>Enviar Mensaje</span>
                     </worky-buttons>
 
-                  <img *ngIf="userData.profile.whatsapp?.isViewable" 
+                  <img *ngIf="userData.profile.whatsapp?.isViewable"
                     class="whatsapp-icon"
                     src="assets/img/logos/whatsapp.svg" alt="whatsapp"
                     (click)="openWhatsApp()">
 
                   </div>
-                </div>    
+                </div>
                 <span> {{ userData.profile.legend }}</span>
                  <p>({{ userData.username }})</p>
               </div>
@@ -114,39 +114,39 @@
       <div *ngIf="(isFriend && !isFriendPending.status) || isCurrentUser" class="worky-module-container">
 
         <worky-add-publication
-          [type]="typePublishing.POSTPROFILE"
+          [type]="typePublishing.POST_PROFILE"
           [idUserProfile]="idUserProfile">
         </worky-add-publication>
 
       </div>
 
-      <div *ngIf="loaderPublications" class="loader"></div> 
+      <div *ngIf="loaderPublications" class="loader"></div>
 
       @for(publication of publicationsProfile(); track publication; let i = $index ) {
         <div class="worky-module-container"
           [attr.id]="i === 0 ? 'first-publication' : null">
           <worky-publication-view
           [publication]="publication"
-          [type]="typePublishing.POSTPROFILE"
+          [type]="typePublishing.POST_PROFILE"
           [userProfile]="idUserProfile"
           [indexPublication]="i">
           </worky-publication-view>
         </div>
       } @empty {
-      <span *ngIf="!loaderPublications">{{ 'home.notPublications' | workyTranslations }}</span> 
-      }   
+      <span *ngIf="!loaderPublications">{{ 'home.notPublications' | workyTranslations }}</span>
+      }
 
     </div>
 
   </div>
 
-  <button 
+  <button
     *ngIf="showScrollToTopButton"
     (click)="scrollToTop()"
     class="floating-button">
     <i class="material-icons">arrow_upward</i>
   </button>
 
-  <div *ngIf="loaderPublications" class="loader"></div>  
+  <div *ngIf="loaderPublications" class="loader"></div>
 
 </div>

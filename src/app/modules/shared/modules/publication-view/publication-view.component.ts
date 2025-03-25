@@ -394,7 +394,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
     await loadingDeleteComment.present();
 
-    this._commentService.deletComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
+    this._commentService.deleteComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.refreshPublications(id_publication);
         loadingDeleteComment.dismiss();

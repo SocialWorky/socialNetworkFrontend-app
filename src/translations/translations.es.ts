@@ -24,7 +24,7 @@ export const translations = {
   'input.email': 'Correo electrónico',
   'input.password': 'Contraseña',
   'input.name': 'Nombre',
-  'input.lastname': 'Apellido',
+  'input.lastName': 'Apellido',
   'input.username': 'Nombre de usuario',
   'input.invitationCode': 'Código de invitación',
   // BUTTONS
@@ -56,7 +56,7 @@ export const translations = {
   'alert.message_success_register': 'Tu registro ha sido exitoso, recibirás un correo para validar tu cuenta',
   'alert.registerInvalidInvitationCode': 'El código de invitación o el Email no es válido',
   // -> RESET PASSWORD
-  'alert.title_reset_password_message': 'Envio exitoso',
+  'alert.title_reset_password_message': 'Envió exitoso',
   'alert.message_reset_password_message': 'Se ha enviado un correo electrónico con las instrucciones para restablecer tu contraseña',
   'alert.error_email_title_reset_password': 'Error al enviar el correo',
   'alert.error_email_message_reset_password': 'El correo no existe, no es un correo valido o no está registrado en la plataforma, por favor, verifica tu correo e inténtalo de nuevo',
@@ -172,9 +172,9 @@ export const translations = {
   'DATE_FNS.X_YEARS': '{{count}} años',
   'DATE_FNS.UNKNOWN': 'hace algún tiempo',
   // ADMIN MODULE
-  'admin.sidemenu-title': 'Worky',
-  'admin.sidemenu-subTitle': 'Sistema de administración',
-  'admin.sidemenu-welcome': 'Bienvenido:',
+  'admin.sideMenu-title': 'Worky',
+  'admin.sideMenu-subTitle': 'Sistema de administración',
+  'admin.sideMenu-welcome': 'Bienvenido:',
   'admin.statistics.group-usersRegister': 'Usuarios Registrados',
   'admin.statistics.group-publicationsTitle': 'Publicaciones',
   'admin.statistics.group-usersReport': 'Usuarios Reportados',

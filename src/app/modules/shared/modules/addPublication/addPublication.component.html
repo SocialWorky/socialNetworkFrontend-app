@@ -2,9 +2,9 @@
   <form [formGroup]="myForm" (ngSubmit)="onSave()" autocomplete="off">
     <div class="publishing-header">
 
-      <ng-container *ngIf="type === typePublishing.POST || type === typePublishing.POSTPROFILE">
+      <ng-container *ngIf="type === typePublishing.POST || type === typePublishing.POST_PROFILE">
         <worky-avatar *ngIf="user.name && user.lastName"
-          [size]="60" 
+          [size]="60"
           img="{{ profileImageUrl }}"
           name="{{ user.name}} {{ user.lastName }}">
         </worky-avatar>
@@ -12,10 +12,10 @@
         <div class="user-name-content">
           <div class="content-name-geo">
             <span class="name"> {{ user.name }} {{ user.lastName }} </span>
-            <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">está en </p> <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span> 
+            <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">está en </p> <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span>
           </div>
 
-          <div class="dropdown" *ngIf="!typePublishing.POSTPROFILE || (idUserProfile === userToken && typePublishing.POSTPROFILE) || (typePublishing.POST && !idUserProfile)">
+          <div class="dropdown" *ngIf="!typePublishing.POST_PROFILE || (idUserProfile === userToken && typePublishing.POST_PROFILE) || (typePublishing.POST && !idUserProfile)">
             <div class="form-select" [innerHTML]="privacyFront"
               data-bs-toggle="dropdown"
               aria-expanded="false">
@@ -59,15 +59,15 @@
           name="{{ user.name}} {{ user.lastName }}">
         </worky-avatar>
 
-        <ion-textarea 
+        <ion-textarea
           #postTextRef [(ngModel)]="postText"
           class="publishing-textarea"
           (input)="onTextareaInput()"
           auto-grow="true"
           formControlName="content"
-          placeholder="{{ 
-              type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.placeholder' | workyTranslations) + ' ' + user.name + ' ' + user.lastName + '?' :
-              ('publishing.placeholderComment' | workyTranslations) + user.name + ' ' + user.lastName + '?' 
+          placeholder="{{
+              type === typePublishing.POST || type === typePublishing.POST_PROFILE ? ('publishing.placeholder' | workyTranslations) + ' ' + user.name + ' ' + user.lastName + '?' :
+              ('publishing.placeholderComment' | workyTranslations) + user.name + ' ' + user.lastName + '?'
           }}">
         </ion-textarea>
 
@@ -134,14 +134,14 @@
         </div>
 
         <!-- Otros botones y opciones -->
-        <div *ngIf="type !== typePublishing.IMAGEVIEW" 
+        <div *ngIf="type !== typePublishing.IMAGE_VIEW"
             class="extra-content-item file-upload"
             matTooltip="Subir Imagen"
             (click)="openUploadModal()">
           <i class="material-icons">add_photo_alternate</i>
         </div>
 
-        <div *ngIf="type === typePublishing.POST || type === typePublishing.POSTPROFILE"
+        <div *ngIf="type === typePublishing.POST || type === typePublishing.POST_PROFILE"
             class="extra-content-item location-on"
             matTooltip="Estoy Aquí"
             (click)="openLocationSearch()">
@@ -175,7 +175,7 @@
           [theme]="WorkyButtonTheme.Accent"
           [height]="'40px'"
           [width]="'100%'">
-          <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POSTPROFILE ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
+          <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POST_PROFILE ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
         </worky-buttons>
         <div *ngIf="loaderSavePublication" class="loader"></div>
       </div>

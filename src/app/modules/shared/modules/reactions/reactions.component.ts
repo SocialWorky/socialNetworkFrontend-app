@@ -84,7 +84,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
       .createReaction({
         authorId: this.token?.id!,
         _idCustomReaction: reaction._id,
-        isPublications: this.type === TypePublishing.POST || TypePublishing.POSTPROFILE ? true : false,
+        isPublications: this.type === TypePublishing.POST || TypePublishing.POST_PROFILE ? true : false,
         isComment: this.type === TypePublishing.COMMENT ? true : false,
         _idPublication: this.publication?._id!,
       }).pipe(takeUntil(this.destroy$))
@@ -127,7 +127,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
     this._reactionsService.editReaction(id, {
       authorId: this.token?.id!,
       _idCustomReaction: reaction._id,
-      isPublications: this.type === TypePublishing.POST || this.typePublishing.POSTPROFILE ? true : false,
+      isPublications: this.type === TypePublishing.POST || this.typePublishing.POST_PROFILE ? true : false,
       isComment: this.type === TypePublishing.COMMENT ? true : false,
       _idPublication: this.publication?._id!,
     }).pipe(takeUntil(this.destroy$)).subscribe({

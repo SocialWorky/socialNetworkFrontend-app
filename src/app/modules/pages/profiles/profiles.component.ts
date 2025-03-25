@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom, lastValueFrom, of, Subject, takeUntil } from 'rxjs';
-import { catchError, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
+import { catchError, filter, switchMap } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { Title } from '@angular/platform-browser';
 
@@ -11,7 +11,7 @@ import { UserService } from '@shared/services/core-apis/users.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
-import { Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
+import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
@@ -177,7 +177,7 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this.loaderPublications = true;
     try {
 
-      const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile));
+      const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POST_PROFILE, this.idUserProfile));
 
       this.publicationsProfile.update((current: PublicationView[]) => [...current, ...newPublications.publications]);
 

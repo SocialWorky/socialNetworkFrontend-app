@@ -25,7 +25,7 @@ export class BodyViewContentComponent  implements OnDestroy {
 
   typePublishingEnum = TypePublishing;
 
-  type?: TypePublishing = TypePublishing.IMAGEVIEW;
+  type?: TypePublishing = TypePublishing.IMAGE_VIEW;
 
   dataViewContent: any;
 
@@ -75,7 +75,7 @@ export class BodyViewContentComponent  implements OnDestroy {
 
     await loadingDeleteComment.present();
 
-    this._commentService.deletComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
+    this._commentService.deleteComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this._publicationService.getPublicationId(id_publication).pipe(takeUntil(this.destroy$)).subscribe({
           next: (data: PublicationView[]) => {

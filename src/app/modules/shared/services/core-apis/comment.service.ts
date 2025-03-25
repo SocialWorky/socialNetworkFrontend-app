@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
-import { environment } from '../../../../../environments/environment';
+import { environment } from '@env/environment';
 import { CreateComment } from '../../interfaces/addComment.interface';
 
 @Injectable({
@@ -20,7 +20,7 @@ export class CommentService {
     return this.http.post(url, comment);
   }
 
-  deletComment(id: string) {
+  deleteComment(id: string) {
     const url = `${this.baseUrl}/comments/${id}`;
     return this.http.delete(url);
   }
