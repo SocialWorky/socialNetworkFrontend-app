@@ -87,81 +87,95 @@
         <div class="markdown-help">
           <div class="extra-content-item"
               matTooltip="Negrita"
+              matTooltipClass="extra-mat-tooltip"
               (click)="insertText('**placeholder**')">
             <i class="material-icons">format_bold</i>
           </div>
           <div class="extra-content-item"
               matTooltip="Cursiva"
+              matTooltipClass="extra-mat-tooltip"
               (click)="insertText('*placeholder*')">
             <i class="material-icons">format_italic</i>
           </div>
           <div class="extra-content-item"
               matTooltip="Tachado"
+              matTooltipClass="extra-mat-tooltip"
               (click)="insertText('~~placeholder~~')">
             <i class="material-icons">format_strikethrough</i>
           </div>
           <div class="extra-content-item"
-              matTooltip="Inserar Enlace"
+              matTooltip="Insertar Enlace"
+              matTooltipClass="extra-mat-tooltip"
               (click)="insertText('[placeholder](url)')">
             <i class="material-icons">link</i>
           </div>
           <div class="extra-content-item"
               matTooltip="Insertar Imagen desde URL"
+              matTooltipClass="extra-mat-tooltip"
               (click)="insertText('![placeholder](url)')">
             <i class="material-icons">image</i>
           </div>
           <div class="extra-content-item"
-              matTooltip="Inserar Código"
+              matTooltip="Insertar Código"
+              matTooltipClass="extra-mat-tooltip"
               (click)="insertText('```placeholder```')">
             <i class="material-icons">code</i>
           </div>
           <div class="extra-content-item"
               matTooltip="Citar Texto"
+              matTooltipClass="extra-mat-tooltip"
               (click)="insertText('> placeholder')">
             <i class="material-icons">label</i>
           </div>
           <div class="extra-content-item"
               matTooltip="Listar Elementos"
+              matTooltipClass="extra-mat-tooltip"
               (click)="insertText('- placeholder')">
             <i class="material-icons">list</i>
           </div>
         </div>
 
-      <div class="options-items">
-        <!-- Botón para buscar GIFs -->
-        <div id="gif-icon" class="extra-content-item gif-icon" matTooltip="Buscar GIF" (click)="openGifSearch()">
-          <i class="material-icons">gif</i>
-        </div>
+        <div class="options-items">
+          <!-- Botón para buscar GIFs -->
+          <div id="gif-icon" class="extra-content-item gif-icon"
+              matTooltip="Buscar GIF"
+              matTooltipClass="extra-mat-tooltip" (click)="openGifSearch()">
+            <i class="material-icons">gif</i>
+          </div>
 
-        <!-- Otros botones y opciones -->
-        <div *ngIf="type !== typePublishing.IMAGE_VIEW"
-            class="extra-content-item file-upload"
-            matTooltip="Subir Imagen"
-            (click)="openUploadModal()">
-          <i class="material-icons">add_photo_alternate</i>
-        </div>
+          <!-- Otros botones y opciones -->
+          <div *ngIf="type !== typePublishing.IMAGE_VIEW"
+              class="extra-content-item file-upload"
+              matTooltip="Subir Imagen"
+              matTooltipClass="extra-mat-tooltip"
+              (click)="openUploadModal()">
+            <i class="material-icons">add_photo_alternate</i>
+          </div>
 
-        <div *ngIf="type === typePublishing.POST || type === typePublishing.POST_PROFILE"
-            class="extra-content-item location-on"
-            matTooltip="Estoy Aquí"
-            (click)="openLocationSearch()">
-          <i class="material-icons">location_on</i>
-        </div>
+          <div *ngIf="type === typePublishing.POST || type === typePublishing.POST_PROFILE"
+              class="extra-content-item location-on"
+              matTooltip="Estoy Aquí"
+              matTooltipClass="extra-mat-tooltip"
+              (click)="openLocationSearch()">
+            <i class="material-icons">location_on</i>
+          </div>
 
-        <div class="extra-content-item emoji-icon" matTooltip="Agrega Emoji">
-          <i class="material-icons" (click)="toggleEmojiMenu()">mood</i>
-          <div *ngIf="showEmojiMenu" class="emoji-menu" (click)="preventClose($event)">
-            <emoji-mart
-              [darkMode]="false"
-              [showPreview]="true"
-              [enableSearch]="true"
-              [perLine]="7"
-              [emojiSize]="24"
-              (emojiSelect)="onEmojiClick($event)">
-            </emoji-mart>
+          <div class="extra-content-item emoji-icon"
+              matTooltip="Agrega Emoji"
+              matTooltipClass="extra-mat-tooltip">
+            <i class="material-icons" (click)="toggleEmojiMenu()">mood</i>
+            <div *ngIf="showEmojiMenu" class="emoji-menu" (click)="preventClose($event)">
+              <emoji-mart
+                [darkMode]="false"
+                [showPreview]="true"
+                [enableSearch]="true"
+                [perLine]="7"
+                [emojiSize]="24"
+                (emojiSelect)="onEmojiClick($event)">
+              </emoji-mart>
+            </div>
           </div>
         </div>
-      </div>
 
       </div>
 

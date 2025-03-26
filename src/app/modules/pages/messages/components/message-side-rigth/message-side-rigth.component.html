@@ -1,6 +1,6 @@
 <div *ngIf="loadMessages" class="loader"></div>
 <div *ngIf="!loadMessages && userId && user[0]" class="content-right-messageChat">
-  
+
   <div *ngIf="isMobile" class="header-content-mobil">
     <div class="header-content-mobil-left">
       <i (click)="goBack()" class="material-icons back-button">arrow_back</i>
@@ -21,8 +21,8 @@
 
         <!-- Apply grouping classes only to the first and last message in the group of the same user and same date -->
         <div [ngClass]="{
-          'message-sent': message.senderId === currentUser?.id, 
-          'message-received': message.senderId !== currentUser?.id, 
+          'message-sent': message.senderId === currentUser?.id,
+          'message-received': message.senderId !== currentUser?.id,
           'grouped': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
           'no-avatar': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
           'first-group': i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp),
@@ -101,16 +101,24 @@
 
     <div class="content-footer-bar">
 
-        <div class="extra-content-item gif-icon" matTooltip="Buscar GIF" (click)="openGifSearch()">
+        <div class="extra-content-item gif-icon"
+            matTooltip="Buscar GIF"
+            matTooltipClass="extra-mat-tooltip"
+            (click)="openGifSearch()">
           <i class="material-icons">gif</i>
         </div>
 
-        <div class="extra-content-item file-upload" matTooltip="Subir Imagen" (click)="openUploadModal()">
+        <div class="extra-content-item file-upload"
+            matTooltip="Subir Imagen"
+            matTooltipClass="extra-mat-tooltip"
+            (click)="openUploadModal()">
           <i class="material-icons">add_photo_alternate</i>
         </div>
 
       <div class="emoji-wrapper"
-        (click)="toggleEmojiPicker()">
+          matTooltip="Emojis"
+          matTooltipClass="extra-mat-tooltip"
+          (click)="toggleEmojiPicker()">
         <i class="material-icons">moods</i>
       </div>
 

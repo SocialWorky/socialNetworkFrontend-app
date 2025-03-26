@@ -606,3 +606,11 @@ img, video {
 .dragging-global {
   cursor: grabbing !important;
 }
+
+.extra-mat-tooltip {
+  padding: 2px;
+  margin: 10px;
+  border-radius: 12px;
+  color: color.$worky-color-light;
+  background-color: map.get(color.$worky-navy, 12);
+}
