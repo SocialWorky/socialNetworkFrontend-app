@@ -7,17 +7,27 @@
 }
 
 .dropdown-menu {
+  position: absolute;
+  left: 0;
   border-radius: var.$worky-border-radius-medium;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
 
-  &.dropdown-down {
-    top: 450px;
+  &.dropdown-menu-end {
+    right: 0;
+    left: auto;
   }
 
   &.dropdown-up {
-    bottom: 50px;
+    bottom: 100%;
+    top: auto;
   }
+
+  &.dropdown-down {
+    top: 100%;
+    bottom: auto;
+  }
+
 }
 
 .content-drop-dow {

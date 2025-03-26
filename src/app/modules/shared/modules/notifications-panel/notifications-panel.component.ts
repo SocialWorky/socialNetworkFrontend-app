@@ -38,7 +38,7 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy {
 
   unreadNotifications: number = 0;
 
-  dataLinkActions: DropdownDataLink<any>[] = [];
+  dataLinkActionsNotifications: DropdownDataLink<any>[] = [];
 
   private destroy$ = new Subject<void>();
 
@@ -103,8 +103,8 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy {
     });
   }
 
-  checkDataLink() {
-    this.dataLinkActions = [];
+  checkDataLinkNotifications() {
+    this.dataLinkActionsNotifications = [];
     const menuActionsNotifications = {
       icon: 'delete',
       function: this.deleteNotification.bind(this),
@@ -112,12 +112,12 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy {
       color: Colors.RED
     };
 
-    this.dataLinkActions.push(menuActionsNotifications);
+    this.dataLinkActionsNotifications.push(menuActionsNotifications);
 
     this._cdr.markForCheck();
   }
 
-  handleActionsClicked(data: DropdownDataLink<any>, notification: any) {
+  handleActionsClickedNotifications(data: DropdownDataLink<any>, notification: any) {
     if (data.function && typeof data.function === 'function') {
       data.function(notification._id);
     } else if (data.link) {

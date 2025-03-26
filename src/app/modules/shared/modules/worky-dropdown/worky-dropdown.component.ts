@@ -19,15 +19,15 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   @Input() icon?: string;
 
   @Input() badge: boolean = false;
-  
+
   @Input() badgeValue: number | null = 0;
-  
+
   @Input() dataLink: DropdownDataLink<any>[] = [];
-  
+
   @Input() img: string | boolean = '';
 
   @Input() size?: number = 50;
-  
+
   @Input() title?: string;
 
   @Input() isFilled?: boolean = false;
@@ -35,11 +35,14 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   @Output() linkClicked = new EventEmitter<DropdownDataLink<any>>();
 
   profileImageUrl: string | null = '';
+
   user: User = {} as User;
+
   decodedToken: Token;
 
   loaderAvatar = false;
-  dropdownDirection: 'up' | 'down' = 'down';
+
+  dropdownDirection?: 'up' | 'down';
 
   private unsubscribe$ = new Subject<void>();
 
@@ -95,13 +98,49 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
 
   checkDropdownDirection() {
     const rect = this.elementRef.nativeElement.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
-    const threshold = 200; // distance from bottom to switch direction
-    if (windowHeight - rect.bottom < threshold) {
+    const container = this.getScrollContainer();
+    const containerRect = container.getBoundingClientRect();
+    const containerScrollTop = container.scrollTop;
+
+    const containerHeight = container.clientHeight;
+
+    const threshold = 200;
+
+    const distanceFromBottom =
+      containerHeight - (rect.bottom - containerRect.top) + containerScrollTop;
+
+    if (distanceFromBottom < threshold) {
       this.dropdownDirection = 'up';
+      this.renderer.setAttribute(
+        this.elementRef.nativeElement,
+        'data-direction',
+        this.dropdownDirection
+      );
+      this.cdr.markForCheck();
     } else {
       this.dropdownDirection = 'down';
+      this.renderer.setAttribute(
+        this.elementRef.nativeElement,
+        'data-direction',
+        this.dropdownDirection
+      );
+      this.cdr.markForCheck();
     }
-    this.renderer.setAttribute(this.elementRef.nativeElement, 'data-direction', this.dropdownDirection);
+  }
+
+  private getScrollContainer(): HTMLElement {
+    if (document.documentElement.scrollHeight > window.innerHeight) {
+      return document.documentElement;
+    }
+
+    let parent = this.elementRef.nativeElement.parentElement;
+    while (parent) {
+      if (parent.scrollHeight > parent.clientHeight) {
+        return parent;
+      }
+      parent = parent.parentElement;
+    }
+
+    return document.documentElement;
   }
 }

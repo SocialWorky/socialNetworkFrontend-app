@@ -1,4 +1,5 @@
-<div class="nav-link" role="button" [attr.data-bs-toggle]="dataLink.length ? 'dropdown' : null">
+<div class="nav-link" role="button" [attr.data-bs-toggle]="dataLink.length ? 'dropdown' : null"
+    (mouseenter)="checkDropdownDirection()">
   <div *ngIf="img && img !== 'avatar'">
     <img [src]="img" class="img-dropdown rounded-circle" loading="lazy" />
   </div>
@@ -21,7 +22,10 @@
   <span *ngIf="title" class="title-dropdown">{{ title }}</span>
 </div>
 
-<div *ngIf="dataLink?.length" class="dropdown-menu" [ngClass]="{'dropdown-menu-end': true, 'dropdown-up': dropdownDirection === 'up', 'dropdown-down': dropdownDirection === 'down'}">
+<div *ngIf="dataLink?.length" class="dropdown-menu"
+  [class.dropdown-menu-end]="true"
+  [class.dropdown-upn]="dropdownDirection === 'up'"
+  [class.dropdown-down]="dropdownDirection === 'down'">
   <div class="content-drop-dow" *ngFor="let data of dataLink; let dataIndex = index;" (click)="handleMenuItemClick(data)">
     <span *ngIf="data.icon"
       class="material-symbols-rounded"

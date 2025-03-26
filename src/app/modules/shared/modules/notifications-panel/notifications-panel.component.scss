@@ -157,9 +157,6 @@
       z-index: 1000;
       ::ng-deep worky-dropdown {
         display: flex;
-        .dropdown-menu {
-          inset: auto 8px -85px auto !important;
-        }
       }
       ::ng-deep worky-dropdown .nav-link:hover{
         color: colors.$worky-color-yellow;
@@ -170,14 +167,4 @@
       }
     }
   }
-
-   .notification-item-content.last-notification .action-menu {
-      ::ng-deep worky-dropdown {
-        .dropdown-menu {
-          inset: auto 8px -14px auto !important;
-        }
-      }
-    }
-
-
 }

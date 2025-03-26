@@ -61,13 +61,13 @@
             </div>
           </div>
 
-          <div class="action-menu" (mouseenter)="checkDataLink()">
+          <div class="action-menu" (mouseenter)="checkDataLinkNotifications()">
             <worky-dropdown
               icon="more_horiz"
               [badge]=false
-              (click)="checkDataLink()"
-              [dataLink]="dataLinkActions"
-              (linkClicked)="handleActionsClicked($event, notification)">
+              (click)="checkDataLinkNotifications()"
+              [dataLink]="dataLinkActionsNotifications"
+              (linkClicked)="handleActionsClickedNotifications($event, notification)">
             </worky-dropdown>
           </div>
 
