@@ -32,4 +32,14 @@ export class NotificationCenterService {
     return this.http.put(url, {});
   }
 
+  deleteNotification(notificationId: string) {
+    const url = `${this.baseUrl}/notifications/${notificationId}`;
+    return this.http.delete(url);
+  }
+
+  markAllAsRead(userId: string) {
+    const url = `${this.baseUrl}/notifications/mark-all-as-read/${userId}`;
+    return this.http.put(url, {});
+  }
+
 }

@@ -1,58 +1,80 @@
 <div class="notifications-panel" [class.active]="isActive">
   <div class="content-header">
-    <div class="text-section">
-      <span>Notificaciones</span>
-      <p> Tienes {{ unreadNotifications }} notificaciones sin leer.</p>
+    <div class="panel-title">
+      <h2>{{ 'notification.title' | workyTranslations }}</h2>
+    </div>
+    <div class="tabs">
+      <button
+        class="tab-button"
+        [class.active]="currentTab === notificationStatus.UNREAD"
+        (click)="switchTab(notificationStatus.UNREAD)">{{ 'notification.label_unread_btn' | workyTranslations }}</button>
+      <button
+        class="tab-button"
+        [class.active]="currentTab === notificationStatus.ALL"
+        (click)="switchTab(notificationStatus.ALL)">{{ 'notification.label_all_btn' | workyTranslations }}</button>
     </div>
     <i class="material-icons" (click)="togglePanel()">close</i>
   </div>
 
   <div class="content-body">
-
-    <div class="notification-item" *ngFor="let notification of formatListNotifications">
-
-      <div class="notification-item-content" 
+    <div class="notification-item" *ngFor="let notification of filteredNotifications; let last = last">
+      <div class="notification-item-content"
         [class.notification-not-viewed]="notification.read === false"
-        (click)="goToLink(notification.link, notification._id)">
+        [class.last-notification]="last">
         <div class="notification-item-header">
-          <span class="notification-item-title">{{notification.content}}</span>
-          <span class="notification-item-date">Hace {{notification.createdAt | workyRelativeTime }}</span>
+          <span class="notification-item-title">{{ notification.content | workyTranslations }}</span>
+          <span class="notification-item-date">{{ 'notification.span_item_date' | workyTranslations }} {{notification.createdAt | workyRelativeTime }}</span>
         </div>
 
-        <div class="notification-item-body" *ngIf="notification.type === type.COMMENT">
-          <i class="material-icons">{{ notification.icon }}</i>
-          <div class="content">
-            <span> {{ notification.additionalDataComment?.nameComment }} Comento: </span>
-            <span class="notification-item-description">{{ notification.additionalDataComment?.comment }}</span>
+        <div class="notification-item-body">
+
+          <div *ngIf="notification.type === type.COMMENT" class="item-body"
+            (click)="goToLink(notification.link, notification._id)">
+            <i class="material-icons">{{ notification.icon }}</i>
+            <div class="content">
+              <span> {{ notification.additionalDataComment?.nameComment }} {{ 'notification.span_item_user_comment' | workyTranslations }} </span>
+              <span class="notification-item-description">{{ notification.additionalDataComment?.comment }}</span>
+            </div>
           </div>
-        </div>
 
-        <div class="notification-item-body" *ngIf="notification.type === type.LIKE">
-          <i class="material-icons">{{ notification.icon }}</i>
-          <div class="content">
-            <span> {{ notification.additionalDataLike?.userNameReaction }} ha reaccionado con un: <img src="{{ notification.additionalDataLike?.emoji }}"> </span>
+          <div *ngIf="notification.type === type.LIKE" class="item-body"
+            (click)="goToLink(notification.link, notification._id)">
+            <i class="material-icons">{{ notification.icon }}</i>
+            <div class="content">
+              <span> {{ notification.additionalDataLike?.userNameReaction }} {{ 'notification.span_item_user_reaction' | workyTranslations }} <img src="{{ notification.additionalDataLike?.emoji }}"> </span>
+            </div>
           </div>
-        </div>
 
-        <div class="notification-item-body" *ngIf="notification.type === type.FRIEND_REQUEST">
-          <i class="material-icons">{{ notification.icon }}</i>
-          <div class="content">
-            <span> {{ notification.additionalDataFriendRequest?.sendUserName }} te ha solicitado amistad. </span>
+          <div *ngIf="notification.type === type.FRIEND_REQUEST" class="item-body"
+            (click)="goToLink(notification.link, notification._id)">
+            <i class="material-icons">{{ notification.icon }}</i>
+            <div class="content">
+              <span> {{ notification.additionalDataFriendRequest?.sendUserName }} {{ 'notification.span_item_user_friendRequest' | workyTranslations }} </span>
+            </div>
           </div>
-        </div>
 
-        <div class="notification-item-body" *ngIf="notification.type === type.FRIEND_ACCEPTED">
-          <i class="material-icons">{{ notification.icon }}</i>
-          <div class="content">
-            <span> {{ notification.additionalDataFriendAccept?.acceptUserName }} ha aceptado tu solicitud de amistad. </span>
+          <div *ngIf="notification.type === type.FRIEND_ACCEPTED" class="item-body"
+            (click)="goToLink(notification.link, notification._id)">
+            <i class="material-icons">{{ notification.icon }}</i>
+            <div class="content">
+              <span> {{ notification.additionalDataFriendAccept?.acceptUserName }} {{ 'notification.span_item_user_friendRequestAccept' | workyTranslations }} </span>
+            </div>
           </div>
-        </div>
 
+          <div class="action-menu" (mouseenter)="checkDataLink()">
+            <worky-dropdown
+              icon="more_horiz"
+              [badge]=false
+              (click)="checkDataLink()"
+              [dataLink]="dataLinkActions"
+              (linkClicked)="handleActionsClicked($event, notification)">
+            </worky-dropdown>
+          </div>
+
+        </div>
       </div>
-
     </div>
-  </div>  
-
+  </div>
 
 </div>
 

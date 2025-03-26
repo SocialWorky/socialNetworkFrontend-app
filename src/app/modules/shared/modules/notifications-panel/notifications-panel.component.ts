@@ -6,8 +6,12 @@ import { AuthService } from '@auth/services/auth.service';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationPanelService } from './services/notificationPanel.service'
 import { AdditionalDataComment, AdditionalDataLike, AdditionalDataFriendRequest, AdditionalDataFriendAccept, NotificationsData } from './interfaces/notificationsData.interface';
-import { NotificationType } from './enums/notificationsType.enum';
+import { NotificationType, NotificationStatus } from './enums/notificationsType.enum';
 import { NotificationService } from '@shared/services/notifications/notification.service';
+import { DropdownDataLink } from '../worky-dropdown/interfaces/dataLink.interface';
+import { Colors } from '@shared/interfaces/colors.enum';
+import { translations } from '@translations/translations';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
     selector: 'worky-notifications-panel',
@@ -18,13 +22,23 @@ import { NotificationService } from '@shared/services/notifications/notification
 export class NotificationsPanelComponent implements OnInit, OnDestroy {
   isActive = false;
 
+  currentTab: NotificationStatus = NotificationStatus.UNREAD;
+
+  notificationStatus = NotificationStatus;
+
   listNotifications: NotificationsData[] = [];
 
   formatListNotifications: NotificationsData[] = [];
 
+  filteredNotifications: NotificationsData[] = [];
+
+  activeActionId: string | null = null;
+
   type = NotificationType;
 
   unreadNotifications: number = 0;
+
+  dataLinkActions: DropdownDataLink<any>[] = [];
 
   private destroy$ = new Subject<void>();
 
@@ -35,15 +49,11 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy {
     private _router: Router,
     private _notificationService: NotificationService,
     private _notificationPanelService: NotificationPanelService,
+    private _logService: LogService,
   ) {}
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   ngOnInit() {
-    if(!this._authService.isAuthenticated()) return;
+    if (!this._authService.isAuthenticated()) return;
     this._notificationPanelService.getIsActive().pipe(takeUntil(this.destroy$)).subscribe(isActive => {
       this.isActive = isActive;
       if (this.isActive) {
@@ -53,8 +63,67 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy {
     });
   }
 
-  togglePanel() {
-    this._notificationPanelService.togglePanel();
+  switchTab(tab: NotificationStatus) {
+    this.currentTab = tab;
+    this.filterNotifications();
+  }
+
+  filterNotifications() {
+    if (this.currentTab === 'unread') {
+      this.filteredNotifications = this.formatListNotifications.filter(notification => !notification.read);
+    } else {
+      this.filteredNotifications = [...this.formatListNotifications];
+    }
+  }
+
+  openActions(notificationId: string, event: MouseEvent) {
+    event.stopPropagation();
+    this.activeActionId = this.activeActionId === notificationId ? null : notificationId;
+  }
+
+  async deleteNotification(notificationId: string) {
+    await this._notificationCenterService.deleteNotification(notificationId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.getNotifications();
+        this._notificationService.sendNotification();
+        this.activeActionId = null;
+      },
+      error: (error) => {
+        const currentUser = this._authService.getDecodedToken();
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'NotificationsPanelComponent',
+          'Error delete notification',
+          {
+            user: currentUser,
+            notificationId,
+            message: error,
+          },
+        );
+      },
+    });
+  }
+
+  checkDataLink() {
+    this.dataLinkActions = [];
+    const menuActionsNotifications = {
+      icon: 'delete',
+      function: this.deleteNotification.bind(this),
+      title: translations['notification.deleteNotification_btn'],
+      color: Colors.RED
+    };
+
+    this.dataLinkActions.push(menuActionsNotifications);
+
+    this._cdr.markForCheck();
+  }
+
+  handleActionsClicked(data: DropdownDataLink<any>, notification: any) {
+    if (data.function && typeof data.function === 'function') {
+      data.function(notification._id);
+    } else if (data.link) {
+      this._router.navigate([data.link]);
+    }
   }
 
   async getNotifications() {
@@ -104,21 +173,25 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy {
             });
           }
 
-          this.formatListNotifications.sort((a, b) => {
-            if (a.read === b.read) {
-              return 0;
-            } else if (a.read && !b.read) {
-              return 1;
-            } else {
-              return -1;
-            }
-          });
-
-          this._cdr.markForCheck();
         });
+        this.formatListNotifications.sort((a, b) => {
+          if (a.read === b.read) return 0;
+          return a.read && !b.read ? 1 : -1;
+        });
+        this.filterNotifications();
+        this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error al obtener las notificaciones:', error);
+        const currentUser = this._authService.getDecodedToken();
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'NotificationsPanelComponent',
+          'Error get notifications',
+          {
+            user: currentUser,
+            message: error,
+          },
+        );
       },
     });
   }
@@ -134,12 +207,31 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy {
 
   async markAsRead(_id: string) {
     await this._notificationCenterService.updateNotification(_id).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response: any) => {
+      next: () => {
         this.getNotifications();
       },
       error: (error) => {
-        console.error('Error al marcar como leida la notificación:', error);
+        const currentUser = this._authService.getDecodedToken();
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'NotificationsPanelComponent',
+          'Error mark as read notification',
+          {
+            user: currentUser,
+            notificationId: _id,
+            message: error,
+          },
+        );
       },
     });
+  }
+
+  togglePanel() {
+    this._notificationPanelService.togglePanel();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

@@ -13,64 +13,103 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   transition: right 0.3s ease-out;
   z-index: 1000;
-  padding: 20px;
+
   @include breakpoints.below-sm {
     width: 100%;
     right: -100%;
   }
 
   &.active {
-    right: 0; /* Desplaza hacia la derecha */
+    right: 0;
   }
 
   .content-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    .text-section {
-      span {
-        font-size: 1.5rem;
+    padding: 8px;
+    height: 80px;
+
+    .panel-title {
+      margin-bottom: 10px;
+
+      h2 {
+        font-size: 24px;
         font-weight: bold;
-      }
-      p {
-        font-size: 1rem;
-        color: #7b7b7b;
+        color: colors.$worky-color-navy;
       }
     }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+
+      .tab-button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 20px;
+        background-color: colors.$worky-color-greyLight;
+        color: colors.$worky-color-navy;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &.active {
+          background-color: colors.$worky-color-navy;
+          color: #fff;
+        }
+
+        &:hover:not(.active) {
+          background-color: colors.$worky-color-grey;
+        }
+      }
+    }
+
     i {
       cursor: pointer;
+      font-size: 24px;
+      color: colors.$worky-color-navy;
     }
   }
 
   .content-body {
-    height: 92%;
-    overflow: scroll;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    height: calc(100% - 80px);
+    overflow-y: auto;
   }
 
   .notification-item-content {
-    cursor: pointer;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    padding: 10px;
+    padding: 15px;
     background-color: colors.$worky-color-greyLight;
+    transition: background-color 0.3s ease;
+
     &:hover {
       background-color: colors.$worky-color-grey;
+    }
+
+    &.notification-not-viewed {
+      background-color: map.get(colors.$worky-blue, 93);
+      color: colors.$worky-color-navy;
+      border: 1px solid map.get(colors.$worky-navy, 87);
+
+      &:hover {
+        background-color: map.get(colors.$worky-yellow, 56);
+      }
     }
 
     .notification-item-header {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
+
       .notification-item-title {
-        font-size: 20px;
-        color: colors.$worky-color-navy;
+        font-size: 16px;
         font-weight: 500;
-        margin-bottom: 5px;
       }
 
       .notification-item-date {
-        margin-left: auto;
         font-size: 12px;
         color: #7b7b7b;
       }
@@ -78,52 +117,67 @@
 
     .notification-item-body {
       display: flex;
-      flex-direction: row;
       align-items: center;
       gap: 10px;
+      justify-content: space-between;
+
+      .item-body {
+        cursor: pointer;
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
       i {
         color: colors.$worky-color-navy;
       }
+
       .content {
         display: flex;
         flex-direction: column;
+        gap: 5px;
+
         span {
-          display: flex;
-          gap: 9px;
+          font-size: 14px;
         }
+
         img {
           width: 25px;
           height: 25px;
         }
-
       }
     }
-  }
 
-  .notification-not-viewed {
-    background-color: map.get(colors.$worky-navy, 24);
-    color: colors.$worky-color-light;
-    &:hover {
-      background-color: map.get(colors.$worky-navy, 9);
-    }
-
-    .notification-item-body {
-      i {
+    .action-menu {
+      display: flex;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      background-color: map.get(colors.$worky-navy, 56);
+      z-index: 1000;
+      ::ng-deep worky-dropdown {
+        display: flex;
+        .dropdown-menu {
+          inset: auto 8px -85px auto !important;
+        }
+      }
+      ::ng-deep worky-dropdown .nav-link:hover{
         color: colors.$worky-color-yellow;
       }
-    }
 
-    .notification-item-header {
-
-      .notification-item-title {
-        color: colors.$worky-color-light;
-      }
-      .notification-item-date {
-        color: colors.$worky-color-light;
+      &:hover {
+        background-color: map.get(colors.$worky-navy, 24);
       }
     }
-
   }
+
+   .notification-item-content.last-notification .action-menu {
+      ::ng-deep worky-dropdown {
+        .dropdown-menu {
+          inset: auto 8px -14px auto !important;
+        }
+      }
+    }
 
 
 }
