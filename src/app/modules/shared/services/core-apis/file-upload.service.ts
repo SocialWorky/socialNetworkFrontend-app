@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '@auth/services/auth.service';
 import { environment } from '@env/environment';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
@@ -12,9 +12,7 @@ export class FileUploadService {
   constructor(
     private http: HttpClient,
     private _authService: AuthService
-  ) {
-    if(!this._authService.isAuthenticated()) return;
-  }
+  ) { }
 
   uploadFile(files: File[], destination: string) {
     const url = `${environment.APIFILESERVICE}upload`;

@@ -100,7 +100,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   ngOnInit() {
-    if(!this._authService.isAuthenticated()) return;
     this.dataUser = this._authService.getDecodedToken();
     this.getUserFriendPending();
     this.menuShareActions();

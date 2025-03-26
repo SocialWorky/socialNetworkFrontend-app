@@ -36,8 +36,7 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
     private _cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    if (!this._authService.isAuthenticated()) return;
+  async ngOnInit(): Promise<void> {
 
     this.users$ = this._messageStateService.usersWithConversations$;
 

@@ -34,7 +34,6 @@ export class SideMenuComponent  implements OnInit {
   constructor(private _authService: AuthService) { }
 
   ngOnInit() {
-    if (!this._authService.isAuthenticated()) return;
     const token = this._authService.getDecodedToken()!;
     this.userName = token?.name;
   }

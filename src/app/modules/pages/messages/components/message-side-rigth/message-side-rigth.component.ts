@@ -75,13 +75,10 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     private _dialog: MatDialog,
     private _fileUploadService: FileUploadService,
     private _loadingCtrl: LoadingController,
-  ) {
-    if (!this._authService.isAuthenticated()) return;
-    this.currentUser = this._authService.getDecodedToken();
-  }
+  ) { }
 
   async ngOnInit() {
-    if (!this._authService.isAuthenticated()) return;
+    this.currentUser = this._authService.getDecodedToken();
     this.userIdMessage = await this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
     if(this.userIdMessage) this.userId = this.userIdMessage;
 

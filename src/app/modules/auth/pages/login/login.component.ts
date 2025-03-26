@@ -175,8 +175,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
           localStorage.setItem('lastLogin', new Date().toISOString());
 
-          if (!await this._authService.isAuthenticated()) return;
-
           const tokenResponse = await this._authService.getDecodedToken()!;
 
           localStorage.setItem('isTooltipActive', tokenResponse.isTooltipActive.toString());
@@ -267,8 +265,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
       const response = await this._authApiService.loginGoogle(dataGoogle).toPromise() as { token: string };
       localStorage.setItem('token', response?.token);
-
-      if (!await this._authService.isAuthenticated()) return;
 
       const tokenResponse = this._authService.getDecodedToken()!;
 

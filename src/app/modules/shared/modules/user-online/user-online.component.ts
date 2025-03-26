@@ -51,10 +51,6 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
   }
 
   private checkAndInitializeUser(): void {
-    if (!this._authService.isAuthenticated()) {
-      this._router.navigate(['/login']);
-      return;
-    }
 
     try {
       const decodedToken = this._authService.getDecodedToken();

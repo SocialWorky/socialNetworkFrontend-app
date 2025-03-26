@@ -130,10 +130,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   ) { }
 
   async ngOnInit() {
-    this.isAuthenticated = await this._authService.isAuthenticated();
-    if (this.isAuthenticated) {
-      this.decodedToken = this._authService.getDecodedToken()!;
-    }
+    this.decodedToken = this._authService.getDecodedToken()!;
     this.postPrivacy(TypePrivacy.PUBLIC);
     this.getUser();
     this.subscription = this._globalEventService.profileImage$

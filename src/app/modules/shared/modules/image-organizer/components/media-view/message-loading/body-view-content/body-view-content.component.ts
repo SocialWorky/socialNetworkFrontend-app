@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnDestroy, signal, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit, signal, SimpleChanges } from '@angular/core';
 import { LoadingController } from '@ionic/angular';
 import { catchError, filter, of, Subject, switchMap, takeUntil } from 'rxjs';
 
@@ -17,7 +17,7 @@ import { Token } from '@shared/interfaces/token.interface';
     styleUrls: ['./body-view-content.component.scss'],
     standalone: false
 })
-export class BodyViewContentComponent  implements OnDestroy {
+export class BodyViewContentComponent  implements OnDestroy, OnInit {
 
   dataUser: Token | null = null;
 
@@ -49,9 +49,10 @@ export class BodyViewContentComponent  implements OnDestroy {
     private _publicationService: PublicationService,
     private _notificationPublicationService: NotificationPublicationService,
   ) {
-    if(!this._authService.isAuthenticated()) return;
-    this.dataUser = this._authService.getDecodedToken();
     this.subscribeToNotificationUpdatePublication();
+  }
+  ngOnInit(): void {
+    this.dataUser = this._authService.getDecodedToken();
   }
 
   ngOnChanges(changes: SimpleChanges) {

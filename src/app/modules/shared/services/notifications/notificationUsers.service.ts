@@ -25,7 +25,7 @@ export class NotificationUsersService implements OnDestroy {
 
   private _unsubscribeAll = new Subject<void>();
 
-  private inactivityDuration = 5 * 60 * 1000; // 5 minutes
+  private inactivityDuration = 5 * 60 * 1000;
 
   private inactivityTimeout: any;
 
@@ -44,9 +44,6 @@ export class NotificationUsersService implements OnDestroy {
     private _cacheService: CacheService,
     private _socketService: SocketService
   ) {
-    if(!this._authService.isAuthenticated()) {
-      this._authService.clearSession();
-    };
     this._decodeToken = this._authService.getDecodedToken()!;
 
     this.initializeUserStatus();

@@ -61,7 +61,6 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    if(!this._authService.isAuthenticated()) return;
     this.loadReactions();
   }
 

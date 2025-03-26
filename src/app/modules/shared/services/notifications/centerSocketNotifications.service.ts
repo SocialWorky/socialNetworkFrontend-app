@@ -24,8 +24,7 @@ export class CenterSocketNotificationsService {
     private _notificationCenterService: NotificationCenterService,
     private _authService: AuthService,
     private _notificationService: NotificationService
-  ) { 
-    if(!this._authService.isAuthenticated()) return;
+  ) {
     this.userToken = this._authService.getDecodedToken();
   }
 
@@ -54,7 +53,7 @@ export class CenterSocketNotificationsService {
   acceptFriendRequestNotification(user: User) {
 
     if (!this.userToken) return;
-    
+
     const dataNotification = {
       acceptUserId: this.userToken.id,
       acceptUserName: this.userToken.name,
