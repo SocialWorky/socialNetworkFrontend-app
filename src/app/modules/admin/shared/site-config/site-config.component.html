@@ -1,117 +1,120 @@
-<div class="bg-gray-900 text-white py-12">
-  <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg shadow-lg">
-    <h2 class="text-3xl font-semibold mb-6">CONFIGURACIÓN</h2>
-    <form [formGroup]="configForm" (ngSubmit)="updateConfig()">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+ <div class="content-config">
+   <div class="bg-gray-900 text-white py-12">
+    <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg shadow-lg">
+      <h2 class="text-3xl font-semibold mb-6">CONFIGURACIÓN</h2>
+      <form [formGroup]="configForm" (ngSubmit)="updateConfig()">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <!-- Columna izquierda -->
-        <div>
-          <div class="mb-6">
-            <label for="title" class="block text-sm font-medium text-gray-300 mb-2">Título del Sitio:</label>
-            <input formControlName="title" id="title" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+          <!-- Columna izquierda -->
+          <div>
+            <div class="mb-6">
+              <label for="title" class="block text-sm font-medium text-gray-300 mb-2">Título del Sitio:</label>
+              <input formControlName="title" id="title" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+            </div>
+
+            <div class="mb-6">
+              <label for="contactEmail" class="block text-sm font-medium text-gray-300 mb-2">E-Mail de contacto:</label>
+              <input formControlName="contactEmail" id="contactEmail" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+            </div>
+
+            <div class="mb-6">
+              <label for="urlSite" class="block text-sm font-medium text-gray-300 mb-2">Url del Sitio:</label>
+              <input formControlName="urlSite" id="urlSite" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+            </div>
+
+            <div class="mb-6">
+              <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Descripción de la app:</label>
+              <textarea formControlName="description" id="description" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" rows="5"></textarea>
+            </div>
+
+            <div class="mb-6">
+              <label for="privacyPolicy" class="block text-sm font-medium text-gray-300 mb-2">Política de Privacidad:</label>
+              <textarea formControlName="privacyPolicy" id="privacyPolicy" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" rows="5"></textarea>
+            </div>
           </div>
 
-          <div class="mb-6">
-            <label for="contactEmail" class="block text-sm font-medium text-gray-300 mb-2">E-Mail de contacto:</label>
-            <input formControlName="contactEmail" id="contactEmail" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-          </div>
+          <!-- Columna derecha -->
+          <div>
+            <div class="mb-6">
+              <h3 class="text-xl font-semibold mb-2">Logo del Sitio</h3>
+              <img
+                [src]="imagePreview || configForm.get('logoUrl')?.value || defaultLogo"
+                alt="Vista previa del logo"
+                class="w-32 h-32 object-contain border border-gray-600 rounded-md mb-4"
+              />
+              <label for="logoUrl" class="block text-sm font-medium text-gray-300 mb-2">Logo URL:</label>
+              <input formControlName="logoUrl" id="logoUrl" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+            </div>
 
-          <div class="mb-6">
-            <label for="urlSite" class="block text-sm font-medium text-gray-300 mb-2">Url del Sitio:</label>
-            <input formControlName="urlSite" id="urlSite" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-          </div>
+            <div class="mb-6">
+              <label for="image" class="block text-sm font-medium text-gray-300 mb-2">O subir Logo:</label>
+              <input id="image" type="file" (change)="onFileChange($event)" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+            </div>
 
-          <div class="mb-6">
-            <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Descripción de la app:</label>
-            <textarea formControlName="description" id="description" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" rows="5"></textarea>
-          </div>
+            <!-- Métodos de inicio de sesión -->
+            <div class="mb-6">
+              <h3 class="text-xl font-semibold mb-2">Métodos de inicio de sesión</h3>
 
-          <div class="mb-6">
-            <label for="privacyPolicy" class="block text-sm font-medium text-gray-300 mb-2">Política de Privacidad:</label>
-            <textarea formControlName="privacyPolicy" id="privacyPolicy" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" rows="5"></textarea>
-          </div>
-        </div>
+              <div formGroupName="loginMethods">
+                <div class="flex items-center mb-4">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input class="sr-only peer"
+                          type="checkbox"
+                          id="email"
+                          formControlName="email">
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-indigo-500"></div>
+                        <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-full"></div>
+                    </label>
+                    <label for="emailLogin" class="ml-2 text-sm font-medium text-gray-300">Iniciar sesión con Email</label>
+                </div>
 
-        <!-- Columna derecha -->
-        <div>
-          <div class="mb-6">
-            <h3 class="text-xl font-semibold mb-2">Logo del Sitio</h3>
-            <img
-              [src]="imagePreview || configForm.get('logoUrl')?.value || defaultLogo"
-              alt="Vista previa del logo"
-              class="w-32 h-32 object-contain border border-gray-600 rounded-md mb-4"
-            />
-            <label for="logoUrl" class="block text-sm font-medium text-gray-300 mb-2">Logo URL:</label>
-            <input formControlName="logoUrl" id="logoUrl" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-          </div>
+                <div class="flex items-center mb-4">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input class="sr-only peer"
+                          type="checkbox"
+                          id="google"
+                          formControlName="google">
+                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-indigo-500"></div>
+                        <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-full"></div>
+                    </label>
+                    <label for="emailLogin" class="ml-2 text-sm font-medium text-gray-300">Iniciar sesión con Google</label>
+                </div>
 
-          <div class="mb-6">
-            <label for="image" class="block text-sm font-medium text-gray-300 mb-2">O subir Logo:</label>
-            <input id="image" type="file" (change)="onFileChange($event)" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-          </div>
+              </div> <!-- Cierre del formGroupName para loginMethods -->
 
-          <!-- Métodos de inicio de sesión -->
-          <div class="mb-6">
-            <h3 class="text-xl font-semibold mb-2">Métodos de inicio de sesión</h3>
+              <h3 class="text-xl font-semibold mb-2">Registro de usuarios</h3>
 
-            <div formGroupName="loginMethods">
               <div class="flex items-center mb-4">
                   <label class="relative inline-flex items-center cursor-pointer">
                       <input class="sr-only peer"
                         type="checkbox"
-                        id="email"
-                        formControlName="email">
+                        id="invitationCode"
+                        formControlName="invitationCode">
                       <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-indigo-500"></div>
                       <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-full"></div>
                   </label>
-                  <label for="emailLogin" class="ml-2 text-sm font-medium text-gray-300">Iniciar sesión con Email</label>
+                  <label for="invitationCode" class="ml-2 text-sm font-medium text-gray-300">Registro con Codigo</label>
               </div>
 
-              <div class="flex items-center mb-4">
-                  <label class="relative inline-flex items-center cursor-pointer">
-                      <input class="sr-only peer"
-                        type="checkbox"
-                        id="google"
-                        formControlName="google">
-                      <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-indigo-500"></div>
-                      <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-full"></div>
-                  </label>
-                  <label for="emailLogin" class="ml-2 text-sm font-medium text-gray-300">Iniciar sesión con Google</label>
-              </div>
-
-            </div> <!-- Cierre del formGroupName para loginMethods -->
-
-            <h3 class="text-xl font-semibold mb-2">Registro de usuarios</h3>
-
-            <div class="flex items-center mb-4">
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input class="sr-only peer"
-                      type="checkbox"
-                      id="invitationCode"
-                      formControlName="invitationCode">
-                    <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-indigo-500"></div>
-                    <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-full"></div>
-                </label>
-                <label for="invitationCode" class="ml-2 text-sm font-medium text-gray-300">Registro con Codigo</label>
             </div>
 
           </div>
+        </div>
 
+        <div class="mt-6">
+          <div *ngIf="loadUpdateConfigButtons" class="loader"></div>
+          <button *ngIf="!loadUpdateConfigButtons" type="submit" class="w-full bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600">Actualizar</button>
+        </div>
+
+      </form>
+
+      <div>
+        <div class="mb-6">
+          <worky-admin-change-theme-colors></worky-admin-change-theme-colors>
         </div>
       </div>
 
-      <div class="mt-6">
-        <div *ngIf="loadUpdateConfigButtons" class="loader"></div>
-        <button *ngIf="!loadUpdateConfigButtons" type="submit" class="w-full bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600">Actualizar</button>
-      </div>
-
-    </form>
-
-    <div>
-      <div class="mb-6">
-        <worky-admin-change-theme-colors></worky-admin-change-theme-colors>
-      </div>
     </div>
-
   </div>
 </div>
+

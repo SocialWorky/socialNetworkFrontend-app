@@ -1,64 +1,79 @@
-<div class="logs-container">
-  @for (log of logs; track $index) {
-    <div class="log-item">
-      <div
-        class="log-header bg-gray-800 text-white p-4 rounded-t-md cursor-pointer"
-        (click)="toggleMetadata(log._id)"
-      >
-        <div class="flex justify-between items-center">
-          @if (log.level === 'error') {
-            <div>
-            <span class="text-red-500">{{ log.level }} - {{ log.message }}</span>
-          </div>
-          } @else if (log.level === 'warn') {
-            <span class="text-yellow-500">{{ log.level }}- {{ log.message }}</span>
-          } @else if (log.level === 'info') {
-            <span class="text-blue-500">{{ log.level }}- {{ log.message }}</span>
-          } @else if (log.level === 'debug') {
-            <span class="text-gray-400">{{ log.level }}- {{ log.message }}</span>
-          } @else {
-            <span class="text-gray-500">{{ log.level }} - {{ log.message }}</span>
-          }
-          <div class="text-sm text-gray-400">
-            {{ log.timestamp.toString() | date: 'dd/MM/yy - HH:mm:ss' }}
-          </div>
-        </div>
-      </div>
+<div class="content-logs">
 
-      <div class="log-details p-4 bg-gray-900 text-gray-300">
-        <div class="mb-2">
-          <span class="font-semibold">Contexto:</span> {{ log.context }}
-        </div>
-
-        <div class="metadata-container">
-          <div
-            class="metadata-header flex items-center cursor-pointer"
-            (click)="toggleMetadata(log._id)"
-          >
-            <span class="text-lg mr-2">
-              <i
-                class="material-icons"
-                [class.rotate-90]="isExpanded(log._id)"
-              >
-                chevron_right
-              </i>
-            </span>
-            <span class="font-semibold">Metadata</span>
-          </div>
-
-          <!-- Contenido de Metadata -->
-          @if (isExpanded(log._id)) {
-          <div class="content-json-viewer">
-            <div class="metadata-content ml-4">
-              <ngx-json-viewer [depth]="1" [json]="log.metadata"></ngx-json-viewer>
-              <button mat-stroked-button (click)="onCopy(log.metadata)">
-                <span class="material-icons">content_copy</span>
-              </button>
+  <div class="logs-container">
+    @for (log of logs; track $index) {
+      <div class="log-item">
+        <div
+          class="log-header bg-gray-800 text-white p-4 rounded-t-md cursor-pointer"
+          (click)="toggleMetadata(log._id)"
+        >
+          <div class="flex justify-between items-center">
+            @if (log.level === 'error') {
+              <span class="text-red-500">{{ log.level }} - {{ log.message }}</span>
+            } @else if (log.level === 'warn') {
+              <span class="text-yellow-500">{{ log.level }} - {{ log.message }}</span>
+            } @else if (log.level === 'info') {
+              <span class="text-blue-500">{{ log.level }} - {{ log.message }}</span>
+            } @else if (log.level === 'debug') {
+              <span class="text-gray-400">{{ log.level }} - {{ log.message }}</span>
+            } @else {
+              <span class="text-gray-500">{{ log.level }} - {{ log.message }}</span>
+            }
+            <div class="text-sm text-gray-400">
+              {{ log.timestamp.toString() | date: 'dd/MM/yy - HH:mm:ss' }}
             </div>
           </div>
-          }
+        </div>
+
+        <div class="log-details p-4 bg-gray-900 text-gray-300">
+          <div class="mb-2">
+            <span class="font-semibold">Contexto:</span> {{ log.context }}
+          </div>
+
+          <div class="metadata-container">
+            <div
+              class="metadata-header flex items-center cursor-pointer"
+              (click)="toggleMetadata(log._id)"
+            >
+              <span class="text-lg mr-2">
+                <i
+                  class="material-icons"
+                  [class.rotate-90]="isExpanded(log._id)"
+                >
+                  chevron_right
+                </i>
+              </span>
+              <span class="font-semibold">Metadata</span>
+            </div>
+
+            <!-- Contenido de Metadata -->
+            @if (isExpanded(log._id)) {
+            <div class="content-json-viewer">
+              <div class="metadata-content ml-4">
+                <ngx-json-viewer [depth]="1" [json]="log.metadata"></ngx-json-viewer>
+                <button mat-stroked-button (click)="onCopy(log.metadata)">
+                  <span class="material-icons">content_copy</span>
+                </button>
+              </div>
+            </div>
+            }
+          </div>
         </div>
       </div>
-    </div>
-  }
+    }
+  </div>
+
+  <div class="pagination mt-4 flex justify-center space-x-2">
+    <button
+      *ngFor="let page of getPageNumbers()"
+      [class.active]="isPageActive(page)"
+      (click)="changePage(page)"
+      class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
+    >
+      {{ page }}
+    </button>
+  </div>
+
 </div>
+
+

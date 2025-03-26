@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { Observable } from 'rxjs';
-import { LogsList } from '../interface/log.interface';
+import { Logs } from '../interface/log.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,7 @@ export class LogService {
     private _http: HttpClient,
   ) { }
 
-  getLogs(): Observable<LogsList[]> {
-    return this._http.get<LogsList[]>(`${this.urlApi}/`);
+  getLogs(page: number = 1, limit: number = 10): Observable<Logs> {
+    return this._http.get<Logs>(`${this.urlApi}?page=${page}&limit=${limit}`);
   }
 }

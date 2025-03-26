@@ -1,11 +1,13 @@
-
+content-config {
+  display: flex;
+  flex-direction: column;
+}
 
 .content-site-colors {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   margin-bottom: 20px;
-  height: 600px;
   overflow-y: auto;
 }
 

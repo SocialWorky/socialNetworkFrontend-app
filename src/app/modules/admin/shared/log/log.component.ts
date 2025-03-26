@@ -1,7 +1,7 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { LogService } from './services/log.service';
-import { LogsList } from './interface/log.interface';
+import { LogsList, Logs } from './interface/log.interface';
 import { GenericSnackbarService } from '@shared/services/generic-snackbar.service';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -11,9 +11,15 @@ import { Subject, takeUntil } from 'rxjs';
     styleUrls: ['./log.component.scss'],
     standalone: false
 })
-export class LogComponent implements OnInit {
+export class LogComponent implements OnInit, OnDestroy {
 
   logs: LogsList[] = [];
+
+  currentPage: number = 1;
+
+  limit: number = 10;
+
+  totalLogs: number = 0;
 
   expandedMetadata: { [key: string]: boolean } = {};
 
@@ -27,14 +33,36 @@ export class LogComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loadLog();
+    this.loadLogs();
   }
 
-  loadLog() {
-    this._logService.getLogs().pipe(takeUntil(this.destroy$)).subscribe((res) => {
-      this.logs = res;
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadLogs() {
+    this._logService.getLogs(this.currentPage, this.limit).pipe(takeUntil(this.destroy$)).subscribe((res) => {
+      this.logs = res.logs;
+      this.totalLogs = res.total;
       this._cdr.markForCheck();
     });
+  }
+
+  changePage(newPage: number): void {
+    if (newPage >= 1 && newPage <= Math.ceil(this.totalLogs / this.limit)) {
+      this.currentPage = newPage;
+      this.loadLogs();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const totalPages = Math.ceil(this.totalLogs / this.limit);
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  isPageActive(page: number): boolean {
+    return this.currentPage === page;
   }
 
   toggleMetadata(logId: string): void {
