@@ -116,8 +116,17 @@ export const translations = {
   'email.commentPublicationSubMessage': 'Your comment was: {{comment}}',
   'email.commentPublicationButtonMessage': 'View publication',
   // -> NOTIFICATION CENTER SERVICE
+  'notification.title': 'Notifications',
   'notification.commentPublication': 'Comment publication',
   'notification.commentPublicationImage': 'Comment image',
+  'notification.deleteNotification_btn': 'Delete notification',
+  'notification.label_unread_btn': 'Unread',
+  'notification.label_all_btn': 'All',
+  'notification.span_item_date': 'Date',
+  'notification.span_item_user_comment': 'comment: ',
+  'notification.span_item_user_reaction': 'It has reacted with: ',
+  'notification.span_item_user_friendRequest': 'Friend request from: ',
+  'notification.span_item_user_friendRequestAccept': 'Friend request accepted from: ',
   // REGISTER COMPONENT
   'register.title': 'Register',
   'register.subTitle': 'Fill in the registration form and become part of the community',
