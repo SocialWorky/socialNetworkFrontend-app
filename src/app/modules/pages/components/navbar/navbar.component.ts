@@ -71,10 +71,10 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     private _scrollService: ScrollService
   ) {
     this.menuProfile();
-    if (!this._authService.isAuthenticated()) return;
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    if (!await this._authService.isAuthenticated()) return;
     this.isMobile = this._deviceDetectionService.isMobile();
     this._deviceDetectionService.getResizeEvent().pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
       this.isMobile = this._deviceDetectionService.isMobile();
@@ -149,8 +149,8 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
    this._authService.logout();
   }
 
-  private checkAdminDataLink() {
-    if (!this._authService.isAuthenticated()) return;
+  private async checkAdminDataLink() {
+    if (!await this._authService.isAuthenticated()) return;
     const dataUser = this._authService.getDecodedToken();
     const link = { icon: 'settings', link: '/admin',  title: 'Administración'}
 
@@ -226,8 +226,8 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     this.searchTerm = '';
   }
 
-  getNotification() {
-    if (!this._authService.isAuthenticated()) return;
+  async getNotification() {
+    if (!await this._authService.isAuthenticated()) return;
     const userId = this._authService.getDecodedToken()?.id!;
     this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {

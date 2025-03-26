@@ -85,8 +85,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _configService: ConfigService,
     private _notificationPublicationService: NotificationPublicationService
   ) {
-    this._authService.isAuthenticated();
-    this.dataUser = this._authService.getDecodedToken();
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Home');
     });
@@ -94,6 +92,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
+    await this._authService.isAuthenticated();
+    this.dataUser = this._authService.getDecodedToken();
     this._notificationUsersService.loginUser();
 
     this.paramPublication = await this.getParamsPublication();

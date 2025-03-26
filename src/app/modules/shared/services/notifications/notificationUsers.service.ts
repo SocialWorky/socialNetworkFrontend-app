@@ -35,7 +35,6 @@ export class NotificationUsersService implements OnDestroy {
 
   private readonly CACHE_KEY = 'online_users';
 
-  // Batching variables
   private batchedUpdates: Token[] = [];
   private batchInterval: any;
 

@@ -11,8 +11,8 @@ export class AuthGuard {
     private router: Router
   ) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    if (this.authService.isAuthenticated()) {
+  async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
+    if (await this.authService.isAuthenticated()) {
       return true;
     }
     this.router.navigate(['/auth/login']);

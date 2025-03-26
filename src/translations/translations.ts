@@ -44,10 +44,6 @@ export const translations = new Proxy<{ [key: string]: string }>({}, {
   get: (obj, prop) => {
     if (prop in translationsDictionary) return translationsDictionary[prop];
 
-    setTimeout(() => {
-      throw new Error(`Translation not found ${String(prop)}`);
-    });
-
     return '';
   },
 });

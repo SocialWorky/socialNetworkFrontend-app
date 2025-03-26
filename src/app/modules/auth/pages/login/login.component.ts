@@ -175,7 +175,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
           localStorage.setItem('lastLogin', new Date().toISOString());
 
-          if (!this._authService.isAuthenticated()) return;
+          if (!await this._authService.isAuthenticated()) return;
 
           const tokenResponse = await this._authService.getDecodedToken()!;
 
@@ -268,7 +268,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       const response = await this._authApiService.loginGoogle(dataGoogle).toPromise() as { token: string };
       localStorage.setItem('token', response?.token);
 
-      if (!this._authService.isAuthenticated()) return;
+      if (!await this._authService.isAuthenticated()) return;
 
       const tokenResponse = this._authService.getDecodedToken()!;
 
@@ -282,7 +282,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
         await this._authService.renewToken(userId);
       }
 
-      //this._socketService.updateToken(localStorage.getItem('token')!);
       this._socketService.emitEvent('loginUser', localStorage.getItem('token'));
       this._notificationUsersService.loginUser();
 

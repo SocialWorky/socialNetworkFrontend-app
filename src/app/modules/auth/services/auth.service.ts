@@ -7,6 +7,7 @@ import { environment } from '@env/environment';
 import { Token } from '../../shared/interfaces/token.interface';
 import { AuthGoogleService } from './auth-google.service';
 import { UserService } from '../../shared/services/core-apis/users.service';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -22,24 +23,31 @@ export class AuthService {
     private _userService: UserService,
   ) {}
 
-  isAuthenticated(): boolean {
+  async isAuthenticated(): Promise<boolean> {
     const token = localStorage.getItem('token');
     if (token && token !== 'undefined') {
-      const decodedToken: any = jwtDecode(token);
-      const currentTime = Math.floor(Date.now() / 1000);
+      try {
+        const decodedToken: any = jwtDecode(token);
+        const currentTime = Math.floor(Date.now() / 1000);
 
-      const currentUser = this._userService.getUserById(decodedToken._id);
-      if (!currentUser) {
+        if (!decodedToken || !decodedToken.exp || decodedToken.exp <= currentTime) {
+          this.clearSession();
+          this._router.navigate(['/auth/login']);
+          return false;
+        }
+
+        const user = await firstValueFrom(this._userService.getUserById(decodedToken.id));
+        if (user) {
+          return true;
+        } else {
+          this.clearSession();
+          this._router.navigate(['/auth/login']);
+          return false;
+        }
+      } catch (error) {
+        console.error('Error verifying authentication:', error);
         this.clearSession();
         this._router.navigate(['/auth/login']);
-        return false;
-      }
-
-      if (decodedToken && decodedToken.exp && (decodedToken.exp > currentTime)) {
-        return true;
-      } else {
-        this._router.navigate(['/auth/login']);
-        this.clearSession();
         return false;
       }
     } else {

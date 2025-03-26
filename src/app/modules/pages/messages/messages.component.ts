@@ -45,18 +45,18 @@ export class MessagesComponent implements OnInit {
     private _userService: UserService,
     private _titleService: Title,
     private _configService: ConfigService
-   ) { 
+   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Messages');
     });
-    this.isAuthenticated = this._authService.isAuthenticated();
+  }
+
+  async ngOnInit() {
+    this.isAuthenticated = await this._authService.isAuthenticated();
     if (this.isAuthenticated) {
       this.decodedToken = this._authService.getDecodedToken()!;
       this.userName = this.decodedToken.name;
     }
-  }
-
-  async ngOnInit() {
       this.userIdMessage = await this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
 
       if(!this.userIdMessage) return;

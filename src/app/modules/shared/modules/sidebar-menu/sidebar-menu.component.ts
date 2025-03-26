@@ -34,15 +34,14 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
     private _notificationService: NotificationService,
     private _messageService: MessageService,
     private _notificationPanelService: NotificationPanelService
-  ) { 
-    this.isAuthenticated = this._authService.isAuthenticated();
+  ) { }
+
+  async ngOnInit() {
+    this.isAuthenticated = await this._authService.isAuthenticated();
     if (this.isAuthenticated) {
       this.decodedToken = this._authService.getDecodedToken()!;
       this.userName = this.decodedToken.name;
     }
-  }
-
-  ngOnInit() {
     this._notificationService.notification$.pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: () => {
         this.getNotification();
