@@ -42,17 +42,17 @@
               <ng-container *ngIf="!isProfile">
                 <i *ngIf="!publication.isMyFriend || publication.isFriendshipPending" class="material-icons">fiber_manual_record</i>
 
-                <a *ngIf="!publication.isMyFriend && (!userRequest?._id || !userReceive?._id)" class="follow-my-friend" 
+                <a *ngIf="!publication.isMyFriend && (!userRequest?._id || !userReceive?._id)" class="follow-my-friend"
                   (click)="followMyFriend(publication.author._id)">
                   {{ 'publicationsView.follow' | workyTranslations }}
                 </a>
 
-                <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending && userRequest?._id === dataUser?.id" class="follow-my-friend" 
+                <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending && userRequest?._id === dataUser?.id" class="follow-my-friend"
                   (click)="cancelFriendship(publication.isFriendshipPending!, publication.author._id)">
                   {{ 'publicationsView.cancelRequest' | workyTranslations }}
                 </a>
 
-                <a *ngIf="userReceive?._id === dataUser?.id" class="follow-my-friend" 
+                <a *ngIf="userReceive?._id === dataUser?.id" class="follow-my-friend"
                   (click)="acceptFriendship(publication.isFriendshipPending!, publication.author._id)">
                   Aceptar Amistad
                 </a>
@@ -61,12 +61,12 @@
             </span>
 
           </div>
-        </ng-template>    
+        </ng-template>
 
       </div>
       <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">está en </p><a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
       <div class="publication-date">
-        <span>{{ publication.createdAt! | workyRelativeTime }}</span>
+        <span>{{ publication.createdAt! | workyDate:'relative' }}</span>
         <ng-container *ngIf="publication.privacy === typePrivacy.PUBLIC">
           <i class="material-icons">public</i>
         </ng-container>
@@ -84,7 +84,7 @@
     <div class="publication-content">
       <div class="content markdown" *ngIf="(publication.content | workyPreviewHtml | async) as result">
         <div class="publication-markdown-view" [innerHTML]="result.markdownHtml"></div>
-        <div class="publication-youtube-preview" [innerHTML]="result.youtubeHtml"></div>
+        <div class="publication-youtube-preview" [innerHTML]="result.youTubeHtml"></div>
         <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
       </div>
     </div>
@@ -137,7 +137,7 @@
   </div>
 
   <div class="publication-comment-on" *ngIf="viewCommentSection === indexPublication">
-    <worky-add-publication 
+    <worky-add-publication
       [type]="typePublishing.COMMENT"
       [idPublication]="publication._id"
       [indexPublication]="indexPublication">
@@ -146,7 +146,7 @@
 
   <div class="publication-comment" *ngIf="viewComments === indexPublication">
     <div class="publication-comment-item" *ngFor="let comment of publication.comment">
-      <worky-avatar 
+      <worky-avatar
         [size]="30"
         [img]="comment.author.avatar"
         [name]="comment.author.name + ' ' + comment.author.lastName">
@@ -165,7 +165,7 @@
           </div>
           <div class="comment-content markdown" *ngIf="(comment.content | workyPreviewHtml | async) as result">
             <div [innerHTML]="result.markdownHtml"></div>
-            <div class="publication-youtube-preview" [innerHTML]="result.youtubeHtml"></div>
+            <div class="publication-youtube-preview" [innerHTML]="result.youTubeHtml"></div>
             <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
           </div>
 
@@ -175,7 +175,7 @@
             type="comment">
           </worky-image-organizer>
         </div>
-        <span class="comment-date">{{ comment.createdAt | workyRelativeTime }}</span>
+        <span class="comment-date">{{ comment.createdAt | workyDate:'relative' }}</span>
       </div>
     </div>
   </div>

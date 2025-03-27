@@ -174,9 +174,9 @@ export const translations = {
   'publicationsView.loadingUnfixedPublication': 'Desfijando publicación...',
   // DATE OF PUBLICATION AND COMMENTS
   'DATE_FNS.LESS_THAN_A_MINUTE': 'hace un momento',
-  'DATE_FNS.X_MINUTES': '{{count}} m',
-  'DATE_FNS.X_HOURS': '{{count}} h',
-  'DATE_FNS.X_DAYS': '{{count}} d',
+  'DATE_FNS.X_MINUTES': '{{count}} minuto{{count > 1 ? "s" : ""}}',
+  'DATE_FNS.X_HOURS': '{{count}} hora{{count > 1 ? "s" : ""}}',
+  'DATE_FNS.X_DAYS': '{{count}} día{{count > 1 ? "s" : ""}}',
   'DATE_FNS.X_MONTHS': '{{count}} meses',
   'DATE_FNS.X_YEARS': '{{count}} años',
   'DATE_FNS.UNKNOWN': 'hace algún tiempo',

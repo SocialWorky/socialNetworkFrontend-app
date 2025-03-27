@@ -23,7 +23,7 @@
         [class.last-notification]="last">
         <div class="notification-item-header">
           <span class="notification-item-title">{{ notification.content | workyTranslations }}</span>
-          <span class="notification-item-date">{{ 'notification.span_item_date' | workyTranslations }} {{notification.createdAt | workyRelativeTime }}</span>
+          <span class="notification-item-date">{{ 'notification.span_item_date' | workyTranslations }} {{notification.createdAt | workyDate:'relative' }}</span>
         </div>
 
         <div class="notification-item-body">
