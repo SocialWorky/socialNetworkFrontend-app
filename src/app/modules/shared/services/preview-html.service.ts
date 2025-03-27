@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
 import { Observable, forkJoin, of } from 'rxjs';
 import { marked } from 'marked';
@@ -13,7 +13,6 @@ import { environment } from '@env/environment';
 export class ContentService {
 
   constructor(private http: HttpClient) {
-    // Configuración de marked para personalizar el renderizado de código
     const renderer = new marked.Renderer();
     renderer.code = ({ text, lang, escaped }: { text: string; lang?: string; escaped?: boolean }) => {
       const validLanguage = lang && hljs.getLanguage(lang) ? lang : 'plaintext';
@@ -28,8 +27,6 @@ export class ContentService {
       langPrefix: 'hljs ',
       gfm: true,
       breaks: true,
-      // Agregar la propiedad highlight usando @ts-ignore para evitar errores de TypeScript
-      // @ts-ignore
       highlight: function(code, lang) {
         const language = hljs.getLanguage(lang) ? lang : 'plaintext';
         return hljs.highlight(code, { language }).value;
@@ -44,17 +41,15 @@ export class ContentService {
     );
   }
 
-  processContent(value: string): Observable<{ markdownHtml: string, previewsHtml: string, youtubeHtml: string }> {
-    if (!value) return of({ markdownHtml: '', previewsHtml: '', youtubeHtml: '' });
+  processContent(value: string): Observable<{ markdownHtml: string, previewsHtml: string, youTubeHtml: string }> {
+    if (!value) return of({ markdownHtml: '', previewsHtml: '', youTubeHtml: '' });
 
-    // Convertir Markdown a HTML
     const markdownHtml = marked(value) as string;
 
-    // Extraer y filtrar URLs
     const urls = this.extractAndFilterUrls(value);
 
     if (urls.length === 0) {
-      return of({ markdownHtml, previewsHtml: '', youtubeHtml: '' });
+      return of({ markdownHtml, previewsHtml: '', youTubeHtml: '' });
     }
 
     const metadataRequests = urls.map(url => {
@@ -67,18 +62,18 @@ export class ContentService {
     return forkJoin(metadataRequests).pipe(
       map(results => {
         let previewsHtml = '';
-        let youtubeHtml = '';
+        let youTubeHtml = '';
 
         results.forEach(result => {
-          const { previewHtml, isYoutube } = this.generatePreviewHTML(result.url, result.metadata);
-          if (isYoutube) {
-            youtubeHtml += previewHtml;
+          const { previewHtml, isYouTube } = this.generatePreviewHTML(result.url, result.metadata);
+          if (isYouTube) {
+            youTubeHtml += previewHtml;
           } else {
             previewsHtml += previewHtml;
           }
         });
 
-        return { markdownHtml, previewsHtml, youtubeHtml };
+        return { markdownHtml, previewsHtml, youTubeHtml };
       })
     );
   }
@@ -115,22 +110,22 @@ export class ContentService {
     return nonImageAndNonCodeBlockUrls;
   }
 
-  private generatePreviewHTML(url: string, metadata: any): { previewHtml: string, isYoutube: boolean } {
+  private generatePreviewHTML(url: string, metadata: any): { previewHtml: string, isYouTube: boolean } {
     // Detectar si es un enlace de YouTube
-    const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i;
-    const youtubeMatch = url.match(youtubeRegex);
+    const youTubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i;
+    const youTubeMatch = url.match(youTubeRegex);
 
-    if (youtubeMatch) {
-      const videoId = youtubeMatch[1];
-      const youtubeHtml = `
+    if (youTubeMatch) {
+      const videoId = youTubeMatch[1];
+      const youTubeHtml = `
         <div class="link-preview-youtube">
           <iframe width="100%" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
         </div>
       `;
-      return { previewHtml: youtubeHtml, isYoutube: true };
+      return { previewHtml: youTubeHtml, isYouTube: true };
     }
 
-    if (!metadata || !metadata.ogTitle) return { previewHtml: '', isYoutube: false };
+    if (!metadata || !metadata.ogTitle) return { previewHtml: '', isYouTube: false };
 
     const displayTitle = metadata.ogTitle || metadata.twitterTitle || metadata.linkedinTitle;
     const displayDescription = metadata.ogDescription || metadata.twitterDescription || metadata.linkedinDescription;
@@ -145,6 +140,6 @@ export class ContentService {
         </div>
       </div>
     `;
-    return { previewHtml, isYoutube: false };
+    return { previewHtml, isYouTube: false };
   }
 }

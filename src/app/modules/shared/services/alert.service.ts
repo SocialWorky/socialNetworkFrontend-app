@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import Swal, { SweetAlertOptions } from 'sweetalert2';
-import { Alerts, Position } from './../enums/alerts.enum';
 import { Router } from '@angular/router';
+import Swal, { SweetAlertOptions } from 'sweetalert2';
+
+import { Alerts, Position } from './../enums/alerts.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -18,14 +19,12 @@ export class AlertService {
     confirmButtonText?: string,
     options?: [string | null]
   ) {
-    // Reemplazar <br> con saltos de línea
     message = message.replace(/<br>/g, '\n');
 
-    // Configuración de SweetAlert2
     const swalOptions: SweetAlertOptions = {
       title: title,
       text: message,
-      icon: icon as any, // Asegúrate de que `Alerts` sea compatible con SweetAlertIcon
+      icon: icon as any || Alerts.SUCCESS,
       position: position || Position.CENTER,
       showConfirmButton: showConfirmButton,
       confirmButtonText: confirmButtonText || undefined,
@@ -34,7 +33,6 @@ export class AlertService {
       },
     };
 
-    // Mostrar la alerta
     Swal.fire(swalOptions).then((result) => {
       if (result.isConfirmed) {
         if (options && options[0]) {

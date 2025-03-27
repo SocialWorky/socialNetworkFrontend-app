@@ -4,7 +4,6 @@ import { UserService } from './core-apis/users.service';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 
-
 @Injectable({
   providedIn: 'root'
 })
