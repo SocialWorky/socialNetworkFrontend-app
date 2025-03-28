@@ -8,7 +8,7 @@
           <img class="worky-logo" src="{{ logoUrl }}" alt="{{ title }}" style="margin-top: 2px;" loading="lazy">
         </a>
         <!-- Search -->
-        <form 
+        <form
           class="worky-search"
           (ngSubmit)="search($event)">
           <div class="search-container">
@@ -48,13 +48,15 @@
           [badgeValue]="messages > 0 ? messages : null"
           (click)="messagesUrl()"
           [isFilled]=true
+          [isMenu]=false
           [badge]=true>
         </worky-dropdown>
         <!-- Notification -->
         <worky-dropdown class="item-navbar-actions"
           icon="notifications"
-          [badgeValue]="notifications > 0 ? notifications : null" 
+          [badgeValue]="notifications > 0 ? notifications : null"
           (click)="toggleNotificationsPanel()"
+          [isMenu]=false
           [badge]=true>
         </worky-dropdown>
         <!-- Profile -->
@@ -77,18 +79,20 @@
       <div class="worky-profile">
         <worky-menu-component></worky-menu-component>
         <!-- Message -->
-        <worky-dropdown 
+        <worky-dropdown
           icon="chat"
           [badgeValue]="messages > 0 ? messages : null"
           (click)="messagesUrl()"
           [isFilled]=true
+          [isMenu]=false
           [badge]=true>
         </worky-dropdown>
         <!-- Notification -->
-        <worky-dropdown 
+        <worky-dropdown
           icon="notifications"
           [badgeValue]="notifications > 0 ? notifications : null"
           (click)="toggleNotificationsPanel()"
+          [isMenu]=false
           [badge]=true>
         </worky-dropdown>
         <!-- Profile -->

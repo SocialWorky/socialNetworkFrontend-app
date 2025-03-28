@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 
 import { translations } from '@translations/translations'
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { UserService } from '@shared/services/core-apis/users.service';
@@ -159,15 +159,15 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private checkPwaInstall() {
     if (!this._pwaInstallService.isAppInstalled()) {
-      const link = { icon: 'download', function: this.installPWA.bind(this),  title: 'Instalar App'}
+      const link = { icon: 'download', function: this.installPWA.bind(this),  title: translations['navbar.installApp']}
       this.dataLinkProfile.unshift(link);
     }
   }
 
   private installPWA() {
     this._pwaInstallService.showInstallPrompt(
-       '🎉 ¡Bienvenido!',
-       'Instala nuestra app para una mejor experiencia.'
+       translations['navbar.show_install_app'],
+       translations['navbar.show_install_app_message'],
      );
   }
 

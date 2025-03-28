@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
 
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { AuthService } from '@auth/services/auth.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { ScrollService } from '@shared/services/scroll.service';

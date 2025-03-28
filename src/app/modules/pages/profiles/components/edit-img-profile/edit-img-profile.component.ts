@@ -8,7 +8,7 @@ import { FileUploadService } from '@shared/services/core-apis/file-upload.servic
 import { ProfileService } from '../../services/profile.service';
 import { AuthService } from '@auth/services/auth.service';
 import { environment } from '@env/environment';
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 
 @Component({
     selector: 'worky-edit-img-profile',

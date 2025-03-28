@@ -4,7 +4,7 @@ import { MAT_DIALOG_DATA, MatDialog  } from '@angular/material/dialog';
 import * as _ from 'lodash';
 
 import { ImageOrganizer } from '../../interfaces/image-organizer.interface';
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { Comment, PublicationView } from '@shared/interfaces/publicationView.interface';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
@@ -25,13 +25,13 @@ export class MediaViewComponent  implements OnInit {
 
   private destroy$ = new Subject<void>();
 
-  constructor( 
+  constructor(
     private _deviceDetectionService: DeviceDetectionService,
     private _cdr: ChangeDetectorRef,
     private _publicationService: PublicationService,
     private _notificationService: NotificationService,
     private _dialog: MatDialog,
-    @Inject(MAT_DIALOG_DATA) public data: { 
+    @Inject(MAT_DIALOG_DATA) public data: {
       images: ImageOrganizer[],
       imageSelected: ImageOrganizer,
       comment: Comment,

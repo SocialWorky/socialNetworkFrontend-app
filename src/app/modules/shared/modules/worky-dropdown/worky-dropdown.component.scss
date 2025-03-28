@@ -8,13 +8,13 @@
 
 .dropdown-menu {
   position: absolute;
+  margin-top: 10px;
   left: 0;
   border-radius: var.$worky-border-radius-medium;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
 
   &.dropdown-menu-end {
-    right: 0;
     left: auto;
   }
 
@@ -27,7 +27,6 @@
     top: 100%;
     bottom: auto;
   }
-
 }
 
 .content-drop-dow {
@@ -71,4 +70,31 @@
 
 .mover-icono {
   animation: moverIcono 0.8s infinite alternate;
+}
+
+::ng-deep ion-action-sheet.dropdown-menu-mobile .action-sheet-group {
+  width: 100%;
+  padding: 5px;
+  background-color: map.get(colors.$worky-navy, 12);
+  border-radius: 16px 16px 0px 0px;
+  .action-sheet-title {
+    color: colors.$worky-color-light;
+    font-size: 25px;
+    font-weight: 600;
+  }
+  button {
+    display: flex;
+    align-items: center;
+    span {
+      color: colors.$worky-color-light;
+      font-size: 20px;
+    }
+    .action-sheet-icon {
+      color: colors.$worky-color-light;
+      background-color: map.get(colors.$worky-navy, 7);
+      padding: 8px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+  }
 }

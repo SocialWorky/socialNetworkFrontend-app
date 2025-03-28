@@ -14,7 +14,7 @@ import { translations } from '@translations/translations';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { AuthService } from '@auth/services/auth.service';
 import { ResetPasswordModalComponent } from './reset-password-modal/reset-password-modal.component';
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { SocketService } from '@shared/services/socket.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';

@@ -12,6 +12,8 @@ El `WorkyDropdownComponent` se utiliza para crear un menú desplegable personali
 - size (opcional): Tamaño del avatar o icono. Valor por defecto es 50 .
 - title (opcional): Título del dropdown.
 - isFilled (opcional): Indica si el icono del dropdown debe estar solido. Valor por defecto es false .
+- isMenu (opcional): Indica si el dropdown debe mostrar un menú. Valor por defecto es true.
+- menuTitle (opcional): Título del menú;
 
 ## Propiedades de Salida (Outputs)
 

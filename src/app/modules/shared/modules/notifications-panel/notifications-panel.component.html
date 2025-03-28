@@ -67,6 +67,7 @@
               [badge]=false
               (click)="checkDataLinkNotifications()"
               [dataLink]="dataLinkActionsNotifications"
+              menuTitle="{{ 'notification.title' | workyTranslations }}"
               (linkClicked)="handleActionsClickedNotifications($event, notification)">
             </worky-dropdown>
           </div>

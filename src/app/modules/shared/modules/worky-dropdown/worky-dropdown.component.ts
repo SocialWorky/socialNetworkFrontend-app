@@ -1,13 +1,15 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ElementRef, Renderer2 } from '@angular/core';
+import { firstValueFrom, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { ActionSheetController } from '@ionic/angular';
+
 import { AuthService } from '@auth/services/auth.service';
-import { DropdownDataLink } from './interfaces/dataLink.interface';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
-import { Subject } from 'rxjs';
 import { UserService } from '@shared/services/core-apis/users.service';
 import { User } from '@shared/interfaces/user.interface';
 import { Token } from '@shared/interfaces/token.interface';
-import { takeUntil } from 'rxjs/operators';
-import { firstValueFrom } from 'rxjs';
+import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 
 @Component({
     selector: 'worky-dropdown',
@@ -32,6 +34,10 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
 
   @Input() isFilled?: boolean = false;
 
+  @Input() isMenu?: boolean = true;
+
+  @Input() menuTitle?: string;
+
   @Output() linkClicked = new EventEmitter<DropdownDataLink<any>>();
 
   profileImageUrl: string | null = '';
@@ -44,26 +50,30 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
 
   dropdownDirection?: 'up' | 'down';
 
+  isMobile: boolean = this._deviceDetectionService.isMobile();
+
   private unsubscribe$ = new Subject<void>();
 
   constructor(
-    private authService: AuthService,
-    private globalEventService: GlobalEventService,
-    private userService: UserService,
-    private cdr: ChangeDetectorRef,
-    private elementRef: ElementRef,
-    private renderer: Renderer2
+    private _authService: AuthService,
+    private _globalEventService: GlobalEventService,
+    private _userService: UserService,
+    private _cdr: ChangeDetectorRef,
+    private _elementRef: ElementRef,
+    private _renderer: Renderer2,
+    private _deviceDetectionService: DeviceDetectionService,
+    private _actionSheetController: ActionSheetController
   ) {
-    this.decodedToken = this.authService.getDecodedToken()!;
+    this.decodedToken = this._authService.getDecodedToken()!;
   }
 
   ngOnInit() {
     if (this.img === 'avatar') this.getUser();
-    this.globalEventService.profileImage$
+    this._globalEventService.profileImage$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(newImageUrl => {
         this.profileImageUrl = newImageUrl;
-        this.cdr.markForCheck();
+        this._cdr.markForCheck();
       });
     this.checkDropdownDirection();
   }
@@ -80,12 +90,12 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   async getUser() {
     try {
       this.loaderAvatar = true;
-      const response = await firstValueFrom(this.userService.getUserById(this.decodedToken.id).pipe(takeUntil(this.unsubscribe$)));
+      const response = await firstValueFrom(this._userService.getUserById(this.decodedToken.id).pipe(takeUntil(this.unsubscribe$)));
       if (response) {
         this.user = response;
         this.profileImageUrl = response.avatar;
         this.loaderAvatar = false;
-        this.cdr.markForCheck();
+        this._cdr.markForCheck();
       } else {
         this.loaderAvatar = false;
         console.error('User not found');
@@ -97,7 +107,7 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   }
 
   checkDropdownDirection() {
-    const rect = this.elementRef.nativeElement.getBoundingClientRect();
+    const rect = this._elementRef.nativeElement.getBoundingClientRect();
     const container = this.getScrollContainer();
     const containerRect = container.getBoundingClientRect();
     const containerScrollTop = container.scrollTop;
@@ -111,20 +121,20 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
 
     if (distanceFromBottom < threshold) {
       this.dropdownDirection = 'up';
-      this.renderer.setAttribute(
-        this.elementRef.nativeElement,
+      this._renderer.setAttribute(
+        this._elementRef.nativeElement,
         'data-direction',
         this.dropdownDirection
       );
-      this.cdr.markForCheck();
+      this._cdr.markForCheck();
     } else {
       this.dropdownDirection = 'down';
-      this.renderer.setAttribute(
-        this.elementRef.nativeElement,
+      this._renderer.setAttribute(
+        this._elementRef.nativeElement,
         'data-direction',
         this.dropdownDirection
       );
-      this.cdr.markForCheck();
+      this._cdr.markForCheck();
     }
   }
 
@@ -133,7 +143,7 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
       return document.documentElement;
     }
 
-    let parent = this.elementRef.nativeElement.parentElement;
+    let parent = this._elementRef.nativeElement.parentElement;
     while (parent) {
       if (parent.scrollHeight > parent.clientHeight) {
         return parent;
@@ -143,4 +153,55 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
 
     return document.documentElement;
   }
+
+  async showMobileMenu() {
+    const buttons = this.dataLink.map((data) => ({
+      text: data.title,
+      icon: this.mapIconToIonic(data.icon || 'help'),
+      handler: () => this.handleMenuItemClick(data),
+    }));
+
+    buttons.push({
+      text: 'Cancelar',
+      icon: 'close',
+      handler: () => {},
+    });
+
+    const actionSheet = await this._actionSheetController.create({
+      header: this.menuTitle || 'Menú',
+      cssClass: 'dropdown-menu-mobile',
+      translucent: true,
+      buttons: buttons,
+    });
+
+    await actionSheet.present();
+  }
+
+  private mapIconToIonic(iconName: string): string {
+    const iconMapping: { [key: string]: string } = {
+      // Material Symbols Rounded -> Ionicons
+      'download': 'download-outline',
+      'logout': 'log-out-outline',
+      'cancel': 'close-outline',
+      'settings': 'settings-outline',
+      'person': 'person-outline',
+      'favorite': 'heart-outline',
+      'edit': 'create-outline',
+      'delete': 'trash-outline',
+      'share': 'share-outline',
+      'search': 'search-outline',
+      'add': 'add-outline',
+      'remove': 'remove-outline',
+      'check': 'checkmark-outline',
+      'arrow_upward': 'arrow-up-outline',
+      'arrow_downward': 'arrow-down-outline',
+      'arrow_forward': 'arrow-forward-outline',
+      'arrow_back': 'arrow-back-outline',
+      'push_pin': 'locate-outline',
+      'report':'alert-outline',
+    };
+
+    return iconMapping[iconName] || 'help-outline';
+  }
+
 }

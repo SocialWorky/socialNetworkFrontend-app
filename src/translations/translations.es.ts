@@ -134,6 +134,9 @@ export const translations = {
   'register.messageLoading': 'Registrando...',
   // NAVBAR COMPONENT
   'navbar.logout': 'Cerrar sesión',
+  'navbar.installApp': 'Instalar Aplicación',
+  'navbar.show_install_app': '🎉 ¡Bienvenido!',
+  'navbar.show_install_app_message': 'Instala nuestra app para una mejor experiencia.',
   // HOME COMPONENT
   'home.errorGetPublications': 'Error al obtener las publicaciones: ',
   'home.notPublications': 'No hay publicaciones',

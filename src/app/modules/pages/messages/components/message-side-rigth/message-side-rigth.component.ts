@@ -12,7 +12,7 @@ import { User } from '@shared/interfaces/user.interface';
 import { UserService } from '@shared/services/core-apis/users.service';
 import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { GifSearchComponent } from '@shared/modules/gif-search/gif-search.component';
 import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';
 import { FileUploadService } from '@shared/services/core-apis/file-upload.service';

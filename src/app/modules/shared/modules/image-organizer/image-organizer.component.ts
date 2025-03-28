@@ -4,7 +4,7 @@ import { ImageOrganizer } from './interfaces/image-organizer.interface';
 import { environment } from '@env/environment';
 import { MediaViewComponent } from './components/media-view/media-view.component';
 import { PublicationView, Comment } from '@shared/interfaces/publicationView.interface';
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 
 @Component({
     selector: 'worky-image-organizer',

@@ -6,7 +6,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { ConfigService } from '@shared/services/core-apis/config.service';
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { UserService } from '@shared/services/core-apis/users.service';
 
 @Component({

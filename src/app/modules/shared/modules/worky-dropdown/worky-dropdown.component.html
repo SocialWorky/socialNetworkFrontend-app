@@ -1,5 +1,6 @@
-<div class="nav-link" role="button" [attr.data-bs-toggle]="dataLink.length ? 'dropdown' : null"
-    (mouseenter)="checkDropdownDirection()">
+<div class="nav-link" role="button" [attr.data-bs-toggle]="!isMobile && dataLink.length ? 'dropdown' : null"
+    (mouseenter)="checkDropdownDirection()"
+    (click)="isMobile && isMenu && showMobileMenu()">
   <div *ngIf="img && img !== 'avatar'">
     <img [src]="img" class="img-dropdown rounded-circle" loading="lazy" />
   </div>
@@ -22,7 +23,7 @@
   <span *ngIf="title" class="title-dropdown">{{ title }}</span>
 </div>
 
-<div *ngIf="dataLink?.length" class="dropdown-menu"
+<div *ngIf="!isMobile && dataLink?.length" class="dropdown-menu"
   [class.dropdown-menu-end]="true"
   [class.dropdown-upn]="dropdownDirection === 'up'"
   [class.dropdown-down]="dropdownDirection === 'down'">
