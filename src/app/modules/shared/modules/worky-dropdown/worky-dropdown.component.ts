@@ -158,6 +158,7 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
     const buttons = this.dataLink.map((data) => ({
       text: data.title,
       icon: this.mapIconToIonic(data.icon || 'help'),
+      ...(data.img ? { icon: data.img } : {}),
       handler: () => this.handleMenuItemClick(data),
     }));
 

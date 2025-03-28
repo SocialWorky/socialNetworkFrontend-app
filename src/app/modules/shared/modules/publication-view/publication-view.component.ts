@@ -208,14 +208,14 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     const url = environment.BASE_URL;
     this.dataShareActions = [
       {
-        img: 'assets/img/logos/facebook.svg',
+        img: 'assets/img/logos/svg-facebook.svg',
         linkUrl: `https://web.facebook.com/sharer.php?u=${url}`,
         title: 'Facebook'
       },
       {
-        img: 'assets/img/logos/twitter_x.svg',
+        img: 'assets/img/logos/twitter-x.svg',
         linkUrl: `https://twitter.com/intent/tweet?url=${url}`,
-        title: 'Twitter'
+        title: 'X (Twitter)'
       },
       // TODO: Uncomment when the linkedin share is ready
       // {
@@ -224,7 +224,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       //   title: 'Linkedin'
       // },
       {
-        img: 'assets/img/logos/whatsapp.svg',
+        img: 'assets/img/logos/svg-whatsapp.svg',
         linkUrl: `whatsapp://send?text=${url}`,
         title: 'Whatsapp'
       },
