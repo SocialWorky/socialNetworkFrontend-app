@@ -197,4 +197,14 @@ export const translations = {
   'admin.lastRegisteredUsers-createdAt': 'Registration date',
   'admin.lastRegisteredUsers-validated': 'Validated',
   'admin.lastRegisteredUsers-pending': 'Pending',
+  // PROFILE COMPONENT
+  'profile.details': 'Details',
+  'profile.details-name': 'Name: ',
+  'profile.details-lastName': 'Last name: ',
+  'profile.details-username': 'Username: ',
+  'profile.details-email': 'Email: ',
+  'profile.details-sexo': 'Sex: ',
+  'profile.details-birthday': 'Birthday: ',
+  'profile.details-createdAt': 'Registered: ',
+  'profile.btn-editProfile': 'Edit profile',
 };

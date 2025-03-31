@@ -197,4 +197,14 @@ export const translations = {
   'admin.lastRegisteredUsers-createdAt': 'Fecha de registro',
   'admin.lastRegisteredUsers-validated': 'Validado',
   'admin.lastRegisteredUsers-pending': 'Pendiente',
+  // PROFILE COMPONENT
+  'profile.details': 'Detalles',
+  'profile.details-name': 'Nombre: ',
+  'profile.details-lastName': 'Apellido: ',
+  'profile.details-username': 'Nombre de usuario: ',
+  'profile.details-email': 'Correo electrónico: ',
+  'profile.details-sexo': 'Sexo: ',
+  'profile.details-birthday': 'Fecha de nacimiento: ',
+  'profile.details-createdAt': 'Se unió hace: ',
+  'profile.btn-editProfile': 'Editar Perfil',
 };
