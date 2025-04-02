@@ -29,7 +29,7 @@ export class GifSearchComponent {
 
   searchGifs(term: string) {
     const apiKey = environment.GIPHYAPIKEY;
-    const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${term}&limit=20`;
+    const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${term}&limit=50`;
     return this.http.get(url);
   }
 

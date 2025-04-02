@@ -9,8 +9,8 @@
   height: 100%;
   border-radius: 0.5rem;
   padding: 10px;
-  background-color: #dcdcdc;
-  border: 1px solid var(--worky-color-light);
+  background-color: map.get(color.$worky-navy, 87);
+  //border: 1px solid var(--worky-color-light);
   position: relative;
   overflow: hidden;
 
@@ -44,15 +44,15 @@
         height: 0;
         border-left: 10px solid transparent;
         border-right: 10px solid transparent;
-        border-bottom: 10px solid #fff;
+        border-bottom: 10px solid map.get(color.$worky-navy, 87);
       }
 
       .message-sent .message-triangle {
-        border-bottom-color: var(--worky-color-indigo);
+        border-bottom-color: map.get(color.$worky-blue, 9);
       }
 
       .message-received .message-triangle {
-        border-bottom-color: var(--worky-color-greyLight);
+        border-bottom-color: map.get(color.$worky-navy, 87);
         left: 10px;
       }
 
@@ -143,8 +143,8 @@
         display: flex;
         justify-content: flex-end;
         .sent-content {
-          background-color: var(--worky-color-indigo);
-          color: var(--worky-color-light);
+          background-color: map.get(color.$worky-blue, 9);
+          color: #fff;
         }
       }
 
@@ -152,8 +152,8 @@
         display: flex;
         justify-content: flex-start;
         .received-content {
-          background-color: var(--worky-color-greyLight);
-          color: var(--worky-color-dark);
+          background-color: map.get(color.$worky-navy, 87);
+          color: color.$worky-color-text;
         }
       }
 
@@ -179,7 +179,7 @@
     display: flex;
     align-items: center;
     flex-direction: column;
-    background-color: var(--worky-color-light);
+    background-color: color-mix(in srgb,var(--worky-color-light),transparent 10%);
     border-radius: 0.5rem;
     padding: 0.3rem;
     box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.1);
@@ -195,12 +195,13 @@
       .input-wrapper {
         display: flex;
         flex-grow: 1;
-        border: 1px solid var(--worky-color-greyLight);
+        //border: 1px solid var(--worky-color-greyLight);
         margin: 5px;
         border-radius: 8px;
       }
 
       .message-input {
+        color: color.$worky-color-text;
         font-size: 1rem;
         background-color: var(--worky-color-greyLight);
         width: 100%;
@@ -210,7 +211,6 @@
         resize: none;
         overflow-y: hidden;
         padding: 0.5rem 0.5rem;
-        border: 1px solid #ccc;
         border-radius: 8px;
         font-size: 1rem;
         box-sizing: border-box;

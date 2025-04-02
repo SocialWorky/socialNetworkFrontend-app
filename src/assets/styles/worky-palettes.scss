@@ -25,6 +25,15 @@ $worky-color-primary: $worky-color-navy;
 $worky-color-accent: $worky-color-blue;
 $worky-color-warn: $worky-color-magenta;
 
+// Colors icons, text, etc
+$worky-color-icon: var(--worky-color-icon);
+$worky-color-text: var(--worky-color-text);
+$worky-color-input-background: var(--worky-color-input-background);
+
+// Colors Components
+$worky-color-module-container: var(--worky-color-module-container);
+$worky-color-content-navbar: var(--worky-color-content-navbar);
+
 $worky-navy: (
    3:  color-mix(in srgb, $worky-color-navy, $worky-color-light 3%),
    6:  color-mix(in srgb, $worky-color-navy, $worky-color-light 6%),
@@ -382,9 +391,9 @@ $worky-grey: (
 /* worky App Components Colors */
 
 /* App */
-$worky-color-app-background: #FFFFFF;
-$worky-color-app-text: $worky-color-navy;
-$worky-color-app-dark: $worky-color-navy;
+$worky-color-app-background: $worky-color-light;
+// $worky-color-app-text: $worky-color-navy;
+// $worky-color-app-dark: $worky-color-navy;
 
 $worky-color-app-primary: map.get($worky-blue, 100);
 $worky-color-app-secondary: map.get($worky-blue, 56);

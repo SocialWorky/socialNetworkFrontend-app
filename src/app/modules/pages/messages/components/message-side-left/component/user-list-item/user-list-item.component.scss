@@ -33,7 +33,7 @@
       .user-name {
         font-size: 1rem;
         font-weight: 700;
-        color: var(--worky-color-blue);
+        color: color.$worky-color-text;
       }
 
       .unread-messages {

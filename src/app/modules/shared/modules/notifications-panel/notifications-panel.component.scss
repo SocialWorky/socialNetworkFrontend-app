@@ -9,7 +9,8 @@
   right: -500px;
   width: 500px;
   height: 100%;
-  background-color: #fff;
+  color: colors.$worky-color-text;
+  background-color: colors.$worky-color-light;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   transition: right 0.3s ease-out;
   z-index: 1000;
@@ -48,19 +49,20 @@
         padding: 10px 15px;
         border: none;
         border-radius: 20px;
-        background-color: colors.$worky-color-greyLight;
-        color: colors.$worky-color-navy;
+        background-color: colors.$worky-color-input-background;
+        color: colors.$worky-color-text;
         font-size: 14px;
         cursor: pointer;
         transition: all 0.3s ease;
 
         &.active {
-          background-color: colors.$worky-color-navy;
-          color: #fff;
+          background-color: map.get(colors.$worky-navy, 12);
+          color: map.get(colors.$worky-navy, 87);
         }
 
         &:hover:not(.active) {
-          background-color: colors.$worky-color-grey;
+          background-color: map.get(colors.$worky-navy, 3);
+          color: map.get(colors.$worky-navy, 87);
         }
       }
     }
@@ -90,12 +92,12 @@
     }
 
     &.notification-not-viewed {
-      background-color: map.get(colors.$worky-blue, 93);
+      background-color: map.get(colors.$worky-navy, 93);
       color: colors.$worky-color-navy;
       border: 1px solid map.get(colors.$worky-navy, 87);
 
       &:hover {
-        background-color: map.get(colors.$worky-yellow, 56);
+        background-color: map.get(colors.$worky-navy, 72);
       }
     }
 
@@ -159,7 +161,7 @@
         display: flex;
       }
       ::ng-deep worky-dropdown .nav-link:hover{
-        color: colors.$worky-color-yellow;
+        color: #fff;
       }
 
       &:hover {

@@ -203,6 +203,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   menuProfile() {
   this.dataLinkProfile = [
+    { icon: 'dark_mode', function: () => this.toggleDarkMode(true), title: 'modo oscuro'},
     { icon: 'logout', function: this.logoutUser.bind(this),  title: translations['navbar.logout']},
   ];
 }
@@ -210,6 +211,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   handleLinkClicked(data: DropdownDataLink<any>) {
     if (data.function) {
       if (typeof data.function === 'function') {
+        console.log('Function clicked:', data.function);
         data.function();
       }
     }
@@ -251,6 +253,16 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
         console.error('Error getting messages', error);
       }
     });
+  }
+
+  toggleDarkMode(isDarkMode: boolean) {
+    console.log('Dark mode toggled:', isDarkMode);
+    const body = document.body;
+    if (isDarkMode) {
+      body.classList.add('dark-mode');
+    } else {
+      body.classList.remove('dark-mode');
+    }
   }
 
 }

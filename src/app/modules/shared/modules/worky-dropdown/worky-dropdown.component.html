@@ -29,7 +29,7 @@
   [class.dropdown-down]="dropdownDirection === 'down'">
   <div class="content-drop-dow" *ngFor="let data of dataLink; let dataIndex = index;" (click)="handleMenuItemClick(data)">
     <span *ngIf="data.icon"
-      class="material-symbols-rounded"
+      class="material-symbols-rounded icon-worky-dropdown"
       [ngClass]="{'filled': isFilled}"
       [ngClass]="data?.color">
       {{ data.icon }}

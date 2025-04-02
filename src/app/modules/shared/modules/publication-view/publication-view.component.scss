@@ -28,7 +28,7 @@
       margin-left: 5px;
 
       &:hover {
-        background-color: colors.$worky-color-greyLight;
+        background-color: color-mix(in srgb, var(--worky-color-text), transparent 90%);
       }
     }
 
@@ -133,6 +133,7 @@
     .publication-content {
       padding: 16px;
       .content {
+        color: colors.$worky-color-text;
         overflow: hidden;
       }
     }
@@ -173,6 +174,8 @@
       position: relative;
       display: flex;
       justify-content: space-around;
+      background-color: color-mix(in srgb, var(--worky-color-light), transparent 60%);
+      padding: 8px 0px;
       margin-top: 1rem;
       border-top: 1px solid colors.$worky-color-grey;
       border-bottom: 1px solid colors.$worky-color-grey;
@@ -183,23 +186,11 @@
         gap: 0.2rem;
         padding: 8px 20px;
         border-radius: variables.$worky-border-radius-medium;
-        color: colors.$worky-color-navy;
+        color: colors.$worky-color-text;
         cursor: pointer;
         &:hover {
-          color: colors.$worky-color-blue;
-          background-color: colors.$worky-color-greyLight;
-        }
-
-        ::ng-deep worky-dropdown {
-          .nav-link {
-            span {
-              color: colors.$worky-color-navy;
-            }
-            &:hover span {
-              color: colors.$worky-color-blue;
-            }
-          }
-
+          color: color-mix(in srgb, var(--worky-color-text), transparent 10%);
+          background-color: color-mix(in srgb, var(--worky-color-text), transparent 90%);
         }
 
       }

@@ -126,10 +126,10 @@
           }
         }
 
-        p {
+        p, span {
             font-size: 14px;
             font-weight: medium;
-            color: map.get(color.$worky-navy, 24);
+            color: color.$worky-color-navy;
         }
       }
     }

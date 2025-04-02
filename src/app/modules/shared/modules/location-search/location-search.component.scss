@@ -7,10 +7,13 @@
   padding: 5px 15px;
   align-content: center;
   padding: 15px;
+  color: colors.$worky-color-text;
+  background-color: color-mix(in srgb,var(--worky-color-light),transparent 20%);
   .search-container {
     display: flex;
     align-items: center;
     position: relative;
+    gap: 10px;
     .my-location {
       cursor: pointer;
     }
@@ -18,7 +21,7 @@
 
   .search-icon {
     position: absolute;
-    color: colors.$worky-color-app-dark;
+    color: colors.$worky-color-text;
     left: 8px;
     top: 50%;
     transform: translateY(-50%);
@@ -27,6 +30,7 @@
   .form-control-search {
     width: 90%;
     padding: 5px 40px;
+    background-color: color-mix(in srgb,var(--worky-color-light),transparent 12%);
     border-radius: variables.$worky-border-radius-medium;
     border: 1px solid colors.$worky-color-greyLight;
 
@@ -40,13 +44,15 @@
 .location-search-results {
    max-height: 250px;
    overflow-y: auto;
+   color: colors.$worky-color-text;
+   background-color: color-mix(in srgb,var(--worky-color-light),transparent 20%);
   .location-search-result {
     display: flex;
     padding: 10px;
     cursor: pointer;
     &:hover {
-      color: colors.$worky-color-light;
-      background-color: colors.$worky-background-header-color;
+      color: colors.$worky-color-text;
+      background-color: color-mix(in srgb,var(--worky-color-navy),transparent 80%);
     }
   }
 }

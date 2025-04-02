@@ -169,14 +169,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     const menuDeletePublications = {
       icon: 'delete',
       function: this.deletePublications.bind(this),
-      title: translations['publicationsView.deletePublication'],
-      color: Colors.RED
+      title: translations['publicationsView.deletePublication']
     };
     const menuFixedPublications = {
       icon: 'push_pin',
       function: this.fixedPublications.bind(this),
-      title: !this.publication.fixed ? translations['publicationsView.fixedPublication'] : translations['publicationsView.unfixedPublication'],
-      color: this.publication.fixed ? Colors.RED : Colors.BLUE
+      title: !this.publication.fixed ? translations['publicationsView.fixedPublication'] : translations['publicationsView.unfixedPublication']
     };
 
     if (userId === this.dataUser?.id || this.dataUser?.role === RoleUser.ADMIN) {
@@ -200,7 +198,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   menuActions() {
     this.dataLinkActions = [
-      { icon: 'report', function: this.createReport.bind(this), title: translations['publicationsView.reportPublication'], color: Colors.RED },
+      { icon: 'report', function: this.createReport.bind(this), title: translations['publicationsView.reportPublication'] },
     ];
   }
 

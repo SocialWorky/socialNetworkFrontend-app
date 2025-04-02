@@ -1,7 +1,7 @@
-@use 'src/assets/styles/worky-palettes.scss' as color;
-@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
-@use 'src/assets/styles/worky-variables.scss' as variables;
-@use 'sass:map';
+@use "src/assets/styles/worky-palettes.scss" as color;
+@use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
+@use "src/assets/styles/worky-variables.scss" as variables;
+@use "sass:map";
 
 .publishing-container {
   padding: 16px;
@@ -22,7 +22,7 @@
         .name {
           font-size: 1rem;
           font-weight: 500;
-          color: color.$worky-color-indigo;
+          color: color.$worky-color-text;
         }
 
         .geoLocationName {
@@ -35,9 +35,7 @@
             font-weight: 700;
           }
         }
-
       }
-
 
       .form-select {
         display: flex;
@@ -45,8 +43,8 @@
         align-items: center;
         width: 130px;
         margin-top: 2px;
-        background: color.$worky-color-greyLight;
-        border: 1px solid color.$worky-color-grey;
+        background-color: color.$worky-color-input-background;
+        color: color.$worky-color-text;
         padding: 8px;
         border-radius: 6px;
         font-size: 14px;
@@ -55,23 +53,28 @@
       }
     }
 
-    .dropdown {
+    .dropdown-privacy {
       ul {
+        background-color: color.$worky-color-input-background;
+        color: color.$worky-color-text;
         li {
           padding: 3px 0;
           cursor: pointer;
-
-          &:hover {
-            background: color.$worky-color-greyLight;
-          }
           .dropdown-item {
             display: flex;
             align-items: center;
             padding: 5px 10px;
             font-size: 14px;
-            color: color.$worky-color-dark;
+            color: color.$worky-color-text;
             i {
               margin-right: 10px;
+            }
+            &:hover {
+              background-color: color-mix(
+                in srgb,
+                var(--worky-color-light),
+                transparent 50%
+              );
             }
           }
         }
@@ -97,16 +100,24 @@
         max-height: 500px;
         box-sizing: border-box;
         border-radius: 8px;
-        border: 1px solid color.$worky-color-light;
+        border: 1px solid color.$worky-color-greyLight;
         resize: none;
         padding: 8px;
         overflow: auto;
-        background: color.$worky-color-greyLight;
+        background-color: color-mix(
+          in srgb,
+          var(--worky-color-light),
+          transparent 60%
+        );
         color: color.$worky-color-dark;
         @include breakpoints.below-sm {
           max-height: 200px;
         }
-        ::ng-deep .textarea-wrapper .textarea-wrapper-inner .native-wrapper .native-textarea {
+        ::ng-deep
+          .textarea-wrapper
+          .textarea-wrapper-inner
+          .native-wrapper
+          .native-textarea {
           padding: 2px;
         }
       }
@@ -148,12 +159,16 @@
       border-radius: 50%;
     }
 
-
     .extra-content {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin: 5px;
+      background-color: color-mix(
+        in srgb,
+        var(--worky-color-light),
+        transparent 60%
+      );
+      margin: 5px 0px;
       gap: 2px;
       padding: 5px;
       border: 1px solid color.$worky-color-greyLight;
@@ -181,13 +196,16 @@
         display: flex;
         align-items: center;
         justify-content: left;
+        gap: 3px;
         .extra-content-item {
+          background-color: color.$worky-color-input-background;
+          padding: 5px;
           cursor: pointer;
           i {
-            color: color.$worky-color-grey;
+            color: color-mix(in srgb, var(--worky-color-text), transparent 60%);
           }
           i:hover {
-            color: color.$worky-color-indigo;
+            color: color-mix(in srgb, var(--worky-color-text), transparent 10%);
           }
         }
       }
@@ -196,14 +214,8 @@
         display: flex;
         align-items: center;
         justify-content: flex-end;
+        gap: 3px;
 
-        .emoji-icon {
-          color: color.$worky-color-grey;
-          cursor: pointer;
-          :hover {
-            color: color.$worky-color-indigo;
-          }
-        }
         .emoji-menu {
           position: absolute;
           top: 100%;
@@ -212,32 +224,19 @@
           overflow-y: auto;
         }
 
-        .location-on {
-          color: map.get(color.$worky-red, 56);
+        div {
+          background-color: color.$worky-color-input-background;
+          padding: 5px;
           cursor: pointer;
-          :hover {
-            color: map.get(color.$worky-red, 9);
-          }
         }
 
-        .file-upload {
-          color: map.get(color.$worky-green, 56);
-          cursor: pointer;
-          :hover {
-            color: map.get(color.$worky-green, 9);
-          }
+        i {
+          color: color-mix(in srgb, var(--worky-color-text), transparent 60%);
         }
-
-        .gif-icon {
-          color: map.get(color.$worky-red, 72);
-          cursor: pointer;
-          :hover {
-            color: map.get(color.$worky-red, 9);
-          }
+        i:hover {
+          color: color-mix(in srgb, var(--worky-color-text), transparent 10%);
         }
-
       }
-
     }
   }
 
@@ -264,5 +263,8 @@
       width: 100%;
     }
   }
+}
 
+::ng-deep mat-dialog-container .mat-mdc-dialog-inner-container .mat-mdc-dialog-surface.mdc-dialog__surface {
+  border-radius: 12px;
 }

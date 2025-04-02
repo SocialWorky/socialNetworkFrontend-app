@@ -24,7 +24,7 @@ export class WeatherComponent implements OnInit, OnDestroy {
   currentHour: number = 0;
   weatherData: WeatherMain = this.getInitialWeatherData();
   city?: string;
-  i: number = 0; // Definir la propiedad i
+  i: number = 0;
 
   private unsubscribe$ = new Subject<void>();
   private timeSubscription?: Subscription;

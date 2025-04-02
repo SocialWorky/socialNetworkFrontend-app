@@ -10,6 +10,7 @@
   position: absolute;
   margin-top: 10px;
   left: 0;
+  background-color: color-mix(in srgb, var(--worky-color-light), transparent 20%);
   border-radius: var.$worky-border-radius-medium;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -36,15 +37,23 @@
   cursor: pointer;
   transition: 0.3s;
   gap: 10px;
+  color: colors.$worky-color-text;
+  background-color: color-mix(in srgb, var(--worky-color-light), transparent 20%);
 
   &:hover {
-    color: colors.$worky-color-light;
-    background-color: map.get(colors.$worky-blue, 56);
+    background-color: map.get(colors.$worky-navy, 87);
+  }
+
+  .icon-worky-dropdown {
+    border-radius: 50%;
+    background-color: map.get(colors.$worky-navy, 87);
+    padding: 5px;
   }
 
   .icon-img-dropdown {
     width: 20px;
     height: 20px;
+    padding: 5px;
   }
 }
 

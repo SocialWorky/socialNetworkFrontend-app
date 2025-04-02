@@ -1,65 +1,68 @@
+@use "src/assets/styles/worky-variables" as variables;
+@use "src/assets/styles/worky-palettes" as colors;
+@use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
+@use "sass:map";
+
 .content-news {
-    display: flex;
-    flex-direction: column;
-    overflow-y: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: #ffffff #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+  color: colors.$worky-color-text;
+  scrollbar-width: thin;
+  scrollbar-color: #ffffff #f0f0f0;
 
-    .news-article {
-        margin-bottom: 20px;
-    }
+  .news-article {
+    margin-bottom: 20px;
+  }
 
-    .news-card {
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        overflow: hidden;
-    }
+  .news-card {
+    border-radius: 5px;
+    overflow: hidden;
+  }
 
-    .news-image {
-        width: 100%;
-        height: auto;
-    }
+  .news-image {
+    width: 100%;
+    height: auto;
+  }
 
-    .news-card-content {
-        padding: 15px;
-    }
+  .news-card-content {
+    padding: 15px;
+  }
 
-    .news-title {
-        font-size: 1.2em;
-        margin-bottom: 5px;
-    }
+  .news-title {
+    font-size: 1.2em;
+    margin-bottom: 5px;
+  }
 
-    .news-date {
-        color: #888;
-        margin-bottom: 10px;
-    }
+  .news-date {
+    color: #888;
+    margin-bottom: 10px;
+  }
 
-    .news-description {
-      margin-bottom: 15px;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 4;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+  .news-description {
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-    .news-read-more {
-        display: block;
-        text-align: center;
-        padding: 10px;
-        background-color: #007bff;
-        color: #fff;
-        text-decoration: none;
-        border-radius: 5px;
-    }
+  .news-read-more {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    background-color: map.get(colors.$worky-navy, 12);
+    color: map.get(colors.$worky-navy, 87);
+    text-decoration: none;
+    border-radius: 5px;
+  }
 
-    .news-read-more:hover {
-        background-color: #0056b3;
-    }
+  .news-read-more:hover {
+    background-color: map.get(colors.$worky-navy, 3);
+  }
 
-    &:hover {
-        overflow-y: auto; /* Muestra el scroll cuando se coloca el cursor sobre el widget */
-    }
-
-
-} 
+  &:hover {
+    overflow-y: auto;
+  }
+}

@@ -43,14 +43,15 @@
       align-items: center;
       i {
         border-radius: 50%;
-        color: white;
-        background-color: color.$worky-color-navy;
+        color: color.$worky-color-text;
+        background-color: color.$worky-color-input-background;
         padding: 8px;
         margin: 2px 10px 2px 0;
       }
+      span {
+        color: color.$worky-color-text;
+      }
       .label-detail {
-        font-size: 16px;
-        color: map.get(color.$worky-navy, 24);
         font-weight: bold;
         margin-right: 5px;
       }

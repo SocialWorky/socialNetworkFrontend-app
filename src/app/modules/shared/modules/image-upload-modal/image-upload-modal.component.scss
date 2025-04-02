@@ -1,9 +1,13 @@
 @use 'src/assets/styles/worky-typography.scss' as Fonts;
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'sass:map';
 
 .upload-file-modal {
   position: relative;
+  background-color: color.$worky-color-light;
+  border: 2px solid color.$worky-color-grey;
+  color: color.$worky-color-text;
   padding: 20px;
   width: 450px;
   max-width: 600px;

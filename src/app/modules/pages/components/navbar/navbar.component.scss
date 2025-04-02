@@ -7,7 +7,7 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  background-color: transparent;
+  background: colors.$worky-color-content-navbar;
   z-index: 10;
   @include breakpoints.below-sm {
     flex-direction: column;
@@ -60,15 +60,22 @@
 
       .search-icon {
         position: absolute;
-        color: colors.$worky-color-app-dark;
+        color: colors.$worky-color-text;
         left: 8px;
         top: 50%;
         transform: translateY(-50%);
         z-index: 1;
       }
       .form-control {
+        border: none;
         padding-left: 40px;
+        color: colors.$worky-color-text;
+        background-color: colors.$worky-color-input-background;
         border-radius: variables.$worky-border-radius-medium;
+        &:focus {
+          outline: none;
+          box-shadow: none;
+        }
       }
     }
 
