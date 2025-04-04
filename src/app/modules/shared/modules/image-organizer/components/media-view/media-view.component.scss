@@ -27,6 +27,7 @@
     width: 35%;
     height: 95vh;
     padding: 5px;
+    background-color: color-mix(in srgb, var(--worky-color-light), transparent 5%);
     @include breakpoints.below-sm {
       width: 100%;
       height: 65vh;

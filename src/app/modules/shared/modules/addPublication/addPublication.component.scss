@@ -163,11 +163,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background-color: color-mix(
-        in srgb,
-        var(--worky-color-light),
-        transparent 60%
-      );
+      flex-wrap: wrap;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 60%);
       margin: 5px 0px;
       gap: 2px;
       padding: 5px;
@@ -185,7 +182,7 @@
         padding: 2px;
         @include breakpoints.below-sm {
           .material-icons {
-            font-size: 35px;
+            font-size: 2rem;
           }
         }
         &:hover {
@@ -197,6 +194,7 @@
         display: flex;
         align-items: center;
         justify-content: left;
+        flex-wrap: wrap;
         gap: 3px;
         .extra-content-item {
           background-color: color.$worky-color-input-background;
@@ -218,6 +216,7 @@
         display: flex;
         align-items: center;
         justify-content: flex-end;
+        flex-wrap: wrap;
         gap: 3px;
 
         .emoji-menu {

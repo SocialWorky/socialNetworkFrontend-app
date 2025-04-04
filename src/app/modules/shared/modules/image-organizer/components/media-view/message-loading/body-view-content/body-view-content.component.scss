@@ -1,6 +1,6 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-palettes' as colors;
-@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;  
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
 .content-view-comment {
   display: flex;
@@ -17,12 +17,13 @@
         gap: 0.5rem;
         margin-top: 0.3rem;
         .publication-comment-content {
+          color: colors.$worky-color-text;
           max-width: 100%;
           .publication-comment-data {
             padding: 0.4rem 1rem 0.4rem 1rem;
             display: flex;
             flex-direction: column;
-            background-color: colors.$worky-color-greyLight;
+            background-color: color-mix(in srgb, var(--worky-color-light), transparent 40%);
             border-radius: 8px;
             span {
               font-size: variables.$worky-font-size-2;
@@ -33,7 +34,7 @@
               justify-content: space-between;
               margin-bottom: 10px;
               .comment-author {
-                color: colors.$worky-color-blue;
+                color: colors.$worky-color-text;
               }
               .delete-comment {
                 margin-left: 15px;

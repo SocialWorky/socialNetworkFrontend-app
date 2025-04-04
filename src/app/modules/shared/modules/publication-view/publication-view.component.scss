@@ -212,6 +212,7 @@
       gap: 0.5rem;
       margin-top: 0.3rem;
       .publication-comment-content {
+         color: colors.$worky-color-text;
          max-width: 100%;
         .publication-comment-data {
           padding: 0.4rem 1rem 0.4rem 1rem;
@@ -228,11 +229,11 @@
             justify-content: space-between;
             margin-bottom: 10px;
             .comment-author {
-              color: colors.$worky-color-blue;
+              color: colors.$worky-color-text;
             }
             .link-profile {
               cursor: pointer;
-              color: colors.$worky-color-blue;
+              color: colors.$worky-color-text;
             }
             .delete-comment {
               margin-left: 15px;
