@@ -123,7 +123,8 @@ export class AuthService {
   }
 
   clearSession() {
-    localStorage.clear();
+    localStorage.removeItem('token');
+    localStorage.removeItem('lastLogin');
     sessionStorage.clear();
     this.router.navigate(['/auth']);
   }

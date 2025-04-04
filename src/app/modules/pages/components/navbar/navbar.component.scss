@@ -1,7 +1,7 @@
-@use 'src/assets/styles/worky-variables' as variables;
-@use 'src/assets/styles/worky-palettes' as colors;
-@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
-@use 'sass:map';
+@use "src/assets/styles/worky-variables" as variables;
+@use "src/assets/styles/worky-palettes" as colors;
+@use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
+@use "sass:map";
 
 .content-navbar {
   display: flex;
@@ -118,7 +118,6 @@
       background: colors.$worky-color-greyLight;
       cursor: pointer;
     }
-
   }
 
   ::ng-deep worky-menu-component {
@@ -129,7 +128,6 @@
     @include breakpoints.below-sm {
       justify-content: flex-start;
     }
-
   }
 
   .worky-profile {
@@ -147,12 +145,22 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: map.get(colors.$worky-navy, 24);
+      background-color: color-mix(in srgb, var(--worky-color-light), transparent 70%);
       border-radius: 50%;
       margin: 4px;
 
-      &:focus, &:hover {
-        background: map.get(colors.$worky-navy, 56);
+      &:focus,
+      &:hover {
+        background: map.get(colors.$worky-navy, 72);
+      }
+    }
+
+    ::ng-deep worky-dropdown {
+      .nav-link {
+        color: #FFF;
+        &:hover {
+          color: colors.$worky-color-text;
+        }
       }
     }
 
@@ -169,12 +177,12 @@
       font-size: variables.$worky-font-size-9;
     }
     div.nav-link {
-      &:focus, &:hover {
+      &:focus,
+      &:hover {
         color: colors.$worky-color-greyLight;
       }
     }
   }
-
 }
 
 .content-navbar.sticky-content {

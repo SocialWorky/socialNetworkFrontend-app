@@ -14,6 +14,7 @@
   }
   .content {
     width: 100%;
+    color: color.$worky-color-text;
     display: flex;
     @include breakpoints.below-sm {
       flex-direction: column;

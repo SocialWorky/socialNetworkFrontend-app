@@ -10,7 +10,6 @@
   border-radius: 0.5rem;
   padding: 10px;
   background-color: map.get(color.$worky-navy, 87);
-  //border: 1px solid var(--worky-color-light);
   position: relative;
   overflow: hidden;
 
@@ -195,7 +194,6 @@
       .input-wrapper {
         display: flex;
         flex-grow: 1;
-        //border: 1px solid var(--worky-color-greyLight);
         margin: 5px;
         border-radius: 8px;
       }
@@ -253,19 +251,21 @@
   align-items: center;
   height: 80px;
   padding: 20px;
-  background: color.$worky-color-navy;
+  background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  color: #FFF;
+  color: color.$worky-color-text;
   flex-shrink: 0;
 
   .header-content-mobil-left {
     display: flex;
     align-items: center;
+    font-size: 1.2rem;
+    font-weight: 600;
 
     .back-button {
       display: flex;
-      background: #ffffffc4;
-      color: color.$worky-color-navy;
+      background-color: map.get(color.$worky-navy, 12);
+      color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
       margin-left: 10px;
       margin-right: 20px;
       border-radius: 50%;

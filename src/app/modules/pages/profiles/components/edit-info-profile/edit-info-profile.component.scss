@@ -6,6 +6,8 @@
   display: flex;
   width: 550px;
   padding: 15px;
+  background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+  color: color.$worky-color-text;
   @include breakpoints.below-sm {
     width: 100%;
   }
@@ -18,14 +20,14 @@
       margin: 0 auto;
       @include breakpoints.below-sm {
         width: 95%;
-      }   
+      }
       .form-input {
         //margin-top: 50px;
         display: flex;
         flex-direction: column;
         justify-content: center;
       }
-        
+
       span {
         @include Fonts.worky-text;
         color: color.$worky-color-navy;
@@ -45,4 +47,4 @@
     max-width: 100% !important;
     width: 95%;
   }
-} 
+}

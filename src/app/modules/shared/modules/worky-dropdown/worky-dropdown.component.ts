@@ -200,6 +200,8 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
       'arrow_back': 'arrow-back-outline',
       'push_pin': 'locate-outline',
       'report':'alert-outline',
+      'dark_mode': 'moon-outline',
+      'light_mode': 'sunny-outline',
     };
 
     return iconMapping[iconName] || 'help-outline';

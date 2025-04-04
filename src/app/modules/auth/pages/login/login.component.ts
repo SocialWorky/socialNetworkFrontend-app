@@ -21,6 +21,7 @@ import { EmailNotificationService } from '@shared/services/notifications/email-n
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { MetaTagService } from '@shared/services/meta-tag.service';
 import { LoginMethods } from './interfaces/login.interface';
+import { User } from '@shared/interfaces/user.interface';
 
 @Component({
     selector: 'worky-login',
@@ -170,10 +171,20 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
     await this._authApiService.loginUser(credentials).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (response: any) => {
+        console.log('LOGIN RESPONSE: ', response);
         if (response && response.token) {
           localStorage.setItem('token', response.token);
 
           localStorage.setItem('lastLogin', new Date().toISOString());
+
+          localStorage.setItem('isDarkMode', response.user.isDarkMode.toString());
+
+          const body = document.body;
+          if (response.user.isDarkMode) {
+            body.classList.add('dark-mode');
+          } else {
+            body.classList.remove('dark-mode');
+          }
 
           const tokenResponse = await this._authService.getDecodedToken()!;
 
@@ -263,8 +274,17 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
         password: await this._authService.generatePassword(),
       };
 
-      const response = await this._authApiService.loginGoogle(dataGoogle).toPromise() as { token: string };
+      const response = await this._authApiService.loginGoogle(dataGoogle).toPromise() as { token: string, user: User };
       localStorage.setItem('token', response?.token);
+
+      const body = document.body;
+      if (response.user.isDarkMode) {
+        body.classList.add('dark-mode');
+      } else {
+        body.classList.remove('dark-mode');
+      }
+
+      localStorage.setItem('isDarkMode', response.user.isDarkMode.toString());
 
       const tokenResponse = this._authService.getDecodedToken()!;
 

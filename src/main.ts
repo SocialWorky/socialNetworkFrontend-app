@@ -32,6 +32,13 @@ async function initializeApp() {
       });
     }
 
+    const body = document.body;
+    if (localStorage.getItem('isDarkMode') === 'true') {
+      body.classList.add('dark-mode');
+    } else {
+      body.classList.remove('dark-mode');
+    }
+
     const appModuleRef = await platformBrowserDynamic().bootstrapModule(AppModule);
     defineCustomElements(window);
 
@@ -87,7 +94,7 @@ function updateMetaTags(configData: any) {
 
 function updateMetaTag(attrName: string, attrValue: string, content: string) {
   let element: HTMLMetaElement | null = document.querySelector(`meta[${attrName}="${attrValue}"]`);
-  
+
   if (element) {
     element.setAttribute('content', content);
   } else {

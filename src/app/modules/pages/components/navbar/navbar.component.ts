@@ -52,6 +52,8 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   scrolledTop = false;
 
+  isDarkMode = true;
+
   @Input() isMessages: boolean = false;
 
 
@@ -74,6 +76,13 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async ngOnInit() {
+
+    if (localStorage.getItem('isDarkMode') === 'true') {
+      this.isDarkMode = false;
+      this.menuProfile();
+      this._cdr.markForCheck();
+    }
+
     this.isMobile = this._deviceDetectionService.isMobile();
     this._deviceDetectionService.getResizeEvent().pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
       this.isMobile = this._deviceDetectionService.isMobile();
@@ -202,8 +211,14 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   menuProfile() {
+  let iconMode = 'light_mode';
+  if (this.isDarkMode) {
+    iconMode = 'dark_mode';
+  } else {
+    iconMode = 'light_mode';
+  }
   this.dataLinkProfile = [
-    { icon: 'dark_mode', function: () => this.toggleDarkMode(true), title: 'modo oscuro'},
+    { icon: iconMode, function: () => this.toggleDarkMode(this.isDarkMode), title: this.isDarkMode ? 'modo oscuro' : 'modo claro' },
     { icon: 'logout', function: this.logoutUser.bind(this),  title: translations['navbar.logout']},
   ];
 }
@@ -256,13 +271,24 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   toggleDarkMode(isDarkMode: boolean) {
-    console.log('Dark mode toggled:', isDarkMode);
     const body = document.body;
+    const userId = this._authService.getDecodedToken()?.id!;
     if (isDarkMode) {
       body.classList.add('dark-mode');
+      localStorage.setItem('isDarkMode', 'true');
+      this._userService.userEdit(userId, { isDarkMode: true }).pipe(takeUntil(this.unsubscribe$)).subscribe({});
     } else {
+      localStorage.setItem('isDarkMode', 'false');
       body.classList.remove('dark-mode');
+      this._userService.userEdit(userId, { isDarkMode: false }).pipe(takeUntil(this.unsubscribe$)).subscribe({});
     }
+
+    this.isDarkMode = !isDarkMode;
+    this.menuProfile();
+    this.checkAdminDataLink();
+    this.checkPwaInstall();
+    this._cdr.markForCheck();
+
   }
 
 }

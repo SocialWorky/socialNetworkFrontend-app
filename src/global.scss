@@ -98,11 +98,18 @@ img, video {
  .worky-input {
     .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mat-mdc-floating-label {
       top: calc(var(--mat-form-field-container-height) / 2);
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+      color: color.$worky-color-text;
     }
     .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-floating-label--float-above {
       top: calc(var(--mat-form-field-container-height) / 4);
+      color: color.$worky-color-text;
     }
+
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-text-field__input {
+      color: color.$worky-color-text;
+    }
+
     .mdc-line-ripple {
       display: none;
     }
@@ -114,22 +121,64 @@ img, video {
     .mdc-text-field {
       overflow: visible;
       .mat-mdc-form-field-focus-overlay {
-        background-color: color.$worky-color-light;
+        background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
         border-radius: 8px;
       }
     }
     .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+      .mat-mdc-form-field-infix label {
+         color: color.$worky-color-text;
+      }
     }
     .mat-mdc-text-field-wrapper:hover .mat-mdc-form-field-focus-overlay {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+      .mat-mdc-form-field-infix label {
+         color: color.$worky-color-text;
+      }
     }
     .mat-mdc-form-field.mat-focused:not(:focus) .mat-mdc-form-field-focus-overlay {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+      .mat-mdc-form-field-infix label {
+         color: color.$worky-color-text;
+      }
     }
     .mat-mdc-form-field.mat-focused .mat-mdc-form-field-focus-overlay {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+      .mat-mdc-form-field-infix label {
+         color: color.$worky-color-text;
+      }
     }
+    .mat-mdc-text-field-wrapper:not(:focus) {
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+      .mat-mdc-form-field-infix label,input {
+        &:hover {
+          color: color.$worky-color-text;
+        }
+      }
+    }
+
+    /* Cambia el color del label cuando el mouse pasa sobre el contenedor y el campo NO está enfocado */
+    .mat-mdc-text-field-wrapper:not(:focus-within):hover .mat-mdc-form-field-infix label {
+      color: var(--worky-color-text); /* Color específico para el hover del label */
+    }
+
+    /* Asegúrate de que el input no afecte el color del label */
+    .mat-mdc-text-field-wrapper:not(:focus-within):hover .mat-mdc-form-field-infix input {
+      color: inherit; /* Mantén el color del texto del input como está */
+    }
+
+    /* Maneja el caso cuando el campo no está lleno */
+    .mat-mdc-text-field-wrapper:not(.mdc-text-field--filled):not(:focus-within):hover .mat-mdc-form-field-infix label {
+      color: var(--worky-color-text); /* Mismo color para campos no llenos */
+    }
+
+    /* Cambiar el color de fondo del input cuando está prellenado */
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-infix input:-webkit-autofill {
+      -webkit-box-shadow: 0 0 0px 1000px var(--worky-color-light) inset !important;
+      -webkit-text-fill-color: var(--worky-color-text) !important; /* Cambiar el color del texto */
+    }
+
     .mat-mdc-text-field--focused {
       border-color: color.$worky-color-blue;
     }
@@ -202,7 +251,13 @@ img, video {
     }
     .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-floating-label--float-above {
       top: calc(var(--mat-form-field-container-height) / 4);
+      color: color.$worky-color-text;
     }
+
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-text-field__input {
+      color: color.$worky-color-text;
+    }
+
     .mdc-line-ripple {
       display: none;
     }
@@ -214,20 +269,20 @@ img, video {
     .mdc-text-field {
       overflow: visible;
       .mat-mdc-form-field-focus-overlay {
-        background-color: color.$worky-color-light;
+        background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
       }
     }
     .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
     }
     .mat-mdc-text-field-wrapper:hover .mat-mdc-form-field-focus-overlay {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
     }
     .mat-mdc-form-field.mat-focused:not(:focus) .mat-mdc-form-field-focus-overlay {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
     }
     .mat-mdc-form-field.mat-focused .mat-mdc-form-field-focus-overlay {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
     }
     .mat-mdc-text-field--focused {
       border-color: color.$worky-color-blue;
@@ -291,6 +346,14 @@ img, video {
       .mat-mdc-floating-label.mdc-floating-label {
         color: color.$worky-color-red;
       }
+    }
+  }
+
+  .worky-toggle {
+    .mdc-label {
+      font-size: 14px;
+      font-weight: bold;
+      color: color.$worky-color-text;
     }
   }
 

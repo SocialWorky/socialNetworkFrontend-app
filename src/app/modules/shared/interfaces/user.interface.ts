@@ -13,4 +13,5 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   profile: ProfileData;
+  isDarkMode: boolean;
 }
