@@ -2,12 +2,14 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestro
 import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
 import { Subject, takeUntil } from 'rxjs';
+import { Capacitor } from '@capacitor/core';
 
 import { getTranslationsLanguage } from '../translations/translations';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { LoadingService } from '@shared/services/loading.service';
 import { SocketService } from '@shared/services/socket.service';
+import { PushNotificationService } from '@shared/services/notifications/push-notification.service';
 
 @Component({
     selector: 'worky-root',
@@ -31,8 +33,10 @@ export class AppComponent implements OnInit, OnDestroy {
     private _notificationUsersService: NotificationUsersService,
     private _loadingService: LoadingService,
     private _socketService: SocketService,
+    private _pushNotificationService: PushNotificationService,
   ) {
     this._notificationUsersService.setupInactivityListeners();
+    if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();
   }
 
   ngOnInit(): void {

@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.worky.cl',
+  appId: 'com.worky.dev',
   appName: 'socialNetworkFrontend-app',
   webDir: 'www',
   server: {
