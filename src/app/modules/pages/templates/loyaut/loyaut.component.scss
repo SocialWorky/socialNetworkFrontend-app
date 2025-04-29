@@ -4,18 +4,18 @@
 
 .content-app {
   width: 100vw;
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   flex-direction: column;
   background-color: color.$worky-color-light;
   grid-template:
   "header" 6vh
-  "main" 94vh;
+  "main" 94dvh;
   @include breakpoints.below-sm {
     grid-template:
     "header" 14vh
-    "main" 86vh;
+    "main" 86dvh;
   }
 
   .navbar-content {
@@ -44,7 +44,7 @@
 ::ng-deep worky-content-left-side,
 ::ng-deep worky-content-right-side {
   width: variables.$worky-container-width-sidebar;
-  height: 94vh;
+  height: 94dvh;
   padding: 5px;
   display: block;
   justify-content: space-around;
@@ -59,10 +59,10 @@
 .social-content-center {
   width: variables.$worky-container-width-content;
   grid-area: main;
-  height: 94vh;
+  height: 94dvh;
   min-width: variables.$worky-app-min-width;
   @include breakpoints.below-sm {
-    height: 90vh;
+    height: 90dvh;
     width: 100vw;
   }
 }
@@ -76,12 +76,12 @@
   margin: inherit;
   max-width: 100%;
   width: 100%;
-  height: 94vh;
+  height: 94dvh;
   padding: 10px;
   overflow: hidden;
   @include breakpoints.below-sm {
     padding: 0px;
-    height: 87vh;
+    height: 87dvh;
   }
 }
 

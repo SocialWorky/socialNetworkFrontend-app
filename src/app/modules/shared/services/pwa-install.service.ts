@@ -1,6 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Subject } from 'rxjs';
+import { Capacitor } from '@capacitor/core';
 
 import { AlertService } from './alert.service';
 import { Alerts, Position } from './../enums/alerts.enum';
@@ -18,7 +19,7 @@ export class PwaInstallService {
   constructor(
     private ngZone: NgZone,
     private alertController: AlertController,
-    private _alertService: AlertService
+    private _alertService: AlertService,
   ) {
     this.setupInstallPrompt();
     this.setupDisplayModeListener();
@@ -88,8 +89,11 @@ export class PwaInstallService {
   }
 
   async showInstallPrompt(header: string, message: string) {
-    if (!this.deferredPrompt || this.isAppInstalled()) {
+    if (!this.deferredPrompt || this.isAppInstalled() && Capacitor.getPlatform() === 'android') {
       this._alertService.showAlert('App ya Instalada', 'Se detecto que ya cuentas con la App instalada', Alerts.INFO, Position.CENTER, true, 'Aceptar');
+      return;
+    } else if (Capacitor.getPlatform() === 'ios') {
+      this._alertService.showAlert('Instalar App en IOS', 'Para instalar esta aplicación en iOS, toca el botón de compartir en la barra inferior y selecciona "Agregar a pantalla de inicio".', Alerts.INFO, Position.CENTER, true, 'Aceptar');
       return;
     }
 
