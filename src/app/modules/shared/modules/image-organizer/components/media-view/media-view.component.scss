@@ -6,7 +6,7 @@
 .content-view-media {
   display: flex;
   width: 100%;
-  height: 100%;
+  height: 100dvh;
   &.desktop {
     flex-direction: row;
   }
@@ -19,18 +19,19 @@
     height: 95vh;
     @include breakpoints.below-sm {
       width: 100%;
-      height: 35vh;
+      height: 35dvh;
     }
   }
 
   worky-message-loading {
     width: 35%;
-    height: 95vh;
+    height: 95dvh;
     padding: 5px;
     background-color: color-mix(in srgb, var(--worky-color-light), transparent 5%);
+    overflow: auto;
     @include breakpoints.below-sm {
       width: 100%;
-      height: 65vh;
+      height: 65dvh;
     }
   }
 

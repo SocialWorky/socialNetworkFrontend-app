@@ -132,10 +132,8 @@
     overflow: auto;
     .publication-content {
       padding: 16px;
-      .content {
-        color: colors.$worky-color-text;
-        overflow: hidden;
-      }
+      color: colors.$worky-color-text;
+      overflow: hidden;
     }
   }
 
