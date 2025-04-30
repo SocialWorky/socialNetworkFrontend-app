@@ -42,8 +42,10 @@ export interface User {
 
 export interface MediaFileUpload {
   filename: string;
-  filenameThumbnail: string;
-  filenameCompressed: string;
+  thumbnail: string;
+  optimized?: string;
+  compressed?: string;
+  originalname?: string;
 }
 
 export interface Comment {

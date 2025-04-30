@@ -6,6 +6,12 @@ export interface ImageOrganizer {
   urlThumbnail: string;
   urlCompressed: string;
   comments: Comment[];
+  type: MediaType;
+}
+
+export enum MediaType {
+  IMAGE = 'image',
+  VIDEO = 'video'
 }
 
 export enum TypeView {

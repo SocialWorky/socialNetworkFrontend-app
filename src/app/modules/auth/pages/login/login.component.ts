@@ -171,7 +171,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
     await this._authApiService.loginUser(credentials).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (response: any) => {
-        console.log('LOGIN RESPONSE: ', response);
         if (response && response.token) {
           localStorage.setItem('token', response.token);
 

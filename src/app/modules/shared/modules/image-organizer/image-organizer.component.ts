@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ImageOrganizer } from './interfaces/image-organizer.interface';
+import { ImageOrganizer, MediaType } from './interfaces/image-organizer.interface';
 import { environment } from '@env/environment';
 import { MediaViewComponent } from './components/media-view/media-view.component';
 import { PublicationView, Comment } from '@shared/interfaces/publicationView.interface';
@@ -68,6 +68,10 @@ export class ImageOrganizerComponent implements OnInit {
         return null;
       }
     }).filter(item => item !== null);
+
+    this.images.map(image => {
+      image.type = this.isImageUrl(image.url) ? MediaType.IMAGE : MediaType.VIDEO;
+    })
   }
 
   isImageUrl(url: string): boolean {

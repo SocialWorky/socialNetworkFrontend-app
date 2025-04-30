@@ -22,51 +22,54 @@ export class ImageLoadingComponent implements OnInit, OnChanges {
 
   constructor() { }
 
-  ngOnInit() {}
+  ngOnInit(): void {}
 
-  ngOnChanges() {
+  ngOnChanges(): void {
     this.updateSelectedImage();
   }
 
-  // Actualizar la imagen seleccionada basado en el ID
-  updateSelectedImage() {
+  updateSelectedImage(): void {
     if (this.imageSelected && this.images.length) {
-      const selectedImage = this.images.find(image => image._id === this.imageSelected?._id);
-      if (selectedImage) {
-        this.currentIndex = this.images.indexOf(selectedImage);
+      const index = this.images.findIndex(img => img._id === this.imageSelected?._id);
+      if (index !== -1) {
+        this.currentIndex = index;
+        this.imageSelected = { ...this.images[index] }; // Copia limpia
         this.imageChanged.emit(this.imageSelected._id);
       }
     }
   }
 
-  // Navegar a la imagen anterior
-  previousImage() {
+  previousImage(): void {
     if (this.images.length) {
       this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
-      this.imageSelected = this.images[this.currentIndex];
+      this.imageSelected = { ...this.images[this.currentIndex] };
       this.imageChanged.emit(this.imageSelected._id);
     }
   }
 
-  // Navegar a la imagen siguiente
-  nextImage() {
+  nextImage(): void {
     if (this.images.length) {
       this.currentIndex = (this.currentIndex + 1) % this.images.length;
-      this.imageSelected = this.images[this.currentIndex];
+      this.imageSelected = { ...this.images[this.currentIndex] };
       this.imageChanged.emit(this.imageSelected._id);
     }
   }
 
-  // Seleccionar una imagen directamente desde las miniaturas
-  selectImage(image: ImageOrganizer) {
-    this.imageSelected = image;
-    this.currentIndex = this.images.indexOf(image);
+  selectImage(image: ImageOrganizer): void {
+    this.imageSelected = { ...image };
+    this.currentIndex = this.images.findIndex(i => i._id === image._id);
     this.imageChanged.emit(this.imageSelected._id);
   }
 
-  openImage(image: ImageOrganizer) {
-    window
-      .open(image?.url, '_blank')
-      ?.focus(); 
+  openImage(image: ImageOrganizer): void {
+    window.open(image.url, '_blank')?.focus();
+  }
+
+  isImage(): boolean {
+    return this.imageSelected?.type === 'image';
+  }
+
+  isVideo(): boolean {
+    return this.imageSelected?.type === 'video';
   }
 }

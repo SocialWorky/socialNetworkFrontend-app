@@ -391,11 +391,15 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   private async saveFiles(response: MediaFileUpload[], saveLocation: string, id: string, type: TypePublishing) {
     for (const file of response) {
       try {
+
+        const filename = this.isVideoUrl(file.filename) ? file.optimized! : file.filename;
+        const filenameCompressed = this.isVideoUrl(file.filename) ? file.optimized! : file.compressed!;
+
         await lastValueFrom(
           this._fileUploadService.saveUrlFile(
-            saveLocation + file.filename,
-            saveLocation + file.filenameThumbnail,
-            saveLocation + file.filenameCompressed,
+            saveLocation + filename,
+            saveLocation + file.thumbnail,
+            saveLocation + filenameCompressed,
             id,
             type
           ).pipe(takeUntil(this.unsubscribe$))
@@ -409,6 +413,10 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this.previews = [];
     this._cdr.markForCheck();
   }
+
+    isVideoUrl(url: string): boolean {
+      return /\.(mp4|ogg|webm|avi|mov)$/i.test(url);
+    }
 
   private async updatePublicationAndNotify(idPublication: string, comment?: any) {
     const publication = await lastValueFrom(this._publicationService.getPublicationId(idPublication).pipe(takeUntil(this.unsubscribe$)));

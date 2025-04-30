@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input,  AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
-import { Capacitor } from '@capacitor/core';
 
 import { translations } from '@translations/translations'
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
@@ -73,7 +72,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     private _scrollService: ScrollService
   ) {
     this.menuProfile();
-    console.log('DISPOSITIVO: ', Capacitor.getPlatform());
   }
 
   async ngOnInit() {

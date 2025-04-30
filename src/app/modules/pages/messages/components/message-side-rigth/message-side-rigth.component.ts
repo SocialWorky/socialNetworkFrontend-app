@@ -338,21 +338,38 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
   private async uploadFiles(folder: string) {
     const loadingUploadImage = await this._loadingCtrl.create({
-      message: 'Subiendo imagen...',
+      message: 'Subiendo....',
     });
 
     loadingUploadImage.present();
 
     return this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$)).subscribe({
           next: (file) => {
-            const imagenSaved = environment.APIFILESERVICE + 'messages/' + file[0].filenameCompressed;
-            this.sendMessage('imageContent', `![Image](${imagenSaved})`);
-            loadingUploadImage.dismiss();
+            if (this.isVideoUrl(file[0]?.optimized)) {
+              const videoSaved = environment.APIFILESERVICE +'messages/' + file[0].optimized;
+              this.sendMessage('videoContent', `
+                <video width="50%" height="auto" controls>
+                  <source src="${videoSaved}" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              `);
+              loadingUploadImage.dismiss();
+            } else {
+              const imagenSaved = environment.APIFILESERVICE + 'messages/' + file[0].filename;
+              this.sendMessage('imageContent', `![Image](${imagenSaved})`);
+              loadingUploadImage.dismiss();
+            }
+
+
           },
           error: (error) => {
             console.error('Error uploading files:', error);
           }
         });
+  }
+
+  isVideoUrl(url: string): boolean {
+    return /\.(mp4|ogg|webm|avi|mov)$/i.test(url);
   }
 
 }

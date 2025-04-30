@@ -27,6 +27,15 @@
     transition: transform 0.3s ease-in-out;
   }
 
+  .main-video {
+    display: block;
+    background-color: #000; /* Fondo negro para videos */
+    width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
   .nav-button {
     display: flex;
     align-items: center;
