@@ -193,18 +193,30 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     this.loaderPublications = true;
     try {
-      const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.ALL));
+      const newPublicationsResponse = await firstValueFrom(
+        this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.ALL)
+      );
 
-      this.publications.update((current: PublicationView[]) => [...current, ...newPublications.publications]);
+      const currentPublications = this.publications();
+      const newPublicationsList = newPublicationsResponse.publications;
 
-      if (this.publications().length >= newPublications.total) {
+      const existingIds = new Set(currentPublications.map(pub => pub._id));
+
+      const uniqueNewPublications = newPublicationsList.filter(
+        pub => !existingIds.has(pub._id)
+      );
+
+      if (uniqueNewPublications.length > 0) {
+        this.publications.update(current => [...current, ...uniqueNewPublications]);
+      }
+
+      if (this.publications().length >= newPublicationsResponse.total) {
         this.hasMorePublications = false;
       }
 
       this.page++;
       this.loaderPublications = false;
       this._cdr.markForCheck();
-
 
     } catch (error) {
       console.error('Error al cargar las publicaciones:', error);

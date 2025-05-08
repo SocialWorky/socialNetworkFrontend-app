@@ -89,6 +89,8 @@
       </div>
     </div>
 
+    <worky-processing-media *ngIf="!publication.media.length && publication.containsMedia"></worky-processing-media>
+
     <worky-image-organizer *ngIf="publication.media.length"
       [publication]="publication"
       type="publication">
@@ -168,6 +170,8 @@
             <div class="publication-youtube-preview" [innerHTML]="result.youTubeHtml"></div>
             <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
           </div>
+
+          <worky-processing-media *ngIf="!comment.media.length && comment.containsMedia"></worky-processing-media>
 
           <worky-image-organizer *ngIf="comment.media.length"
             [comment]="comment"

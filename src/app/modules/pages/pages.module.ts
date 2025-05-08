@@ -35,6 +35,7 @@ import { UserListItemComponent } from './messages/components/message-side-left/c
 import { MessageListComponent } from './messages/components/message-side-left/component/message-list/message-list.component';
 import { UserOnlineModule } from '@shared/modules/user-online/user-online.module';
 import { NotificationsPanelModule } from '@shared/modules/notifications-panel/notifications-panel.module';
+import { ProcessingMediaModule } from '@shared/modules/processing-media/processing-media.module';
 
 
 @NgModule({
@@ -76,6 +77,7 @@ import { NotificationsPanelModule } from '@shared/modules/notifications-panel/no
     NotificationsPanelModule,
     MarkdownModule.forRoot(),
     PipesSharedModule,
+    ProcessingMediaModule,
   ]
 })
 export class PagesModule { }

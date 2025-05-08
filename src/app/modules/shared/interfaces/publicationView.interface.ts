@@ -11,6 +11,7 @@ export interface PublicationView {
     content:     string;
     privacy:     string;
     fixed:       boolean;
+    containsMedia: boolean;
     extraData:   ExtraData;
     createdAt:   Date;
     updatedAt:   Date;
@@ -51,6 +52,7 @@ export interface MediaFileUpload {
 export interface Comment {
   _id: string;
   content: string;
+  containsMedia: boolean;
   createdAt: Date;
   author: User;
   media: ImageOrganizer[];

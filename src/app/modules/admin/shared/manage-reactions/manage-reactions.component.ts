@@ -114,7 +114,6 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
         this.submitReaction();
       }
     } else {
-      console.log('Form is invalid');
       this.loadReactionsButtons = false;
     }
   }

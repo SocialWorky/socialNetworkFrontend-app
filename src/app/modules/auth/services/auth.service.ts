@@ -78,7 +78,6 @@ export class AuthService {
       return null;
     }
     return jwtDecode(token);
-
   }
 
   getUseFromToken(token: string): Token {

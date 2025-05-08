@@ -1,9 +1,13 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UtilityService {
+
+  private unsubscribe$ = new Subject<void>();
+
   constructor() {}
 
   /**
@@ -25,5 +29,8 @@ export class UtilityService {
     return passwordRegex.test(password);
   }
 
+  isVideoUrl(url: string): boolean {
+    return /\.(mp4|ogg|webm|avi|mov)$/i.test(url);
+  }
 
 }

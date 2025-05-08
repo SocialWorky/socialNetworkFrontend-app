@@ -14,13 +14,30 @@ export class FileUploadService {
     private _authService: AuthService
   ) { }
 
-  uploadFile(files: File[], destination: string) {
+  uploadFile(
+    files: File[],
+    destination: string,
+    idReference?: string,
+    urlMedia?: string,
+    type?: TypePublishing
+  ) {
     const url = `${environment.APIFILESERVICE}upload`;
     const id = this._authService.getDecodedToken()?.id;
     const formData = new FormData();
 
     formData.append('userId', `${id}|`);
     formData.append('destination', destination);
+
+    if (idReference) {
+      formData.append('idReference', idReference);
+    }
+    if (urlMedia) {
+      formData.append('urlMedia', urlMedia);
+    }
+
+    if (type) {
+      formData.append('type', type);
+    }
 
     const uniqueFiles = this.getUniqueFiles(files);
     uniqueFiles.forEach(file => {

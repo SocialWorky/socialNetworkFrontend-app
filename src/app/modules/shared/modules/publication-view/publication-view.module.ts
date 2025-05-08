@@ -14,6 +14,7 @@ import { ReactionsModule } from '../reactions/reactions.module';
 import { WorkyButtonsModule } from '../buttons/buttons.module';
 import { MaterialModule } from '@shared/modules/material/material.module';
 import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
+import { ProcessingMediaModule } from '@shared/modules/processing-media/processing-media.module';
 
 @NgModule({
   declarations: [PublicationViewComponent, ReportResponseComponent],
@@ -31,6 +32,7 @@ import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
     WorkyButtonsModule,
     MaterialModule,
     PipesSharedModule,
+    ProcessingMediaModule,
   ],
 })
 export class PublicationViewModule {}

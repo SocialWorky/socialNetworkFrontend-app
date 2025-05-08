@@ -1,11 +1,12 @@
 import { enableProdMode } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { AppModule } from './app/app.module';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
+
+import { AppModule } from './app/app.module';
 import { Translations } from './translations/translations';
 import { environment } from './environments/environment';
 import { ConfigService } from '@shared/services/core-apis/config.service';
-import { Subject, takeUntil } from 'rxjs';
 
 const destroy$ = new Subject<void>();
 

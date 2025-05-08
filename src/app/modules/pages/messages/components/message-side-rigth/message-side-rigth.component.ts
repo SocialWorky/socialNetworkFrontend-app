@@ -16,9 +16,11 @@ import { DeviceDetectionService } from '@shared/services/device-detection.servic
 import { GifSearchComponent } from '@shared/modules/gif-search/gif-search.component';
 import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';
 import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
-import { environment } from '@env/environment';
 import { LoadingController } from '@ionic/angular';
 import { Token } from '@shared/interfaces/token.interface';
+import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
+import { SocketService } from '@shared/services/socket.service';
+import { ExternalMessage } from '@shared/interfaces/notification-external-message.interface';
 
 @Component({
     selector: 'worky-message-side-rigth',
@@ -75,6 +77,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     private _dialog: MatDialog,
     private _fileUploadService: FileUploadService,
     private _loadingCtrl: LoadingController,
+    private _socketService: SocketService,
   ) { }
 
   async ngOnInit() {
@@ -116,6 +119,23 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       });
     this.loadMessagesWithUser(this.currentUser!.id, this.userId);
     this.markMessagesAsRead();
+
+    this._socketService.listenEvent('newExternalMessage', (message: ExternalMessage) => {
+      if (message.type === TypePublishing.MESSAGE) {
+        this.updateContentMessage(message.idReference, message.response);
+      }
+    });
+  }
+
+  private updateContentMessage(idMessage: string, contentMessage: string) {
+    if (!idMessage) return;
+    this.messages.forEach(message => {
+      if (message._id === idMessage) {
+        message.content = contentMessage;
+        this._notificationService.sendNotification([message]);
+        this.scrollToBottom();
+      }
+    })
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -222,6 +242,10 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
         this._notificationMessageChatService.sendNotificationMessageChat(msg);
         this._notificationService.sendNotification();
         this.newMessage = '';
+
+        if(type === 'procesando') {
+          this._fileUploadService.uploadFile(this.selectedFiles, 'messages', msg._id, '', TypePublishing.MESSAGE).pipe(takeUntil(this.unsubscribe$)).subscribe();
+        }
 
         const textarea = document.querySelector('textarea');
         if (textarea) {
@@ -331,41 +355,21 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.selectedFiles = result;
-        this.uploadFiles('messages');
+        this.uploadFiles();
       }
     });
   }
 
-  private async uploadFiles(folder: string) {
+  private async uploadFiles() {
     const loadingUploadImage = await this._loadingCtrl.create({
       message: 'Subiendo....',
     });
 
     loadingUploadImage.present();
 
-    return this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$)).subscribe({
-          next: (file) => {
-            if (this.isVideoUrl(file[0]?.optimized)) {
-              const videoSaved = environment.APIFILESERVICE +'messages/' + file[0].optimized;
-              this.sendMessage('videoContent', `
-                <video width="50%" height="auto" controls>
-                  <source src="${videoSaved}" type="video/mp4">
-                  Your browser does not support the video tag.
-                </video>
-              `);
-              loadingUploadImage.dismiss();
-            } else {
-              const imagenSaved = environment.APIFILESERVICE + 'messages/' + file[0].filename;
-              this.sendMessage('imageContent', `![Image](${imagenSaved})`);
-              loadingUploadImage.dismiss();
-            }
+    this.sendMessage('procesando', 'procesando');
+    loadingUploadImage.dismiss();
 
-
-          },
-          error: (error) => {
-            console.error('Error uploading files:', error);
-          }
-        });
   }
 
   isVideoUrl(url: string): boolean {

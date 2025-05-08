@@ -24,14 +24,17 @@
   }
 
   worky-message-loading {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
     width: 35%;
-    height: 95dvh;
+    max-height: 95dvh;
     padding: 5px;
     background-color: color-mix(in srgb, var(--worky-color-light), transparent 5%);
     overflow: auto;
     @include breakpoints.below-sm {
       width: 100%;
-      height: 65dvh;
+      max-height: 65dvh;
     }
   }
 

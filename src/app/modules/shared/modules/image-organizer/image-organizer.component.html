@@ -18,10 +18,6 @@
         <ng-container *ngIf="isVideoUrl(image.urlCompressed)">
           <div class="video-container">
             <img [src]="image.urlThumbnail" alt="Image">
-            <!-- <video [src]="image.urlCompressed" controls>
-              <source [src]="image.urlThumbnail" type="video/mp4">
-              Tu navegador no soporta el elemento <code>video</code>.
-            </video> -->
           </div>
         </ng-container>
       </div>

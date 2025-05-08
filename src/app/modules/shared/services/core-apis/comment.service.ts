@@ -25,4 +25,9 @@ export class CommentService {
     return this.http.delete(url);
   }
 
+  getCommentsById(id: string) {
+    const url = `${this.baseUrl}/comments/${id}`;
+    return this.http.get(url);
+  }
+
 }

@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ElementRef, ViewChild } from '@angular/core';
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { CustomReactionsService } from '@admin/shared/manage-reactions/service/customReactions.service';
@@ -89,11 +89,21 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
       }).pipe(takeUntil(this.destroy$))
       .subscribe({
         next: async () => {
+
+          const publicationsUpdated = await firstValueFrom(
+            this._publicationService.getPublicationId(this.publication?._id!).pipe(takeUntil(this.destroy$))
+          );
+
+          if (publicationsUpdated) {
+            this._publicationService.updatePublications(publicationsUpdated);
+            this.publication = publicationsUpdated[0];
+            this._cdr.markForCheck();
+          }
+
           this.reactionsVisible = false;
           this.unlockReactions = true;
           this._notificationService.sendNotification(this.publication);
           this._emailNotificationService.reactionsNotification(this.publication!, reaction);
-
           this.refreshPublications();
         },
         error: (err) => {
@@ -103,21 +113,47 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  deleteReaction(idReaction: string) {
+
+
+  async deleteReaction(idReaction: string) {
     this.hideReactions();
     this.unlockReactions = false;
-    this._reactionsService.deleteReaction(idReaction).pipe(takeUntil(this.destroy$)).subscribe({
-      next: async () => {
-        this._notificationService.sendNotification(this.publication);
-        this.refreshPublications();
-        this.unlockReactions = true;
-        this.hideReactions();
-      },
-      error: (err) => {
-        console.error('Failed to delete reaction', err);
-        this.unlockReactions = true;
+
+    try {
+      await firstValueFrom(
+        this._reactionsService.deleteReaction(idReaction).pipe(takeUntil(this.destroy$))
+      );
+
+      if (this.publication?.reaction) {
+        const index = this.publication.reaction.findIndex(r => r._id === idReaction);
+        if (index !== -1) {
+          this.publication.reaction = [
+            ...this.publication.reaction.slice(0, index),
+            ...this.publication.reaction.slice(index + 1)
+          ];
+        }
       }
-    });
+
+      const publicationsUpdated = await firstValueFrom(
+        this._publicationService.getPublicationId(this.publication?._id!).pipe(takeUntil(this.destroy$))
+      );
+
+      if (publicationsUpdated && publicationsUpdated.length > 0) {
+        this._publicationService.updatePublications(publicationsUpdated);
+        this.publication = publicationsUpdated[0];
+        this._cdr.markForCheck();
+      }
+
+      this.reactionsVisible = false;
+      this.unlockReactions = true;
+      await this._notificationService.sendNotification(this.publication);
+      this.hideReactions();
+      this.refreshPublications();
+
+    } catch (err) {
+      console.error('Failed to delete reaction', err);
+      this.unlockReactions = true;
+    }
   }
 
   editReaction(id: string, reaction: CustomReactionList) {
@@ -131,6 +167,17 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
       _idPublication: this.publication?._id!,
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: async () => {
+
+        const publicationsUpdated = await firstValueFrom(
+          this._publicationService.getPublicationId(this.publication?._id!).pipe(takeUntil(this.destroy$))
+        );
+
+        if (publicationsUpdated) {
+          this._publicationService.updatePublications(publicationsUpdated);
+          this.publication = publicationsUpdated[0];
+          this._cdr.markForCheck();
+        }
+
         this._notificationService.sendNotification(this.publication);
         this.refreshPublications();
         this.unlockReactions = true;
@@ -181,14 +228,23 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
     this._publicationService.getPublicationId(this.publication._id).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: (publication: PublicationView[]) => {
-        this._publicationService.updatePublications(publication);
+      next: (publicationList: PublicationView[]) => {
+        if (publicationList.length > 0) {
+          const updatedPublication = structuredClone(publicationList[0]);
+
+          this.publication = updatedPublication;
+          this.reactionsToPublication = [...(updatedPublication.reaction || [])];
+
+          this._publicationService.updatePublications(publicationList);
+          this._cdr.markForCheck();
+        }
       },
       error: (error) => {
         console.error('Failed to refresh publications', error);
       }
     });
   }
+
 
   onTouchStart() {
     this.touchTimeout = setTimeout(() => {

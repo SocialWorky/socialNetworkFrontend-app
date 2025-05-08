@@ -36,7 +36,7 @@
     </div>
   </div>
 
-  <div class="publication-body" *ngIf="images.length === 1 && typeView === typeViewEnum.PUBLICATION">
+  <div class="publication-body" *ngIf="images.length === 1 && typeView === typeViewEnum.PUBLICATION || typeViewEnum.COMMENT">
     <div class="publication-content">
       <div class="content markdown" *ngIf="(contentView.content | workyPreviewHtml | async) as result">
         <div class="publication-markdown-view" [innerHTML]="result.markdownHtml"></div>
@@ -52,13 +52,13 @@
         <div class="reactions-img-container" *ngFor="let emoji of listReaction; let i = index;">
           <img class="reactions-img" [src]="emoji" style="--i: {{ i }};">
         </div>
-        <span>{{ contentView.reaction.length }}</span>
+        <span>{{ listReaction.length }}</span>
       </div>
     </div>
 
     <div class="publication-footer-actions">
       <div class="publication-footer-actions-item">
-        <worky-reactions
+        <worky-reactions *ngIf="contentView"
           [type]="type"
           [publication]="contentView"
           [reactionsToPublication]="contentView.reaction">

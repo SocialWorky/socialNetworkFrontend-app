@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
-import { Subject, takeUntil } from 'rxjs';
+import { filter, map, Subject, switchMap, takeUntil } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 
 import { getTranslationsLanguage } from '../translations/translations';
@@ -10,6 +10,11 @@ import { NotificationUsersService } from '@shared/services/notifications/notific
 import { LoadingService } from '@shared/services/loading.service';
 import { SocketService } from '@shared/services/socket.service';
 import { PushNotificationService } from '@shared/services/notifications/push-notification.service';
+import { PublicationService } from '@shared/services/core-apis/publication.service';
+import { PublicationView } from '@shared/interfaces/publicationView.interface';
+import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
+import { CommentService } from '@shared/services/core-apis/comment.service';
+import { AuthService } from '@auth/services/auth.service';
 
 @Component({
     selector: 'worky-root',
@@ -23,6 +28,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
   showInstallPrompt = false;
 
+  currentUserId: string = '';
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -34,6 +41,9 @@ export class AppComponent implements OnInit, OnDestroy {
     private _loadingService: LoadingService,
     private _socketService: SocketService,
     private _pushNotificationService: PushNotificationService,
+    private _publicationService: PublicationService,
+    private _commentService: CommentService,
+    private _authService: AuthService,
   ) {
     this._notificationUsersService.setupInactivityListeners();
     if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();
@@ -52,11 +62,51 @@ export class AppComponent implements OnInit, OnDestroy {
       document.getElementById('loading-screen')?.remove();
     }, 4000);
     this._socketService.connectToWebSocket();
+
+    this._socketService.listenEvent('newExternalMessage', (message: any) => {
+      if (!message.idReference) return;
+      switch (message.type) {
+        case TypePublishing.POST:
+          this.handlePostUpdate(message.idReference);
+          break;
+        case TypePublishing.COMMENT:
+          this.handleCommentUpdate(message.idReference);
+          break;
+        default:
+          console.warn('Tipo de mensaje no soportado:', message.type);
+      }
+    });
+
+    if(localStorage.getItem('token')) this.currentUserId = this._authService.getDecodedToken()!.id;
+
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private handlePostUpdate(publicationId: string): void {
+    this._publicationService.getPublicationId(publicationId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((publication: PublicationView[]) => {
+        this._socketService.emitEvent('updatePublication', publication);
+      });
+  }
+
+  private handleCommentUpdate(commentId: string): void {
+    this._commentService.getCommentsById(commentId)
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(Boolean),
+        switchMap((comment: any) =>
+          this._publicationService.getPublicationId(comment.publicationId)
+            .pipe(map((publication: PublicationView[]) => ({ comment, publication })))
+        )
+      )
+      .subscribe(({ publication }) => {
+        this._socketService.emitEvent('updatePublication', publication);
+      });
   }
 
   applyCustomConfig() {

@@ -38,14 +38,19 @@
 
           <div *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId !== currentUser?.id" class="message-triangle"></div>
 
-          <div [ngClass]="{'sent-content': message.senderId === currentUser?.id, 'received-content': message.senderId !== currentUser?.id}">
-            <markdown class="worky-font-roboto">{{ message.content }}</markdown>
-            <div class="content-footer">
-              <small>{{ formatTime(message.timestamp) }}</small>
-              <i *ngIf="message.senderId === currentUser?.id && !message.isRead" class="material-icons">done</i>
-              <i *ngIf="message.senderId === currentUser?.id && message.isRead" class="material-icons">done_all</i>
+          <div *ngIf="message.content !='procesando'">
+            <div [ngClass]="{'sent-content': message.senderId === currentUser?.id, 'received-content': message.senderId !== currentUser?.id}">
+              <markdown class="worky-font-roboto">{{ message.content }}</markdown>
+              <div class="content-footer">
+                <small>{{ formatTime(message.timestamp) }}</small>
+                <i *ngIf="message.senderId === currentUser?.id && !message.isRead" class="material-icons">done</i>
+                <i *ngIf="message.senderId === currentUser?.id && message.isRead" class="material-icons">done_all</i>
+              </div>
             </div>
           </div>
+
+          <worky-processing-media *ngIf="message.content === 'procesando'"></worky-processing-media>
+
 
           <div *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId === currentUser?.id" class="message-triangle"></div>
 

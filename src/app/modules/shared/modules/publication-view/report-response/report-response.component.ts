@@ -12,24 +12,23 @@ import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/model
 export class ReportResponseComponent  implements OnInit {
 
   WorkyButtonType = WorkyButtonType;
-  
+
   WorkyButtonTheme = WorkyButtonTheme;
 
   createReportForm: FormGroup;
 
-  constructor( 
+  constructor(
     private _fb: FormBuilder,
     private _dialogRef: MatDialogRef<ReportResponseComponent>,
   ) {
     this.createReportForm = this._fb.group({
       detail_report: ['', Validators.required],
-    });   
+    });
   }
 
   ngOnInit() {}
 
   closeReport() {
-    console.log('close report');
   }
 
   createReport() {

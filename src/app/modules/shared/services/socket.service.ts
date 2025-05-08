@@ -45,7 +45,7 @@ export class SocketService {
 
   socketError() {
     this.socket.on('connect_error', (error: any) => {
-      console.log('Error de conexión:', error);
+      console.error('Error de conexión:', error);
     });
   }
 }

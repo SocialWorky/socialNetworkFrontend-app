@@ -225,7 +225,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   handleLinkClicked(data: DropdownDataLink<any>) {
     if (data.function) {
       if (typeof data.function === 'function') {
-        console.log('Function clicked:', data.function);
         data.function();
       }
     }

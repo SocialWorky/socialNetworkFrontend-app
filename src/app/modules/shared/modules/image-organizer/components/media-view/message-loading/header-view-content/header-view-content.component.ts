@@ -64,7 +64,7 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
           if (this.currentPublication && data?._id === this.currentPublication._id) {
             this.refreshPublications(data._id);
             this.loadReactionsImg(data);
-            this._cdr.detectChanges();
+            this._cdr.markForCheck();
           }
         }
       });
@@ -82,9 +82,9 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
       publication.reaction.forEach((element: Reactions) => {
         if(this.listReaction.includes(element.customReaction.emoji)) return;
         this.listReaction.push(element.customReaction.emoji);
-        this._cdr.markForCheck();
       });
     }
+    this._cdr.markForCheck();
   }
 
   refreshPublications(_id?: string) {

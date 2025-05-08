@@ -171,14 +171,31 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   private async loadPublications() {
-
     if (this.loaderPublications || !this.hasMorePublications) return;
+
     this.loaderPublications = true;
     try {
+      const newPublications = await firstValueFrom(
+        this._publicationService.getAllPublications(
+          this.page,
+          this.pageSize,
+          TypePublishing.POST_PROFILE,
+          this.idUserProfile
+        )
+      );
 
-      const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POST_PROFILE, this.idUserProfile));
+      const currentPublications = this.publicationsProfile();
+      const newPublicationsList = newPublications.publications;
 
-      this.publicationsProfile.update((current: PublicationView[]) => [...current, ...newPublications.publications]);
+      const existingIds = new Set(currentPublications.map(pub => pub._id));
+
+      const uniqueNewPublications = newPublicationsList.filter(
+        pub => !existingIds.has(pub._id)
+      );
+
+      if (uniqueNewPublications.length > 0) {
+        this.publicationsProfile.update(current => [...current, ...uniqueNewPublications]);
+      }
 
       if (this.publicationsProfile().length >= newPublications.total) {
         this.hasMorePublications = false;
@@ -193,7 +210,6 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this.loaderPublications = false;
     }
   }
-
 
   private async getDataProfile(): Promise<void> {
     this._userService.getUserById(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
@@ -296,7 +312,11 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (publication: PublicationView[]) => {
 
-          if (publication[0].author._id !== this.userData?._id) return;
+          let userValid = false;
+
+          if (publication[0].author._id !== this.userData?._id ) userValid = true;
+          if (publication[0].userReceiving?._id!== this.userData?._id ) userValid = true;
+          if (!userValid) return;
 
           const updatedPublication = publication[0];
           const publicationsCurrent = this.publicationsProfile();

@@ -110,6 +110,7 @@ export class BodyViewContentComponent  implements OnDestroy, OnInit {
       )
       .subscribe({
         next: (publication: PublicationView[]) => {
+
           const updatedPublication = publication[0];
 
           if(this.typeView === TypeView.PUBLICATION && this.publications){
@@ -123,14 +124,36 @@ export class BodyViewContentComponent  implements OnDestroy, OnInit {
           } else if (this.typeView === TypeView.COMMENT && this.comment) {
             const commentCurrent = this.comment();
             if (commentCurrent) {
-              const updatedComment = commentCurrent.map(com =>
-                com._id === updatedPublication._id ? updatedPublication : com
-              );
-              this.comment.set(updatedComment);
+
+              const mediaComments = updatedPublication.comment;
+              if (mediaComments) {
+
+                const updateComments = mediaComments.find(
+                  (comment) => comment._id === commentCurrent[0]?._id
+                );
+
+                if (updateComments && updateComments.media && updateComments.media.length > 0) {
+                  const mediaItem = updateComments.media[0];
+
+                  const sortedMediaComments = [...mediaItem.comments].sort((a, b) => {
+                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                  });
+
+                  const result = {
+                    ...updateComments,
+                    media: [
+                      {
+                        ...mediaItem,
+                        comments: sortedMediaComments
+                      }
+                    ]
+                  };
+                if(updateComments) this.comment.set([result]);
+
+                }
+              }
             }
           }
-
-
           this._cdr.markForCheck();
         },
         error: (error) => {

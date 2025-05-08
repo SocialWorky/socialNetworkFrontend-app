@@ -27,7 +27,7 @@ export class InvitationsCodeComponent  implements OnInit {
     private _invitationsCodeService: InvitationsCodeService,
     private _emailNotificationService: EmailNotificationService,
     private _cdr: ChangeDetectorRef,
-  ) { 
+  ) {
     this.invitationsForm = this._fb.group({
       email: ['', Validators.required],
     });
@@ -71,7 +71,6 @@ export class InvitationsCodeComponent  implements OnInit {
         }
       });
     } else {
-      console.log('Form is invalid');
       this.loadInvitationsButtons = false;
     }
   }
@@ -101,7 +100,7 @@ export class InvitationsCodeComponent  implements OnInit {
       subMessage,
       buttonMessage,
       urlSlug
-    );  
+    );
 
   }
 

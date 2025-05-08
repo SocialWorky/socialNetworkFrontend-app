@@ -1,12 +1,10 @@
 import {
   ChangeDetectorRef,
   Component,
-  ElementRef,
   Input,
   OnInit,
   OnDestroy,
   ViewChild,
-  NgZone
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonTextarea, LoadingController } from '@ionic/angular';
@@ -90,6 +88,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     privacy: [''],
     authorId: [''],
     extraData: [''],
+    containsMedia: [false],
     userReceivingId: [''],
   });
 
@@ -125,7 +124,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _globalEventService: GlobalEventService,
     private _emailNotificationService: EmailNotificationService,
     private _notificationCenterService: NotificationCenterService,
-    private _ngZone: NgZone,
     private _tooltipsOnboardingService: TooltipsOnboardingService,
   ) { }
 
@@ -258,6 +256,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
     const dataComment: CreateComment = {
       content: this.myForm.controls['content'].value,
+      containsMedia: this.selectedFiles.length > 0,
       authorId: this.decodedToken.id,
       idPublication: this.type === this.typePublishing.COMMENT ? idPublication : null,
       idMedia: this.type === this.typePublishing.IMAGE_VIEW ? this.idMedia : null,
@@ -280,8 +279,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   private async handleCommentResponse(message: any, idPublication: string) {
     try {
       if (this.selectedFiles.length) {
-        const response = await this.uploadFiles('comments', message.comment._id);
-        await this.saveFiles(response, environment.APIFILESERVICE + 'comments/', message.comment._id, TypePublishing.COMMENT);
+        const urlMedia = environment.APIFILESERVICE + 'comments/';
+        const idReference = message.comment._id;
+        await this.uploadFiles('comments', idReference, urlMedia, TypePublishing.COMMENT);
+        this.selectedFiles = [];
+        this.previews = [];
+        this._cdr.markForCheck();
       }
 
       await this.updatePublicationAndNotify(idPublication, message.comment);
@@ -311,6 +314,9 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       this.myForm.controls['userReceivingId'].setValue(this.idUserProfile);
       this.myForm.controls['privacy'].setValue(TypePrivacy.FRIENDS);
     }
+
+    const containsMedia = this.selectedFiles.length > 0;
+    this.myForm.controls['containsMedia'].setValue(containsMedia);
 
     await this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
@@ -354,8 +360,13 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   private async handlePublicationResponse(message: any) {
     try {
       if (this.selectedFiles.length) {
-        const response = await this.uploadFiles('publications', message.publications._id);
-        await this.saveFiles(response, environment.APIFILESERVICE + 'publications/', message.publications._id, TypePublishing.POST);
+        const urlMedia = environment.APIFILESERVICE + 'publications/';
+        const idReference = message.publications._id;
+        await this.uploadFiles('publications', idReference, urlMedia, TypePublishing.POST);
+        this.selectedFiles = [];
+        this.previews = [];
+        this._cdr.markForCheck();
+        //await this.saveFiles(response, environment.APIFILESERVICE + 'publications/', message.publications._id, TypePublishing.POST);
       }
 
       await this.updatePublicationAndNotify(message.publications._id);
@@ -384,39 +395,9 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     }
   }
 
-  private uploadFiles(folder: string, id: string): Promise<MediaFileUpload[]> {
-    return lastValueFrom(this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$)));
+  private uploadFiles(folder: string, idReference?: string, urlMedia?: string, type?: TypePublishing): Promise<MediaFileUpload[]> {
+    return lastValueFrom(this._fileUploadService.uploadFile(this.selectedFiles, folder, idReference, urlMedia, type).pipe(takeUntil(this.unsubscribe$)));
   }
-
-  private async saveFiles(response: MediaFileUpload[], saveLocation: string, id: string, type: TypePublishing) {
-    for (const file of response) {
-      try {
-
-        const filename = this.isVideoUrl(file.filename) ? file.optimized! : file.filename;
-        const filenameCompressed = this.isVideoUrl(file.filename) ? file.optimized! : file.compressed!;
-
-        await lastValueFrom(
-          this._fileUploadService.saveUrlFile(
-            saveLocation + filename,
-            saveLocation + file.thumbnail,
-            saveLocation + filenameCompressed,
-            id,
-            type
-          ).pipe(takeUntil(this.unsubscribe$))
-        );
-      } catch (error) {
-        console.error(`Error saving file ${file.filename}: ${error}`);
-      }
-    }
-
-    this.selectedFiles = [];
-    this.previews = [];
-    this._cdr.markForCheck();
-  }
-
-    isVideoUrl(url: string): boolean {
-      return /\.(mp4|ogg|webm|avi|mov)$/i.test(url);
-    }
 
   private async updatePublicationAndNotify(idPublication: string, comment?: any) {
     const publication = await lastValueFrom(this._publicationService.getPublicationId(idPublication).pipe(takeUntil(this.unsubscribe$)));
@@ -442,8 +423,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       link: `/publication/${publication._id}`,
       additionalData: JSON.stringify(dataNotification),
     }).pipe(takeUntil(this.unsubscribe$)).subscribe();
-
-
   }
 
   private createNotificationData(publication: PublicationView, comment: any) {

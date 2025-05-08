@@ -33,7 +33,7 @@
 
   <div class="content-add-comment">
     <worky-add-publication
-      [type]="currentPublication?.comment?.length && images.length === 1 && typeView === typeViewEnum.PUBLICATION ? typePublishingEnum.COMMENT : typePublishingEnum.IMAGE_VIEW"
+      [type]="(currentPublication?.comment?.length ?? 0) >= 0 && images.length === 1 && typeView === typeViewEnum.PUBLICATION ? typePublishingEnum.COMMENT : typePublishingEnum.IMAGE_VIEW"
       [idMedia]="imageSelected"
       [idPublication]="currentPublicationId">
     </worky-add-publication>

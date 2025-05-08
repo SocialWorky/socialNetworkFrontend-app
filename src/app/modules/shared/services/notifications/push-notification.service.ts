@@ -55,8 +55,7 @@ export class PushNotificationService {
       if (permission === 'granted') {
         messaging?.getToken({ vapidKey: environment.FIREBASE_VAPID_KEY })
           .then(token => {
-            console.log('Token web:', token);
-            // Aquí puedes enviar el token al backend
+
           });
       } else {
         console.log('Permiso denegado');

@@ -5,17 +5,14 @@
 .content-view-comment {
   display: flex;
   flex-direction: column;
-  max-height: 71dvh;
+  max-height: 75dvh;
   overflow: hidden;
-
-  // @include breakpoints.below-sm {
-  //   height: 40dvh;
-  // }
 
   .publication-comment {
     margin-top: 3px;
     padding: 10px;
     overflow: auto;
+    max-height: 59dvh;
     .publication-comment-item {
       display: flex;
       align-items: flex-start;
@@ -63,5 +60,9 @@
         }
       }
     }
+  }
+
+  .content-add-comment {
+    height: auto;
   }
 }
