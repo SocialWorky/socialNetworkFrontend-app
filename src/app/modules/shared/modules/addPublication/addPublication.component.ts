@@ -366,7 +366,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         this.selectedFiles = [];
         this.previews = [];
         this._cdr.markForCheck();
-        //await this.saveFiles(response, environment.APIFILESERVICE + 'publications/', message.publications._id, TypePublishing.POST);
       }
 
       await this.updatePublicationAndNotify(message.publications._id);

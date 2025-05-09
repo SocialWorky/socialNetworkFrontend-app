@@ -4,7 +4,8 @@ export enum TypePublishing {
   COMMENT = 'comment',
   POST_PROFILE = 'postProfile',
   IMAGE_VIEW = 'image-view',
-  MESSAGE = 'message'
+  MESSAGE = 'message',
+  PROCESSING = 'procesando',
 }
 
 export enum TypePrivacy {

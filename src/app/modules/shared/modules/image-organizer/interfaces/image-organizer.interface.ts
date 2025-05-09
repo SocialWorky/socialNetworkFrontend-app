@@ -10,8 +10,12 @@ export interface ImageOrganizer {
 }
 
 export enum MediaType {
+  TEXT = 'text',
   IMAGE = 'image',
-  VIDEO = 'video'
+  VIDEO = 'video',
+  AUDIO = 'audio',
+  FILE = 'file',
+  PROCESSING = 'procesando',
 }
 
 export enum TypeView {

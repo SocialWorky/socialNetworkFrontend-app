@@ -21,6 +21,7 @@ import { Token } from '@shared/interfaces/token.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { SocketService } from '@shared/services/socket.service';
 import { ExternalMessage } from '@shared/interfaces/notification-external-message.interface';
+import { MediaType } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
 
 @Component({
     selector: 'worky-message-side-rigth',
@@ -33,6 +34,8 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   WorkyButtonType = WorkyButtonType;
 
   WorkyButtonTheme = WorkyButtonTheme;
+
+  MediaType = MediaType;
 
   userIdMessage: string = '';
 
@@ -122,20 +125,23 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
     this._socketService.listenEvent('newExternalMessage', (message: ExternalMessage) => {
       if (message.type === TypePublishing.MESSAGE) {
-        this.updateContentMessage(message.idReference, message.response);
+        this.updateContentMessage(message.idReference, message.response?.content, message.response?.typeFile, message.response?.urlFile);
       }
     });
   }
 
-  private updateContentMessage(idMessage: string, contentMessage: string) {
+  private updateContentMessage(idMessage: string, contentMessage: string, typeFile: string, urlFile: string) {
     if (!idMessage) return;
     this.messages.forEach(message => {
       if (message._id === idMessage) {
         message.content = contentMessage;
-        this._notificationService.sendNotification([message]);
-        this.scrollToBottom();
+        message.type = typeFile;
+        message.urlFile = urlFile;
+        this._cdr.detectChanges();
+        this._notificationService.sendNotification(this.messages);
       }
     })
+
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -355,6 +361,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.selectedFiles = result;
+        this.scrollToBottom();
         this.uploadFiles();
       }
     });
@@ -374,6 +381,19 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
   isVideoUrl(url: string): boolean {
     return /\.(mp4|ogg|webm|avi|mov)$/i.test(url);
+  }
+
+  getThumbnail(message: any): string {
+    const patron = /\(([^)]+)\)/;
+    const match = message.match(patron);
+    if (match && match[1]) {
+      return match[1];
+    }
+    return '';
+  }
+
+  openUrl(url: string): void {
+    if (url) window.open(url, '_blank');
   }
 
 }

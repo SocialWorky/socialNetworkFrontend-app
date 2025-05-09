@@ -11,6 +11,7 @@ export interface Message {
   isEdited: boolean;
   isDeleted: boolean;
   deletedAt?: Date;
+  urlFile?: string;
 }
 
 export interface CreateMessage {
