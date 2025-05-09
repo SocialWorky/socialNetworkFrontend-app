@@ -6,12 +6,15 @@
 .content-right-messageChat {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 92dvh;
   border-radius: 0.5rem;
   padding: 10px;
   background-color: map.get(color.$worky-navy, 87);
   position: relative;
   overflow: hidden;
+  @include breakpoints.below-sm {
+    height: 86dvh;
+  }
 
   .content-section-wall {
     height: 100%;
