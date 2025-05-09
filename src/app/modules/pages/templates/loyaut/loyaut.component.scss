@@ -34,6 +34,7 @@
   grid-area: main;
   box-sizing: border-box;
   max-width: variables.$worky-app-width;
+  -webkit-overflow-scrolling: touch;
   @include breakpoints.below-sm {
     width: 100vw;
     margin: inherit;
@@ -100,6 +101,7 @@
   justify-content: flex-start;
   width: 100vw;
   flex-grow: 1;
+  -webkit-overflow-scrolling: touch;
 }
 
 .messages-view,

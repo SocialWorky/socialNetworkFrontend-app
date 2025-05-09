@@ -3,6 +3,7 @@
 
 .content-publications {
   height: 94vh;
+  -webkit-overflow-scrolling: touch;
 
   @include breakpoints.below-md {
     height: 90vh;

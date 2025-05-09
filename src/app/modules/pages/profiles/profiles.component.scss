@@ -4,7 +4,7 @@
 @use 'sass:map';
 
 .content-header-profile {
-
+  -webkit-overflow-scrolling: touch;
   .image-container {
     width: 100%;
     height: 250px;
@@ -140,6 +140,7 @@
   width: 100%;
   display: flex;
   justify-content: center;
+  -webkit-overflow-scrolling: touch;
 
   @include breakpoints.below-sm {
     flex-direction: column;
@@ -163,6 +164,7 @@
 
 ::ng-deep .cdk-global-overlay-wrapper .cdk-overlay-pane {
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 
