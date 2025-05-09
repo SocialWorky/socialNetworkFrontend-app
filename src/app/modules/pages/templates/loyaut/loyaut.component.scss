@@ -3,8 +3,6 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 
 .content-app {
-  top: 0;
-  left: 0;
   width: 100vw;
   min-height: 100dvh;
   display: flex;
@@ -37,6 +35,7 @@
   box-sizing: border-box;
   max-width: variables.$worky-app-width;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   @include breakpoints.below-sm {
     width: 100vw;
     margin: inherit;
@@ -57,6 +56,7 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   @include breakpoints.below-sm {
     display: none;
   }
@@ -105,6 +105,7 @@
   width: 100vw;
   flex-grow: 1;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .messages-view,
@@ -114,4 +115,5 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
