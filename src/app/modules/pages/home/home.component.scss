@@ -14,6 +14,7 @@
   overflow-y: scroll;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .content-publications::-webkit-scrollbar {
