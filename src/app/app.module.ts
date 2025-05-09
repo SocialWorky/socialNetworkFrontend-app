@@ -5,6 +5,7 @@ import { RouteReuseStrategy } from '@angular/router';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { SocketIoConfig, SocketIoModule } from 'ngx-socket-io';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+
 import { AuthModule } from '@auth/auth.module';
 import { environment } from '@env/environment';
 import { AppComponent } from './app.component';

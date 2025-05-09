@@ -15,6 +15,7 @@ import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { CommentService } from '@shared/services/core-apis/comment.service';
 import { AuthService } from '@auth/services/auth.service';
+import { PwaUpdateService } from '@shared/services/pwa-update.service';
 
 @Component({
     selector: 'worky-root',
@@ -44,6 +45,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private _publicationService: PublicationService,
     private _commentService: CommentService,
     private _authService: AuthService,
+    private _pwaUpdateService: PwaUpdateService,
   ) {
     this._notificationUsersService.setupInactivityListeners();
     if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();
@@ -79,6 +81,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     if(localStorage.getItem('token')) this.currentUserId = this._authService.getDecodedToken()!.id;
 
+    this._pwaUpdateService.checkForUpdates();
   }
 
   ngOnDestroy() {
