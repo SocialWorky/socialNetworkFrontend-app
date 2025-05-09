@@ -12,6 +12,8 @@
   grid-template:
   "header" 6vh
   "main" 94dvh;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   @include breakpoints.below-sm {
     grid-template:
     "header" 14vh

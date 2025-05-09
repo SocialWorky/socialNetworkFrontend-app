@@ -9,6 +9,8 @@ html, body {
   overflow-x: hidden;
   width: 100%;
   height: 100dvh;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 body {
   margin: 0;
