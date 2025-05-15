@@ -171,38 +171,47 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   }
 
   private async loadMessagesWithUser(currentUserId: string, userIdMessage: string) {
-    if (userIdMessage === currentUserId) return;
+    if (userIdMessage === currentUserId) {
+      return;
+    }
     this.loadMessages = true;
-    await this.getUser(userIdMessage);
-    this._messageService.getConversationsWithUser(currentUserId, userIdMessage)
-      .pipe(
-        takeUntil(this.unsubscribe$)
-       )
-      .subscribe({
-      next: (messages: Message[]) => {
-        this.messages = messages;
-        this.scrollToBottom();
-        this._cdr.markForCheck();
-        this.loadMessages = false;
-      },
-      error: (error) => {
-        console.error('Error loading messages:', error);
-        this.loadMessages = false;
-      }
-    });
+    try {
+      await this.getUser(userIdMessage);
+
+      this._messageService.getConversationsWithUser(currentUserId, userIdMessage)
+        .pipe(
+          takeUntil(this.unsubscribe$)
+        )
+        .subscribe({
+          next: (messages: Message[]) => {
+            this.messages = messages;
+            this.scrollToBottom();
+            this._cdr.markForCheck();
+            this.loadMessages = false;
+          },
+          error: (error) => {
+            console.error('Error loading messages:', error);
+            this.loadMessages = false;
+          }
+        });
+    } catch (error) {
+      console.error('Error en loadMessagesWithUser:', error);
+      this.loadMessages = false;
+    }
   }
 
-  private async getUser(userId: string) {
+  private async getUser(userId: string): Promise<void> {
     this.user = [];
-    await this._user.getUserById(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (user: User) => {
+    try {
+      const user = await this._user.getUserById(userId).pipe(takeUntil(this.unsubscribe$)).toPromise();
+      if (user) {
         this.user = [user];
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Error loading user:', error);
       }
-    });
+      this._cdr.markForCheck();
+    } catch (error) {
+      console.error('Error loading user:', error);
+      throw error;
+    }
   }
 
   formatDate(date: Date): string {
