@@ -12,8 +12,11 @@
   grid-template:
   "header" 6vh
   "main" 94dvh;
+  overscroll-behavior: contain;
+  -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  -ms-overflow-style: none;
   @include breakpoints.below-sm {
     grid-template:
     "header" 14vh
@@ -25,6 +28,9 @@
     flex-direction: column;
     grid-area: header;
     width: 100vw;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 }
 
@@ -34,8 +40,9 @@
   grid-area: main;
   box-sizing: border-box;
   max-width: variables.$worky-app-width;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
   @include breakpoints.below-sm {
     width: 100vw;
     margin: inherit;
@@ -67,6 +74,9 @@
   grid-area: main;
   height: 94dvh;
   min-width: variables.$worky-app-min-width;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   @include breakpoints.below-sm {
     height: 90dvh;
     width: 100vw;
@@ -104,6 +114,7 @@
   justify-content: flex-start;
   width: 100vw;
   flex-grow: 1;
+  -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }

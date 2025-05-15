@@ -507,8 +507,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         this.loaderPreviews = true;
         if (result) {
           this.selectedFiles = result;
-          this.createPreviews();
           this._cdr.markForCheck();
+          this.createPreviews();
         } else {
           this.loaderPreviews = false;
         }
@@ -528,15 +528,16 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
           type: fileType === 'image' ? 'image' : 'video',
           url: e.target.result
         });
+        this._cdr.markForCheck();
       };
       reader.readAsDataURL(file);
     });
     if (count >= this.selectedFiles.length){
       setTimeout(() => {
         this.loaderPreviews = false;
-      }, 1500);
+        this._cdr.markForCheck();
+      }, 500);
     }
-
     this._cdr.markForCheck();
   }
 
