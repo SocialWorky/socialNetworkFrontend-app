@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 import { PagesRoutingModule } from './pages-routing.module';
 import { HomeComponent } from './home/home.component';
@@ -60,6 +61,7 @@ import { ProcessingMediaModule } from '@shared/modules/processing-media/processi
     CommonModule,
     IonicModule,
     FormsModule,
+    ScrollingModule,
     ReactiveFormsModule,
     PagesRoutingModule,
     WorkyDropdownModule,

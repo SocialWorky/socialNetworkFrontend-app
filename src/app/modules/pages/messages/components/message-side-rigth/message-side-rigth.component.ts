@@ -22,6 +22,7 @@ import { TypePublishing } from '@shared/modules/addPublication/enum/addPublicati
 import { SocketService } from '@shared/services/socket.service';
 import { ExternalMessage } from '@shared/interfaces/notification-external-message.interface';
 import { MediaType } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
+import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 
 @Component({
     selector: 'worky-message-side-rigth',
@@ -61,7 +62,11 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     return this._deviceDetectionService.isMobile();
   }
 
-  @ViewChild('messageContainer', { static: false }) private messageContainer?: ElementRef;
+  trackByMessageId(index: number, message: Message): string {
+    return message._id;
+  }
+
+  @ViewChild(CdkVirtualScrollViewport, { static: false }) private messageContainer?: CdkVirtualScrollViewport;
 
   private unsubscribe$ = new Subject<void>();
 
@@ -104,7 +109,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       .subscribe({
         next: (message: any) => {
           if (message.senderId === this.userId || message.receiverId === this.userId) {
-            this.messages.push(message);
+            this.messages = [...this.messages, message];
             this._cdr.markForCheck();
             this.scrollToBottom();
           }
@@ -120,7 +125,8 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
           }
         }
       });
-    this.loadMessagesWithUser(this.currentUser!.id, this.userId);
+
+    await this.loadMessagesWithUser(this.currentUser!.id, this.userId);
     this.markMessagesAsRead();
 
     this._socketService.listenEvent('newExternalMessage', (message: ExternalMessage) => {
@@ -162,7 +168,9 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   }
 
   ngAfterViewChecked(): void {
-    this.scrollToBottom();
+    setTimeout(() => {
+      this.scrollToBottom();
+    }, 0);
   }
 
   ngOnDestroy() {
@@ -170,7 +178,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     this.unsubscribe$.complete();
   }
 
-  private async loadMessagesWithUser(currentUserId: string, userIdMessage: string) {
+  async loadMessagesWithUser(currentUserId: string, userIdMessage: string) {
     if (userIdMessage === currentUserId) {
       return;
     }
@@ -178,19 +186,20 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     try {
       await this.getUser(userIdMessage);
 
-      this._messageService.getConversationsWithUser(currentUserId, userIdMessage)
+      await this._messageService.getConversationsWithUser(currentUserId, userIdMessage)
         .pipe(
           takeUntil(this.unsubscribe$)
         )
         .subscribe({
           next: (messages: Message[]) => {
             this.messages = messages;
-            this.scrollToBottom();
             this._cdr.markForCheck();
-            this.loadMessages = false;
           },
           error: (error) => {
             console.error('Error loading messages:', error);
+            this.loadMessages = false;
+          },
+          complete: () => {
             this.loadMessages = false;
           }
         });
@@ -199,6 +208,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       this.loadMessages = false;
     }
   }
+
 
   private async getUser(userId: string): Promise<void> {
     this.user = [];
@@ -282,12 +292,15 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     setTimeout(() => {
       if (this.messageContainer) {
         try {
-          this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
+          this.messageContainer.scrollTo({
+            behavior: 'smooth',
+            top: this.messages.length * 1000,
+          })
         } catch (err) {
           console.error('Error scrolling to bottom:', err);
         }
       }
-    }, 2000);
+    }, 0);
   }
 
   async markMessagesAsRead() {

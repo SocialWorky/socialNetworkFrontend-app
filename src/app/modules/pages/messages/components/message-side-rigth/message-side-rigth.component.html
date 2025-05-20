@@ -9,9 +9,9 @@
     <div class="header-content-mobil-right"></div>
   </div>
 
-  <div class="content-section-wall" #messageContainer>
+  <cdk-virtual-scroll-viewport itemSize="autoResize" class="content-section-wall" #messageContainer layoutDirection="LTR">
     <div class="messages-container fadeIn fast">
-      <ng-container *ngFor="let message of messages; let i = index">
+      <ng-container *cdkVirtualFor="let message of messages; let i = index; trackBy: trackByMessageId">
         <!-- Show the date when it changes with respect to the previous message -->
         <ng-container *ngIf="i === 0 || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)">
           <div class="date-divider">
@@ -76,7 +76,7 @@
         </div>
       </ng-container>
     </div>
-  </div>
+  </cdk-virtual-scroll-viewport>
 
   <div *ngIf="showEmojiPicker" class="emoji-picker-container">
     <emoji-mart

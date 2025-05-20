@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { forkJoin, Subject, takeUntil } from 'rxjs';
+
 import { AuthService } from '@auth/services/auth.service';
 import { User } from '@shared/interfaces/user.interface';
 import { UserService } from '@shared/services/core-apis/users.service';
