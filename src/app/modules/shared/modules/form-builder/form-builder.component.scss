@@ -9,8 +9,17 @@
 
 .fields {
   width: 30%;
-  border: 1px solid colors.$worky-color-grey;
+  border: 1px solid colors.$worky-color-navy;
   padding: 10px;
+
+  ::ng-deep .input-destino .mat-mdc-text-field-wrapper {
+    .mat-mdc-floating-label {
+      background-color: transparent!important;
+      color: #000;
+    }
+    background-color: #FFF;
+  }
+
 }
 
 .cdk-drag-preview,
@@ -18,15 +27,16 @@
   display: flex;
   box-shadow: 0 1px 3px #0000001f, 0 1px 1px #00000024, 0 2px 1px #0003;
   border-radius: 4px;
-  background: map.get(colors.$worky-indigo, 72);
+  background: map.get(colors.$worky-navy, 72);
   height: 40px;
   align-items: center;
   margin-bottom: 8px;
   gap: 2px;
+  color: colors.$worky-color-text;
 
 
   .drag-and-drop-zone {
-    background: map.get(colors.$worky-indigo, 56);
+    background: map.get(colors.$worky-navy, 56);
     height: 100%;
     width: 24px;
     display: flex;
@@ -34,7 +44,7 @@
     align-items: center;
     margin-right: 10px;
     * {
-    color: #000000de;
+    color: colors.$worky-color-text;
     }
   }
 }
@@ -86,7 +96,7 @@
 
 .config-panel {
   position: absolute;
-  top: 100%; /* Debajo del campo */
+  top: 100%;
   left: 0;
   width: 100%;
   background-color: colors.$worky-color-light;

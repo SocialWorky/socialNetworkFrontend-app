@@ -1,7 +1,7 @@
 <div class="container">
   <div class="fields">
 
-    <mat-form-field class="worky-input worky-accent">
+    <mat-form-field class="worky-input worky-accent input-destino">
       <mat-label>Destino</mat-label>
       <mat-select [(value)]="formDestination" (selectionChange)="updateFormDestination($event)">
         <mat-option *ngFor="let destination of customFieldDestinations" [value]="destination" (click)="getFields()">
