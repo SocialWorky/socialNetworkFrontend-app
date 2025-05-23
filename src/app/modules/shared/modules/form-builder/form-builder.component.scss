@@ -51,17 +51,18 @@
 
 .form-preview {
   width: 70%;
-  border: 1px solid colors.$worky-color-grey;
+  border: 1px solid colors.$worky-color-navy;
   padding: 10px;
+  color: colors.$worky-color-text;
 }
 
 .form-preview div[cdkDrag] {
-  border: 1px dashed colors.$worky-color-grey;
+  border: 1px dashed colors.$worky-color-navy;
   border-radius: 8px;
   padding: 5px;
   margin-bottom: 10px;
   min-height: 30px;
-  background-color: map.get(colors.$worky-blue, 87);
+  background-color: map.get(colors.$worky-navy, 87);
 }
 
 .cdk-drag-placeholder {
@@ -85,7 +86,7 @@
     align-items: center;
     gap: 10px;
     .field-item {
-        flex: auto;
+      flex: auto;
     }
     i {
       cursor: pointer;
@@ -122,6 +123,16 @@
 
 ::ng-deep .mat-form-field-infix {
   width: auto !important;
+}
+
+::ng-deep .mat-mdc-select-value {
+  color: colors.$worky-color-text;
+}
+::ng-deep .mat-mdc-select-arrow {
+  color: colors.$worky-color-text!important;
+}
+::ng-deep .mat-mdc-floating-label, .mdc-floating-label {
+  color: colors.$worky-color-text!important;
 }
 
 .draggable {

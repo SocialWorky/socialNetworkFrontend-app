@@ -7,12 +7,10 @@ import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 import { TemplatesComponent } from './templates/templates.component';
 import { HomeAdminComponent } from './pages/home/home.component';
-import { ChangeThemeComponent } from './pages/change-theme/change-theme.component';
 
 import { SideMenuComponent } from './shared/side-menu/side-menu.component';
 import { StatisticsComponent } from './shared/statistics/statistics.component';
 import { LastRegisteredUsersComponent } from './shared/last-registered-users/last-registered-users.component';
-import { ChangeThemeColorsComponent } from './shared/change-theme-colors/change-theme-colors.component';
 import { CustomCssComponent } from './shared/custom-css/custom-css.component';
 import { ManageReactionsComponent } from './shared/manage-reactions/manage-reactions.component';
 import { SiteConfigComponent } from './shared/site-config/site-config.component';
@@ -31,10 +29,8 @@ import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.mod
     TemplatesComponent,
     SideMenuComponent,
     HomeAdminComponent,
-    ChangeThemeComponent,
     StatisticsComponent,
     LastRegisteredUsersComponent,
-    ChangeThemeColorsComponent,
     CustomCssComponent,
     ManageReactionsComponent,
     SiteConfigComponent,
