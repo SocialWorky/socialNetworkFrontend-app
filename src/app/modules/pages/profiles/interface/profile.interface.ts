@@ -24,6 +24,7 @@ export interface ProfileData {
   languages?: {
     name?: string;
   };
+  dynamicFields?: any;
 }
 
 export interface Location {

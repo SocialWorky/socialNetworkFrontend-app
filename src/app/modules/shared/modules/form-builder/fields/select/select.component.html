@@ -1,16 +1,17 @@
 <mat-form-field appearance="fill" class="worky-input worky-accent">
   <mat-label>{{ field.label }}</mat-label>
-  
-  <mat-select 
+
+  <mat-select
+    class="worky-select"
     [formControl]="control"
     [multiple]="field.additionalOptions?.multiSelect ?? false"
     [placeholder]="(field.additionalOptions?.multiSelect ?? false) ? 'Selecciona una o varias opciones' : 'Selecciona una opción'">
-    
+
     <!-- Mensaje de opción predeterminada, solo si no es multiSelect -->
     <mat-option *ngIf="!(field.additionalOptions?.multiSelect ?? false)" value="" disabled>
       Selecciona una opción
     </mat-option>
-    
+
     <!-- Opciones dinámicas -->
     <mat-option *ngFor="let option of field?.options" [value]="option.value">
       {{ option.label }}

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 import { environment } from '../../../../../environments/environment';
 import { CustomField } from '../../modules/form-builder/interfaces/custom-field.interface';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -33,8 +34,8 @@ export class CustomFieldService {
     return this.http.delete(url);
   }
 
-  getCustomFields() {
+  getCustomFields(): Observable<CustomField[]>  {
     const url = `${this._apiUrl}/custom-fields`;
-    return this.http.get(url);
+    return this.http.get<CustomField[]>(url);
   }
 }

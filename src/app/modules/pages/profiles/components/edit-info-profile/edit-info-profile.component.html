@@ -1,65 +1,89 @@
 <div class="content-edit-detail-profile">
-  <div class="edit-profile-container">
+  <div class="edit-profile-container" *ngIf="dataOk">
     <form [formGroup]="editProfileBasicDetailForm" autocomplete="off">
       <div class="form-detail-basic">
-        <div class="form-input">
-          <mat-form-field class="worky-input worky-accent">
+
+          <mat-form-field class="worky-input worky-accent worky-50">
             <mat-label>Nombre</mat-label>
             <input type="text" formControlName="name" id="name" matInput required>
           </mat-form-field>
 
-          <mat-form-field class="worky-input worky-accent">
+          <mat-form-field class="worky-input worky-accent worky-50">
             <mat-label>Apellido</mat-label>
             <input type="text" formControlName="lastName" id="lastName" matInput required>
           </mat-form-field>
-        </div>
+
       </div>
     </form>
 
-    <form [formGroup]="editProfailDetailForm" autocomplete="off">
-      <div class="form-detail-basic">
-        <div class="form-input">
-          <mat-form-field class="worky-input worky-accent">
+    <form [formGroup]="editProfileDetailForm" autocomplete="off">
+      <div class="form-detail-basic detail-full">
+          <mat-form-field class="worky-input worky-accent worky-100">
             <mat-label>Leyenda</mat-label>
             <input id="legend" type="text" formControlName="legend" matInput>
           </mat-form-field>
 
-          <mat-form-field class="worky-input worky-accent">
-            <mat-label>Fecha de Cumpleaño</mat-label>
-            <input id="dateOfBirth" type="date" formControlName="dateOfBirth" matInput>
-          </mat-form-field>
-
-          <mat-form-field class="worky-input worky-accent">
+          <mat-form-field class="worky-input worky-accent worky-100">
             <mat-label>Descripción</mat-label>
             <textarea id="description" formControlName="description" matInput></textarea>
           </mat-form-field>
 
-          <mat-form-field class="worky-input worky-accent">
-            <mat-label>Sexo</mat-label>
-            <mat-select id="sex" formControlName="sex">
-              <mat-option value="">Select</mat-option>
-              <mat-option value="masculino">Masculino</mat-option>
-              <mat-option value="femenino">Femenino</mat-option>
-              <mat-option value="otro">Otro</mat-option>
-            </mat-select>
-          </mat-form-field>
+          <div class="form-detail-basic">
+              <mat-form-field class="worky-input worky-accent worky-50">
+                <mat-label>Fecha de Cumpleaño</mat-label>
+                <input id="dateOfBirth" type="date" formControlName="dateOfBirth" matInput>
+              </mat-form-field>
 
-          <div formGroupName="whatsapp" class="whatsapp-content">
+              <mat-form-field class="worky-input worky-accent worky-50">
+                <mat-label>Sexo</mat-label>
+                <mat-select id="sex" formControlName="sex">
+                  <mat-option value="">Select</mat-option>
+                  <mat-option value="masculino">Masculino</mat-option>
+                  <mat-option value="femenino">Femenino</mat-option>
+                  <mat-option value="otro">Otro</mat-option>
+                </mat-select>
+              </mat-form-field>
+          </div>
+
+
+          <div formGroupName="whatsapp" class="whatsapp-content" worky-100>
             <div class="worky-toggle">
               <mat-slide-toggle class="whatsapp-content" formControlName="isViewable">Habilitar WhatsApp</mat-slide-toggle>
             </div>
 
-            <div *ngIf="editProfailDetailForm.get('whatsapp.isViewable')?.value">
+            <div *ngIf="editProfileDetailForm.get('whatsapp.isViewable')?.value">
               <mat-form-field class="worky-input worky-accent">
                 <mat-label>Numero de WhatsApp</mat-label>
                 <input id="whatsappNumber" type="text" formControlName="number" matInput>
               </mat-form-field>
             </div>
           </div>
-
-        </div>
       </div>
     </form>
+
+
+    <form [formGroup]="dynamicFieldsForm" *ngIf="dynamicFieldsForm">
+      <div *ngFor="let field of dynamicFields; let i = index" class="form-detail-basic">
+          <app-input *ngIf="field.type === enumCustomFieldType.TEXT"
+            class="worky-100"
+            [field]="field"
+            [formControlName]="field.id">
+          </app-input>
+
+          <app-textarea *ngIf="field.type === enumCustomFieldType.TEXTAREA"
+            class="worky-100"
+            [field]="field"
+            [formControlName]="field.id">
+          </app-textarea>
+
+          <app-select *ngIf="field.type === enumCustomFieldType.SELECT"
+            class="worky-100"
+            [field]="field"
+            [formControlName]="field.id">
+          </app-select>
+      </div>
+    </form>
+
 
     <worky-buttons
       [workyButtonType]="WorkyButtonType.Flat"
@@ -70,4 +94,7 @@
       <span basic-button-text>Guardar Cambios</span>
     </worky-buttons>
   </div>
+
+  <div class="loader" *ngIf="!dataOk"></div>
+
 </div>

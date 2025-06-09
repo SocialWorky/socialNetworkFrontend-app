@@ -37,6 +37,7 @@ import { MessageListComponent } from './messages/components/message-side-left/co
 import { UserOnlineModule } from '@shared/modules/user-online/user-online.module';
 import { NotificationsPanelModule } from '@shared/modules/notifications-panel/notifications-panel.module';
 import { ProcessingMediaModule } from '@shared/modules/processing-media/processing-media.module';
+import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.module';
 
 
 @NgModule({
@@ -80,6 +81,7 @@ import { ProcessingMediaModule } from '@shared/modules/processing-media/processi
     MarkdownModule.forRoot(),
     PipesSharedModule,
     ProcessingMediaModule,
+    FormBuilderModule,
   ]
 })
 export class PagesModule { }

@@ -8,6 +8,8 @@ import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/model
 import { LocationService } from '@shared/services/apis/location.service';
 import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { AuthService } from '@auth/services/auth.service';
 
 @Component({
     selector: 'worky-weather',
@@ -18,23 +20,37 @@ import { GeoLocationsService } from '@shared/services/apis/apiGeoLocations.servi
 })
 export class WeatherComponent implements OnInit, OnDestroy {
   WorkyButtonType = WorkyButtonType;
+
   WorkyButtonTheme = WorkyButtonTheme;
 
   localTime: Date = new Date();
-  currentHour: number = 0;
-  weatherData: WeatherMain = this.getInitialWeatherData();
-  city?: string;
-  i: number = 0;
 
-  private unsubscribe$ = new Subject<void>();
-  private timeSubscription?: Subscription;
+  currentHour: number = 0;
+
+  weatherData: WeatherMain = this.getInitialWeatherData();
+
+  city?: string;
+
+  i = 0;
+
+  location?: [number, number];
+
+  loading = false;
+
+  error?: string;
+
+  private _unsubscribe$ = new Subject<void>();
+
+  private _timeSubscription?: Subscription;
 
   constructor(
-    private weatherService: WeatherService,
-    private cdr: ChangeDetectorRef,
-    private locationService: LocationService,
-    private geocodingService: GeocodingService,
-    private geoLocationsService: GeoLocationsService
+    private _weatherService: WeatherService,
+    private _cdr: ChangeDetectorRef,
+    private _locationService: LocationService,
+    private _geocodingService: GeocodingService,
+    private _geoLocationsService: GeoLocationsService,
+    private _logService: LogService,
+    private _authService: AuthService,
   ) {
     const storedWeatherData = localStorage.getItem('WorkyWeatherData');
     if (storedWeatherData) {
@@ -42,7 +58,7 @@ export class WeatherComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.verifyWeatherData().then(verify => {
       if (!verify) {
         this.updateWeatherData();
@@ -53,9 +69,9 @@ export class WeatherComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
-    this.timeSubscription?.unsubscribe();
+    this._unsubscribe$.next();
+    this._unsubscribe$.complete();
+    this._timeSubscription?.unsubscribe();
   }
 
   private getInitialWeatherData(): WeatherMain {
@@ -102,38 +118,48 @@ export class WeatherComponent implements OnInit, OnDestroy {
   }
 
   private startClock(): void {
-    this.timeSubscription = interval(1000).pipe(
-      takeUntil(this.unsubscribe$)
+    this._timeSubscription = interval(1000).pipe(
+      takeUntil(this._unsubscribe$)
     ).subscribe(() => {
       this.localTime = new Date();
       this.currentHour = this.localTime.getHours();
-      this.cdr.markForCheck();
+      this._cdr.markForCheck();
     });
   }
 
   private async updateWeatherData(): Promise<void> {
     try {
-      const [latitude, longitude] = await this.locationService.getUserLocation();
+      const [latitude, longitude] = await this._locationService.getUserLocation();
+      console.log('LATITUD, LONGITUD', latitude, longitude);
+      console.log('THIS.LOCATION: ', this.location);
       await this.setCityFromCoordinates(latitude, longitude);
       await this.getWeatherData(latitude, longitude);
     } catch (error) {
-      console.error('Error getting location or geocoding data:', error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'WorkyWeatherComponent',
+        'Error getting location or geocoding data',
+        {
+          user: this._authService.getDecodedToken(),
+          message: error,
+        },
+      );
     } finally {
-      this.cdr.markForCheck();
+      this._cdr.markForCheck();
     }
   }
 
   private async setCityFromCoordinates(latitude: number, longitude: number): Promise<void> {
     try {
       const location = await firstValueFrom(
-        this.geoLocationsService.findLocationByLatAndLng(latitude, longitude).pipe(
-          takeUntil(this.unsubscribe$),
+        this._geoLocationsService.findLocationByLatAndLng(latitude, longitude).pipe(
+          takeUntil(this._unsubscribe$),
           switchMap(result => {
             if (!result) {
-              return this.geocodingService.getGeocodeLatAndLng(latitude, longitude).pipe(
+              return this._geocodingService.getGeocodeLatAndLng(latitude, longitude).pipe(
                 switchMap(data => {
                   if (data.results && data.results.length > 0) {
-                    return this.geoLocationsService.createLocations(data).pipe(
+                    return this._geoLocationsService.createLocations(data).pipe(
                       switchMap(() => of(data.results[0].components.city || 'Unknown location'))
                     );
                   }
@@ -144,7 +170,15 @@ export class WeatherComponent implements OnInit, OnDestroy {
             return of(result[0]?.city || null);
           }),
           catchError(error => {
-            console.error('Error getting geocoding data:', error);
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'WorkyWeatherComponent',
+              'Error getting geocoding data',
+              {
+                user: this._authService.getDecodedToken(),
+                message: error,
+              },
+            );
             return of('Unknown location');
           })
         )
@@ -155,14 +189,22 @@ export class WeatherComponent implements OnInit, OnDestroy {
         await this.getWeatherData(latitude, longitude);
       }
     } catch (error) {
-      console.error('Error getting geocoding data:', error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'WorkyWeatherComponent',
+        'Error getting geocoding data',
+        {
+          user: this._authService.getDecodedToken(),
+          message: error,
+        },
+      );
     }
   }
 
   private getWeatherData(lat: number, lng: number): Promise<void> {
     return firstValueFrom(
-      this.weatherService.getWeatherLatAndLng(lat, lng).pipe(
-        takeUntil(this.unsubscribe$),
+      this._weatherService.getWeatherLatAndLng(lat, lng).pipe(
+        takeUntil(this._unsubscribe$),
         switchMap(data => {
           localStorage.setItem('WorkyWeatherData', JSON.stringify(data));
           this.weatherData = data;
@@ -170,7 +212,15 @@ export class WeatherComponent implements OnInit, OnDestroy {
           return of(void 0);
         }),
         catchError(error => {
-          console.error('Error fetching weather data:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'WorkyWeatherComponent',
+            'Error fetching weather data',
+            {
+              user: this._authService.getDecodedToken(),
+              message: error,
+            },
+          );
           return of(void 0);
         })
       )
@@ -187,7 +237,7 @@ export class WeatherComponent implements OnInit, OnDestroy {
 
     if (today.includes(currentDay)) {
       this.city = this.weatherData.location.name;
-      this.cdr.markForCheck();
+      this._cdr.markForCheck();
       return true;
     }
 
@@ -205,22 +255,29 @@ export class WeatherComponent implements OnInit, OnDestroy {
     return `${iconUrl}?_=${this.currentHour}`;
   }
 
-  // Método para obtener el clima por ciudad
   getWeatherCity(city?: string): void {
     if (!city) return;
 
-    this.geocodingService.getGeocodeCity(city).pipe(
-      takeUntil(this.unsubscribe$),
+    this._geocodingService.getGeocodeCity(city).pipe(
+      takeUntil(this._unsubscribe$),
       switchMap(data => {
         if (data.results && data.results.length > 0) {
-          return this.geoLocationsService.createLocations(data).pipe(
-            switchMap(() => this.weatherService.getWeatherCity(city))
+          return this._geoLocationsService.createLocations(data).pipe(
+            switchMap(() => this._weatherService.getWeatherCity(city))
           );
         }
         return of(null);
       }),
       catchError(error => {
-        console.error('Error fetching geocoding data:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'WorkyWeatherComponent',
+          'Error fetching geocoding data',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
         return of(null);
       })
     ).subscribe({
@@ -228,10 +285,20 @@ export class WeatherComponent implements OnInit, OnDestroy {
         if (data) {
           localStorage.setItem('WorkyWeatherData', JSON.stringify(data));
           this.weatherData = data;
-          this.cdr.markForCheck();
+          this._cdr.markForCheck();
         }
       },
-      error: error => console.error('Error fetching weather data:', error)
+      error: error => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'WorkyWeatherComponent',
+          'Error fetching weather data',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
+      }
     });
   }
 }

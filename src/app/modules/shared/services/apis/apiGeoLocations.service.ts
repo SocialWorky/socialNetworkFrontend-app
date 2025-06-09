@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 import { StreetMapData } from '../../interfaces/streetMap.interface';
 import { CreateLocationRequest } from '../../interfaces/apiGeoLocations.interface';

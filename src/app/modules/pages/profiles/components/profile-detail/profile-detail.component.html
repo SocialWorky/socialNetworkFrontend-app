@@ -50,6 +50,24 @@
 
     </div>
 
+    <div *ngIf="userData?.profile?.dynamicFields && pushData.length">
+        <div class="body-detail">
+          <div class="detail" *ngFor="let item of dynamicFields">
+            <ng-container *ngIf="item.label && item.value != '' || item.value.length && item.label">
+              <i class="material-icons">dynamic_form</i>
+              <span class="label-detail">{{ item.label }} : </span>
+              <span *ngIf="item.type != 'array'">{{ item.value }}</span>
+
+              <div *ngIf="item.type=== 'array'">
+                <div class="worky-chip" *ngFor="let value of item.value; let i = index">
+                  <span class="worky-label">{{ value }}</span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+    </div>
+
     <div class="footer-detail">
       <worky-buttons *ngIf="isCurrentUser"
           [workyButtonType]="WorkyButtonType.Outline"

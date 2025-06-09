@@ -29,6 +29,7 @@ import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
     selector: 'worky-profiles',
@@ -114,7 +115,8 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _scrollService: ScrollService,
     private _titleService: Title,
     private _configService: ConfigService,
-    private _notificationPublicationService: NotificationPublicationService
+    private _notificationPublicationService: NotificationPublicationService,
+    private _logService: LogService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
@@ -151,8 +153,6 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this.getDataProfile();
       this._cdr.markForCheck();
     });
-
-
   }
 
   private scrollSubscription() {
@@ -206,7 +206,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this._cdr.markForCheck();
 
     } catch (error) {
-      console.error('Error al cargar las publicaciones:', error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'ProfilesComponent',
+        'Error al cargar las publicaciones',
+        {
+          user: this._authService.getDecodedToken(),
+          message: error,
+        },
+      );
       this.loaderPublications = false;
     }
   }
@@ -218,7 +226,16 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error al obtener los datos del perfil:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error al obtener los datos del perfil',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
+        this._router.navigate(['/']);
       },
     });
   }
@@ -261,12 +278,28 @@ export class ProfilesComponent implements OnInit, OnDestroy {
                 this._cdr.markForCheck();
               },
               error: (error) => {
-               console.error('Error al obtener la publicación:', error);
+                this._logService.log(
+                  LevelLogEnum.ERROR,
+                  'ProfilesComponent',
+                  'Error al obtener la publicación',
+                  {
+                    user: this._authService.getDecodedToken(),
+                    message: error,
+                  },
+                );
               }
             });
         },
         error: (error) => {
-          console.error('Error en suscripción de notificaciones de nuevas publicaciones', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'ProfilesComponent',
+            'Error en suscripción de notificaciones de nuevas publicaciones',
+            {
+              user: this._authService.getDecodedToken(),
+              message: error,
+            },
+          );
         }
       });
   }
@@ -288,7 +321,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error('Error en suscripción de notificaciones de eliminar publicaciones', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'ProfilesComponent',
+            'Error en suscripción de notificaciones de eliminar publicaciones',
+            {
+              user: this._authService.getDecodedToken(),
+              message: error,
+            },
+          );
         }
       });
   }
@@ -302,7 +343,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           const notification = data[0];
           return this._publicationService.getPublicationId(notification._id).pipe(
             catchError((error) => {
-              console.error('Error al obtener la publicación:', error);
+              this._logService.log(
+                LevelLogEnum.ERROR,
+                'ProfilesComponent',
+                'Error al obtener la publicación',
+                {
+                  user: this._authService.getDecodedToken(),
+                  message: error,
+                },
+              );
               return of([]);
             })
           );
@@ -343,7 +392,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         },
         error: (error) => {
-          console.error('Error en suscripción de notificaciones de actualizar publicaciones', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'ProfilesComponent',
+            'Error en suscripción de notificaciones de actualizar publicaciones',
+            {
+              user: this._authService.getDecodedToken(),
+              message: error,
+            },
+          );
         }
       });
   }
@@ -368,7 +425,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-       console.error('Error en suscripción de notificaciones de comentarios', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error en suscripción de notificaciones de comentarios',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
       }
     });
   }
@@ -380,7 +445,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this.getUserFriendPending();
       },
       error: (error) => {
-        console.error('Error al obtener los amigos:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error al obtener los amigos',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
       },
     });
   }
@@ -403,8 +476,16 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         }
       },
-      error: (error: any) => {
-        console.error('Error al obtener el estado de la solicitud de amistad:', error);
+      error: (error) => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error al obtener el estado de la solicitud de amistad',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
       },
     });
   }
@@ -418,7 +499,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error al enviar la solicitud de amistad:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error al enviar la solicitud de amistad',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
       }
     });
   }
@@ -442,7 +531,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error al aceptar la solicitud de amistad:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error al aceptar la solicitud de amistad',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
       }
     });
   }
@@ -494,7 +591,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           }, 1200);
         },
         error: (error) => {
-          console.error('Error al actualizar la imagen de perfil:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'ProfilesComponent',
+            'Error al actualizar la imagen de perfil',
+            {
+              user: this._authService.getDecodedToken(),
+              message: error,
+            },
+          );
           this.isUploading = false;
           this._cdr.markForCheck();
         }

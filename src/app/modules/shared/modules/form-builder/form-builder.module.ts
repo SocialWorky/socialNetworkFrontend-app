@@ -1,4 +1,3 @@
-// src/app/form-builder/form-builder.module.ts
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -13,7 +12,7 @@ import { InputComponent, TextareaComponent, SelectComponent } from './fields/ind
     FormBuilderComponent,
     InputComponent,
     TextareaComponent,
-    SelectComponent
+    SelectComponent,
   ],
   imports: [
     CommonModule,
@@ -22,6 +21,6 @@ import { InputComponent, TextareaComponent, SelectComponent } from './fields/ind
     FormsModule,
     MaterialModule
   ],
-  exports: [FormBuilderComponent]
+  exports: [FormBuilderComponent, InputComponent, TextareaComponent, SelectComponent]
 })
 export class FormBuilderModule { }

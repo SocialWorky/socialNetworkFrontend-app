@@ -3,8 +3,7 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
 .content-edit-detail-profile {
-  display: flex;
-  width: 550px;
+  max-width: 550px;
   padding: 15px;
   background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
   color: color.$worky-color-text;
@@ -15,36 +14,36 @@
   .edit-profile-container {
     width: 100%;
     .form-detail-basic {
-      width: 100%;
-      display: block;
-      margin: 0 auto;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      gap: 10px;
       @include breakpoints.below-sm {
         width: 95%;
       }
-      .form-input {
-        //margin-top: 50px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-      }
-
       span {
         @include Fonts.worky-text;
-        color: color.$worky-color-navy;
+        color: color.$worky-color-text;
       }
     }
-
+    .detail-full {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
     .whatsapp-content {
       margin-bottom: 10px;
     }
-
    }
-
-  }
+}
 
 .cdk-global-overlay-wrapper .cdk-overlay-pane {
   @include breakpoints.below-sm {
     max-width: 100% !important;
     width: 95%;
   }
+}
+
+::ng-deep .mat-mdc-floating-label, .mdc-floating-label {
+  color: color.$worky-color-text!important;
 }

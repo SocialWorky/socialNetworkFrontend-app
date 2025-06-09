@@ -45,7 +45,7 @@ img, video {
   --worky-color-greyLight: var(--worky-color-greyLight-dark);
   --worky-color-grey: var(--worky-color-grey-dark);
 
-  // Colors Icons, texts, etc.
+  // Colors Icons, texts, chips, etc.
   --worky-color-icon: var(--worky-color-icon-dark);
   --worky-color-text: var(--worky-color-text-dark);
   --worky-color-input-background: var(--worky-color-input-background-dark);
@@ -99,6 +99,36 @@ img, video {
   font-variation-settings: 'FILL' 1;
 }
 
+.worky-50 {
+  width: 50%;
+  @include breakpoints.below-sm {
+    width: 100%;
+  }
+}
+.worky-100 {
+  width: 100%;
+}
+
+.worky-chip {
+  border-radius: 16px;
+  -webkit-font-smoothing: antialiased;
+  margin-inline: 4px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  padding-inline: 12px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  min-height: 32px;
+  overflow: hidden;
+  vertical-align: middle;
+  background: map.get(color.$worky-navy, 56);
+  worky-label {
+    color: color.$worky-color-text;
+  }
+}
 
  .worky-input {
     .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mat-mdc-floating-label {
@@ -115,6 +145,18 @@ img, video {
       color: color.$worky-color-text;
     }
 
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-text-field__input::placeholder {
+      color: color.$worky-color-text;
+    }
+
+    .mat-mdc-select-trigger .mat-mdc-select-value-text {
+      color: color.$worky-color-text;
+    }
+
+    span {
+      color: color.$worky-color-text;
+    }
+
     .mdc-line-ripple {
       display: none;
     }
@@ -123,6 +165,11 @@ img, video {
       border: 1px solid color.$worky-color-navy;
       border-radius: 8px;
     }
+
+    .mat-mdc-select-arrow-wrapper .mat-mdc-select-arrow {
+      color: color.$worky-color-text;
+    }
+
     .mdc-text-field {
       overflow: visible;
       .mat-mdc-form-field-focus-overlay {
@@ -260,6 +307,14 @@ img, video {
     }
 
     .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-text-field__input {
+      color: color.$worky-color-text;
+    }
+
+    .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-floating-label {
+      color: var(--worky-color-text);
+    }
+
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-text-field__input::placeholder {
       color: color.$worky-color-text;
     }
 
