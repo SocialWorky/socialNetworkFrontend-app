@@ -7,17 +7,15 @@
     [multiple]="field.additionalOptions?.multiSelect ?? false"
     [placeholder]="(field.additionalOptions?.multiSelect ?? false) ? 'Selecciona una o varias opciones' : 'Selecciona una opción'">
 
-    <!-- Mensaje de opción predeterminada, solo si no es multiSelect -->
     <mat-option *ngIf="!(field.additionalOptions?.multiSelect ?? false)" value="" disabled>
       Selecciona una opción
     </mat-option>
 
-    <!-- Opciones dinámicas -->
     <mat-option *ngFor="let option of field?.options" [value]="option.value">
       {{ option.label }}
     </mat-option>
   </mat-select>
-  <!-- Mensaje de error -->
+
   <mat-error *ngIf="isRequired && control.hasError('required') && control.touched">
     Este campo es requerido.
   </mat-error>

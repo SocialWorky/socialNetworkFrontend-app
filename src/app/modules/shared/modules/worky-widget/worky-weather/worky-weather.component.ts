@@ -130,8 +130,6 @@ export class WeatherComponent implements OnInit, OnDestroy {
   private async updateWeatherData(): Promise<void> {
     try {
       const [latitude, longitude] = await this._locationService.getUserLocation();
-      console.log('LATITUD, LONGITUD', latitude, longitude);
-      console.log('THIS.LOCATION: ', this.location);
       await this.setCityFromCoordinates(latitude, longitude);
       await this.getWeatherData(latitude, longitude);
     } catch (error) {

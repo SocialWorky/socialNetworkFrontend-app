@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 import { StreetMapData } from '../../interfaces/streetMap.interface';
 import { CreateLocationRequest } from '../../interfaces/apiGeoLocations.interface';
 import { environment } from '@env/environment'
-import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'

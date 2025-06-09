@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil } from 'rxjs';
+import { isArray } from 'lodash';
 
 import { EditInfoProfileDetailComponent } from '../edit-info-profile/edit-info-profile.component';
 import { User } from '@shared/interfaces/user.interface';
@@ -8,7 +9,6 @@ import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/model
 import { UserService } from '@shared/services/core-apis/users.service';
 import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
 import { CustomFieldDestination } from '@shared/modules/form-builder/interfaces/custom-field.interface';
-import { isArray } from 'lodash';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({

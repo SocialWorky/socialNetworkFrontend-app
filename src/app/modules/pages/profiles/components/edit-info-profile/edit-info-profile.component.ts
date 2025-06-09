@@ -1,6 +1,6 @@
-import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, Inject, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { ChangeDetectorRef } from '@angular/core';
+import { LoadingController } from '@ionic/angular';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { map, Subject, takeUntil } from 'rxjs';
 
@@ -8,10 +8,10 @@ import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/model
 import { ProfileService } from '../../services/profile.service';
 import { User } from '@shared/interfaces/user.interface';
 import { UserService } from '@shared/services/core-apis/users.service';
-import { LoadingController } from '@ionic/angular';
 import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
 import { Field } from '@shared/modules/form-builder/interfaces/field.interface';
 import { CustomFieldDestination, CustomFieldType } from '@shared/modules/form-builder/interfaces/custom-field.interface';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
     selector: 'worky-edit-info-profile',
@@ -52,6 +52,7 @@ export class EditInfoProfileDetailComponent implements OnInit {
     private _userService: UserService,
     private _loadingCtrl: LoadingController,
     private _customFieldService: CustomFieldService,
+    private _logService: LogService,
   ) {
     this.editProfileBasicDetailForm = this._fb.group({
       name: ['', Validators.required],
@@ -158,6 +159,19 @@ export class EditInfoProfileDetailComponent implements OnInit {
       this._dialogRef.close('saved');
     } catch (error) {
       console.error('Error al guardar los cambios:', error);
+
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'EditInfoProfileDetailComponent',
+        'Error guardando los cambios en el perfil.',
+        {
+          user: this.userData,
+          message: error,
+          dataBasic: this.editProfileBasicDetailForm.value,
+          dataProfile: this.editProfileDetailForm.value,
+          dynamicFields: this.dynamicFieldsForm.value,
+        },
+      );
     } finally {
       await this.dismissLoading();
     }

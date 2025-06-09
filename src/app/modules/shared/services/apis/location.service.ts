@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
+
 import { AuthService } from '@auth/services/auth.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 

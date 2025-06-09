@@ -1,14 +1,14 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal } from '@angular/core';
+import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom, lastValueFrom, of, Subject, takeUntil } from 'rxjs';
 import { catchError, filter, switchMap } from 'rxjs/operators';
 import * as _ from 'lodash';
-import { Title } from '@angular/platform-browser';
 
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { UserService } from '@shared/services/core-apis/users.service';
-import { ActivatedRoute, Router } from '@angular/router';
 import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';

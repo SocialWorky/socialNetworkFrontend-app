@@ -7,6 +7,8 @@ import { map, Subject, takeUntil } from 'rxjs';
 import { Field } from './interfaces/field.interface';
 import { CustomFieldType, CustomFieldDestination, CustomField} from './interfaces/custom-field.interface';
 import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { AuthService } from '@auth/services/auth.service';
 
 @Component({
     selector: 'worky-form-builder',
@@ -42,7 +44,9 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
   constructor(
     private _cdr: ChangeDetectorRef,
     private _renderer: Renderer2,
-    private _customFieldService: CustomFieldService
+    private _customFieldService: CustomFieldService,
+    private _logService: LogService,
+    private _authService: AuthService
   ) { }
 
   ngOnInit() {
@@ -369,13 +373,18 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         },
         error: (error) => {
-          console.error('Error al guardar formulario:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'FormBuilderComponent',
+            'Error al guardar formulario',
+            {
+              user: this._authService.getDecodedToken(),
+              message: error,
+            },
+          );
         }
       });
     });
-    // setTimeout(() => {
-    //   this.getFields();
-    // }, 400);
   }
 
   updateIndexFields() {
