@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
-import { filter, takeUntil, debounceTime } from 'rxjs/operators';
+import { filter, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 
@@ -281,7 +281,12 @@ export class HomeComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         filter((data: PublicationView[]) => !!data?.[0]?._id),
-        debounceTime(500)
+        debounceTime(500),
+        distinctUntilChanged((prev, curr) => {
+          if (!prev || !curr || prev.length === 0 || curr.length === 0) return false;
+          return prev[0]._id === curr[0]._id && 
+                 JSON.stringify(prev[0]) === JSON.stringify(curr[0]);
+        })
       )
       .subscribe({
         next: (data: PublicationView[]) => {

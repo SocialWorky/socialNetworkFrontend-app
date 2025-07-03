@@ -142,7 +142,6 @@ export class PwaUpdateNotificationComponent implements OnInit, OnDestroy {
   constructor(private pwaUpdateService: PwaUpdateService) {}
 
   ngOnInit(): void {
-    // Suscribirse a las actualizaciones disponibles
     this.pwaUpdateService.updateAvailable
       .pipe(takeUntil(this.destroy$))
       .subscribe(updateInfo => {
@@ -152,7 +151,6 @@ export class PwaUpdateNotificationComponent implements OnInit, OnDestroy {
         }
       });
 
-    // Obtener el estado de actualización automática
     this.autoUpdateEnabled = this.pwaUpdateService.getAutoUpdateStatus();
   }
 
@@ -161,9 +159,6 @@ export class PwaUpdateNotificationComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * Aplica la actualización
-   */
   async applyUpdate(): Promise<void> {
     try {
       this.isUpdating = true;
@@ -174,16 +169,10 @@ export class PwaUpdateNotificationComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Oculta la notificación
-   */
   dismiss(): void {
     this.showNotification = false;
   }
 
-  /**
-   * Cambia el estado de actualización automática
-   */
   toggleAutoUpdate(event: any): void {
     this.pwaUpdateService.setAutoUpdate(event.detail.checked);
   }

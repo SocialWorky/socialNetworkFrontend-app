@@ -137,6 +137,10 @@ export class PublicationService {
     return response;
   }
 
+  updatePublicationsLocal(newPublications: PublicationView[]): void {
+    this._publicationDatabase.addPublications(newPublications);
+  }
+
   updatePublications(newPublications: PublicationView[]): void {
     this._notificationPublicationService.sendNotificationUpdatePublication(newPublications);  
     this._publicationDatabase.addPublications(newPublications);

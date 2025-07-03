@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, takeUntil, debounceTime } from 'rxjs/operators';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 import * as _ from 'lodash';
@@ -110,14 +110,13 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._notificationService.notification$
       .pipe(
         distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+        debounceTime(300),
         takeUntil(this.destroy$)
       )
       .subscribe({
         next: (data: any) => {
           if (data?._id === this.publication._id) {
-            this.refreshPublications(data._id);
-            this.loadReactionsImg(data);
-            this._cdr.markForCheck();
+            this.updatePublicationIfNeeded(data);
           }
         }
       });
@@ -330,16 +329,24 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   refreshPublications(_id?: string) {
     if (_id) {
-      this._publicationService.getPublicationId(_id).pipe(takeUntil(this.destroy$)).subscribe({
+      this._publicationService.getPublicationId(_id).pipe(
+        takeUntil(this.destroy$),
+        debounceTime(200)
+      ).subscribe({
         next: (publication: PublicationView[]) => {
           if (!publication.length) {
             return;
           }
-          this._publicationService.updatePublications(publication);
-          this.publication = publication[0];
-          this.loadReactionsImg(publication[0]);
-          this.checkDataLink(publication[0]._id);
-          this._cdr.markForCheck();
+          
+          const updatedPublication = publication[0];
+          
+          if (JSON.stringify(this.publication) !== JSON.stringify(updatedPublication)) {
+            this._publicationService.updatePublicationsLocal(publication);
+            this.publication = updatedPublication;
+            this.loadReactionsImg(updatedPublication);
+            this.checkDataLink(updatedPublication._id);
+            this._cdr.markForCheck();
+          }
         },
         error: (error) => {
           console.error('Failed to refresh publications', error);
@@ -401,5 +408,19 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         loadingDeleteComment.dismiss();
       }
     });
+  }
+
+  private updatePublicationIfNeeded(updatedData: any) {
+    const hasRelevantChanges = 
+      this.publication.reaction.length !== updatedData.reaction?.length ||
+      this.publication.comment.length !== updatedData.comment?.length ||
+      this.publication.fixed !== updatedData.fixed ||
+      JSON.stringify(this.publication.reaction) !== JSON.stringify(updatedData.reaction);
+
+    if (hasRelevantChanges) {
+      this.refreshPublications(updatedData._id);
+      this.loadReactionsImg(updatedData);
+      this._cdr.markForCheck();
+    }
   }
 }
