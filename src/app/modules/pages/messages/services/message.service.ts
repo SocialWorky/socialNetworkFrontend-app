@@ -211,7 +211,7 @@ export class MessageService {
         return this.http.get<number>(url).pipe(
           catchError((serverError) => {
             console.error('Error también en servidor:', serverError);
-            return of(0); // Devolver 0 en caso de error
+            return of(0);
           })
         );
       })
@@ -335,7 +335,6 @@ export class MessageService {
     
     return this.http.get<number>(url).pipe(
       tap((serverCount) => {
-        console.log('Conteo del servidor:', serverCount);
         this.updateLocalReadStatus(serverCount);
       }),
       catchError((error) => {
@@ -348,7 +347,6 @@ export class MessageService {
   private updateLocalReadStatus(serverCount: number): void {
     if (serverCount === 0) {
       this._messageDatabase.markAllMessagesAsRead().then(() => {
-        console.log('Todos los mensajes marcados como leídos en cache local');
       });
     }
   }

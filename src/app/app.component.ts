@@ -87,6 +87,7 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    this._pwaUpdateService.destroy();
   }
 
   private handlePostUpdate(publicationId: string): void {
