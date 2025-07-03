@@ -9,6 +9,16 @@
     <div class="header-content-mobil-right"></div>
   </div>
 
+  <!-- <div *ngIf="isMobile" class="refresh-container">
+    <button 
+      (click)="forceSyncMessages()" 
+      [disabled]="loadMessages"
+      class="refresh-button">
+      <i class="material-icons" [class.spinning]="loadMessages">refresh</i>
+      Actualizar
+    </button>
+  </div> -->
+
   <cdk-virtual-scroll-viewport itemSize="autoResize" class="content-section-wall" #messageContainer layoutDirection="LTR">
     <div class="messages-container fadeIn fast">
       <ng-container *cdkVirtualFor="let message of messages; let i = index; trackBy: trackByMessageId">

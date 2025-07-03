@@ -1,5 +1,6 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 @use 'src/assets/styles/worky-palettes.scss' as color;
+@use "sass:map";
 
 .content-publications {
   height: 94vh;

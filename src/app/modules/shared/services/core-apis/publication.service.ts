@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { signal } from '@angular/core';
-import { catchError, map, Observable, Subject, takeUntil, throwError } from 'rxjs';
+import { catchError, map, Observable, Subject, throwError, from, of, switchMap, tap, forkJoin, firstValueFrom } from 'rxjs';
 
 import { environment } from '@env/environment';
 import { CreatePost } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { EditPublication, Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
+import { PublicationDatabaseService } from '@shared/services/database/publication-database.service';
 
 @Injectable({
   providedIn: 'root',
@@ -31,7 +32,10 @@ export class PublicationService {
   constructor(
     private http: HttpClient,
     private _notificationPublicationService: NotificationPublicationService,
-  ) {}
+    private _publicationDatabase: PublicationDatabaseService,
+  ) {
+    this._publicationDatabase.initDatabase();
+  }
 
   private handleError(error: any) {
     console.error('An error occurred', error);
@@ -44,6 +48,7 @@ export class PublicationService {
       catchError(this.handleError),
       map((data) => {
         this._notificationPublicationService.sendNotificationNewPublication(data);
+        this._publicationDatabase.addPublication(data as PublicationView);
         return data;
       })
     );
@@ -51,7 +56,11 @@ export class PublicationService {
 
   getPublicationId(id: string): Observable<PublicationView[]> {
     const url = `${this.baseUrl}/publications/${id}`;
-    return this.http.get<PublicationView[]>(url);
+    return this.http.get<PublicationView[]>(url).pipe(
+      tap((publications) => {
+        publications.forEach(pub => this._publicationDatabase.addPublication(pub));
+      })
+    );
   }
 
   deletePublication(id: string): Observable<any> {
@@ -60,7 +69,8 @@ export class PublicationService {
       catchError(this.handleError),
       map((data) => {
         this._notificationPublicationService.sendNotificationDeletePublication(data);
-        return data
+        this._publicationDatabase.deletePublication(id);
+        return data;
       })
     );
 
@@ -74,12 +84,42 @@ export class PublicationService {
 
   getAllPublications(page: number, size: number, type: string = 'all', consultId: string = ''): Observable<Publication> {
     const url = `${this.baseUrl}/publications/all?page=${page}&pageSize=${size}&type=${type}&consultId=${consultId}`;
+    
     return this.http.get<Publication>(url).pipe(
       catchError((error) => {
         console.error(error);
         return [];
       }),
       map((publicationsResponse: Publication) => {
+        if (publicationsResponse.publications) {
+          this._publicationDatabase.addPublications(publicationsResponse.publications);
+        }
+        return publicationsResponse;
+      })
+    );
+  }
+
+  getLocalPublications(): Observable<PublicationView[]> {
+    return from(this._publicationDatabase.getAllPublications());
+  }
+
+  getAllPublicationsWithCache(page: number, size: number, type: string = 'all', consultId: string = ''): Observable<Publication> {
+    const url = `${this.baseUrl}/publications/all?page=${page}&pageSize=${size}&type=${type}&consultId=${consultId}`;
+    
+    return this.http.get<Publication>(url).pipe(
+      catchError((error) => {
+        console.error('Error fetching from server, using local cache:', error);
+        return from(this._publicationDatabase.getAllPublications()).pipe(
+          map((localPublications) => ({
+            publications: localPublications,
+            total: localPublications.length
+          }))
+        );
+      }),
+      map((publicationsResponse: Publication) => {
+        if (publicationsResponse.publications) {
+          this._publicationDatabase.addPublications(publicationsResponse.publications);
+        }
         return publicationsResponse;
       })
     );
@@ -88,14 +128,18 @@ export class PublicationService {
   updatePublicationById(id: string, data: EditPublication): Observable<any> {
     const url = `${this.baseUrl}/publications/edit/${id}`;
     const response = this.http.put<any>(url, data).pipe(
-      catchError(this.handleError)
+      catchError(this.handleError),
+      tap((updatedPublication) => {
+        this._publicationDatabase.updatePublication(updatedPublication);
+      })
     );
     this._notificationPublicationService.sendNotificationUpdatePublication(response);
     return response;
   }
 
   updatePublications(newPublications: PublicationView[]): void {
-    this._notificationPublicationService.sendNotificationUpdatePublication(newPublications);
+    this._notificationPublicationService.sendNotificationUpdatePublication(newPublications);  
+    this._publicationDatabase.addPublications(newPublications);
   }
 
   updatePublicationsDeleted(newPublications: PublicationView[]): void {
@@ -104,6 +148,128 @@ export class PublicationService {
 
   cleanPublications(): void {
     this.publications.set([]);
+    this._publicationDatabase.clearAllPublications();
   }
 
+  syncPublicationComments(publicationId: string, comments: any[]): void {
+    this._publicationDatabase.getPublication(publicationId).then((publication) => {
+      if (publication) {
+        const hasChanges = JSON.stringify(publication.comment) !== JSON.stringify(comments);
+        
+        if (hasChanges) {
+          publication.comment = comments;
+          publication.updatedAt = new Date();
+          this._publicationDatabase.updatePublication(publication);
+          console.log(`Comentarios sincronizados para publicación ${publicationId}`);
+        }
+      }
+    });
+  }
+
+  syncPublicationReactions(publicationId: string, reactions: any[]): void {
+    this._publicationDatabase.getPublication(publicationId).then((publication) => {
+      if (publication) {
+        const hasChanges = JSON.stringify(publication.reaction) !== JSON.stringify(reactions);
+        
+        if (hasChanges) {
+          publication.reaction = reactions;
+          publication.updatedAt = new Date();
+          this._publicationDatabase.updatePublication(publication);
+          console.log(`Reacciones sincronizadas para publicación ${publicationId}`);
+        }
+      }
+    });
+  }
+
+  getAllPublicationsSmart(page: number, size: number, type: string = 'all', consultId: string = ''): Observable<Publication> {
+    
+    return from(this._publicationDatabase.getLocalPublicationsPaginated(page, size)).pipe(
+      switchMap((localData) => {
+        
+        if (localData.publications.length > 0) {
+          if (page === 1) {
+            this.getTotalFromServer(type, consultId).then((serverTotal) => {
+            });
+          }
+          
+          return of({
+            publications: localData.publications,
+            total: localData.total
+          });
+        } else {
+          return this.getAllPublicationsFromServer(page, size, type, consultId);
+        }
+      }),
+      catchError((error) => {
+        return this.getAllPublicationsFromServer(page, size, type, consultId);
+      })
+    );
+  }
+
+  private async getTotalFromServer(type: string, consultId: string): Promise<number> {
+    try {
+      const url = `${this.baseUrl}/publications/count?type=${type}&consultId=${consultId}`;
+      const total = await firstValueFrom(this.http.get<number>(url));
+      return total;
+    } catch (error) {
+      console.error('Error obteniendo total del servidor:', error);
+      return 0;
+    }
+  }
+
+  private getAllPublicationsFromServer(page: number, size: number, type: string = 'all', consultId: string = ''): Observable<Publication> {
+    const url = `${this.baseUrl}/publications/all?page=${page}&pageSize=${size}&type=${type}&consultId=${consultId}`;
+    
+    return this.http.get<Publication>(url).pipe(
+      catchError((error) => {
+        console.error('Error fetching from server:', error);
+        return of({ publications: [], total: 0 });
+      }),
+      tap((publicationsResponse: Publication) => {
+        if (publicationsResponse.publications) {
+          this._publicationDatabase.addPublications(publicationsResponse.publications);
+        }
+      })
+    );
+  }
+
+  forceSyncPublications(page: number, size: number, type: string = 'all', consultId: string = ''): Observable<Publication> {
+    console.log('Forzando sincronización completa');
+    return this.getAllPublicationsFromServer(page, size, type, consultId);
+  }
+
+  getOnlyLocalPublications(page: number, size: number): Observable<Publication> {
+    return from(this._publicationDatabase.getLocalPublicationsPaginated(page, size));
+  }
+
+  syncSpecificPublication(publicationId: string): Observable<PublicationView | null> {
+    const url = `${this.baseUrl}/publications/${publicationId}`;
+    
+    return this.http.get<PublicationView[]>(url).pipe(
+      catchError((error) => {
+        console.error('Error sincronizando publicación específica:', error);
+        return of([]);
+      }),
+      map((publications) => {
+        if (publications.length > 0) {
+          const publication = publications[0];
+          this._publicationDatabase.updatePublication(publication);
+          return publication;
+        }
+        return null;
+      })
+    );
+  }
+
+  syncSpecificPublications(publicationIds: string[]): Observable<PublicationView[]> {
+    if (publicationIds.length === 0) {
+      return of([]);
+    }
+
+    const syncRequests = publicationIds.map(id => this.syncSpecificPublication(id));
+    
+    return forkJoin(syncRequests).pipe(
+      map((results) => results.filter(pub => pub !== null) as PublicationView[])
+    );
+  }
 }

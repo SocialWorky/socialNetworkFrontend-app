@@ -20,6 +20,11 @@
       <span>Notifications</span>
       <span *ngIf="notifications > 0" class="badge">{{ notifications }}</span>
     </a>
+
+    <a (click)="forceSyncMessageCount()" style="cursor: pointer;">
+      <i class="material-icons">sync</i>
+      <span>Sync Messages</span>
+    </a>
   </div>
 
 </div>

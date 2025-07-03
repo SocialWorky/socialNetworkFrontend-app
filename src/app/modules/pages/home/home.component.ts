@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal } from '@angular/core';
-import { Subject, firstValueFrom, of } from 'rxjs';
-import { catchError, filter, switchMap, takeUntil } from 'rxjs/operators';
+import { Subject, firstValueFrom } from 'rxjs';
+import { filter, takeUntil, debounceTime } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 
@@ -15,7 +15,6 @@ import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { environment } from '@env/environment';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { NetworkService } from '@shared/services/network.service';
-import { translations } from '@translations/translations';
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
@@ -99,17 +98,28 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.paramPublication = await this.getParamsPublication();
     if (this.paramPublication) return;
 
-    await this.loadPublications();
+    this.resetPagination();
+
+    const isOnline = await firstValueFrom(this.isOnline$);
+    if (isOnline) {
+      await this.loadPublications();
+      await this.checkForMorePublications();
+    } else {
+      await this.loadFromLocalCache();
+    }
 
     this.subscribeToNotificationNewPublication();
     this.subscribeToNotificationDeletePublication();
     this.subscribeToNotificationUpdatePublication();
     this.scrollSubscription();
     this.subscribeToNotificationComment();
+    
+    this.observeConnectionStatus();
 
     setTimeout(() => {
       this._notificationUsersService.userActive();
     }, 300);
+
   }
 
   ngOnDestroy(): void {
@@ -117,122 +127,85 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // private observeConnectionStatus(): void {
-  //   this.isOnline$.pipe(takeUntil(this.destroy$)).subscribe({
-  //     next: (isOnline) => {
-  //       this.updateConnectionStatus(isOnline);
-  //     },
-  //     error: (error) => {
-  //       this.logError('Error verificando estado online', error);
-  //     },
-  //   });
-  // }
+  private observeConnectionStatus(): void {
+    this.isOnline$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: (isOnline) => {
+        this.updateConnectionStatus(isOnline);
+      },
+      error: (error) => {
+        console.error('Error verificando estado online', error);
+      },
+    });
+  }
 
-  // private updateConnectionStatus(isOnline: boolean): void {
-  //   this.showConnectionOverlay = !isOnline;
-  //   this.connectionStatusMessage = isOnline ? '' : 'You are offline';
-  // }
-
-  // private observeConnectionSpeed(): void {
-  //   this.connectionSpeed$.pipe(takeUntil(this.destroy$)).subscribe({
-  //     next: (speed) => {
-  //       if (speed === 'slow') {
-  //         this.handleSlowConnection();
-  //       }
-  //     },
-  //     error: (error) => {
-  //       this.logError('Error verificando velocidad de conexión', error);
-  //     },
-  //   });
-  // }
-
-  // private handleSlowConnection(): void {
-  //   this._alertService.showAlert(
-  //     'Su conexión a internet es lenta',
-  //     'puede experimentar problemas de carga',
-  //     Alerts.WARNING,
-  //     Position.CENTER,
-  //     true,
-  //     true,
-  //     'Aceptar'
-  //   );
-  //   this._axiomService.sendLog({
-  //     message: 'Conexión lenta del usuario',
-  //     component: 'HomeComponent',
-  //     type: AxiomType.INFO,
-  //     info: this.dataUser,
-  //   });
-  // }
-
-  // private handleOfflineStatus(): void {
-  //   this.showConnectionOverlay = true;
-  //   this.connectionStatusMessage = 'You are offline';
-  // }
-
-  // private logError(message: string, error: any): void {
-  //   this._axiomService.sendLog({
-  //     message,
-  //     component: 'HomeComponent',
-  //     type: AxiomType.ERROR,
-  //     error,
-  //   });
-  // }
+  private updateConnectionStatus(isOnline: boolean): void {
+    this.showConnectionOverlay = !isOnline;
+    this.connectionStatusMessage = isOnline ? '' : 'Estás offline - Usando cache local';
+    
+    if (!isOnline && this.publications().length === 0) {
+      this.loadFromLocalCache();
+    }
+  }
 
   private scrollSubscription() {
     this._scrollService.scrollEnd$.pipe(
       takeUntil(this.destroy$)
     ).subscribe((data) => {
-      if(data === 'scrollEnd') this.loadPublications();
+      if(data === 'scrollEnd') {
+        this.loadPublications();
+      }
       if(data === 'showScrollToTopButton') this.showScrollToTopButton = true;
       if(data === 'hideScrollToTopButton') this.showScrollToTopButton = false;
     });
   }
 
-  private async loadPublications() {
-    if (this.loaderPublications || !this.hasMorePublications) return;
+  public async loadPublications() {
+    
+    if (this.loaderPublications || !this.hasMorePublications) {
+      return;
+    }
 
     this.loaderPublications = true;
+    
     try {
       const newPublicationsResponse = await firstValueFrom(
-        this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.ALL)
+        this._publicationService.getAllPublicationsSmart(this.page, this.pageSize, TypePublishing.ALL)
       );
 
       const currentPublications = this.publications();
       const newPublicationsList = newPublicationsResponse.publications;
 
-      const existingIds = new Set(currentPublications.map(pub => pub._id));
+      if (this.page === 1) {
+        this.publications.set(newPublicationsList);
+      } else {
+        const existingIds = new Set(currentPublications.map(pub => pub._id));
+        const uniqueNewPublications = newPublicationsList.filter(
+          pub => !existingIds.has(pub._id)
+        );
 
-      const uniqueNewPublications = newPublicationsList.filter(
-        pub => !existingIds.has(pub._id)
-      );
-
-      if (uniqueNewPublications.length > 0) {
-        this.publications.update(current => [...current, ...uniqueNewPublications]);
+        if (uniqueNewPublications.length > 0) {
+          this.publications.update(current => [...current, ...uniqueNewPublications]);
+        }
       }
 
-      if (this.publications().length >= newPublicationsResponse.total) {
+      if (newPublicationsList.length === 0) {
         this.hasMorePublications = false;
+      } else if (newPublicationsResponse.total && this.publications().length >= newPublicationsResponse.total) {
+        this.hasMorePublications = false;
+      } else if (newPublicationsList.length < this.pageSize) {
+        this.hasMorePublications = false;
+      } else {
+        this.hasMorePublications = true;
       }
 
       this.page++;
       this.loaderPublications = false;
       this._cdr.markForCheck();
 
+      await this.checkForMorePublications();
+
     } catch (error) {
-      console.error('Error al cargar las publicaciones:', error);
       this.loaderPublications = false;
-    }
-  }
-
-  onScroll(event: any) {
-    const threshold = 100;
-    const position = event.target.scrollTop + event.target.clientHeight;
-    const height = event.target.scrollHeight;
-
-    this.showScrollToTopButton = position > 3500;
-
-    if (position >= height - threshold && !this.loaderPublications && this.hasMorePublications) {
-      this.loadPublications();
     }
   }
 
@@ -245,32 +218,33 @@ export class HomeComponent implements OnInit, OnDestroy {
       .subscribe({
         next: async (notifications: NotificationNewPublication[]) => {
           const notification = notifications[0];
-          const publicationsCurrent = this.publications();
-
-          this._publicationService.getPublicationId(notification.publications._id)
-            .pipe(
-              takeUntil(this.destroy$),
-              filter((publication: PublicationView[]) => !!publication && publication.length > 0)
-            )
+          
+          this._publicationService.syncSpecificPublication(notification.publications._id)
+            .pipe(takeUntil(this.destroy$))
             .subscribe({
-              next: (publication: PublicationView[]) => {
-                if (!publication.length) return;
-                const newPublication = publication[0];
-
-                const fixedPublications = publicationsCurrent.filter(pub => pub.fixed);
-                const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed);
-
-                const updatedPublications = [
-                  ...fixedPublications,
-                  newPublication,
-                  ...nonFixedPublications
-                ];
-
-                this.publications.set(updatedPublications);
-                this._cdr.markForCheck();
+              next: (newPublication) => {
+                if (newPublication) {
+                  const publicationsCurrent = this.publications();
+                  
+                  const existingIndex = publicationsCurrent.findIndex(pub => pub._id === newPublication._id);
+                  
+                  if (existingIndex === -1) {
+                    const fixedPublications = publicationsCurrent.filter(pub => pub.fixed);
+                    const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed);
+                    
+                    const updatedPublications = [
+                      ...fixedPublications,
+                      newPublication,
+                      ...nonFixedPublications
+                    ];
+                    
+                    this.publications.set(updatedPublications);
+                    this._cdr.markForCheck();
+                  }
+                }
               },
               error: (error) => {
-                console.error('Error al obtener la publicación:', error);
+                console.error('Error al sincronizar nueva publicación:', error);
               }
             });
         },
@@ -307,42 +281,45 @@ export class HomeComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         filter((data: PublicationView[]) => !!data?.[0]?._id),
-        switchMap((data: PublicationView[]) => {
-          const notification = data[0];
-          return this._publicationService.getPublicationId(notification._id).pipe(
-            catchError((error) => {
-              console.error('Error al obtener la publicación:', error);
-              return of([]);
-            })
-          );
-        }),
-        filter((publication: PublicationView[]) => publication.length > 0)
+        debounceTime(500)
       )
       .subscribe({
-        next: (publication: PublicationView[]) => {
-          const updatedPublication = publication[0];
-          const publicationsCurrent = this.publications();
-
-          const fixedPublications = publicationsCurrent.filter(pub => pub.fixed && pub._id !== updatedPublication._id);
-          const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed && pub._id !== updatedPublication._id);
-
-          let updatedPublications: PublicationView[];
-
-          if (updatedPublication.fixed) {
-            updatedPublications = [
-              updatedPublication,
-              ...fixedPublications,
-              ...nonFixedPublications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            ];
-          } else {
-            updatedPublications = [
-              ...fixedPublications,
-              ...nonFixedPublications.concat(updatedPublication).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            ];
-          }
-
-          this.publications.set(updatedPublications);
-          this._cdr.markForCheck();
+        next: (data: PublicationView[]) => {
+          const notification = data[0];
+          
+          this._publicationService.syncSpecificPublication(notification._id)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (updatedPublication) => {
+                if (updatedPublication) {
+                  const publicationsCurrent = this.publications();
+                  const index = publicationsCurrent.findIndex(pub => pub._id === updatedPublication._id);
+                  
+                  if (index !== -1) {
+                    const currentPub = publicationsCurrent[index];
+                    const hasChanges = JSON.stringify(currentPub) !== JSON.stringify(updatedPublication);
+                    
+                    if (hasChanges) {
+                      publicationsCurrent[index] = updatedPublication;
+                      
+                      const fixedPublications = publicationsCurrent.filter(pub => pub.fixed);
+                      const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed);
+                      
+                      const updatedPublications = [
+                        ...fixedPublications,
+                        ...nonFixedPublications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                      ];
+                      
+                      this.publications.set(updatedPublications);
+                      this._cdr.markForCheck();
+                    }
+                  }
+                }
+              },
+              error: (error) => {
+                console.error('Error al sincronizar publicación actualizada:', error);
+              }
+            });
         },
         error: (error) => {
           console.error('Error en la suscripción de notificaciones de actualizar publicaciones:', error);
@@ -417,5 +394,153 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   scrollToTop() {
     this._scrollService.scrollToTop();
+  }
+
+  private resetPagination() {
+    this.page = 1;
+    this.hasMorePublications = true;
+  }
+
+  async forceRefreshPublications() {
+    console.log('Forzando actualización de publicaciones...');
+    
+    this.loaderPublications = true;
+    this.resetPagination();
+    
+    try {
+      const freshPublicationsResponse = await firstValueFrom(
+        this._publicationService.forceSyncPublications(this.page, this.pageSize, TypePublishing.ALL)
+      );
+
+      this.publications.set(freshPublicationsResponse.publications);
+      
+      if (freshPublicationsResponse.publications.length === 0 || 
+          freshPublicationsResponse.publications.length >= freshPublicationsResponse.total) {
+        this.hasMorePublications = false;
+      } else {
+        this.hasMorePublications = true;
+      }
+      
+      this.page = 2;
+      this.loaderPublications = false;
+      this._cdr.markForCheck();
+      
+    } catch (error) {
+      console.error('Error al forzar actualización:', error);
+      this.loaderPublications = false;
+    }
+  }
+
+  async loadFromLocalCache() {
+    
+    this.loaderPublications = true;
+    this.page = 1;
+    this.hasMorePublications = true;
+    
+    try {
+      const localPublicationsResponse = await firstValueFrom(
+        this._publicationService.getOnlyLocalPublications(this.page, this.pageSize)
+      );
+
+      this.publications.set(localPublicationsResponse.publications);
+      
+      this.page = 2;
+      this.loaderPublications = false;
+      this._cdr.markForCheck();
+      
+    } catch (error) {
+      console.error('Error al cargar desde cache local:', error);
+      this.loaderPublications = false;
+    }
+  }
+
+  async manualRefreshPublications() {
+    console.log('Sincronización manual iniciada...');
+    
+    this.loaderPublications = true;
+    
+    try {
+      const currentPublications = this.publications();
+      const publicationIds = currentPublications.map(pub => pub._id);
+      
+      const updatedPublications = await firstValueFrom(
+        this._publicationService.syncSpecificPublications(publicationIds)
+      );
+      
+      if (updatedPublications.length > 0) {
+        console.log(`${updatedPublications.length} publicaciones actualizadas`);
+        
+        const updatedMap = new Map(updatedPublications.map(pub => [pub._id, pub]));
+        
+        const refreshedPublications = currentPublications.map(pub => 
+          updatedMap.get(pub._id) || pub
+        );
+        
+        this.publications.set(refreshedPublications);
+        this._cdr.markForCheck();
+      } else {
+        console.log('No hay publicaciones para actualizar');
+      }
+      
+      this.loaderPublications = false;
+      
+    } catch (error) {
+      console.error('Error en sincronización manual:', error);
+      this.loaderPublications = false;
+    }
+  }
+
+  onScroll(event: any) {
+    const threshold = 100;
+    const position = event.target.scrollTop + event.target.clientHeight;
+    const height = event.target.scrollHeight;
+
+    this.showScrollToTopButton = position > 3500;
+
+    if (position >= height - threshold && !this.loaderPublications && this.hasMorePublications) {
+      this.loadPublications();
+    }
+  }
+
+  public checkIfMorePublicationsAvailable(): void {
+    if (this.publications().length === 0) {
+      this.hasMorePublications = true;
+      return;
+    }
+
+    if (!this.hasMorePublications) {
+      return;
+    }
+
+    this._publicationService.getCountPublications().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (totalCount) => {
+        const currentCount = this.publications().length;
+        this.hasMorePublications = currentCount < totalCount;
+      },
+      error: (error) => {
+        console.error('Error verificando total de publicaciones:', error);
+        this.hasMorePublications = true;
+      }
+    });
+  }
+
+  private async checkForMorePublications(): Promise<void> {
+    try {
+      const totalCount = await firstValueFrom(
+        this._publicationService.getCountPublications()
+      );
+      
+      const currentCount = this.publications().length;
+      const hasMore = currentCount < totalCount;
+            
+      if (this.hasMorePublications !== hasMore) {
+        this.hasMorePublications = hasMore;
+        this._cdr.markForCheck();
+      }
+    } catch (error) {
+      console.error('Error verificando total de publicaciones:', error);
+    }
   }
 }
