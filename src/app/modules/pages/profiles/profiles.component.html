@@ -2,7 +2,9 @@
 
 <div *ngIf="userData" #contentContainer 
   class="profile-container"
-  [class.refreshing]="isRefreshing">
+  [class.refreshing]="isRefreshing"
+  [class.mobile-container]="isMobile"
+  (scroll)="onScroll($event)">
 
   <div class="content-header-profile">
       <div class="image-container">
@@ -103,7 +105,6 @@
   </div>
 
   <div class="content-body-profile">
-
     <div class="content-left-profile">
       <worky-profile-detail *ngIf="userData"
         [isCurrentUser]="isCurrentUser"
@@ -139,7 +140,6 @@
       }
 
     </div>
-
   </div>
 
   <button

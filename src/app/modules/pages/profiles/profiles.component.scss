@@ -148,10 +148,21 @@
 
   .content-left-profile {
     width: 40%;
+    
+    @include breakpoints.from-sm-up {
+      position: sticky;
+      top: 20px;
+      height: fit-content;
+      align-self: flex-start;
+    }
+    
     @include breakpoints.below-sm {
       width: 100%;
+      position: relative;
+      top: auto;
     }
   }
+  
   .content-section-wall {
     width: 60%;
     margin-left: 1rem;
@@ -177,4 +188,19 @@
   &.refreshing {
     pointer-events: none;
   }
+  
+  &.mobile-container {
+    height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  &:not(.mobile-container) {
+    height: auto;
+    overflow: visible;
+  }
 }
+
+

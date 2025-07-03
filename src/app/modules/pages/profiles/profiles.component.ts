@@ -171,12 +171,20 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   ngAfterViewInit(): void {
     // Inicializar pull-to-refresh después de que la vista esté lista
     setTimeout(() => {
-      if (this.contentContainer?.nativeElement) {
+      if (this.contentContainer?.nativeElement && this.isMobile) {
+        console.log('Inicializando pull-to-refresh en profiles');
         this._pullToRefreshService.initPullToRefresh(
           this.contentContainer.nativeElement
         );
+        
+        // Configurar el contenedor para scroll móvil
+        const container = this.contentContainer.nativeElement;
+        container.style.height = '100vh';
+        container.style.overflowY = 'auto';
+        container.style.webkitOverflowScrolling = 'touch';
+        container.style.overscrollBehavior = 'contain';
       }
-    }, 100);
+    }, 500);
   }
 
   private scrollSubscription() {
@@ -725,6 +733,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private async handlePullToRefresh(): Promise<void> {
+    console.log('Pull-to-refresh activado en profiles');
     if (this.isRefreshing) return;
     
     this.isRefreshing = true;
