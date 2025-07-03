@@ -3,7 +3,7 @@
 @use "sass:map";
 
 .content-publications {
-  height: 94vh;
+  height: 94dvh;
   -webkit-overflow-scrolling: touch;
   position: relative;
   overflow-y: auto;
@@ -15,7 +15,7 @@
   }
 
   @include breakpoints.below-md {
-    height: 90vh;
+    height: 86dvh;
   }
 }
 
