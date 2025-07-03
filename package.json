@@ -16,8 +16,8 @@
     "pwa": "node generate-icons.js && node generate-manifest.js && node prepare-meta-tags.js && ionic build --prod",
     "build": "ng build",
     "build:prod": "ng build --configuration production",
-    "pwa:dev": "ng build --configuration development && http-server dist/socialNetworkFrontend-app -p 8080",
-    "pwa:test": "ng build --configuration production && http-server dist/socialNetworkFrontend-app -p 8080",
+    "pwa:dev": "node generate-icons.js && node generate-manifest.js && node prepare-meta-tags.js && ng build --configuration development && http-server www -p 8080",
+    "pwa:test": "node generate-icons.js && node generate-manifest.js && node prepare-meta-tags.js && ng build --configuration production && http-server www -p 8080",
     "sw:clear": "node scripts/force-sw-update.js",
     "sw:status": "node -e \"console.log('Usa PWAUtils.showServiceWorkerStatus() en la consola del navegador')\""
   },

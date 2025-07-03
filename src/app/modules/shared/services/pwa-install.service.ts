@@ -28,8 +28,10 @@ export class PwaInstallService {
 
   isPwaSupported(): boolean {
     return (
-      window.matchMedia('(display-mode: standalone)').matches ||
-      ('standalone' in navigator && (navigator as any).standalone === true)
+      'serviceWorker' in navigator &&
+      'PushManager' in window &&
+      (window.matchMedia('(display-mode: standalone)').matches ||
+       ('standalone' in navigator && (navigator as any).standalone === true))
     );
   }
 
@@ -89,11 +91,11 @@ export class PwaInstallService {
   }
 
   async showInstallPrompt(header: string, message: string) {
-    if (!this.deferredPrompt || this.isAppInstalled() && Capacitor.getPlatform() === 'android') {
-      this._alertService.showAlert('App ya Instalada', 'Se detecto que ya cuentas con la App instalada', Alerts.INFO, Position.CENTER, true, 'Aceptar');
+    if (!this.deferredPrompt || (this.isAppInstalled() && Capacitor.getPlatform() === 'android')) {
+      this._alertService.showAlert('App ya Instalada', 'Se detectó que ya cuentas con la App instalada', Alerts.INFO, Position.CENTER, true, 'Aceptar');
       return;
     } else if (Capacitor.getPlatform() === 'ios') {
-      this._alertService.showAlert('Instalar App en IOS', 'Para instalar esta aplicación en iOS, toca el botón de compartir en la barra inferior y selecciona "Agregar a pantalla de inicio".', Alerts.INFO, Position.CENTER, true, 'Aceptar');
+      this._alertService.showAlert('Instalar App en iOS', 'Para instalar esta aplicación en iOS:\n\n1. Toca el botón de compartir (□↑) en la barra inferior\n2. Selecciona "Agregar a pantalla de inicio"\n3. Toca "Agregar"', Alerts.INFO, Position.CENTER, true, 'Entendido');
       return;
     }
 
@@ -132,5 +134,21 @@ export class PwaInstallService {
         this.deferredPrompt = null;
       });
     }
+  }
+
+  canInstallPWA(): boolean {
+    return !!this.deferredPrompt && !this.isAppInstalled();
+  }
+
+  getInstallationStatus(): { canInstall: boolean; isInstalled: boolean; platform: string } {
+    const platform = Capacitor.getPlatform();
+    const canInstall = this.canInstallPWA();
+    const isInstalled = this.isAppInstalled();
+    
+    return {
+      canInstall,
+      isInstalled,
+      platform
+    };
   }
 }
