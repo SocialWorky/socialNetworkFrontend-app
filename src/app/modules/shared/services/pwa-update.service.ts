@@ -38,13 +38,10 @@ export class PwaUpdateService {
    */
   private initializeUpdateDetection(): void {
     if (!this.swUpdate.isEnabled) {
-      console.log('Service Worker no está habilitado');
       return;
     }
 
-    // Escuchar eventos de actualización
     this.swUpdate.versionUpdates.subscribe(event => {
-      console.log('Evento de actualización:', event);
       
       switch (event.type) {
         case 'VERSION_READY':
@@ -59,7 +56,6 @@ export class PwaUpdateService {
       }
     });
 
-    // Verificar actualizaciones periódicamente
     this.startPeriodicChecks();
   }
 
@@ -76,7 +72,6 @@ export class PwaUpdateService {
 
     this.updateAvailable$.next(updateInfo);
     
-    // Si está en modo automático, actualizar inmediatamente
     if (this.shouldAutoUpdate()) {
       this.applyUpdate();
     }
@@ -86,14 +81,12 @@ export class PwaUpdateService {
    * Inicia verificaciones periódicas de actualizaciones
    */
   private startPeriodicChecks(): void {
-    // Verificar cada 30 minutos en producción
     const checkIntervalMs = environment.PRODUCTION ? 30 * 60 * 1000 : 5 * 60 * 1000;
     
     this.checkInterval = interval(checkIntervalMs).subscribe(() => {
       this.checkForUpdates();
     });
 
-    // Verificación inicial después de 1 minuto
     setTimeout(() => {
       this.checkForUpdates();
     }, 60000);
@@ -119,7 +112,6 @@ export class PwaUpdateService {
 
     return this.swUpdate.checkForUpdate()
       .then(updateAvailable => {
-        console.log('Verificación manual de actualización:', updateAvailable);
         this.isChecking = false;
         return updateAvailable;
       })
@@ -136,8 +128,6 @@ export class PwaUpdateService {
   public applyUpdate(): Promise<void> {
     return this.swUpdate.activateUpdate()
       .then(() => {
-        console.log('Actualización aplicada exitosamente');
-        // Recargar la página después de un breve delay
         setTimeout(() => {
           window.location.reload();
         }, 1000);

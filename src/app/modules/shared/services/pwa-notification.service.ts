@@ -141,4 +141,4 @@ export class PwaNotificationService {
     this.destroy$.next();
     this.destroy$.complete();
   }
-} 
+}
