@@ -5,6 +5,14 @@
 .content-publications {
   height: 94vh;
   -webkit-overflow-scrolling: touch;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  
+  &.refreshing {
+    pointer-events: none;
+  }
 
   @include breakpoints.below-md {
     height: 90vh;

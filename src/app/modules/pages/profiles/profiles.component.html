@@ -1,6 +1,8 @@
 <div *ngIf="!userData" class="loader"></div>
 
-<div *ngIf="userData">
+<div *ngIf="userData" #contentContainer 
+  class="profile-container"
+  [class.refreshing]="isRefreshing">
 
   <div class="content-header-profile">
       <div class="image-container">

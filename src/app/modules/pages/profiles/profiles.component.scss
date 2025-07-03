@@ -167,4 +167,14 @@
   -webkit-overflow-scrolling: touch;
 }
 
-
+.profile-container {
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  
+  &.refreshing {
+    pointer-events: none;
+  }
+}

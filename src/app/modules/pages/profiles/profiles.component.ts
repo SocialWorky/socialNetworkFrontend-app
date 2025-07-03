@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom, lastValueFrom, of, Subject, takeUntil } from 'rxjs';
-import { catchError, filter, switchMap } from 'rxjs/operators';
+import { catchError, filter, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import * as _ from 'lodash';
 
 import { Token } from '@shared/interfaces/token.interface';
@@ -30,6 +30,7 @@ import { ConfigService } from '@shared/services/core-apis/config.service';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
 
 @Component({
     selector: 'worky-profiles',
@@ -37,7 +38,7 @@ import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service
     styleUrls: ['./profiles.component.scss'],
     standalone: false
 })
-export class ProfilesComponent implements OnInit, OnDestroy {
+export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   typePublishing = TypePublishing;
 
   publicationsProfile = signal<PublicationView[]>([]);
@@ -96,6 +97,10 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
+  @ViewChild('contentContainer', { static: false }) contentContainer!: ElementRef;
+  
+  isRefreshing = false;
+
   constructor(
     public _dialog: MatDialog,
     private _authService: AuthService,
@@ -116,7 +121,8 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _titleService: Title,
     private _configService: ConfigService,
     private _notificationPublicationService: NotificationPublicationService,
-    private _logService: LogService
+    private _logService: LogService,
+    private _pullToRefreshService: PullToRefreshService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
@@ -153,6 +159,24 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this.getDataProfile();
       this._cdr.markForCheck();
     });
+
+    // Suscribirse al evento de pull-to-refresh
+    this._pullToRefreshService.refresh$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.handlePullToRefresh();
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Inicializar pull-to-refresh después de que la vista esté lista
+    setTimeout(() => {
+      if (this.contentContainer?.nativeElement) {
+        this._pullToRefreshService.initPullToRefresh(
+          this.contentContainer.nativeElement
+        );
+      }
+    }, 100);
   }
 
   private scrollSubscription() {
@@ -168,6 +192,13 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    
+    // Limpiar pull-to-refresh
+    if (this.contentContainer?.nativeElement) {
+      this._pullToRefreshService.destroyPullToRefresh(
+        this.contentContainer.nativeElement
+      );
+    }
   }
 
   private async loadPublications() {
@@ -244,7 +275,12 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this._notificationPublicationService.notificationNewPublication$
       .pipe(
         takeUntil(this.destroy$),
-        filter((notifications: NotificationNewPublication[]) => !!notifications?.[0]?.publications?._id)
+        filter((notifications: NotificationNewPublication[]) => !!notifications?.[0]?.publications?._id),
+        debounceTime(300),
+        distinctUntilChanged((prev, curr) => {
+          if (!prev || !curr || prev.length === 0 || curr.length === 0) return false;
+          return prev[0].publications._id === curr[0].publications._id;
+        })
       )
       .subscribe({
         next: async (notifications: NotificationNewPublication[]) => {
@@ -257,13 +293,18 @@ export class ProfilesComponent implements OnInit, OnDestroy {
               filter((publication: PublicationView[]) => {
                 return !!publication &&
                        publication.length > 0 &&
-                       publication[0].author._id === this.idUserProfile ||
-                       publication[0].userReceiving?._id === this.idUserProfile;
+                       (publication[0].author._id === this.idUserProfile ||
+                        publication[0].userReceiving?._id === this.idUserProfile);
               })
             )
             .subscribe({
               next: (publication: PublicationView[]) => {
                 const newPublication = publication[0];
+                
+                const existingPublication = publicationsCurrent.find(pub => pub._id === newPublication._id);
+                if (existingPublication) {
+                  return;
+                }
 
                 const fixedPublications = publicationsCurrent.filter(pub => pub.fixed);
                 const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed);
@@ -306,7 +347,14 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   private async subscribeToNotificationDeletePublication() {
     this._notificationPublicationService.notificationDeletePublication$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        debounceTime(300),
+        distinctUntilChanged((prev, curr) => {
+          if (!prev || !curr || prev.length === 0 || curr.length === 0) return false;
+          return prev[0]._id === curr[0]._id;
+        })
+      )
       .subscribe({
         next: async (notifications: {_id: string}[]) => {
           const notification = notifications[0];
@@ -339,8 +387,23 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         filter((data: PublicationView[]) => !!data?.[0]?._id),
+        debounceTime(500),
+        distinctUntilChanged((prev, curr) => {
+          if (!prev || !curr || prev.length === 0 || curr.length === 0) return false;
+          return prev[0]._id === curr[0]._id && 
+                 JSON.stringify(prev[0]) === JSON.stringify(curr[0]);
+        }),
         switchMap((data: PublicationView[]) => {
           const notification = data[0];
+          
+          const isRelevantPublication = 
+            notification.author._id === this.idUserProfile ||
+            notification.userReceiving?._id === this.idUserProfile;
+          
+          if (!isRelevantPublication) {
+            return of([]);
+          }
+          
           return this._publicationService.getPublicationId(notification._id).pipe(
             catchError((error) => {
               this._logService.log(
@@ -360,36 +423,30 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (publication: PublicationView[]) => {
-
-          let userValid = false;
-
-          if (publication[0].author._id !== this.userData?._id ) userValid = true;
-          if (publication[0].userReceiving?._id!== this.userData?._id ) userValid = true;
-          if (!userValid) return;
-
           const updatedPublication = publication[0];
           const publicationsCurrent = this.publicationsProfile();
-
-          const fixedPublications = publicationsCurrent.filter(pub => pub.fixed && pub._id !== updatedPublication._id);
-          const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed && pub._id !== updatedPublication._id);
-
-          let updatedPublications: PublicationView[];
-
-          if (updatedPublication.fixed) {
-            updatedPublications = [
-              updatedPublication,
-              ...fixedPublications,
-              ...nonFixedPublications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            ];
-          } else {
-            updatedPublications = [
-              ...fixedPublications,
-              ...nonFixedPublications.concat(updatedPublication).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            ];
+          
+          const existingIndex = publicationsCurrent.findIndex(pub => pub._id === updatedPublication._id);
+          
+          if (existingIndex !== -1) {
+            const currentPub = publicationsCurrent[existingIndex];
+            const hasChanges = JSON.stringify(currentPub) !== JSON.stringify(updatedPublication);
+            
+            if (hasChanges) {
+              publicationsCurrent[existingIndex] = updatedPublication;
+              
+              const fixedPublications = publicationsCurrent.filter(pub => pub.fixed);
+              const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed);
+              
+              const updatedPublications = [
+                ...fixedPublications,
+                ...nonFixedPublications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+              ];
+              
+              this.publicationsProfile.set(updatedPublications);
+              this._cdr.markForCheck();
+            }
           }
-
-          this.publicationsProfile.set(updatedPublications);
-          this._cdr.markForCheck();
         },
         error: (error) => {
           this._logService.log(
@@ -407,20 +464,51 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   private async subscribeToNotificationComment() {
     this._notificationCommentService.notificationComment$
-     .pipe(takeUntil(this.destroy$))
+     .pipe(
+       takeUntil(this.destroy$),
+       debounceTime(300),
+       filter((data: any) => !!data?.postId)
+     )
      .subscribe({
       next: async (data: any) => {
         if (data.postId) {
           const publicationsCurrent = this.publicationsProfile();
-          this._publicationService.getPublicationId(data.postId).pipe(takeUntil(this.destroy$)).subscribe({
+          
+          const existingPublication = publicationsCurrent.find(pub => pub._id === data.postId);
+          if (!existingPublication) {
+            return;
+          }
+          
+          this._publicationService.getPublicationId(data.postId).pipe(
+            takeUntil(this.destroy$),
+            debounceTime(200)
+          ).subscribe({
             next: (publication: PublicationView[]) => {
-              const index = publicationsCurrent.findIndex(pub => pub._id === publication[0]._id);
-              if (index !== -1) {
-                publicationsCurrent[index] = publication[0];
-                this.publicationsProfile.set(publicationsCurrent);
-                this._cdr.markForCheck();
+              if (publication.length > 0) {
+                const index = publicationsCurrent.findIndex(pub => pub._id === publication[0]._id);
+                if (index !== -1) {
+                  const currentPub = publicationsCurrent[index];
+                  const hasChanges = JSON.stringify(currentPub) !== JSON.stringify(publication[0]);
+                  
+                  if (hasChanges) {
+                    publicationsCurrent[index] = publication[0];
+                    this.publicationsProfile.set(publicationsCurrent);
+                    this._cdr.markForCheck();
+                  }
+                }
               }
             },
+            error: (error) => {
+              this._logService.log(
+                LevelLogEnum.ERROR,
+                'ProfilesComponent',
+                'Error al obtener la publicación para comentario',
+                {
+                  user: this._authService.getDecodedToken(),
+                  message: error,
+                },
+              );
+            }
           });
         }
       },
@@ -634,5 +722,140 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   scrollToTop() {
     this._scrollService.scrollToTop();
+  }
+
+  private async handlePullToRefresh(): Promise<void> {
+    if (this.isRefreshing) return;
+    
+    this.isRefreshing = true;
+    this._cdr.markForCheck();
+    
+    try {
+      // Mostrar indicador de refresh moderno
+      this.showModernRefreshIndicator();
+      
+      // Recargar datos del perfil
+      await this.getDataProfile();
+      
+      // Recargar publicaciones
+      this.page = 1;
+      this.hasMorePublications = true;
+      this.publicationsProfile.set([]);
+      await this.loadPublications();
+      
+      // Ocultar indicador después de completar
+      setTimeout(() => {
+        this.hideModernRefreshIndicator();
+        this.isRefreshing = false;
+        this._cdr.markForCheck();
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error en pull-to-refresh:', error);
+      this.hideModernRefreshIndicator();
+      this.isRefreshing = false;
+      this._cdr.markForCheck();
+    }
+  }
+
+  private showModernRefreshIndicator(): void {
+    let indicator = document.querySelector('.modern-refresh-indicator') as HTMLElement;
+    
+    if (!indicator) {
+      indicator = this.createModernRefreshIndicator();
+      document.body.appendChild(indicator);
+    }
+    
+    indicator.style.opacity = '1';
+    indicator.style.transform = 'translateX(-50%) translateY(20px)';
+  }
+
+  private hideModernRefreshIndicator(): void {
+    const indicator = document.querySelector('.modern-refresh-indicator') as HTMLElement;
+    if (indicator) {
+      indicator.style.opacity = '0';
+      indicator.style.transform = 'translateX(-50%) translateY(-20px)';
+      
+      setTimeout(() => {
+        if (indicator.parentNode) {
+          indicator.parentNode.removeChild(indicator);
+        }
+      }, 300);
+    }
+  }
+
+  private createModernRefreshIndicator(): HTMLElement {
+    const indicator = document.createElement('div');
+    indicator.className = 'modern-refresh-indicator';
+    indicator.innerHTML = `
+      <div class="modern-refresh-container">
+        <div class="modern-spinner">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor" opacity="0.2"/>
+            <path d="M12 4v2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 17.5V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4.93 4.93l1.77 1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.3 17.3l1.77 1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12h2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19.5 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4.93 19.07l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.3 6.7l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="modern-refresh-text">Actualizando...</span>
+      </div>
+    `;
+    
+    indicator.style.cssText = `
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 9999;
+      pointer-events: none;
+    `;
+    
+    const container = indicator.querySelector('.modern-refresh-container') as HTMLElement;
+    container.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      background: rgba(59, 130, 246, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 25px;
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    `;
+    
+    const spinner = indicator.querySelector('.modern-spinner') as HTMLElement;
+    spinner.style.cssText = `
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: spin 1s linear infinite;
+      color: white;
+    `;
+    
+    const svg = spinner.querySelector('svg') as unknown as HTMLElement;
+    svg.style.cssText = `
+      width: 100%;
+      height: 100%;
+    `;
+    
+    const text = indicator.querySelector('.modern-refresh-text') as HTMLElement;
+    text.style.cssText = `
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+      letter-spacing: 0.025em;
+    `;
+    
+    return indicator;
   }
 }

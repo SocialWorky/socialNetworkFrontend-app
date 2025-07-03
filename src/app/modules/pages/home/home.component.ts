@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
 import { filter, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
@@ -21,6 +21,7 @@ import { ConfigService } from '@shared/services/core-apis/config.service';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
 import { Token } from '@shared/interfaces/token.interface';
+import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
 
 @Component({
     selector: 'worky-home',
@@ -28,7 +29,7 @@ import { Token } from '@shared/interfaces/token.interface';
     styleUrls: ['./home.component.scss'],
     standalone: false
 })
-export class HomeComponent implements OnInit, OnDestroy {
+export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   typePublishing = TypePublishing;
 
   publications = signal<PublicationView[]>([]);
@@ -59,6 +60,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
+  @ViewChild('contentContainer', { static: false }) contentContainer!: ElementRef;
+  
+  isRefreshing = false;
+
   get isMobile(): boolean {
     return this._deviceDetectionService.isMobile();
   }
@@ -82,7 +87,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private _scrollService: ScrollService,
     private _titleService: Title,
     private _configService: ConfigService,
-    private _notificationPublicationService: NotificationPublicationService
+    private _notificationPublicationService: NotificationPublicationService,
+    private _pullToRefreshService: PullToRefreshService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Home');
@@ -120,11 +126,35 @@ export class HomeComponent implements OnInit, OnDestroy {
       this._notificationUsersService.userActive();
     }, 300);
 
+    // Suscribirse al evento de pull-to-refresh
+    this._pullToRefreshService.refresh$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.handlePullToRefresh();
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Inicializar pull-to-refresh después de que la vista esté lista
+    setTimeout(() => {
+      if (this.contentContainer?.nativeElement) {
+        this._pullToRefreshService.initPullToRefresh(
+          this.contentContainer.nativeElement
+        );
+      }
+    }, 100);
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    
+    // Limpiar pull-to-refresh
+    if (this.contentContainer?.nativeElement) {
+      this._pullToRefreshService.destroyPullToRefresh(
+        this.contentContainer.nativeElement
+      );
+    }
   }
 
   private observeConnectionStatus(): void {
@@ -547,5 +577,134 @@ export class HomeComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error verificando total de publicaciones:', error);
     }
+  }
+
+  private async handlePullToRefresh(): Promise<void> {
+    if (this.isRefreshing) return;
+    
+    this.isRefreshing = true;
+    this._cdr.markForCheck();
+    
+    try {
+      // Mostrar indicador de refresh moderno
+      this.showModernRefreshIndicator();
+      
+      // Forzar actualización de publicaciones
+      await this.forceRefreshPublications();
+      
+      // Ocultar indicador después de completar
+      setTimeout(() => {
+        this.hideModernRefreshIndicator();
+        this.isRefreshing = false;
+        this._cdr.markForCheck();
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error en pull-to-refresh:', error);
+      this.hideModernRefreshIndicator();
+      this.isRefreshing = false;
+      this._cdr.markForCheck();
+    }
+  }
+
+  private showModernRefreshIndicator(): void {
+    let indicator = document.querySelector('.modern-refresh-indicator') as HTMLElement;
+    
+    if (!indicator) {
+      indicator = this.createModernRefreshIndicator();
+      document.body.appendChild(indicator);
+    }
+    
+    indicator.style.opacity = '1';
+    indicator.style.transform = 'translateX(-50%) translateY(20px)';
+  }
+
+  private hideModernRefreshIndicator(): void {
+    const indicator = document.querySelector('.modern-refresh-indicator') as HTMLElement;
+    if (indicator) {
+      indicator.style.opacity = '0';
+      indicator.style.transform = 'translateX(-50%) translateY(-20px)';
+      
+      setTimeout(() => {
+        if (indicator.parentNode) {
+          indicator.parentNode.removeChild(indicator);
+        }
+      }, 300);
+    }
+  }
+
+  private createModernRefreshIndicator(): HTMLElement {
+    const indicator = document.createElement('div');
+    indicator.className = 'modern-refresh-indicator';
+    indicator.innerHTML = `
+      <div class="modern-refresh-container">
+        <div class="modern-spinner">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor" opacity="0.2"/>
+            <path d="M12 4v2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 17.5V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4.93 4.93l1.77 1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.3 17.3l1.77 1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12h2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19.5 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4.93 19.07l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.3 6.7l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="modern-refresh-text">Actualizando...</span>
+      </div>
+    `;
+    
+    indicator.style.cssText = `
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 9999;
+      pointer-events: none;
+    `;
+    
+    const container = indicator.querySelector('.modern-refresh-container') as HTMLElement;
+    container.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      background: rgba(59, 130, 246, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 25px;
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    `;
+    
+    const spinner = indicator.querySelector('.modern-spinner') as HTMLElement;
+    spinner.style.cssText = `
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: spin 1s linear infinite;
+      color: white;
+    `;
+    
+    const svg = spinner.querySelector('svg') as unknown as HTMLElement;
+    svg.style.cssText = `
+      width: 100%;
+      height: 100%;
+    `;
+    
+    const text = indicator.querySelector('.modern-refresh-text') as HTMLElement;
+    text.style.cssText = `
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+      letter-spacing: 0.025em;
+    `;
+    
+    return indicator;
   }
 }
