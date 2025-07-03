@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import * as _ from 'lodash';
@@ -73,6 +73,10 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   @Input()
   userId: string = '';
 
+  loadingMoreMessages = false;
+
+  currentPage = 1;
+
   constructor(
     private _messageService: MessageService,
     private _authService: AuthService,
@@ -109,9 +113,26 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       .subscribe({
         next: (message: any) => {
           if (message.senderId === this.userId || message.receiverId === this.userId) {
-            this.messages = [...this.messages, message];
-            this._cdr.markForCheck();
-            this.scrollToBottom();
+            this._messageService.syncSpecificMessage(message._id)
+              .pipe(takeUntil(this.unsubscribe$))
+              .subscribe({
+                next: (syncedMessage) => {
+                  if (syncedMessage) {
+                    const existingIndex = this.messages.findIndex(m => m._id === syncedMessage._id);
+                    if (existingIndex === -1) {
+                      this.messages = [...this.messages, syncedMessage];
+                      this._cdr.markForCheck();
+                      this.scrollToBottom();
+                    }
+                  }
+                },
+                error: (error) => {
+                  console.error('Error sincronizando mensaje:', error);
+                  this.messages = [...this.messages, message];
+                  this._cdr.markForCheck();
+                  this.scrollToBottom();
+                }
+              });
           }
         }
       });
@@ -186,13 +207,13 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     try {
       await this.getUser(userIdMessage);
 
-      await this._messageService.getConversationsWithUser(currentUserId, userIdMessage)
+      await this._messageService.getConversationsWithUserSmart(currentUserId, userIdMessage, 1, 50)
         .pipe(
           takeUntil(this.unsubscribe$)
         )
         .subscribe({
-          next: (messages: Message[]) => {
-            this.messages = messages;
+          next: (data: { messages: Message[], total: number }) => {
+            this.messages = data.messages;
             this._cdr.markForCheck();
           },
           error: (error) => {
@@ -208,7 +229,6 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       this.loadMessages = false;
     }
   }
-
 
   private async getUser(userId: string): Promise<void> {
     this.user = [];
@@ -308,16 +328,32 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
     if (this.userId && this.messages.length > 0) {
       const chatId = this.messages[0].chatId;
-      await this._messageService.markMessagesAsRead(chatId, this.userId).subscribe({
-        next: (updatedMessages: Message[]) => {
-          this._notificationService.sendNotification(updatedMessages);
-          this.updateMessages(updatedMessages);
-          this._cdr.markForCheck();
-        },
-        error: (error) => {
-          console.error('Error marking messages as read:', error);
-        }
-      });
+      
+      await this._messageService.markMessagesAsReadLocal(chatId, this.userId)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe({
+          next: () => {
+            this.messages.forEach(message => {
+              if (message.senderId !== this.currentUser?.id) {
+                message.isRead = true;
+              }
+            });
+            this._cdr.markForCheck();
+          }
+        });
+
+      await this._messageService.markMessagesAsRead(chatId, this.userId)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe({
+          next: (updatedMessages: Message[]) => {
+            this._notificationService.sendNotification(updatedMessages);
+            this.updateMessages(updatedMessages);
+            this._cdr.markForCheck();
+          },
+          error: (error) => {
+            console.error('Error marking messages as read:', error);
+          }
+        });
     }
   }
 
@@ -416,6 +452,55 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
   openUrl(url: string): void {
     if (url) window.open(url, '_blank');
+  }
+
+  async loadMoreMessages(page: number = 2) {
+    if (!this.userId || !this.currentUser?.id) return;
+
+    try {
+      const data = await this._messageService.getConversationsWithUserSmart(
+        this.currentUser.id, 
+        this.userId, 
+        page, 
+        20
+      ).pipe(takeUntil(this.unsubscribe$)).toPromise();
+
+      if (data && data.messages.length > 0) {
+        this.messages = [...data.messages, ...this.messages];
+        this._cdr.markForCheck();
+      }
+    } catch (error) {
+      console.error('Error loading more messages:', error);
+    }
+  }
+
+  async forceSyncMessages() {
+    if (!this.userId || !this.currentUser?.id) return;
+    
+    try {
+      const messages = await this._messageService.forceSyncChat(
+        this.currentUser.id, 
+        this.userId
+      ).pipe(takeUntil(this.unsubscribe$)).toPromise();
+
+      if (messages) {
+        this.messages = messages;
+        this._cdr.markForCheck();
+      }
+    } catch (error) {
+      console.error('Error forzando sincronización:', error);
+    }
+  }
+
+  onScroll(event: any): void {
+    const element = event.target;
+    const scrollTop = element.scrollTop;
+    
+    if (scrollTop < 100 && !this.loadingMoreMessages) {
+      this.loadingMoreMessages = true;
+      this.currentPage++;
+      this.loadMoreMessages(this.currentPage);
+    }
   }
 
 }

@@ -3,7 +3,6 @@ import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 
-import { Message } from '../../../pages/messages/interfaces/message.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -34,9 +33,13 @@ export class NotificationMessageChatService implements OnDestroy {
       });
     }
 
-    sendNotificationMessageChat(payload: Message) {
-      this.socket.emit('generalNotification');
-      this.socket.emit('newMessageChat', payload);
+    sendNotificationMessageChat(message: any) {
+      if (message && message._id) {
+        this.socket.emit('generalNotification');
+        this.socket.emit('newMessageChat', message);
+      } else {
+        console.warn('Intentando enviar mensaje sin ID:', message);
+      }
     }
 
     ngOnDestroy() {

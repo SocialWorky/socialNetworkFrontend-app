@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef, Output, EventEmitter, OnDestroy } from '@angular/core';
-import { forkJoin, Subject, takeUntil } from 'rxjs';
+import { forkJoin, Subject, takeUntil, of } from 'rxjs';
 
 import { AuthService } from '@auth/services/auth.service';
 import { User } from '@shared/interfaces/user.interface';
@@ -85,21 +85,27 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
         }
 
         const userObservables = userIds.map(userId => this._userService.getUserById(userId));
-        const messageObservables = userIds.map(userId => this._messageService.getLastConversationWithUser(userId));
+        const messageObservables = userIds.map(userId => 
+          this._messageService.getLastConversationWithUser(userId)
+        );
 
         forkJoin([forkJoin(userObservables), forkJoin(messageObservables)]).subscribe({
           next: ([users, messages]: [User[], Message[]]) => {
-            const unreadMessagesObservables = users.map((user, index) =>
-              this._messageService.getUnreadMessagesCount(messages[index].chatId, user._id)
-            );
+            const unreadMessagesObservables = users.map((user, index) => {
+              const chatId = messages[index]?.chatId;
+              if (chatId) {
+                return this._messageService.getUnreadMessagesCount(chatId, user._id);
+              }
+              return of(0);
+            });
 
             forkJoin(unreadMessagesObservables).subscribe({
               next: (unreadCounts: number[]) => {
                 const updatedUsers = users.map((user, index) => ({
                   user,
-                  lastMessage: messages[index].content,
-                  createAt: messages[index].timestamp,
-                  unreadMessagesCount: unreadCounts[index],
+                  lastMessage: messages[index]?.content || '',
+                  createAt: messages[index]?.timestamp || new Date(),
+                  unreadMessagesCount: unreadCounts[index] || 0,
                 }));
 
                 this._messageStateService.updateUsersWithConversations(updatedUsers);

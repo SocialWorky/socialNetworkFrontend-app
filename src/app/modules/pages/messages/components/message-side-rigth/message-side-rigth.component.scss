@@ -350,3 +350,41 @@
     }
   }
 }
+
+.refresh-container {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+  
+  .refresh-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: map.get(color.$worky-blue, 9);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .material-icons {
+      font-size: 18px;
+      
+      &.spinning {
+        animation: spin 1s linear infinite;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

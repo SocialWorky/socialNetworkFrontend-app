@@ -45,4 +45,28 @@ export class ScrollService {
     }
   }
 
+  setScrollContainer(selector: string) {
+    const container = document.querySelector(selector);
+    if (container) {
+      container.addEventListener('scroll', (event) => {
+        this.handleScroll(event);
+      });
+    }
+  }
+
+  private handleScroll(event: any) {
+    const threshold = 100;
+    const position = event.target.scrollTop + event.target.clientHeight;
+    const height = event.target.scrollHeight;
+
+    if (position >= height - threshold) {
+      this.scrollEndSource.next('scrollEnd');
+    }
+
+    if (position > 3500) {
+      this.scrollEndSource.next('showScrollToTopButton');
+    } else {
+      this.scrollEndSource.next('hideScrollToTopButton');
+    }
+  }
 }
