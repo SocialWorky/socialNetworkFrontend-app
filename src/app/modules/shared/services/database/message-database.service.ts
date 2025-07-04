@@ -159,7 +159,6 @@ export class MessageDatabaseService {
       
       request.onsuccess = () => {
         const messages = request.result as Message[];
-        console.log(`Total de mensajes en BD para chat ${chatId}:`, messages.length);
         
         messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
         
@@ -167,7 +166,6 @@ export class MessageDatabaseService {
         
         if (page === 1) {
           const lastMessages = messages.slice(-size);
-          console.log(`Página 1: devolviendo ${lastMessages.length} de ${total} mensajes`);
           
           resolve({
             messages: lastMessages,
@@ -177,8 +175,6 @@ export class MessageDatabaseService {
           const startIndex = Math.max(0, total - (page * size));
           const endIndex = Math.max(0, total - ((page - 1) * size));
           const paginatedMessages = messages.slice(startIndex, endIndex);
-          
-          console.log(`Página ${page}: devolviendo ${paginatedMessages.length} mensajes (índices ${startIndex}-${endIndex})`);
           
           resolve({
             messages: paginatedMessages,

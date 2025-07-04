@@ -38,14 +38,11 @@ export class MessageService {
     const chatId = this.generateChatId(currentUserId, otherUserId);
     
     return from(this._messageDatabase.getMessagesByChatId(chatId)).pipe(
-      switchMap((localMessages) => {
-        console.log('Cargando mensajes desde cache local:', localMessages.length, 'mensajes');
-        
+      switchMap((localMessages) => {        
         if (localMessages.length > 0) {
           this.syncMessagesInBackground(chatId);
           return of(localMessages);
         } else {
-          console.log('No hay mensajes locales, cargando desde servidor');
           return this.getConversationsFromServer(currentUserId, otherUserId);
         }
       }),
@@ -66,9 +63,7 @@ export class MessageService {
     const chatId = this.generateChatId(currentUserId, otherUserId);
     
     return from(this._messageDatabase.getMessagesByChatIdPaginated(chatId, page, size)).pipe(
-      switchMap((localData) => {
-        console.log('Cargando mensajes paginados desde cache:', localData.messages.length, 'de', localData.total);
-        
+      switchMap((localData) => {        
         if (localData.messages.length > 0) {
           if (page === 1) {
             this.syncMessagesSilently(chatId);
@@ -186,7 +181,6 @@ export class MessageService {
     return this.http.post<Message[]>(url, { chatId, senderId }).pipe(
       tap((messages) => {
         messages.forEach(message => this._messageDatabase.updateMessage(message));
-        console.log('Mensajes marcados como leídos y sincronizados con cache local');
       })
     );
   }
@@ -265,13 +259,11 @@ export class MessageService {
 
   private syncMessagesInBackground(chatId: string): void {
     setTimeout(() => {
-      console.log('Sincronizando mensajes en segundo plano para chat:', chatId);
     }, 2000);
   }
 
   private syncMessagesSilently(chatId: string): void {
     setTimeout(() => {
-      console.log('Sincronización silenciosa de mensajes para chat:', chatId);
     }, 3000);
   }
 
@@ -291,14 +283,12 @@ export class MessageService {
       tap((message) => {
         if (message) {
           this._messageDatabase.addMessage(message);
-          console.log(`Mensaje ${messageId} sincronizado`);
         }
       })
     );
   }
 
   forceSyncChat(currentUserId: string, otherUserId: string): Observable<Message[]> {
-    console.log('Forzando sincronización completa del chat');
     return this.getConversationsFromServer(currentUserId, otherUserId);
   }
 
