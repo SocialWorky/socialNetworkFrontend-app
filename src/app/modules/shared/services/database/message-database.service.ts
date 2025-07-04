@@ -6,9 +6,13 @@ import { Message } from '../../../pages/messages/interfaces/message.interface';
 })
 export class MessageDatabaseService {
   private readonly DB_NAME = 'WorkyMessagesDB';
+
   private readonly DB_VERSION = 2;
+
   private readonly STORE_NAME = 'messages';
+
   private readonly MAX_MESSAGES = 1000;
+
   private db: IDBDatabase | null = null;
 
   async initDatabase(): Promise<void> {
@@ -109,6 +113,42 @@ export class MessageDatabaseService {
   }
 
   async getMessagesByChatId(chatId: string): Promise<Message[]> {
+    try {
+      if (!this.db) {
+        await this.initDatabase();
+      }
+      
+      return new Promise((resolve, reject) => {
+        try {
+          const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+          const store = transaction.objectStore(this.STORE_NAME);
+          const index = store.index('chatId');
+          const request = index.getAll(chatId);
+          
+          request.onsuccess = () => {
+            const messages = request.result as Message[];
+            messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+            resolve(messages);
+          };
+          request.onerror = () => {
+            console.error('Error en request de base de datos:', request.error);
+            resolve([]);
+          };
+        } catch (error) {
+          console.error('Error en transacción de base de datos:', error);
+          resolve([]);
+        }
+      });
+    } catch (error) {
+      console.error('Error inicializando base de datos:', error);
+      return [];
+    }
+  }
+
+  async getMessagesByChatIdPaginated(chatId: string, page: number, size: number): Promise<{
+    messages: Message[],
+    total: number
+  }> {
     if (!this.db) await this.initDatabase();
     
     return new Promise((resolve, reject) => {
@@ -119,26 +159,35 @@ export class MessageDatabaseService {
       
       request.onsuccess = () => {
         const messages = request.result as Message[];
+        console.log(`Total de mensajes en BD para chat ${chatId}:`, messages.length);
+        
         messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-        resolve(messages);
+        
+        const total = messages.length;
+        
+        if (page === 1) {
+          const lastMessages = messages.slice(-size);
+          console.log(`Página 1: devolviendo ${lastMessages.length} de ${total} mensajes`);
+          
+          resolve({
+            messages: lastMessages,
+            total: total
+          });
+        } else {
+          const startIndex = Math.max(0, total - (page * size));
+          const endIndex = Math.max(0, total - ((page - 1) * size));
+          const paginatedMessages = messages.slice(startIndex, endIndex);
+          
+          console.log(`Página ${page}: devolviendo ${paginatedMessages.length} mensajes (índices ${startIndex}-${endIndex})`);
+          
+          resolve({
+            messages: paginatedMessages,
+            total: total
+          });
+        }
       };
       request.onerror = () => reject(request.error);
     });
-  }
-
-  async getMessagesByChatIdPaginated(chatId: string, page: number, size: number): Promise<{
-    messages: Message[],
-    total: number
-  }> {
-    const allMessages = await this.getMessagesByChatId(chatId);
-    const startIndex = (page - 1) * size;
-    const endIndex = startIndex + size;
-    const paginatedMessages = allMessages.slice(startIndex, endIndex);
-    
-    return {
-      messages: paginatedMessages,
-      total: allMessages.length
-    };
   }
 
   async getLastMessageByChatId(chatId: string): Promise<Message | null> {
@@ -373,6 +422,59 @@ export class MessageDatabaseService {
           };
           updateRequest.onerror = () => reject(updateRequest.error);
         });
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getMessagesBeforeDate(chatId: string, beforeDate: Date, limit: number = 20): Promise<Message[]> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const index = store.index('chatId');
+      const request = index.getAll(chatId);
+      
+      request.onsuccess = () => {
+        const messages = request.result as Message[];
+        const beforeTimestamp = beforeDate.getTime();
+        
+        const olderMessages = messages.filter(msg => 
+          new Date(msg.timestamp).getTime() < beforeTimestamp
+        );
+        
+        olderMessages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        
+        const limitedMessages = olderMessages.slice(0, limit);
+        
+        limitedMessages.reverse();
+        
+        resolve(limitedMessages);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getLastMessagesByChatId(chatId: string, limit: number = 20): Promise<Message[]> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const index = store.index('chatId');
+      const request = index.getAll(chatId);
+      
+      request.onsuccess = () => {
+        const messages = request.result as Message[];
+        
+        messages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        
+        const lastMessages = messages.slice(0, limit);
+        
+        lastMessages.reverse();
+        
+        resolve(lastMessages);
       };
       request.onerror = () => reject(request.error);
     });
