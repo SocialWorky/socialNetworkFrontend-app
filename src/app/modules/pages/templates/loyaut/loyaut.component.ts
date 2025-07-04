@@ -25,6 +25,14 @@ export class LoyautComponent implements OnInit, OnDestroy {
     return this._deviceDetectionService.isMobile();
   }
 
+  get isIOS(): boolean {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  }
+
+  get isIPhoneWithNotch(): boolean {
+    return this.isIOS && window.screen.height >= 812;
+  }
+
   get token() {
     this._authService.getDecodedToken();
     return this._authService.getDecodedToken();
@@ -46,6 +54,12 @@ export class LoyautComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this._authService.getDecodedToken();
     this._notificationUsersService.refreshUserStatuses();
+    
+    // Aplicar clase específica para iPhone con notch
+    if (this.isIPhoneWithNotch) {
+      document.body.classList.add('iphone-with-notch');
+    }
+    
     this.routeSub = this._router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd)

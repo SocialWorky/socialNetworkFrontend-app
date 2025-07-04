@@ -51,7 +51,7 @@ export class PwaUpdateService {
           console.error('Error al instalar la nueva versión:', event);
           break;
         case 'NO_NEW_VERSION_DETECTED':
-          console.log('No hay nuevas versiones disponibles');
+          //console.log('No hay nuevas versiones disponibles');
           break;
       }
     });

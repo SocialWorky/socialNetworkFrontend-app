@@ -82,17 +82,7 @@ export class LocationService {
       this._locationReady = true;
       this._usingFallbackLocation = false;
       this._locationPromise = undefined;
-      
-      this._logService.log(
-        LevelLogEnum.INFO,
-        'LocationService',
-        'Location obtained successfully',
-        {
-          user: await this._authService.getDecodedToken(),
-          coordinates: this._userLocation,
-        },
-      );
-      
+            
       return this._userLocation;
     } catch (error: any) {
       const decodedToken = await this._authService.getDecodedToken();
