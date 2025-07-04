@@ -741,10 +741,3 @@ img, video {
     bottom: env(safe-area-inset-bottom) !important;
   }
 }
-
-/* Fallback para dispositivos que no soportan safe area insets */
-@supports not (padding-top: env(safe-area-inset-top)) {
-  body {
-    padding-top: 20px;
-  }
-}
