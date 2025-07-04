@@ -122,27 +122,24 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
         next: (message: any) => {
-          if (message.senderId === this.userId || message.receiverId === this.userId) {
-            this._messageService.syncSpecificMessage(message._id)
-              .pipe(takeUntil(this.unsubscribe$))
-              .subscribe({
-                next: (syncedMessage) => {
-                  if (syncedMessage) {
-                    const existingIndex = this.messages.findIndex(m => m._id === syncedMessage._id);
-                    if (existingIndex === -1) {
-                      this.messages = [...this.messages, syncedMessage];
-                      this._cdr.markForCheck();
-                      this.scrollToBottom();
-                    }
-                  }
-                },
-                error: (error) => {
-                  console.error('Error sincronizando mensaje:', error);
-                  this.messages = [...this.messages, message];
-                  this._cdr.markForCheck();
-                  this.scrollToBottom();
-                }
-              });
+          // Verificar si el mensaje pertenece al chat actual
+          const isCurrentChat = (message.senderId === this.userId && message.receiverId === this.currentUser?.id) ||
+                               (message.senderId === this.currentUser?.id && message.receiverId === this.userId);
+          
+          if (isCurrentChat) {
+            // Verificar si el mensaje ya existe localmente
+            const existingMessage = this.messages.find(m => m._id === message._id);
+            if (!existingMessage) {
+              // Agregar el mensaje inmediatamente sin intentar sincronizar
+              this.messages = [...this.messages, message];
+              this._cdr.markForCheck();
+              this.scrollToBottomSmooth();
+              
+              // Marcar como leído si es un mensaje entrante
+              if (message.senderId !== this.currentUser?.id) {
+                this.markMessagesAsRead();
+              }
+            }
           }
         }
       });
@@ -336,6 +333,8 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
     await this._messageService.createMessage(message).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (msg) => {
+        this.messages = [...this.messages, msg];
+        
         this._notificationMessageChatService.sendNotificationMessageChat(msg);
         this._notificationService.sendNotification();
         this.newMessage = '';
@@ -446,7 +445,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
     if (hasChanges) {
       this.messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-      this.scrollToBottom();
+      this.scrollToBottomSmooth();
       this._cdr.markForCheck();
     }
   }
@@ -546,7 +545,6 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     
     // Cargar más mensajes cuando el usuario está cerca del inicio
     if (scrollTop < 100 && !this.loadingMoreMessages && this.hasMoreMessages) {
-      console.log('Intentando cargar más mensajes, página:', this.currentPage + 1);
       this.currentPage++;
       this.loadMoreMessages(this.currentPage);
     }
@@ -557,7 +555,6 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       return;
     }
 
-    console.log('Cargando mensajes de la página:', page);
     this.loadingMoreMessages = true;
     
     // Guardar la posición exacta del scroll antes de cargar
