@@ -255,6 +255,10 @@
     z-index: 1;
     margin-bottom: 10px;
 
+    @supports (padding-top: env(safe-area-inset-top)) {  
+      margin-bottom: env(safe-area-inset-bottom);
+    }
+
     .message-input-container {
       display: flex;
       align-items: center;
