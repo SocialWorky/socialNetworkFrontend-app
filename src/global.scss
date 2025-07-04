@@ -473,13 +473,11 @@ img, video {
     background-color: color.$worky-color-module-container;
     border: 0px solid #e4e6ebe0;
     border-radius: max(0px, min(8px, calc((100vw - 4px - 100%) * 9999))) / 8px;
-    //box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
     box-shadow: 1px 2px 8px 1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
     @include breakpoints.below-sm {
       margin: 15px -1px 0px -1px;
     }
-
   }
 
   .container-widget {
@@ -627,7 +625,6 @@ img, video {
   background-color: color.$worky-color-navy;
 }
 
-
 .mobil-content-app {
   overflow-y: scroll;
   overflow-x: hidden;
@@ -715,7 +712,7 @@ img, video {
   to { transform: rotate(360deg); }
 }
 
-/* Estilos específicos para iPhone con notch/isla dinámica */
+
 @supports (padding-top: env(safe-area-inset-top)) {
   body {
     padding-top: env(safe-area-inset-top);
@@ -724,7 +721,6 @@ img, video {
     padding-bottom: env(safe-area-inset-bottom);
   }
   
-  /* Para modales y overlays */
   .cdk-overlay-container {
     padding-top: env(safe-area-inset-top);
     padding-left: env(safe-area-inset-left);
@@ -732,7 +728,6 @@ img, video {
     padding-bottom: env(safe-area-inset-bottom);
   }
   
-  /* Para elementos fixed */
   .fixed-top {
     top: env(safe-area-inset-top) !important;
   }

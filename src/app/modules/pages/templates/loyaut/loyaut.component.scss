@@ -17,29 +17,11 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   -ms-overflow-style: none;
-  
-  // Solución para iPhone con isla dinámica
-  // @supports (padding-top: env(safe-area-inset-top)) {
-  //   padding-top: env(safe-area-inset-top);
-  //   padding-left: env(safe-area-inset-left);
-  //   padding-right: env(safe-area-inset-right);
-  //   padding-bottom: env(safe-area-inset-bottom);
-  // }
-  
+    
   @include breakpoints.below-sm {
     grid-template:
     "header" 14vh
     "main" 86dvh;
-    
-    // Altura dinámica para móviles
-    // min-height: 100dvh;
-    // height: 100dvh;
-    
-    //Padding específico para iPhone
-    // padding-top: max(env(safe-area-inset-top), 20px);
-    // padding-left: env(safe-area-inset-left);
-    // padding-right: env(safe-area-inset-right);
-    // padding-bottom: env(safe-area-inset-bottom);
   }
 
   .navbar-content {
@@ -51,7 +33,6 @@
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     
-    // Asegurar que el navbar respete el safe area
     @include breakpoints.below-sm {
       position: sticky;
       top: 0;
@@ -76,9 +57,6 @@
     padding-top: 0px;
     flex-direction: column;
     align-items: center;
-    
-    // Ajustar altura para considerar safe area
-    //height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
 
