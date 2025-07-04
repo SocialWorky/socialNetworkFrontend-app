@@ -19,9 +19,20 @@
     </button>
   </div> -->
 
-  <cdk-virtual-scroll-viewport itemSize="autoResize" class="content-section-wall" #messageContainer layoutDirection="LTR">
+  <div class="content-section-wall" #messageContainer (scroll)="onScroll($event)">
+    <!-- Indicador de carga de mensajes antiguos -->
+    <div *ngIf="loadingMoreMessages" class="loading-messages">
+      <div class="loader"></div>
+      <span>Cargando mensajes anteriores...</span>
+    </div>
+
+    <!-- Mensaje cuando no hay más mensajes -->
+    <div *ngIf="!loadingMoreMessages && !hasMoreMessages && messages.length > 0" class="no-more-messages">
+      <span>No hay más mensajes que mostrar</span>
+    </div>
+
     <div class="messages-container fadeIn fast">
-      <ng-container *cdkVirtualFor="let message of messages; let i = index; trackBy: trackByMessageId">
+      <ng-container *ngFor="let message of messages; let i = index; trackBy: trackByMessageId">
         <!-- Show the date when it changes with respect to the previous message -->
         <ng-container *ngIf="i === 0 || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)">
           <div class="date-divider">
@@ -30,14 +41,15 @@
         </ng-container>
 
         <!-- Apply grouping classes only to the first and last message in the group of the same user and same date -->
-        <div [ngClass]="{
-          'message-sent': message.senderId === currentUser?.id,
-          'message-received': message.senderId !== currentUser?.id,
-          'grouped': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
-          'no-avatar': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
-          'first-group': i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp),
-          'last-group': i === messages.length - 1 || messages[i + 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i + 1].timestamp)
-        }">
+        <div 
+          [ngClass]="{
+            'message-sent': message.senderId === currentUser?.id,
+            'message-received': message.senderId !== currentUser?.id,
+            'grouped': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
+            'no-avatar': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
+            'first-group': i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp),
+            'last-group': i === messages.length - 1 || messages[i + 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i + 1].timestamp)
+          }">
 
           <worky-avatar
             [size]="40"
@@ -86,7 +98,17 @@
         </div>
       </ng-container>
     </div>
-  </cdk-virtual-scroll-viewport>
+  </div>
+
+  <!-- Flecha flotante para volver al final -->
+  <div 
+    *ngIf="showScrollToBottomButton" 
+    class="scroll-to-bottom-button"
+    (click)="scrollToBottomSmooth()"
+    matTooltip="Ir al final"
+    matTooltipClass="scroll-tooltip">
+    <i class="material-icons">keyboard_arrow_down</i>
+  </div>
 
   <div *ngIf="showEmojiPicker" class="emoji-picker-container">
     <emoji-mart

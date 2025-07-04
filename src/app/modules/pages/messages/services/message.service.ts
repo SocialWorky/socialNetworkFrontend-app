@@ -70,6 +70,7 @@ export class MessageService {
           }
           return of(localData);
         } else {
+          // Si no hay datos locales, cargar desde servidor pero limitar la respuesta
           return this.getConversationsFromServerPaginated(currentUserId, otherUserId, page, size);
         }
       }),
@@ -250,10 +251,28 @@ export class MessageService {
       tap((messages) => {
         this._messageDatabase.addMessages(messages);
       }),
-      map((messages: Message[]) => ({
-        messages,
-        total: messages.length
-      }))
+      map((messages: Message[]) => {
+        // Ordenar mensajes por timestamp
+        messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        
+        const total = messages.length;
+        let paginatedMessages = messages;
+        
+        if (page === 1) {
+          // Para la primera página, tomar los últimos 'size' mensajes
+          paginatedMessages = messages.slice(-size);
+        } else {
+          // Para páginas posteriores, calcular el rango correcto
+          const startIndex = Math.max(0, total - (page * size));
+          const endIndex = Math.max(0, total - ((page - 1) * size));
+          paginatedMessages = messages.slice(startIndex, endIndex);
+        }
+        
+        return {
+          messages: paginatedMessages,
+          total: total
+        };
+      })
     );
   }
 
@@ -304,7 +323,7 @@ export class MessageService {
     return from(this._messageDatabase.clearAllMessages());
   }
   
-  private generateChatId(userId1: string, userId2: string): string {
+  public generateChatId(userId1: string, userId2: string): string {
     const sortedIds = [userId1, userId2].sort();
     return `${sortedIds[0]}_${sortedIds[1]}`;
   }

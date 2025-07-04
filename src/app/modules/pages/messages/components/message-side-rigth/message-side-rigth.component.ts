@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import * as _ from 'lodash';
@@ -22,7 +22,6 @@ import { TypePublishing } from '@shared/modules/addPublication/enum/addPublicati
 import { SocketService } from '@shared/services/socket.service';
 import { ExternalMessage } from '@shared/interfaces/notification-external-message.interface';
 import { MediaType } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
-import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 
 @Component({
     selector: 'worky-message-side-rigth',
@@ -66,7 +65,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     return message._id;
   }
 
-  @ViewChild(CdkVirtualScrollViewport, { static: false }) private messageContainer?: CdkVirtualScrollViewport;
+  @ViewChild('messageContainer', { static: false }) private messageContainer?: ElementRef;
 
   private unsubscribe$ = new Subject<void>();
 
@@ -76,6 +75,17 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   loadingMoreMessages = false;
 
   currentPage = 1;
+
+  private isInitialLoad = true;
+  private scrollPositionBeforeLoad = 0;
+
+  // Agregar nueva propiedad para controlar el scroll
+  private userScrolling = false;
+  private scrollTimeout: any;
+
+  // Nuevas propiedades para el estado
+  hasMoreMessages = true;
+  showScrollToBottomButton = false;
 
   constructor(
     private _messageService: MessageService,
@@ -189,14 +199,15 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   }
 
   ngAfterViewChecked(): void {
-    setTimeout(() => {
-      this.scrollToBottom();
-    }, 0);
+    // Removemos el scroll automático aquí
   }
 
   ngOnDestroy() {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+    if (this.scrollTimeout) {
+      clearTimeout(this.scrollTimeout);
+    }
   }
 
   async loadMessagesWithUser(currentUserId: string, userIdMessage: string) {
@@ -204,26 +215,67 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       return;
     }
     this.loadMessages = true;
+    this.isInitialLoad = true;
+    this.hasMoreMessages = true; // Resetear el estado
+    this.currentPage = 1; // Resetear la página
+    
     try {
       await this.getUser(userIdMessage);
 
-      await this._messageService.getConversationsWithUserSmart(currentUserId, userIdMessage, 1, 50)
-        .pipe(
-          takeUntil(this.unsubscribe$)
-        )
-        .subscribe({
-          next: (data: { messages: Message[], total: number }) => {
-            this.messages = data.messages;
-            this._cdr.markForCheck();
-          },
-          error: (error) => {
-            console.error('Error loading messages:', error);
-            this.loadMessages = false;
-          },
-          complete: () => {
-            this.loadMessages = false;
+      const chatId = this._messageService.generateChatId(currentUserId, userIdMessage);
+      
+      const localData = await this._messageService.getOnlyLocalMessages(chatId).pipe(
+        takeUntil(this.unsubscribe$)
+      ).toPromise();
+
+      if (localData && localData.length > 0) {
+        const paginatedData = await this._messageService.getConversationsWithUserSmart(currentUserId, userIdMessage, 1, 20)
+          .pipe(takeUntil(this.unsubscribe$))
+          .toPromise();
+        
+        if (paginatedData) {
+          this.messages = paginatedData.messages;
+          
+          // Verificar si hay más mensajes disponibles
+          this.hasMoreMessages = paginatedData.total > this.messages.length;
+          
+          if (this.isInitialLoad) {
+            setTimeout(() => {
+              this.scrollToBottomSmooth();
+            }, 100);
+            this.isInitialLoad = false;
           }
-        });
+        }
+      } else {
+        await this._messageService.getConversationsWithUserSmart(currentUserId, userIdMessage, 1, 20)
+          .pipe(takeUntil(this.unsubscribe$))
+          .subscribe({
+            next: (data: { messages: Message[], total: number }) => {
+              this.messages = data.messages;
+              
+              // Verificar si hay más mensajes disponibles
+              this.hasMoreMessages = data.total > this.messages.length;
+              
+              if (this.isInitialLoad) {
+                setTimeout(() => {
+                  this.scrollToBottomSmooth();
+                }, 100);
+                this.isInitialLoad = false;
+              }
+              
+              this._cdr.markForCheck();
+            },
+            error: (error) => {
+              console.error('Error loading messages:', error);
+              this.loadMessages = false;
+            },
+            complete: () => {
+              this.loadMessages = false;
+            }
+          });
+      }
+      
+      this._cdr.markForCheck();
     } catch (error) {
       console.error('Error en loadMessagesWithUser:', error);
       this.loadMessages = false;
@@ -269,7 +321,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     this.showEmojiPicker = false;
   }
 
- async sendMessage(type: string, content?: string) {
+  async sendMessage(type: string, content?: string) {
     if (this.newMessage.trim() === '' && type === this.plainText) return;
 
     const messageContent = type === this.plainText ? this.newMessage : content;
@@ -297,7 +349,8 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
           textarea.style.height = '40px';
         }
 
-        this.scrollToBottom();
+        // Siempre hacer scroll al enviar un mensaje nuevo
+        this.scrollToBottomSmooth();
         this.sendMessagesLoader = false;
         this._cdr.markForCheck();
       },
@@ -308,19 +361,38 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     });
   }
 
-  private scrollToBottom(): void {
+  public scrollToBottomSmooth(): void {
     setTimeout(() => {
       if (this.messageContainer) {
         try {
-          this.messageContainer.scrollTo({
+          this.messageContainer.nativeElement.scrollTo({
             behavior: 'smooth',
-            top: this.messages.length * 1000,
-          })
+            top: this.messageContainer.nativeElement.scrollHeight
+          });
+          this.showScrollToBottomButton = false;
         } catch (err) {
           console.error('Error scrolling to bottom:', err);
         }
       }
-    }, 0);
+    }, 50);
+  }
+
+  private scrollToBottom(): void {
+    // Solo hacer scroll automático si el usuario no está haciendo scroll manual
+    if (!this.userScrolling) {
+      setTimeout(() => {
+        if (this.messageContainer) {
+          try {
+            this.messageContainer.nativeElement.scrollTo({
+              behavior: 'auto',
+              top: this.messageContainer.nativeElement.scrollHeight
+            });
+          } catch (err) {
+            console.error('Error scrolling to bottom:', err);
+          }
+        }
+      }, 0);
+    }
   }
 
   async markMessagesAsRead() {
@@ -454,23 +526,85 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     if (url) window.open(url, '_blank');
   }
 
-  async loadMoreMessages(page: number = 2) {
-    if (!this.userId || !this.currentUser?.id) return;
+  onScroll(event: any): void {
+    const element = event.target;
+    const scrollTop = element.scrollTop;
+    const scrollHeight = element.scrollHeight;
+    const clientHeight = element.clientHeight;
+    
+    // Detectar si el usuario está haciendo scroll manual
+    this.userScrolling = true;
+    clearTimeout(this.scrollTimeout);
+    
+    this.scrollTimeout = setTimeout(() => {
+      this.userScrolling = false;
+    }, 150);
+    
+    // Mostrar/ocultar botón de scroll al final
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    this.showScrollToBottomButton = !isNearBottom;
+    
+    // Cargar más mensajes cuando el usuario está cerca del inicio
+    if (scrollTop < 100 && !this.loadingMoreMessages && this.hasMoreMessages) {
+      console.log('Intentando cargar más mensajes, página:', this.currentPage + 1);
+      this.currentPage++;
+      this.loadMoreMessages(this.currentPage);
+    }
+  }
 
+  async loadMoreMessages(page: number = 2) {
+    if (!this.userId || !this.currentUser?.id || this.loadingMoreMessages) {
+      return;
+    }
+
+    console.log('Cargando mensajes de la página:', page);
+    this.loadingMoreMessages = true;
+    
+    // Guardar la posición exacta del scroll antes de cargar
+    const scrollTopBefore = this.messageContainer?.nativeElement.scrollTop || 0;
+    const scrollHeightBefore = this.messageContainer?.nativeElement.scrollHeight || 0;
+    
     try {
       const data = await this._messageService.getConversationsWithUserSmart(
         this.currentUser.id, 
         this.userId, 
         page, 
-        20
+        10
       ).pipe(takeUntil(this.unsubscribe$)).toPromise();
 
       if (data && data.messages.length > 0) {
-        this.messages = [...data.messages, ...this.messages];
-        this._cdr.markForCheck();
+        const existingIds = this.messages.map(m => m._id);
+        const newMessages = data.messages.filter(msg => !existingIds.includes(msg._id));
+        
+        if (newMessages.length > 0) {
+          // Agregar mensajes nuevos al inicio
+          this.messages = [...newMessages, ...this.messages];
+          
+          // Mantener la posición exacta del scroll
+          setTimeout(() => {
+            if (this.messageContainer) {
+              const scrollHeightAfter = this.messageContainer.nativeElement.scrollHeight;
+              const heightDifference = scrollHeightAfter - scrollHeightBefore;
+              
+              // Establecer la nueva posición del scroll
+              this.messageContainer.nativeElement.scrollTop = scrollTopBefore + heightDifference;
+            }
+          }, 100);
+          
+          this._cdr.markForCheck();
+        } else {
+          if (data.total <= this.messages.length) {
+            this.hasMoreMessages = false;
+          }
+        }
+      } else {
+        this.hasMoreMessages = false;
       }
     } catch (error) {
       console.error('Error loading more messages:', error);
+      this.hasMoreMessages = false;
+    } finally {
+      this.loadingMoreMessages = false;
     }
   }
 
@@ -489,17 +623,6 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       }
     } catch (error) {
       console.error('Error forzando sincronización:', error);
-    }
-  }
-
-  onScroll(event: any): void {
-    const element = event.target;
-    const scrollTop = element.scrollTop;
-    
-    if (scrollTop < 100 && !this.loadingMoreMessages) {
-      this.loadingMoreMessages = true;
-      this.currentPage++;
-      this.loadMoreMessages(this.currentPage);
     }
   }
 
