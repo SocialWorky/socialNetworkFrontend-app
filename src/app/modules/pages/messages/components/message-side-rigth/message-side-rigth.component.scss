@@ -256,7 +256,7 @@
     margin-bottom: 10px;
 
     @supports (padding-top: env(safe-area-inset-top)) {  
-      margin-bottom: env(safe-area-inset-bottom);
+      margin-bottom: 10px + env(safe-area-inset-bottom);
     }
 
     .message-input-container {
