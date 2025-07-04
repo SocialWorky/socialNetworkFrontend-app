@@ -54,6 +54,14 @@ export class RegisterComponent implements OnInit {
     });
   }
 
+  get isIOS(): boolean {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  }
+
+  get isIPhoneWithNotch(): boolean {
+    return this.isIOS && window.screen.height >= 812;
+  }
+
   ngOnInit() {
     this.registerForm = this._formBuilder.group({
       name: ['', [Validators.required, Validators.minLength(4)]],
@@ -64,6 +72,11 @@ export class RegisterComponent implements OnInit {
       invitationCode: [this.invitationCode ? ['', [Validators.required]] : ''],
       role: [RoleUser.USER],
     });
+
+    // Aplicar clase específica para iPhone con notch
+    if (this.isIPhoneWithNotch) {
+      document.body.classList.add('iphone-with-notch');
+    }
   }
 
   async register() {

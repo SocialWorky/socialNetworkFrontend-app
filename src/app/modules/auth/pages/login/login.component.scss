@@ -7,10 +7,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   @include breakpoints.below-sm {
     height: auto;
-    padding: 20px;
+    padding: max(env(safe-area-inset-top), 20px) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
   .content {
     width: 100%;
@@ -18,6 +20,8 @@
     display: flex;
     @include breakpoints.below-sm {
       flex-direction: column;
+      padding: 20px;
+      padding-top: 0;
     }
     .img-login {
       width: 50%;

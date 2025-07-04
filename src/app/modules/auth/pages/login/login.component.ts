@@ -82,6 +82,14 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  get isIOS(): boolean {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  }
+
+  get isIPhoneWithNotch(): boolean {
+    return this.isIOS && window.screen.height >= 812;
+  }
+
   ngOnInit() {
     this.checkLastLogin();
     this.checkSessionGoogle();
@@ -89,6 +97,10 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
+
+    if (this.isIPhoneWithNotch) {
+      document.body.classList.add('iphone-with-notch');
+    }
 
     this._cdr.markForCheck();
   }
