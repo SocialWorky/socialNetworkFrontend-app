@@ -5,7 +5,18 @@ const config: CapacitorConfig = {
   appName: 'socialNetworkFrontend-app',
   webDir: 'www',
   server: {
-    androidScheme: 'https'
+    androidScheme: 'https',
+    cleartext: true
+  },
+  ios: {
+    scheme: 'https',
+    contentInset: 'always'
+  },
+  plugins: {
+    SplashScreen: {
+      launchShowDuration: 3000,
+      backgroundColor: "#113355"
+    }
   }
 };
 

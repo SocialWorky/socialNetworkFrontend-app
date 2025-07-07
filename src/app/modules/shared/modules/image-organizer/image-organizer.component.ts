@@ -35,6 +35,10 @@ export class ImageOrganizerComponent implements OnInit {
     return this._deviceDetectionService.isMobile();
   }
 
+  get isIphone(): boolean {
+    return this._deviceDetectionService.isIphone();
+  }
+
   constructor(
     private _dialog: MatDialog,
     private _deviceDetectionService: DeviceDetectionService
@@ -92,12 +96,40 @@ export class ImageOrganizerComponent implements OnInit {
     this.currentItem = null;
   }
 
+  private resetIOSViewport(): void {
+    if (!this.isIphone) return;
+
+    const resetStyles = (element: HTMLElement) => {
+      element.style.padding = '0';
+      element.style.margin = '0';
+      element.style.top = '0';
+      element.style.position = '';
+      element.style.height = '';
+      element.style.overflow = '';
+      element.style.transform = '';
+    };
+
+    [document.body, document.documentElement].forEach(resetStyles);
+    
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    
+    // Doble reset para asegurar que se aplique
+    setTimeout(() => {
+      [document.body, document.documentElement].forEach(resetStyles);
+      window.scrollTo(0, 0);
+    }, 50);
+  }
+
   openViewMedia(imagenSelected: ImageOrganizer): void {
-    const dialogRef = this._dialog.open(MediaViewComponent, {
-      width: this.isMobile ? '100vw' : '95vw',
-      height: this.isMobile? '100vh' : '95vh',
-      maxWidth: this.isMobile? '100vw' : '95vw',
+    const dialogConfig: MatDialogConfig = {
+      width: this.isIphone ? '100vw' : (this.isMobile ? '100dvw' : '95dvw'),
+      height: this.isIphone ? '100vh' : (this.isMobile ? '100dvh' : '95dvh'),
+      maxWidth: this.isIphone ? '100vw' : (this.isMobile ? '100dvw' : '95dvw'),
+      maxHeight: this.isIphone ? '100vh' : (this.isMobile ? '100dvh' : '95dvh'),
       panelClass: 'view-media-modal-container',
+      disableClose: this.isIphone,
       data: {
         images: this.images,
         imageSelected: imagenSelected,
@@ -105,10 +137,21 @@ export class ImageOrganizerComponent implements OnInit {
         publication: this.publication,
         type: this.type
       }
-    });
+    };
+
+    if (this.isIphone) {
+      dialogConfig.position = { top: '0px' };
+    }
+
+    const dialogRef = this._dialog.open(MediaViewComponent, dialogConfig);
 
     dialogRef.afterClosed().subscribe(result => {
+      if (this.isIphone) {
+        this.resetIOSViewport();
+      }
+      
       if (result) {
+        // Tu lógica existente aquí
       }
     });
   }

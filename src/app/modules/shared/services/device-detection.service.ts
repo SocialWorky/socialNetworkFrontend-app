@@ -60,6 +60,10 @@ export class DeviceDetectionService implements OnDestroy {
     return Capacitor.isNativePlatform();
   }
 
+  isIphone(): boolean {
+    return this._platform.is('ios') && this._platform.is('iphone');
+  }
+
   width() {
     return this._platform.width();
   }

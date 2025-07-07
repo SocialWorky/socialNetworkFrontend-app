@@ -255,9 +255,17 @@
     z-index: 1;
     margin-bottom: 10px;
 
-    @supports (padding-top: env(safe-area-inset-top)) {  
-      margin-bottom: calc(10px + env(safe-area-inset-bottom));
+    @supports (padding-top: env(safe-area-inset-top)) {
+      margin-bottom: calc(env(safe-area-inset-top) + 30px);
     }
+
+    // @supports (padding-top: env(safe-area-inset-top)) {  
+    //   @media screen and (-webkit-min-device-pixel-ratio: 0) {
+    //     @supports (-webkit-touch-callout: none) {
+    //       margin-bottom: calc(40px + env(safe-area-inset-bottom));
+    //     }
+    //   }
+    // }
 
     .message-input-container {
       display: flex;
@@ -311,7 +319,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 100dvh;
   background: url('../../../../../../assets/img/shared/fondo_message_chat.jpg') center/cover no-repeat;
   opacity: 0.2;
   z-index: 0;
