@@ -1,5 +1,6 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-palettes' as colors;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
 .content-view-media-carousel {
   display: flex;
@@ -18,6 +19,9 @@
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    @include breakpoints.below-sm {
+      height: 100%;
+    }
   }
 
   .main-image {

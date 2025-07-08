@@ -27,7 +27,7 @@
     </ng-container>
   </div>
 
-  <div class="thumbnail-list">
+  <div *ngIf="!isMobile" class="thumbnail-list">
     <img
       *ngFor="let image of images"
       [src]="image.urlThumbnail"

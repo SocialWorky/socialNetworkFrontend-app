@@ -5,14 +5,17 @@
 .content-view-comment {
   display: flex;
   flex-direction: column;
-  max-height: 75dvh;
+  max-height: 70dvh;
   overflow: hidden;
-
   .publication-comment {
     margin-top: 3px;
     padding: 10px;
     overflow: auto;
-    max-height: 59dvh;
+    max-height: 55dvh;
+    @include breakpoints.below-sm {
+      max-height: 26dvh;
+    }
+
     .publication-comment-item {
       display: flex;
       align-items: flex-start;
@@ -64,5 +67,7 @@
 
   .content-add-comment {
     height: auto;
+    border-radius: 12px;
+    background-color: color-mix(in srgb, var(--worky-color-navy), transparent 95%);
   }
 }

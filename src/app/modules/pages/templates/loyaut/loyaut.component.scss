@@ -86,7 +86,7 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   @include breakpoints.below-sm {
-    height: calc(90dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    height: 90dvh;
     width: 100vw;
   }
 }
@@ -105,7 +105,7 @@
   overflow: hidden;
   @include breakpoints.below-sm {
     padding: 0px;
-    height: calc(87dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    height: 87dvh;
   }
 }
 

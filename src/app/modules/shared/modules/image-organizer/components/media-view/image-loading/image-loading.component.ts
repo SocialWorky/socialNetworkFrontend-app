@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { ImageOrganizer } from '../../../interfaces/image-organizer.interface';
 import { environment } from '@env/environment';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 
 @Component({
     selector: 'worky-image-loading',
@@ -9,6 +10,9 @@ import { environment } from '@env/environment';
     standalone: false
 })
 export class ImageLoadingComponent implements OnInit, OnChanges {
+  get isMobile(): boolean {
+    return this._deviceDetectionService.isMobile();
+  }
 
   @Input() images: ImageOrganizer[] = [];
 
@@ -20,7 +24,7 @@ export class ImageLoadingComponent implements OnInit, OnChanges {
 
   urlFilesService = environment.APIFILESERVICE;
 
-  constructor() { }
+  constructor(private _deviceDetectionService: DeviceDetectionService) { }
 
   ngOnInit(): void {}
 

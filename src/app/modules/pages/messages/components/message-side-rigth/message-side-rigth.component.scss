@@ -259,14 +259,6 @@
       margin-bottom: calc(env(safe-area-inset-top) + 30px);
     }
 
-    // @supports (padding-top: env(safe-area-inset-top)) {  
-    //   @media screen and (-webkit-min-device-pixel-ratio: 0) {
-    //     @supports (-webkit-touch-callout: none) {
-    //       margin-bottom: calc(40px + env(safe-area-inset-bottom));
-    //     }
-    //   }
-    // }
-
     .message-input-container {
       display: flex;
       align-items: center;

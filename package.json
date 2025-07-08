@@ -17,7 +17,10 @@
     "build": "ng build",
     "build:prod": "ng build --configuration production",
     "pwa:dev": "node generate-icons.js && node generate-manifest.js && node prepare-meta-tags.js && ng build --configuration development && http-server www -p 8080",
+    "pwa:dev:watch": "node generate-icons.js && node generate-manifest.js && node prepare-meta-tags.js && ng build --configuration development --watch & http-server www -p 8080",
     "pwa:test": "node generate-icons.js && node generate-manifest.js && node prepare-meta-tags.js && ng build --configuration production && http-server www -p 8080",
+    "ios:dev": "npm run pwa:dev:watch & npx cap sync ios && npx cap open ios",
+    "ios:build": "ng build --configuration development && npx cap sync ios",
     "sw:clear": "node scripts/force-sw-update.js",
     "sw:status": "node -e \"console.log('Usa PWAUtils.showServiceWorkerStatus() en la consola del navegador')\""
   },

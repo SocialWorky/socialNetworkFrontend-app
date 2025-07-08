@@ -6,11 +6,13 @@ const config: CapacitorConfig = {
   webDir: 'www',
   server: {
     androidScheme: 'https',
-    cleartext: true
+    cleartext: true,
+    allowNavigation: ['*']
   },
   ios: {
     scheme: 'https',
-    contentInset: 'always'
+    contentInset: 'always',
+    limitsNavigationsToAppBoundDomains: false
   },
   plugins: {
     SplashScreen: {

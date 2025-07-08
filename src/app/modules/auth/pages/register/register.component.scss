@@ -8,11 +8,9 @@
   justify-content: center;
   align-items: center;
   min-height: 100dvh;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding-top: 20px;
   @include breakpoints.below-sm {
     height: auto;
-    padding: max(env(safe-area-inset-top), 20px) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
   .content {
     width: 100%;
