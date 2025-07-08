@@ -31,7 +31,9 @@
 }
 
 .last-publication {
-  margin-bottom: 20px;
+  @supports (padding-top: env(safe-area-inset-top)) {
+    margin-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
 }
 
 .connection-overlay {
