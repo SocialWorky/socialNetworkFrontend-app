@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import * as _ from 'lodash';
@@ -29,7 +29,7 @@ import { MediaType } from '@shared/modules/image-organizer/interfaces/image-orga
     styleUrls: ['./message-side-rigth.component.scss'],
     standalone: false
 })
-export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterViewChecked, OnInit{
+export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
 
   WorkyButtonType = WorkyButtonType;
 
@@ -77,14 +77,13 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
   currentPage = 1;
 
   private isInitialLoad = true;
-  private scrollPositionBeforeLoad = 0;
 
-  // Agregar nueva propiedad para controlar el scroll
   private userScrolling = false;
+  
   private scrollTimeout: any;
 
-  // Nuevas propiedades para el estado
   hasMoreMessages = true;
+  
   showScrollToBottomButton = false;
 
   constructor(
@@ -122,20 +121,16 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
         next: (message: any) => {
-          // Verificar si el mensaje pertenece al chat actual
           const isCurrentChat = (message.senderId === this.userId && message.receiverId === this.currentUser?.id) ||
                                (message.senderId === this.currentUser?.id && message.receiverId === this.userId);
           
           if (isCurrentChat) {
-            // Verificar si el mensaje ya existe localmente
             const existingMessage = this.messages.find(m => m._id === message._id);
             if (!existingMessage) {
-              // Agregar el mensaje inmediatamente sin intentar sincronizar
               this.messages = [...this.messages, message];
               this._cdr.markForCheck();
               this.scrollToBottomSmooth();
               
-              // Marcar como leído si es un mensaje entrante
               if (message.senderId !== this.currentUser?.id) {
                 this.markMessagesAsRead();
               }
@@ -195,10 +190,6 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     }
   }
 
-  ngAfterViewChecked(): void {
-    // Removemos el scroll automático aquí
-  }
-
   ngOnDestroy() {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
@@ -212,9 +203,12 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       return;
     }
     this.loadMessages = true;
+
     this.isInitialLoad = true;
-    this.hasMoreMessages = true; // Resetear el estado
-    this.currentPage = 1; // Resetear la página
+
+    this.hasMoreMessages = true;
+
+    this.currentPage = 1;
     
     try {
       await this.getUser(userIdMessage);
@@ -233,7 +227,6 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
         if (paginatedData) {
           this.messages = paginatedData.messages;
           
-          // Verificar si hay más mensajes disponibles
           this.hasMoreMessages = paginatedData.total > this.messages.length;
           
           if (this.isInitialLoad) {
@@ -544,7 +537,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     this.showScrollToBottomButton = !isNearBottom;
     
     // Cargar más mensajes cuando el usuario está cerca del inicio
-    if (scrollTop < 100 && !this.loadingMoreMessages && this.hasMoreMessages) {
+    if (scrollTop < 200 && !this.loadingMoreMessages && this.hasMoreMessages) {
       this.currentPage++;
       this.loadMoreMessages(this.currentPage);
     }
@@ -574,20 +567,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
         const newMessages = data.messages.filter(msg => !existingIds.includes(msg._id));
         
         if (newMessages.length > 0) {
-          // Agregar mensajes nuevos al inicio
           this.messages = [...newMessages, ...this.messages];
-          
-          // Mantener la posición exacta del scroll
-          setTimeout(() => {
-            if (this.messageContainer) {
-              const scrollHeightAfter = this.messageContainer.nativeElement.scrollHeight;
-              const heightDifference = scrollHeightAfter - scrollHeightBefore;
-              
-              // Establecer la nueva posición del scroll
-              this.messageContainer.nativeElement.scrollTop = scrollTopBefore + heightDifference;
-            }
-          }, 100);
-          
           this._cdr.markForCheck();
         } else {
           if (data.total <= this.messages.length) {
