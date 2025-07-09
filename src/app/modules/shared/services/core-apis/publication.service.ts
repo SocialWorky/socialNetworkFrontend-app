@@ -46,9 +46,15 @@ export class PublicationService {
     const url = `${this.baseUrl}/publications/create`;
     return this.http.post(url, post).pipe(
       catchError(this.handleError),
-      map((data) => {
+      map((data: any) => {
         this._notificationPublicationService.sendNotificationNewPublication(data);
-        this._publicationDatabase.addPublication(data as PublicationView);
+        // Verificar si data tiene la estructura correcta antes de guardar
+        if (data && data.publications && data.publications._id) {
+          this._publicationDatabase.addPublication(data.publications as PublicationView);
+        } else if (data && data._id) {
+          // Si data es directamente la publicación
+          this._publicationDatabase.addPublication(data as PublicationView);
+        }
         return data;
       })
     );
