@@ -34,8 +34,12 @@
           "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
         ],
         "urls": [
-          "https://fonts.googleapis.com/**",
-          "https://fonts.gstatic.com/**"
+          "https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap",
+          "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap",
+          "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap",
+          "https://fonts.googleapis.com/icon?family=Material+Icons&display=swap",
+          "https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap",
+          "https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
         ]
       }
     }

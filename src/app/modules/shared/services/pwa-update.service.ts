@@ -108,6 +108,12 @@ export class PwaUpdateService {
       return Promise.resolve(false);
     }
 
+    // Verificar si los service workers están habilitados
+    if (!this.swUpdate.isEnabled) {
+      console.log('Service workers no están habilitados en este navegador');
+      return Promise.resolve(false);
+    }
+
     this.isChecking = true;
 
     return this.swUpdate.checkForUpdate()
@@ -116,7 +122,10 @@ export class PwaUpdateService {
         return updateAvailable;
       })
       .catch(error => {
-        console.error('Error al verificar actualizaciones:', error);
+        // Solo mostrar error si no es por service workers deshabilitados
+        if (!error.message?.includes('Service workers are disabled')) {
+          console.error('Error al verificar actualizaciones:', error);
+        }
         this.isChecking = false;
         return false;
       });

@@ -81,7 +81,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
     if(localStorage.getItem('token')) this.currentUserId = this._authService.getDecodedToken()!.id;
 
-    this._pwaUpdateService.checkForUpdates();
+    // Verificar actualizaciones de PWA de forma segura
+    this._pwaUpdateService.checkForUpdates().catch(() => {
+      // Error silencioso si no se pueden verificar actualizaciones
+    });
   }
 
   ngOnDestroy() {
