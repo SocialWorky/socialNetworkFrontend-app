@@ -107,7 +107,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   @Input() idMedia?: string;
 
   @ViewChild('postTextRef', { static: false }) postTextRef!: IonTextarea;
-  postText!: string;
 
   constructor(
     private _fb: FormBuilder,
@@ -581,9 +580,9 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   insertText(markdown: string) {
-    const textareaValue = this.postTextRef.value || '';
+    const textareaValue = this.myForm.get('content')?.value || '';
 
-    const textarea = this.postTextRef.getInputElement().then((textarea: HTMLTextAreaElement) => {
+    this.postTextRef.getInputElement().then((textarea: HTMLTextAreaElement) => {
       const startPos = textarea.selectionStart;
       const endPos = textarea.selectionEnd;
 
