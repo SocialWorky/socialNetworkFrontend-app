@@ -17,9 +17,9 @@ export class FileUploadService {
   uploadFile(
     files: File[],
     destination: string,
-    idReference?: string,
-    urlMedia?: string,
-    type?: TypePublishing
+    idReference?: string | null,
+    urlMedia?: string | null,
+    type?: TypePublishing | null
   ) {
     const url = `${environment.APIFILESERVICE}upload`;
     const id = this._authService.getDecodedToken()?.id;

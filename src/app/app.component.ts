@@ -16,6 +16,7 @@ import { TypePublishing } from '@shared/modules/addPublication/enum/addPublicati
 import { CommentService } from '@shared/services/core-apis/comment.service';
 import { AuthService } from '@auth/services/auth.service';
 import { PwaUpdateService } from '@shared/services/pwa-update.service';
+import { EmojiEventsService } from '@shared/services/emoji-events.service';
 
 @Component({
     selector: 'worky-root',
@@ -46,12 +47,21 @@ export class AppComponent implements OnInit, OnDestroy {
     private _commentService: CommentService,
     private _authService: AuthService,
     private _pwaUpdateService: PwaUpdateService,
+    private _emojiEventsService: EmojiEventsService
   ) {
     this._notificationUsersService.setupInactivityListeners();
     if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();
   }
 
   ngOnInit(): void {
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      this._socketService.updateToken(token);
+    } else {
+      this._socketService.connectToWebSocket();
+    }
+
     this.document.body.classList.add('light-theme');
     this._renderer.setAttribute(
       this.document.documentElement,
@@ -59,31 +69,38 @@ export class AppComponent implements OnInit, OnDestroy {
       getTranslationsLanguage()
     );
     this.applyCustomConfig();
+
+    //TODO: Wait a little before subscribing to events, this is to give time for components to start before subscribing
+    setTimeout(() => {
+      this._socketService.listenEvent('newExternalMessage', (message: any) => {
+        if (!message.idReference) return;
+        
+        switch (message.type) {
+          case TypePublishing.POST:
+            this.handlePostUpdate(message.idReference);
+            break;
+          case TypePublishing.COMMENT:
+            this.handleCommentUpdate(message.idReference);
+            break;
+          case TypePublishing.EMOJI:
+            this._emojiEventsService.notifyEmojiProcessed(message);
+            break;
+          default:
+            break;
+        }
+      });
+    }, 1000);
+
     setTimeout(() => {
       this._loadingService.setLoading(false);
       document.getElementById('loading-screen')?.remove();
     }, 4000);
-    this._socketService.connectToWebSocket();
-
-    this._socketService.listenEvent('newExternalMessage', (message: any) => {
-      if (!message.idReference) return;
-      switch (message.type) {
-        case TypePublishing.POST:
-          this.handlePostUpdate(message.idReference);
-          break;
-        case TypePublishing.COMMENT:
-          this.handleCommentUpdate(message.idReference);
-          break;
-        default:
-          console.warn('Tipo de mensaje no soportado:', message.type);
-      }
-    });
 
     if(localStorage.getItem('token')) this.currentUserId = this._authService.getDecodedToken()!.id;
 
-    // Verificar actualizaciones de PWA de forma segura
+    // Verify PWA updates securely
     this._pwaUpdateService.checkForUpdates().catch(() => {
-      // Error silencioso si no se pueden verificar actualizaciones
+      // Silent error if updates cannot be verified
     });
   }
 

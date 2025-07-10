@@ -30,7 +30,7 @@ const config: SocketIoConfig = {
   declarations: [
     AppComponent,
     PwaUpdateNotificationComponent,
-    PwaSettingsComponent
+    PwaSettingsComponent,
   ],
   imports: [
     BrowserModule,
