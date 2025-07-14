@@ -9,6 +9,7 @@ import { AdminCustomFieldsComponent } from './shared/admin-custom-fields/admin-c
 import { InvitationsCodeComponent } from './shared/invitations-code/invitations-code.component';
 import { LogComponent } from './shared/log/log.component';
 import { WidgetManagementComponent } from './shared/widget-management/widget-management.component';
+import { WebhooksComponent } from './shared/webhooks/webhooks.component';
 
 export const routes: Routes = [
   {
@@ -28,6 +29,7 @@ export const routes: Routes = [
           { title: 'Widgets Gestión', path: 'widget-management', component: WidgetManagementComponent },
           { title: 'CSS', path: 'custom-css', component: CustomCssComponent },
           { title: 'Invitaciones', path: 'invitations-code', component: InvitationsCodeComponent },
+          { title: 'Webhooks', path: 'webhooks', component: WebhooksComponent },
         ],
       },
       { title: 'Logs', path: 'logs', component: LogComponent },
