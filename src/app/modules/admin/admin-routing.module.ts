@@ -8,6 +8,7 @@ import { SiteConfigComponent } from './shared/site-config/site-config.component'
 import { AdminCustomFieldsComponent } from './shared/admin-custom-fields/admin-custom-fields.component';
 import { InvitationsCodeComponent } from './shared/invitations-code/invitations-code.component';
 import { LogComponent } from './shared/log/log.component';
+import { WidgetManagementComponent } from './shared/widget-management/widget-management.component';
 
 export const routes: Routes = [
   {
@@ -24,6 +25,7 @@ export const routes: Routes = [
           { title: 'Del Sistema', path: 'site-config', component: SiteConfigComponent },
           { title: 'Reacciones', path: 'manage-reactions', component: ManageReactionsComponent },
           { title: 'Campos Personalizados', path: 'custom-fields', component: AdminCustomFieldsComponent },
+          { title: 'Widgets Gestión', path: 'widget-management', component: WidgetManagementComponent },
           { title: 'CSS', path: 'custom-css', component: CustomCssComponent },
           { title: 'Invitaciones', path: 'invitations-code', component: InvitationsCodeComponent },
         ],
