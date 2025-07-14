@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { WidgetPosition, WidgetConfig, WidgetStatus } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
-import { WidgetConfigService } from '@shared/modules/worky-widget/worky-news/service/widget-config.service';
+import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget-config.service';
 
 @Component({
   selector: 'worky-widget-container',

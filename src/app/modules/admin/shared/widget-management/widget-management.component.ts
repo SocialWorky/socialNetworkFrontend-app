@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { WidgetConfig, WidgetPosition, WidgetStatus } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
-import { WidgetConfigService } from '@shared/modules/worky-widget/worky-news/service/widget-config.service';
+import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget-config.service';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { WidgetLayout } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
@@ -141,37 +141,19 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const existingWidget = this.widgetConfigService.getWidgetBySelectorFromCache(widgetConfig.selector);
-      
-      if (existingWidget) {
-        this.widgetConfigService.updateWidget(widgetConfig.selector, widgetConfig)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: () => {
-              this.alertService.showAlert('Éxito', 'Widget actualizado correctamente', Alerts.SUCCESS, Position.CENTER, true, 'Aceptar');
-              this.widgetForm.reset();
-              this.widgetConfigService.forceRefresh();
-              this._cdr.markForCheck();
-            },
-            error: () => {
-              this.alertService.showAlert('Error', 'Error al actualizar widget', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
-            }
-          });
-      } else {
-        this.widgetConfigService.createWidget(widgetConfig)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: () => {
-              this.alertService.showAlert('Éxito', 'Widget creado correctamente', Alerts.SUCCESS, Position.CENTER, true, 'Aceptar');
-              this.widgetForm.reset();
-              this.widgetConfigService.forceRefresh();
-              this._cdr.markForCheck();
-            },
-            error: () => {
-              this.alertService.showAlert('Error', 'Error al crear widget', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
-            }
-          });
-      }
+      this.widgetConfigService.saveOrUpdateWidget(widgetConfig)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.alertService.showAlert('Éxito', 'Widget guardado correctamente', Alerts.SUCCESS, Position.CENTER, true, 'Aceptar');
+            this.widgetForm.reset();
+            this.widgetConfigService.forceRefresh();
+            this._cdr.markForCheck();
+          },
+          error: () => {
+            this.alertService.showAlert('Error', 'Error al guardar widget', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
+          }
+        });
     }
   }
 

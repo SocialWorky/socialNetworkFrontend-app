@@ -17,7 +17,7 @@ import { CommentService } from '@shared/services/core-apis/comment.service';
 import { AuthService } from '@auth/services/auth.service';
 import { PwaUpdateService } from '@shared/services/pwa-update.service';
 import { EmojiEventsService } from '@shared/services/emoji-events.service';
-import { WidgetConfigService } from '@shared/modules/worky-widget/worky-news/service/widget-config.service';
+import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget-config.service';
 
 @Component({
     selector: 'worky-root',

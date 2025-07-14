@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { environment } from '@env/environment';
 import { WidgetConfig, WidgetLayout, WidgetPosition, WidgetStatus } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
@@ -29,7 +29,7 @@ export class WidgetConfigService {
       name: 'Clima',
       description: 'Muestra información del clima actual',
       position: WidgetPosition.RIGHT,
-      order: 1,
+      order: 0,
       status: WidgetStatus.ENABLED,
       allowedPositions: [WidgetPosition.LEFT, WidgetPosition.RIGHT],
       icon: 'wb_sunny'
@@ -39,9 +39,9 @@ export class WidgetConfigService {
       name: 'Noticias',
       description: 'Muestra las últimas noticias',
       position: WidgetPosition.RIGHT,
-      order: 2,
+      order: 0,
       status: WidgetStatus.ENABLED,
-      allowedPositions: [WidgetPosition.LEFT, WidgetPosition.RIGHT, WidgetPosition.TOP],
+      allowedPositions: [WidgetPosition.LEFT, WidgetPosition.RIGHT],
       icon: 'article'
     }
   ];
@@ -213,5 +213,22 @@ export class WidgetConfigService {
 
   getDefaultWidgets(): WidgetConfig[] {
     return this.defaultWidgets;
+  }
+
+  saveOrUpdateWidget(widget: WidgetConfig): Observable<WidgetConfig> {
+    return this.getWidgetBySelector(widget.selector).pipe(
+      switchMap(() => {
+        // Si llega aquí, el widget existe, entonces actualizar
+        return this.updateWidget(widget.selector, widget);
+      }),
+      catchError((error) => {
+        if (error.status === 404) {
+          // El widget no existe, crearlo
+          return this.createWidget(widget);
+        }
+        // Re-lanzar otros errores
+        throw error;
+      })
+    );
   }
 }
