@@ -6,6 +6,7 @@ import { DeviceDetectionService } from '@shared/services/device-detection.servic
 import { AuthService } from '@auth/services/auth.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { ScrollService } from '@shared/services/scroll.service';
+import { WidgetPosition } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
 
 @Component({
     selector: 'worky-loyaut',
@@ -16,8 +17,12 @@ import { ScrollService } from '@shared/services/scroll.service';
 export class LoyautComponent implements OnInit, OnDestroy {
 
   routeUrl: string = '';
+
   isProfile: boolean = false;
+
   isMessages: boolean = false;
+
+  WidgetPosition = WidgetPosition;
 
   private routeSub: Subscription | undefined;
 

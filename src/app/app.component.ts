@@ -17,6 +17,7 @@ import { CommentService } from '@shared/services/core-apis/comment.service';
 import { AuthService } from '@auth/services/auth.service';
 import { PwaUpdateService } from '@shared/services/pwa-update.service';
 import { EmojiEventsService } from '@shared/services/emoji-events.service';
+import { WidgetConfigService } from '@shared/modules/worky-widget/worky-news/service/widget-config.service';
 
 @Component({
     selector: 'worky-root',
@@ -47,7 +48,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private _commentService: CommentService,
     private _authService: AuthService,
     private _pwaUpdateService: PwaUpdateService,
-    private _emojiEventsService: EmojiEventsService
+    private _emojiEventsService: EmojiEventsService,
+    private _widgetConfigService: WidgetConfigService
   ) {
     this._notificationUsersService.setupInactivityListeners();
     if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();
@@ -69,6 +71,8 @@ export class AppComponent implements OnInit, OnDestroy {
       getTranslationsLanguage()
     );
     this.applyCustomConfig();
+
+    this._widgetConfigService.initializeData();
 
     //TODO: Wait a little before subscribing to events, this is to give time for components to start before subscribing
     setTimeout(() => {

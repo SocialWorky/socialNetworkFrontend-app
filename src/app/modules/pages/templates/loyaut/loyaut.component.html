@@ -6,6 +6,8 @@
     [isMessages]="isMessages">
   </worky-navbar>
 
+  <worky-widget-container [position]="WidgetPosition.TOP"></worky-widget-container>
+
   <div class="content-social-app" 
     [class.content-messages-app]="isMessages"
     [class.content-profile-app]="isProfile" *ngIf="token">

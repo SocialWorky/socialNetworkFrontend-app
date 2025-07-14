@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { WidgetPosition } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
 
 @Component({
     selector: 'worky-content-left-side',
@@ -7,6 +8,7 @@ import { Component } from '@angular/core';
     standalone: false
 })
 export class ContentLeftSideComponent{
+  WidgetPosition = WidgetPosition;
 
   constructor() { }
 }

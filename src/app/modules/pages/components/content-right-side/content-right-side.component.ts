@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { WidgetPosition } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
 
 @Component({
     selector: 'worky-content-right-side',
@@ -7,6 +8,7 @@ import { Component, OnInit } from '@angular/core';
     standalone: false
 })
 export class ContentRightSideComponent implements OnInit {
+  WidgetPosition = WidgetPosition;
 
   constructor() {}
 
