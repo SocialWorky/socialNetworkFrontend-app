@@ -1,67 +1,569 @@
-.custom-css-editor {
-  display: flex;
-  flex-direction: column;
-  width: 90%;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+// Color palette variables (same as other components)
+$primary-color: #3b82f6;
+$primary-dark: #1d4ed8;
+$success-color: #10b981;
+$warning-color: #f59e0b;
+$danger-color: #ef4444;
+$info-color: #06b6d4;
+$secondary-color: #6b7280;
+$dark-bg: #1f2937;
+$darker-bg: #111827;
+$card-bg: #374151;
+$border-color: #4b5563;
+$text-primary: #f9fafb;
+$text-secondary: #d1d5db;
+$text-muted: #9ca3af;
+
+.custom-css-dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, $darker-bg 0%, $dark-bg 100%);
+  padding: 2rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 }
 
-.editor-title {
-  font-size: 1.8rem;
-  margin-bottom: 15px;
-  color: #333;
-}
+// Header Section
+.dashboard-header {
+  background: $card-bg;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid $border-color;
 
-.editor-info {
-  margin-bottom: 20px;
-}
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
 
-.editor-description {
-  margin-bottom: 10px;
-}
-
-.tag-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.tag-list li {
-  margin-bottom: 5px;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 14px;
-}
-
-.editor-form {
-  display: block;
-
-  ngx-monaco-editor {
-    min-height: 350px;
-    margin-bottom: 20px;
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
   }
 
+  .header-title {
+    .title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: $text-primary;
+      margin: 0 0 0.5rem 0;
+      background: linear-gradient(135deg, $primary-color, $info-color);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: $text-secondary;
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      justify-content: stretch;
+    }
+  }
+
+  .preview-btn, .save-btn, .reset-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    i {
+      font-size: 1rem;
+    }
+
+    .btn-text {
+      @media (max-width: 480px) {
+        display: none;
+      }
+    }
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .preview-btn {
+    background: $info-color;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: darken($info-color, 10%);
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+    }
+  }
+
+  .save-btn {
+    background: linear-gradient(135deg, $success-color, darken($success-color, 10%));
+    color: white;
+
+    &:hover:not(:disabled) {
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+  }
+
+  .reset-btn {
+    background: $warning-color;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: darken($warning-color, 10%);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+  }
 }
 
-.editor-button {
-  margin-top: 15px;
-  padding: 10px 16px;
-  font-size: 14px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
+// Section Styles
+.editor-section, .help-section {
+  background: $card-bg;
+  border-radius: 12px;
+  border: 1px solid $border-color;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
 }
 
-.editor-button:hover {
-  background-color: #0056b3;
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, rgba($primary-color, 0.1), rgba($info-color, 0.1));
+  border-bottom: 1px solid $border-color;
+
+  .section-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, $primary-color, $info-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+  }
+
+  .section-info {
+    flex: 1;
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $text-primary;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .section-description {
+      color: $text-secondary;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+  }
+
+  .section-actions {
+    .format-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: $secondary-color;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background: darken($secondary-color, 10%);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
 }
 
-.editor-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.section-content {
+  padding: 2rem;
+}
+
+// Editor Container
+.editor-container {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid $border-color;
+  background: $dark-bg;
+
+  .monaco-editor {
+    min-height: 400px;
+    width: 100%;
+  }
+
+  // Override Monaco Editor styles
+  ::ng-deep {
+    .monaco-editor {
+      .monaco-editor-background {
+        background-color: $dark-bg !important;
+      }
+
+      .monaco-editor .margin {
+        background-color: $card-bg !important;
+      }
+
+      .monaco-editor .inputarea {
+        background-color: $dark-bg !important;
+        color: $text-primary !important;
+      }
+    }
+  }
+}
+
+// Help Section
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+
+  .help-card {
+    background: $dark-bg;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: $primary-color;
+      box-shadow: 0 4px 12px rgba($primary-color, 0.1);
+    }
+
+    .help-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, $primary-color, $info-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    h4 {
+      color: $text-primary;
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.5rem 0;
+    }
+
+    p {
+      color: $text-secondary;
+      font-size: 0.875rem;
+      margin: 0 0 1rem 0;
+      line-height: 1.5;
+    }
+
+    .code-example {
+      background: $card-bg;
+      border: 1px solid $border-color;
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+
+      code {
+        color: $success-color;
+        font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+        font-size: 0.875rem;
+        background: none;
+        padding: 0;
+      }
+    }
+  }
+}
+
+// Preview Modal
+.preview-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+
+  .preview-content {
+    background: $card-bg;
+    border-radius: 12px;
+    border: 1px solid $border-color;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid $border-color;
+      background: linear-gradient(135deg, rgba($primary-color, 0.1), rgba($info-color, 0.1));
+
+      h3 {
+        color: $text-primary;
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        color: $text-secondary;
+        font-size: 1.25rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: rgba($danger-color, 0.1);
+          color: $danger-color;
+        }
+      }
+    }
+
+    .preview-body {
+      padding: 2rem;
+
+      .preview-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba($info-color, 0.1);
+        border: 1px solid rgba($info-color, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: $info-color;
+        font-size: 0.875rem;
+
+        i {
+          font-size: 1rem;
+        }
+      }
+
+      .preview-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+
+        .apply-btn, .cancel-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 0.875rem;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .apply-btn {
+          background: $success-color;
+          color: white;
+
+          &:hover {
+            background: darken($success-color, 10%);
+            transform: translateY(-1px);
+          }
+        }
+
+        .cancel-btn {
+          background: $secondary-color;
+          color: white;
+
+          &:hover {
+            background: darken($secondary-color, 10%);
+            transform: translateY(-1px);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Loading State
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+
+  .loading-spinner {
+    text-align: center;
+    color: $text-secondary;
+
+    i {
+      font-size: 2rem;
+      color: $primary-color;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      margin: 0;
+      font-size: 1rem;
+    }
+  }
+}
+
+// Error State
+.error-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+
+  .error-content {
+    text-align: center;
+    color: $text-secondary;
+
+    .error-icon {
+      font-size: 3rem;
+      color: $danger-color;
+      margin-bottom: 1rem;
+    }
+
+    h3 {
+      color: $text-primary;
+      margin: 0 0 0.5rem 0;
+      font-size: 1.25rem;
+    }
+
+    p {
+      margin: 0 0 1.5rem 0;
+      font-size: 0.875rem;
+    }
+
+    .refresh-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: $primary-color;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: $primary-dark;
+        transform: translateY(-1px);
+      }
+
+      &.primary {
+        background: $primary-color;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1024px) {
+  .help-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .custom-css-dashboard {
+    padding: 1rem;
+  }
+
+  .dashboard-header {
+    padding: 1.5rem;
+
+    .header-title .title {
+      font-size: 1.5rem;
+    }
+  }
+
+  .section-header {
+    padding: 1rem 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+
+    .section-actions {
+      align-self: stretch;
+      text-align: center;
+    }
+  }
+
+  .section-content {
+    padding: 1.5rem;
+  }
+
+  .help-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-modal {
+    padding: 0.5rem;
+
+    .preview-content {
+      .preview-header {
+        padding: 1rem 1.5rem;
+      }
+
+      .preview-body {
+        padding: 1.5rem;
+
+        .preview-actions {
+          flex-direction: column;
+
+          .apply-btn, .cancel-btn {
+            width: 100%;
+            justify-content: center;
+          }
+        }
+      }
+    }
+  }
 }
