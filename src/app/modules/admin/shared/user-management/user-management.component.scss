@@ -1,20 +1,18 @@
-// Color palette variables
-$primary-color: #3b82f6;
-$primary-dark: #1d4ed8;
-$success-color: #10b981;
-$warning-color: #f59e0b;
-$danger-color: #ef4444;
-$info-color: #06b6d4;
-$secondary-color: #6b7280;
+// Variables
+$primary: #3b82f6;
+$success: #10b981;
+$warning: #f59e0b;
+$danger: #ef4444;
+$info: #06b6d4;
+$secondary: #6b7280;
 $dark-bg: #1f2937;
 $darker-bg: #111827;
 $card-bg: #374151;
-$border-color: #4b5563;
+$border: #4b5563;
 $text-primary: #f9fafb;
 $text-secondary: #d1d5db;
 $text-muted: #9ca3af;
 
-// Animation for rotating icons
 @keyframes rotate {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -39,14 +37,13 @@ $text-muted: #9ca3af;
   }
 }
 
-// Header Section
 .dashboard-header {
   background: $card-bg;
   border-radius: 12px;
   padding: 2rem;
   margin-bottom: 2rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid $border-color;
+  border: 1px solid $border;
 
   .header-content {
     display: flex;
@@ -67,7 +64,7 @@ $text-muted: #9ca3af;
       font-weight: 700;
       color: $text-primary;
       margin: 0 0 0.5rem 0;
-      background: linear-gradient(135deg, $primary-color, $info-color);
+      background: linear-gradient(135deg, $primary, $info);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -124,26 +121,25 @@ $text-muted: #9ca3af;
   }
 
   .refresh-btn {
-    background: $info-color;
+    background: $info;
     color: white;
 
     &:hover:not(:disabled) {
-      background: color-mix(in srgb, $info-color 90%, black);
+      background: color-mix(in srgb, $info 90%, black);
       box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
     }
   }
 
   .filters-btn {
-    background: $secondary-color;
+    background: $secondary;
     color: white;
 
     &:hover:not(:disabled) {
-      background: color-mix(in srgb, $secondary-color 90%, black);
+      background: color-mix(in srgb, $secondary 90%, black);
     }
   }
 }
 
-// Statistics Section
 .stats-section {
   margin-bottom: 2rem;
 
@@ -165,7 +161,7 @@ $text-muted: #9ca3af;
     background: $card-bg;
     border-radius: 12px;
     padding: 1.5rem;
-    border: 1px solid $border-color;
+    border: 1px solid $border;
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -209,28 +205,27 @@ $text-muted: #9ca3af;
     }
 
     &.total .stat-icon {
-      background: linear-gradient(135deg, $primary-color, $info-color);
+      background: linear-gradient(135deg, $primary, $info);
     }
 
     &.active .stat-icon {
-      background: linear-gradient(135deg, $success-color, #059669);
+      background: linear-gradient(135deg, $success, #059669);
     }
 
     &.inactive .stat-icon {
-      background: linear-gradient(135deg, $warning-color, #d97706);
+      background: linear-gradient(135deg, $warning, #d97706);
     }
 
     &.pending-verification .stat-icon {
-      background: linear-gradient(135deg, $info-color, #0891b2);
+      background: linear-gradient(135deg, $info, #0891b2);
     }
   }
 }
 
-// Filters Section
 .filters-section {
   background: $card-bg;
   border-radius: 12px;
-  border: 1px solid $border-color;
+  border: 1px solid $border;
   margin-bottom: 2rem;
   overflow: hidden;
 
@@ -260,7 +255,7 @@ $text-muted: #9ca3af;
       .filter-input, .filter-select {
         width: 100%;
         padding: 0.75rem;
-        border: 1px solid $border-color;
+        border: 1px solid $border;
         border-radius: 8px;
         background: $dark-bg;
         color: $text-primary;
@@ -269,8 +264,8 @@ $text-muted: #9ca3af;
 
         &:focus {
           outline: none;
-          border-color: $primary-color;
-          box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+          border-color: $primary;
+          box-shadow: 0 0 0 3px rgba($primary, 0.1);
         }
 
         &::placeholder {
@@ -310,37 +305,36 @@ $text-muted: #9ca3af;
       }
 
       .apply-btn {
-        background: $primary-color;
+        background: $primary;
         color: white;
 
         &:hover {
-          background: $primary-dark;
+          background: #1d4ed8;
         }
       }
 
       .clear-btn {
-        background: $secondary-color;
+        background: $secondary;
         color: white;
 
         &:hover {
-          background: color-mix(in srgb, $secondary-color 90%, black);
+          background: color-mix(in srgb, $secondary 90%, black);
         }
       }
     }
   }
 }
 
-// Users Section
 .users-section {
   background: $card-bg;
   border-radius: 12px;
-  border: 1px solid $border-color;
+  border: 1px solid $border;
   overflow: hidden;
 
   .section-header {
     padding: 1.5rem 2rem;
-    border-bottom: 1px solid $border-color;
-    background: linear-gradient(135deg, rgba($primary-color, 0.1), rgba($info-color, 0.1));
+    border-bottom: 1px solid $border;
+    background: linear-gradient(135deg, rgba($primary, 0.1), rgba($info, 0.1));
 
     .section-title {
       display: flex;
@@ -384,7 +378,7 @@ $text-muted: #9ca3af;
 
       i {
         font-size: 2rem;
-        color: $primary-color;
+        color: $primary;
         margin-bottom: 1rem;
       }
 
@@ -402,7 +396,7 @@ $text-muted: #9ca3af;
       gap: 1rem;
       padding: 1rem 2rem;
       background: $dark-bg;
-      border-bottom: 1px solid $border-color;
+      border-bottom: 1px solid $border;
 
       @media (max-width: 1024px) {
         grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
@@ -431,7 +425,7 @@ $text-muted: #9ca3af;
         grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr 1fr;
         gap: 1rem;
         padding: 1rem 2rem;
-        border-bottom: 1px solid $border-color;
+        border-bottom: 1px solid $border;
         transition: all 0.2s ease;
 
         @media (max-width: 1024px) {
@@ -448,7 +442,7 @@ $text-muted: #9ca3af;
         }
 
         &:hover {
-          background: rgba($primary-color, 0.05);
+          background: rgba($primary, 0.05);
         }
 
         .table-cell {
@@ -485,7 +479,7 @@ $text-muted: #9ca3af;
             }
 
             .verified-icon {
-              color: $success-color;
+              color: $success;
               font-size: 1rem;
             }
           }
@@ -507,45 +501,45 @@ $text-muted: #9ca3af;
 
           .role-badge {
             &.role-danger {
-              background: rgba($danger-color, 0.1);
-              color: $danger-color;
+              background: rgba($danger, 0.1);
+              color: $danger;
             }
 
             &.role-warning {
-              background: rgba($warning-color, 0.1);
-              color: $warning-color;
+              background: rgba($warning, 0.1);
+              color: $warning;
             }
 
             &.role-success {
-              background: rgba($success-color, 0.1);
-              color: $success-color;
+              background: rgba($success, 0.1);
+              color: $success;
             }
 
             &.role-info {
-              background: rgba($info-color, 0.1);
-              color: $info-color;
+              background: rgba($info, 0.1);
+              color: $info;
             }
           }
 
           .status-badge {
             &.status-success {
-              background: rgba($success-color, 0.1);
-              color: $success-color;
+              background: rgba($success, 0.1);
+              color: $success;
             }
 
             &.status-warning {
-              background: rgba($warning-color, 0.1);
-              color: $warning-color;
+              background: rgba($warning, 0.1);
+              color: $warning;
             }
 
             &.status-danger {
-              background: rgba($danger-color, 0.1);
-              color: $danger-color;
+              background: rgba($danger, 0.1);
+              color: $danger;
             }
 
             &.status-info {
-              background: rgba($info-color, 0.1);
-              color: $info-color;
+              background: rgba($info, 0.1);
+              color: $info;
             }
           }
 
@@ -588,11 +582,11 @@ $text-muted: #9ca3af;
                 }
 
                 &.view-btn {
-                  background: rgba($info-color, 0.1);
-                  color: $info-color;
+                  background: rgba($info, 0.1);
+                  color: $info;
 
                   &:hover:not(:disabled) {
-                    background: $info-color;
+                    background: $info;
                     color: white;
                   }
 
@@ -603,11 +597,11 @@ $text-muted: #9ca3af;
                 }
 
                 &.edit-btn {
-                  background: rgba($warning-color, 0.1);
-                  color: $warning-color;
+                  background: rgba($warning, 0.1);
+                  color: $warning;
 
                   &:hover:not(:disabled) {
-                    background: $warning-color;
+                    background: $warning;
                     color: white;
                   }
 
@@ -618,11 +612,11 @@ $text-muted: #9ca3af;
                 }
 
                 &.activate-btn {
-                  background: rgba($success-color, 0.1);
-                  color: $success-color;
+                  background: rgba($success, 0.1);
+                  color: $success;
 
                   &:hover:not(:disabled) {
-                    background: $success-color;
+                    background: $success;
                     color: white;
                   }
 
@@ -633,11 +627,11 @@ $text-muted: #9ca3af;
                 }
 
                 &.deactivate-btn {
-                  background: rgba($warning-color, 0.1);
-                  color: $warning-color;
+                  background: rgba($warning, 0.1);
+                  color: $warning;
 
                   &:hover:not(:disabled) {
-                    background: $warning-color;
+                    background: $warning;
                     color: white;
                   }
 
@@ -648,11 +642,11 @@ $text-muted: #9ca3af;
                 }
 
                 &.verify-btn {
-                  background: rgba($info-color, 0.1);
-                  color: $info-color;
+                  background: rgba($info, 0.1);
+                  color: $info;
 
                   &:hover:not(:disabled) {
-                    background: $info-color;
+                    background: $info;
                     color: white;
                   }
 
@@ -663,11 +657,11 @@ $text-muted: #9ca3af;
                 }
 
                 &.delete-btn {
-                  background: rgba($danger-color, 0.1);
-                  color: $danger-color;
+                  background: rgba($danger, 0.1);
+                  color: $danger;
 
                   &:hover:not(:disabled) {
-                    background: $danger-color;
+                    background: $danger;
                     color: white;
                   }
 
@@ -713,7 +707,7 @@ $text-muted: #9ca3af;
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  border-top: 1px solid $border-color;
+  border-top: 1px solid $border;
   background: $dark-bg;
 
   @media (max-width: 768px) {
@@ -735,7 +729,7 @@ $text-muted: #9ca3af;
       width: 36px;
       height: 36px;
       border-radius: 6px;
-      border: 1px solid $border-color;
+      border: 1px solid $border;
       background: $card-bg;
       color: $text-primary;
       cursor: pointer;
@@ -749,9 +743,9 @@ $text-muted: #9ca3af;
       }
 
       &:hover:not(:disabled) {
-        background: $primary-color;
+        background: $primary;
         color: white;
-        border-color: $primary-color;
+        border-color: $primary;
       }
 
       &:disabled {
@@ -768,7 +762,7 @@ $text-muted: #9ca3af;
         min-width: 36px;
         height: 36px;
         border-radius: 6px;
-        border: 1px solid $border-color;
+        border: 1px solid $border;
         background: $card-bg;
         color: $text-primary;
         cursor: pointer;
@@ -780,22 +774,21 @@ $text-muted: #9ca3af;
         transition: all 0.2s ease;
 
         &:hover {
-          background: $primary-color;
+          background: $primary;
           color: white;
-          border-color: $primary-color;
+          border-color: $primary;
         }
 
         &.active {
-          background: $primary-color;
+          background: $primary;
           color: white;
-          border-color: $primary-color;
+          border-color: $primary;
         }
       }
     }
   }
 }
 
-// Modal Styles
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -813,7 +806,7 @@ $text-muted: #9ca3af;
 .modal-content {
   background: $card-bg;
   border-radius: 12px;
-  border: 1px solid $border-color;
+  border: 1px solid $border;
   max-width: 600px;
   width: 100%;
   max-height: 80vh;
@@ -826,8 +819,8 @@ $text-muted: #9ca3af;
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  border-bottom: 1px solid $border-color;
-  background: linear-gradient(135deg, rgba($primary-color, 0.1), rgba($info-color, 0.1));
+  border-bottom: 1px solid $border;
+  background: linear-gradient(135deg, rgba($primary, 0.1), rgba($info, 0.1));
 
   h3 {
     color: $text-primary;
@@ -851,8 +844,8 @@ $text-muted: #9ca3af;
     }
 
     &:hover {
-      background: rgba($danger-color, 0.1);
-      color: $danger-color;
+      background: rgba($danger, 0.1);
+      color: $danger;
     }
   }
 }
@@ -867,7 +860,7 @@ $text-muted: #9ca3af;
       gap: 1.5rem;
       margin-bottom: 2rem;
       padding-bottom: 1.5rem;
-      border-bottom: 1px solid $border-color;
+      border-bottom: 1px solid $border;
 
       .profile-info {
         flex: 1;
@@ -898,13 +891,13 @@ $text-muted: #9ca3af;
           }
 
           .role-badge {
-            background: rgba($primary-color, 0.1);
-            color: $primary-color;
+            background: rgba($primary, 0.1);
+            color: $primary;
           }
 
           .status-badge {
-            background: rgba($success-color, 0.1);
-            color: $success-color;
+            background: rgba($success, 0.1);
+            color: $success;
           }
         }
       }
@@ -932,7 +925,7 @@ $text-muted: #9ca3af;
         }
 
         .verified-icon {
-          color: $success-color;
+          color: $success;
           font-size: 1rem;
         }
 
@@ -942,11 +935,11 @@ $text-muted: #9ca3af;
         }
 
         .completed {
-          color: $success-color;
+          color: $success;
         }
 
         .incomplete {
-          color: $warning-color;
+          color: $warning;
         }
       }
     }
@@ -977,7 +970,7 @@ $text-muted: #9ca3af;
     input, select {
       width: 100%;
       padding: 0.75rem;
-      border: 1px solid $border-color;
+      border: 1px solid $border;
       border-radius: 8px;
       background: $dark-bg;
       color: $text-primary;
@@ -986,12 +979,12 @@ $text-muted: #9ca3af;
 
       &:focus {
         outline: none;
-        border-color: $primary-color;
-        box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+        border-color: $primary;
+        box-shadow: 0 0 0 3px rgba($primary, 0.1);
       }
 
       &:read-only {
-        background: rgba($secondary-color, 0.1);
+        background: rgba($secondary, 0.1);
         color: $text-muted;
         cursor: not-allowed;
       }
@@ -1012,7 +1005,7 @@ $text-muted: #9ca3af;
 
     .warning-icon {
       font-size: 3rem;
-      color: $warning-color;
+      color: $warning;
       margin-bottom: 1rem;
     }
 
@@ -1067,34 +1060,33 @@ $text-muted: #9ca3af;
   }
 
   .cancel-btn {
-    background: $secondary-color;
+    background: $secondary;
     color: white;
 
     &:hover {
-      background: color-mix(in srgb, $secondary-color 90%, black);
+      background: color-mix(in srgb, $secondary 90%, black);
     }
   }
 
   .save-btn {
-    background: $success-color;
+    background: $success;
     color: white;
 
     &:hover {
-      background: color-mix(in srgb, $success-color 90%, black);
+      background: color-mix(in srgb, $success 90%, black);
     }
   }
 
   .delete-btn {
-    background: $danger-color;
+    background: $danger;
     color: white;
 
     &:hover {
-      background: color-mix(in srgb, $danger-color 90%, black);
+      background: color-mix(in srgb, $danger 90%, black);
     }
   }
 }
 
-// Responsive Design
 @media (max-width: 1024px) {
   .users-table {
     .table-header, .table-row {
