@@ -1,0 +1,526 @@
+// Admin Global Styles
+// Variables compartidas para el módulo admin
+$admin-primary: #3b82f6;
+$admin-success: #10b981;
+$admin-warning: #f59e0b;
+$admin-danger: #ef4444;
+$admin-info: #06b6d4;
+$admin-secondary: #6b7280;
+$admin-dark-bg: #1f2937;
+$admin-darker-bg: #111827;
+$admin-card-bg: #374151;
+$admin-border: #4b5563;
+$admin-text-primary: #f9fafb;
+$admin-text-secondary: #d1d5db;
+$admin-text-muted: #9ca3af;
+
+// Animaciones globales
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.rotating {
+  animation: rotate 1s linear infinite;
+}
+
+.loading-spinner {
+  color: $admin-text-secondary;
+}
+
+// Estilos base para dashboards admin
+.admin-dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, $admin-darker-bg 0%, $admin-dark-bg 100%);
+  padding: 2rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+// Cards comunes
+.admin-card {
+  background: $admin-card-bg;
+  border-radius: 12px;
+  border: 1px solid $admin-border;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+// Headers de sección
+.admin-section-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid $admin-border;
+  background: linear-gradient(135deg, rgba($admin-primary, 0.1), rgba($admin-info, 0.1));
+
+  h2 {
+    color: $admin-text-primary;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+// Botones comunes
+.admin-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  i {
+    font-size: 1.125rem;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.admin-btn-primary {
+  @extend .admin-btn;
+  background: $admin-primary;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+  }
+}
+
+.admin-btn-success {
+  @extend .admin-btn;
+  background: $admin-success;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, $admin-success 90%, black);
+  }
+}
+
+.admin-btn-warning {
+  @extend .admin-btn;
+  background: $admin-warning;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, $admin-warning 90%, black);
+  }
+}
+
+.admin-btn-danger {
+  @extend .admin-btn;
+  background: $admin-danger;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, $admin-danger 90%, black);
+  }
+}
+
+.admin-btn-secondary {
+  @extend .admin-btn;
+  background: $admin-secondary;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, $admin-secondary 90%, black);
+  }
+}
+
+.admin-btn-info {
+  @extend .admin-btn;
+  background: $admin-info;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, $admin-info 90%, black);
+  }
+}
+
+// Badges comunes
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  i {
+    font-size: 0.875rem;
+  }
+}
+
+.admin-badge-success {
+  @extend .admin-badge;
+  background: rgba($admin-success, 0.1);
+  color: $admin-success;
+}
+
+.admin-badge-warning {
+  @extend .admin-badge;
+  background: rgba($admin-warning, 0.1);
+  color: $admin-warning;
+}
+
+.admin-badge-danger {
+  @extend .admin-badge;
+  background: rgba($admin-danger, 0.1);
+  color: $admin-danger;
+}
+
+.admin-badge-info {
+  @extend .admin-badge;
+  background: rgba($admin-info, 0.1);
+  color: $admin-info;
+}
+
+.admin-badge-primary {
+  @extend .admin-badge;
+  background: rgba($admin-primary, 0.1);
+  color: $admin-primary;
+}
+
+// Formularios comunes
+.admin-form-group {
+  margin-bottom: 1.5rem;
+
+  label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $admin-text-secondary;
+    margin-bottom: 0.5rem;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid $admin-border;
+    border-radius: 8px;
+    background: $admin-dark-bg;
+    color: $admin-text-primary;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $admin-primary;
+      box-shadow: 0 0 0 3px rgba($admin-primary, 0.1);
+    }
+
+    &:read-only {
+      background: rgba($admin-secondary, 0.1);
+      color: $admin-text-muted;
+      cursor: not-allowed;
+    }
+
+    &::placeholder {
+      color: $admin-text-muted;
+    }
+  }
+}
+
+// Modales comunes
+.admin-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.admin-modal-content {
+  background: $admin-card-bg;
+  border-radius: 12px;
+  border: 1px solid $admin-border;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.admin-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid $admin-border;
+  background: linear-gradient(135deg, rgba($admin-primary, 0.1), rgba($admin-info, 0.1));
+
+  h3 {
+    color: $admin-text-primary;
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    color: $admin-text-secondary;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+
+    i {
+      font-size: 1.25rem;
+    }
+
+    &:hover {
+      background: rgba($admin-danger, 0.1);
+      color: $admin-danger;
+    }
+  }
+}
+
+.admin-modal-body {
+  padding: 2rem;
+}
+
+.admin-modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+// Tablas comunes
+.admin-table {
+  .table-header {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem 2rem;
+    background: $admin-dark-bg;
+    border-bottom: 1px solid $admin-border;
+
+    .header-cell {
+      color: $admin-text-secondary;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  .table-row {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid $admin-border;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba($admin-primary, 0.05);
+    }
+
+    .table-cell {
+      display: flex;
+      align-items: center;
+      color: $admin-text-primary;
+      font-size: 0.875rem;
+    }
+  }
+}
+
+// Paginación común
+.admin-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-top: 1px solid $admin-border;
+  background: $admin-dark-bg;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .pagination-info {
+    color: $admin-text-secondary;
+    font-size: 0.875rem;
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .pagination-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: 1px solid $admin-border;
+      background: $admin-card-bg;
+      color: $admin-text-primary;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+
+      i {
+        font-size: 1.125rem;
+      }
+
+      &:hover:not(:disabled) {
+        background: $admin-primary;
+        color: white;
+        border-color: $admin-primary;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    .page-numbers {
+      display: flex;
+      gap: 0.25rem;
+
+      .page-btn {
+        min-width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        border: 1px solid $admin-border;
+        background: $admin-card-bg;
+        color: $admin-text-primary;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: $admin-primary;
+          color: white;
+          border-color: $admin-primary;
+        }
+
+        &.active {
+          background: $admin-primary;
+          color: white;
+          border-color: $admin-primary;
+        }
+      }
+    }
+  }
+}
+
+// Estados vacíos
+.admin-empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: $admin-text-muted;
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  h3 {
+    color: $admin-text-secondary;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+}
+
+// Loading states
+.admin-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+
+  .loading-spinner {
+    text-align: center;
+    color: $admin-text-secondary;
+
+    i {
+      font-size: 2rem;
+      color: $admin-primary;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      margin: 0;
+      font-size: 1rem;
+    }
+  }
+}
+
+// Grid responsivo común
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Responsive helpers
+@media (max-width: 768px) {
+  .admin-dashboard {
+    padding: 1rem;
+  }
+
+  .admin-modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .admin-modal-content {
+    .admin-modal-header {
+      padding: 1rem 1.5rem;
+    }
+
+    .admin-modal-body {
+      padding: 1.5rem;
+    }
+  }
+
+  .admin-modal-actions {
+    flex-direction: column;
+  }
+} 
