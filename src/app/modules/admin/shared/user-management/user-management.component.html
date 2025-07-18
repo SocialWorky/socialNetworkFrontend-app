@@ -1,0 +1,482 @@
+<div class="user-management-dashboard">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1 class="title">Gestión de Usuarios</h1>
+        <p class="subtitle">Administra y gestiona todos los usuarios de la plataforma</p>
+      </div>
+      <div class="header-actions">
+        <button class="refresh-btn" (click)="refreshUsers()" [disabled]="loading">
+          <i class="material-icons" [class.rotating]="loading">refresh</i>
+          <span class="btn-text">Actualizar</span>
+        </button>
+        <button class="filters-btn" (click)="showFilters = !showFilters">
+          <i class="material-icons">filter_list</i>
+          <span class="btn-text">Filtros</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card total">
+        <div class="stat-icon">
+          <i class="material-icons">people</i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ userStats.total }}</h3>
+          <p class="stat-label">Total Usuarios</p>
+        </div>
+      </div>
+      
+      <div class="stat-card active">
+        <div class="stat-icon">
+          <i class="material-icons">check_circle</i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ userStats.active }}</h3>
+          <p class="stat-label">Activos</p>
+        </div>
+      </div>
+      
+      <div class="stat-card inactive">
+        <div class="stat-icon">
+          <i class="material-icons">pause_circle</i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ userStats.inactive }}</h3>
+          <p class="stat-label">Inactivos</p>
+        </div>
+      </div>
+      
+      <div class="stat-card pending-verification">
+        <div class="stat-icon">
+          <i class="material-icons">email</i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ userStats.pendingVerification }}</h3>
+          <p class="stat-label">Pendientes de Verificación</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section" *ngIf="showFilters">
+    <div class="filters-container">
+      <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
+        <div class="filters-grid">
+          <div class="filter-group">
+            <label class="filter-label">Buscar</label>
+            <input 
+              type="text" 
+              formControlName="search" 
+              placeholder="Buscar por nombre, email o username"
+              class="filter-input">
+          </div>
+          
+          <div class="filter-group">
+            <label class="filter-label">Rol</label>
+            <select formControlName="role" class="filter-select">
+              <option value="">Todos los roles</option>
+              <option [value]="UserRole.ADMIN">Administrador</option>
+              <option [value]="UserRole.MODERATOR">Moderador</option>
+              <option [value]="UserRole.USER">Usuario</option>
+              <option [value]="UserRole.GUEST">Invitado</option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label class="filter-label">Estado</label>
+            <select formControlName="status" class="filter-select">
+              <option value="">Todos los estados</option>
+              <option [value]="UserStatus.ACTIVE">Activo</option>
+              <option [value]="UserStatus.INACTIVE">Inactivo</option>
+              <option [value]="UserStatus.PENDING_VERIFICATION">Pendiente de Verificación</option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label class="filter-label">Fecha desde</label>
+            <input 
+              type="date" 
+              formControlName="dateFrom" 
+              class="filter-input">
+          </div>
+          
+          <div class="filter-group">
+            <label class="filter-label">Fecha hasta</label>
+            <input 
+              type="date" 
+              formControlName="dateTo" 
+              class="filter-input">
+          </div>
+        </div>
+        
+        <div class="filters-actions">
+          <button type="submit" class="apply-btn">
+            <i class="material-icons">search</i>
+            <span>Aplicar Filtros</span>
+          </button>
+          <button type="button" (click)="clearFilters()" class="clear-btn">
+            <i class="material-icons">clear</i>
+            <span>Limpiar</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Users Table Section -->
+  <div class="users-section">
+    <div class="section-header">
+      <div class="section-title">
+        <h2>Lista de Usuarios</h2>
+        <span class="user-count">{{ totalUsers }} usuarios encontrados</span>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <!-- Loading State -->
+      <div class="loading-container" *ngIf="loading">
+        <div class="loading-spinner">
+          <i class="material-icons rotating">refresh</i>
+          <p>Cargando usuarios...</p>
+        </div>
+      </div>
+
+      <!-- Users Table -->
+      <div class="users-table" *ngIf="!loading">
+        <div class="table-header">
+          <div class="header-cell">Usuario</div>
+          <div class="header-cell">Email</div>
+          <div class="header-cell">Rol</div>
+          <div class="header-cell">Estado</div>
+          <div class="header-cell">Fecha Registro</div>
+          <div class="header-cell">Último Login</div>
+          <div class="header-cell">Acciones</div>
+        </div>
+        
+        <div class="table-body">
+          <div class="table-row" *ngFor="let user of users; trackBy: trackByUserId">
+            <!-- User Info -->
+            <div class="table-cell user-info">
+              <div class="user-avatar">
+                <worky-avatar [size]="40" [img]="user.avatar" [name]="user.name + ' ' + user.lastName"></worky-avatar>
+              </div>
+              <div class="user-details">
+                <div class="user-name">{{ user.name }} {{ user.lastName }}</div>
+                <div class="user-username">usuario: {{ user.username }}</div>
+              </div>
+            </div>
+            
+            <!-- Email -->
+            <div class="table-cell">
+              <div class="email-info">
+                <span class="email">{{ user.email }}</span>
+                <i class="material-icons verified-icon" *ngIf="user.isVerified" title="Email verificado">
+                  verified
+                </i>
+              </div>
+            </div>
+            
+            <!-- Role -->
+            <div class="table-cell">
+              <span class="role-badge" [class]="'role-' + getRoleColor(user.role)">
+                <i class="material-icons">{{ getRoleIcon(user.role) }}</i>
+                {{ user.role | titlecase }}
+              </span>
+            </div>
+            
+            <!-- Status -->
+            <div class="table-cell">
+              <span class="status-badge" [class]="'status-' + getStatusColor(user.isActive ? 'ACTIVE' : 'INACTIVE')">
+                <i class="material-icons">{{ getStatusIcon(user.isActive ? 'ACTIVE' : 'INACTIVE') }}</i>
+                {{ user.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+            
+            <!-- Created Date -->
+            <div class="table-cell">
+              <span class="date-info">{{ user.createdAt | date:'dd/MM/yyyy' }}</span>
+            </div>
+            
+            <!-- Last Login -->
+            <div class="table-cell">
+              <span class="no-login">No disponible</span>
+            </div>
+            
+            <!-- Actions -->
+            <div class="table-cell actions">
+              <div class="action-buttons">
+                <button class="action-btn view-btn" (click)="viewUserDetails(user)" title="Ver detalles">
+                  <i class="material-icons">visibility</i>
+                </button>
+                
+                <button class="action-btn edit-btn" (click)="editUser(user)" title="Editar usuario">
+                  <i class="material-icons">edit</i>
+                </button>
+                
+                <button 
+                  class="action-btn status-btn" 
+                  [class]="user.isActive ? 'deactivate-btn' : 'activate-btn'"
+                  (click)="toggleUserStatus(user)" 
+                  [disabled]="isTogglingStatus(user._id)"
+                  [title]="user.isActive ? 'Desactivar' : 'Activar'">
+                  <i class="material-icons" *ngIf="!isTogglingStatus(user._id)">
+                    {{ user.isActive ? 'pause' : 'play_arrow' }}
+                  </i>
+                  <i class="material-icons loading-spinner" *ngIf="isTogglingStatus(user._id)">hourglass_empty</i>
+                </button>
+                
+                <button 
+                  class="action-btn verify-btn" 
+                  *ngIf="!user.isVerified"
+                  (click)="sendVerificationEmail(user)" 
+                  [disabled]="isSendingVerification(user._id)"
+                  title="Reenviar email de verificación">
+                  <i class="material-icons" *ngIf="!isSendingVerification(user._id)">email</i>
+                  <i class="material-icons loading-spinner" *ngIf="isSendingVerification(user._id)">hourglass_empty</i>
+                </button>
+                
+                <button class="action-btn delete-btn" (click)="deleteUser(user)" title="Eliminar usuario">
+                  <i class="material-icons">delete</i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="users.length === 0 && !loading">
+          <i class="material-icons empty-icon">people_outline</i>
+          <h3>No se encontraron usuarios</h3>
+          <p>No hay usuarios que coincidan con los filtros aplicados</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="totalPages > 1">
+      <div class="pagination-info">
+        <span>Página {{ currentPage }} de {{ totalPages }}</span>
+      </div>
+      <div class="pagination-controls">
+        <button 
+          class="pagination-btn" 
+          [disabled]="currentPage === 1"
+          (click)="onPageChange(currentPage - 1)">
+          <i class="material-icons">chevron_left</i>
+        </button>
+        
+        <div class="page-numbers">
+          <button 
+            class="page-btn" 
+            [class.active]="page === currentPage"
+            *ngFor="let page of [].constructor(totalPages); let i = index"
+            (click)="onPageChange(i + 1)">
+            {{ i + 1 }}
+          </button>
+        </div>
+        
+        <button 
+          class="pagination-btn" 
+          [disabled]="currentPage === totalPages"
+          (click)="onPageChange(currentPage + 1)">
+          <i class="material-icons">chevron_right</i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Details Modal -->
+<div class="modal-overlay" *ngIf="showUserDetails" (click)="closeUserDetails()">
+  <div class="modal-content user-details-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Detalles del Usuario</h3>
+      <button class="close-btn" (click)="closeUserDetails()">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="selectedUser">
+      <div class="user-profile">
+        <div class="profile-header">
+          <worky-avatar [size]="80" [img]="selectedUser.avatar" [name]="selectedUser.name + ' ' + selectedUser.lastName"></worky-avatar>
+          <div class="profile-info">
+            <h4>{{ selectedUser.name }} {{ selectedUser.lastName }}</h4>
+            <p class="username">usuario: {{ selectedUser.username }}</p>
+            <div class="profile-badges">
+              <span class="role-badge" [class]="'role-' + getRoleColor(selectedUser.role)">
+                {{ selectedUser.role | titlecase }}
+              </span>
+              <span class="status-badge" [class]="'status-' + getStatusColor(selectedUser.isActive ? 'ACTIVE' : 'INACTIVE')">
+                {{ selectedUser.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="profile-details">
+          <div class="detail-item">
+            <label>Email:</label>
+            <span>{{ selectedUser.email }}</span>
+            <i class="material-icons verified-icon" *ngIf="selectedUser.isVerified" title="Email verificado">
+              verified
+            </i>
+          </div>
+          
+          <div class="detail-item">
+            <label>Fecha de registro:</label>
+            <span>{{ selectedUser.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <label>Último login:</label>
+            <span class="no-login">No disponible</span>
+          </div>
+          
+          <div class="detail-item">
+            <label>Perfil completado:</label>
+            <span class="completed">Sí</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
+  <div class="modal-content edit-user-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Editar Usuario</h3>
+      <button class="close-btn" (click)="closeEditModal()">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="selectedUser">
+      <form #editForm="ngForm" (ngSubmit)="updateUser()">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre de usuario</label>
+            <input type="text" name="username" [(ngModel)]="selectedUser.username" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" [value]="selectedUser.email" readonly>
+            <small class="form-help">El email no se puede editar</small>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" name="name" [(ngModel)]="selectedUser.name" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Apellido</label>
+            <input type="text" name="lastName" [(ngModel)]="selectedUser.lastName" required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Rol</label>
+            <select name="role" [(ngModel)]="selectedUser.role" required>
+              <option value="admin">Administrador</option>
+              <option value="editor">Editor</option>
+              <option value="user">Usuario</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Estado</label>
+            <select name="isActive" [(ngModel)]="selectedUser.isActive" required>
+              <option [ngValue]="true">Activo</option>
+              <option [ngValue]="false">Inactivo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Verificación de email</label>
+            <select name="isVerified" [(ngModel)]="selectedUser.isVerified" required>
+              <option [ngValue]="true">Verificado</option>
+              <option [ngValue]="false">No verificado</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Modo oscuro</label>
+            <select name="isDarkMode" [(ngModel)]="selectedUser.isDarkMode" required>
+              <option [ngValue]="true">Activado</option>
+              <option [ngValue]="false">Desactivado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Avatar URL</label>
+          <input type="url" name="avatar" [(ngModel)]="selectedUser.avatar" placeholder="https://ejemplo.com/avatar.jpg">
+          <small class="form-help">URL de la imagen de perfil</small>
+        </div>
+
+        <div class="form-group">
+          <label>Nueva contraseña (opcional)</label>
+          <input type="password" name="password" [(ngModel)]="newPassword" placeholder="Dejar vacío para no cambiar">
+          <small class="form-help">Solo llenar si deseas cambiar la contraseña</small>
+        </div>
+        
+        <div class="modal-actions">
+          <button type="button" class="cancel-btn" (click)="closeEditModal()">
+            <i class="material-icons">close</i>
+            <span>Cancelar</span>
+          </button>
+          <button type="submit" class="save-btn" [disabled]="isUpdatingUser()">
+            <i class="material-icons" *ngIf="!isUpdatingUser()">save</i>
+            <i class="material-icons loading-spinner" *ngIf="isUpdatingUser()">hourglass_empty</i>
+            <span>{{ isUpdatingUser() ? 'Guardando...' : 'Guardar Cambios' }}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+  <div class="modal-content delete-user-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Confirmar Eliminación</h3>
+      <button class="close-btn" (click)="closeDeleteModal()">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="selectedUser">
+      <div class="delete-warning">
+        <i class="material-icons warning-icon">warning</i>
+        <h4>¿Estás seguro de que quieres eliminar este usuario?</h4>
+        <p>Esta acción no se puede deshacer. El usuario <strong>{{ selectedUser.name }} {{ selectedUser.lastName }}</strong> será eliminado permanentemente.</p>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" (click)="closeDeleteModal()">
+          <i class="material-icons">close</i>
+          <span>Cancelar</span>
+        </button>
+        <button type="button" class="delete-btn" (click)="confirmDelete()" [disabled]="isDeletingUser()">
+          <i class="material-icons" *ngIf="!isDeletingUser()">delete</i>
+          <i class="material-icons loading-spinner" *ngIf="isDeletingUser()">hourglass_empty</i>
+          <span>{{ isDeletingUser() ? 'Eliminando...' : 'Eliminar Usuario' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

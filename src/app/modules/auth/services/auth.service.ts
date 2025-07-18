@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { jwtDecode } from 'jwt-decode';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 
 import { environment } from '@env/environment';
 import { Token } from '../../shared/interfaces/token.interface';
@@ -126,5 +127,25 @@ export class AuthService {
     localStorage.removeItem('lastLogin');
     sessionStorage.clear();
     this.router.navigate(['/auth']);
+  }
+
+  validateEmail(token: string): Observable<any> {
+    // Decode the JWT token to get user information
+    try {
+      const decodedToken: any = jwtDecode(token);
+      const userId = decodedToken.id;
+      
+      // Use the user update endpoint to mark email as verified
+      const url = `${environment.API_URL}/user/edit/${userId}`;
+      const updateData = {
+        isVerified: true
+      };
+      
+      return this.http.put(url, updateData);
+    } catch (error) {
+      return new Observable(observer => {
+        observer.error(new Error('Invalid token format'));
+      });
+    }
   }
 }

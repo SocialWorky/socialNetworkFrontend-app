@@ -1,0 +1,46 @@
+<div class="validate-email-container">
+  <div class="validate-card">
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="loading">
+      <div class="loading-spinner">
+        <i class="material-icons rotating">hourglass_empty</i>
+      </div>
+      <h2>Verificando tu email...</h2>
+      <p>Por favor espera mientras verificamos tu cuenta.</p>
+    </div>
+
+    <!-- Success State -->
+    <div class="success-state" *ngIf="validated && !loading">
+      <div class="success-icon">
+        <i class="material-icons">check_circle</i>
+      </div>
+      <h2>¡Email verificado!</h2>
+      <p>Tu cuenta ha sido verificada correctamente. Ya puedes iniciar sesión y disfrutar de todas las funcionalidades.</p>
+      <div class="actions">
+        <button class="btn-primary" (click)="goToLogin()" type="button">
+          <i class="material-icons">login</i>
+          <span>Ir al login</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" *ngIf="error && !loading">
+      <div class="error-icon">
+        <i class="material-icons">error</i>
+      </div>
+      <h2>Error en la verificación</h2>
+      <p>No se pudo verificar tu email. El enlace puede haber expirado o ser inválido.</p>
+      <div class="actions">
+        <button class="btn-secondary" (click)="goToRegister()">
+          <i class="material-icons">person_add</i>
+          <span>Registrarse nuevamente</span>
+        </button>
+        <button class="btn-primary" (click)="goToLogin()" type="button">
+          <i class="material-icons">login</i>
+          <span>Ir al login</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

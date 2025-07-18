@@ -10,6 +10,7 @@ import { InvitationsCodeComponent } from './shared/invitations-code/invitations-
 import { LogComponent } from './shared/log/log.component';
 import { WidgetManagementComponent } from './shared/widget-management/widget-management.component';
 import { WebhooksComponent } from './shared/webhooks/webhooks.component';
+import { UserManagementComponent } from './shared/user-management/user-management.component';
 
 export const routes: Routes = [
   {
@@ -32,6 +33,7 @@ export const routes: Routes = [
           { title: 'Webhooks', path: 'webhooks', component: WebhooksComponent },
         ],
       },
+      { title: 'Gestión de Usuarios', path: 'user-management', component: UserManagementComponent },
       { title: 'Logs', path: 'logs', component: LogComponent },
     ],
   },

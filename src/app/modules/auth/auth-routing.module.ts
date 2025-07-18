@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { LayoutPageComponent } from './templates/layout-page/layout-page.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegisterComponent } from './pages/register/register.component';
+import { ValidateEmailComponent } from './pages/validate-email/validate-email.component';
 
 const routes: Routes = [
   {
@@ -11,10 +12,13 @@ const routes: Routes = [
     children: [
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegisterComponent },
-      { path: 'validate/:token', component: LoginComponent },
       { path: 'reset-password/:tokenPassword', component: LoginComponent },
       { path: '', redirectTo: 'login', pathMatch: 'full' },
     ],
+  },
+  {
+    path: 'validate/:token',
+    component: ValidateEmailComponent,
   },
 ];
 

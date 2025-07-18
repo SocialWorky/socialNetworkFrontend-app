@@ -49,7 +49,7 @@ export class SideMenuComponent implements OnInit {
     const titleLower = title.toLowerCase();
     
     if (titleLower.includes('home') || titleLower.includes('dashboard')) return 'dashboard';
-    if (titleLower.includes('user')) return 'people';
+    if (titleLower.includes('user') || titleLower.includes('gestión de usuarios')) return 'people';
     if (titleLower.includes('log')) return 'analytics';
     if (titleLower.includes('stat')) return 'bar_chart';
     if (titleLower.includes('config') || titleLower.includes('setting')) return 'settings';

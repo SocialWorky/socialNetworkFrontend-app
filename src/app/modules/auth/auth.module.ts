@@ -8,6 +8,7 @@ import { LayoutPageComponent } from './templates/layout-page/layout-page.compone
 import { LoginComponent } from './pages/login/login.component';
 import { ResetPasswordModalComponent } from './pages/login/reset-password-modal/reset-password-modal.component';
 import { RegisterComponent } from './pages/register/register.component';
+import { ValidateEmailComponent } from './pages/validate-email/validate-email.component';
 import { AuthRoutingModule } from './auth-routing.module';
 import { MaterialModule } from '@shared/modules/material/material.module';
 import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
@@ -23,7 +24,8 @@ import { TranslationsModule } from '@shared/modules/translations/translations.mo
     AuthRoutingModule,
     MaterialModule,
     WorkyButtonsModule,
-    TranslationsModule
+    TranslationsModule,
+    ValidateEmailComponent
   ]
 })
 export class AuthModule { }

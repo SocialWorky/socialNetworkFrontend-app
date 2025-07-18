@@ -18,6 +18,7 @@ import { AdminCustomFieldsComponent } from './shared/admin-custom-fields/admin-c
 import { InvitationsCodeComponent } from './shared/invitations-code/invitations-code.component';
 import { LogComponent } from './shared/log/log.component';
 import { WebhooksComponent } from './shared/webhooks/webhooks.component';
+import { UserManagementComponent } from './shared/user-management/user-management.component';
 
 import { AdminRoutingModule } from './admin-routing.module';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
@@ -40,6 +41,7 @@ import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
     InvitationsCodeComponent,
     LogComponent,
     WebhooksComponent,
+    UserManagementComponent,
   ],
   imports: [
     CommonModule,
