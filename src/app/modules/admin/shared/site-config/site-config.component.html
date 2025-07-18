@@ -1,112 +1,283 @@
- <div class="content-config">
-   <div class="bg-gray-900 text-white py-12">
-    <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg shadow-lg">
-      <h2 class="text-3xl font-semibold mb-6">CONFIGURACIÓN</h2>
-      <form [formGroup]="configForm" (ngSubmit)="updateConfig()">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="site-config-dashboard">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1 class="title">Configuración del Sitio</h1>
+        <p class="subtitle">Gestiona la configuración general de la plataforma</p>
+      </div>
+      <div class="header-actions">
+        <button class="save-btn" (click)="updateConfig()" [disabled]="loadUpdateConfigButtons || !configForm.valid">
+          <i class="fas fa-save" [class.fa-spin]="loadUpdateConfigButtons"></i>
+          <span class="btn-text">Guardar Cambios</span>
+        </button>
+        <button class="refresh-btn" (click)="getSiteConfig()" [disabled]="loadUpdateConfigButtons">
+          <i class="fas fa-sync-alt"></i>
+          <span class="btn-text">Recargar</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
-          <!-- Columna izquierda -->
-          <div>
-            <div class="mb-6">
-              <label for="title" class="block text-sm font-medium text-gray-300 mb-2">Título del Sitio:</label>
-              <input formControlName="title" id="title" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loadUpdateConfigButtons">
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Guardando configuración...</p>
+    </div>
+  </div>
+
+  <!-- Main Configuration Form -->
+  <div class="config-content" *ngIf="!loadUpdateConfigButtons">
+    <form [formGroup]="configForm" class="config-form">
+      
+      <!-- Basic Information Section -->
+      <div class="config-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="fas fa-info-circle"></i>
+          </div>
+          <div class="section-info">
+            <h3 class="section-title">Información Básica</h3>
+            <p class="section-description">Configuración general del sitio web</p>
+          </div>
+        </div>
+        
+        <div class="section-content">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="title" class="form-label">
+                <i class="fas fa-tag"></i>
+                Título del Sitio
+              </label>
+              <input 
+                formControlName="title" 
+                id="title" 
+                type="text" 
+                class="form-input"
+                placeholder="Ingresa el título de tu sitio"
+              >
             </div>
 
-            <div class="mb-6">
-              <label for="contactEmail" class="block text-sm font-medium text-gray-300 mb-2">E-Mail de contacto:</label>
-              <input formControlName="contactEmail" id="contactEmail" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+            <div class="form-group">
+              <label for="urlSite" class="form-label">
+                <i class="fas fa-link"></i>
+                URL del Sitio
+              </label>
+              <input 
+                formControlName="urlSite" 
+                id="urlSite" 
+                type="url" 
+                class="form-input"
+                placeholder="https://tusitio.com"
+              >
             </div>
 
-            <div class="mb-6">
-              <label for="urlSite" class="block text-sm font-medium text-gray-300 mb-2">Url del Sitio:</label>
-              <input formControlName="urlSite" id="urlSite" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+            <div class="form-group">
+              <label for="contactEmail" class="form-label">
+                <i class="fas fa-envelope"></i>
+                Email de Contacto
+              </label>
+              <input 
+                formControlName="contactEmail" 
+                id="contactEmail" 
+                type="email" 
+                class="form-input"
+                placeholder="contacto@tusitio.com"
+              >
             </div>
 
-            <div class="mb-6">
-              <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Descripción de la app:</label>
-              <textarea formControlName="description" id="description" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" rows="5"></textarea>
-            </div>
-
-            <div class="mb-6">
-              <label for="privacyPolicy" class="block text-sm font-medium text-gray-300 mb-2">Política de Privacidad:</label>
-              <textarea formControlName="privacyPolicy" id="privacyPolicy" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" rows="5"></textarea>
+            <div class="form-group full-width">
+              <label for="description" class="form-label">
+                <i class="fas fa-align-left"></i>
+                Descripción de la App
+              </label>
+              <textarea 
+                formControlName="description" 
+                id="description" 
+                class="form-textarea"
+                rows="3"
+                placeholder="Describe brevemente tu aplicación..."
+              ></textarea>
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- Columna derecha -->
-          <div>
-            <div class="mb-6">
-              <h3 class="text-xl font-semibold mb-2">Logo del Sitio</h3>
-              <img
-                [src]="imagePreview || configForm.get('logoUrl')?.value || defaultLogo"
-                alt="Vista previa del logo"
-                class="w-32 h-32 object-contain border border-gray-600 rounded-md mb-4"
-              />
-              <label for="logoUrl" class="block text-sm font-medium text-gray-300 mb-2">Logo URL:</label>
-              <input formControlName="logoUrl" id="logoUrl" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-            </div>
-
-            <div class="mb-6">
-              <label for="image" class="block text-sm font-medium text-gray-300 mb-2">O subir Logo:</label>
-              <input id="image" type="file" (change)="onFileChange($event)" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-            </div>
-
-            <!-- Métodos de inicio de sesión -->
-            <div class="mb-6">
-              <h3 class="text-xl font-semibold mb-2">Métodos de inicio de sesión</h3>
-
-              <div formGroupName="loginMethods">
-                <div class="flex items-center mb-4">
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input class="sr-only peer"
-                          type="checkbox"
-                          id="email"
-                          formControlName="email">
-                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-indigo-500"></div>
-                        <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-full"></div>
-                    </label>
-                    <label for="emailLogin" class="ml-2 text-sm font-medium text-gray-300">Iniciar sesión con Email</label>
+      <!-- Branding Section -->
+      <div class="config-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="fas fa-palette"></i>
+          </div>
+          <div class="section-info">
+            <h3 class="section-title">Identidad Visual</h3>
+            <p class="section-description">Logo y elementos visuales del sitio</p>
+          </div>
+        </div>
+        
+        <div class="section-content">
+          <div class="branding-grid">
+            <div class="logo-section">
+              <div class="logo-preview-container">
+                <img
+                  [src]="imagePreview || configForm.get('logoUrl')?.value || defaultLogo"
+                  alt="Vista previa del logo"
+                  class="logo-preview"
+                />
+                <div class="logo-overlay">
+                  <i class="fas fa-image"></i>
                 </div>
-
-                <div class="flex items-center mb-4">
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input class="sr-only peer"
-                          type="checkbox"
-                          id="google"
-                          formControlName="google">
-                        <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-indigo-500"></div>
-                        <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-full"></div>
-                    </label>
-                    <label for="emailLogin" class="ml-2 text-sm font-medium text-gray-300">Iniciar sesión con Google</label>
-                </div>
-
-              </div> <!-- Cierre del formGroupName para loginMethods -->
-
-              <h3 class="text-xl font-semibold mb-2">Registro de usuarios</h3>
-
-              <div class="flex items-center mb-4">
-                  <label class="relative inline-flex items-center cursor-pointer">
-                      <input class="sr-only peer"
-                        type="checkbox"
-                        id="invitationCode"
-                        formControlName="invitationCode">
-                      <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-500 rounded-full peer dark:bg-gray-700 peer-checked:bg-indigo-500"></div>
-                      <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white border border-gray-300 rounded-full transition-transform peer-checked:translate-x-full"></div>
-                  </label>
-                  <label for="invitationCode" class="ml-2 text-sm font-medium text-gray-300">Registro con Codigo</label>
               </div>
-
+              
+              <div class="logo-actions">
+                <div class="form-group">
+                  <label for="logoUrl" class="form-label">
+                    <i class="fas fa-link"></i>
+                    URL del Logo
+                  </label>
+                  <input 
+                    formControlName="logoUrl" 
+                    id="logoUrl" 
+                    type="url" 
+                    class="form-input"
+                    placeholder="https://ejemplo.com/logo.png"
+                  >
+                </div>
+                
+                <div class="form-group">
+                  <label for="image" class="form-label">
+                    <i class="fas fa-upload"></i>
+                    Subir Logo
+                  </label>
+                  <input 
+                    id="image" 
+                    type="file" 
+                    (change)="onFileChange($event)"
+                    accept="image/*"
+                    class="form-file-input"
+                  >
+                </div>
+              </div>
             </div>
-
           </div>
         </div>
+      </div>
 
-        <div class="mt-6">
-          <div *ngIf="loadUpdateConfigButtons" class="loader"></div>
-          <button *ngIf="!loadUpdateConfigButtons" type="submit" class="w-full bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600">Actualizar</button>
+      <!-- Legal Section -->
+      <div class="config-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="fas fa-gavel"></i>
+          </div>
+          <div class="section-info">
+            <h3 class="section-title">Información Legal</h3>
+            <p class="section-description">Políticas y términos legales</p>
+          </div>
         </div>
+        
+        <div class="section-content">
+          <div class="form-group">
+            <label for="privacyPolicy" class="form-label">
+              <i class="fas fa-shield-alt"></i>
+              Política de Privacidad
+            </label>
+            <textarea 
+              formControlName="privacyPolicy" 
+              id="privacyPolicy" 
+              class="form-textarea"
+              rows="6"
+              placeholder="Ingresa tu política de privacidad..."
+            ></textarea>
+          </div>
+        </div>
+      </div>
 
-      </form>
+      <!-- Authentication Section -->
+      <div class="config-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <i class="fas fa-lock"></i>
+          </div>
+          <div class="section-info">
+            <h3 class="section-title">Autenticación</h3>
+            <p class="section-description">Configuración de métodos de acceso</p>
+          </div>
+        </div>
+        
+        <div class="section-content">
+          <div class="auth-grid">
+            <div class="auth-methods">
+              <h4 class="auth-subtitle">Métodos de Inicio de Sesión</h4>
+              
+              <div formGroupName="loginMethods" class="toggle-group">
+                <div class="toggle-item">
+                  <label class="toggle-switch">
+                    <input 
+                      type="checkbox"
+                      formControlName="email"
+                      class="toggle-input"
+                    >
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div class="toggle-info">
+                    <span class="toggle-label">Iniciar sesión con Email</span>
+                    <span class="toggle-description">Permitir registro con email y contraseña</span>
+                  </div>
+                </div>
+
+                <div class="toggle-item">
+                  <label class="toggle-switch">
+                    <input 
+                      type="checkbox"
+                      formControlName="google"
+                      class="toggle-input"
+                    >
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <div class="toggle-info">
+                    <span class="toggle-label">Iniciar sesión con Google</span>
+                    <span class="toggle-description">Permitir registro con cuenta de Google</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="registration-settings">
+              <h4 class="auth-subtitle">Configuración de Registro</h4>
+              
+              <div class="toggle-item">
+                <label class="toggle-switch">
+                  <input 
+                    type="checkbox"
+                    formControlName="invitationCode"
+                    class="toggle-input"
+                  >
+                  <span class="toggle-slider"></span>
+                </label>
+                <div class="toggle-info">
+                  <span class="toggle-label">Registro con Código de Invitación</span>
+                  <span class="toggle-description">Requerir código de invitación para registrarse</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error">
+    <div class="error-content">
+      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <h3>Error al cargar configuración</h3>
+      <p>{{ error }}</p>
+      <button class="refresh-btn primary" (click)="getSiteConfig()">
+        <i class="fas fa-sync-alt"></i>
+        <span>Intentar de nuevo</span>
+      </button>
     </div>
   </div>
 </div>

@@ -32,6 +32,8 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
   loginMethods = { email: true, google: true };
 
+  error: string | null = null;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -68,39 +70,49 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
   }
 
   getSiteConfig() {
-    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
-      let loginMethods = { email: false, google: false };
+    this.error = null;
+    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (configData) => {
+        let loginMethods = { email: false, google: false };
 
-      if (configData.settings.loginMethods) {
-        try {
-         loginMethods = JSON.parse(configData.settings.loginMethods);
+        if (configData.settings.loginMethods) {
+          try {
+           loginMethods = JSON.parse(configData.settings.loginMethods);
 
-        } catch (error) {
-          console.error('Error parsing loginMethods:', error);
+          } catch (error) {
+            console.error('Error parsing loginMethods:', error);
+          }
         }
+
+        this.configForm.patchValue({
+          logoUrl: configData.settings.logoUrl || '',
+          title: configData.settings.title || '',
+          privacyPolicy: configData.settings.privacyPolicy || '',
+          contactEmail: configData.settings.contactEmail || '',
+          faviconUrl: configData.settings.faviconUrl || '',
+          urlSite: configData.settings.urlSite || '',
+          description: configData.settings.description || '',
+          invitationCode: configData.settings.invitationCode || false,
+          loginMethods: {
+            email: JSON.parse(String(loginMethods.email)),
+            google: JSON.parse(String(loginMethods.google)),
+          },
+        });
+
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error loading site config:', error);
+        this.error = 'Error al cargar la configuración del sitio. Por favor, intenta de nuevo.';
+        this._cdr.markForCheck();
       }
-
-      this.configForm.patchValue({
-        logoUrl: configData.settings.logoUrl || '',
-        title: configData.settings.title || '',
-        privacyPolicy: configData.settings.privacyPolicy || '',
-        contactEmail: configData.settings.contactEmail || '',
-        faviconUrl: configData.settings.faviconUrl || '',
-        urlSite: configData.settings.urlSite || '',
-        description: configData.settings.description || '',
-        invitationCode: configData.settings.invitationCode || false,
-        loginMethods: {
-          email: JSON.parse(String(loginMethods.email)),
-          google: JSON.parse(String(loginMethods.google)),
-        },
-      });
-
-      this._cdr.markForCheck();
     });
   }
 
   updateConfig() {
     this.loadUpdateConfigButtons = true;
+    this.error = null;
+    
     if (this.configForm.valid) {
       if (this.imageFile) {
         this._fileUploadService.uploadFile([this.imageFile], 'config').pipe(takeUntil(this.destroy$)).subscribe({
@@ -109,8 +121,10 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
             this.imageFile = null;
             this.submitUpdateConfig();
           },
-          error: () => {
+          error: (error) => {
+            console.error('Error uploading file:', error);
             this.loadUpdateConfigButtons = false;
+            this.error = 'Error al subir el archivo. Por favor, intenta de nuevo.';
             this._alertService.showAlert(
               'Error',
               'Error al subir archivo, intente de nuevo.',
@@ -119,11 +133,16 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
               true,
               translations['button.ok']
             );
+            this._cdr.markForCheck();
           }
         });
       } else {
         this.submitUpdateConfig();
       }
+    } else {
+      this.loadUpdateConfigButtons = false;
+      this.error = 'Por favor, completa todos los campos requeridos.';
+      this._cdr.markForCheck();
     }
   }
 
@@ -155,9 +174,12 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
         this.loadUpdateConfigButtons = false;
         this._cdr.markForCheck();
       },
-      error: () => {
+      error: (error) => {
+        console.error('Error updating config:', error);
+        this.error = 'Error al actualizar la configuración. Por favor, intenta de nuevo.';
         loadingReaction.dismiss();
         this.loadUpdateConfigButtons = false;
+        this._cdr.markForCheck();
       }
     });
   }
