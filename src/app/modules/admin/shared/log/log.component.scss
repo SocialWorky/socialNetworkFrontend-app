@@ -21,7 +21,6 @@ $text-muted: #64748b;
   overflow: hidden;
 }
 
-// Header Section
 .dashboard-header {
   background: rgba(30, 41, 59, 0.95);
   backdrop-filter: blur(10px);
@@ -120,7 +119,6 @@ $text-muted: #64748b;
     }
   }
 
-  // Filters Section
   .filters-section {
     .filters-row {
       display: flex;
@@ -356,7 +354,6 @@ $text-muted: #64748b;
   }
 }
 
-// Content Section
 .logs-content {
   flex: 1;
   overflow: hidden;
@@ -442,25 +439,25 @@ $text-muted: #64748b;
       }
     }
 
-          .log-card {
-        background: $card-bg;
-        border: 1px solid $border-color;
-        border-radius: 12px;
-        overflow: visible;
-        transition: all 0.3s ease;
-        margin-bottom: 1rem;
+    .log-card {
+      background: $card-bg;
+      border: 1px solid $border-color;
+      border-radius: 12px;
+      overflow: visible;
+      transition: all 0.3s ease;
+      margin-bottom: 1rem;
 
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-          border-color: rgba(255, 255, 255, 0.2);
-        }
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
 
-        &.expanded {
-          border-color: $primary-color;
-          z-index: 10;
-          position: relative;
-        }
+      &.expanded {
+        border-color: $primary-color;
+        z-index: 10;
+        position: relative;
+      }
 
       .log-header {
         display: flex;
@@ -675,7 +672,6 @@ $text-muted: #64748b;
     }
   }
 
-  // Pagination
   .pagination-container {
     display: flex;
     justify-content: space-between;
@@ -743,7 +739,6 @@ $text-muted: #64748b;
   }
 }
 
-// JSON Viewer Customization
 ::ng-deep .ngx-json-viewer {
   background: transparent !important;
   color: $text-primary !important;
@@ -797,13 +792,11 @@ $text-muted: #64748b;
   }
 }
 
-// Animations
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-// Responsive Design
 @media (max-width: 1024px) {
   .dashboard-header {
     .header-content {

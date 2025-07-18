@@ -1,10 +1,10 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Clipboard } from '@angular/cdk/clipboard';
+import { Subject, takeUntil } from 'rxjs';
+
 import { LogService } from './services/log.service';
-import { LogsList, Logs } from './interface/log.interface';
+import { LogsList } from './interface/log.interface';
 import { GenericSnackbarService } from '@shared/services/generic-snackbar.service';
-import { Subject, takeUntil, timer } from 'rxjs';
-import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'worky-log',
@@ -15,18 +15,27 @@ import { FormsModule } from '@angular/forms';
 export class LogComponent implements OnInit, OnDestroy {
 
   logs: LogsList[] = [];
+
   filteredLogs: LogsList[] = [];
+
   currentPage: number = 1;
+
   limit: number = 10;
+
   totalLogs: number = 0;
+
   expandedMetadata: { [key: string]: boolean } = {};
+
   isLoading: boolean = false;
+
   searchTerm: string = '';
+
   selectedLevel: string = '';
+
   autoRefresh: boolean = false;
+
   private autoRefreshTimer?: any;
 
-  // Configuración de niveles de log
   logLevels = [
     { value: '', label: 'Todos', icon: 'list' },
     { value: 'error', label: 'Errores', icon: 'error' },
@@ -35,7 +44,6 @@ export class LogComponent implements OnInit, OnDestroy {
     { value: 'debug', label: 'Debug', icon: 'bug_report' }
   ];
 
-  // Referencia a Math para usar en el template
   Math = Math;
 
   private destroy$ = new Subject<void>();
@@ -111,7 +119,7 @@ export class LogComponent implements OnInit, OnDestroy {
     if (this.autoRefresh) {
       this.autoRefreshTimer = setInterval(() => {
         this.loadLogs();
-      }, 30000); // 30 segundos
+      }, 30000);
     } else {
       if (this.autoRefreshTimer) {
         clearInterval(this.autoRefreshTimer);
