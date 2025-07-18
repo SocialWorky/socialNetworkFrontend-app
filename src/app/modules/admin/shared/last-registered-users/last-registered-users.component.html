@@ -3,33 +3,33 @@
   <div class="header-section">
     <div class="header-content">
       <div class="title-section">
-        <i class="fas fa-users title-icon"></i>
+        <i class="material-icons title-icon">people</i>
         <h2 class="title">Últimos usuarios registrados</h2>
       </div>
       <div class="header-actions">
         <button class="refresh-btn" (click)="refreshUsers()" [disabled]="isLoading">
-          <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+          <i class="material-icons" [class.rotating]="isLoading">refresh</i>
           <span class="btn-text">{{ 'refresh' | workyTranslations }}</span>
         </button>
       </div>
     </div>
     <div class="stats-section">
       <div class="stat-card">
-        <i class="fas fa-user-check stat-icon active"></i>
+        <i class="material-icons stat-icon active">check_circle</i>
         <div class="stat-content">
           <span class="stat-number">{{ activeUsersCount }}</span>
           <span class="stat-label">Usuarios Activos</span>
         </div>
       </div>
       <div class="stat-card">
-        <i class="fas fa-user-clock stat-icon pending"></i>
+        <i class="material-icons stat-icon pending">schedule</i>
         <div class="stat-content">
           <span class="stat-number">{{ pendingUsersCount }}</span>
           <span class="stat-label">Pendiente de Verificación</span>
         </div>
       </div>
       <div class="stat-card">
-        <i class="fas fa-user-times stat-icon inactive"></i>
+        <i class="material-icons stat-icon inactive">cancel</i>
         <div class="stat-content">
           <span class="stat-number">{{ inactiveUsersCount }}</span>
           <span class="stat-label">Usuarios Desactivados</span>
@@ -41,7 +41,7 @@
   <!-- Loading State -->
   <div class="loading-container" *ngIf="isLoading">
     <div class="loading-spinner">
-      <i class="fas fa-spinner fa-spin"></i>
+      <i class="material-icons rotating">refresh</i>
       <p class="loading-text">{{ 'loadingUsers' | workyTranslations }}</p>
     </div>
   </div>
@@ -68,17 +68,17 @@
       <div class="card-body">
         <div class="user-details">
           <div class="detail-item">
-            <i class="fas fa-calendar-alt detail-icon"></i>
+            <i class="material-icons detail-icon">calendar_today</i>
             <span class="detail-label">Fecha de registro:</span>
             <span class="detail-value">{{ user.createdAt | date:'longDate':'':'es' }}</span>
           </div>
           <div class="detail-item">
-            <i class="fas fa-clock detail-icon"></i>
+            <i class="material-icons detail-icon">access_time</i>
             <span class="detail-label">Último ingreso:</span>
             <span class="detail-value">{{ user.updatedAt | date:'medium':'':'es' }}</span>
           </div>
           <div class="detail-item">
-            <i class="fas fa-shield-alt detail-icon"></i>
+            <i class="material-icons detail-icon">security</i>
             <span class="detail-label">Rol:</span>
             <span class="detail-value role-badge" [class]="getRoleClass(user.role)">
               {{ user.role | titlecase }}
@@ -88,7 +88,9 @@
         
         <div class="verification-status">
           <div class="status-badge" [class]="getVerificationClass(user)">
-            <i class="fas" [class.fa-check-circle]="user.isVerified" [class.fa-exclamation-circle]="!user.isVerified"></i>
+            <i class="material-icons" [class.verified-icon]="user.isVerified" [class.pending-icon]="!user.isVerified">
+              {{ user.isVerified ? 'verified' : 'warning' }}
+            </i>
             <span>{{ user.isVerified ? 'Verificado' : 'Pendiente de verificación' }}</span>
           </div>
         </div>
@@ -113,11 +115,11 @@
   <!-- Empty State -->
   <div class="empty-state" *ngIf="!isLoading && users.length === 0">
     <div class="empty-content">
-      <i class="fas fa-users empty-icon"></i>
+      <i class="material-icons empty-icon">people</i>
       <h3 class="empty-title">{{ 'noUsersFound' | workyTranslations }}</h3>
       <p class="empty-description">{{ 'noUsersDescription' | workyTranslations }}</p>
       <button class="refresh-btn primary" (click)="refreshUsers()">
-        <i class="fas fa-sync-alt"></i>
+        <i class="material-icons">refresh</i>
         <span class="btn-text">{{ 'tryAgain' | workyTranslations }}</span>
       </button>
     </div>
@@ -126,11 +128,11 @@
   <!-- Error State -->
   <div class="error-state" *ngIf="error">
     <div class="error-content">
-      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <i class="material-icons error-icon">warning</i>
       <h3 class="error-title">{{ 'errorLoadingUsers' | workyTranslations }}</h3>
       <p class="error-description">{{ error }}</p>
       <button class="refresh-btn primary" (click)="refreshUsers()">
-        <i class="fas fa-sync-alt"></i>
+        <i class="material-icons">refresh</i>
         <span class="btn-text">{{ 'tryAgain' | workyTranslations }}</span>
       </button>
     </div>

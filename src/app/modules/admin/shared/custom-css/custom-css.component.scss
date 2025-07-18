@@ -14,6 +14,20 @@ $text-primary: #f9fafb;
 $text-secondary: #d1d5db;
 $text-muted: #9ca3af;
 
+// Animation for rotating icons
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotating {
+  animation: rotate 1s linear infinite;
+}
+
 .custom-css-dashboard {
   min-height: 100vh;
   background: linear-gradient(135deg, $darker-bg 0%, $dark-bg 100%);
@@ -90,7 +104,7 @@ $text-muted: #9ca3af;
     transition: all 0.2s ease;
 
     i {
-      font-size: 1rem;
+      font-size: 1.125rem;
     }
 
     .btn-text {
@@ -167,6 +181,10 @@ $text-muted: #9ca3af;
     justify-content: center;
     color: white;
     font-size: 1.25rem;
+
+    i {
+      font-size: 1.25rem;
+    }
   }
 
   .section-info {
@@ -200,6 +218,10 @@ $text-muted: #9ca3af;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
+
+      i {
+        font-size: 1rem;
+      }
 
       &:hover:not(:disabled) {
         background: darken($secondary-color, 10%);
@@ -277,6 +299,10 @@ $text-muted: #9ca3af;
       color: white;
       font-size: 1rem;
       margin-bottom: 1rem;
+
+      i {
+        font-size: 1rem;
+      }
     }
 
     h4 {
@@ -358,6 +384,10 @@ $text-muted: #9ca3af;
         border-radius: 6px;
         transition: all 0.2s ease;
 
+        i {
+          font-size: 1.25rem;
+        }
+
         &:hover {
           background: rgba($danger-color, 0.1);
           color: $danger-color;
@@ -401,6 +431,10 @@ $text-muted: #9ca3af;
           border: none;
           cursor: pointer;
           transition: all 0.2s ease;
+
+          i {
+            font-size: 1.125rem;
+          }
         }
 
         .apply-btn {
@@ -491,6 +525,10 @@ $text-muted: #9ca3af;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
+
+      i {
+        font-size: 1.125rem;
+      }
 
       &:hover {
         background: $primary-dark;

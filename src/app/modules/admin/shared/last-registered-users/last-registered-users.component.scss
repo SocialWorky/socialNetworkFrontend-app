@@ -11,9 +11,22 @@ $text-primary: #f8fafc;
 $text-secondary: #cbd5e1;
 $text-muted: #64748b;
 
+// Animation for rotating icons
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotating {
+  animation: rotate 1s linear infinite;
+}
+
 .last-registered-users-container {
   padding: 1.5rem;
-  max-width: 1200px;
   margin: 0 auto;
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   min-height: 100vh;
@@ -78,6 +91,10 @@ $text-muted: #64748b;
   cursor: pointer;
   transition: all 0.2s ease;
 
+  i {
+    font-size: 1.125rem;
+  }
+
   &:hover:not(:disabled) {
     background: $primary-color;
     color: white;
@@ -129,6 +146,8 @@ $text-muted: #64748b;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: white;
+  font-size: 1.25rem;
 
   &.active {
     background: linear-gradient(135deg, $success-color, darken($success-color, 10%));
@@ -140,11 +159,6 @@ $text-muted: #64748b;
 
   &.inactive {
     background: linear-gradient(135deg, $error-color, darken($error-color, 10%));
-  }
-
-  i {
-    color: white;
-    font-size: 1.25rem;
   }
 }
 
@@ -393,6 +407,7 @@ $text-muted: #64748b;
   width: 16px;
   color: $text-muted;
   flex-shrink: 0;
+  font-size: 1rem;
 }
 
 .detail-label {
@@ -442,6 +457,10 @@ $text-muted: #64748b;
   border-radius: 6px;
   font-size: 0.875rem;
   font-weight: 500;
+
+  i {
+    font-size: 1rem;
+  }
 
   &.verified {
     background: rgba($success-color, 0.2);

@@ -14,6 +14,20 @@ $text-primary: #f9fafb;
 $text-secondary: #d1d5db;
 $text-muted: #9ca3af;
 
+// Animation for rotating icons
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotating {
+  animation: rotate 1s linear infinite;
+}
+
 .admin-custom-fields-dashboard {
   min-height: 100vh;
   background: linear-gradient(135deg, $darker-bg 0%, $dark-bg 100%);
@@ -90,7 +104,7 @@ $text-muted: #9ca3af;
     transition: all 0.2s ease;
 
     i {
-      font-size: 1rem;
+      font-size: 1.125rem;
     }
 
     .btn-text {
@@ -178,6 +192,10 @@ $text-muted: #9ca3af;
         border-radius: 6px;
         transition: all 0.2s ease;
 
+        i {
+          font-size: 1.25rem;
+        }
+
         &:hover {
           background: rgba($danger-color, 0.1);
           color: $danger-color;
@@ -207,6 +225,7 @@ $text-muted: #9ca3af;
           i {
             color: $primary-color;
             width: 16px;
+            font-size: 1rem;
           }
         }
 
@@ -492,6 +511,10 @@ $text-muted: #9ca3af;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
+
+      i {
+        font-size: 1.125rem;
+      }
 
       &:hover {
         background: $primary-dark;

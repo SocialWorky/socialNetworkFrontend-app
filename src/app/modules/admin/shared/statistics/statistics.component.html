@@ -8,11 +8,11 @@
       </div>
       <div class="header-actions">
         <button class="refresh-btn" (click)="refreshStatistics()" [disabled]="isLoading">
-          <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+          <i class="material-icons" [class.rotating]="isLoading">refresh</i>
           <span class="btn-text">Actualizar</span>
         </button>
         <div class="last-updated">
-          <i class="fas fa-clock"></i>
+          <i class="material-icons">schedule</i>
           <span>Última actualización: {{ lastUpdated | workyDate:'short' }}</span>
         </div>
       </div>
@@ -22,7 +22,7 @@
   <!-- Loading State -->
   <div class="loading-container" *ngIf="isLoading">
     <div class="loading-spinner">
-      <i class="fas fa-spinner fa-spin"></i>
+      <i class="material-icons rotating">refresh</i>
       <p>Cargando estadísticas...</p>
     </div>
   </div>
@@ -33,7 +33,7 @@
     <div class="stat-card primary">
       <div class="card-header">
         <div class="card-icon">
-          <i class="fas fa-users"></i>
+          <i class="material-icons">people</i>
         </div>
         <div class="card-info">
           <h3 class="card-title">Usuarios Registrados</h3>
@@ -62,7 +62,7 @@
     <div class="stat-card success">
       <div class="card-header">
         <div class="card-icon">
-          <i class="fas fa-newspaper"></i>
+          <i class="material-icons">article</i>
         </div>
         <div class="card-info">
           <h3 class="card-title">Publicaciones</h3>
@@ -91,7 +91,7 @@
     <div class="stat-card info">
       <div class="card-header">
         <div class="card-icon">
-          <i class="fas fa-comments"></i>
+          <i class="material-icons">chat_bubble</i>
         </div>
         <div class="card-info">
           <h3 class="card-title">Comentarios</h3>
@@ -120,7 +120,7 @@
     <div class="stat-card warning">
       <div class="card-header">
         <div class="card-icon">
-          <i class="fas fa-heart"></i>
+          <i class="material-icons">favorite</i>
         </div>
         <div class="card-info">
           <h3 class="card-title">Reacciones</h3>
@@ -149,7 +149,7 @@
     <div class="stat-card danger">
       <div class="card-header">
         <div class="card-icon">
-          <i class="fas fa-flag"></i>
+          <i class="material-icons">flag</i>
         </div>
         <div class="card-info">
           <h3 class="card-title">Reportes</h3>
@@ -178,7 +178,7 @@
     <div class="stat-card secondary">
       <div class="card-header">
         <div class="card-icon">
-          <i class="fas fa-envelope"></i>
+          <i class="material-icons">email</i>
         </div>
         <div class="card-info">
           <h3 class="card-title">Mensajes</h3>
@@ -212,7 +212,7 @@
       <!-- Engagement Rate -->
       <div class="metric-card">
         <div class="metric-header">
-          <i class="fas fa-chart-line metric-icon"></i>
+          <i class="material-icons metric-icon">trending_up</i>
           <h4>Tasa de Engagement</h4>
         </div>
         <div class="metric-value">
@@ -226,7 +226,7 @@
       <!-- Content Growth -->
       <div class="metric-card">
         <div class="metric-header">
-          <i class="fas fa-arrow-up metric-icon"></i>
+          <i class="material-icons metric-icon">arrow_upward</i>
           <h4>Crecimiento de Contenido</h4>
         </div>
         <div class="metric-value">
@@ -240,7 +240,7 @@
       <!-- User Activity -->
       <div class="metric-card">
         <div class="metric-header">
-          <i class="fas fa-user-clock metric-icon"></i>
+          <i class="material-icons metric-icon">access_time</i>
           <h4>Actividad de Usuarios</h4>
         </div>
         <div class="metric-value">
@@ -254,7 +254,7 @@
       <!-- Response Time -->
       <div class="metric-card">
         <div class="metric-header">
-          <i class="fas fa-stopwatch metric-icon"></i>
+          <i class="material-icons metric-icon">timer</i>
           <h4>Tiempo de Respuesta</h4>
         </div>
         <div class="metric-value">
@@ -270,11 +270,11 @@
   <!-- Error State -->
   <div class="error-state" *ngIf="error">
     <div class="error-content">
-      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <i class="material-icons error-icon">warning</i>
       <h3>Error al cargar estadísticas</h3>
       <p>{{ error }}</p>
       <button class="refresh-btn primary" (click)="refreshStatistics()">
-        <i class="fas fa-sync-alt"></i>
+        <i class="material-icons">refresh</i>
         <span>Intentar de nuevo</span>
       </button>
     </div>

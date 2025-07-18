@@ -8,7 +8,7 @@
       </div>
       <div class="header-actions">
         <button class="refresh-btn" (click)="listReactions()" [disabled]="loadReactionsButtons">
-          <i class="fas fa-sync-alt"></i>
+          <i class="material-icons" [class.rotating]="loadReactionsButtons">refresh</i>
           <span class="btn-text">Recargar</span>
         </button>
       </div>
@@ -18,7 +18,7 @@
   <!-- Loading State -->
   <div class="loading-container" *ngIf="loadReactionsButtons">
     <div class="loading-spinner">
-      <i class="fas fa-spinner fa-spin"></i>
+      <i class="material-icons rotating">refresh</i>
       <p>Procesando reacción...</p>
     </div>
   </div>
@@ -30,7 +30,7 @@
     <div class="create-section">
       <div class="section-header">
         <div class="section-icon">
-          <i class="fas fa-plus-circle"></i>
+          <i class="material-icons">add_circle</i>
         </div>
         <div class="section-info">
           <h3 class="section-title">Crear Nueva Reacción</h3>
@@ -43,7 +43,7 @@
           <div class="form-grid">
             <div class="form-group">
               <label for="name" class="form-label">
-                <i class="fas fa-tag"></i>
+                <i class="material-icons">label</i>
                 Nombre de la Reacción
               </label>
               <input 
@@ -54,14 +54,14 @@
                 placeholder="Ej: Me encanta, Increíble, etc."
               >
               <div class="error-message" *ngIf="reactionForm.controls['name'].invalid && reactionForm.controls['name'].touched">
-                <i class="fas fa-exclamation-circle"></i>
+                <i class="material-icons">error</i>
                 El nombre es requerido
               </div>
             </div>
 
             <div class="form-group">
               <label for="emoji" class="form-label">
-                <i class="fas fa-smile"></i>
+                <i class="material-icons">emoji_emotions</i>
                 Emoji o URL de Imagen
               </label>
               <input 
@@ -72,14 +72,14 @@
                 placeholder="😍 o https://ejemplo.com/imagen.png"
               >
               <div class="error-message" *ngIf="reactionForm.controls['emoji'].invalid && reactionForm.controls['emoji'].touched">
-                <i class="fas fa-exclamation-circle"></i>
+                <i class="material-icons">error</i>
                 El emoji es requerido
               </div>
             </div>
 
             <div class="form-group full-width">
               <label for="image" class="form-label">
-                <i class="fas fa-upload"></i>
+                <i class="material-icons">upload</i>
                 Subir Imagen
               </label>
               <div class="file-upload-container">
@@ -91,7 +91,7 @@
                   class="form-file-input"
                 >
                 <div class="file-upload-info">
-                  <i class="fas fa-cloud-upload-alt"></i>
+                  <i class="material-icons">cloud_upload</i>
                   <span>Haz clic para seleccionar una imagen o arrastra aquí</span>
                 </div>
               </div>
@@ -104,7 +104,7 @@
               [disabled]="reactionForm.invalid || loadReactionsButtons"
               class="submit-btn"
             >
-              <i class="fas fa-plus"></i>
+              <i class="material-icons">add</i>
               <span>Crear Reacción</span>
             </button>
           </div>
@@ -116,7 +116,7 @@
     <div class="reactions-list-section">
       <div class="section-header">
         <div class="section-icon">
-          <i class="fas fa-list"></i>
+          <i class="material-icons">list</i>
         </div>
         <div class="section-info">
           <h3 class="section-title">Reacciones Disponibles</h3>
@@ -133,15 +133,15 @@
             <thead>
               <tr>
                 <th class="table-header">
-                  <i class="fas fa-tag"></i>
+                  <i class="material-icons">label</i>
                   Nombre
                 </th>
                 <th class="table-header">
-                  <i class="fas fa-image"></i>
+                  <i class="material-icons">image</i>
                   Imagen
                 </th>
                 <th class="table-header actions-header">
-                  <i class="fas fa-cogs"></i>
+                  <i class="material-icons">settings</i>
                   Acciones
                 </th>
               </tr>
@@ -170,7 +170,7 @@
                       (click)="deleteReaction(reaction._id)"
                       [title]="'Eliminar ' + reaction.name"
                     >
-                      <i class="fas fa-trash"></i>
+                      <i class="material-icons">delete</i>
                       <span class="btn-text">Eliminar</span>
                     </button>
                   </div>
@@ -182,7 +182,7 @@
           <!-- Empty State -->
           <div class="empty-state" *ngIf="reactionsList.length === 0">
             <div class="empty-content">
-              <i class="fas fa-smile empty-icon"></i>
+              <i class="material-icons empty-icon">emoji_emotions</i>
               <h3>No hay reacciones creadas</h3>
               <p>Crea tu primera reacción personalizada usando el formulario de arriba</p>
             </div>
@@ -195,11 +195,11 @@
   <!-- Error State -->
   <div class="error-state" *ngIf="error">
     <div class="error-content">
-      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <i class="material-icons error-icon">warning</i>
       <h3>Error al cargar reacciones</h3>
       <p>{{ error }}</p>
       <button class="refresh-btn primary" (click)="listReactions()">
-        <i class="fas fa-sync-alt"></i>
+        <i class="material-icons">refresh</i>
         <span>Intentar de nuevo</span>
       </button>
     </div>

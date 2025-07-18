@@ -153,7 +153,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     // Optionally show a placeholder
     const placeholder = document.createElement('div');
     placeholder.className = 'image-placeholder';
-    placeholder.innerHTML = '<i class="fas fa-image"></i>';
+    placeholder.innerHTML = '<i class="material-icons">image</i>';
     placeholder.style.cssText = `
       width: 32px;
       height: 32px;

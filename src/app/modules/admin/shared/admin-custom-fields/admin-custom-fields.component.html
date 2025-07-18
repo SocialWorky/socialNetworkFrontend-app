@@ -8,11 +8,11 @@
       </div>
       <div class="header-actions">
         <button class="help-btn" (click)="showHelp()">
-          <i class="fas fa-question-circle"></i>
+          <i class="material-icons">help</i>
           <span class="btn-text">Ayuda</span>
         </button>
         <button class="refresh-btn" (click)="refreshFormBuilder()">
-          <i class="fas fa-sync-alt"></i>
+          <i class="material-icons" [class.rotating]="isLoading">refresh</i>
           <span class="btn-text">Recargar</span>
         </button>
       </div>
@@ -25,24 +25,24 @@
       <div class="help-header">
         <h3>Guía de Uso del Constructor</h3>
         <button class="close-btn" (click)="closeHelp()">
-          <i class="fas fa-times"></i>
+          <i class="material-icons">close</i>
         </button>
       </div>
       <div class="help-body">
         <div class="help-section">
-          <h4><i class="fas fa-drag-indicator"></i> Arrastrar y Soltar</h4>
+          <h4><i class="material-icons">drag_indicator</i> Arrastrar y Soltar</h4>
           <p>Arrastra los campos desde el panel izquierdo hacia el área de formulario para agregarlos.</p>
         </div>
         <div class="help-section">
-          <h4><i class="fas fa-cog"></i> Configuración</h4>
+          <h4><i class="material-icons">settings</i> Configuración</h4>
           <p>Haz clic en el ícono de configuración para personalizar cada campo: etiqueta, validaciones, opciones, etc.</p>
         </div>
         <div class="help-section">
-          <h4><i class="fas fa-save"></i> Guardar</h4>
+          <h4><i class="material-icons">save</i> Guardar</h4>
           <p>Los cambios se guardan automáticamente cuando arrastras campos o modificas configuraciones.</p>
         </div>
         <div class="help-section">
-          <h4><i class="fas fa-trash"></i> Eliminar</h4>
+          <h4><i class="material-icons">delete</i> Eliminar</h4>
           <p>Usa el ícono de eliminar para quitar campos del formulario.</p>
         </div>
       </div>
@@ -59,7 +59,7 @@
   <!-- Loading State -->
   <div class="loading-container" *ngIf="isLoading">
     <div class="loading-spinner">
-      <i class="fas fa-spinner fa-spin"></i>
+      <i class="material-icons rotating">refresh</i>
       <p>Cargando constructor de formularios...</p>
     </div>
   </div>
@@ -67,11 +67,11 @@
   <!-- Error State -->
   <div class="error-state" *ngIf="error">
     <div class="error-content">
-      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <i class="material-icons error-icon">warning</i>
       <h3>Error al cargar el constructor</h3>
       <p>{{ error }}</p>
       <button class="refresh-btn primary" (click)="refreshFormBuilder()">
-        <i class="fas fa-sync-alt"></i>
+        <i class="material-icons">refresh</i>
         <span>Intentar de nuevo</span>
       </button>
     </div>

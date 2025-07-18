@@ -1,0 +1,222 @@
+// Color palette variables
+$primary-color: #3b82f6;
+$primary-dark: #1d4ed8;
+$success-color: #10b981;
+$warning-color: #f59e0b;
+$danger-color: #ef4444;
+$info-color: #06b6d4;
+$secondary-color: #6b7280;
+$dark-bg: #1f2937;
+$darker-bg: #111827;
+$card-bg: #374151;
+$border-color: #4b5563;
+$text-primary: #f9fafb;
+$text-secondary: #d1d5db;
+$text-muted: #9ca3af;
+
+// Animation for rotating icons
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotating {
+  animation: rotate 1s linear infinite;
+}
+
+// Widget Management Styles
+.content-config {
+  .bg-gray-900 {
+    background: $darker-bg;
+  }
+
+  .bg-gray-800 {
+    background: $dark-bg;
+  }
+
+  .bg-gray-700 {
+    background: $card-bg;
+  }
+
+  .bg-gray-600 {
+    background: $border-color;
+  }
+
+  .text-white {
+    color: $text-primary;
+  }
+
+  .text-gray-300 {
+    color: $text-secondary;
+  }
+
+  .text-gray-400 {
+    color: $text-muted;
+  }
+
+  .text-gray-500 {
+    color: $text-muted;
+  }
+
+  .text-indigo-400 {
+    color: $primary-color;
+  }
+
+  .text-indigo-500 {
+    color: $primary-color;
+  }
+
+  .bg-indigo-500 {
+    background: $primary-color;
+  }
+
+  .hover\:bg-indigo-600:hover {
+    background: $primary-dark;
+  }
+
+  .border-gray-500 {
+    border-color: $border-color;
+  }
+
+  .border-gray-600 {
+    border-color: $border-color;
+  }
+
+  // Material Icons specific styles
+  .material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+  }
+
+  // Icon sizes for different contexts
+  .material-icons.text-sm {
+    font-size: 16px;
+  }
+
+  .material-icons.text-2xl {
+    font-size: 32px;
+  }
+
+  // Form styles
+  .form-group {
+    margin-bottom: 1rem;
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: $text-secondary;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  // Button styles
+  button {
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+
+    &:focus {
+      outline: none;
+      ring: 2px;
+      ring-color: $primary-color;
+    }
+  }
+
+  // Widget item styles
+  .widget-item {
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba($primary-color, 0.1);
+      border-color: $primary-color;
+    }
+  }
+
+  // Status badges
+  .bg-green-600 {
+    background: $success-color;
+  }
+
+  .bg-red-600 {
+    background: $danger-color;
+  }
+
+  // Loading states
+  .loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  // Empty state
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: $text-muted;
+
+    .material-icons {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+  }
+
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    .grid-cols-2 {
+      grid-template-columns: 1fr;
+    }
+
+    .grid-cols-3 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .flex.space-x-2 {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+
+  // Focus states for accessibility
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+  }
+
+  // Custom scrollbar for better UX
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: $dark-bg;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: $border-color;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: $text-muted;
+  }
+}
