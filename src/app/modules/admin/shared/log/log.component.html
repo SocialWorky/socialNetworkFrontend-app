@@ -1,79 +1,213 @@
-<div class="content-logs">
-
-  <div class="logs-container">
-    @for (log of logs; track $index) {
-      <div class="log-item">
-        <div
-          class="log-header bg-gray-800 text-white p-4 rounded-t-md cursor-pointer"
-          (click)="toggleMetadata(log._id)"
-        >
-          <div class="flex justify-between items-center">
-            @if (log.level === 'error') {
-              <span class="text-red-500">{{ log.level }} - {{ log.message }}</span>
-            } @else if (log.level === 'warn') {
-              <span class="text-yellow-500">{{ log.level }} - {{ log.message }}</span>
-            } @else if (log.level === 'info') {
-              <span class="text-blue-500">{{ log.level }} - {{ log.message }}</span>
-            } @else if (log.level === 'debug') {
-              <span class="text-gray-400">{{ log.level }} - {{ log.message }}</span>
-            } @else {
-              <span class="text-gray-500">{{ log.level }} - {{ log.message }}</span>
-            }
-            <div class="text-sm text-gray-400">
-              {{ log.timestamp.toString() | date: 'dd/MM/yy - HH:mm:ss' }}
-            </div>
+<div class="logs-dashboard">
+  <!-- Header con filtros y estadísticas -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1 class="title">Sistema de Logs</h1>
+        <p class="subtitle">Monitoreo y análisis de eventos del sistema</p>
+      </div>
+      
+      <div class="header-stats">
+        <div class="stat-card">
+          <div class="stat-icon total">
+            <i class="material-icons">list_alt</i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-number">{{ totalLogs }}</span>
+            <span class="stat-label">Total Logs</span>
           </div>
         </div>
-
-        <div class="log-details p-4 bg-gray-900 text-gray-300">
-          <div class="mb-2">
-            <span class="font-semibold">Contexto:</span> {{ log.context }}
+        
+        <div class="stat-card">
+          <div class="stat-icon error">
+            <i class="material-icons">error</i>
           </div>
-
-          <div class="metadata-container">
-            <div
-              class="metadata-header flex items-center cursor-pointer"
-              (click)="toggleMetadata(log._id)"
-            >
-              <span class="text-lg mr-2">
-                <i
-                  class="material-icons"
-                  [class.rotate-90]="isExpanded(log._id)"
-                >
-                  chevron_right
-                </i>
-              </span>
-              <span class="font-semibold">Metadata</span>
-            </div>
-
-            <!-- Contenido de Metadata -->
-            @if (isExpanded(log._id)) {
-            <div class="content-json-viewer">
-              <div class="metadata-content ml-4">
-                <ngx-json-viewer [depth]="1" [json]="log.metadata"></ngx-json-viewer>
-                <button mat-stroked-button (click)="onCopy(log.metadata)">
-                  <span class="material-icons">content_copy</span>
-                </button>
-              </div>
-            </div>
-            }
+          <div class="stat-info">
+            <span class="stat-number">{{ getLogCountByLevel('error') }}</span>
+            <span class="stat-label">Errores</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon warning">
+            <i class="material-icons">warning</i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-number">{{ getLogCountByLevel('warn') }}</span>
+            <span class="stat-label">Advertencias</span>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Filtros y controles -->
+    <div class="filters-section">
+      <div class="filters-row">
+        <div class="filter-group">
+          <label class="filter-label">Nivel de Log:</label>
+          <div class="level-filters">
+            <button 
+              *ngFor="let level of logLevels" 
+              [class.active]="selectedLevel === level.value"
+              [class]="'level-btn ' + level.value"
+              (click)="filterByLevel(level.value)"
+            >
+              <i class="material-icons">{{ level.icon }}</i>
+              {{ level.label }}
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Búsqueda:</label>
+          <div class="search-container">
+            <i class="material-icons search-icon">search</i>
+            <input 
+              type="text" 
+              placeholder="Buscar en mensajes o contexto..."
+              [(ngModel)]="searchTerm"
+              (input)="onSearchChange()"
+              class="search-input"
+            >
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label class="filter-label">Elementos por página:</label>
+          <select [(ngModel)]="limit" (change)="onLimitChange()" class="limit-select">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <button class="action-btn refresh-btn" (click)="refreshLogs()" [disabled]="isLoading">
+          <i class="material-icons">refresh</i>
+          {{ isLoading ? 'Actualizando...' : 'Actualizar' }}
+        </button>
+        
+        <button class="action-btn export-btn" (click)="exportLogs()">
+          <i class="material-icons">download</i>
+          Exportar
+        </button>
+        
+        <div class="auto-refresh-toggle">
+          <label class="toggle-label">
+            <input type="checkbox" [(ngModel)]="autoRefresh" (change)="toggleAutoRefresh()">
+            <span class="toggle-slider"></span>
+            Auto-refresh (30s)
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="logs-content">
+    @if (isLoading) {
+      <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Cargando logs...</p>
+      </div>
+    } @else if (filteredLogs.length === 0) {
+      <div class="empty-state">
+        <i class="material-icons empty-icon">info</i>
+        <h3>No se encontraron logs</h3>
+        <p>Intenta ajustar los filtros o actualizar la página</p>
+      </div>
+    } @else {
+      <div class="logs-container">
+        @for (log of filteredLogs; track log._id) {
+          <div class="log-card" [class.expanded]="isExpanded(log._id)">
+            <div class="log-header" (click)="toggleMetadata(log._id)">
+              <div class="log-level-badge" [class]="'level-' + log.level">
+                <i class="material-icons">{{ getLevelIcon(log.level) }}</i>
+                <span class="level-text">{{ log.level.toUpperCase() }}</span>
+              </div>
+              
+              <div class="log-content">
+                <div class="log-message">{{ log.message }}</div>
+                <div class="log-context">{{ log.context }}</div>
+              </div>
+              
+              <div class="log-meta">
+                <div class="log-timestamp">
+                  <i class="material-icons">schedule</i>
+                  {{ log.timestamp | date: 'dd/MM/yy HH:mm:ss' }}
+                </div>
+                <div class="log-actions">
+                  <button class="action-icon" (click)="onCopy(log); $event.stopPropagation()" title="Copiar log">
+                    <i class="material-icons">content_copy</i>
+                  </button>
+                  <button class="action-icon" (click)="toggleMetadata(log._id); $event.stopPropagation()" title="Ver metadata">
+                    <i class="material-icons" [class.rotated]="isExpanded(log._id)">expand_more</i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            @if (isExpanded(log._id)) {
+              <div class="log-details">
+                <div class="metadata-section">
+                  <h4 class="metadata-title">
+                    <i class="material-icons">code</i>
+                    Metadata
+                  </h4>
+                  <div class="metadata-content">
+                    <ngx-json-viewer [depth]="2" [json]="log.metadata"></ngx-json-viewer>
+                    <button class="copy-metadata-btn" (click)="onCopy(log.metadata)">
+                      <i class="material-icons">content_copy</i>
+                      Copiar JSON
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Paginación mejorada -->
+      @if (getPageNumbers().length > 1) {
+        <div class="pagination-container">
+          <div class="pagination-info">
+            Mostrando {{ (currentPage - 1) * limit + 1 }} - {{ Math.min(currentPage * limit, totalLogs) }} de {{ totalLogs }} logs
+          </div>
+          
+          <div class="pagination-controls">
+            <button 
+              class="pagination-btn" 
+              [disabled]="currentPage === 1"
+              (click)="changePage(currentPage - 1)"
+            >
+              <i class="material-icons">chevron_left</i>
+            </button>
+            
+            @for (page of getVisiblePageNumbers(); track page) {
+              <button 
+                class="pagination-btn" 
+                [class.active]="currentPage === page"
+                (click)="changePage(page)"
+              >
+                {{ page }}
+              </button>
+            }
+            
+            <button 
+              class="pagination-btn" 
+              [disabled]="currentPage === getPageNumbers().length"
+              (click)="changePage(currentPage + 1)"
+            >
+              <i class="material-icons">chevron_right</i>
+            </button>
+          </div>
+        </div>
+      }
     }
   </div>
-
-  <div class="pagination mt-4 flex justify-center space-x-2">
-    <button
-      *ngFor="let page of getPageNumbers()"
-      [class.active]="isPageActive(page)"
-      (click)="changePage(page)"
-      class="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
-    >
-      {{ page }}
-    </button>
-  </div>
-
 </div>
 
 

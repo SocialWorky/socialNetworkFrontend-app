@@ -3,7 +3,8 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { LogService } from './services/log.service';
 import { LogsList, Logs } from './interface/log.interface';
 import { GenericSnackbarService } from '@shared/services/generic-snackbar.service';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, timer } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'worky-log',
@@ -14,14 +15,28 @@ import { Subject, takeUntil } from 'rxjs';
 export class LogComponent implements OnInit, OnDestroy {
 
   logs: LogsList[] = [];
-
+  filteredLogs: LogsList[] = [];
   currentPage: number = 1;
-
   limit: number = 10;
-
   totalLogs: number = 0;
-
   expandedMetadata: { [key: string]: boolean } = {};
+  isLoading: boolean = false;
+  searchTerm: string = '';
+  selectedLevel: string = '';
+  autoRefresh: boolean = false;
+  private autoRefreshTimer?: any;
+
+  // Configuración de niveles de log
+  logLevels = [
+    { value: '', label: 'Todos', icon: 'list' },
+    { value: 'error', label: 'Errores', icon: 'error' },
+    { value: 'warn', label: 'Advertencias', icon: 'warning' },
+    { value: 'info', label: 'Información', icon: 'info' },
+    { value: 'debug', label: 'Debug', icon: 'bug_report' }
+  ];
+
+  // Referencia a Math para usar en el template
+  Math = Math;
 
   private destroy$ = new Subject<void>();
 
@@ -39,19 +54,129 @@ export class LogComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.autoRefreshTimer) {
+      clearInterval(this.autoRefreshTimer);
+    }
   }
 
   loadLogs() {
-    this._logService.getLogs(this.currentPage, this.limit).pipe(takeUntil(this.destroy$)).subscribe((res) => {
-      this.logs = res.logs;
-      this.totalLogs = res.total;
-      this._cdr.markForCheck();
+    this.isLoading = true;
+    this._logService.getLogs(this.currentPage, this.limit).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        this.logs = res.logs;
+        this.totalLogs = res.total;
+        this.applyFilters();
+        this.isLoading = false;
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error loading logs:', error);
+        this.isLoading = false;
+        this._genericSnackbarService.error('Error al cargar los logs');
+        this._cdr.markForCheck();
+      }
     });
   }
 
-  changePage(newPage: number): void {
-    if (newPage >= 1 && newPage <= Math.ceil(this.totalLogs / this.limit)) {
-      this.currentPage = newPage;
+  refreshLogs() {
+    this.loadLogs();
+  }
+
+  applyFilters() {
+    this.filteredLogs = this.logs.filter(log => {
+      const matchesLevel = !this.selectedLevel || log.level === this.selectedLevel;
+      const matchesSearch = !this.searchTerm || 
+        log.message.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        log.context.toLowerCase().includes(this.searchTerm.toLowerCase());
+      
+      return matchesLevel && matchesSearch;
+    });
+  }
+
+  filterByLevel(level: string) {
+    this.selectedLevel = level;
+    this.applyFilters();
+  }
+
+  onSearchChange() {
+    this.applyFilters();
+  }
+
+  onLimitChange() {
+    this.currentPage = 1;
+    this.loadLogs();
+  }
+
+  toggleAutoRefresh() {
+    if (this.autoRefresh) {
+      this.autoRefreshTimer = setInterval(() => {
+        this.loadLogs();
+      }, 30000); // 30 segundos
+    } else {
+      if (this.autoRefreshTimer) {
+        clearInterval(this.autoRefreshTimer);
+        this.autoRefreshTimer = undefined;
+      }
+    }
+  }
+
+  exportLogs() {
+    const dataToExport = this.filteredLogs.map(log => ({
+      timestamp: log.timestamp,
+      level: log.level,
+      message: log.message,
+      context: log.context,
+      metadata: log.metadata
+    }));
+
+    const csvContent = this.convertToCSV(dataToExport);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `logs_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  private convertToCSV(data: any[]): string {
+    const headers = ['Timestamp', 'Level', 'Message', 'Context', 'Metadata'];
+    const csvRows = [headers.join(',')];
+    
+    for (const row of data) {
+      const values = [
+        row.timestamp,
+        row.level,
+        `"${row.message.replace(/"/g, '""')}"`,
+        `"${row.context.replace(/"/g, '""')}"`,
+        `"${JSON.stringify(row.metadata).replace(/"/g, '""')}"`
+      ];
+      csvRows.push(values.join(','));
+    }
+    
+    return csvRows.join('\n');
+  }
+
+  getLogCountByLevel(level: string): number {
+    return this.logs.filter(log => log.level === level).length;
+  }
+
+  getLevelIcon(level: string): string {
+    const iconMap: { [key: string]: string } = {
+      'error': 'error',
+      'warn': 'warning',
+      'info': 'info',
+      'debug': 'bug_report'
+    };
+    return iconMap[level] || 'help';
+  }
+
+  changePage(newPage: number | string): void {
+    const pageNumber = typeof newPage === 'string' ? parseInt(newPage, 10) : newPage;
+    if (pageNumber >= 1 && pageNumber <= Math.ceil(this.totalLogs / this.limit)) {
+      this.currentPage = pageNumber;
       this.loadLogs();
     }
   }
@@ -73,10 +198,34 @@ export class LogComponent implements OnInit, OnDestroy {
     return !!this.expandedMetadata[logId];
   }
 
-  onCopy(data: Object) {
-    const str = JSON.stringify(data, null, 2);
+  onCopy(data: any) {
+    const str = typeof data === 'object' ? JSON.stringify(data, null, 2) : data.toString();
     this._clipboard.copy(str);
-    this._genericSnackbarService.info('Copied to clipboard');
+    this._genericSnackbarService.info('Copiado al portapapeles');
+  }
+
+  getVisiblePageNumbers(): number[] {
+    const totalPages = Math.ceil(this.totalLogs / this.limit);
+    const current = this.currentPage;
+    const pages: number[] = [];
+
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    if (current <= 4) {
+      for (let i = 1; i <= 5; i++) pages.push(i);
+      pages.push(totalPages);
+    } else if (current >= totalPages - 3) {
+      pages.push(1);
+      for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      for (let i = current - 1; i <= current + 1; i++) pages.push(i);
+      pages.push(totalPages);
+    }
+
+    return pages;
   }
 
 }

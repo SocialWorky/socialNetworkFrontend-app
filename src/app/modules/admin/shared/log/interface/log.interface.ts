@@ -11,5 +11,5 @@ export interface LogsList {
   message: string;
   context: string;
   metadata: [];
-  timestamp: Data;
+  timestamp: Date;
 }
