@@ -1,62 +1,138 @@
-  <div class="mt-4 mx-4">
-    <div class="w-full overflow-hidden rounded-lg shadow-xs">
-      <div class="w-full overflow-x-auto">
-
-        <div class="content-header-title">
-          <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ 'admin.lastRegisteredUsers-title' | workyTranslations }}</h2>
+<div class="last-registered-users-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-section">
+        <i class="fas fa-users title-icon"></i>
+        <h2 class="title">Últimos usuarios registrados</h2>
+      </div>
+      <div class="header-actions">
+        <button class="refresh-btn" (click)="refreshUsers()" [disabled]="isLoading">
+          <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+          <span class="btn-text">{{ 'refresh' | workyTranslations }}</span>
+        </button>
+      </div>
+    </div>
+    <div class="stats-section">
+      <div class="stat-card">
+        <i class="fas fa-user-check stat-icon active"></i>
+        <div class="stat-content">
+          <span class="stat-number">{{ activeUsersCount }}</span>
+          <span class="stat-label">Usuarios Activos</span>
         </div>
-
-        <table class="w-full">
-          <thead>
-            <tr class="header-tr">
-              <th class="px-4 py-3">{{ 'admin.lastRegisteredUsers-user' | workyTranslations }}</th>
-              <th class="px-4 py-3">{{ 'admin.lastRegisteredUsers-status' | workyTranslations }}</th>
-              <th class="px-4 py-3">{{ 'admin.lastRegisteredUsers-email' | workyTranslations }}</th>
-              <th class="px-4 py-3">{{ 'admin.lastRegisteredUsers-createdAt' | workyTranslations }}</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
-
-            @for(user of users; track $index) {
-
-              <tr class="body-tr">
-                <td class="px-4 py-3">
-                  <div class="flex items-center text-sm">
-
-                    <div class="relative hidden w-8 h-8 mr-3 rounded-full md:block">
-                        <worky-avatar 
-                          [size]="35"
-                          img="{{ user?.avatar }}"
-                          name="{{ user?.name }} {{ user.lastName }}">
-                        </worky-avatar>
-                      <div class="absolute inset-0 rounded-full shadow-inner" aria-hidden="true"></div>
-                    </div>
-
-                    <div>
-                      <p class="font-semibold">{{ user?.name }} {{ user?.lastName }}</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ user.username }}</p>
-                    </div>
-
-                  </div>
-                </td>
-
-                <td class="px-4 py-3 text-xs">
-                  <span class="px-2 py-1 font-semibold leading-tight text-green-700  rounded-full dark:text-green-100"
-                    [class.dark:bg-red-700]="user.isVerified === false"
-                    [class.dark:bg-green-700]="user.isVerified === true"> {{ user.isVerified === true ? ('admin.lastRegisteredUsers-validated' | workyTranslations) : ('admin.lastRegisteredUsers-pending' | workyTranslations)  }} </span>
-                </td>
-
-                <td class="px-4 py-3 text-sm">
-                  <span> {{ user.email }} </span>
-                </td>
-
-                <td class="px-4 py-3 text-sm">{{ user.createdAt | date }}</td>
-              </tr>
-  
-            }
-
-          </tbody>
-        </table>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-user-clock stat-icon pending"></i>
+        <div class="stat-content">
+          <span class="stat-number">{{ pendingUsersCount }}</span>
+          <span class="stat-label">Pendiente de Verificación</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-user-times stat-icon inactive"></i>
+        <div class="stat-content">
+          <span class="stat-number">{{ inactiveUsersCount }}</span>
+          <span class="stat-label">Usuarios Desactivados</span>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p class="loading-text">{{ 'loadingUsers' | workyTranslations }}</p>
+    </div>
+  </div>
+
+  <!-- Users Grid -->
+  <div class="users-grid" *ngIf="!isLoading && users.length > 0">
+    <div class="user-card" *ngFor="let user of users; trackBy: trackByUserId">
+      <div class="card-header">
+        <div class="user-avatar">
+          <worky-avatar 
+            [size]="50"
+            [img]="user?.avatar"
+            [name]="user?.name + ' ' + user.lastName">
+          </worky-avatar>
+          <div class="status-indicator" [class]="getStatusClass(user)"></div>
+        </div>
+        <div class="user-info">
+          <h3 class="user-name">{{ user?.name }} {{ user?.lastName }}</h3>
+          <p class="user-username">&#64;{{ user.username }}</p>
+          <p class="user-email">{{ user.email }}</p>
+        </div>
+      </div>
+      
+      <div class="card-body">
+        <div class="user-details">
+          <div class="detail-item">
+            <i class="fas fa-calendar-alt detail-icon"></i>
+            <span class="detail-label">Fecha de registro:</span>
+            <span class="detail-value">{{ user.createdAt | date:'longDate':'':'es' }}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-clock detail-icon"></i>
+            <span class="detail-label">Último ingreso:</span>
+            <span class="detail-value">{{ user.updatedAt | date:'medium':'':'es' }}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-shield-alt detail-icon"></i>
+            <span class="detail-label">Rol:</span>
+            <span class="detail-value role-badge" [class]="getRoleClass(user.role)">
+              {{ user.role | titlecase }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="verification-status">
+          <div class="status-badge" [class]="getVerificationClass(user)">
+            <i class="fas" [class.fa-check-circle]="user.isVerified" [class.fa-exclamation-circle]="!user.isVerified"></i>
+            <span>{{ user.isVerified ? 'Verificado' : 'Pendiente de verificación' }}</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <div class="toggle-container">
+            <span class="toggle-label">{{ user.isActive ? 'Activo' : 'Inactivo' }}</span>
+            <label class="toggle-switch">
+              <input 
+                type="checkbox" 
+                [checked]="user.isActive"
+                (change)="toggleUserStatus(user)"
+                [disabled]="updatingUsers.has(user._id)">
+              <span class="toggle-slider" [class.loading]="updatingUsers.has(user._id)"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && users.length === 0">
+    <div class="empty-content">
+      <i class="fas fa-users empty-icon"></i>
+      <h3 class="empty-title">{{ 'noUsersFound' | workyTranslations }}</h3>
+      <p class="empty-description">{{ 'noUsersDescription' | workyTranslations }}</p>
+      <button class="refresh-btn primary" (click)="refreshUsers()">
+        <i class="fas fa-sync-alt"></i>
+        <span class="btn-text">{{ 'tryAgain' | workyTranslations }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error">
+    <div class="error-content">
+      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <h3 class="error-title">{{ 'errorLoadingUsers' | workyTranslations }}</h3>
+      <p class="error-description">{{ error }}</p>
+      <button class="refresh-btn primary" (click)="refreshUsers()">
+        <i class="fas fa-sync-alt"></i>
+        <span class="btn-text">{{ 'tryAgain' | workyTranslations }}</span>
+      </button>
+    </div>
+  </div>
+</div>
