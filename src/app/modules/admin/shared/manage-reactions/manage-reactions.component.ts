@@ -33,6 +33,8 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
 
   public imageFile: File | null = null;
 
+  error: string | null = null;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -110,6 +112,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
   }
 
   listReactions() {
+    this.error = null;
     this._customReactionsService.getCustomReactionsAll().pipe(takeUntil(this.destroy$)).subscribe({
       next: (reactions: CustomReactionList[]) => {
         this.reactionsList = reactions
@@ -122,6 +125,8 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Failed to load reactions', err);
+        this.error = 'Error al cargar las reacciones. Por favor, intenta de nuevo.';
+        this._cdr.markForCheck();
       },
     });
   }
@@ -142,24 +147,49 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     }
   }
 
+  onImageError(event: any) {
+    // Set a fallback image or hide the image
+    event.target.style.display = 'none';
+    // Optionally show a placeholder
+    const placeholder = document.createElement('div');
+    placeholder.className = 'image-placeholder';
+    placeholder.innerHTML = '<i class="fas fa-image"></i>';
+    placeholder.style.cssText = `
+      width: 32px;
+      height: 32px;
+      background: #374151;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      font-size: 14px;
+    `;
+    event.target.parentNode.appendChild(placeholder);
+  }
+
   createCustomReaction() {
     const idImagenMoment = Date.now().toString() + Math.random().toString(36).substring(2, 15);
     this.loadReactionsButtons = true;
+    this.error = null;
+    
     if (this.reactionForm.valid) {
       if (this.imageFile) {
         this._fileUploadService.uploadFile([this.imageFile], 'emojis', idImagenMoment, null, TypePublishing.EMOJI).pipe(takeUntil(this.destroy$)).subscribe({
           error: (err) => {
+            console.error('Error uploading file:', err);
             this.loadReactionsButtons = false;
+            this.error = 'Error al subir archivo, intente de nuevo. Con otro formato o tamaño.';
             this._cdr.markForCheck();
 
-              this._alertService.showAlert(
-                'Error',
-                'Error al subir archivo, intente de nuevo. Con otro formato o tamaño.',
-                Alerts.ERROR,
-                Position.CENTER,
-                true,
-                translations['button.ok'],
-              );
+            this._alertService.showAlert(
+              'Error',
+              'Error al subir archivo, intente de nuevo. Con otro formato o tamaño.',
+              Alerts.ERROR,
+              Position.CENTER,
+              true,
+              translations['button.ok'],
+            );
           },
         });
       } else {
@@ -167,6 +197,8 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
       }
     } else {
       this.loadReactionsButtons = false;
+      this.error = 'Por favor, completa todos los campos requeridos.';
+      this._cdr.markForCheck();
     }
   }
 
@@ -210,11 +242,14 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
           loadingReaction.dismiss();
           this.listReactions();
           this.loadReactionsButtons = false;
+          this._cdr.markForCheck();
         },
         error: (err) => {
           console.error('Failed to create reaction', err);
+          this.error = 'Error al crear la reacción. Por favor, intenta de nuevo.';
           loadingReaction.dismiss();
           this.loadReactionsButtons = false;
+          this._cdr.markForCheck();
         }
       });
   }
@@ -236,6 +271,11 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
 
           this.listReactions();
         },
+        error: (err) => {
+          console.error('Failed to delete reaction', err);
+          this.error = 'Error al eliminar la reacción. Por favor, intenta de nuevo.';
+          this._cdr.markForCheck();
+        }
       });
   }
 }
