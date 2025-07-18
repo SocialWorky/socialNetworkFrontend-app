@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import Swal, { SweetAlertOptions } from 'sweetalert2';
+import { Observable, from } from 'rxjs';
 
 import { Alerts, Position } from './../enums/alerts.enum';
 
@@ -43,5 +44,35 @@ export class AlertService {
         }
       }
     });
+  }
+
+  showConfirmation(
+    title: string,
+    message: string,
+    confirmButtonText: string = 'Sí',
+    cancelButtonText: string = 'No',
+    icon: Alerts = Alerts.QUESTION,
+    position: Position = Position.CENTER
+  ): Observable<boolean> {
+    message = message.replace(/<br>/g, '\n');
+
+    const swalOptions: SweetAlertOptions = {
+      title: title,
+      text: message,
+      icon: icon as any,
+      position: position,
+      showCancelButton: true,
+      confirmButtonText: confirmButtonText,
+      cancelButtonText: cancelButtonText,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      customClass: {
+        container: 'custom-swal-container custom-swal-center',
+      },
+    };
+
+    return from(Swal.fire(swalOptions).then((result) => {
+      return result.isConfirmed;
+    }));
   }
 }

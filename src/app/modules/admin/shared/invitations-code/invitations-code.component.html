@@ -1,68 +1,250 @@
-<div class="bg-gray-900 text-white py-12">
-    <div class="max-w-lg mx-auto bg-gray-800 p-8 rounded-lg shadow-lg">
-        <h2 class="text-3xl font-semibold mb-6">Crear Nueva Invitación</h2>
-        <form [formGroup]="invitationsForm" (ngSubmit)="createInvitations()">
-            <div class="mb-6">
-                <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Email:</label>
-                <input formControlName="email" id="email" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-                <div *ngIf="invitationsForm.controls['email'].invalid && invitationsForm.controls['email'].touched" class="text-red-500 text-sm mt-2">El email es requerido.</div>
-            </div>
-            <div class="mt-6">
-                <div *ngIf="loadInvitationsButtons" class="loader"></div>
-                <button *ngIf="!loadInvitationsButtons" type="submit" [disabled]="invitationsForm.invalid" class="w-full bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600">Enviar Invitación</button>
-            </div>
-        </form>
-    </div>
-
-
-  <div class="mt-4 mx-4">
-    <div class="w-full overflow-hidden rounded-lg shadow-xs">
-      <div class="w-full overflow-x-auto">
-
-        <div class="content-header-title">
-          <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Invitaciones Enviadas</h2>
-        </div>
-
-        <table class="w-full">
-          <thead>
-            <tr class="header-tr">
-              <th class="px-4 py-3">ID</th>
-              <th class="px-4 py-3">CODIGO</th>
-              <th class="px-4 py-3">EMAIL</th>
-              <th class="px-4 py-3">FECHA ENVIO</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
-
-            @for(invitation of listInvitationsCode; track $index) {
-
-              <tr class="body-tr">
-                <td class="px-4 py-3">
-                  <div class="flex items-center text-sm">
-                      <p class="font-semibold">{{ invitation._id }}</p>
-                  </div>
-                </td>
-
-                <td class="px-4 py-3 text-xs">
-                  <span class="px-2 py-1 font-semibold leading-tight text-green-700  rounded-full dark:text-green-100"> 
-                    {{ invitation.code  }} </span>
-                </td>
-
-                <td class="px-4 py-3 text-sm">
-                  <span> {{ invitation.email }} </span>
-                </td>
-
-                <td class="px-4 py-3 text-sm">{{ invitation.createdAt | date }}</td>
-              </tr>
-
-            }
-
-          </tbody>
-        </table>
+<div class="invitations-code-dashboard">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1 class="title">Gestión de Códigos de Invitación</h1>
+        <p class="subtitle">Crea y administra códigos de invitación para nuevos usuarios</p>
+      </div>
+      <div class="header-actions">
+        <button class="refresh-btn" (click)="getInvitationsCode()" [disabled]="loadInvitationsButtons">
+          <i class="material-icons" [class.spinning]="loadInvitationsButtons">refresh</i>
+          <span class="btn-text">Actualizar</span>
+        </button>
+        <button class="stats-btn" (click)="showStats()" [disabled]="loadInvitationsButtons">
+          <i class="material-icons">bar_chart</i>
+          <span class="btn-text">Estadísticas</span>
+        </button>
       </div>
     </div>
   </div>
 
+  <!-- Create Invitation Section -->
+  <div class="create-section">
+    <div class="section-header">
+      <div class="section-icon">
+        <i class="material-icons">add_circle</i>
+      </div>
+      <div class="section-info">
+        <h3 class="section-title">Crear Nueva Invitación</h3>
+        <p class="section-description">Genera un código de invitación y envíalo por email</p>
+      </div>
+    </div>
+    
+    <div class="section-content">
+      <form [formGroup]="invitationsForm" (ngSubmit)="createInvitations()" class="create-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="email" class="form-label">
+              <i class="material-icons">email</i>
+              <span>Email del Invitado</span>
+            </label>
+            <input 
+              formControlName="email" 
+              id="email" 
+              type="email" 
+              class="form-input"
+              placeholder="ejemplo@correo.com"
+              [class.error]="invitationsForm.controls['email'].invalid && invitationsForm.controls['email'].touched">
+            <div *ngIf="invitationsForm.controls['email'].invalid && invitationsForm.controls['email'].touched" class="error-message">
+              <i class="material-icons">error</i>
+              <span>El email es requerido y debe ser válido</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button 
+            type="submit" 
+            [disabled]="invitationsForm.invalid || loadInvitationsButtons" 
+            class="submit-btn">
+            <i class="material-icons" [class.spinning]="loadInvitationsButtons">send</i>
+            <span>Enviar Invitación</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Invitations List Section -->
+  <div class="list-section">
+    <div class="section-header">
+      <div class="section-icon">
+        <i class="material-icons">list</i>
+      </div>
+      <div class="section-info">
+        <h3 class="section-title">Invitaciones Enviadas</h3>
+        <p class="section-description">Historial de todos los códigos de invitación generados</p>
+      </div>
+      <div class="section-actions">
+        <div class="invitations-count">
+          <span class="count-number">{{ listInvitationsCode.length }}</span>
+          <span class="count-label">Invitaciones</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section-content">
+      <div class="table-container">
+        <table class="invitations-table">
+          <thead>
+            <tr class="table-header">
+              <th class="header-cell">
+                <i class="material-icons">tag</i>
+                <span>ID</span>
+              </th>
+              <th class="header-cell">
+                <i class="material-icons">vpn_key</i>
+                <span>Código</span>
+              </th>
+              <th class="header-cell">
+                <i class="material-icons">email</i>
+                <span>Email</span>
+              </th>
+              <th class="header-cell">
+                <i class="material-icons">schedule</i>
+                <span>Fecha de Envío</span>
+              </th>
+              <th class="header-cell">
+                <i class="material-icons">settings</i>
+                <span>Acciones</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="table-body">
+            <tr *ngFor="let invitation of listInvitationsCode; trackBy: trackByInvitation" class="table-row">
+              <td class="table-cell">
+                <div class="id-cell">
+                  <span class="id-number">#{{ invitation._id }}</span>
+                </div>
+              </td>
+              <td class="table-cell">
+                <div class="code-cell">
+                  <span class="code-text">{{ invitation.code }}</span>
+                  <button class="copy-btn" (click)="copyCode(invitation.code)" title="Copiar código">
+                    <i class="material-icons">content_copy</i>
+                  </button>
+                </div>
+              </td>
+              <td class="table-cell">
+                <div class="email-cell">
+                  <i class="material-icons email-icon">email</i>
+                  <span class="email-text">{{ invitation.email }}</span>
+                </div>
+              </td>
+              <td class="table-cell">
+                <div class="date-cell">
+                  <i class="material-icons date-icon">schedule</i>
+                  <span class="date-text">{{ invitation.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </td>
+              <td class="table-cell">
+                <div class="actions-cell">
+                  <button class="action-btn resend-btn" (click)="resendInvitation(invitation)" title="Reenviar invitación">
+                    <i class="material-icons">refresh</i>
+                  </button>
+                  <button class="action-btn delete-btn" (click)="deleteInvitation(invitation._id)" title="Eliminar invitación" [disabled]="loadInvitationsButtons">
+                    <i class="material-icons">delete</i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Empty State -->
+        <div *ngIf="listInvitationsCode.length === 0" class="empty-state">
+          <div class="empty-icon">
+            <i class="material-icons">inbox</i>
+          </div>
+          <h3>No hay invitaciones</h3>
+          <p>Crea tu primera invitación usando el formulario de arriba</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Modal -->
+  <div class="stats-modal" *ngIf="showStatsModal" (click)="closeStats()">
+    <div class="stats-content" (click)="$event.stopPropagation()">
+      <div class="stats-header">
+        <h3>Estadísticas de Invitaciones</h3>
+        <button class="close-btn" (click)="closeStats()">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
+      <div class="stats-body">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="material-icons">send</i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-number">{{ listInvitationsCode.length }}</span>
+              <span class="stat-label">Total Enviadas</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="material-icons">today</i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-number">{{ getTodayInvitations() }}</span>
+              <span class="stat-label">Hoy</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="material-icons">view_week</i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-number">{{ getThisWeekInvitations() }}</span>
+              <span class="stat-label">Esta Semana</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="material-icons">calendar_month</i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-number">{{ getThisMonthInvitations() }}</span>
+              <span class="stat-label">Este Mes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loadInvitationsButtons">
+    <div class="loading-spinner">
+      <i class="material-icons spinning">refresh</i>
+      <p>Procesando invitación...</p>
+    </div>
+  </div>
+
+  <!-- Success State -->
+  <div class="success-state" *ngIf="successMessage">
+    <div class="success-content">
+      <i class="material-icons success-icon">check_circle</i>
+      <h3>Operación exitosa</h3>
+      <p>{{ successMessage }}</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error">
+    <div class="error-content">
+      <i class="material-icons error-icon">error</i>
+      <h3>Error en la operación</h3>
+      <p>{{ error }}</p>
+      <button class="refresh-btn primary" (click)="getInvitationsCode()">
+        <i class="material-icons">refresh</i>
+        <span>Intentar de nuevo</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 
