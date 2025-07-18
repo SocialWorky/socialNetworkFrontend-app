@@ -188,8 +188,9 @@ export class StatisticsComponent implements OnInit {
     this.isLoading = true;
     
     try {
+      // Load users first, then calculate message statistics based on user data
+      await this.getAllUsers();
       await Promise.all([
-        this.getAllUsers(),
         this.getCountPublications(),
         this.getAllPublications(),
         this.getReportsStatusPending(),
@@ -314,39 +315,73 @@ export class StatisticsComponent implements OnInit {
 
   private async getMessagesStatistics() {
     try {
-      // Get total unread messages count
-      await this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
-        next: (unreadCount: number) => {
-          this._unreadMessages = unreadCount;
-          this._cdr.markForCheck();
+      // First verify admin permissions
+      await this._messageService.verifyAdminPermissions().pipe(takeUntil(this.unsubscribe$)).subscribe({
+        next: (permissionResult) => {
+          
+          if (!permissionResult.hasAdminAccess) {
+            console.warn('Admin access denied:', permissionResult.message);
+            // Use basic statistics as fallback
+            this._messageService.getBasicMessagesStatistics().pipe(takeUntil(this.unsubscribe$)).subscribe({
+              next: (stats: any) => {
+                this._totalMessages = stats.totalMessages || 0;
+                this._unreadMessages = stats.unreadMessages || 0;
+                this._activeConversations = stats.activeConversations || 0;
+                this._cdr.markForCheck();
+              },
+              error: (error: any) => {
+                console.error('Error loading basic messages statistics:', error);
+                this._unreadMessages = 0;
+                this._cdr.markForCheck();
+              }
+            });
+            return;
+          }
         },
         error: (error: any) => {
-          console.error('Error loading unread messages count:', error);
-          this._unreadMessages = 0;
+          console.error('Error verifying admin permissions:', error);
         }
       });
 
-      // Get users with conversations to estimate active conversations
-      await this._messageService.getUsersWithConversations().pipe(takeUntil(this.unsubscribe$)).subscribe({
-        next: (userIds: string[]) => {
-          this._activeConversations = userIds.length;
-          // Estimate total messages based on active conversations
-          this._totalMessages = this._activeConversations * 25; // Average 25 messages per conversation
+      // Get complete messages statistics from the new endpoint
+      await this._messageService.getMessagesStatistics().pipe(takeUntil(this.unsubscribe$)).subscribe({
+        next: (stats: any) => {
+          this._totalMessages = stats.totalMessages || 0;
+          this._unreadMessages = stats.unreadMessages || 0;
+          this._activeConversations = stats.activeConversations || 0;
           this._cdr.markForCheck();
         },
         error: (error: any) => {
-          console.error('Error loading users with conversations:', error);
-          this._activeConversations = 0;
-          this._totalMessages = 0;
+          console.error('Error loading messages statistics:', error);
+          // Fallback to unread count only
+          this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
+            next: (unreadCount: number) => {
+              this._unreadMessages = unreadCount;
+              this._cdr.markForCheck();
+            },
+            error: (unreadError: any) => {
+              console.error('Error loading unread messages count:', unreadError);
+              this._unreadMessages = 0;
+              this._cdr.markForCheck();
+            }
+          });
         }
       });
 
     } catch (error) {
       console.error('Error loading messages statistics:', error);
-      // Fallback to simulated data
-      this._totalMessages = this.allUsersLength * 15;
-      this._unreadMessages = Math.floor(this._totalMessages * 0.15);
-      this._activeConversations = Math.floor(this.allUsersLength * 0.4);
+      // Fallback to unread count only
+      this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
+        next: (unreadCount: number) => {
+          this._unreadMessages = unreadCount;
+          this._cdr.markForCheck();
+        },
+        error: (unreadError: any) => {
+          console.error('Error loading unread messages count:', unreadError);
+          this._unreadMessages = 0;
+          this._cdr.markForCheck();
+        }
+      });
     }
   }
 

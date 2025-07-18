@@ -4,6 +4,7 @@ import { Observable, from, of, switchMap, tap, catchError, map } from 'rxjs';
 import { environment } from '@env/environment';
 import { CreateMessage, Message, UpdateMessage } from '../interfaces/message.interface';
 import { MessageDatabaseService } from '@shared/services/database/message-database.service';
+import { AuthService } from '@auth/services/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,8 @@ export class MessageService {
 
   constructor(
     private http: HttpClient,
-    private _messageDatabase: MessageDatabaseService
+    private _messageDatabase: MessageDatabaseService,
+    private _authService: AuthService
   ) {
     this.baseUrl = environment.APIMESSAGESERVICE;
     this._messageDatabase.initDatabase();
@@ -24,9 +26,197 @@ export class MessageService {
    * @returns Observable con la lista de IDs de usuarios.
    */
   getUsersWithConversations(): Observable<string[]> {
+    if (!this.baseUrl) {
+      console.warn('APIMESSAGESERVICE not configured, using fallback');
+      return of([]);
+    }
     const url = `${this.baseUrl}/messages/users`;
-    return this.http.get<string[]>(url);
+    return this.http.get<string[]>(url).pipe(
+      catchError((error) => {
+        console.error('Error loading users with conversations:', error);
+        return of([]);
+      })
+    );
   }
+
+  /**
+   * Verificar si el usuario tiene permisos de administrador en el backend.
+   * @returns Observable con el resultado de la verificación.
+   */
+  verifyAdminPermissions(): Observable<{ hasAdminAccess: boolean; message?: string }> {
+    if (!this.baseUrl) {
+      return of({ hasAdminAccess: false, message: 'APIMESSAGESERVICE not configured' });
+    }
+
+    const decodedToken = this._authService.getDecodedToken();
+    if (!decodedToken) {
+      return of({ hasAdminAccess: false, message: 'No token found' });
+    }
+
+    if (decodedToken.role !== 'admin') {
+      return of({ hasAdminAccess: false, message: `User role is ${decodedToken.role}, not admin` });
+    }
+
+    // Try to access a simple admin endpoint to verify permissions
+    const url = `${this.baseUrl}/messages/statistics`;
+    
+    return this.http.get(url, { observe: 'response' }).pipe(
+      map((response) => {
+        return { hasAdminAccess: true };
+      }),
+      catchError((error) => {
+        console.error('Admin permissions verification failed:', error);
+        
+        if (error.status === 403) {
+          return of({ 
+            hasAdminAccess: false, 
+            message: 'User has admin role but lacks backend permissions' 
+          });
+        } else if (error.status === 401) {
+          return of({ 
+            hasAdminAccess: false, 
+            message: 'Token is invalid or expired' 
+          });
+        } else {
+          return of({ 
+            hasAdminAccess: false, 
+            message: `Backend error: ${error.status} - ${error.message}` 
+          });
+        }
+      })
+    );
+  }
+
+  /**
+   * Obtener estadísticas básicas de mensajes (fallback para usuarios no admin).
+   * @returns Observable con estadísticas básicas.
+   */
+  getBasicMessagesStatistics(): Observable<{
+    totalMessages: number;
+    unreadMessages: number;
+    activeConversations: number;
+    totalConversations: number;
+    messagesToday: number;
+    averageMessagesPerConversation: number;
+  }> {
+    // Try to get unread count as a basic metric
+    return this.getUnreadAllMessagesCount().pipe(
+      map((unreadCount) => {
+        return {
+          totalMessages: 0, // Not available for non-admin users
+          unreadMessages: unreadCount,
+          activeConversations: 0, // Not available for non-admin users
+          totalConversations: 0, // Not available for non-admin users
+          messagesToday: 0, // Not available for non-admin users
+          averageMessagesPerConversation: 0 // Not available for non-admin users
+        };
+      }),
+      catchError((error) => {
+        console.error('Error getting basic messages statistics:', error);
+        return of({
+          totalMessages: 0,
+          unreadMessages: 0,
+          activeConversations: 0,
+          totalConversations: 0,
+          messagesToday: 0,
+          averageMessagesPerConversation: 0
+        });
+      })
+    );
+  }
+
+  /**
+   * Obtener estadísticas completas de mensajes.
+   * @returns Observable con las estadísticas de mensajes.
+   */
+  getMessagesStatistics(): Observable<{
+    totalMessages: number;
+    unreadMessages: number;
+    activeConversations: number;
+    totalConversations: number;
+    messagesToday: number;
+    averageMessagesPerConversation: number;
+  }> {
+    if (!this.baseUrl) {
+      console.warn('APIMESSAGESERVICE not configured, using fallback');
+      return of({
+        totalMessages: 0,
+        unreadMessages: 0,
+        activeConversations: 0,
+        totalConversations: 0,
+        messagesToday: 0,
+        averageMessagesPerConversation: 0
+      });
+    }
+
+    // Check if user has admin role (token is handled by interceptor)
+    const decodedToken = this._authService.getDecodedToken();
+    if (!decodedToken || decodedToken.role !== 'admin') {
+      console.warn('User does not have admin role. Current role:', decodedToken?.role);
+      return this.getBasicMessagesStatistics();
+    }
+
+    const url = `${this.baseUrl}/messages/statistics`;
+    
+    return this.http.get<{
+      totalMessages: number;
+      unreadMessages: number;
+      activeConversations: number;
+      totalConversations: number;
+      messagesToday: number;
+      averageMessagesPerConversation: number;
+    }>(url).pipe(
+      catchError((error) => {
+        console.error('Error loading messages statistics:', error);
+        console.error('Error status:', error.status);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.error);
+        
+        if (error.status === 403) {
+          console.error('Access forbidden. Check if user has admin role or proper permissions.');
+          console.error('Current user role:', this._authService.getDecodedToken()?.role);
+          console.error('Current user ID:', this._authService.getDecodedToken()?.id);
+          console.error('Token from localStorage:', localStorage.getItem('token')?.substring(0, 50) + '...');
+          
+          // Try to get more information about the token
+          try {
+            const token = localStorage.getItem('token');
+            if (token) {
+              const decoded = this._authService.getDecodedToken();
+              console.error('Decoded token info:', {
+                id: decoded?.id,
+                email: decoded?.email,
+                role: decoded?.role,
+                username: decoded?.username
+              });
+            }
+          } catch (tokenError) {
+            console.error('Error decoding token:', tokenError);
+          }
+          
+          // Use basic statistics as fallback for 403 errors
+          return this.getBasicMessagesStatistics();
+        } else if (error.status === 401) {
+          console.error('Unauthorized. Token may be invalid or expired.');
+        } else if (error.status === 404) {
+          console.error('Endpoint not found. Check if the endpoint exists in the backend.');
+        } else if (error.status === 0) {
+          console.error('Network error. Check if the service is accessible.');
+        }
+        
+        return of({
+          totalMessages: 0,
+          unreadMessages: 0,
+          activeConversations: 0,
+          totalConversations: 0,
+          messagesToday: 0,
+          averageMessagesPerConversation: 0
+        });
+      })
+    );
+  }
+
+
 
   /**
    * Obtener las conversaciones del usuario logeado con otro usuario específico.
@@ -340,6 +530,10 @@ export class MessageService {
   }
 
   syncReadStatusFromServer(): Observable<number> {
+    if (!this.baseUrl) {
+      console.warn('APIMESSAGESERVICE not configured, using fallback');
+      return of(0);
+    }
     const url = `${this.baseUrl}/messages/unread-all-count`;
     
     return this.http.get<number>(url).pipe(
