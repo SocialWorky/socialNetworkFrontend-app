@@ -1,43 +1,283 @@
-<div class="content-statistics">
-  <div class="grid grid-cols-12 gap-4 worky-grid-content">
-
-    <div class="col-span-12 sm:col-span-4 worky-grid">
-      <div class="p-4 relative  bg-gray-800 border border-gray-800 shadow-lg  rounded-2xl">
-
-
-        <span class="h-15 w-15 absolute right-3 text-green-400 material-icons">group</span>
-
-        <div class="text-2xl text-gray-100 font-medium leading-8 mt-5">{{ allUsersLength }}</div>
-        <div class="text-sm text-gray-500">{{ 'admin.statistics.group-usersRegister' | workyTranslations }}</div>
+<div class="statistics-dashboard">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1 class="title">Dashboard de Estadísticas</h1>
+        <p class="subtitle">Métricas en tiempo real de la plataforma</p>
       </div>
-    </div>
-
-    <div class="col-span-12 sm:col-span-4 worky-grid">
-      <div class="p-4 relative  bg-gray-800 border border-gray-800 shadow-lg  rounded-2xl">
-
-        <span class="h-15 w-15 absolute right-3 text-blue-400 material-icons">feed</span>
-
-        <div class="flex justify-between items-center ">
-          <i class="fab fa-behance text-xl text-gray-400"></i>
+      <div class="header-actions">
+        <button class="refresh-btn" (click)="refreshStatistics()" [disabled]="isLoading">
+          <i class="fas fa-sync-alt" [class.fa-spin]="isLoading"></i>
+          <span class="btn-text">Actualizar</span>
+        </button>
+        <div class="last-updated">
+          <i class="fas fa-clock"></i>
+          <span>Última actualización: {{ lastUpdated | workyDate:'short' }}</span>
         </div>
-        <div class="text-2xl text-gray-100 font-medium leading-8 mt-5">{{ countPublications }}</div>
-        <div class="text-sm text-gray-500">{{ 'admin.statistics.group-publicationsTitle' | workyTranslations }}</div>
       </div>
     </div>
+  </div>
 
-    <div class="col-span-12 sm:col-span-4 worky-grid">
-      <div class="p-4 relative  bg-gray-800 border border-gray-800 shadow-lg  rounded-2xl">
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Cargando estadísticas...</p>
+    </div>
+  </div>
 
-        <span class="h-15 w-15 absolute right-3 text-red-400 material-icons">warning</span>
-
-        <div class="flex justify-between items-center ">
-          <i class="fab fa-codepen text-xl text-gray-400"></i>
+  <!-- Main Statistics Grid -->
+  <div class="statistics-grid" *ngIf="!isLoading">
+    <!-- Users Statistics -->
+    <div class="stat-card primary">
+      <div class="card-header">
+        <div class="card-icon">
+          <i class="fas fa-users"></i>
         </div>
-        <div class="text-2xl text-gray-100 font-medium leading-8 mt-5">{{ ReportsStatusPendingCount }}</div>
-        <div class="text-sm text-gray-500">Publicaciones Reportadas</div>
+        <div class="card-info">
+          <h3 class="card-title">Usuarios Registrados</h3>
+          <p class="card-subtitle">Total de usuarios en la plataforma</p>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="main-stat">
+          <span class="stat-number">{{ allUsersLength | number }}</span>
+          <span class="stat-label">usuarios</span>
+        </div>
+        <div class="stat-details">
+          <div class="detail-item">
+            <span class="detail-label">Activos:</span>
+            <span class="detail-value">{{ activeUsersCount | number }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Pendientes:</span>
+            <span class="detail-value">{{ pendingUsersCount | number }}</span>
+          </div>
+        </div>
       </div>
     </div>
 
+    <!-- Publications Statistics -->
+    <div class="stat-card success">
+      <div class="card-header">
+        <div class="card-icon">
+          <i class="fas fa-newspaper"></i>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title">Publicaciones</h3>
+          <p class="card-subtitle">Contenido generado por usuarios</p>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="main-stat">
+          <span class="stat-number">{{ countPublications | number }}</span>
+          <span class="stat-label">publicaciones</span>
+        </div>
+        <div class="stat-details">
+          <div class="detail-item">
+            <span class="detail-label">Con media:</span>
+            <span class="detail-value">{{ publicationsWithMedia | number }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Hoy:</span>
+            <span class="detail-value">{{ todayPublications | number }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comments Statistics -->
+    <div class="stat-card info">
+      <div class="card-header">
+        <div class="card-icon">
+          <i class="fas fa-comments"></i>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title">Comentarios</h3>
+          <p class="card-subtitle">Interacciones en publicaciones</p>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="main-stat">
+          <span class="stat-number">{{ totalComments | number }}</span>
+          <span class="stat-label">comentarios</span>
+        </div>
+        <div class="stat-details">
+          <div class="detail-item">
+            <span class="detail-label">Promedio por pub:</span>
+            <span class="detail-value">{{ avgCommentsPerPublication | number:'1.1-1' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Hoy:</span>
+            <span class="detail-value">{{ todayComments | number }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reactions Statistics -->
+    <div class="stat-card warning">
+      <div class="card-header">
+        <div class="card-icon">
+          <i class="fas fa-heart"></i>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title">Reacciones</h3>
+          <p class="card-subtitle">Engagement de usuarios</p>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="main-stat">
+          <span class="stat-number">{{ totalReactions | number }}</span>
+          <span class="stat-label">reacciones</span>
+        </div>
+        <div class="stat-details">
+          <div class="detail-item">
+            <span class="detail-label">Promedio por pub:</span>
+            <span class="detail-value">{{ avgReactionsPerPublication | number:'1.1-1' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Hoy:</span>
+            <span class="detail-value">{{ todayReactions | number }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reports Statistics -->
+    <div class="stat-card danger">
+      <div class="card-header">
+        <div class="card-icon">
+          <i class="fas fa-flag"></i>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title">Reportes</h3>
+          <p class="card-subtitle">Contenido reportado por usuarios</p>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="main-stat">
+          <span class="stat-number">{{ ReportsStatusPendingCount | number }}</span>
+          <span class="stat-label">pendientes</span>
+        </div>
+        <div class="stat-details">
+          <div class="detail-item">
+            <span class="detail-label">Resueltos:</span>
+            <span class="detail-value">{{ resolvedReports | number }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Hoy:</span>
+            <span class="detail-value">{{ todayReports | number }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages Statistics -->
+    <div class="stat-card secondary">
+      <div class="card-header">
+        <div class="card-icon">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title">Mensajes</h3>
+          <p class="card-subtitle">Comunicación entre usuarios</p>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="main-stat">
+          <span class="stat-number">{{ totalMessages | number }}</span>
+          <span class="stat-label">mensajes</span>
+        </div>
+        <div class="stat-details">
+          <div class="detail-item">
+            <span class="detail-label">No leídos:</span>
+            <span class="detail-value">{{ unreadMessages | number }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Conversaciones:</span>
+            <span class="detail-value">{{ activeConversations | number }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Metrics Section -->
+  <div class="additional-metrics" *ngIf="!isLoading">
+    <h2 class="section-title">Métricas Adicionales</h2>
+    
+    <div class="metrics-grid">
+      <!-- Engagement Rate -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <i class="fas fa-chart-line metric-icon"></i>
+          <h4>Tasa de Engagement</h4>
+        </div>
+        <div class="metric-value">
+          <span class="percentage">{{ engagementRate | number:'1.1-1' }}%</span>
+        </div>
+        <div class="metric-description">
+          Porcentaje de usuarios activos que interactúan con el contenido
+        </div>
+      </div>
+
+      <!-- Content Growth -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <i class="fas fa-arrow-up metric-icon"></i>
+          <h4>Crecimiento de Contenido</h4>
+        </div>
+        <div class="metric-value">
+          <span class="percentage">{{ contentGrowthRate | number:'1.1-1' }}%</span>
+        </div>
+        <div class="metric-description">
+          Incremento de publicaciones en los últimos 7 días
+        </div>
+      </div>
+
+      <!-- User Activity -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <i class="fas fa-user-clock metric-icon"></i>
+          <h4>Actividad de Usuarios</h4>
+        </div>
+        <div class="metric-value">
+          <span class="percentage">{{ userActivityRate | number:'1.1-1' }}%</span>
+        </div>
+        <div class="metric-description">
+          Usuarios que han interactuado en las últimas 24 horas
+        </div>
+      </div>
+
+      <!-- Response Time -->
+      <div class="metric-card">
+        <div class="metric-header">
+          <i class="fas fa-stopwatch metric-icon"></i>
+          <h4>Tiempo de Respuesta</h4>
+        </div>
+        <div class="metric-value">
+          <span class="time">{{ avgResponseTime | number:'1.0-0' }}h</span>
+        </div>
+        <div class="metric-description">
+          Tiempo promedio de respuesta a reportes
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="error">
+    <div class="error-content">
+      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <h3>Error al cargar estadísticas</h3>
+      <p>{{ error }}</p>
+      <button class="refresh-btn primary" (click)="refreshStatistics()">
+        <i class="fas fa-sync-alt"></i>
+        <span>Intentar de nuevo</span>
+      </button>
+    </div>
   </div>
 </div>
 

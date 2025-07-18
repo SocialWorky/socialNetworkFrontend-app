@@ -23,6 +23,7 @@ import { AdminRoutingModule } from './admin-routing.module';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
 import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.module';
 import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.module';
+import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
 
 
 @NgModule({
@@ -49,7 +50,8 @@ import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.mod
     AdminRoutingModule,
     TranslationsModule,
     WorkyAvatarModule,
-    FormBuilderModule
+    FormBuilderModule,
+    PipesSharedModule
   ],
   exports: [TemplatesComponent],
 })

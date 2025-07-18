@@ -1,12 +1,471 @@
-.content-statistics {
+// Variables - Same as logs component
+$primary-color: #3b82f6;
+$success-color: #10b981;
+$warning-color: #f59e0b;
+$error-color: #ef4444;
+$info-color: #06b6d4;
+$secondary-color: #8b5cf6;
+$dark-bg: #0f172a;
+$card-bg: #1e293b;
+$border-color: #334155;
+$text-primary: #f8fafc;
+$text-secondary: #cbd5e1;
+$text-muted: #64748b;
+
+.statistics-dashboard {
   display: flex;
-  padding: 20px;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: $text-primary;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
 }
 
-.worky-grid-content {
-  .worky-grid {
-    .material-icons {
-      font-size: 4rem;
+.dashboard-header {
+  background: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid $border-color;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    .header-title {
+      .title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        background: linear-gradient(135deg, #3b82f6, #06b6d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .subtitle {
+        color: $text-secondary;
+        margin: 0.25rem 0 0 0;
+        font-size: 1rem;
+      }
     }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+
+      .refresh-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border: 1px solid $primary-color;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        color: $primary-color;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover:not(:disabled) {
+          background: $primary-color;
+          color: white;
+          transform: translateY(-1px);
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        &.primary {
+          background: $success-color;
+          border-color: $success-color;
+          color: white;
+
+          &:hover:not(:disabled) {
+            background: darken($success-color, 10%);
+          }
+        }
+      }
+
+      .last-updated {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: $text-secondary;
+        font-size: 0.875rem;
+
+        i {
+          color: $text-muted;
+        }
+      }
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 1rem;
+
+  .loading-spinner {
+    text-align: center;
+
+    i {
+      font-size: 2rem;
+      color: $primary-color;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      color: $text-secondary;
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
+}
+
+.statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, currentColor, transparent);
+    opacity: 0.3;
+  }
+
+  &.primary::before {
+    background: linear-gradient(90deg, transparent, $primary-color, transparent);
+  }
+
+  &.success::before {
+    background: linear-gradient(90deg, transparent, $success-color, transparent);
+  }
+
+  &.warning::before {
+    background: linear-gradient(90deg, transparent, $warning-color, transparent);
+  }
+
+  &.danger::before {
+    background: linear-gradient(90deg, transparent, $error-color, transparent);
+  }
+
+  &.info::before {
+    background: linear-gradient(90deg, transparent, $info-color, transparent);
+  }
+
+  &.secondary::before {
+    background: linear-gradient(90deg, transparent, $secondary-color, transparent);
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+
+  .stat-card.primary & {
+    background: linear-gradient(135deg, $primary-color, darken($primary-color, 10%));
+  }
+
+  .stat-card.success & {
+    background: linear-gradient(135deg, $success-color, darken($success-color, 10%));
+  }
+
+  .stat-card.warning & {
+    background: linear-gradient(135deg, $warning-color, darken($warning-color, 10%));
+  }
+
+  .stat-card.danger & {
+    background: linear-gradient(135deg, $error-color, darken($error-color, 10%));
+  }
+
+  .stat-card.info & {
+    background: linear-gradient(135deg, $info-color, darken($info-color, 10%));
+  }
+
+  .stat-card.secondary & {
+    background: linear-gradient(135deg, $secondary-color, darken($secondary-color, 10%));
+  }
+}
+
+.card-info {
+  flex: 1;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: $text-primary;
+  margin: 0 0 0.25rem 0;
+}
+
+.card-subtitle {
+  font-size: 0.875rem;
+  color: $text-secondary;
+  margin: 0;
+}
+
+.card-content {
+  .main-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: $text-primary;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 1rem;
+      color: $text-secondary;
+      text-transform: lowercase;
+    }
+  }
+
+  .stat-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+
+    .detail-label {
+      color: $text-secondary;
+    }
+
+    .detail-value {
+      color: $text-primary;
+      font-weight: 500;
+    }
+  }
+}
+
+.additional-metrics {
+  padding: 1.5rem;
+  border-top: 1px solid $border-color;
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .metric-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .metric-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    .metric-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba($primary-color, 0.2);
+      color: $primary-color;
+      font-size: 1rem;
+    }
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: $text-primary;
+      margin: 0;
+    }
+  }
+
+  .metric-value {
+    margin-bottom: 0.75rem;
+
+    .percentage {
+      font-size: 2rem;
+      font-weight: 700;
+      color: $success-color;
+      line-height: 1;
+    }
+
+    .time {
+      font-size: 2rem;
+      font-weight: 700;
+      color: $warning-color;
+      line-height: 1;
+    }
+  }
+
+  .metric-description {
+    font-size: 0.875rem;
+    color: $text-secondary;
+    line-height: 1.4;
+  }
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 1rem;
+  text-align: center;
+
+  .error-content {
+    max-width: 400px;
+
+    .error-icon {
+      font-size: 3rem;
+      color: $error-color;
+      margin-bottom: 1rem;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $text-primary;
+      margin: 0 0 0.5rem 0;
+    }
+
+    p {
+      color: $text-secondary;
+      margin: 0 0 1.5rem 0;
+      line-height: 1.5;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    padding: 1rem;
+
+    .header-content {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+
+      .header-actions {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  }
+
+  .statistics-grid {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .additional-metrics {
+    padding: 1rem;
+
+    .metrics-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .card-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .card-content .main-stat {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header .header-title .title {
+    font-size: 1.5rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .card-content .main-stat .stat-number {
+    font-size: 2rem;
+  }
+
+  .additional-metrics .metric-value .percentage,
+  .additional-metrics .metric-value .time {
+    font-size: 1.5rem;
   }
 }

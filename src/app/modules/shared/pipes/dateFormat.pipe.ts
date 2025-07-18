@@ -7,7 +7,7 @@ import { translations } from 'src/translations/translations';
   standalone: false,
 })
 export class WorkyDatePipe implements PipeTransform {
-  transform(value: string | Date, mode: 'relative' | 'absolute' = 'relative'): string {
+  transform(value: string | Date, mode: 'relative' | 'absolute' | 'short' = 'relative'): string {
     if (!value) return '';
 
     // Convertir el valor a un objeto Date
@@ -15,6 +15,8 @@ export class WorkyDatePipe implements PipeTransform {
 
     if (mode === 'relative') {
       return this.formatRelativeDate(date);
+    } else if (mode === 'short') {
+      return this.formatShortDate(date);
     } else {
       return this.formatAbsoluteDate(date);
     }
@@ -38,6 +40,16 @@ export class WorkyDatePipe implements PipeTransform {
     const key = this.mapDistanceToKey(distance);
     const count = this.extractCount(distance);
     return this.replaceTranslationVariables(translations[key], { count });
+  }
+
+  private formatShortDate(date: Date): string {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear().toString();
+    const hour = date.getHours().toString().padStart(2, '0');
+    const minute = date.getMinutes().toString().padStart(2, '0');
+
+    return `${day}/${month}/${year} ${hour}:${minute}`;
   }
 
   private formatAbsoluteDate(date: Date): string {
