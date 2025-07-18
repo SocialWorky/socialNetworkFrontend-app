@@ -1,91 +1,135 @@
-<div id="menu"
-  class="bg-gray-900 min-h-screen z-10 text-slate-300 w-64 left-0 h-screen overflow-y-scroll">
-
-  <div id="logo" class="my-4 px-6">
-
-      <h1 class="text-lg md:text-2xl font-bold text-white">
-        {{ title }}
-      </h1>
-      <p class="text-slate-500 text-sm">{{ subTitle }}</p>
-
-  </div>
-
-  <div id="profile" class="px-6 py-10">
-    <p class="text-slate-500">{{ 'admin.sideMenu-welcome' | workyTranslations }}</p>
-    <p class="inline-flex space-x-2 items-center">
-      <span>
-         <worky-avatar [size]="40"></worky-avatar>
-      </span>
-      <span class="text-sm md:text-base font-bold"> {{ userName }} </span>
-    </p>
-  </div>
-
-<div id="nav" class="w-full">
-  @for (item of menuItems; track $index) {
-    <div>
-  <button
-    *ngIf="item.children && item.children.length > 0"
-    class="w-full px-2 inline-flex space-x-2 items-center border-b border-slate-700 py-3 hover:bg-white/5 transition ease-linear duration-150 cursor-pointer"
-    (click)="toggleMenu(item.title?.toString() || 'Sin título')"
-  >
-    <span
-      class="text-white transition-transform duration-300"
-      [class.rotate-90]="expandedMenus[item.title?.toString() || 'Sin título']"
-    >
-      <i class="material-icons">chevron_right</i>
-    </span>
-
-    <div class="flex flex-col pl-2">
-      <span class="text-lg font-bold leading-5 text-white">{{ item.title || 'Sin título' }}</span>
-      <span class="text-sm text-white/50 hidden md:block">{{ item.path }}</span>
-    </div>
-  </button>
-
-  <a
-    *ngIf="!item.children || item.children.length === 0"
-    class="w-full px-2 inline-flex space-x-2 items-center border-b border-slate-700 py-3 hover:bg-white/5 transition ease-linear duration-150"
-    [routerLink]="item.path"
-    routerLinkActive="bg-blue-900"
-  >
-    <div class="flex flex-col pl-2">
-      <span class="text-lg font-bold leading-5 text-white">{{ item.title || 'Sin título' }}</span>
-      <span class="text-sm text-white/50 hidden md:block">{{ item.path }}</span>
-    </div>
-  </a>
-
-      @if (item.children && item.children.length > 0 && expandedMenus[item.title?.toString() || 'Sin título']) {
-        <div>
-          @for (child of item.children; track $index) {
-            <div
-              class="w-full px-2 inline-flex space-x-2 items-center border-b border-slate-700 py-3 hover:bg-white/5 transition ease-linear duration-150 cursor-pointer font-bold"
-              [routerLink]="child.path"
-              routerLinkActive="bg-blue-900"
-            >
-              <span class="text-white mr-2">
-                <i class="material-icons text-sm pl-4">remove</i>
-              </span>
-              {{ child.title || 'Sin título' }}
-            </div>
-          }
-        </div>
-      }
-    </div>
-  }
-</div>
-
-  <div id="nav" class="w-full bottom-0 worky-logout">
-    <a class="w-full px-2 inline-flex space-x-2 items-center border-b border-slate-700 py-3 hover:bg-white/5 transition ease-linear duration-150"
-        (click)="logout()">
-
-      <span>
-        <i class="material-icons">logout</i>
-      </span>
-
-      <div class="flex flex-col pl2">
-        <span class="text-lg font-bold leading-5 text-white">{{ 'navbar.logout' | workyTranslations }}</span>
+<div class="side-menu-container">
+  <!-- Header Section -->
+  <div class="menu-header">
+    <div class="logo-section">
+      <div class="logo-icon">
+        <i class="material-icons">admin_panel_settings</i>
       </div>
-
-    </a>
+      <div class="logo-content">
+        <h1 class="logo-title">{{ title }}</h1>
+        <p class="logo-subtitle">{{ subTitle }}</p>
+      </div>
+    </div>
   </div>
 
+  <!-- User Profile Section -->
+  <div class="user-profile">
+    <div class="profile-info">
+      <div class="welcome-text">{{ 'admin.sideMenu-welcome' | workyTranslations }}</div>
+      <div class="user-info">
+        <div class="avatar-container">
+          <worky-avatar [size]="48"></worky-avatar>
+          <div class="online-indicator"></div>
+        </div>
+        <div class="user-details">
+          <span class="user-name">{{ userName }}</span>
+          <span class="user-role">Administrator</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav class="menu-navigation">
+    <div class="nav-section">
+      <div class="section-title">
+        <i class="material-icons">dashboard</i>
+        <span>Navigation</span>
+      </div>
+      
+      <div class="menu-items">
+        @for (item of menuItems; track $index) {
+          <div class="menu-item-wrapper">
+            <!-- Parent Menu Item with Children -->
+            @if (item.children && item.children.length > 0) {
+              <button
+                class="menu-item parent-item"
+                [class.expanded]="expandedMenus[item.title?.toString() || 'Untitled']"
+                (click)="toggleMenu(item.title?.toString() || 'Untitled')"
+              >
+                <div class="item-content">
+                  <div class="item-icon">
+                    <i class="material-icons">{{ getMenuIcon(item.title?.toString()) }}</i>
+                  </div>
+                  <div class="item-text">
+                    <span class="item-title">{{ item.title || 'Untitled' }}</span>
+                    <span class="item-description">{{ item.path }}</span>
+                  </div>
+                  <div class="item-arrow">
+                    <i class="material-icons" [class.rotated]="expandedMenus[item.title?.toString() || 'Untitled']">
+                      expand_more
+                    </i>
+                  </div>
+                </div>
+              </button>
+
+              <!-- Submenu Items -->
+              @if (expandedMenus[item.title?.toString() || 'Untitled']) {
+                <div class="submenu-container">
+                  @for (child of item.children; track $index) {
+                    <a
+                      class="menu-item submenu-item"
+                      [routerLink]="child.path"
+                      routerLinkActive="active"
+                    >
+                      <div class="item-content">
+                        <div class="item-icon">
+                          <i class="material-icons">{{ getSubmenuIcon(child.title?.toString()) }}</i>
+                        </div>
+                        <div class="item-text">
+                          <span class="item-title">{{ child.title || 'Untitled' }}</span>
+                          <span class="item-description">{{ child.path }}</span>
+                        </div>
+                      </div>
+                    </a>
+                  }
+                </div>
+              }
+            }
+
+            <!-- Single Menu Item -->
+            @if (!item.children || item.children.length === 0) {
+              <a
+                class="menu-item single-item"
+                [routerLink]="item.path"
+                routerLinkActive="active"
+              >
+                <div class="item-content">
+                  <div class="item-icon">
+                    <i class="material-icons">{{ getMenuIcon(item.title?.toString()) }}</i>
+                  </div>
+                  <div class="item-text">
+                    <span class="item-title">{{ item.title || 'Untitled' }}</span>
+                    <span class="item-description">{{ item.path }}</span>
+                  </div>
+                </div>
+              </a>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </nav>
+
+  <!-- Footer Section -->
+  <div class="menu-footer">
+    <div class="footer-section">
+      <div class="section-title">
+        <i class="material-icons">settings</i>
+        <span>Account</span>
+      </div>
+      
+      <button class="menu-item logout-item" (click)="logout()">
+        <div class="item-content">
+          <div class="item-icon">
+            <i class="material-icons">logout</i>
+          </div>
+          <div class="item-text">
+            <span class="item-title">{{ 'navbar.logout' | workyTranslations }}</span>
+            <span class="item-description">Sign out of your account</span>
+          </div>
+        </div>
+      </button>
+    </div>
+  </div>
 </div>

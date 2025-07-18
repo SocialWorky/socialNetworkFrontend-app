@@ -10,14 +10,11 @@ import { translations } from '@translations/translations';
     styleUrls: ['./side-menu.component.scss'],
     standalone: false
 })
-export class SideMenuComponent  implements OnInit {
+export class SideMenuComponent implements OnInit {
 
   title: string = translations['admin.sideMenu-title'];
-
   subTitle: string = translations['admin.sideMenu-subTitle'];
-
   userName: string = 'Admin';
-
   expandedMenus: { [key: string]: boolean } = {};
 
   menuItems = routes
@@ -46,5 +43,40 @@ export class SideMenuComponent  implements OnInit {
     this.expandedMenus[menuTitle] = !this.expandedMenus[menuTitle];
   }
 
+  getMenuIcon(title: string | undefined): string {
+    if (!title) return 'dashboard';
+    
+    const titleLower = title.toLowerCase();
+    
+    if (titleLower.includes('home') || titleLower.includes('dashboard')) return 'dashboard';
+    if (titleLower.includes('user')) return 'people';
+    if (titleLower.includes('log')) return 'analytics';
+    if (titleLower.includes('stat')) return 'bar_chart';
+    if (titleLower.includes('config') || titleLower.includes('setting')) return 'settings';
+    if (titleLower.includes('template')) return 'description';
+    if (titleLower.includes('webhook')) return 'webhook';
+    if (titleLower.includes('widget')) return 'widgets';
+    if (titleLower.includes('invitation') || titleLower.includes('code')) return 'vpn_key';
+    if (titleLower.includes('reaction')) return 'thumb_up';
+    if (titleLower.includes('css') || titleLower.includes('custom')) return 'palette';
+    
+    return 'dashboard';
+  }
 
+  getSubmenuIcon(title: string | undefined): string {
+    if (!title) return 'chevron_right';
+    
+    const titleLower = title.toLowerCase();
+    
+    if (titleLower.includes('list') || titleLower.includes('all')) return 'list';
+    if (titleLower.includes('add') || titleLower.includes('create')) return 'add';
+    if (titleLower.includes('edit') || titleLower.includes('update')) return 'edit';
+    if (titleLower.includes('delete') || titleLower.includes('remove')) return 'delete';
+    if (titleLower.includes('view') || titleLower.includes('show')) return 'visibility';
+    if (titleLower.includes('export') || titleLower.includes('download')) return 'download';
+    if (titleLower.includes('import') || titleLower.includes('upload')) return 'upload';
+    if (titleLower.includes('config') || titleLower.includes('setting')) return 'settings';
+    
+    return 'chevron_right';
+  }
 }
