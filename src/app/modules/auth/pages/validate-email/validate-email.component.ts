@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
@@ -7,7 +8,9 @@ import { AuthService } from '@auth/services/auth.service';
 @Component({
   selector: 'worky-validate-email',
   templateUrl: './validate-email.component.html',
-  styleUrls: ['./validate-email.component.scss']
+  styleUrls: ['./validate-email.component.scss'],
+  standalone: true,
+  imports: [CommonModule]
 })
 export class ValidateEmailComponent implements OnInit {
   loading = true;
