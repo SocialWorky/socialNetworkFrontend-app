@@ -2,35 +2,14 @@
 @use 'src/assets/styles/admin-global.scss' as admin;
 
 .user-management-dashboard {
-  min-height: 100vh;
-  background: linear-gradient(135deg, admin.$admin-darker-bg 0%, admin.$admin-dark-bg 100%);
-  padding: 2rem;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
+  @extend .admin-dashboard;
 }
 
 .dashboard-header {
-  background: admin.$admin-card-bg;
-  border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid admin.$admin-border;
+  @extend .admin-dashboard-header;
 
   .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 2rem;
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
-    }
+    @extend .header-content;
   }
 
   .header-title {
@@ -58,36 +37,14 @@
     align-items: center;
 
     .refresh-btn, .filters-btn {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.5rem;
+      @extend .admin-btn;
       border: 1px solid admin.$admin-border;
-      border-radius: 8px;
       background: admin.$admin-card-bg;
-      color: admin.$admin-text-primary;
-      font-size: 0.875rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
       text-decoration: none;
 
-      i {
-        font-size: 1.125rem;
-      }
-
       &:hover:not(:disabled) {
-        background: admin.$admin-primary;
-        border-color: admin.$admin-primary;
-        color: white;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(admin.$admin-primary, 0.3);
-      }
-
-      &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        transform: none;
       }
 
       &.rotating i {

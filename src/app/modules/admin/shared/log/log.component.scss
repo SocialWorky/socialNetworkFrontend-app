@@ -159,36 +159,10 @@
         }
 
         .search-container {
-          position: relative;
-
-          .search-icon {
-            position: absolute;
-            left: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: admin.$admin-text-muted;
-            font-size: 1.125rem;
-          }
+          @extend .admin-search-container;
 
           .search-input {
-            width: 300px;
-            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-            border: 1px solid admin.$admin-border;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            color: admin.$admin-text-primary;
-            font-size: 0.875rem;
-            transition: all 0.2s ease;
-
-            &::placeholder {
-              color: admin.$admin-text-muted;
-            }
-
-            &:focus {
-              outline: none;
-              border-color: admin.$admin-primary;
-              box-shadow: 0 0 0 3px rgba(admin.$admin-primary, 0.1);
-            }
+            @extend .search-input;
           }
         }
 
