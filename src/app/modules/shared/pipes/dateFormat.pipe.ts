@@ -31,7 +31,7 @@ export class WorkyDatePipe implements PipeTransform {
       return parseISO(value); // Intentamos parsear una cadena ISO
     } catch {
       console.error('Invalid date format:', value);
-      return new Date(); // Retornamos una fecha válida por defecto en caso de error
+      return new Date(); // Return a valid default date in case of error
     }
   }
 

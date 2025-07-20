@@ -135,7 +135,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Inicializar pull-to-refresh después de que la vista esté lista
+    // Initialize pull-to-refresh after view is ready
     setTimeout(() => {
       if (this.contentContainer?.nativeElement) {
         this._pullToRefreshService.initPullToRefresh(
@@ -589,10 +589,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       // Mostrar indicador de refresh moderno
       this.showModernRefreshIndicator();
       
-      // Forzar actualización de publicaciones
+      // Force publications update
       await this.forceRefreshPublications();
       
-      // Ocultar indicador después de completar
+      // Hide indicator after completion
       setTimeout(() => {
         this.hideModernRefreshIndicator();
         this.isRefreshing = false;

@@ -79,24 +79,24 @@ export class ContentService {
   }
 
   private extractAndFilterUrls(text: string): string[] {
-    // Patrón para extraer URLs
+    // Pattern to extract URLs
     const urlPattern = /(?:https?:\/\/[^\s)]+)|(?:www\.[^\s)]+)|(?:[\w-]+\.[\w]+[^\s)]+[^\s.;,()])/ig;
-    // Patrón para identificar imágenes en Markdown
+    // Pattern to identify images in Markdown
     const imagePattern = /!\[.*?\]\((https?:\/\/[^\s)]+)\)/g;
-    // Patrón para identificar bloques de código
+    // Pattern to identify code blocks
     const codeBlockPattern = /```[\s\S]*?```|`[^`\r\n]+`/g;
 
     // Extraer todas las URLs
     const allUrls = text.match(urlPattern) || [];
 
-    // Extraer URLs de imágenes
+    // Extract image URLs
     const imageUrls: string[] = [];
     let match;
     while ((match = imagePattern.exec(text)) !== null) {
       imageUrls.push(match[1]);
     }
 
-    // Extraer URLs en bloques de código
+    // Extract URLs in code blocks
     const codeBlockUrls: string[] = [];
     while ((match = codeBlockPattern.exec(text)) !== null) {
       const codeBlockText = match[0];
@@ -104,7 +104,7 @@ export class ContentService {
       codeBlockUrls.push(...urlsInCodeBlock);
     }
 
-    // Filtrar URLs de imágenes y URLs en bloques de código de todas las URLs
+    // Filter image URLs and URLs in code blocks from all URLs
     const nonImageAndNonCodeBlockUrls = allUrls.filter(url => !imageUrls.includes(url) && !codeBlockUrls.includes(url));
 
     return nonImageAndNonCodeBlockUrls;

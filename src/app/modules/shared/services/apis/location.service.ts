@@ -24,12 +24,12 @@ export class LocationService {
   private readonly FALLBACK_LOCATIONS: Record<string, UserCoordinates> = {
     'CL': [-33.4489, -70.6693], // Santiago, Chile
     'AR': [-34.6037, -58.3816], // Buenos Aires, Argentina
-    'PE': [-12.0464, -77.0428], // Lima, Perú
-    'CO': [4.7110, -74.0721],   // Bogotá, Colombia
-    'MX': [19.4326, -99.1332],  // Ciudad de México, México
-    'ES': [40.4168, -3.7038],   // Madrid, España
-    'US': [40.7128, -74.0060],  // Nueva York, Estados Unidos
-    'default': [-33.4489, -70.6693] // Santiago como ubicación por defecto
+    'PE': [-12.0464, -77.0428], // Lima, Peru
+    'CO': [4.7110, -74.0721],   // Bogota, Colombia
+    'MX': [19.4326, -99.1332],  // Mexico City, Mexico
+    'ES': [40.4168, -3.7038],   // Madrid, Spain
+    'US': [40.7128, -74.0060],  // New York, United States
+    'default': [-33.4489, -70.6693] // Santiago as default location
   };
 
   constructor(

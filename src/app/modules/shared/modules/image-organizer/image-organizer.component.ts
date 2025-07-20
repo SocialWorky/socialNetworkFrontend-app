@@ -151,7 +151,7 @@ export class ImageOrganizerComponent implements OnInit {
       }
       
       if (result) {
-        // Tu lógica existente aquí
+        // Your existing logic here
       }
     });
   }

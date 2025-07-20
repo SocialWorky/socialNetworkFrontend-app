@@ -20,7 +20,7 @@ export class SelectComponent implements ControlValueAccessor, OnChanges, OnInit 
   @Input() field!: Field;
   control = new FormControl('');
 
-  // Implementación de ControlValueAccessor
+  // ControlValueAccessor implementation
   onChange: any = () => { };
   onTouched: any = () => { };
 

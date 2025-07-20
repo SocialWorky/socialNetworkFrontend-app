@@ -218,7 +218,7 @@ export class WidgetConfigService {
   saveOrUpdateWidget(widget: WidgetConfig): Observable<WidgetConfig> {
     return this.getWidgetBySelector(widget.selector).pipe(
       switchMap(() => {
-        // Si llega aquí, el widget existe, entonces actualizar
+        // If it reaches here, the widget exists, so update
         return this.updateWidget(widget.selector, widget);
       }),
       catchError((error) => {

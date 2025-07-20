@@ -52,7 +52,7 @@ export class PublicationService {
         if (data && data.publications && data.publications._id) {
           this._publicationDatabase.addPublication(data.publications as PublicationView);
         } else if (data && data._id) {
-          // Si data es directamente la publicación
+          // If data is directly the publication
           this._publicationDatabase.addPublication(data as PublicationView);
         }
         return data;

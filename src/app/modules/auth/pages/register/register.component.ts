@@ -73,7 +73,7 @@ export class RegisterComponent implements OnInit {
       role: [RoleUser.USER],
     });
 
-    // Aplicar clase específica para iPhone con notch
+    // Apply specific class for iPhone with notch
     if (this.isIPhoneWithNotch) {
       document.body.classList.add('iphone-with-notch');
     }

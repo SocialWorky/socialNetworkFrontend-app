@@ -138,10 +138,10 @@ export class PwaSettingsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Obtener el estado de actualización automática
+    // Get automatic update status
     this.autoUpdateEnabled = this.pwaUpdateService.getAutoUpdateStatus();
     
-    // Verificar si la PWA está instalada
+    // Check if PWA is installed
     this.isInstalled = this.pwaInstallService.isAppInstalled();
     this.pwaSupported = this.pwaInstallService.isPwaSupported();
 

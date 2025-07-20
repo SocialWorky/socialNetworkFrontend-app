@@ -39,7 +39,7 @@ export class WorkyNewsComponent implements OnInit {
       }),
       catchError(error => {
         console.error('Error fetching news', error);
-        return of([]); // En caso de error, retornar un array vacío
+        return of([]); // In case of error, return empty array
       })
     ).subscribe(articles => {
       this.articles = articles;

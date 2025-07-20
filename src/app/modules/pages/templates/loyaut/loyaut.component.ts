@@ -60,7 +60,7 @@ export class LoyautComponent implements OnInit, OnDestroy {
     this._authService.getDecodedToken();
     this._notificationUsersService.refreshUserStatuses();
     
-    // Aplicar clase específica para iPhone con notch
+    // Apply specific class for iPhone with notch
     if (this.isIPhoneWithNotch) {
       document.body.classList.add('iphone-with-notch');
     }

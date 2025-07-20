@@ -108,7 +108,7 @@ export class PwaUpdateService {
       return Promise.resolve(false);
     }
 
-    // Verificar si los service workers están habilitados
+    // Check if service workers are enabled
     if (!this.swUpdate.isEnabled) {
       console.log('Service workers no están habilitados en este navegador');
       return Promise.resolve(false);

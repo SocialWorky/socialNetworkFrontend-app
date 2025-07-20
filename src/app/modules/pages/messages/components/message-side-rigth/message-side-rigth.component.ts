@@ -243,7 +243,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
             next: (data: { messages: Message[], total: number }) => {
               this.messages = data.messages;
               
-              // Verificar si hay más mensajes disponibles
+              // Check if there are more messages available
               this.hasMoreMessages = data.total > this.messages.length;
               
               if (this.isInitialLoad) {
@@ -370,7 +370,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
   }
 
   private scrollToBottom(): void {
-    // Solo hacer scroll automático si el usuario no está haciendo scroll manual
+    // Only auto-scroll if user is not manually scrolling
     if (!this.userScrolling) {
       setTimeout(() => {
         if (this.messageContainer) {
@@ -524,7 +524,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
     const scrollHeight = element.scrollHeight;
     const clientHeight = element.clientHeight;
     
-    // Detectar si el usuario está haciendo scroll manual
+    // Detect if user is manually scrolling
     this.userScrolling = true;
     clearTimeout(this.scrollTimeout);
     
@@ -532,11 +532,11 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
       this.userScrolling = false;
     }, 150);
     
-    // Mostrar/ocultar botón de scroll al final
+    // Show/hide scroll to bottom button
     const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
     this.showScrollToBottomButton = !isNearBottom;
     
-    // Cargar más mensajes cuando el usuario está cerca del inicio
+    // Load more messages when user is near the beginning
     if (scrollTop < 200 && !this.loadingMoreMessages && this.hasMoreMessages) {
       this.currentPage++;
       this.loadMoreMessages(this.currentPage);
@@ -550,7 +550,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
 
     this.loadingMoreMessages = true;
     
-    // Guardar la posición exacta del scroll antes de cargar
+    // Save exact scroll position before loading
     const scrollTopBefore = this.messageContainer?.nativeElement.scrollTop || 0;
     const scrollHeightBefore = this.messageContainer?.nativeElement.scrollHeight || 0;
     

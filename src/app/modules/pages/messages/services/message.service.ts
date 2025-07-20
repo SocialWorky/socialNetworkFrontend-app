@@ -449,10 +449,10 @@ export class MessageService {
         let paginatedMessages = messages;
         
         if (page === 1) {
-          // Para la primera página, tomar los últimos 'size' mensajes
+          // For the first page, take the last 'size' messages
           paginatedMessages = messages.slice(-size);
         } else {
-          // Para páginas posteriores, calcular el rango correcto
+                      // For subsequent pages, calculate the correct range
           const startIndex = Math.max(0, total - (page * size));
           const endIndex = Math.max(0, total - ((page - 1) * size));
           paginatedMessages = messages.slice(startIndex, endIndex);

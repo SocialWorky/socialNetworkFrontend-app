@@ -70,7 +70,7 @@ export class PushNotificationService {
   private listenToNativeEvents() {
     PushNotifications.addListener('registration', token => {
       console.log('Token Nativo:', token.value);
-      // Envía este token a tu backend
+      // Send this token to your backend
     });
 
     PushNotifications.addListener('pushNotificationReceived', notification => {

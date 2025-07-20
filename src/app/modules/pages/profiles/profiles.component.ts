@@ -747,7 +747,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       this.publicationsProfile.set([]);
       await this.loadPublications();
       
-      // Ocultar indicador después de completar
+      // Hide indicator after completion
       setTimeout(() => {
         this.hideModernRefreshIndicator();
         this.isRefreshing = false;

@@ -50,7 +50,7 @@ export class PullToRefreshService implements OnDestroy {
 
     const finalConfig = { ...this.defaultConfig, ...config };
     
-    // Solo aplicar en dispositivos móviles
+    // Only apply on mobile devices
     if (!this.deviceDetectionService.isMobile()) {
       return;
     }
@@ -58,7 +58,7 @@ export class PullToRefreshService implements OnDestroy {
     // Prevenir el comportamiento por defecto del scroll
     container.style.overscrollBehavior = 'contain';
     
-    // Eventos táctiles
+    // Touch events
     container.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
     container.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
     container.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
@@ -89,7 +89,7 @@ export class PullToRefreshService implements OnDestroy {
       this.isRefreshing = true;
       this.refreshSubject.next();
       
-      // Reset después de un tiempo
+      // Reset after some time
       setTimeout(() => {
         this.isRefreshing = false;
       }, 2000);
@@ -100,7 +100,7 @@ export class PullToRefreshService implements OnDestroy {
     if (this.isRefreshing) return;
     
     const container = event.currentTarget as HTMLElement;
-    if (container.scrollTop > 0) return; // Solo activar cuando esté en la parte superior
+          if (container.scrollTop > 0) return; // Only activate when at the top
     
     this.startY = event.touches[0].clientY;
     this.isPulling = true;
