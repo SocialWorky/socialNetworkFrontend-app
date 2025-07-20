@@ -182,24 +182,7 @@
       }
 
       .filter-input, .filter-select {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid admin.$admin-border;
-        border-radius: 8px;
-        background: admin.$admin-dark-bg;
-        color: admin.$admin-text-primary;
-        font-size: 0.875rem;
-        transition: all 0.2s ease;
-
-        &:focus {
-          outline: none;
-          border-color: admin.$admin-primary;
-          box-shadow: 0 0 0 3px rgba(admin.$admin-primary, 0.1);
-        }
-
-        &::placeholder {
-          color: admin.$admin-text-muted;
-        }
+        @extend .admin-input;
       }
     }
 
