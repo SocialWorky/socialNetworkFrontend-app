@@ -31,6 +31,7 @@ export class CustomCssComponent implements OnDestroy {
   };
 
   customCss: string = '';
+  isLoading = true;
   customCssLoader: boolean = false;
   showPreview: boolean = false;
   error: string | null = null;
@@ -68,18 +69,23 @@ export class CustomCssComponent implements OnDestroy {
   }
 
   async loadCustomCss() {
+    this.isLoading = true;
+    this.error = null;
+    
     await this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe({
       next: (configData) => {
         if (configData.customCss) {
           this.customCss = String(configData.customCss);
           this.originalCss = this.customCss;
-          this._cdr.markForCheck();
           this.applyCustomCss();
         }
+        this.isLoading = false;
+        this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading CSS:', error);
         this.error = 'Error al cargar el CSS personalizado. Por favor, intenta de nuevo.';
+        this.isLoading = false;
         this._cdr.markForCheck();
       }
     });

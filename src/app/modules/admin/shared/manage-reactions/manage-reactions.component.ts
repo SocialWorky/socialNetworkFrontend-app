@@ -29,6 +29,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
 
   urlApiFile: string = '';
 
+  isLoading = true;
   loadReactionsButtons = false;
 
   public imageFile: File | null = null;
@@ -112,6 +113,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
   }
 
   listReactions() {
+    this.isLoading = true;
     this.error = null;
     this._customReactionsService.getCustomReactionsAll().pipe(takeUntil(this.destroy$)).subscribe({
       next: (reactions: CustomReactionList[]) => {
@@ -121,11 +123,13 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
             ...reaction,
             zoomed: false,
           }));
+        this.isLoading = false;
         this._cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load reactions', err);
         this.error = 'Error al cargar las reacciones. Por favor, intenta de nuevo.';
+        this.isLoading = false;
         this._cdr.markForCheck();
       },
     });

@@ -28,6 +28,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
   urlApiFile = `${environment.APIFILESERVICE}config/`;
 
+  isLoading = true;
   loadUpdateConfigButtons = false;
 
   loginMethods = { email: true, google: true };
@@ -70,6 +71,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
   }
 
   getSiteConfig() {
+    this.isLoading = true;
     this.error = null;
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe({
       next: (configData) => {
@@ -99,11 +101,13 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
           },
         });
 
+        this.isLoading = false;
         this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading site config:', error);
         this.error = 'Error al cargar la configuración del sitio. Por favor, intenta de nuevo.';
+        this.isLoading = false;
         this._cdr.markForCheck();
       }
     });

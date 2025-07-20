@@ -5,6 +5,7 @@ import { environment } from '@env/environment';
 import { UserService } from '@shared/services/core-apis/users.service';
 import { User } from '@shared/interfaces/user.interface';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
 import { translations } from '@translations/translations';
 import { 
@@ -31,7 +32,8 @@ export class UserManagementService {
   constructor(
     private http: HttpClient,
     private userService: UserService,
-    private emailNotificationService: EmailNotificationService
+    private emailNotificationService: EmailNotificationService,
+    private logService: LogService
   ) {}
 
   getUsers(filters: UserFilters = {}, page: number = 1, limit: number = 10): Observable<UserListResponse> {
@@ -87,7 +89,17 @@ export class UserManagementService {
           observer.complete();
         },
         error: (error) => {
-          console.error('Error fetching users:', error);
+          this.logService.log(
+            LevelLogEnum.ERROR,
+            'UserManagementService',
+            'Error al obtener usuarios',
+            {
+              error: error,
+              component: 'UserManagementService',
+              method: 'getUsers',
+              timestamp: new Date().toISOString()
+            }
+          );
           this.loadingSubject.next(false);
           observer.error(error);
         }
@@ -167,7 +179,18 @@ export class UserManagementService {
           });
         },
         error: (tokenError) => {
-          console.warn('Token generation endpoint not available, using fallback method:', tokenError);
+          this.logService.log(
+            LevelLogEnum.WARN,
+            'UserManagementService',
+            'Endpoint de generación de token no disponible, usando método alternativo',
+            {
+              error: tokenError,
+              component: 'UserManagementService',
+              method: 'sendVerificationEmail',
+              fallback: 'tokenGeneration',
+              timestamp: new Date().toISOString()
+            }
+          );
           
           // Fallback: Use the existing user's token if available, or send without token
           // The backend should handle token generation during the validation process

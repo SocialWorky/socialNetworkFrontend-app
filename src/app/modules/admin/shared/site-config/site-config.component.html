@@ -19,16 +19,58 @@
     </div>
   </div>
 
-  <!-- Loading State -->
-  <div class="loading-container" *ngIf="loadUpdateConfigButtons">
-    <div class="loading-spinner">
-      <i class="material-icons rotating">refresh</i>
-      <p>Guardando configuración...</p>
+  <!-- Initial Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="loading-content">
+      <div class="loading-spinner">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+      </div>
+      <div class="loading-text">
+        <h3>Cargando configuración</h3>
+        <p>Recopilando datos del sitio...</p>
+        <div class="loading-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-container" *ngIf="error && !isLoading">
+    <div class="error-content">
+      <div class="error-icon">
+        <i class="material-icons">error_outline</i>
+      </div>
+      <div class="error-text">
+        <h3>Error al cargar configuración</h3>
+        <p>{{ error }}</p>
+        <button class="retry-btn" (click)="getSiteConfig()">
+          <i class="material-icons">refresh</i>
+          Reintentar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Saving Loading State -->
+  <div class="saving-container" *ngIf="loadUpdateConfigButtons && !isLoading">
+    <div class="saving-content">
+      <div class="saving-spinner">
+        <i class="material-icons rotating">save</i>
+      </div>
+      <div class="saving-text">
+        <h3>Guardando configuración</h3>
+        <p>Actualizando datos del sitio...</p>
+      </div>
     </div>
   </div>
 
   <!-- Main Configuration Form -->
-  <div class="config-content" *ngIf="!loadUpdateConfigButtons">
+  <div class="config-content" *ngIf="!isLoading && !error">
     <form [formGroup]="configForm" class="config-form">
       
       <!-- Basic Information Section -->

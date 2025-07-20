@@ -25,6 +25,7 @@ import { TranslationsModule } from '@shared/modules/translations/translations.mo
 import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.module';
 import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.module';
 import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
+import { SharedModule } from '@shared/shared.module';
 
 
 @NgModule({
@@ -53,7 +54,8 @@ import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
     TranslationsModule,
     WorkyAvatarModule,
     FormBuilderModule,
-    PipesSharedModule
+    PipesSharedModule,
+    SharedModule
   ],
   exports: [TemplatesComponent],
 })

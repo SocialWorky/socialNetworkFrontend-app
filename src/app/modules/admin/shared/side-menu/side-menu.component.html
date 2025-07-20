@@ -53,9 +53,9 @@
                   </div>
                   <div class="item-text">
                     <span class="item-title">{{ item.title || 'Untitled' }}</span>
-                    <span class="item-description">{{ item.path }}</span>
                   </div>
                   <div class="item-arrow">
+                    <span class="submenu-count">{{ item.children?.length || 0 }}</span>
                     <i class="material-icons" [class.rotated]="expandedMenus[item.title?.toString() || 'Untitled']">
                       expand_more
                     </i>
@@ -115,20 +115,13 @@
   <div class="menu-footer">
     <div class="footer-section">
       <div class="section-title">
-        <i class="material-icons">settings</i>
+        <i class="material-icons">account_circle</i>
         <span>Account</span>
       </div>
       
-      <button class="menu-item logout-item" (click)="logout()">
-        <div class="item-content">
-          <div class="item-icon">
-            <i class="material-icons">logout</i>
-          </div>
-          <div class="item-text">
-            <span class="item-title">{{ 'navbar.logout' | workyTranslations }}</span>
-            <span class="item-description">Sign out of your account</span>
-          </div>
-        </div>
+      <button class="logout-item" (click)="logout()">
+        <i class="material-icons">logout</i>
+        <span>Logout</span>
       </button>
     </div>
   </div>

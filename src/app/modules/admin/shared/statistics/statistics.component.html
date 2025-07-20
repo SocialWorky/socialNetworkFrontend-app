@@ -1,5 +1,4 @@
 <div class="statistics-dashboard">
-  <!-- Header Section -->
   <div class="dashboard-header">
     <div class="header-content">
       <div class="header-title">
@@ -19,17 +18,42 @@
     </div>
   </div>
 
-  <!-- Loading State -->
   <div class="loading-container" *ngIf="isLoading">
-    <div class="loading-spinner">
-      <i class="material-icons rotating">refresh</i>
-      <p>Cargando estadísticas...</p>
+    <div class="loading-content">
+      <div class="loading-spinner">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+      </div>
+      <div class="loading-text">
+        <h3>Cargando métricas</h3>
+        <p>Recopilando estadísticas en tiempo real...</p>
+        <div class="loading-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Main Statistics Grid -->
-  <div class="statistics-grid" *ngIf="!isLoading">
-    <!-- Users Statistics -->
+  <div class="error-container" *ngIf="error && !isLoading">
+    <div class="error-content">
+      <div class="error-icon">
+        <i class="material-icons">error_outline</i>
+      </div>
+      <div class="error-text">
+        <h3>Error al cargar métricas</h3>
+        <p>{{ error }}</p>
+        <button class="retry-btn" (click)="refreshStatistics()">
+          <i class="material-icons">refresh</i>
+          Reintentar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="statistics-grid" *ngIf="!isLoading && !error">
     <div class="stat-card primary">
       <div class="card-header">
         <div class="card-icon">
@@ -41,11 +65,17 @@
         </div>
       </div>
       <div class="card-content">
-        <div class="main-stat">
+        <div class="main-stat" *ngIf="!isLoadingUsers; else usersLoading">
           <span class="stat-number">{{ allUsersLength | number }}</span>
           <span class="stat-label">usuarios</span>
         </div>
-        <div class="stat-details">
+        <ng-template #usersLoading>
+          <div class="main-stat loading">
+            <div class="stat-skeleton"></div>
+            <span class="stat-label">usuarios</span>
+          </div>
+        </ng-template>
+        <div class="stat-details" *ngIf="!isLoadingUsers; else usersDetailsLoading">
           <div class="detail-item">
             <span class="detail-label">Activos:</span>
             <span class="detail-value">{{ activeUsersCount | number }}</span>
@@ -55,10 +85,21 @@
             <span class="detail-value">{{ pendingUsersCount | number }}</span>
           </div>
         </div>
+        <ng-template #usersDetailsLoading>
+          <div class="stat-details">
+            <div class="detail-item">
+              <span class="detail-label">Activos:</span>
+              <div class="detail-skeleton"></div>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Pendientes:</span>
+              <div class="detail-skeleton"></div>
+            </div>
+          </div>
+        </ng-template>
       </div>
     </div>
 
-    <!-- Publications Statistics -->
     <div class="stat-card success">
       <div class="card-header">
         <div class="card-icon">
@@ -70,11 +111,17 @@
         </div>
       </div>
       <div class="card-content">
-        <div class="main-stat">
+        <div class="main-stat" *ngIf="!isLoadingPublications; else publicationsLoading">
           <span class="stat-number">{{ countPublications | number }}</span>
           <span class="stat-label">publicaciones</span>
         </div>
-        <div class="stat-details">
+        <ng-template #publicationsLoading>
+          <div class="main-stat loading">
+            <div class="stat-skeleton"></div>
+            <span class="stat-label">publicaciones</span>
+          </div>
+        </ng-template>
+        <div class="stat-details" *ngIf="!isLoadingPublications; else publicationsDetailsLoading">
           <div class="detail-item">
             <span class="detail-label">Con media:</span>
             <span class="detail-value">{{ publicationsWithMedia | number }}</span>
@@ -84,10 +131,21 @@
             <span class="detail-value">{{ todayPublications | number }}</span>
           </div>
         </div>
+        <ng-template #publicationsDetailsLoading>
+          <div class="stat-details">
+            <div class="detail-item">
+              <span class="detail-label">Con media:</span>
+              <div class="detail-skeleton"></div>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Hoy:</span>
+              <div class="detail-skeleton"></div>
+            </div>
+          </div>
+        </ng-template>
       </div>
     </div>
 
-    <!-- Comments Statistics -->
     <div class="stat-card info">
       <div class="card-header">
         <div class="card-icon">
@@ -99,11 +157,17 @@
         </div>
       </div>
       <div class="card-content">
-        <div class="main-stat">
+        <div class="main-stat" *ngIf="!isLoadingComments; else commentsLoading">
           <span class="stat-number">{{ totalComments | number }}</span>
           <span class="stat-label">comentarios</span>
         </div>
-        <div class="stat-details">
+        <ng-template #commentsLoading>
+          <div class="main-stat loading">
+            <div class="stat-skeleton"></div>
+            <span class="stat-label">comentarios</span>
+          </div>
+        </ng-template>
+        <div class="stat-details" *ngIf="!isLoadingComments; else commentsDetailsLoading">
           <div class="detail-item">
             <span class="detail-label">Promedio por pub:</span>
             <span class="detail-value">{{ avgCommentsPerPublication | number:'1.1-1' }}</span>
@@ -113,10 +177,21 @@
             <span class="detail-value">{{ todayComments | number }}</span>
           </div>
         </div>
+        <ng-template #commentsDetailsLoading>
+          <div class="stat-details">
+            <div class="detail-item">
+              <span class="detail-label">Promedio por pub:</span>
+              <div class="detail-skeleton"></div>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Hoy:</span>
+              <div class="detail-skeleton"></div>
+            </div>
+          </div>
+        </ng-template>
       </div>
     </div>
 
-    <!-- Reactions Statistics -->
     <div class="stat-card warning">
       <div class="card-header">
         <div class="card-icon">
@@ -128,11 +203,17 @@
         </div>
       </div>
       <div class="card-content">
-        <div class="main-stat">
+        <div class="main-stat" *ngIf="!isLoadingReactions; else reactionsLoading">
           <span class="stat-number">{{ totalReactions | number }}</span>
           <span class="stat-label">reacciones</span>
         </div>
-        <div class="stat-details">
+        <ng-template #reactionsLoading>
+          <div class="main-stat loading">
+            <div class="stat-skeleton"></div>
+            <span class="stat-label">reacciones</span>
+          </div>
+        </ng-template>
+        <div class="stat-details" *ngIf="!isLoadingReactions; else reactionsDetailsLoading">
           <div class="detail-item">
             <span class="detail-label">Promedio por pub:</span>
             <span class="detail-value">{{ avgReactionsPerPublication | number:'1.1-1' }}</span>
@@ -142,10 +223,21 @@
             <span class="detail-value">{{ todayReactions | number }}</span>
           </div>
         </div>
+        <ng-template #reactionsDetailsLoading>
+          <div class="stat-details">
+            <div class="detail-item">
+              <span class="detail-label">Promedio por pub:</span>
+              <div class="detail-skeleton"></div>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Hoy:</span>
+              <div class="detail-skeleton"></div>
+            </div>
+          </div>
+        </ng-template>
       </div>
     </div>
 
-    <!-- Reports Statistics -->
     <div class="stat-card danger">
       <div class="card-header">
         <div class="card-icon">
@@ -157,11 +249,17 @@
         </div>
       </div>
       <div class="card-content">
-        <div class="main-stat">
+        <div class="main-stat" *ngIf="!isLoadingReports; else reportsLoading">
           <span class="stat-number">{{ ReportsStatusPendingCount | number }}</span>
           <span class="stat-label">pendientes</span>
         </div>
-        <div class="stat-details">
+        <ng-template #reportsLoading>
+          <div class="main-stat loading">
+            <div class="stat-skeleton"></div>
+            <span class="stat-label">pendientes</span>
+          </div>
+        </ng-template>
+        <div class="stat-details" *ngIf="!isLoadingReports; else reportsDetailsLoading">
           <div class="detail-item">
             <span class="detail-label">Resueltos:</span>
             <span class="detail-value">{{ resolvedReports | number }}</span>
@@ -171,10 +269,21 @@
             <span class="detail-value">{{ todayReports | number }}</span>
           </div>
         </div>
+        <ng-template #reportsDetailsLoading>
+          <div class="stat-details">
+            <div class="detail-item">
+              <span class="detail-label">Resueltos:</span>
+              <div class="detail-skeleton"></div>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Hoy:</span>
+              <div class="detail-skeleton"></div>
+            </div>
+          </div>
+        </ng-template>
       </div>
     </div>
 
-    <!-- Messages Statistics -->
     <div class="stat-card secondary">
       <div class="card-header">
         <div class="card-icon">
@@ -186,11 +295,17 @@
         </div>
       </div>
       <div class="card-content">
-        <div class="main-stat">
+        <div class="main-stat" *ngIf="!isLoadingMessages; else messagesLoading">
           <span class="stat-number">{{ totalMessages | number }}</span>
           <span class="stat-label">mensajes</span>
         </div>
-        <div class="stat-details">
+        <ng-template #messagesLoading>
+          <div class="main-stat loading">
+            <div class="stat-skeleton"></div>
+            <span class="stat-label">mensajes</span>
+          </div>
+        </ng-template>
+        <div class="stat-details" *ngIf="!isLoadingMessages; else messagesDetailsLoading">
           <div class="detail-item">
             <span class="detail-label">No leídos:</span>
             <span class="detail-value">{{ unreadMessages | number }}</span>
@@ -200,6 +315,18 @@
             <span class="detail-value">{{ activeConversations | number }}</span>
           </div>
         </div>
+        <ng-template #messagesDetailsLoading>
+          <div class="stat-details">
+            <div class="detail-item">
+              <span class="detail-label">No leídos:</span>
+              <div class="detail-skeleton"></div>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Conversaciones:</span>
+              <div class="detail-skeleton"></div>
+            </div>
+          </div>
+        </ng-template>
       </div>
     </div>
   </div>

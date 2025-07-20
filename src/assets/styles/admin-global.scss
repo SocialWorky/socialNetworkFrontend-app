@@ -1,5 +1,4 @@
 // Admin Global Styles
-// Variables compartidas para el módulo admin
 $admin-primary: #3b82f6;
 $admin-primary-dark: #1d4ed8;
 $admin-success: #10b981;
@@ -15,7 +14,6 @@ $admin-text-primary: #f9fafb;
 $admin-text-secondary: #d1d5db;
 $admin-text-muted: #9ca3af;
 
-// Animaciones globales
 @keyframes rotate {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -25,7 +23,11 @@ $admin-text-muted: #9ca3af;
   animation: rotate 1s linear infinite;
 }
 
-// Estilos base para dashboards admin
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .admin-dashboard {
   min-height: 100vh;
   background: linear-gradient(135deg, $admin-darker-bg 0%, $admin-dark-bg 100%);
@@ -37,7 +39,6 @@ $admin-text-muted: #9ca3af;
   }
 }
 
-// Dashboard headers comunes
 .admin-dashboard-header {
   background: $admin-card-bg;
   border-radius: 12px;
@@ -90,7 +91,6 @@ $admin-text-muted: #9ca3af;
   }
 }
 
-// Cards comunes
 .admin-card {
   background: $admin-card-bg;
   border-radius: 12px;
@@ -98,7 +98,6 @@ $admin-text-muted: #9ca3af;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-// Section headers comunes
 .admin-section-header {
   display: flex;
   align-items: center;
@@ -141,12 +140,10 @@ $admin-text-muted: #9ca3af;
   }
 }
 
-// Section content común
 .admin-section-content {
   padding: 2rem;
 }
 
-// Botones comunes
 .admin-btn {
   display: flex;
   align-items: center;
@@ -244,6 +241,34 @@ $admin-text-muted: #9ca3af;
   }
 }
 
+@mixin admin-btn-variant($bg-color, $text-color: white) {
+  background-color: $bg-color;
+  color: $text-color;
+
+  &:hover:not(:disabled) {
+    background-color: color-mix(in srgb, $bg-color 90%, black);
+  }
+}
+
+// Icon-only buttons mixin
+@mixin admin-icon-btn($color) {
+  background: transparent;
+  border: none;
+  color: $color;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba($color, 0.1);
+  }
+}
+
 // Badges comunes
 .admin-badge {
   display: inline-flex;
@@ -335,7 +360,7 @@ $admin-text-muted: #9ca3af;
   }
 }
 
-// Form grid común
+// Common form grid
 .admin-form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -387,50 +412,46 @@ $admin-text-muted: #9ca3af;
   padding: 1rem;
 }
 
+// Estilos de modales
+.admin-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
 .admin-modal-content {
   background: $admin-card-bg;
   border-radius: 12px;
-  border: 1px solid $admin-border;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  width: 90%;
   max-width: 600px;
-  width: 100%;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: modal-fade-in 0.3s ease;
 }
 
 .admin-modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid $admin-border;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid $admin-border;
-  background: linear-gradient(135deg, rgba($admin-primary, 0.1), rgba($admin-info, 0.1));
 
   h3 {
-    color: $admin-text-primary;
-    margin: 0;
     font-size: 1.25rem;
     font-weight: 600;
+    margin: 0;
+    color: $admin-text-primary;
   }
 
   .close-btn {
-    background: none;
-    border: none;
-    color: $admin-text-secondary;
-    font-size: 1.25rem;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-
-    i {
-      font-size: 1.25rem;
-    }
-
-    &:hover {
-      background: rgba($admin-danger, 0.1);
-      color: $admin-danger;
-    }
+    @include admin-icon-btn($admin-text-secondary);
   }
 }
 
@@ -438,55 +459,51 @@ $admin-text-muted: #9ca3af;
   padding: 2rem;
 }
 
-.admin-modal-actions {
+.admin-modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid $admin-border;
   display: flex;
-  gap: 1rem;
   justify-content: flex-end;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
+  gap: 1rem;
 }
 
 // Tablas comunes
 .admin-table {
-  .table-header {
-    display: grid;
-    gap: 1rem;
-    padding: 1rem 2rem;
-    background: $admin-dark-bg;
-    border-bottom: 1px solid $admin-border;
+  width: 100%;
+  border-collapse: collapse;
+  background: $admin-dark-bg;
+}
 
-    .header-cell {
-      color: $admin-text-secondary;
-      font-size: 0.875rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
+.admin-table-header {
+  background: $admin-card-bg;
+  padding: 1rem 1.5rem;
+  text-align: left;
+  font-weight: 600;
+  color: $admin-text-primary;
+  font-size: 0.875rem;
+  border-bottom: 1px solid $admin-border;
+  white-space: nowrap;
+}
+
+.admin-table-row {
+  border-bottom: 1px solid $admin-border;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: rgba($admin-primary, 0.05);
   }
 
-  .table-row {
-    display: grid;
-    gap: 1rem;
-    padding: 1rem 2rem;
-    border-bottom: 1px solid $admin-border;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: rgba($admin-primary, 0.05);
-    }
-
-    .table-cell {
-      display: flex;
-      align-items: center;
-      color: $admin-text-primary;
-      font-size: 0.875rem;
-    }
+  &:last-child {
+    border-bottom: none;
   }
 }
 
-// Paginación común
+.admin-table-cell {
+  padding: 1rem 1.5rem;
+  vertical-align: middle;
+}
+
+// Common pagination
 .admin-pagination {
   display: flex;
   justify-content: space-between;
@@ -574,7 +591,7 @@ $admin-text-muted: #9ca3af;
   }
 }
 
-// Estados vacíos
+// Empty states
 .admin-empty-state {
   text-align: center;
   padding: 4rem 2rem;
@@ -598,7 +615,7 @@ $admin-text-muted: #9ca3af;
   }
 }
 
-// Grid responsivo común
+// Common responsive grid
 .admin-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -816,5 +833,69 @@ $admin-text-muted: #9ca3af;
 
   .admin-search-container .search-input {
     width: 100%;
+  }
+}
+
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+} 
+
+// Estilos de formularios
+.admin-form-group {
+  margin-bottom: 1.5rem;
+
+  .form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $admin-text-secondary;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.admin-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid $admin-border;
+  border-radius: 8px;
+  background: $admin-dark-bg;
+  color: $admin-text-primary;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+
+  &::placeholder {
+    color: $admin-text-muted;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $admin-primary;
+    box-shadow: 0 0 0 3px rgba($admin-primary, 0.1);
+  }
+
+  &:hover {
+    border-color: color-mix(in srgb, $admin-border 90%, white);
+  }
+}
+
+.admin-error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: $admin-danger;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+
+  i {
+    font-size: 0.875rem;
   }
 } 

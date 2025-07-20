@@ -1,8 +1,5 @@
 // Widget Management Component Styles
-// Usando las clases globales del admin
 @use 'src/assets/styles/admin-global.scss' as admin;
-
-// Widget Management Styles
 .content-config {
   .bg-gray-900 {
     background: admin.$admin-darker-bg;
@@ -60,7 +57,7 @@
     border-color: admin.$admin-border;
   }
 
-  // Material Icons specific styles
+  
   .material-icons {
     font-family: 'Material Icons';
     font-weight: normal;
@@ -77,7 +74,7 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  // Icon sizes for different contexts
+  
   .material-icons.text-sm {
     font-size: 16px;
   }
@@ -86,7 +83,7 @@
     font-size: 32px;
   }
 
-  // Form styles
+  
   .form-group {
     margin-bottom: 1rem;
 
@@ -99,7 +96,7 @@
     }
   }
 
-  // Button styles
+  
   button {
     transition: all 0.2s ease;
 
@@ -114,7 +111,7 @@
     }
   }
 
-  // Widget item styles
+  
   .widget-item {
     transition: all 0.2s ease;
 
@@ -124,7 +121,7 @@
     }
   }
 
-  // Status badges
+  
   .bg-green-600 {
     background: admin.$admin-success;
   }
@@ -133,13 +130,13 @@
     background: admin.$admin-danger;
   }
 
-  // Loading states
+  
   .loading {
     opacity: 0.6;
     pointer-events: none;
   }
 
-  // Empty state
+  
   .empty-state {
     text-align: center;
     padding: 2rem;
@@ -152,7 +149,7 @@
     }
   }
 
-  // Responsive adjustments
+  
   @media (max-width: 768px) {
     .grid-cols-2 {
       grid-template-columns: 1fr;
@@ -168,7 +165,7 @@
     }
   }
 
-  // Focus states for accessibility
+  
   input:focus,
   select:focus,
   textarea:focus {
@@ -176,7 +173,7 @@
     box-shadow: 0 0 0 3px rgba(admin.$admin-primary, 0.1);
   }
 
-  // Custom scrollbar for better UX
+  
   ::-webkit-scrollbar {
     width: 8px;
   }

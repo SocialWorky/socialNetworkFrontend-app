@@ -17,6 +17,7 @@ export class WebhooksComponent implements OnInit, OnDestroy {
 
   webhookForm: FormGroup;
   webhooks: Webhook[] = [];
+  isLoading = true;
   loadWebhookButtons = false;
   editingWebhook: Webhook | null = null;
 
@@ -53,9 +54,16 @@ export class WebhooksComponent implements OnInit, OnDestroy {
   }
 
   loadWebhooks() {
+    this.isLoading = true;
     this.webhookService.getAllWebhooks().pipe(takeUntil(this.destroy$)).subscribe({
       next: (webhooks) => {
         this.webhooks = webhooks;
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error loading webhooks:', error);
+        this.isLoading = false;
         this.cdr.markForCheck();
       }
     });

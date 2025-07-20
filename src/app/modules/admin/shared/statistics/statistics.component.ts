@@ -20,41 +20,39 @@ export class StatisticsComponent implements OnInit {
 
   private unsubscribe$ = new Subject<void>();
 
-  // Loading and error states
-  isLoading = false;
+  isLoading = true;
+  isLoadingUsers = true;
+  isLoadingPublications = true;
+  isLoadingComments = true;
+  isLoadingReactions = true;
+  isLoadingReports = true;
+  isLoadingMessages = true;
   error: string | null = null;
   lastUpdated = new Date();
 
-  // Users data
   private _allUsers: User[] = [];
   private _activeUsers: User[] = [];
   private _pendingUsers: User[] = [];
 
-  // Publications data
   private _countPublications: number = 0;
   private _publicationsWithMedia: number = 0;
   private _todayPublications: number = 0;
   private _allPublications: PublicationView[] = [];
 
-  // Comments data
   private _totalComments: number = 0;
   private _todayComments: number = 0;
 
-  // Reactions data
   private _totalReactions: number = 0;
   private _todayReactions: number = 0;
 
-  // Reports data
   private _reportsStatusPending: any[] = [];
   private _resolvedReports: number = 0;
   private _todayReports: number = 0;
 
-  // Messages data
   private _totalMessages: number = 0;
   private _unreadMessages: number = 0;
   private _activeConversations: number = 0;
 
-  // Computed properties for users
   get allUsersLength() {
     return this._allUsers.length;
   }
@@ -67,7 +65,6 @@ export class StatisticsComponent implements OnInit {
     return this._pendingUsers.length;
   }
 
-  // Computed properties for publications
   get countPublications() {
     return this._countPublications;
   }
@@ -80,7 +77,6 @@ export class StatisticsComponent implements OnInit {
     return this._todayPublications;
   }
 
-  // Computed properties for comments
   get totalComments() {
     return this._totalComments;
   }
@@ -93,7 +89,6 @@ export class StatisticsComponent implements OnInit {
     return this.countPublications > 0 ? this.totalComments / this.countPublications : 0;
   }
 
-  // Computed properties for reactions
   get totalReactions() {
     return this._totalReactions;
   }
@@ -106,7 +101,6 @@ export class StatisticsComponent implements OnInit {
     return this.countPublications > 0 ? this.totalReactions / this.countPublications : 0;
   }
 
-  // Computed properties for reports
   get ReportsStatusPendingCount() {
     return this._reportsStatusPending.length;
   }
@@ -119,7 +113,6 @@ export class StatisticsComponent implements OnInit {
     return this._todayReports;
   }
 
-  // Computed properties for messages
   get totalMessages() {
     return this._totalMessages;
   }
@@ -132,7 +125,6 @@ export class StatisticsComponent implements OnInit {
     return this._activeConversations;
   }
 
-  // Computed metrics
   get engagementRate() {
     const totalInteractions = this.totalComments + this.totalReactions;
     const activeUsers = this.activeUsersCount;
@@ -140,18 +132,16 @@ export class StatisticsComponent implements OnInit {
   }
 
   get contentGrowthRate() {
-    // Simulated growth rate based on today's publications
-    const weeklyAverage = this.countPublications / 52; // Assuming 52 weeks
+    const weeklyAverage = this.countPublications / 52;
     return weeklyAverage > 0 ? (this.todayPublications / weeklyAverage) * 100 : 0;
   }
 
   get userActivityRate() {
-    const todayActiveUsers = Math.floor(this.activeUsersCount * 0.3); // Simulated 30% daily activity
+    const todayActiveUsers = Math.floor(this.activeUsersCount * 0.3);
     return this.allUsersLength > 0 ? (todayActiveUsers / this.allUsersLength) * 100 : 0;
   }
 
   get avgResponseTime() {
-    // Simulated average response time in hours
     return this.ReportsStatusPendingCount > 0 ? 4.5 : 2.0;
   }
 
@@ -188,7 +178,6 @@ export class StatisticsComponent implements OnInit {
     this.isLoading = true;
     
     try {
-      // Load users first, then calculate message statistics based on user data
       await this.getAllUsers();
       await Promise.all([
         this.getCountPublications(),
@@ -203,33 +192,42 @@ export class StatisticsComponent implements OnInit {
   }
 
   private async getAllUsers() {
+    this.isLoadingUsers = true;
     await this._userService.getAllUsers().pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: User[]) => {
         this._allUsers = data;
         this._activeUsers = data.filter(user => user.isActive);
         this._pendingUsers = data.filter(user => !user.isVerified);
+        this.isLoadingUsers = false;
         this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading users:', error);
+        this.isLoadingUsers = false;
+        this._cdr.markForCheck();
       }
     });
   }
 
   private async getCountPublications() {
+    this.isLoadingPublications = true;
     await this._publicationService.getCountPublications().pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data) => {
         this._countPublications = data;
+        this.isLoadingPublications = false;
         this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading publications count:', error);
+        this.isLoadingPublications = false;
+        this._cdr.markForCheck();
       }
     });
   }
 
   private async getAllPublications() {
-    // Get all publications to calculate real statistics
+    this.isLoadingComments = true;
+    this.isLoadingReactions = true;
     await this._publicationService.getAllPublications(1, 1000, 'all').pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {
         if (data.publications) {
@@ -237,11 +235,16 @@ export class StatisticsComponent implements OnInit {
           this.calculatePublicationStatistics();
           this.calculateCommentsStatistics();
           this.calculateReactionsStatistics();
+          this.isLoadingComments = false;
+          this.isLoadingReactions = false;
           this._cdr.markForCheck();
         }
       },
       error: (error) => {
         console.error('Error loading publications:', error);
+        this.isLoadingComments = false;
+        this.isLoadingReactions = false;
+        this._cdr.markForCheck();
       }
     });
   }
@@ -299,23 +302,26 @@ export class StatisticsComponent implements OnInit {
   }
 
   private async getReportsStatusPending() {
+    this.isLoadingReports = true;
     await this._reportsService.getReportsStatus(ReportStatus.PENDING).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data) => {
         this._reportsStatusPending = data;
-        // Simulated data for additional metrics
-        this._resolvedReports = Math.floor(data.length * 0.7); // 70% resolved
-        this._todayReports = Math.floor(data.length * 0.1); // 10% today
+        this._resolvedReports = Math.floor(data.length * 0.7);
+        this._todayReports = Math.floor(data.length * 0.1);
+        this.isLoadingReports = false;
         this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading reports:', error);
+        this.isLoadingReports = false;
+        this._cdr.markForCheck();
       }
     });
   }
 
   private async getMessagesStatistics() {
+    this.isLoadingMessages = true;
     try {
-      // First verify admin permissions
       await this._messageService.verifyAdminPermissions().pipe(takeUntil(this.unsubscribe$)).subscribe({
         next: (permissionResult) => {
           
@@ -327,11 +333,13 @@ export class StatisticsComponent implements OnInit {
                 this._totalMessages = stats.totalMessages || 0;
                 this._unreadMessages = stats.unreadMessages || 0;
                 this._activeConversations = stats.activeConversations || 0;
+                this.isLoadingMessages = false;
                 this._cdr.markForCheck();
               },
               error: (error: any) => {
                 console.error('Error loading basic messages statistics:', error);
                 this._unreadMessages = 0;
+                this.isLoadingMessages = false;
                 this._cdr.markForCheck();
               }
             });
@@ -349,19 +357,21 @@ export class StatisticsComponent implements OnInit {
           this._totalMessages = stats.totalMessages || 0;
           this._unreadMessages = stats.unreadMessages || 0;
           this._activeConversations = stats.activeConversations || 0;
+          this.isLoadingMessages = false;
           this._cdr.markForCheck();
         },
         error: (error: any) => {
           console.error('Error loading messages statistics:', error);
-          // Fallback to unread count only
           this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
             next: (unreadCount: number) => {
               this._unreadMessages = unreadCount;
+              this.isLoadingMessages = false;
               this._cdr.markForCheck();
             },
             error: (unreadError: any) => {
               console.error('Error loading unread messages count:', unreadError);
               this._unreadMessages = 0;
+              this.isLoadingMessages = false;
               this._cdr.markForCheck();
             }
           });
@@ -370,15 +380,16 @@ export class StatisticsComponent implements OnInit {
 
     } catch (error) {
       console.error('Error loading messages statistics:', error);
-      // Fallback to unread count only
       this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
         next: (unreadCount: number) => {
           this._unreadMessages = unreadCount;
+          this.isLoadingMessages = false;
           this._cdr.markForCheck();
         },
         error: (unreadError: any) => {
           console.error('Error loading unread messages count:', unreadError);
           this._unreadMessages = 0;
+          this.isLoadingMessages = false;
           this._cdr.markForCheck();
         }
       });

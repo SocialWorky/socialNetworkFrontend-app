@@ -1,6 +1,28 @@
 <div class="custom-css-dashboard">
-  <!-- Header Section -->
-  <div class="dashboard-header">
+  <!-- Initial Loading State -->
+  <div class="initial-loading-container" *ngIf="isLoading">
+    <div class="loading-content">
+      <div class="loading-spinner">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+      </div>
+      <div class="loading-text">
+        <h3>Cargando editor de CSS</h3>
+        <p>Preparando el entorno de desarrollo...</p>
+        <div class="loading-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading">
+    <!-- Header Section -->
+    <div class="dashboard-header">
     <div class="header-content">
       <div class="header-title">
         <h1 class="title">Editor de CSS Personalizado</h1>
@@ -150,16 +172,17 @@
     </div>
   </div>
 
-  <!-- Error State -->
-  <div class="error-state" *ngIf="error">
-    <div class="error-content">
-      <i class="material-icons error-icon">warning</i>
-      <h3>Error al guardar CSS</h3>
-      <p>{{ error }}</p>
-      <button class="refresh-btn primary" (click)="saveCustomCss()">
-        <i class="material-icons">refresh</i>
-        <span>Intentar de nuevo</span>
-      </button>
+    <!-- Error State -->
+    <div class="error-state" *ngIf="error">
+      <div class="error-content">
+        <i class="material-icons error-icon">warning</i>
+        <h3>Error al guardar CSS</h3>
+        <p>{{ error }}</p>
+        <button class="refresh-btn primary" (click)="saveCustomCss()">
+          <i class="material-icons">refresh</i>
+          <span>Intentar de nuevo</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
