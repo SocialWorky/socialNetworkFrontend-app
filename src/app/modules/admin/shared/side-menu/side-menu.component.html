@@ -55,7 +55,7 @@
                     <span class="item-title">{{ item.title || 'Untitled' }}</span>
                   </div>
                   <div class="item-arrow">
-                    <span class="submenu-count">{{ item.children?.length || 0 }}</span>
+                    <span class="submenu-count">{{ item.children.length || 0 }}</span>
                     <i class="material-icons" [class.rotated]="expandedMenus[item.title?.toString() || 'Untitled']">
                       expand_more
                     </i>
