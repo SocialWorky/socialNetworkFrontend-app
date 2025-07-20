@@ -132,9 +132,20 @@
                   accept="image/*"
                   class="form-file-input"
                 >
-                <div class="file-upload-info">
+                <div class="file-upload-info" *ngIf="!imagePreview">
                   <i class="material-icons">cloud_upload</i>
                   <span>Haz clic para seleccionar una imagen o arrastra aquí</span>
+                </div>
+                <div class="file-preview" *ngIf="imagePreview">
+                  <div class="preview-header">
+                    <span class="file-name">{{ selectedFileName }}</span>
+                    <button type="button" class="remove-file-btn" (click)="removeSelectedFile()">
+                      <i class="material-icons">close</i>
+                    </button>
+                  </div>
+                  <div class="preview-image">
+                    <img [src]="imagePreview" [alt]="selectedFileName" class="preview-img">
+                  </div>
                 </div>
               </div>
             </div>

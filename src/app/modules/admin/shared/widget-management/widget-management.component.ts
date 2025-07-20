@@ -32,6 +32,9 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
 
   allowedPositionsForSelectedWidget: WidgetPosition[] = [];
   
+  isSaving = false;
+  isDeleting = false;
+  
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -146,10 +149,15 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
   }
 
   saveWidget(): void {
-    if (this.widgetForm.valid) {
+    if (this.widgetForm.valid && !this.isSaving) {
+      this.isSaving = true;
+      this._cdr.markForCheck();
+      
       const widgetConfig: WidgetConfig = this.widgetForm.value;
       
       if (!this.validateWidgetConstraints(widgetConfig)) {
+        this.isSaving = false;
+        this._cdr.markForCheck();
         return;
       }
 
@@ -160,6 +168,7 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
             this.alertService.showAlert('Éxito', 'Widget guardado correctamente', Alerts.SUCCESS, Position.CENTER, true, 'Aceptar');
             this.widgetForm.reset();
             this.widgetConfigService.forceRefresh();
+            this.isSaving = false;
             this._cdr.markForCheck();
           },
           error: (error) => {
@@ -170,6 +179,8 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
               { error: String(error), widgetConfig }
             );
             this.alertService.showAlert('Error', 'Error al guardar widget', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
+            this.isSaving = false;
+            this._cdr.markForCheck();
           }
         });
     }
@@ -191,12 +202,18 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
   }
 
   deleteWidget(selector: string): void {
+    if (this.isDeleting) return;
+    
+    this.isDeleting = true;
+    this._cdr.markForCheck();
+    
     this.widgetConfigService.deleteWidget(selector)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           this.alertService.showAlert('Éxito', 'Widget eliminado correctamente', Alerts.SUCCESS, Position.CENTER, true, 'Aceptar');
           this.widgetConfigService.forceRefresh();
+          this.isDeleting = false;
           this._cdr.markForCheck();
         },
         error: (error) => {
@@ -207,6 +224,8 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
             { error: String(error), widgetSelector: selector }
           );
           this.alertService.showAlert('Error', 'Error al eliminar widget', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
+          this.isDeleting = false;
+          this._cdr.markForCheck();
         }
       });
   }

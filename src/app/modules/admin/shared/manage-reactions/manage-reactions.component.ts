@@ -34,6 +34,8 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
   loadReactionsButtons = false;
 
   public imageFile: File | null = null;
+  public imagePreview: string | null = null;
+  public selectedFileName: string = '';
 
   error: string | null = null;
 
@@ -146,16 +148,41 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     const file = event.target.files[0];
     if (file) {
       this.imageFile = file;
+      this.selectedFileName = file.name;
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagePreview = e.target.result;
+        this._cdr.markForCheck();
+      };
+      reader.readAsDataURL(file);
+      
       this.reactionForm.patchValue({
         emoji: '',
       });
       this.reactionForm.get('emoji')?.clearValidators();
       this.reactionForm.get('emoji')?.updateValueAndValidity();
     } else {
-      this.imageFile = null;
-      this.reactionForm.get('emoji')?.setValidators([Validators.required]);
-      this.reactionForm.get('emoji')?.updateValueAndValidity();
+      this.clearSelectedFile();
     }
+  }
+
+  removeSelectedFile() {
+    this.clearSelectedFile();
+    const fileInput = document.getElementById('image') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
+
+  private clearSelectedFile() {
+    this.imageFile = null;
+    this.imagePreview = null;
+    this.selectedFileName = '';
+    this.reactionForm.get('emoji')?.setValidators([Validators.required]);
+    this.reactionForm.get('emoji')?.updateValueAndValidity();
+    this._cdr.markForCheck();
   }
 
   onImageError(event: any) {
@@ -248,9 +275,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
           );
 
           this.reactionForm.reset();
-          this.imageFile = null;
-          this.reactionForm.get('emoji')?.setValidators([Validators.required]);
-          this.reactionForm.get('emoji')?.updateValueAndValidity();
+          this.clearSelectedFile();
           const fileInput = document.getElementById('image') as HTMLInputElement;
           if (fileInput) {
             fileInput.value = '';

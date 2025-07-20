@@ -387,16 +387,17 @@
         
         <div class="form-row">
           <div class="form-group">
-            <label>Rol</label>
+            <label><i class="material-icons">admin_panel_settings</i> Rol <span class="editable-indicator">(Editable)</span></label>
             <select name="role" [(ngModel)]="selectedUser.role" required>
               <option value="admin">Administrador</option>
-              <option value="editor">Editor</option>
+              <option value="moderator">Moderador</option>
               <option value="user">Usuario</option>
+              <option value="guest">Invitado</option>
             </select>
           </div>
           
           <div class="form-group">
-            <label>Estado</label>
+            <label><i class="material-icons">toggle_on</i> Estado <span class="editable-indicator">(Editable)</span></label>
             <select name="isActive" [(ngModel)]="selectedUser.isActive" required>
               <option [ngValue]="true">Activo</option>
               <option [ngValue]="false">Inactivo</option>
@@ -406,7 +407,7 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label>Verificación de email</label>
+            <label><i class="material-icons">verified</i> Verificación de email <span class="editable-indicator">(Editable)</span></label>
             <select name="isVerified" [(ngModel)]="selectedUser.isVerified" required>
               <option [ngValue]="true">Verificado</option>
               <option [ngValue]="false">No verificado</option>
@@ -414,7 +415,7 @@
           </div>
           
           <div class="form-group">
-            <label>Modo oscuro</label>
+            <label><i class="material-icons">dark_mode</i> Modo oscuro <span class="editable-indicator">(Editable)</span></label>
             <select name="isDarkMode" [(ngModel)]="selectedUser.isDarkMode" required>
               <option [ngValue]="true">Activado</option>
               <option [ngValue]="false">Desactivado</option>

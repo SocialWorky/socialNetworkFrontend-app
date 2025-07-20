@@ -853,9 +853,22 @@
       font-weight: 600;
       color: admin.$admin-text-secondary;
       margin-bottom: 0.5rem;
+
+      i {
+        font-size: 1rem;
+        color: admin.$admin-primary;
+      }
+
+      .editable-indicator {
+        font-size: 0.75rem;
+        color: admin.$admin-success;
+        font-weight: 400;
+        margin-left: 0.5rem;
+        opacity: 0.8;
+      }
     }
 
-    input, select {
+    input {
       width: 100%;
       padding: 0.75rem;
       border: 1px solid admin.$admin-border;
@@ -864,6 +877,7 @@
       color: admin.$admin-text-primary;
       font-size: 0.875rem;
       transition: all 0.2s ease;
+      cursor: text;
 
       &:focus {
         outline: none;
@@ -879,6 +893,60 @@
 
       &::placeholder {
         color: admin.$admin-text-muted;
+      }
+    }
+
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid admin.$admin-border;
+      border-radius: 8px;
+      background: admin.$admin-dark-bg;
+      color: admin.$admin-text-primary;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.5em 1.5em;
+      padding-right: 2.5rem;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      cursor: pointer;
+      border: 2px solid admin.$admin-border;
+
+      &:hover {
+        border-color: admin.$admin-primary;
+        background-color: rgba(admin.$admin-primary, 0.05);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(admin.$admin-primary, 0.1);
+      }
+
+      &:focus {
+        border-color: admin.$admin-primary;
+        box-shadow: 0 0 0 3px rgba(admin.$admin-primary, 0.1);
+        background-color: admin.$admin-dark-bg;
+        outline: none;
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      option {
+        background: admin.$admin-dark-bg;
+        color: admin.$admin-text-primary;
+        padding: 0.5rem;
+      }
+
+      &[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: rgba(admin.$admin-secondary, 0.1);
+        border-color: admin.$admin-border;
+        transform: none;
+        box-shadow: none;
       }
     }
 

@@ -179,7 +179,11 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   }
 
   editUser(user: User): void {
-    this.selectedUser = user;
+    this.selectedUser = { 
+      ...user,
+      isDarkMode: user.isDarkMode ?? false
+    };
+    this.newPassword = '';
     this.showEditModal = true;
     this._cdr.markForCheck();
   }
