@@ -1,55 +1,26 @@
-// Variables
-$primary-color: #3b82f6;
-$success-color: #10b981;
-$warning-color: #f59e0b;
-$error-color: #ef4444;
-$info-color: #06b6d4;
-$dark-bg: #0f172a;
-$card-bg: #1e293b;
-$border-color: #334155;
-$text-primary: #f8fafc;
-$text-secondary: #cbd5e1;
-$text-muted: #64748b;
+// Logs Component Styles
+// Usando las clases globales del admin
+@use 'src/assets/styles/admin-global.scss' as admin;
 
 .logs-dashboard {
-  display: flex;
-  flex-direction: column;
+  @extend .admin-dashboard;
   height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: $text-primary;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
 }
 
 .dashboard-header {
+  @extend .admin-dashboard-header;
   background: rgba(30, 41, 59, 0.95);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid $border-color;
+  border-bottom: 1px solid admin.$admin-border;
   padding: 1.5rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 
   .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 1.5rem;
 
-    .header-title {
-      .title {
-        font-size: 1.875rem;
-        font-weight: 700;
-        margin: 0;
-        background: linear-gradient(135deg, #3b82f6, #06b6d4);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      .subtitle {
-        color: $text-secondary;
-        margin: 0.25rem 0 0 0;
-        font-size: 0.875rem;
-      }
+    .header-title .title {
+      font-size: 1.875rem;
     }
 
     .header-stats {
@@ -57,43 +28,32 @@ $text-muted: #64748b;
       gap: 1rem;
 
       .stat-card {
+        @extend .admin-stat-card;
         display: flex;
         align-items: center;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
         padding: 0.75rem 1rem;
         min-width: 120px;
-        transition: all 0.3s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        }
 
         .stat-icon {
+          @extend .admin-card-icon;
           width: 40px;
           height: 40px;
           border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
           margin-right: 0.75rem;
 
           &.total {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            background: linear-gradient(135deg, admin.$admin-primary, admin.$admin-primary-dark);
           }
 
           &.error {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, admin.$admin-danger, darken(admin.$admin-danger, 10%));
           }
 
           &.warning {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
+            background: linear-gradient(135deg, admin.$admin-warning, darken(admin.$admin-warning, 10%));
           }
 
           i {
-            color: white;
             font-size: 1.25rem;
           }
         }
@@ -106,11 +66,12 @@ $text-muted: #64748b;
             font-size: 1.5rem;
             font-weight: 700;
             line-height: 1;
+            color: admin.$admin-text-primary;
           }
 
           .stat-label {
             font-size: 0.75rem;
-            color: $text-secondary;
+            color: admin.$admin-text-secondary;
             text-transform: uppercase;
             letter-spacing: 0.05em;
           }
@@ -134,7 +95,7 @@ $text-muted: #64748b;
         .filter-label {
           font-size: 0.875rem;
           font-weight: 600;
-          color: $text-secondary;
+          color: admin.$admin-text-secondary;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
@@ -149,10 +110,10 @@ $text-muted: #64748b;
             align-items: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
-            border: 1px solid $border-color;
+            border: 1px solid admin.$admin-border;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.05);
-            color: $text-secondary;
+            color: admin.$admin-text-secondary;
             font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
@@ -164,29 +125,29 @@ $text-muted: #64748b;
             }
 
             &.active {
-              background: $primary-color;
-              border-color: $primary-color;
+              background: admin.$admin-primary;
+              border-color: admin.$admin-primary;
               color: white;
             }
 
             &.error.active {
-              background: $error-color;
-              border-color: $error-color;
+              background: admin.$admin-danger;
+              border-color: admin.$admin-danger;
             }
 
             &.warn.active {
-              background: $warning-color;
-              border-color: $warning-color;
+              background: admin.$admin-warning;
+              border-color: admin.$admin-warning;
             }
 
             &.info.active {
-              background: $info-color;
-              border-color: $info-color;
+              background: admin.$admin-info;
+              border-color: admin.$admin-info;
             }
 
             &.debug.active {
-              background: $text-muted;
-              border-color: $text-muted;
+              background: admin.$admin-text-muted;
+              border-color: admin.$admin-text-muted;
             }
 
             i {
@@ -203,49 +164,49 @@ $text-muted: #64748b;
             left: 0.75rem;
             top: 50%;
             transform: translateY(-50%);
-            color: $text-muted;
+            color: admin.$admin-text-muted;
             font-size: 1.125rem;
           }
 
           .search-input {
             width: 300px;
             padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-            border: 1px solid $border-color;
+            border: 1px solid admin.$admin-border;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.05);
-            color: $text-primary;
+            color: admin.$admin-text-primary;
             font-size: 0.875rem;
             transition: all 0.2s ease;
 
             &::placeholder {
-              color: $text-muted;
+              color: admin.$admin-text-muted;
             }
 
             &:focus {
               outline: none;
-              border-color: $primary-color;
-              box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+              border-color: admin.$admin-primary;
+              box-shadow: 0 0 0 3px rgba(admin.$admin-primary, 0.1);
             }
           }
         }
 
         .limit-select {
           padding: 0.75rem;
-          border: 1px solid $border-color;
+          border: 1px solid admin.$admin-border;
           border-radius: 8px;
           background: rgba(255, 255, 255, 0.05);
-          color: $text-primary;
+          color: admin.$admin-text-primary;
           font-size: 0.875rem;
           cursor: pointer;
 
           &:focus {
             outline: none;
-            border-color: $primary-color;
+            border-color: admin.$admin-primary;
           }
 
           option {
-            background: $card-bg;
-            color: $text-primary;
+            background: admin.$admin-card-bg;
+            color: admin.$admin-text-primary;
           }
         }
       }
@@ -262,10 +223,10 @@ $text-muted: #64748b;
         align-items: center;
         gap: 0.5rem;
         padding: 0.75rem 1.5rem;
-        border: 1px solid $border-color;
+        border: 1px solid admin.$admin-border;
         border-radius: 8px;
         background: rgba(255, 255, 255, 0.05);
-        color: $text-primary;
+        color: admin.$admin-text-primary;
         font-size: 0.875rem;
         font-weight: 500;
         cursor: pointer;
@@ -283,21 +244,21 @@ $text-muted: #64748b;
         }
 
         &.refresh-btn {
-          border-color: $primary-color;
-          color: $primary-color;
+          border-color: admin.$admin-primary;
+          color: admin.$admin-primary;
 
           &:hover:not(:disabled) {
-            background: $primary-color;
+            background: admin.$admin-primary;
             color: white;
           }
         }
 
         &.export-btn {
-          border-color: $success-color;
-          color: $success-color;
+          border-color: admin.$admin-success;
+          color: admin.$admin-success;
 
           &:hover {
-            background: $success-color;
+            background: admin.$admin-success;
             color: white;
           }
         }
@@ -314,7 +275,7 @@ $text-muted: #64748b;
           gap: 0.75rem;
           cursor: pointer;
           font-size: 0.875rem;
-          color: $text-secondary;
+          color: admin.$admin-text-secondary;
 
           input[type="checkbox"] {
             display: none;
@@ -342,7 +303,7 @@ $text-muted: #64748b;
           }
 
           input:checked + .toggle-slider {
-            background: $primary-color;
+            background: admin.$admin-primary;
 
             &::before {
               transform: translateX(24px);
@@ -373,13 +334,13 @@ $text-muted: #64748b;
       width: 40px;
       height: 40px;
       border: 3px solid rgba(255, 255, 255, 0.1);
-      border-top: 3px solid $primary-color;
+      border-top: 3px solid admin.$admin-primary;
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
 
     p {
-      color: $text-secondary;
+      color: admin.$admin-text-secondary;
       font-size: 1rem;
     }
   }
@@ -395,18 +356,18 @@ $text-muted: #64748b;
 
     .empty-icon {
       font-size: 4rem;
-      color: $text-muted;
+      color: admin.$admin-text-muted;
     }
 
     h3 {
       font-size: 1.5rem;
       font-weight: 600;
       margin: 0;
-      color: $text-primary;
+      color: admin.$admin-text-primary;
     }
 
     p {
-      color: $text-secondary;
+      color: admin.$admin-text-secondary;
       font-size: 1rem;
       margin: 0;
     }
@@ -440,8 +401,8 @@ $text-muted: #64748b;
     }
 
     .log-card {
-      background: $card-bg;
-      border: 1px solid $border-color;
+      background: admin.$admin-card-bg;
+      border: 1px solid admin.$admin-border;
       border-radius: 12px;
       overflow: visible;
       transition: all 0.3s ease;
@@ -454,7 +415,7 @@ $text-muted: #64748b;
       }
 
       &.expanded {
-        border-color: $primary-color;
+        border-color: admin.$admin-primary;
         z-index: 10;
         position: relative;
       }
@@ -524,11 +485,12 @@ $text-muted: #64748b;
             margin-bottom: 0.25rem;
             line-height: 1.4;
             word-break: break-word;
+            color: admin.$admin-text-primary;
           }
 
           .log-context {
             font-size: 0.875rem;
-            color: $text-secondary;
+            color: admin.$admin-text-secondary;
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
             word-break: break-word;
           }
@@ -544,7 +506,7 @@ $text-muted: #64748b;
             align-items: center;
             gap: 0.5rem;
             font-size: 0.875rem;
-            color: $text-muted;
+            color: admin.$admin-text-muted;
 
             i {
               font-size: 1rem;
@@ -558,10 +520,10 @@ $text-muted: #64748b;
             .action-icon {
               width: 32px;
               height: 32px;
-              border: 1px solid $border-color;
+              border: 1px solid admin.$admin-border;
               border-radius: 6px;
               background: rgba(255, 255, 255, 0.05);
-              color: $text-secondary;
+              color: admin.$admin-text-secondary;
               display: flex;
               align-items: center;
               justify-content: center;
@@ -571,7 +533,7 @@ $text-muted: #64748b;
               &:hover {
                 background: rgba(255, 255, 255, 0.1);
                 border-color: rgba(255, 255, 255, 0.2);
-                color: $text-primary;
+                color: admin.$admin-text-primary;
               }
 
               i {
@@ -587,7 +549,7 @@ $text-muted: #64748b;
       }
 
       .log-details {
-        border-top: 1px solid $border-color;
+        border-top: 1px solid admin.$admin-border;
         background: rgba(0, 0, 0, 0.2);
         max-height: none;
         overflow: visible;
@@ -602,10 +564,10 @@ $text-muted: #64748b;
             font-size: 1rem;
             font-weight: 600;
             margin: 0 0 1rem 0;
-            color: $text-primary;
+            color: admin.$admin-text-primary;
 
             i {
-              color: $primary-color;
+              color: admin.$admin-primary;
             }
           }
 
@@ -645,10 +607,10 @@ $text-muted: #64748b;
               align-items: center;
               gap: 0.5rem;
               padding: 0.5rem 1rem;
-              border: 1px solid $border-color;
+              border: 1px solid admin.$admin-border;
               border-radius: 6px;
               background: rgba(0, 0, 0, 0.8);
-              color: $text-secondary;
+              color: admin.$admin-text-secondary;
               font-size: 0.875rem;
               cursor: pointer;
               transition: all 0.2s ease;
@@ -659,7 +621,7 @@ $text-muted: #64748b;
               &:hover {
                 background: rgba(255, 255, 255, 0.1);
                 border-color: rgba(255, 255, 255, 0.2);
-                color: $text-primary;
+                color: admin.$admin-text-primary;
               }
 
               i {
@@ -679,13 +641,13 @@ $text-muted: #64748b;
     margin-top: 1.5rem;
     padding: 1rem;
     background: rgba(255, 255, 255, 0.02);
-    border: 1px solid $border-color;
+    border: 1px solid admin.$admin-border;
     border-radius: 8px;
     flex-shrink: 0;
 
     .pagination-info {
       font-size: 0.875rem;
-      color: $text-secondary;
+      color: admin.$admin-text-secondary;
     }
 
     .pagination-controls {
@@ -696,10 +658,10 @@ $text-muted: #64748b;
       .pagination-btn {
         min-width: 40px;
         height: 40px;
-        border: 1px solid $border-color;
+        border: 1px solid admin.$admin-border;
         border-radius: 6px;
         background: rgba(255, 255, 255, 0.05);
-        color: $text-secondary;
+        color: admin.$admin-text-secondary;
         font-size: 0.875rem;
         font-weight: 500;
         cursor: pointer;
@@ -711,7 +673,7 @@ $text-muted: #64748b;
         &:hover:not(:disabled) {
           background: rgba(255, 255, 255, 0.1);
           border-color: rgba(255, 255, 255, 0.2);
-          color: $text-primary;
+          color: admin.$admin-text-primary;
         }
 
         &:disabled {
@@ -720,8 +682,8 @@ $text-muted: #64748b;
         }
 
         &.active {
-          background: $primary-color;
-          border-color: $primary-color;
+          background: admin.$admin-primary;
+          border-color: admin.$admin-primary;
           color: white;
         }
 
@@ -731,7 +693,7 @@ $text-muted: #64748b;
       }
 
       .pagination-ellipsis {
-        color: $text-muted;
+        color: admin.$admin-text-muted;
         font-weight: 500;
         padding: 0 0.5rem;
       }
@@ -741,7 +703,7 @@ $text-muted: #64748b;
 
 ::ng-deep .ngx-json-viewer {
   background: transparent !important;
-  color: $text-primary !important;
+  color: admin.$admin-text-primary !important;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
   font-size: 0.875rem !important;
   max-width: 100% !important;
@@ -757,7 +719,7 @@ $text-muted: #64748b;
       }
 
       .segment-value {
-        color: $text-primary !important;
+        color: admin.$admin-text-primary !important;
       }
     }
 
@@ -788,7 +750,7 @@ $text-muted: #64748b;
   }
 
   .segment-expand {
-    color: $primary-color !important;
+    color: admin.$admin-primary !important;
   }
 }
 

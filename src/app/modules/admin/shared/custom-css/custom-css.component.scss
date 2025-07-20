@@ -1,208 +1,40 @@
-// Color palette variables (same as other components)
-$primary-color: #3b82f6;
-$primary-dark: #1d4ed8;
-$success-color: #10b981;
-$warning-color: #f59e0b;
-$danger-color: #ef4444;
-$info-color: #06b6d4;
-$secondary-color: #6b7280;
-$dark-bg: #1f2937;
-$darker-bg: #111827;
-$card-bg: #374151;
-$border-color: #4b5563;
-$text-primary: #f9fafb;
-$text-secondary: #d1d5db;
-$text-muted: #9ca3af;
-
-// Animation for rotating icons
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.rotating {
-  animation: rotate 1s linear infinite;
-}
+// Custom CSS Component Styles
+// Usando las clases globales del admin
+@use 'src/assets/styles/admin-global.scss' as admin;
 
 .custom-css-dashboard {
-  min-height: 100vh;
-  background: linear-gradient(135deg, $darker-bg 0%, $dark-bg 100%);
-  padding: 2rem;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
+  @extend .admin-dashboard;
 }
 
 // Header Section
 .dashboard-header {
-  background: $card-bg;
-  border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid $border-color;
-
-  .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 2rem;
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-  }
-
-  .header-title {
-    .title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: $text-primary;
-      margin: 0 0 0.5rem 0;
-      background: linear-gradient(135deg, $primary-color, $info-color);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .subtitle {
-      color: $text-secondary;
-      font-size: 1rem;
-      margin: 0;
-    }
-  }
-
-  .header-actions {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-
-    @media (max-width: 768px) {
-      width: 100%;
-      justify-content: stretch;
-    }
-  }
+  @extend .admin-dashboard-header;
 
   .preview-btn, .save-btn, .reset-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.875rem;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    i {
-      font-size: 1.125rem;
-    }
-
-    .btn-text {
-      @media (max-width: 480px) {
-        display: none;
-      }
-    }
-
-    &:hover:not(:disabled) {
-      transform: translateY(-1px);
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    @extend .admin-btn;
   }
 
   .preview-btn {
-    background: $info-color;
-    color: white;
-
-    &:hover:not(:disabled) {
-      background: darken($info-color, 10%);
-      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
-    }
+    @extend .admin-btn-info;
   }
 
   .save-btn {
-    background: linear-gradient(135deg, $success-color, darken($success-color, 10%));
-    color: white;
-
-    &:hover:not(:disabled) {
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-    }
+    @extend .admin-btn-success;
   }
 
   .reset-btn {
-    background: $warning-color;
-    color: white;
-
-    &:hover:not(:disabled) {
-      background: darken($warning-color, 10%);
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
-    }
+    @extend .admin-btn-warning;
   }
 }
 
 // Section Styles
 .editor-section, .help-section {
-  background: $card-bg;
-  border-radius: 12px;
-  border: 1px solid $border-color;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  @extend .admin-card;
   margin-bottom: 2rem;
 }
 
 .section-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.5rem 2rem;
-  background: linear-gradient(135deg, rgba($primary-color, 0.1), rgba($info-color, 0.1));
-  border-bottom: 1px solid $border-color;
-
-  .section-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, $primary-color, $info-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.25rem;
-
-    i {
-      font-size: 1.25rem;
-    }
-  }
-
-  .section-info {
-    flex: 1;
-
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: $text-primary;
-      margin: 0 0 0.25rem 0;
-    }
-
-    .section-description {
-      color: $text-secondary;
-      font-size: 0.875rem;
-      margin: 0;
-    }
-  }
+  @extend .admin-section-header;
 
   .section-actions {
     .format-btn {
@@ -210,7 +42,7 @@ $text-muted: #9ca3af;
       align-items: center;
       gap: 0.5rem;
       padding: 0.5rem 1rem;
-      background: $secondary-color;
+      background: admin.$admin-secondary;
       color: white;
       border: none;
       border-radius: 6px;
@@ -224,7 +56,7 @@ $text-muted: #9ca3af;
       }
 
       &:hover:not(:disabled) {
-        background: darken($secondary-color, 10%);
+        background: color-mix(in srgb, admin.$admin-secondary 90%, black);
       }
 
       &:disabled {
@@ -243,8 +75,8 @@ $text-muted: #9ca3af;
 .editor-container {
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid $border-color;
-  background: $dark-bg;
+  border: 1px solid admin.$admin-border;
+  background: admin.$admin-dark-bg;
 
   .monaco-editor {
     min-height: 400px;
@@ -255,16 +87,16 @@ $text-muted: #9ca3af;
   ::ng-deep {
     .monaco-editor {
       .monaco-editor-background {
-        background-color: $dark-bg !important;
+        background-color: admin.$admin-dark-bg !important;
       }
 
       .monaco-editor .margin {
-        background-color: $card-bg !important;
+        background-color: admin.$admin-card-bg !important;
       }
 
       .monaco-editor .inputarea {
-        background-color: $dark-bg !important;
-        color: $text-primary !important;
+        background-color: admin.$admin-dark-bg !important;
+        color: admin.$admin-text-primary !important;
       }
     }
   }
@@ -277,22 +109,22 @@ $text-muted: #9ca3af;
   gap: 1.5rem;
 
   .help-card {
-    background: $dark-bg;
-    border: 1px solid $border-color;
+    background: admin.$admin-dark-bg;
+    border: 1px solid admin.$admin-border;
     border-radius: 8px;
     padding: 1.5rem;
     transition: all 0.2s ease;
 
     &:hover {
-      border-color: $primary-color;
-      box-shadow: 0 4px 12px rgba($primary-color, 0.1);
+      border-color: admin.$admin-primary;
+      box-shadow: 0 4px 12px rgba(admin.$admin-primary, 0.1);
     }
 
     .help-icon {
       width: 40px;
       height: 40px;
       border-radius: 8px;
-      background: linear-gradient(135deg, $primary-color, $info-color);
+      background: linear-gradient(135deg, admin.$admin-primary, admin.$admin-info);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -306,28 +138,28 @@ $text-muted: #9ca3af;
     }
 
     h4 {
-      color: $text-primary;
+      color: admin.$admin-text-primary;
       font-size: 1rem;
       font-weight: 600;
       margin: 0 0 0.5rem 0;
     }
 
     p {
-      color: $text-secondary;
+      color: admin.$admin-text-secondary;
       font-size: 0.875rem;
       margin: 0 0 1rem 0;
       line-height: 1.5;
     }
 
     .code-example {
-      background: $card-bg;
-      border: 1px solid $border-color;
+      background: admin.$admin-card-bg;
+      border: 1px solid admin.$admin-border;
       border-radius: 6px;
       padding: 0.75rem;
       margin-top: 0.5rem;
 
       code {
-        color: $success-color;
+        color: admin.$admin-success;
         font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
         font-size: 0.875rem;
         background: none;
@@ -352,9 +184,9 @@ $text-muted: #9ca3af;
   padding: 1rem;
 
   .preview-content {
-    background: $card-bg;
+    background: admin.$admin-card-bg;
     border-radius: 12px;
-    border: 1px solid $border-color;
+    border: 1px solid admin.$admin-border;
     max-width: 500px;
     width: 100%;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
@@ -364,11 +196,11 @@ $text-muted: #9ca3af;
       justify-content: space-between;
       align-items: center;
       padding: 1.5rem 2rem;
-      border-bottom: 1px solid $border-color;
-      background: linear-gradient(135deg, rgba($primary-color, 0.1), rgba($info-color, 0.1));
+      border-bottom: 1px solid admin.$admin-border;
+      background: linear-gradient(135deg, rgba(admin.$admin-primary, 0.1), rgba(admin.$admin-info, 0.1));
 
       h3 {
-        color: $text-primary;
+        color: admin.$admin-text-primary;
         margin: 0;
         font-size: 1.25rem;
         font-weight: 600;
@@ -377,7 +209,7 @@ $text-muted: #9ca3af;
       .close-btn {
         background: none;
         border: none;
-        color: $text-secondary;
+        color: admin.$admin-text-secondary;
         font-size: 1.25rem;
         cursor: pointer;
         padding: 0.5rem;
@@ -389,8 +221,8 @@ $text-muted: #9ca3af;
         }
 
         &:hover {
-          background: rgba($danger-color, 0.1);
-          color: $danger-color;
+          background: rgba(admin.$admin-danger, 0.1);
+          color: admin.$admin-danger;
         }
       }
     }
@@ -402,12 +234,12 @@ $text-muted: #9ca3af;
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        background: rgba($info-color, 0.1);
-        border: 1px solid rgba($info-color, 0.3);
+        background: rgba(admin.$admin-info, 0.1);
+        border: 1px solid rgba(admin.$admin-info, 0.3);
         border-radius: 8px;
         padding: 1rem;
         margin-bottom: 1.5rem;
-        color: $info-color;
+        color: admin.$admin-info;
         font-size: 0.875rem;
 
         i {
@@ -438,21 +270,21 @@ $text-muted: #9ca3af;
         }
 
         .apply-btn {
-          background: $success-color;
+          background: admin.$admin-success;
           color: white;
 
           &:hover {
-            background: darken($success-color, 10%);
+            background: color-mix(in srgb, admin.$admin-success 90%, black);
             transform: translateY(-1px);
           }
         }
 
         .cancel-btn {
-          background: $secondary-color;
+          background: admin.$admin-secondary;
           color: white;
 
           &:hover {
-            background: darken($secondary-color, 10%);
+            background: color-mix(in srgb, admin.$admin-secondary 90%, black);
             transform: translateY(-1px);
           }
         }
@@ -463,26 +295,7 @@ $text-muted: #9ca3af;
 
 // Loading State
 .loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-
-  .loading-spinner {
-    text-align: center;
-    color: $text-secondary;
-
-    i {
-      font-size: 2rem;
-      color: $primary-color;
-      margin-bottom: 1rem;
-    }
-
-    p {
-      margin: 0;
-      font-size: 1rem;
-    }
-  }
+  @extend .admin-loading-container;
 }
 
 // Error State
@@ -494,16 +307,16 @@ $text-muted: #9ca3af;
 
   .error-content {
     text-align: center;
-    color: $text-secondary;
+    color: admin.$admin-text-secondary;
 
     .error-icon {
       font-size: 3rem;
-      color: $danger-color;
+      color: admin.$admin-danger;
       margin-bottom: 1rem;
     }
 
     h3 {
-      color: $text-primary;
+      color: admin.$admin-text-primary;
       margin: 0 0 0.5rem 0;
       font-size: 1.25rem;
     }
@@ -518,7 +331,7 @@ $text-muted: #9ca3af;
       align-items: center;
       gap: 0.5rem;
       padding: 0.75rem 1.5rem;
-      background: $primary-color;
+      background: admin.$admin-primary;
       color: white;
       border: none;
       border-radius: 8px;
@@ -531,12 +344,12 @@ $text-muted: #9ca3af;
       }
 
       &:hover {
-        background: $primary-dark;
+        background: admin.$admin-primary-dark;
         transform: translateY(-1px);
       }
 
       &.primary {
-        background: $primary-color;
+        background: admin.$admin-primary;
       }
     }
   }

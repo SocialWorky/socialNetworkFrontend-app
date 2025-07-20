@@ -1,156 +1,63 @@
-// Variables - Same as logs component
-$primary-color: #3b82f6;
-$success-color: #10b981;
-$warning-color: #f59e0b;
-$error-color: #ef4444;
-$info-color: #06b6d4;
-$secondary-color: #8b5cf6;
-$dark-bg: #0f172a;
-$card-bg: #1e293b;
-$border-color: #334155;
-$text-primary: #f8fafc;
-$text-secondary: #cbd5e1;
-$text-muted: #64748b;
-
-// Animation for rotating icons
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.rotating {
-  animation: rotate 1s linear infinite;
-}
+// Statistics Component Styles
+// Usando las clases globales del admin
+@use 'src/assets/styles/admin-global.scss' as admin;
 
 .statistics-dashboard {
-  display: flex;
-  flex-direction: column;
+  @extend .admin-dashboard;
   height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: $text-primary;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
 }
 
 .dashboard-header {
+  @extend .admin-dashboard-header;
   background: rgba(30, 41, 59, 0.95);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid $border-color;
+  border-bottom: 1px solid admin.$admin-border;
   padding: 1.5rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 
   .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 1rem;
+  }
 
-    .header-title {
-      .title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin: 0;
-        background: linear-gradient(135deg, #3b82f6, #06b6d4);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+  .header-actions {
+    gap: 1.5rem;
+
+    .refresh-btn {
+      @extend .admin-btn-info;
+      border: 1px solid admin.$admin-primary;
+      background: rgba(255, 255, 255, 0.05);
+      color: admin.$admin-primary;
+
+      &:hover:not(:disabled) {
+        background: admin.$admin-primary;
+        color: white;
       }
 
-      .subtitle {
-        color: $text-secondary;
-        margin: 0.25rem 0 0 0;
-        font-size: 1rem;
+      &.primary {
+        @extend .admin-btn-success;
       }
     }
 
-    .header-actions {
+    .last-updated {
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      gap: 0.5rem;
+      color: admin.$admin-text-secondary;
+      font-size: 0.875rem;
 
-      .refresh-btn {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        border: 1px solid $primary-color;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.05);
-        color: $primary-color;
-        font-size: 0.875rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-
-        i {
-          font-size: 1.125rem;
-        }
-
-        &:hover:not(:disabled) {
-          background: $primary-color;
-          color: white;
-          transform: translateY(-1px);
-        }
-
-        &:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        &.primary {
-          background: $success-color;
-          border-color: $success-color;
-          color: white;
-
-          &:hover:not(:disabled) {
-            background: darken($success-color, 10%);
-          }
-        }
-      }
-
-      .last-updated {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: $text-secondary;
-        font-size: 0.875rem;
-
-        i {
-          color: $text-muted;
-          font-size: 1rem;
-        }
+      i {
+        color: admin.$admin-text-muted;
+        font-size: 1rem;
       }
     }
   }
 }
 
 .loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  @extend .admin-loading-container;
   height: 100%;
   gap: 1rem;
-
-  .loading-spinner {
-    text-align: center;
-
-    i {
-      font-size: 2rem;
-      color: $primary-color;
-      margin-bottom: 1rem;
-    }
-
-    p {
-      color: $text-secondary;
-      font-size: 1rem;
-      margin: 0;
-    }
-  }
 }
 
 .statistics-grid {
@@ -189,27 +96,27 @@ $text-muted: #64748b;
   }
 
   &.primary::before {
-    background: linear-gradient(90deg, transparent, $primary-color, transparent);
+    background: linear-gradient(90deg, transparent, admin.$admin-primary, transparent);
   }
 
   &.success::before {
-    background: linear-gradient(90deg, transparent, $success-color, transparent);
+    background: linear-gradient(90deg, transparent, admin.$admin-success, transparent);
   }
 
   &.warning::before {
-    background: linear-gradient(90deg, transparent, $warning-color, transparent);
+    background: linear-gradient(90deg, transparent, admin.$admin-warning, transparent);
   }
 
   &.danger::before {
-    background: linear-gradient(90deg, transparent, $error-color, transparent);
+    background: linear-gradient(90deg, transparent, admin.$admin-danger, transparent);
   }
 
   &.info::before {
-    background: linear-gradient(90deg, transparent, $info-color, transparent);
+    background: linear-gradient(90deg, transparent, admin.$admin-info, transparent);
   }
 
   &.secondary::before {
-    background: linear-gradient(90deg, transparent, $secondary-color, transparent);
+    background: linear-gradient(90deg, transparent, admin.$admin-secondary, transparent);
   }
 }
 
@@ -235,27 +142,27 @@ $text-muted: #64748b;
   }
 
   .stat-card.primary & {
-    background: linear-gradient(135deg, $primary-color, darken($primary-color, 10%));
+    background: linear-gradient(135deg, admin.$admin-primary, color-mix(in srgb, admin.$admin-primary 90%, black));
   }
 
   .stat-card.success & {
-    background: linear-gradient(135deg, $success-color, darken($success-color, 10%));
+    background: linear-gradient(135deg, admin.$admin-success, color-mix(in srgb, admin.$admin-success 90%, black));
   }
 
   .stat-card.warning & {
-    background: linear-gradient(135deg, $warning-color, darken($warning-color, 10%));
+    background: linear-gradient(135deg, admin.$admin-warning, color-mix(in srgb, admin.$admin-warning 90%, black));
   }
 
   .stat-card.danger & {
-    background: linear-gradient(135deg, $error-color, darken($error-color, 10%));
+    background: linear-gradient(135deg, admin.$admin-danger, color-mix(in srgb, admin.$admin-danger 90%, black));
   }
 
   .stat-card.info & {
-    background: linear-gradient(135deg, $info-color, darken($info-color, 10%));
+    background: linear-gradient(135deg, admin.$admin-info, color-mix(in srgb, admin.$admin-info 90%, black));
   }
 
   .stat-card.secondary & {
-    background: linear-gradient(135deg, $secondary-color, darken($secondary-color, 10%));
+    background: linear-gradient(135deg, admin.$admin-secondary, color-mix(in srgb, admin.$admin-secondary 90%, black));
   }
 }
 
@@ -266,13 +173,13 @@ $text-muted: #64748b;
 .card-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: $text-primary;
+  color: admin.$admin-text-primary;
   margin: 0 0 0.25rem 0;
 }
 
 .card-subtitle {
   font-size: 0.875rem;
-  color: $text-secondary;
+  color: admin.$admin-text-secondary;
   margin: 0;
 }
 
@@ -286,13 +193,13 @@ $text-muted: #64748b;
     .stat-number {
       font-size: 2.5rem;
       font-weight: 700;
-      color: $text-primary;
+      color: admin.$admin-text-primary;
       line-height: 1;
     }
 
     .stat-label {
       font-size: 1rem;
-      color: $text-secondary;
+      color: admin.$admin-text-secondary;
       text-transform: lowercase;
     }
   }
@@ -310,11 +217,11 @@ $text-muted: #64748b;
     font-size: 0.875rem;
 
     .detail-label {
-      color: $text-secondary;
+      color: admin.$admin-text-secondary;
     }
 
     .detail-value {
-      color: $text-primary;
+      color: admin.$admin-text-primary;
       font-weight: 500;
     }
   }
@@ -322,12 +229,12 @@ $text-muted: #64748b;
 
 .additional-metrics {
   padding: 1.5rem;
-  border-top: 1px solid $border-color;
+  border-top: 1px solid admin.$admin-border;
 
   .section-title {
     font-size: 1.5rem;
     font-weight: 600;
-    color: $text-primary;
+    color: admin.$admin-text-primary;
     margin: 0 0 1.5rem 0;
   }
 
@@ -363,15 +270,15 @@ $text-muted: #64748b;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba($primary-color, 0.2);
-      color: $primary-color;
+      background: rgba(admin.$admin-primary, 0.2);
+      color: admin.$admin-primary;
       font-size: 1rem;
     }
 
     h4 {
       font-size: 1rem;
       font-weight: 600;
-      color: $text-primary;
+      color: admin.$admin-text-primary;
       margin: 0;
     }
   }
@@ -382,21 +289,21 @@ $text-muted: #64748b;
     .percentage {
       font-size: 2rem;
       font-weight: 700;
-      color: $success-color;
+      color: admin.$admin-success;
       line-height: 1;
     }
 
     .time {
       font-size: 2rem;
       font-weight: 700;
-      color: $warning-color;
+      color: admin.$admin-warning;
       line-height: 1;
     }
   }
 
   .metric-description {
     font-size: 0.875rem;
-    color: $text-secondary;
+    color: admin.$admin-text-secondary;
     line-height: 1.4;
   }
 }
@@ -415,19 +322,19 @@ $text-muted: #64748b;
 
     .error-icon {
       font-size: 3rem;
-      color: $error-color;
+      color: admin.$admin-danger;
       margin-bottom: 1rem;
     }
 
     h3 {
       font-size: 1.25rem;
       font-weight: 600;
-      color: $text-primary;
+      color: admin.$admin-text-primary;
       margin: 0 0 0.5rem 0;
     }
 
     p {
-      color: $text-secondary;
+      color: admin.$admin-text-secondary;
       margin: 0 0 1.5rem 0;
       line-height: 1.5;
     }

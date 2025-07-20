@@ -1,154 +1,23 @@
-// Color palette variables (same as other components)
-$primary-color: #3b82f6;
-$primary-dark: #1d4ed8;
-$success-color: #10b981;
-$warning-color: #f59e0b;
-$danger-color: #ef4444;
-$info-color: #06b6d4;
-$secondary-color: #6b7280;
-$dark-bg: #1f2937;
-$darker-bg: #111827;
-$card-bg: #374151;
-$border-color: #4b5563;
-$text-primary: #f9fafb;
-$text-secondary: #d1d5db;
-$text-muted: #9ca3af;
-
-// Animation for rotating icons
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.rotating {
-  animation: rotate 1s linear infinite;
-}
+// Manage Reactions Component Styles
+// Usando las clases globales del admin
+@use 'src/assets/styles/admin-global.scss' as admin;
 
 .manage-reactions-dashboard {
-  min-height: 100vh;
-  background: linear-gradient(135deg, $darker-bg 0%, $dark-bg 100%);
-  padding: 2rem;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
+  @extend .admin-dashboard;
 }
 
 // Header Section
 .dashboard-header {
-  background: $card-bg;
-  border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid $border-color;
-
-  .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 2rem;
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-  }
-
-  .header-title {
-    .title {
-      font-size: 2rem;
-      font-weight: 700;
-      color: $text-primary;
-      margin: 0 0 0.5rem 0;
-      background: linear-gradient(135deg, $primary-color, $info-color);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .subtitle {
-      color: $text-secondary;
-      font-size: 1rem;
-      margin: 0;
-    }
-  }
-
-  .header-actions {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-
-    @media (max-width: 768px) {
-      width: 100%;
-      justify-content: stretch;
-    }
-  }
+  @extend .admin-dashboard-header;
 
   .refresh-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.875rem;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background: $secondary-color;
-    color: white;
-
-    i {
-      font-size: 1.125rem;
-    }
-
-    .btn-text {
-      @media (max-width: 480px) {
-        display: none;
-      }
-    }
-
-    &:hover:not(:disabled) {
-      background: darken($secondary-color, 10%);
-      transform: translateY(-1px);
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    @extend .admin-btn-secondary;
   }
 }
 
 // Loading State
 .loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-
-  .loading-spinner {
-    text-align: center;
-    color: $text-secondary;
-
-    i {
-      font-size: 2rem;
-      color: $primary-color;
-      margin-bottom: 1rem;
-    }
-
-    p {
-      margin: 0;
-      font-size: 1rem;
-    }
-  }
+  @extend .admin-loading-container;
 }
 
 // Main Content
@@ -160,63 +29,21 @@ $text-muted: #9ca3af;
 
 // Section Styles
 .create-section, .reactions-list-section {
-  background: $card-bg;
-  border-radius: 12px;
-  border: 1px solid $border-color;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  @extend .admin-card;
 }
 
 .section-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.5rem 2rem;
-  background: linear-gradient(135deg, rgba($primary-color, 0.1), rgba($info-color, 0.1));
-  border-bottom: 1px solid $border-color;
-
-  .section-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, $primary-color, $info-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.25rem;
-
-    i {
-      font-size: 1.25rem;
-    }
-  }
-
-  .section-info {
-    flex: 1;
-
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: $text-primary;
-      margin: 0 0 0.25rem 0;
-    }
-
-    .section-description {
-      color: $text-secondary;
-      font-size: 0.875rem;
-      margin: 0;
-    }
-  }
+  @extend .admin-section-header;
 
   .section-stats {
     .stat-badge {
-      background: rgba($success-color, 0.2);
-      color: $success-color;
+      background: rgba(admin.$admin-success, 0.2);
+      color: admin.$admin-success;
       padding: 0.5rem 1rem;
       border-radius: 20px;
       font-size: 0.875rem;
       font-weight: 600;
-      border: 1px solid rgba($success-color, 0.3);
+      border: 1px solid rgba(admin.$admin-success, 0.3);
     }
   }
 }
@@ -240,20 +67,11 @@ $text-muted: #9ca3af;
   }
 
   .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    @extend .admin-form-group;
 
     .form-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 600;
-      color: $text-primary;
-      font-size: 0.875rem;
-
       i {
-        color: $primary-color;
+        color: admin.$admin-primary;
         width: 16px;
         font-size: 1rem;
       }
@@ -261,25 +79,25 @@ $text-muted: #9ca3af;
 
     .form-input {
       padding: 0.75rem 1rem;
-      border: 2px solid $border-color;
+      border: 2px solid admin.$admin-border;
       border-radius: 8px;
-      background: $dark-bg;
-      color: $text-primary;
+      background: admin.$admin-dark-bg;
+      color: admin.$admin-text-primary;
       font-size: 0.875rem;
       transition: all 0.2s ease;
 
       &::placeholder {
-        color: $text-muted;
+        color: admin.$admin-text-muted;
       }
 
       &:focus {
         outline: none;
-        border-color: $primary-color;
-        box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+        border-color: admin.$admin-primary;
+        box-shadow: 0 0 0 3px rgba(admin.$admin-primary, 0.1);
       }
 
       &:hover {
-        border-color: lighten($border-color, 10%);
+        border-color: color-mix(in srgb, admin.$admin-border 90%, white);
       }
     }
 
@@ -287,7 +105,7 @@ $text-muted: #9ca3af;
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      color: $danger-color;
+      color: admin.$admin-danger;
       font-size: 0.75rem;
       margin-top: 0.25rem;
 
@@ -299,15 +117,15 @@ $text-muted: #9ca3af;
 
   .file-upload-container {
     position: relative;
-    border: 2px dashed $border-color;
+    border: 2px dashed admin.$admin-border;
     border-radius: 8px;
-    background: $dark-bg;
+    background: admin.$admin-dark-bg;
     transition: all 0.2s ease;
     cursor: pointer;
 
     &:hover {
-      border-color: $primary-color;
-      background: rgba($primary-color, 0.05);
+      border-color: admin.$admin-primary;
+      background: rgba(admin.$admin-primary, 0.05);
     }
 
     .form-file-input {
@@ -327,12 +145,12 @@ $text-muted: #9ca3af;
       align-items: center;
       gap: 0.5rem;
       padding: 2rem 1rem;
-      color: $text-secondary;
+      color: admin.$admin-text-secondary;
       text-align: center;
 
       i {
         font-size: 2rem;
-        color: $primary-color;
+        color: admin.$admin-primary;
       }
 
       span {
@@ -346,14 +164,14 @@ $text-muted: #9ca3af;
     justify-content: flex-end;
     margin-top: 2rem;
     padding-top: 1.5rem;
-    border-top: 1px solid $border-color;
+    border-top: 1px solid admin.$admin-border;
 
     .submit-btn {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       padding: 0.75rem 1.5rem;
-      background: linear-gradient(135deg, $success-color, darken($success-color, 10%));
+      background: linear-gradient(135deg, admin.$admin-success, color-mix(in srgb, admin.$admin-success 90%, black));
       color: white;
       border: none;
       border-radius: 8px;
@@ -384,26 +202,26 @@ $text-muted: #9ca3af;
 .reactions-table-container {
   overflow-x: auto;
   border-radius: 8px;
-  border: 1px solid $border-color;
+  border: 1px solid admin.$admin-border;
 }
 
 .reactions-table {
   width: 100%;
   border-collapse: collapse;
-  background: $dark-bg;
+  background: admin.$admin-dark-bg;
 
   .table-header {
-    background: $card-bg;
+    background: admin.$admin-card-bg;
     padding: 1rem 1.5rem;
     text-align: left;
     font-weight: 600;
-    color: $text-primary;
+    color: admin.$admin-text-primary;
     font-size: 0.875rem;
-    border-bottom: 1px solid $border-color;
+    border-bottom: 1px solid admin.$admin-border;
     white-space: nowrap;
 
     i {
-      color: $primary-color;
+      color: admin.$admin-primary;
       margin-right: 0.5rem;
       font-size: 1rem;
     }
@@ -414,11 +232,11 @@ $text-muted: #9ca3af;
   }
 
   .table-row {
-    border-bottom: 1px solid $border-color;
+    border-bottom: 1px solid admin.$admin-border;
     transition: background-color 0.2s ease;
 
     &:hover {
-      background: rgba($primary-color, 0.05);
+      background: rgba(admin.$admin-primary, 0.05);
     }
 
     &:last-child {
@@ -434,7 +252,7 @@ $text-muted: #9ca3af;
       .reaction-name {
         .name-text {
           font-weight: 600;
-          color: $text-primary;
+          color: admin.$admin-text-primary;
           font-size: 0.875rem;
         }
       }
@@ -451,7 +269,7 @@ $text-muted: #9ca3af;
           height: 32px;
           object-fit: contain;
           border-radius: 4px;
-          background: $card-bg;
+          background: admin.$admin-card-bg;
           padding: 2px;
         }
       }
@@ -470,7 +288,7 @@ $text-muted: #9ca3af;
           align-items: center;
           gap: 0.5rem;
           padding: 0.5rem 1rem;
-          background: $danger-color;
+          background: admin.$admin-danger;
           color: white;
           border: none;
           border-radius: 6px;
@@ -490,7 +308,7 @@ $text-muted: #9ca3af;
           }
 
           &:hover {
-            background: darken($danger-color, 10%);
+            background: color-mix(in srgb, admin.$admin-danger 90%, black);
             transform: translateY(-1px);
           }
         }
@@ -509,16 +327,16 @@ $text-muted: #9ca3af;
 
   .empty-content {
     text-align: center;
-    color: $text-secondary;
+    color: admin.$admin-text-secondary;
 
     .empty-icon {
       font-size: 3rem;
-      color: $info-color;
+      color: admin.$admin-info;
       margin-bottom: 1rem;
     }
 
     h3 {
-      color: $text-primary;
+      color: admin.$admin-text-primary;
       margin: 0 0 0.5rem 0;
       font-size: 1.25rem;
     }
@@ -539,16 +357,16 @@ $text-muted: #9ca3af;
 
   .error-content {
     text-align: center;
-    color: $text-secondary;
+    color: admin.$admin-text-secondary;
 
     .error-icon {
       font-size: 3rem;
-      color: $danger-color;
+      color: admin.$admin-danger;
       margin-bottom: 1rem;
     }
 
     h3 {
-      color: $text-primary;
+      color: admin.$admin-text-primary;
       margin: 0 0 0.5rem 0;
       font-size: 1.25rem;
     }
@@ -563,7 +381,7 @@ $text-muted: #9ca3af;
       align-items: center;
       gap: 0.5rem;
       padding: 0.75rem 1.5rem;
-      background: $primary-color;
+      background: admin.$admin-primary;
       color: white;
       border: none;
       border-radius: 8px;
@@ -576,12 +394,12 @@ $text-muted: #9ca3af;
       }
 
       &:hover {
-        background: $primary-dark;
+        background: admin.$admin-primary-dark;
         transform: translateY(-1px);
       }
 
       &.primary {
-        background: $primary-color;
+        background: admin.$admin-primary;
       }
     }
   }

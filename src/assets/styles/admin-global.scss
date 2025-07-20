@@ -1,6 +1,7 @@
 // Admin Global Styles
 // Variables compartidas para el módulo admin
 $admin-primary: #3b82f6;
+$admin-primary-dark: #1d4ed8;
 $admin-success: #10b981;
 $admin-warning: #f59e0b;
 $admin-danger: #ef4444;
@@ -24,10 +25,6 @@ $admin-text-muted: #9ca3af;
   animation: rotate 1s linear infinite;
 }
 
-.loading-spinner {
-  color: $admin-text-secondary;
-}
-
 // Estilos base para dashboards admin
 .admin-dashboard {
   min-height: 100vh;
@@ -40,6 +37,59 @@ $admin-text-muted: #9ca3af;
   }
 }
 
+// Dashboard headers comunes
+.admin-dashboard-header {
+  background: $admin-card-bg;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid $admin-border;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }
+
+  .header-title {
+    .title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: $admin-text-primary;
+      margin: 0 0 0.5rem 0;
+      background: linear-gradient(135deg, $admin-primary, $admin-info);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: $admin-text-secondary;
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+
+    @media (max-width: 768px) {
+      width: 100%;
+      justify-content: stretch;
+    }
+  }
+}
+
 // Cards comunes
 .admin-card {
   background: $admin-card-bg;
@@ -48,18 +98,52 @@ $admin-text-muted: #9ca3af;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-// Headers de sección
+// Section headers comunes
 .admin-section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   padding: 1.5rem 2rem;
-  border-bottom: 1px solid $admin-border;
   background: linear-gradient(135deg, rgba($admin-primary, 0.1), rgba($admin-info, 0.1));
+  border-bottom: 1px solid $admin-border;
 
-  h2 {
-    color: $admin-text-primary;
+  .section-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, $admin-primary, $admin-info);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
     font-size: 1.25rem;
-    font-weight: 600;
-    margin: 0;
+
+    i {
+      font-size: 1.25rem;
+    }
   }
+
+  .section-info {
+    flex: 1;
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: $admin-text-primary;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .section-description {
+      color: $admin-text-secondary;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+  }
+}
+
+// Section content común
+.admin-section-content {
+  padding: 2rem;
 }
 
 // Botones comunes
@@ -79,6 +163,12 @@ $admin-text-muted: #9ca3af;
     font-size: 1.125rem;
   }
 
+  .btn-text {
+    @media (max-width: 480px) {
+      display: none;
+    }
+  }
+
   &:hover:not(:disabled) {
     transform: translateY(-1px);
   }
@@ -95,7 +185,8 @@ $admin-text-muted: #9ca3af;
   color: white;
 
   &:hover:not(:disabled) {
-    background: #1d4ed8;
+    background: $admin-primary-dark;
+    box-shadow: 0 4px 12px rgba($admin-primary, 0.4);
   }
 }
 
@@ -106,6 +197,7 @@ $admin-text-muted: #9ca3af;
 
   &:hover:not(:disabled) {
     background: color-mix(in srgb, $admin-success 90%, black);
+    box-shadow: 0 4px 12px rgba($admin-success, 0.4);
   }
 }
 
@@ -116,6 +208,7 @@ $admin-text-muted: #9ca3af;
 
   &:hover:not(:disabled) {
     background: color-mix(in srgb, $admin-warning 90%, black);
+    box-shadow: 0 4px 12px rgba($admin-warning, 0.4);
   }
 }
 
@@ -126,6 +219,7 @@ $admin-text-muted: #9ca3af;
 
   &:hover:not(:disabled) {
     background: color-mix(in srgb, $admin-danger 90%, black);
+    box-shadow: 0 4px 12px rgba($admin-danger, 0.4);
   }
 }
 
@@ -146,6 +240,7 @@ $admin-text-muted: #9ca3af;
 
   &:hover:not(:disabled) {
     background: color-mix(in srgb, $admin-info 90%, black);
+    box-shadow: 0 4px 12px rgba($admin-info, 0.4);
   }
 }
 
@@ -197,10 +292,15 @@ $admin-text-muted: #9ca3af;
 
 // Formularios comunes
 .admin-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   margin-bottom: 1.5rem;
 
-  label {
-    display: block;
+  .form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 0.875rem;
     font-weight: 600;
     color: $admin-text-secondary;
@@ -231,6 +331,43 @@ $admin-text-muted: #9ca3af;
 
     &::placeholder {
       color: $admin-text-muted;
+    }
+  }
+}
+
+// Form grid común
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+
+  .form-group {
+    &.full-width {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+// Loading states comunes
+.admin-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+
+  .loading-spinner {
+    text-align: center;
+    color: $admin-text-secondary;
+
+    i {
+      font-size: 2rem;
+      color: $admin-primary;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      margin: 0;
+      font-size: 1rem;
     }
   }
 }
@@ -461,30 +598,6 @@ $admin-text-muted: #9ca3af;
   }
 }
 
-// Loading states
-.admin-loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-
-  .loading-spinner {
-    text-align: center;
-    color: $admin-text-secondary;
-
-    i {
-      font-size: 2rem;
-      color: $admin-primary;
-      margin-bottom: 1rem;
-    }
-
-    p {
-      margin: 0;
-      font-size: 1rem;
-    }
-  }
-}
-
 // Grid responsivo común
 .admin-grid {
   display: grid;
@@ -497,6 +610,183 @@ $admin-text-muted: #9ca3af;
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
+  }
+}
+
+// Stat cards comunes
+.admin-stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, currentColor, transparent);
+    opacity: 0.3;
+  }
+
+  &.primary::before {
+    background: linear-gradient(90deg, transparent, $admin-primary, transparent);
+  }
+
+  &.success::before {
+    background: linear-gradient(90deg, transparent, $admin-success, transparent);
+  }
+
+  &.warning::before {
+    background: linear-gradient(90deg, transparent, $admin-warning, transparent);
+  }
+
+  &.danger::before {
+    background: linear-gradient(90deg, transparent, $admin-danger, transparent);
+  }
+
+  &.info::before {
+    background: linear-gradient(90deg, transparent, $admin-info, transparent);
+  }
+}
+
+// Card headers comunes
+.admin-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-card-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+
+  i {
+    font-size: 1.5rem;
+  }
+
+  .admin-stat-card.primary & {
+    background: linear-gradient(135deg, $admin-primary, darken($admin-primary, 10%));
+  }
+
+  .admin-stat-card.success & {
+    background: linear-gradient(135deg, $admin-success, darken($admin-success, 10%));
+  }
+
+  .admin-stat-card.warning & {
+    background: linear-gradient(135deg, $admin-warning, darken($admin-warning, 10%));
+  }
+
+  .admin-stat-card.danger & {
+    background: linear-gradient(135deg, $admin-danger, darken($admin-danger, 10%));
+  }
+
+  .admin-stat-card.info & {
+    background: linear-gradient(135deg, $admin-info, darken($admin-info, 10%));
+  }
+}
+
+// Search containers comunes
+.admin-search-container {
+  position: relative;
+
+  .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $admin-text-muted;
+    font-size: 1.125rem;
+  }
+
+  .search-input {
+    width: 300px;
+    padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+    border: 1px solid $admin-border;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: $admin-text-primary;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+
+    &::placeholder {
+      color: $admin-text-muted;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $admin-primary;
+      box-shadow: 0 0 0 3px rgba($admin-primary, 0.1);
+    }
+  }
+}
+
+// Filter buttons comunes
+.admin-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid $admin-border;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: $admin-text-secondary;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  &.active {
+    background: $admin-primary;
+    border-color: $admin-primary;
+    color: white;
+  }
+
+  &.error.active {
+    background: $admin-danger;
+    border-color: $admin-danger;
+  }
+
+  &.warn.active {
+    background: $admin-warning;
+    border-color: $admin-warning;
+  }
+
+  &.info.active {
+    background: $admin-info;
+    border-color: $admin-info;
+  }
+
+  &.debug.active {
+    background: $admin-text-muted;
+    border-color: $admin-text-muted;
+  }
+
+  i {
+    font-size: 1rem;
   }
 }
 
@@ -522,5 +812,9 @@ $admin-text-muted: #9ca3af;
 
   .admin-modal-actions {
     flex-direction: column;
+  }
+
+  .admin-search-container .search-input {
+    width: 100%;
   }
 } 

@@ -1,89 +1,63 @@
-// Color palette variables
-$primary-color: #3b82f6;
-$primary-dark: #1d4ed8;
-$success-color: #10b981;
-$warning-color: #f59e0b;
-$danger-color: #ef4444;
-$info-color: #06b6d4;
-$secondary-color: #6b7280;
-$dark-bg: #1f2937;
-$darker-bg: #111827;
-$card-bg: #374151;
-$border-color: #4b5563;
-$text-primary: #f9fafb;
-$text-secondary: #d1d5db;
-$text-muted: #9ca3af;
-
-// Animation for rotating icons
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.rotating {
-  animation: rotate 1s linear infinite;
-}
+// Widget Management Component Styles
+// Usando las clases globales del admin
+@use 'src/assets/styles/admin-global.scss' as admin;
 
 // Widget Management Styles
 .content-config {
   .bg-gray-900 {
-    background: $darker-bg;
+    background: admin.$admin-darker-bg;
   }
 
   .bg-gray-800 {
-    background: $dark-bg;
+    background: admin.$admin-dark-bg;
   }
 
   .bg-gray-700 {
-    background: $card-bg;
+    background: admin.$admin-card-bg;
   }
 
   .bg-gray-600 {
-    background: $border-color;
+    background: admin.$admin-border;
   }
 
   .text-white {
-    color: $text-primary;
+    color: admin.$admin-text-primary;
   }
 
   .text-gray-300 {
-    color: $text-secondary;
+    color: admin.$admin-text-secondary;
   }
 
   .text-gray-400 {
-    color: $text-muted;
+    color: admin.$admin-text-muted;
   }
 
   .text-gray-500 {
-    color: $text-muted;
+    color: admin.$admin-text-muted;
   }
 
   .text-indigo-400 {
-    color: $primary-color;
+    color: admin.$admin-primary;
   }
 
   .text-indigo-500 {
-    color: $primary-color;
+    color: admin.$admin-primary;
   }
 
   .bg-indigo-500 {
-    background: $primary-color;
+    background: admin.$admin-primary;
   }
 
   .hover\:bg-indigo-600:hover {
-    background: $primary-dark;
+    background: admin.$admin-primary-dark;
   }
 
   .border-gray-500 {
-    border-color: $border-color;
+    border-color: admin.$admin-border;
   }
 
   .border-gray-600 {
-    border-color: $border-color;
+    border-color: admin.$admin-border;
   }
 
   // Material Icons specific styles
@@ -120,7 +94,7 @@ $text-muted: #9ca3af;
       display: block;
       font-size: 0.875rem;
       font-weight: 500;
-      color: $text-secondary;
+      color: admin.$admin-text-secondary;
       margin-bottom: 0.5rem;
     }
   }
@@ -136,7 +110,7 @@ $text-muted: #9ca3af;
     &:focus {
       outline: none;
       ring: 2px;
-      ring-color: $primary-color;
+      ring-color: admin.$admin-primary;
     }
   }
 
@@ -145,18 +119,18 @@ $text-muted: #9ca3af;
     transition: all 0.2s ease;
 
     &:hover {
-      background: rgba($primary-color, 0.1);
-      border-color: $primary-color;
+      background: rgba(admin.$admin-primary, 0.1);
+      border-color: admin.$admin-primary;
     }
   }
 
   // Status badges
   .bg-green-600 {
-    background: $success-color;
+    background: admin.$admin-success;
   }
 
   .bg-red-600 {
-    background: $danger-color;
+    background: admin.$admin-danger;
   }
 
   // Loading states
@@ -169,7 +143,7 @@ $text-muted: #9ca3af;
   .empty-state {
     text-align: center;
     padding: 2rem;
-    color: $text-muted;
+    color: admin.$admin-text-muted;
 
     .material-icons {
       font-size: 3rem;
@@ -198,8 +172,8 @@ $text-muted: #9ca3af;
   input:focus,
   select:focus,
   textarea:focus {
-    border-color: $primary-color;
-    box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+    border-color: admin.$admin-primary;
+    box-shadow: 0 0 0 3px rgba(admin.$admin-primary, 0.1);
   }
 
   // Custom scrollbar for better UX
@@ -208,15 +182,15 @@ $text-muted: #9ca3af;
   }
 
   ::-webkit-scrollbar-track {
-    background: $dark-bg;
+    background: admin.$admin-dark-bg;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: $border-color;
+    background: admin.$admin-border;
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: $text-muted;
+    background: admin.$admin-text-muted;
   }
 }

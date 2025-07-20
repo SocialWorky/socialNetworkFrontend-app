@@ -1,23 +1,14 @@
-// Variables
-$primary-color: #3b82f6;
-$success-color: #10b981;
-$warning-color: #f59e0b;
-$error-color: #ef4444;
-$info-color: #06b6d4;
-$dark-bg: #0f172a;
-$card-bg: #1e293b;
-$border-color: #334155;
-$text-primary: #f8fafc;
-$text-secondary: #cbd5e1;
-$text-muted: #64748b;
+// Side Menu Component Styles
+// Usando las clases globales del admin
+@use 'src/assets/styles/admin-global.scss' as admin;
 
 .side-menu-container {
   display: flex;
   flex-direction: column;
   width: 280px;
   height: 100vh;
-  background: linear-gradient(180deg, $dark-bg 0%, $card-bg 100%);
-  color: $text-primary;
+  background: linear-gradient(180deg, admin.$admin-darker-bg 0%, admin.$admin-card-bg 100%);
+  color: admin.$admin-text-primary;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
   position: relative;
@@ -30,13 +21,13 @@ $text-muted: #64748b;
     right: 0;
     width: 1px;
     height: 100%;
-    background: linear-gradient(180deg, transparent 0%, rgba($text-primary, 0.1) 50%, transparent 100%);
+    background: linear-gradient(180deg, transparent 0%, rgba(admin.$admin-text-primary, 0.1) 50%, transparent 100%);
   }
 }
 
 .menu-header {
   padding: 1.5rem;
-  border-bottom: 1px solid rgba($text-primary, 0.1);
+  border-bottom: 1px solid rgba(admin.$admin-text-primary, 0.1);
 
   .logo-section {
     display: flex;
@@ -46,15 +37,15 @@ $text-muted: #64748b;
     .logo-icon {
       width: 48px;
       height: 48px;
-      background: linear-gradient(135deg, $primary-color, $info-color);
+      background: linear-gradient(135deg, admin.$admin-primary, admin.$admin-info);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba($primary-color, 0.3);
+      box-shadow: 0 4px 12px rgba(admin.$admin-primary, 0.3);
 
       i {
-        color: $text-primary;
+        color: admin.$admin-text-primary;
         font-size: 1.5rem;
       }
     }
@@ -66,7 +57,7 @@ $text-muted: #64748b;
         font-size: 1.25rem;
         font-weight: 700;
         margin: 0;
-        background: linear-gradient(135deg, $text-primary, $text-secondary);
+        background: linear-gradient(135deg, admin.$admin-text-primary, admin.$admin-text-secondary);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -74,7 +65,7 @@ $text-muted: #64748b;
 
       .logo-subtitle {
         font-size: 0.875rem;
-        color: $text-muted;
+        color: admin.$admin-text-muted;
         margin: 0.25rem 0 0 0;
       }
     }
@@ -83,12 +74,12 @@ $text-muted: #64748b;
 
 .user-profile {
   padding: 1.5rem;
-  border-bottom: 1px solid rgba($text-primary, 0.1);
+  border-bottom: 1px solid rgba(admin.$admin-text-primary, 0.1);
 
   .profile-info {
     .welcome-text {
       font-size: 0.875rem;
-      color: $text-muted;
+      color: admin.$admin-text-muted;
       margin-bottom: 1rem;
     }
 
@@ -106,10 +97,10 @@ $text-muted: #64748b;
           right: 2px;
           width: 12px;
           height: 12px;
-          background: $success-color;
-          border: 2px solid $card-bg;
+          background: admin.$admin-success;
+          border: 2px solid admin.$admin-card-bg;
           border-radius: 50%;
-          box-shadow: 0 0 0 2px rgba($success-color, 0.3);
+          box-shadow: 0 0 0 2px rgba(admin.$admin-success, 0.3);
         }
       }
 
@@ -122,12 +113,12 @@ $text-muted: #64748b;
         .user-name {
           font-size: 1rem;
           font-weight: 600;
-          color: $text-primary;
+          color: admin.$admin-text-primary;
         }
 
         .user-role {
           font-size: 0.75rem;
-          color: $text-muted;
+          color: admin.$admin-text-muted;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
@@ -150,11 +141,11 @@ $text-muted: #64748b;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba($text-primary, 0.2);
+    background: rgba(admin.$admin-text-primary, 0.2);
     border-radius: 2px;
 
     &:hover {
-      background: rgba($text-primary, 0.3);
+      background: rgba(admin.$admin-text-primary, 0.3);
     }
   }
 
@@ -166,7 +157,7 @@ $text-muted: #64748b;
       padding: 0 1.5rem 1rem;
       font-size: 0.75rem;
       font-weight: 600;
-      color: $text-muted;
+      color: admin.$admin-text-muted;
       text-transform: uppercase;
       letter-spacing: 0.1em;
 
@@ -189,25 +180,25 @@ $text-muted: #64748b;
           transition: all 0.2s ease;
 
           &:hover {
-            background: rgba($text-primary, 0.05);
+            background: rgba(admin.$admin-text-primary, 0.05);
           }
 
           &.active {
-            background: rgba($primary-color, 0.1);
-            border-right: 3px solid $primary-color;
+            background: rgba(admin.$admin-primary, 0.1);
+            border-right: 3px solid admin.$admin-primary;
 
             .item-icon {
-              background: $primary-color;
-              color: $text-primary;
+              background: admin.$admin-primary;
+              color: admin.$admin-text-primary;
             }
 
             .item-title {
-              color: $text-primary;
+              color: admin.$admin-text-primary;
             }
           }
 
           &.expanded {
-            background: rgba($text-primary, 0.02);
+            background: rgba(admin.$admin-text-primary, 0.02);
 
             .item-arrow i {
               transform: rotate(180deg);
@@ -223,7 +214,7 @@ $text-muted: #64748b;
             .item-icon {
               width: 36px;
               height: 36px;
-              background: rgba($text-primary, 0.1);
+              background: rgba(admin.$admin-text-primary, 0.1);
               border-radius: 8px;
               display: flex;
               align-items: center;
@@ -232,7 +223,7 @@ $text-muted: #64748b;
 
               i {
                 font-size: 1.125rem;
-                color: $text-secondary;
+                color: admin.$admin-text-secondary;
                 transition: all 0.2s ease;
               }
             }
@@ -246,13 +237,13 @@ $text-muted: #64748b;
               .item-title {
                 font-size: 0.875rem;
                 font-weight: 500;
-                color: $text-primary;
+                color: admin.$admin-text-primary;
                 transition: color 0.2s ease;
               }
 
               .item-description {
                 font-size: 0.75rem;
-                color: $text-muted;
+                color: admin.$admin-text-muted;
                 font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
               }
             }
@@ -260,7 +251,7 @@ $text-muted: #64748b;
             .item-arrow {
               i {
                 font-size: 1.125rem;
-                color: $text-muted;
+                color: admin.$admin-text-muted;
                 transition: transform 0.3s ease;
 
                 &.rotated {
@@ -283,68 +274,68 @@ $text-muted: #64748b;
                 transform: translateY(-50%);
                 width: 6px;
                 height: 1px;
-                background: rgba($text-primary, 0.3);
+                background: rgba(admin.$admin-text-primary, 0.3);
               }
 
               .item-icon {
                 width: 24px;
                 height: 24px;
-                background: rgba($text-primary, 0.05);
+                background: rgba(admin.$admin-text-primary, 0.05);
                 border-radius: 6px;
 
                 i {
                   font-size: 0.875rem;
-                  color: $text-muted;
+                  color: admin.$admin-text-muted;
                 }
               }
 
               .item-title {
                 font-size: 0.8125rem;
                 font-weight: 400;
-                color: $text-secondary;
+                color: admin.$admin-text-secondary;
               }
 
               .item-description {
                 font-size: 0.6875rem;
-                color: $text-muted;
+                color: admin.$admin-text-muted;
                 opacity: 0.7;
               }
 
               &:hover {
-                background: rgba($text-primary, 0.03);
+                background: rgba(admin.$admin-text-primary, 0.03);
 
                 .item-icon {
-                  background: rgba($primary-color, 0.1);
+                  background: rgba(admin.$admin-primary, 0.1);
 
                   i {
-                    color: $primary-color;
+                    color: admin.$admin-primary;
                   }
                 }
 
                 .item-title {
-                  color: $text-primary;
+                  color: admin.$admin-text-primary;
                 }
               }
             }
 
             &.active {
-              background: rgba($primary-color, 0.05);
+              background: rgba(admin.$admin-primary, 0.05);
 
               .item-content {
                 &::before {
-                  background: $primary-color;
+                  background: admin.$admin-primary;
                 }
 
                 .item-icon {
-                  background: rgba($primary-color, 0.2);
+                  background: rgba(admin.$admin-primary, 0.2);
 
                   i {
-                    color: $primary-color;
+                    color: admin.$admin-primary;
                   }
                 }
 
                 .item-title {
-                  color: $primary-color;
+                  color: admin.$admin-primary;
                   font-weight: 500;
                 }
               }
@@ -354,7 +345,7 @@ $text-muted: #64748b;
 
         .submenu-container {
           background: rgba(0, 0, 0, 0.1);
-          border-left: 2px solid rgba($primary-color, 0.2);
+          border-left: 2px solid rgba(admin.$admin-primary, 0.2);
           margin: 0;
           overflow: hidden;
           animation: slideDown 0.3s ease-out;
@@ -366,7 +357,7 @@ $text-muted: #64748b;
 
 .menu-footer {
   padding: 1rem 0;
-  border-top: 1px solid rgba($text-primary, 0.1);
+  border-top: 1px solid rgba(admin.$admin-text-primary, 0.1);
 
   .footer-section {
     .section-title {
@@ -376,7 +367,7 @@ $text-muted: #64748b;
       padding: 0 1.5rem 1rem;
       font-size: 0.75rem;
       font-weight: 600;
-      color: $text-muted;
+      color: admin.$admin-text-muted;
       text-transform: uppercase;
       letter-spacing: 0.1em;
 
@@ -387,15 +378,15 @@ $text-muted: #64748b;
 
     .logout-item {
       &:hover {
-        background: rgba($error-color, 0.1) !important;
+        background: rgba(admin.$admin-danger, 0.1) !important;
 
         .item-icon {
-          background: $error-color !important;
-          color: $text-primary !important;
+          background: admin.$admin-danger !important;
+          color: admin.$admin-text-primary !important;
         }
 
         .item-title {
-          color: $text-primary !important;
+          color: admin.$admin-text-primary !important;
         }
       }
     }
