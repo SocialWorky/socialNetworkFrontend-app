@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { ConfigService } from '@shared/services/core-apis/config.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -39,7 +40,11 @@ export class CustomCssComponent implements OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private _configService: ConfigService, private _cdr: ChangeDetectorRef) {
+  constructor(
+    private _configService: ConfigService, 
+    private _cdr: ChangeDetectorRef,
+    private _logService: LogService
+  ) {
     this.loadCustomCss();
   }
 
@@ -54,7 +59,12 @@ export class CustomCssComponent implements OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error saving CSS:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'CustomCssComponent',
+          'Error saving CSS',
+          { error: String(error), cssLength: this.customCss.length }
+        );
         this.error = 'Error al guardar el CSS personalizado. Por favor, intenta de nuevo.';
         this.customCssLoader = false;
         this._cdr.markForCheck();
@@ -83,7 +93,12 @@ export class CustomCssComponent implements OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error loading CSS:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'CustomCssComponent',
+          'Error loading CSS',
+          { error: String(error) }
+        );
         this.error = 'Error al cargar el CSS personalizado. Por favor, intenta de nuevo.';
         this.isLoading = false;
         this._cdr.markForCheck();
@@ -136,7 +151,12 @@ export class CustomCssComponent implements OnDestroy {
       this.customCss = formatted;
       this._cdr.markForCheck();
     } catch (error) {
-      console.error('Error formatting CSS:', error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'CustomCssComponent',
+        'Error formatting CSS',
+        { error: String(error), cssLength: this.customCss.length }
+      );
       this.error = 'Error al formatear el CSS. Verifica la sintaxis.';
       this._cdr.markForCheck();
     }

@@ -3,6 +3,7 @@ import { UserService } from '@shared/services/core-apis/users.service';
 import { User } from '@shared/interfaces/user.interface';
 import { Subject, takeUntil } from 'rxjs';
 import { AlertService } from '@shared/services/alert.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 
 @Component({
@@ -18,7 +19,8 @@ export class LastRegisteredUsersComponent implements OnInit, OnDestroy {
   constructor(
     private _userService: UserService,
     private _cdr: ChangeDetectorRef,
-    private _alertService: AlertService
+    private _alertService: AlertService,
+    private _logService: LogService
   ) { }
 
   users: User[] = [];
@@ -67,7 +69,12 @@ export class LastRegisteredUsersComponent implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         },
         error: (error) => {
-          console.error('Error fetching users:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'LastRegisteredUsersComponent',
+            'Error fetching users',
+            { error: String(error) }
+          );
           this.error = 'Error loading users. Please try again.';
           this._cdr.markForCheck();
         }
@@ -111,7 +118,12 @@ export class LastRegisteredUsersComponent implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         },
         error: (error) => {
-          console.error('Error updating user status:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'LastRegisteredUsersComponent',
+            'Error updating user status',
+            { error: String(error), userId: user._id, newStatus }
+          );
           this._alertService.showAlert(
             'Error',
             'Error updating user status. Please try again.',

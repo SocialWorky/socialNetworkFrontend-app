@@ -5,6 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { WidgetConfig, WidgetPosition, WidgetStatus } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
 import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget-config.service';
 import { AlertService } from '@shared/services/alert.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { WidgetLayout } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
 
@@ -37,7 +38,8 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private widgetConfigService: WidgetConfigService,
     private alertService: AlertService,
-    private _cdr: ChangeDetectorRef
+    private _cdr: ChangeDetectorRef,
+    private _logService: LogService
   ) {
     this.widgetForm = this.fb.group({
       selector: ['', Validators.required],
@@ -79,7 +81,12 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         },
         error: (error) => {
-          console.error('Error cargando widgets configurados:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'WidgetManagementComponent',
+            'Error loading configured widgets',
+            { error: String(error) }
+          );
         }
       });
   }
@@ -95,7 +102,12 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error('Error cargando layout:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'WidgetManagementComponent',
+            'Error loading widget layout',
+            { error: String(error) }
+          );
         }
       });
   }
@@ -150,7 +162,13 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
             this.widgetConfigService.forceRefresh();
             this._cdr.markForCheck();
           },
-          error: () => {
+          error: (error) => {
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'WidgetManagementComponent',
+              'Error saving widget',
+              { error: String(error), widgetConfig }
+            );
             this.alertService.showAlert('Error', 'Error al guardar widget', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
           }
         });
@@ -181,7 +199,13 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
           this.widgetConfigService.forceRefresh();
           this._cdr.markForCheck();
         },
-        error: () => {
+        error: (error) => {
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'WidgetManagementComponent',
+            'Error deleting widget',
+            { error: String(error), widgetSelector: selector }
+          );
           this.alertService.showAlert('Error', 'Error al eliminar widget', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
         }
       });

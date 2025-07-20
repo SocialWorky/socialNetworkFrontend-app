@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { routes } from '@admin/admin-routing.module';
 import { AuthService } from '@auth/services/auth.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { translations } from '@translations/translations';
 
 @Component({
@@ -28,14 +29,32 @@ export class SideMenuComponent implements OnInit {
     }))
     .filter((route) => route.children || (route.path && !route.path.includes(':')));
 
-  constructor(private _authService: AuthService) { }
+  constructor(
+    private _authService: AuthService,
+    private _logService: LogService
+  ) { }
 
   ngOnInit() {
-    const token = this._authService.getDecodedToken()!;
-    this.userName = token?.name;
+    try {
+      const token = this._authService.getDecodedToken()!;
+      this.userName = token?.name;
+    } catch (error) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'SideMenuComponent',
+        'Error initializing side menu',
+        { error: String(error) }
+      );
+    }
   }
 
   logout() {
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'SideMenuComponent',
+      'Admin user logged out',
+      { userName: this.userName }
+    );
     this._authService.logout();
   }
 

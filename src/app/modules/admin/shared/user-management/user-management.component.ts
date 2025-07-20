@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { UserManagementService } from '@admin/services/user-management.service';
 import { AlertService } from '@shared/services/alert.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { User } from '@shared/interfaces/user.interface';
 import { 
@@ -68,7 +69,8 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     private userService: UserManagementService,
     private alertService: AlertService,
     private fb: FormBuilder,
-    private _cdr: ChangeDetectorRef
+    private _cdr: ChangeDetectorRef,
+    private _logService: LogService
   ) {
     this.filtersForm = this.fb.group({
       search: [''],
@@ -118,7 +120,12 @@ export class UserManagementComponent implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         },
         error: (error) => {
-          console.error('Error loading users:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'UserManagementComponent',
+            'Error loading users',
+            { error: String(error) }
+          );
           this.alertService.showAlert(
             'Error',
             'Error al cargar los usuarios',
@@ -144,7 +151,12 @@ export class UserManagementComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error loading user stats:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'UserManagementComponent',
+          'Error loading user statistics',
+          { error: String(error) }
+        );
       }
     });
   }
@@ -212,7 +224,12 @@ export class UserManagementComponent implements OnInit, OnDestroy {
           this.loadUserStats();
         },
         error: (error) => {
-          console.error('Error deleting user:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'UserManagementComponent',
+            'Error deleting user',
+            { error: String(error), userId: this.selectedUser?._id }
+          );
           this.alertService.showAlert(
             'Error',
             'Error al eliminar el usuario',
@@ -266,7 +283,12 @@ export class UserManagementComponent implements OnInit, OnDestroy {
           this.loadUserStats();
         },
         error: (error) => {
-          console.error('Error updating user:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'UserManagementComponent',
+            'Error updating user',
+            { error: String(error), userId: this.selectedUser?._id }
+          );
           this.alertService.showAlert(
             'Error',
             'Error al actualizar el usuario',
@@ -313,7 +335,12 @@ export class UserManagementComponent implements OnInit, OnDestroy {
           this.loadUserStats();
         },
         error: (error) => {
-          console.error('Error toggling user status:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'UserManagementComponent',
+            'Error toggling user status',
+            { error: String(error), userId: user._id, newStatus }
+          );
           this.alertService.showAlert(
             'Error',
             'Error al cambiar el estado del usuario',
@@ -456,7 +483,17 @@ export class UserManagementComponent implements OnInit, OnDestroy {
           );
         },
         error: (error) => {
-          console.error('Error sending verification email:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'UserManagementComponent',
+            'Error sending verification email',
+            { 
+              error: String(error), 
+              userId: user._id, 
+              userEmail: user.email,
+              errorMessage: error.error?.message 
+            }
+          );
           let errorMessage = 'Error al enviar el email de verificación';
           
           if (error.error?.message === 'Failed send email') {

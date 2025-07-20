@@ -7,6 +7,7 @@ import { Subject, of } from 'rxjs';
 import { CustomReactionsService } from '@admin/shared/manage-reactions/service/customReactions.service';
 import { CustomReactionList } from '@admin/interfaces/customReactions.interface';
 import { AlertService } from '@shared/services/alert.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
 import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
@@ -47,7 +48,8 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     private _fileUploadService: FileUploadService,
     private _utilityService: UtilityService,
     private _socketService: SocketService,
-    private _emojiEventsService: EmojiEventsService
+    private _emojiEventsService: EmojiEventsService,
+    private _logService: LogService
   ) {
     this.reactionForm = this._fb.group({
       name: ['', Validators.required],
@@ -127,7 +129,12 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (err) => {
-        console.error('Failed to load reactions', err);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ManageReactionsComponent',
+          'Failed to load reactions',
+          { error: String(err) }
+        );
         this.error = 'Error al cargar las reacciones. Por favor, intenta de nuevo.';
         this.isLoading = false;
         this._cdr.markForCheck();
@@ -181,7 +188,12 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
       if (this.imageFile) {
         this._fileUploadService.uploadFile([this.imageFile], 'emojis', idImagenMoment, null, TypePublishing.EMOJI).pipe(takeUntil(this.destroy$)).subscribe({
           error: (err) => {
-            console.error('Error uploading file:', err);
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'ManageReactionsComponent',
+              'Error uploading reaction file',
+              { error: String(err), fileName: this.imageFile?.name }
+            );
             this.loadReactionsButtons = false;
             this.error = 'Error al subir archivo, intente de nuevo. Con otro formato o tamaño.';
             this._cdr.markForCheck();
@@ -249,7 +261,12 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         },
         error: (err) => {
-          console.error('Failed to create reaction', err);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'ManageReactionsComponent',
+            'Failed to create reaction',
+            { error: String(err), reactionData: this.reactionForm.value }
+          );
           this.error = 'Error al crear la reacción. Por favor, intenta de nuevo.';
           loadingReaction.dismiss();
           this.loadReactionsButtons = false;
@@ -276,7 +293,12 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
           this.listReactions();
         },
         error: (err) => {
-          console.error('Failed to delete reaction', err);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'ManageReactionsComponent',
+            'Failed to delete reaction',
+            { error: String(err), reactionId: id }
+          );
           this.error = 'Error al eliminar la reacción. Por favor, intenta de nuevo.';
           this._cdr.markForCheck();
         }

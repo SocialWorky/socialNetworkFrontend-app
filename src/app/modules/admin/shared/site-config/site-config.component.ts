@@ -5,6 +5,7 @@ import { LoadingController } from '@ionic/angular';
 
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { environment } from '@env/environment';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
@@ -44,6 +45,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
     private _fileUploadService: FileUploadService,
     private _alertService: AlertService,
     private _loadingCtrl: LoadingController,
+    private _logService: LogService,
   ) {
     this.configForm = this._fb.group({
       logoUrl: [''],
@@ -82,7 +84,12 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
            loginMethods = JSON.parse(configData.settings.loginMethods);
 
           } catch (error) {
-            console.error('Error parsing loginMethods:', error);
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'SiteConfigComponent',
+              'Error parsing loginMethods configuration',
+              { error: String(error), loginMethods: configData.settings.loginMethods }
+            );
           }
         }
 
@@ -105,7 +112,12 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error loading site config:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'SiteConfigComponent',
+          'Error loading site configuration',
+          { error: String(error) }
+        );
         this.error = 'Error al cargar la configuración del sitio. Por favor, intenta de nuevo.';
         this.isLoading = false;
         this._cdr.markForCheck();
@@ -126,7 +138,12 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
             this.submitUpdateConfig();
           },
           error: (error) => {
-            console.error('Error uploading file:', error);
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'SiteConfigComponent',
+              'Error uploading configuration file',
+              { error: String(error) }
+            );
             this.loadUpdateConfigButtons = false;
             this.error = 'Error al subir el archivo. Por favor, intenta de nuevo.';
             this._alertService.showAlert(
@@ -179,7 +196,12 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error updating config:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'SiteConfigComponent',
+          'Error updating site configuration',
+          { error: String(error) }
+        );
         this.error = 'Error al actualizar la configuración. Por favor, intenta de nuevo.';
         loadingReaction.dismiss();
         this.loadUpdateConfigButtons = false;

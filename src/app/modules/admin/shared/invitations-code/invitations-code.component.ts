@@ -5,6 +5,7 @@ import { InvitationsCodeList } from './interface/invitations-code.interface';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { AlertService } from '@shared/services/alert.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { environment } from '@env/environment';
 
@@ -31,6 +32,7 @@ export class InvitationsCodeComponent implements OnInit, OnDestroy {
     private _emailNotificationService: EmailNotificationService,
     private _alertService: AlertService,
     private _cdr: ChangeDetectorRef,
+    private _logService: LogService
   ) {
     this.invitationsForm = this._fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -54,7 +56,12 @@ export class InvitationsCodeComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error loading invitations:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'InvitationsCodeComponent',
+          'Error loading invitations',
+          { error: String(error) }
+        );
         this.error = 'Error al cargar las invitaciones. Por favor, intenta de nuevo.';
         this._cdr.markForCheck();
       }
@@ -75,7 +82,12 @@ export class InvitationsCodeComponent implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         },
         error: (error) => {
-          console.error('Error creating invitation:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'InvitationsCodeComponent',
+            'Error creating invitation',
+            { error: String(error), email: this.invitationsForm.value.email }
+          );
           this.error = 'Error al crear la invitación. Por favor, intenta de nuevo.';
           this.loadInvitationsButtons = false;
           this._cdr.markForCheck();
@@ -122,9 +134,19 @@ export class InvitationsCodeComponent implements OnInit, OnDestroy {
   copyCode(code: string) {
     navigator.clipboard.writeText(code).then(() => {
       // You could add a toast notification here
-      console.log('Code copied to clipboard:', code);
+      this._logService.log(
+        LevelLogEnum.INFO,
+        'InvitationsCodeComponent',
+        'Code copied to clipboard',
+        { code }
+      );
     }).catch(err => {
-      console.error('Failed to copy code:', err);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'InvitationsCodeComponent',
+        'Failed to copy code to clipboard',
+        { error: String(err), code }
+      );
     });
   }
 
@@ -132,7 +154,12 @@ export class InvitationsCodeComponent implements OnInit, OnDestroy {
   resendInvitation(invitation: InvitationsCodeList) {
     this.sendEmailCode(invitation.email, invitation.code);
     // You could add a toast notification here
-    console.log('Invitation resent to:', invitation.email);
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'InvitationsCodeComponent',
+      'Invitation resent',
+      { email: invitation.email, code: invitation.code }
+    );
   }
 
   // Delete invitation
@@ -163,7 +190,12 @@ export class InvitationsCodeComponent implements OnInit, OnDestroy {
           this.listInvitationsCode = this.listInvitationsCode.filter(invitation => invitation._id !== id);
           this.successMessage = response.message;
           this.error = null;
-          console.log('Invitation deleted successfully:', response.message);
+          this._logService.log(
+            LevelLogEnum.INFO,
+            'InvitationsCodeComponent',
+            'Invitation deleted successfully',
+            { invitationId: id, message: response.message }
+          );
           
           // Clear success message after 3 seconds
           setTimeout(() => {
@@ -178,7 +210,12 @@ export class InvitationsCodeComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error deleting invitation:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'InvitationsCodeComponent',
+          'Error deleting invitation',
+          { error: String(error), invitationId: id, status: error.status }
+        );
         this.successMessage = null;
         if (error.status === 404) {
           this.error = 'Invitación no encontrada.';

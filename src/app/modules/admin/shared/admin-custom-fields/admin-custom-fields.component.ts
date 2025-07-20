@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Subject } from 'rxjs';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
     selector: 'worky-admin-custom-fields',
@@ -14,7 +15,10 @@ export class AdminCustomFieldsComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private _cdr: ChangeDetectorRef) { }
+  constructor(
+    private _cdr: ChangeDetectorRef,
+    private _logService: LogService
+  ) { }
 
   ngOnInit() {
     this.initializeComponent();
@@ -35,7 +39,12 @@ export class AdminCustomFieldsComponent implements OnInit, OnDestroy {
       this.isLoading = false;
       this._cdr.markForCheck();
     } catch (error) {
-      console.error('Error initializing component:', error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'AdminCustomFieldsComponent',
+        'Error initializing component',
+        { error: String(error) }
+      );
       this.error = 'Error al cargar el constructor de formularios. Por favor, intenta de nuevo.';
       this.isLoading = false;
       this._cdr.markForCheck();

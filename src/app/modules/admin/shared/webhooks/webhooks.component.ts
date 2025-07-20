@@ -4,6 +4,7 @@ import { WebhookService } from './services/webhook.service';
 import { Webhook } from './interface/webhook.interface';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { AlertService } from '@shared/services/alert.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { Subject, takeUntil } from 'rxjs';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -36,7 +37,8 @@ export class WebhooksComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private webhookService: WebhookService,
     private alertService: AlertService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private _logService: LogService
   ) {
     this.webhookForm = this.fb.group({
       event: ['', Validators.required],
@@ -62,7 +64,12 @@ export class WebhooksComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error loading webhooks:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'WebhooksComponent',
+          'Error loading webhooks',
+          { error: String(error) }
+        );
         this.isLoading = false;
         this.cdr.markForCheck();
       }
@@ -83,7 +90,13 @@ export class WebhooksComponent implements OnInit, OnDestroy {
           this.loadWebhooks();
           this.loadWebhookButtons = false;
         },
-        error: () => {
+        error: (error) => {
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'WebhooksComponent',
+            'Error updating webhook',
+            { error: String(error), webhookId: this.editingWebhook?._id }
+          );
           this.alertService.showAlert('Error', 'No se pudo actualizar el webhook', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
           this.loadWebhookButtons = false;
         }
@@ -96,7 +109,13 @@ export class WebhooksComponent implements OnInit, OnDestroy {
           this.loadWebhooks();
           this.loadWebhookButtons = false;
         },
-        error: () => {
+        error: (error) => {
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'WebhooksComponent',
+            'Error creating webhook',
+            { error: String(error), webhookData: data }
+          );
           this.alertService.showAlert('Error', 'No se pudo crear el webhook', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
           this.loadWebhookButtons = false;
         }
@@ -124,7 +143,13 @@ export class WebhooksComponent implements OnInit, OnDestroy {
         this.alertService.showAlert('Éxito', 'Webhook eliminado correctamente', Alerts.SUCCESS, Position.CENTER, true, 'Aceptar');
         this.loadWebhooks();
       },
-      error: () => {
+      error: (error) => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'WebhooksComponent',
+          'Error deleting webhook',
+          { error: String(error), webhookId: id }
+        );
         this.alertService.showAlert('Error', 'No se pudo eliminar el webhook', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
       }
     });
@@ -136,7 +161,13 @@ export class WebhooksComponent implements OnInit, OnDestroy {
         this.alertService.showAlert('Éxito', `Webhook ${webhook.isActive ? 'desactivado' : 'activado'} correctamente`, Alerts.SUCCESS, Position.CENTER, true, 'Aceptar');
         this.loadWebhooks();
       },
-      error: () => {
+      error: (error) => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'WebhooksComponent',
+          'Error toggling webhook status',
+          { error: String(error), webhookId: webhook._id, newStatus: !webhook.isActive }
+        );
         this.alertService.showAlert('Error', 'No se pudo cambiar el estado del webhook', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
       }
     });

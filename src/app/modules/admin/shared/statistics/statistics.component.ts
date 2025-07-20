@@ -5,6 +5,7 @@ import { UserService } from '@shared/services/core-apis/users.service';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { ReportsService } from '@shared/services/core-apis/reports.service';
 import { CommentService } from '@shared/services/core-apis/comment.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { MessageService } from '../../../pages/messages/services/message.service';
 import { ReportStatus } from '@shared/enums/report.enum';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
@@ -151,7 +152,8 @@ export class StatisticsComponent implements OnInit {
     private _cdr: ChangeDetectorRef,
     private _reportsService: ReportsService,
     private _commentService: CommentService,
-    private _messageService: MessageService
+    private _messageService: MessageService,
+    private _logService: LogService
   ) { }
 
   async ngOnInit() {
@@ -167,7 +169,12 @@ export class StatisticsComponent implements OnInit {
       await this.loadAllStatistics();
     } catch (error) {
       this.error = 'Error al cargar las estadísticas. Por favor, inténtalo de nuevo.';
-      console.error('Error refreshing statistics:', error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'StatisticsComponent',
+        'Error refreshing statistics',
+        { error: String(error) }
+      );
     } finally {
       this.isLoading = false;
       this._cdr.markForCheck();
@@ -202,7 +209,12 @@ export class StatisticsComponent implements OnInit {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error loading users:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'StatisticsComponent',
+          'Error loading users',
+          { error: String(error) }
+        );
         this.isLoadingUsers = false;
         this._cdr.markForCheck();
       }
@@ -218,7 +230,12 @@ export class StatisticsComponent implements OnInit {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error loading publications count:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'StatisticsComponent',
+          'Error loading publications count',
+          { error: String(error) }
+        );
         this.isLoadingPublications = false;
         this._cdr.markForCheck();
       }
@@ -241,7 +258,12 @@ export class StatisticsComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Error loading publications:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'StatisticsComponent',
+          'Error loading publications',
+          { error: String(error) }
+        );
         this.isLoadingComments = false;
         this.isLoadingReactions = false;
         this._cdr.markForCheck();
@@ -312,7 +334,12 @@ export class StatisticsComponent implements OnInit {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error loading reports:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'StatisticsComponent',
+          'Error loading reports',
+          { error: String(error) }
+        );
         this.isLoadingReports = false;
         this._cdr.markForCheck();
       }
@@ -326,7 +353,12 @@ export class StatisticsComponent implements OnInit {
         next: (permissionResult) => {
           
           if (!permissionResult.hasAdminAccess) {
-            console.warn('Admin access denied:', permissionResult.message);
+            this._logService.log(
+              LevelLogEnum.WARN,
+              'StatisticsComponent',
+              'Admin access denied for messages statistics',
+              { message: permissionResult.message }
+            );
             // Use basic statistics as fallback
             this._messageService.getBasicMessagesStatistics().pipe(takeUntil(this.unsubscribe$)).subscribe({
               next: (stats: any) => {
@@ -337,7 +369,12 @@ export class StatisticsComponent implements OnInit {
                 this._cdr.markForCheck();
               },
               error: (error: any) => {
-                console.error('Error loading basic messages statistics:', error);
+                this._logService.log(
+                  LevelLogEnum.ERROR,
+                  'StatisticsComponent',
+                  'Error loading basic messages statistics',
+                  { error: String(error) }
+                );
                 this._unreadMessages = 0;
                 this.isLoadingMessages = false;
                 this._cdr.markForCheck();
@@ -347,7 +384,12 @@ export class StatisticsComponent implements OnInit {
           }
         },
         error: (error: any) => {
-          console.error('Error verifying admin permissions:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'StatisticsComponent',
+            'Error verifying admin permissions',
+            { error: String(error) }
+          );
         }
       });
 
@@ -361,7 +403,12 @@ export class StatisticsComponent implements OnInit {
           this._cdr.markForCheck();
         },
         error: (error: any) => {
-          console.error('Error loading messages statistics:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'StatisticsComponent',
+            'Error loading messages statistics',
+            { error: String(error) }
+          );
           this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
             next: (unreadCount: number) => {
               this._unreadMessages = unreadCount;
@@ -369,7 +416,12 @@ export class StatisticsComponent implements OnInit {
               this._cdr.markForCheck();
             },
             error: (unreadError: any) => {
-              console.error('Error loading unread messages count:', unreadError);
+              this._logService.log(
+                LevelLogEnum.ERROR,
+                'StatisticsComponent',
+                'Error loading unread messages count',
+                { error: String(unreadError) }
+              );
               this._unreadMessages = 0;
               this.isLoadingMessages = false;
               this._cdr.markForCheck();
@@ -379,7 +431,12 @@ export class StatisticsComponent implements OnInit {
       });
 
     } catch (error) {
-      console.error('Error loading messages statistics:', error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'StatisticsComponent',
+        'Error loading messages statistics (catch block)',
+        { error: String(error) }
+      );
       this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
         next: (unreadCount: number) => {
           this._unreadMessages = unreadCount;
@@ -387,7 +444,12 @@ export class StatisticsComponent implements OnInit {
           this._cdr.markForCheck();
         },
         error: (unreadError: any) => {
-          console.error('Error loading unread messages count:', unreadError);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'StatisticsComponent',
+            'Error loading unread messages count (catch block)',
+            { error: String(unreadError) }
+          );
           this._unreadMessages = 0;
           this.isLoadingMessages = false;
           this._cdr.markForCheck();
