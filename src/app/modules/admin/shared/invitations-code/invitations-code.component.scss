@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 // Color palette variables (same as other components)
 $primary-color: #3b82f6;
 $primary-dark: #1d4ed8;
@@ -114,7 +116,7 @@ $text-muted: #9ca3af;
     color: white;
 
     &:hover:not(:disabled) {
-      background: darken($info-color, 10%);
+      background: color.adjust($info-color, $lightness: -10%);
       box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
     }
   }
@@ -124,7 +126,7 @@ $text-muted: #9ca3af;
     color: white;
 
     &:hover:not(:disabled) {
-      background: darken($secondary-color, 10%);
+      background: color.adjust($secondary-color, $lightness: -10%);
       box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
     }
   }
@@ -280,7 +282,7 @@ $text-muted: #9ca3af;
       align-items: center;
       gap: 0.5rem;
       padding: 0.75rem 2rem;
-      background: linear-gradient(135deg, $success-color, darken($success-color, 10%));
+      background: linear-gradient(135deg, $success-color, color.adjust($success-color, $lightness: -10%));
       color: white;
       border: none;
       border-radius: 8px;

@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'src/assets/styles/admin-global.scss' as admin;
 
 .logs-dashboard {
@@ -47,11 +48,11 @@
           }
 
           &.error {
-            background: linear-gradient(135deg, admin.$admin-danger, darken(admin.$admin-danger, 10%));
+            background: linear-gradient(135deg, admin.$admin-danger, color.adjust(admin.$admin-danger, $lightness: -10%));
           }
 
           &.warning {
-            background: linear-gradient(135deg, admin.$admin-warning, darken(admin.$admin-warning, 10%));
+            background: linear-gradient(135deg, admin.$admin-warning, color.adjust(admin.$admin-warning, $lightness: -10%));
           }
 
           i {

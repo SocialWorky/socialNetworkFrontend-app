@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 // Admin Global Styles
 $admin-primary: #3b82f6;
 $admin-primary-dark: #1d4ed8;
@@ -9,6 +11,7 @@ $admin-secondary: #6b7280;
 $admin-dark-bg: #1f2937;
 $admin-darker-bg: #111827;
 $admin-card-bg: #374151;
+$admin-hover-bg: #4b5563;
 $admin-border: #4b5563;
 $admin-text-primary: #f9fafb;
 $admin-text-secondary: #d1d5db;
@@ -701,23 +704,23 @@ $admin-text-muted: #9ca3af;
   }
 
   .admin-stat-card.primary & {
-    background: linear-gradient(135deg, $admin-primary, darken($admin-primary, 10%));
+    background: linear-gradient(135deg, $admin-primary, color.adjust($admin-primary, $lightness: -10%));
   }
 
   .admin-stat-card.success & {
-    background: linear-gradient(135deg, $admin-success, darken($admin-success, 10%));
+    background: linear-gradient(135deg, $admin-success, color.adjust($admin-success, $lightness: -10%));
   }
 
   .admin-stat-card.warning & {
-    background: linear-gradient(135deg, $admin-warning, darken($admin-warning, 10%));
+    background: linear-gradient(135deg, $admin-warning, color.adjust($admin-warning, $lightness: -10%));
   }
 
   .admin-stat-card.danger & {
-    background: linear-gradient(135deg, $admin-danger, darken($admin-danger, 10%));
+    background: linear-gradient(135deg, $admin-danger, color.adjust($admin-danger, $lightness: -10%));
   }
 
   .admin-stat-card.info & {
-    background: linear-gradient(135deg, $admin-info, darken($admin-info, 10%));
+    background: linear-gradient(135deg, $admin-info, color.adjust($admin-info, $lightness: -10%));
   }
 }
 
