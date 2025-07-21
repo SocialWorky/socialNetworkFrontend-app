@@ -395,6 +395,11 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     return this.loadingStates.sendVerification.has(userId);
   }
 
+  onImageError(event: Event): void {
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.src = 'assets/img/shared/drag-drop-upload-add-file.webp';
+  }
+
   sendVerificationEmail(user: User): void {
     // Add user to loading set
     this.loadingStates.sendVerification.add(user._id);
