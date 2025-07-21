@@ -1,0 +1,119 @@
+@use 'src/assets/styles/admin-global.scss' as admin;
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+
+  i {
+    font-size: 0.875rem;
+  }
+
+  .badge-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  // Sizes
+  &.size-small {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.625rem;
+
+    i {
+      font-size: 0.75rem;
+    }
+
+    .badge-text {
+      font-size: 0.625rem;
+    }
+  }
+
+  &.size-medium {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+
+    i {
+      font-size: 0.875rem;
+    }
+
+    .badge-text {
+      font-size: 0.75rem;
+    }
+  }
+
+  &.size-large {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+
+    i {
+      font-size: 1rem;
+    }
+
+    .badge-text {
+      font-size: 0.875rem;
+    }
+  }
+
+  // Types
+  &.type-success {
+    background: rgba(admin.$admin-success, 0.1);
+    color: admin.$admin-success;
+    border: 1px solid rgba(admin.$admin-success, 0.2);
+  }
+
+  &.type-warning {
+    background: rgba(admin.$admin-warning, 0.1);
+    color: admin.$admin-warning;
+    border: 1px solid rgba(admin.$admin-warning, 0.2);
+  }
+
+  &.type-danger {
+    background: rgba(admin.$admin-danger, 0.1);
+    color: admin.$admin-danger;
+    border: 1px solid rgba(admin.$admin-danger, 0.2);
+  }
+
+  &.type-info {
+    background: rgba(admin.$admin-info, 0.1);
+    color: admin.$admin-info;
+    border: 1px solid rgba(admin.$admin-info, 0.2);
+  }
+
+  &.type-neutral {
+    background: rgba(admin.$admin-text-secondary, 0.1);
+    color: admin.$admin-text-secondary;
+    border: 1px solid rgba(admin.$admin-text-secondary, 0.2);
+  }
+
+  // Hover effects
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  // Icon only variant
+  &:not(:has(.badge-text)) {
+    padding: 0.25rem;
+    border-radius: 50%;
+    min-width: 24px;
+    justify-content: center;
+
+    &.size-small {
+      padding: 0.125rem;
+      min-width: 20px;
+    }
+
+    &.size-large {
+      padding: 0.5rem;
+      min-width: 32px;
+    }
+  }
+} 

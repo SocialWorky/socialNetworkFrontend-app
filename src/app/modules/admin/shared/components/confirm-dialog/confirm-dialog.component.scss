@@ -1,0 +1,199 @@
+@use 'src/assets/styles/admin-global.scss' as admin;
+
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1rem;
+}
+
+.confirm-dialog {
+  background: admin.$admin-card-bg;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: dialogSlideIn 0.3s ease-out;
+
+  .dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 1.5rem 0;
+    position: relative;
+
+    .dialog-icon {
+      i {
+        font-size: 2rem;
+        
+        &.text-danger {
+          color: admin.$admin-danger;
+        }
+        
+        &.text-warning {
+          color: admin.$admin-warning;
+        }
+        
+        &.text-info {
+          color: admin.$admin-info;
+        }
+        
+        &.text-success {
+          color: admin.$admin-success;
+        }
+      }
+    }
+
+    .dialog-title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: admin.$admin-text-primary;
+      flex: 1;
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: admin.$admin-text-secondary;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: admin.$admin-hover-bg;
+        color: admin.$admin-text-primary;
+      }
+
+      i {
+        font-size: 1.25rem;
+      }
+    }
+  }
+
+  .dialog-body {
+    padding: 1rem 1.5rem;
+
+    .dialog-message {
+      margin: 0;
+      color: admin.$admin-text-secondary;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+  }
+
+  .dialog-footer {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding: 0 1.5rem 1.5rem;
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.875rem;
+      min-width: 100px;
+
+      &.btn-secondary {
+        background: admin.$admin-border;
+        color: admin.$admin-text-primary;
+
+        &:hover {
+          background: color-mix(in srgb, admin.$admin-border 80%, black);
+        }
+      }
+
+      &.btn-primary {
+        background: admin.$admin-primary;
+        color: white;
+
+        &:hover {
+          background: color-mix(in srgb, admin.$admin-primary 90%, black);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(admin.$admin-primary, 0.3);
+        }
+
+        &.btn-danger {
+          background: admin.$admin-danger;
+
+          &:hover {
+            background: color-mix(in srgb, admin.$admin-danger 90%, black);
+            box-shadow: 0 4px 12px rgba(admin.$admin-danger, 0.3);
+          }
+        }
+      }
+    }
+  }
+
+  // Type variants
+  &.type-danger {
+    border-left: 4px solid admin.$admin-danger;
+  }
+
+  &.type-warning {
+    border-left: 4px solid admin.$admin-warning;
+  }
+
+  &.type-info {
+    border-left: 4px solid admin.$admin-info;
+  }
+
+  &.type-success {
+    border-left: 4px solid admin.$admin-success;
+  }
+}
+
+@keyframes dialogSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .confirm-dialog {
+    .dialog-header {
+      padding: 1rem 1rem 0;
+      
+      .dialog-title {
+        font-size: 1.125rem;
+      }
+    }
+
+    .dialog-body {
+      padding: 0.75rem 1rem;
+    }
+
+    .dialog-footer {
+      padding: 0 1rem 1rem;
+      flex-direction: column-reverse;
+
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+} 

@@ -1,0 +1,175 @@
+@use 'src/assets/styles/admin-global.scss' as admin;
+
+.search-container {
+  position: relative;
+  display: inline-block;
+}
+
+.search-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: admin.$admin-card-bg;
+  border: 1px solid admin.$admin-border;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  overflow: hidden;
+
+  &:focus-within {
+    border-color: admin.$admin-primary;
+    box-shadow: 0 0 0 3px rgba(admin.$admin-primary, 0.1);
+  }
+
+  .search-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.75rem;
+    color: admin.$admin-text-secondary;
+    pointer-events: none;
+
+    i {
+      font-size: 1.125rem;
+    }
+  }
+
+  .search-field {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: admin.$admin-text-primary;
+    font-size: 0.875rem;
+    padding: 0.75rem 0;
+    outline: none;
+
+    &::placeholder {
+      color: admin.$admin-text-muted;
+    }
+  }
+
+  .clear-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: admin.$admin-text-secondary;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: admin.$admin-hover-bg;
+      color: admin.$admin-text-primary;
+    }
+
+    i {
+      font-size: 1rem;
+    }
+  }
+
+  // Sizes
+  &.size-small {
+    .search-field {
+      padding: 0.5rem 0;
+      font-size: 0.8rem;
+    }
+
+    .search-icon {
+      padding: 0 0.5rem;
+
+      i {
+        font-size: 1rem;
+      }
+    }
+
+    .clear-btn {
+      width: 28px;
+      height: 28px;
+      margin-right: 0.25rem;
+
+      i {
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  &.size-medium {
+    .search-field {
+      padding: 0.75rem 0;
+      font-size: 0.875rem;
+    }
+
+    .search-icon {
+      padding: 0 0.75rem;
+
+      i {
+        font-size: 1.125rem;
+      }
+    }
+
+    .clear-btn {
+      width: 32px;
+      height: 32px;
+      margin-right: 0.5rem;
+
+      i {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  &.size-large {
+    .search-field {
+      padding: 1rem 0;
+      font-size: 1rem;
+    }
+
+    .search-icon {
+      padding: 0 1rem;
+
+      i {
+        font-size: 1.25rem;
+      }
+    }
+
+    .clear-btn {
+      width: 36px;
+      height: 36px;
+      margin-right: 0.75rem;
+
+      i {
+        font-size: 1.125rem;
+      }
+    }
+  }
+}
+
+// Focus states
+.search-input:focus-within {
+  .search-icon {
+    color: admin.$admin-primary;
+  }
+}
+
+// Disabled state
+.search-input.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+
+  .search-field {
+    cursor: not-allowed;
+  }
+}
+
+// Error state
+.search-input.error {
+  border-color: admin.$admin-danger;
+
+  &:focus-within {
+    box-shadow: 0 0 0 3px rgba(admin.$admin-danger, 0.1);
+  }
+} 

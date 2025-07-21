@@ -1,0 +1,33 @@
+<div class="action-menu-container" (clickOutside)="onOutsideClick()">
+  <button 
+    [class]="triggerClasses"
+    (click)="toggleMenu()"
+    [disabled]="disabled"
+    [title]="config.triggerText">
+    
+    <i class="material-icons" *ngIf="config.showTriggerIcon">
+      {{ config.triggerIcon }}
+    </i>
+    
+    <span *ngIf="config.showTriggerText">
+      {{ triggerDisplay }}
+    </span>
+  </button>
+
+  <div [class]="menuClasses" *ngIf="isOpen">
+    <div 
+      class="menu-item"
+      [class]="getItemClasses(item)"
+      *ngFor="let item of items"
+      (click)="onActionClick(item)"
+      [title]="item.tooltip">
+      
+      <div class="menu-item-content" *ngIf="!item.divider">
+        <i class="material-icons" *ngIf="item.icon">{{ item.icon }}</i>
+        <span class="menu-item-label">{{ item.label }}</span>
+      </div>
+      
+      <div class="menu-divider" *ngIf="item.divider"></div>
+    </div>
+  </div>
+</div> 

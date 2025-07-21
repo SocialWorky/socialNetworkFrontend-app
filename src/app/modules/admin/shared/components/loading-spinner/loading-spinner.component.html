@@ -1,0 +1,12 @@
+<div [class]="spinnerClasses" *ngIf="loading">
+  <div class="spinner-container">
+    <div class="spinner">
+      <div class="spinner-ring"></div>
+      <div class="spinner-ring"></div>
+      <div class="spinner-ring"></div>
+    </div>
+    <div class="spinner-text" *ngIf="config.text">
+      {{ config.text }}
+    </div>
+  </div>
+</div> 

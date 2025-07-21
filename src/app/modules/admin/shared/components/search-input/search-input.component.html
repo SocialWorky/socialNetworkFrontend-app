@@ -1,0 +1,23 @@
+<div class="search-container" [style.width]="config.width">
+  <div [class]="inputClasses">
+    <div class="search-icon" *ngIf="config.showSearchIcon">
+      <i class="material-icons">search</i>
+    </div>
+    
+    <input
+      type="text"
+      [formControl]="searchControl"
+      [placeholder]="config.placeholder"
+      class="search-field"
+      (focus)="onFocus()"
+      (blur)="onBlur()">
+    
+    <button 
+      class="clear-btn" 
+      *ngIf="config.showClearButton && searchControl.value"
+      (click)="onClear()"
+      title="Limpiar búsqueda">
+      <i class="material-icons">close</i>
+    </button>
+  </div>
+</div> 

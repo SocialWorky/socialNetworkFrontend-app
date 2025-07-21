@@ -1,0 +1,4 @@
+<span [class]="badgeClasses" [style.color]="config.customColor" [style.background-color]="config.customBgColor">
+  <i class="material-icons" *ngIf="config.showIcon">{{ iconClass }}</i>
+  <span class="badge-text" *ngIf="config.showText">{{ displayText }}</span>
+</span> 

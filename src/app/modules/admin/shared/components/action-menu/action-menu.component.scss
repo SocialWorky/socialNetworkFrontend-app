@@ -1,0 +1,242 @@
+@use 'src/assets/styles/admin-global.scss' as admin;
+
+.action-menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+.action-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid admin.$admin-border;
+  background: admin.$admin-card-bg;
+  color: admin.$admin-text-primary;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+
+  &:hover:not(.disabled) {
+    background: admin.$admin-hover-bg;
+    border-color: admin.$admin-primary;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  i {
+    font-size: 1.125rem;
+  }
+
+  // Sizes
+  &.size-small {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+
+    i {
+      font-size: 1rem;
+    }
+  }
+
+  &.size-medium {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+
+    i {
+      font-size: 1.125rem;
+    }
+  }
+
+  &.size-large {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+
+    i {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+.action-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 200px;
+  background: admin.$admin-card-bg;
+  border: 1px solid admin.$admin-border;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  margin-top: 0.5rem;
+  overflow: hidden;
+  animation: menuSlideIn 0.2s ease-out;
+
+  .menu-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover:not(.disabled):not(.divider) {
+      background: admin.$admin-hover-bg;
+    }
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &.divider {
+      cursor: default;
+      padding: 0;
+    }
+
+    .menu-item-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+
+      i {
+        font-size: 1.125rem;
+        color: admin.$admin-text-secondary;
+        width: 20px;
+        text-align: center;
+      }
+
+      .menu-item-label {
+        font-size: 0.875rem;
+        color: admin.$admin-text-primary;
+        flex: 1;
+      }
+    }
+
+    .menu-divider {
+      height: 1px;
+      background: admin.$admin-border;
+      margin: 0.25rem 0;
+    }
+
+    // Types
+    &.type-danger {
+      .menu-item-content {
+        i, .menu-item-label {
+          color: admin.$admin-danger;
+        }
+      }
+
+      &:hover {
+        background: rgba(admin.$admin-danger, 0.1);
+      }
+    }
+
+    &.type-warning {
+      .menu-item-content {
+        i, .menu-item-label {
+          color: admin.$admin-warning;
+        }
+      }
+
+      &:hover {
+        background: rgba(admin.$admin-warning, 0.1);
+      }
+    }
+
+    &.type-success {
+      .menu-item-content {
+        i, .menu-item-label {
+          color: admin.$admin-success;
+        }
+      }
+
+      &:hover {
+        background: rgba(admin.$admin-success, 0.1);
+      }
+    }
+  }
+
+  // Positions
+  &.position-bottom-left {
+    right: auto;
+    left: 0;
+  }
+
+  &.position-bottom-right {
+    right: 0;
+    left: auto;
+  }
+
+  &.position-top-left {
+    bottom: 100%;
+    top: auto;
+    right: auto;
+    left: 0;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  &.position-top-right {
+    bottom: 100%;
+    top: auto;
+    right: 0;
+    left: auto;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  // Sizes
+  &.size-small {
+    min-width: 160px;
+
+    .menu-item .menu-item-content {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+
+      i {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  &.size-large {
+    min-width: 240px;
+
+    .menu-item .menu-item-content {
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+
+      i {
+        font-size: 1.25rem;
+      }
+    }
+  }
+}
+
+@keyframes menuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .action-menu {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-radius: 12px 12px 0 0;
+    margin: 0;
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+} 

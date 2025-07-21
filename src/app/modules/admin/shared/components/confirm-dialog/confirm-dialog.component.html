@@ -1,0 +1,32 @@
+<div class="dialog-overlay" *ngIf="showDialog" (click)="onOverlayClick($event)">
+  <div [class]="dialogClasses" [style.width]="config.width">
+    <div class="dialog-header">
+      <div class="dialog-icon">
+        <i [class]="iconClass">{{ iconName }}</i>
+      </div>
+      <h3 class="dialog-title">{{ config.title }}</h3>
+      <button class="close-btn" (click)="onClose()" title="Cerrar">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+    
+    <div class="dialog-body">
+      <p class="dialog-message">{{ config.message }}</p>
+    </div>
+    
+    <div class="dialog-footer">
+      <button 
+        class="btn btn-secondary" 
+        *ngIf="config.showCancel"
+        (click)="onCancel()">
+        {{ config.cancelText }}
+      </button>
+      <button 
+        class="btn btn-primary" 
+        [class.btn-danger]="config.type === 'danger'"
+        (click)="onConfirm()">
+        {{ config.confirmText }}
+      </button>
+    </div>
+  </div>
+</div> 
