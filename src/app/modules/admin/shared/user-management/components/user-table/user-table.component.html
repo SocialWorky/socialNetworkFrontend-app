@@ -102,12 +102,14 @@
           </div>
         </div>
       </div>
-      
-      <!-- Empty State -->
-      <div class="empty-state" *ngIf="users.length === 0 && !loading">
-        <i class="material-icons empty-icon">people_outline</i>
-        <h3>No se encontraron usuarios</h3>
-        <p>No hay usuarios que coincidan con los filtros aplicados</p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && users.length === 0">
+      <div class="empty-content">
+        <i class="material-icons empty-icon">people</i>
+        <h3 class="empty-title">No se encontraron usuarios</h3>
+        <p class="empty-description">No hay usuarios que coincidan con los criterios de búsqueda</p>
       </div>
     </div>
   </div>

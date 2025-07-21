@@ -5,6 +5,8 @@ import { Subject, takeUntil } from 'rxjs';
 import { LogService } from './services/log.service';
 import { LogsList } from './interface/log.interface';
 import { GenericSnackbarService } from '@shared/services/generic-snackbar.service';
+import { LoadingSpinnerConfig } from '@admin/shared/components/loading-spinner/loading-spinner.component';
+import { PaginationConfig } from '@admin/shared/components/pagination/pagination.component';
 
 @Component({
     selector: 'worky-log',
@@ -33,6 +35,25 @@ export class LogComponent implements OnInit, OnDestroy {
   selectedLevel: string = '';
 
   autoRefresh: boolean = false;
+
+  // Configuraciones para componentes compartidos
+  loadingConfig: LoadingSpinnerConfig = {
+    size: 'medium',
+    text: 'Cargando logs...',
+    overlay: true
+  };
+
+  get paginationConfig(): PaginationConfig {
+    return {
+      currentPage: this.currentPage,
+      totalPages: Math.ceil(this.totalLogs / this.limit),
+      totalItems: this.totalLogs,
+      itemsPerPage: this.limit,
+      showInfo: true,
+      showPageNumbers: true,
+      maxPageNumbers: 5
+    };
+  }
 
   private autoRefreshTimer?: any;
 
@@ -215,25 +236,25 @@ export class LogComponent implements OnInit, OnDestroy {
   getVisiblePageNumbers(): number[] {
     const totalPages = Math.ceil(this.totalLogs / this.limit);
     const current = this.currentPage;
-    const pages: number[] = [];
-
-    if (totalPages <= 7) {
+    const maxVisible = 5;
+    
+    if (totalPages <= maxVisible) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
-
-    if (current <= 4) {
-      for (let i = 1; i <= 5; i++) pages.push(i);
-      pages.push(totalPages);
-    } else if (current >= totalPages - 3) {
-      pages.push(1);
-      for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
-    } else {
-      pages.push(1);
-      for (let i = current - 1; i <= current + 1; i++) pages.push(i);
-      pages.push(totalPages);
+    
+    const half = Math.floor(maxVisible / 2);
+    let start = Math.max(1, current - half);
+    let end = Math.min(totalPages, start + maxVisible - 1);
+    
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
     }
+    
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
 
-    return pages;
+  trackByLogId(index: number, log: LogsList): string {
+    return log._id;
   }
 
 }

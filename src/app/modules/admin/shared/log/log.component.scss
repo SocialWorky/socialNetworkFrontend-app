@@ -1,4 +1,3 @@
-// Logs Component Styles
 @use 'src/assets/styles/admin-global.scss' as admin;
 
 .logs-dashboard {
@@ -302,30 +301,7 @@
   flex-direction: column;
   min-height: 0;
 
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    gap: 1rem;
-
-    .loading-spinner {
-      width: 48px;
-      height: 48px;
-      border: 4px solid rgba(255, 255, 255, 0.1);
-      border-top: 4px solid admin.$admin-primary;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      box-shadow: 0 4px 12px rgba(admin.$admin-primary, 0.2);
-    }
-
-    p {
-      color: admin.$admin-text-secondary;
-      font-size: 1rem;
-      font-weight: 500;
-    }
-  }
+  // Loading spinner styles removed - using shared component
 
   .empty-state {
     display: flex;
@@ -620,95 +596,7 @@
     }
   }
 
-  .pagination-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    background: admin.$admin-card-bg;
-    border: 1px solid admin.$admin-border;
-    border-radius: 12px;
-    flex-shrink: 0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    margin-top: auto;
-
-    .pagination-info {
-      font-size: 0.875rem;
-      color: admin.$admin-text-secondary;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-
-      &::before {
-        content: '';
-        width: 8px;
-        height: 8px;
-        background: admin.$admin-primary;
-        border-radius: 50%;
-        display: inline-block;
-      }
-    }
-
-    .pagination-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-
-      .pagination-btn {
-        min-width: 44px;
-        height: 44px;
-        border: 1px solid admin.$admin-border;
-        border-radius: 8px;
-        background: admin.$admin-dark-bg;
-        color: admin.$admin-text-primary;
-        font-size: 0.875rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        &:hover:not(:disabled) {
-          background: admin.$admin-primary;
-          border-color: admin.$admin-primary;
-          color: white;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(admin.$admin-primary, 0.3);
-        }
-
-        &:disabled {
-          opacity: 0.4;
-          cursor: not-allowed;
-          background: admin.$admin-card-bg;
-        }
-
-        &.active {
-          background: admin.$admin-primary;
-          border-color: admin.$admin-primary;
-          color: white;
-          box-shadow: 0 4px 12px rgba(admin.$admin-primary, 0.3);
-        }
-
-        i {
-          font-size: 1.25rem;
-        }
-      }
-
-      .pagination-ellipsis {
-        color: admin.$admin-text-muted;
-        font-weight: 500;
-        padding: 0 0.75rem;
-      }
-    }
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      gap: 1rem;
-      text-align: center;
-    }
-  }
+  // Pagination styles removed - using shared component
 }
 
 ::ng-deep .ngx-json-viewer {

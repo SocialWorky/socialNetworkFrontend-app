@@ -107,106 +107,69 @@
 
   <!-- Contenido principal -->
   <div class="logs-content">
-    @if (isLoading) {
-      <div class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>Cargando logs...</p>
-      </div>
-    } @else if (filteredLogs.length === 0) {
-      <div class="empty-state">
-        <i class="material-icons empty-icon">info</i>
-        <h3>No se encontraron logs</h3>
-        <p>Intenta ajustar los filtros o actualizar la página</p>
-      </div>
-    } @else {
-      <div class="logs-container">
-        @for (log of filteredLogs; track log._id) {
-          <div class="log-card" [class.expanded]="isExpanded(log._id)">
-            <div class="log-header" (click)="toggleMetadata(log._id)">
-              <div class="log-level-badge" [class]="'level-' + log.level">
-                <i class="material-icons">{{ getLevelIcon(log.level) }}</i>
-                <span class="level-text">{{ log.level.toUpperCase() }}</span>
-              </div>
-              
-              <div class="log-content">
-                <div class="log-message">{{ log.message }}</div>
-                <div class="log-context">{{ log.context }}</div>
-              </div>
-              
-              <div class="log-meta">
-                <div class="log-timestamp">
-                  <i class="material-icons">schedule</i>
-                  {{ log.timestamp | date: 'dd/MM/yy HH:mm:ss' }}
-                </div>
-                <div class="log-actions">
-                  <button class="action-icon" (click)="onCopy(log); $event.stopPropagation()" title="Copiar log">
-                    <i class="material-icons">content_copy</i>
-                  </button>
-                  <button class="action-icon" (click)="toggleMetadata(log._id); $event.stopPropagation()" title="Ver metadata">
-                    <i class="material-icons" [class.rotated]="isExpanded(log._id)">expand_more</i>
-                  </button>
-                </div>
-              </div>
-            </div>
+    <worky-loading-spinner 
+      [loading]="isLoading"
+      [config]="loadingConfig">
+    </worky-loading-spinner>
 
-            @if (isExpanded(log._id)) {
-              <div class="log-details">
-                <div class="metadata-section">
-                  <h4 class="metadata-title">
-                    <i class="material-icons">code</i>
-                    Metadata
-                  </h4>
-                  <div class="metadata-content">
-                    <ngx-json-viewer [depth]="2" [json]="log.metadata"></ngx-json-viewer>
-                    <button class="copy-metadata-btn" (click)="onCopy(log.metadata)">
-                      <i class="material-icons">content_copy</i>
-                      Copiar JSON
-                    </button>
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-        }
-      </div>
+    <div class="empty-state" *ngIf="!isLoading && filteredLogs.length === 0">
+      <i class="material-icons empty-icon">info</i>
+      <h3>No se encontraron logs</h3>
+      <p>Intenta ajustar los filtros o actualizar la página</p>
+    </div>
 
-      <!-- Paginación mejorada -->
-      @if (getPageNumbers().length > 1) {
-        <div class="pagination-container">
-          <div class="pagination-info">
-            Mostrando {{ (currentPage - 1) * limit + 1 }} - {{ Math.min(currentPage * limit, totalLogs) }} de {{ totalLogs }} logs
+    <div class="logs-container" *ngIf="!isLoading && filteredLogs.length > 0">
+      <div class="log-card" [class.expanded]="isExpanded(log._id)" *ngFor="let log of filteredLogs; trackBy: trackByLogId">
+        <div class="log-header" (click)="toggleMetadata(log._id)">
+          <div class="log-level-badge" [class]="'level-' + log.level">
+            <i class="material-icons">{{ getLevelIcon(log.level) }}</i>
+            <span class="level-text">{{ log.level.toUpperCase() }}</span>
           </div>
           
-          <div class="pagination-controls">
-            <button 
-              class="pagination-btn" 
-              [disabled]="currentPage === 1"
-              (click)="changePage(currentPage - 1)"
-            >
-              <i class="material-icons">chevron_left</i>
-            </button>
-            
-            @for (page of getVisiblePageNumbers(); track page) {
-              <button 
-                class="pagination-btn" 
-                [class.active]="currentPage === page"
-                (click)="changePage(page)"
-              >
-                {{ page }}
+          <div class="log-content">
+            <div class="log-message">{{ log.message }}</div>
+            <div class="log-context">{{ log.context }}</div>
+          </div>
+          
+          <div class="log-meta">
+            <div class="log-timestamp">
+              <i class="material-icons">schedule</i>
+              {{ log.timestamp | date: 'dd/MM/yy HH:mm:ss' }}
+            </div>
+            <div class="log-actions">
+              <button class="action-icon" (click)="onCopy(log); $event.stopPropagation()" title="Copiar log">
+                <i class="material-icons">content_copy</i>
               </button>
-            }
-            
-            <button 
-              class="pagination-btn" 
-              [disabled]="currentPage === getPageNumbers().length"
-              (click)="changePage(currentPage + 1)"
-            >
-              <i class="material-icons">chevron_right</i>
-            </button>
+              <button class="action-icon" (click)="toggleMetadata(log._id); $event.stopPropagation()" title="Ver metadata">
+                <i class="material-icons" [class.rotated]="isExpanded(log._id)">expand_more</i>
+              </button>
+            </div>
           </div>
         </div>
-      }
-    }
+
+        <div class="log-details" *ngIf="isExpanded(log._id)">
+          <div class="metadata-section">
+            <h4 class="metadata-title">
+              <i class="material-icons">code</i>
+              Metadata
+            </h4>
+            <div class="metadata-content">
+              <ngx-json-viewer [depth]="2" [json]="log.metadata"></ngx-json-viewer>
+              <button class="copy-metadata-btn" (click)="onCopy(log.metadata)">
+                <i class="material-icons">content_copy</i>
+                Copiar JSON
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paginación -->
+    <worky-pagination 
+      [config]="paginationConfig"
+      (pageChange)="changePage($event)">
+    </worky-pagination>
   </div>
 </div>
 

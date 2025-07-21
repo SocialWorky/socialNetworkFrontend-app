@@ -6,8 +6,6 @@
   background: linear-gradient(135deg, admin.$admin-darker-bg 0%, admin.$admin-dark-bg 100%);
   padding: 2rem;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  height: 100vh;
-  overflow: hidden;
 
   @media (max-width: 768px) {
     padding: 1rem;
@@ -123,6 +121,8 @@
   }
 }
 
+// Loading spinner styles removed - using shared component
+
 .loading-container {
   display: flex;
   justify-content: center;
@@ -213,6 +213,14 @@
       }
     }
   }
+}
+
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 2rem;
 }
 
 @keyframes pulse {
@@ -324,9 +332,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 1.5rem;
-  padding: 1.5rem;
-  overflow-y: auto;
-  flex: 1;
+  margin-top: 2rem;
 }
 
 .stat-card {
@@ -378,111 +384,120 @@
   &.secondary::before {
     background: linear-gradient(90deg, transparent, admin.$admin-secondary, transparent);
   }
-}
 
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 
-.card-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: white;
-
-  i {
-    font-size: 1.5rem;
+    .card-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+    }
   }
 
-  .stat-card.primary & {
+  &.primary .card-icon {
     background: linear-gradient(135deg, admin.$admin-primary, color-mix(in srgb, admin.$admin-primary 90%, black));
   }
 
-  .stat-card.success & {
+  &.success .card-icon {
     background: linear-gradient(135deg, admin.$admin-success, color-mix(in srgb, admin.$admin-success 90%, black));
   }
 
-  .stat-card.warning & {
+  &.warning .card-icon {
     background: linear-gradient(135deg, admin.$admin-warning, color-mix(in srgb, admin.$admin-warning 90%, black));
   }
 
-  .stat-card.danger & {
+  &.danger .card-icon {
     background: linear-gradient(135deg, admin.$admin-danger, color-mix(in srgb, admin.$admin-danger 90%, black));
   }
 
-  .stat-card.info & {
+  &.info .card-icon {
     background: linear-gradient(135deg, admin.$admin-info, color-mix(in srgb, admin.$admin-info 90%, black));
   }
 
-  .stat-card.secondary & {
+  &.secondary .card-icon {
     background: linear-gradient(135deg, admin.$admin-secondary, color-mix(in srgb, admin.$admin-secondary 90%, black));
   }
-}
 
-.card-info {
-  flex: 1;
-}
+  .card-info {
+    flex: 1;
 
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: admin.$admin-text-primary;
-  margin: 0 0 0.25rem 0;
-}
-
-.card-subtitle {
-  font-size: 0.875rem;
-  color: admin.$admin-text-secondary;
-  margin: 0;
-}
-
-.card-content {
-  .main-stat {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-
-    .stat-number {
-      font-size: 2.5rem;
-      font-weight: 700;
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
       color: admin.$admin-text-primary;
-      line-height: 1;
+      margin: 0 0 0.25rem 0;
     }
 
-    .stat-label {
-      font-size: 1rem;
+    .card-subtitle {
+      font-size: 0.875rem;
       color: admin.$admin-text-secondary;
-      text-transform: lowercase;
+      margin: 0;
     }
   }
 
-  .stat-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
+  .card-content {
+    .main-stat {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
 
-  .detail-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.875rem;
+      .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: admin.$admin-text-primary;
+        line-height: 1;
+      }
 
-    .detail-label {
-      color: admin.$admin-text-secondary;
+      .stat-label {
+        font-size: 1rem;
+        color: admin.$admin-text-secondary;
+        text-transform: lowercase;
+      }
+
+      &.loading {
+        .stat-skeleton {
+          width: 80px;
+          height: 2.5rem;
+        }
+      }
     }
 
-    .detail-value {
-      color: admin.$admin-text-primary;
-      font-weight: 500;
+    .stat-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .detail-label {
+          font-size: 0.875rem;
+          color: admin.$admin-text-secondary;
+        }
+
+        .detail-value {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: admin.$admin-text-primary;
+        }
+
+        .detail-skeleton {
+          width: 40px;
+          height: 1rem;
+        }
+      }
     }
   }
 }
@@ -515,56 +530,56 @@
       transform: translateY(-2px);
       border-color: rgba(255, 255, 255, 0.1);
     }
-  }
 
-  .metric-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-
-    .metric-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
+    .metric-header {
       display: flex;
       align-items: center;
-      justify-content: center;
-      background: rgba(admin.$admin-primary, 0.2);
-      color: admin.$admin-primary;
-      font-size: 1rem;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+
+      .metric-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(admin.$admin-primary, 0.2);
+        color: admin.$admin-primary;
+        font-size: 1rem;
+      }
+
+      h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: admin.$admin-text-primary;
+        margin: 0;
+      }
     }
 
-    h4 {
-      font-size: 1rem;
-      font-weight: 600;
-      color: admin.$admin-text-primary;
-      margin: 0;
+    .metric-value {
+      margin-bottom: 0.75rem;
+
+      .percentage {
+        font-size: 2rem;
+        font-weight: 700;
+        color: admin.$admin-success;
+        line-height: 1;
+      }
+
+      .time {
+        font-size: 2rem;
+        font-weight: 700;
+        color: admin.$admin-warning;
+        line-height: 1;
+      }
     }
-  }
 
-  .metric-value {
-    margin-bottom: 0.75rem;
-
-    .percentage {
-      font-size: 2rem;
-      font-weight: 700;
-      color: admin.$admin-success;
-      line-height: 1;
+    .metric-description {
+      font-size: 0.875rem;
+      color: admin.$admin-text-secondary;
+      line-height: 1.4;
     }
-
-    .time {
-      font-size: 2rem;
-      font-weight: 700;
-      color: admin.$admin-warning;
-      line-height: 1;
-    }
-  }
-
-  .metric-description {
-    font-size: 0.875rem;
-    color: admin.$admin-text-secondary;
-    line-height: 1.4;
   }
 }
 
