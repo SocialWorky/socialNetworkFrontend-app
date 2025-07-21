@@ -186,9 +186,10 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
   }
 
   onImageError(event: any) {
-    // Set a fallback image or hide the image
+    // Hide the broken image
     event.target.style.display = 'none';
-    // Optionally show a placeholder
+    
+    // Create a placeholder icon
     const placeholder = document.createElement('div');
     placeholder.className = 'image-placeholder';
     placeholder.innerHTML = '<i class="material-icons">image</i>';

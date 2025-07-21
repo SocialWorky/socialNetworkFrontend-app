@@ -9,6 +9,7 @@ import { ProfileService } from '../../services/profile.service';
 import { AuthService } from '@auth/services/auth.service';
 import { environment } from '@env/environment';
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
+import { UtilityService } from '@shared/services/utility.service';
 
 @Component({
     selector: 'worky-edit-img-profile',
@@ -53,7 +54,8 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     private _fileUploadService: FileUploadService,
     private _profileService: ProfileService,
     private _authService: AuthService,
-    private _deviceDetectionService: DeviceDetectionService
+    private _deviceDetectionService: DeviceDetectionService,
+    private _utilityService: UtilityService
   ) {}
 
   ngAfterViewInit(): void {
@@ -246,5 +248,9 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
       default:
         return 'jpg';
     }
+  }
+
+  onImageError(event: Event): void {
+    this._utilityService.handleImageError(event, this.imgCoverDefault);
   }
 }

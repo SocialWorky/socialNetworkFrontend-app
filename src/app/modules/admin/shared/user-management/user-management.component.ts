@@ -5,6 +5,7 @@ import { takeUntil, finalize } from 'rxjs/operators';
 import { UserManagementService } from '@admin/services/user-management.service';
 import { AlertService } from '@shared/services/alert.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { UtilityService } from '@shared/services/utility.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { User } from '@shared/interfaces/user.interface';
 import { 
@@ -69,7 +70,8 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     private alertService: AlertService,
     private fb: FormBuilder,
     private _cdr: ChangeDetectorRef,
-    private _logService: LogService
+    private _logService: LogService,
+    private _utilityService: UtilityService
   ) {
     this.filtersForm = this.fb.group({
       search: [''],
@@ -396,8 +398,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   }
 
   onImageError(event: Event): void {
-    const imgElement = event.target as HTMLImageElement;
-    imgElement.src = 'assets/img/shared/drag-drop-upload-add-file.webp';
+    this._utilityService.handleImageError(event, 'assets/img/shared/drag-drop-upload-add-file.webp');
   }
 
   sendVerificationEmail(user: User): void {

@@ -31,6 +31,7 @@ import { NotificationPublicationService } from '@shared/services/notifications/n
 import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
+import { UtilityService } from '@shared/services/utility.service';
 
 @Component({
     selector: 'worky-profiles',
@@ -122,7 +123,8 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     private _configService: ConfigService,
     private _notificationPublicationService: NotificationPublicationService,
     private _logService: LogService,
-    private _pullToRefreshService: PullToRefreshService
+    private _pullToRefreshService: PullToRefreshService,
+    private _utilityService: UtilityService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
@@ -861,5 +863,9 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     `;
     
     return indicator;
+  }
+
+  onImageError(event: Event): void {
+    this._utilityService.handleImageError(event, this.imgCoverDefault);
   }
 }

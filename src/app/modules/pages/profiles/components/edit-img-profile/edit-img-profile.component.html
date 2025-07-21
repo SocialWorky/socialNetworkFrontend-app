@@ -1,6 +1,10 @@
 <div class="image-container">
   <div *ngIf="cropping" class="crop-container">
-    <img #cropperImage [src]="selectedImage" alt="Crop Image">
+    <img 
+      #cropperImage 
+      [src]="selectedImage" 
+      alt="Crop Image"
+      (error)="onImageError($event)">
     <div class="edit-icon">
       <i class="material-icons" (click)="cropImage()">crop</i>
       <i class="material-icons" (click)="cancelCrop()">cancel</i>
@@ -9,7 +13,12 @@
 
   <ng-container *ngIf="!cropping">
     <div class="preview">
-      <img #imageElement *ngIf="previews[0].type === 'image'" [src]="previews[0].url" alt="Image Preview">
+      <img 
+        #imageElement 
+        *ngIf="previews[0].type === 'image'" 
+        [src]="previews[0].url" 
+        alt="Image Preview"
+        (error)="onImageError($event)">
       <div class="overlay" [class.show]="isUploading">
         <div class="loading-spinner"></div>
       </div>

@@ -33,4 +33,15 @@ export class UtilityService {
     return /\.(mp4|ogg|webm|avi|mov)$/i.test(url);
   }
 
+  /**
+   * Handles image loading errors by setting a fallback image.
+   * This method is used to provide a default image when the original image URL fails to load.
+   * @param event - The error event from the img element
+   * @param fallbackSrc - The fallback image URL to use when the original image fails
+   */
+  handleImageError(event: Event, fallbackSrc: string): void {
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.src = fallbackSrc;
+  }
+
 }
