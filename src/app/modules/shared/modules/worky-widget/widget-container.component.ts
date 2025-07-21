@@ -1,5 +1,5 @@
-import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Subject, takeUntil, combineLatest } from 'rxjs';
 import { WidgetPosition, WidgetConfig, WidgetStatus } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
 import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget-config.service';
 
@@ -44,16 +44,26 @@ export class WidgetContainerComponent implements OnInit, OnDestroy {
   enabledWidgets: WidgetConfig[] = [];
   private destroy$ = new Subject<void>();
 
-  constructor(private widgetConfigService: WidgetConfigService) {}
+  constructor(
+    private widgetConfigService: WidgetConfigService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-    this.widgetConfigService.widgetLayout$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(layout => {
-        if (layout) {
-          this.enabledWidgets = this.getEnabledWidgetsForPosition();
-        }
-      });
+    // Check if widgets are already loaded, if not initialize them
+    if (!this.widgetConfigService.isInitialized()) {
+      this.widgetConfigService.initializeData();
+    }
+
+    // Subscribe to both widgets and layout using combineLatest
+    combineLatest([
+      this.widgetConfigService.widgets$,
+      this.widgetConfigService.widgetLayout$
+    ])
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(([widgets, layout]) => {
+      this.updateEnabledWidgets();
+    });
   }
 
   ngOnDestroy(): void {
@@ -61,8 +71,16 @@ export class WidgetContainerComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  private updateEnabledWidgets(): void {
+    this.enabledWidgets = this.getEnabledWidgetsForPosition();
+    this.cdr.markForCheck();
+  }
+
   private getEnabledWidgetsForPosition(): WidgetConfig[] {
     const widgets = this.widgetConfigService.getWidgetsByPositionFromCache(this.position);
+    if (!widgets || widgets.length === 0) {
+      return [];
+    }
     return widgets
       .filter((widget: WidgetConfig) => widget.status === WidgetStatus.ENABLED)
       .sort((a: WidgetConfig, b: WidgetConfig) => a.order - b.order);

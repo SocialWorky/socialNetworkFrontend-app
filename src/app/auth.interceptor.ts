@@ -37,7 +37,11 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       catchError((error) => {
         if (error.status === 401) {
-          this.router.navigate(['/auth/login']);
+          // Only redirect if not already on login page
+          const currentUrl = this.router.url;
+          if (!currentUrl.includes('/auth/login')) {
+            this.router.navigate(['/auth/login']);
+          }
         }
         return throwError(() => error);
       })

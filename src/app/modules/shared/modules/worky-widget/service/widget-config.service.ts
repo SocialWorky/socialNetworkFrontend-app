@@ -5,6 +5,7 @@ import { tap, catchError, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { environment } from '@env/environment';
 import { WidgetConfig, WidgetLayout, WidgetPosition, WidgetStatus } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,7 @@ export class WidgetConfigService {
   private apiUrl = `${environment.API_URL}/widgets`;
   private widgetLayoutSubject = new BehaviorSubject<WidgetLayout | null>(null);
   private widgetsSubject = new BehaviorSubject<WidgetConfig[]>([]);
+  private isLoading = false;
   
   public widgetLayout$ = this.widgetLayoutSubject.asObservable();
   public widgets$ = this.widgetsSubject.asObservable();
@@ -46,7 +48,10 @@ export class WidgetConfigService {
     }
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private logService: LogService
+  ) {}
 
   getAllWidgets(): Observable<WidgetConfig[]> {
     return this.http.get<WidgetConfig[]>(`${this.apiUrl}`).pipe(
@@ -56,10 +61,15 @@ export class WidgetConfigService {
         } else {
           this.widgetsSubject.next(widgets);
         }
+        this.isLoading = false;
       }),
       catchError((error) => {
-        console.error('Error obteniendo widgets:', error);
+        // Only log error if it's not an authentication error
+        if (error.status !== 401) {
+          this.logService.log(LevelLogEnum.ERROR, 'WidgetConfigService', 'Error obteniendo widgets', { error: error.message, status: error.status });
+        }
         this.widgetsSubject.next(this.defaultWidgets);
+        this.isLoading = false;
         return of(this.defaultWidgets);
       })
     );
@@ -69,9 +79,13 @@ export class WidgetConfigService {
     return this.http.get<WidgetLayout>(`${this.apiUrl}/layout`).pipe(
       tap(layout => {
         this.widgetLayoutSubject.next(layout);
+        this.isLoading = false;
       }),
       catchError((error) => {
-        console.error('Error obteniendo layout:', error);
+        // Only log error if it's not an authentication error
+        if (error.status !== 401) {
+          this.logService.log(LevelLogEnum.ERROR, 'WidgetConfigService', 'Error obteniendo layout', { error: error.message, status: error.status });
+        }
         const defaultLayout: WidgetLayout = {
           top: [],
           left: [
@@ -100,6 +114,7 @@ export class WidgetConfigService {
           ]
         };
         this.widgetLayoutSubject.next(defaultLayout);
+        this.isLoading = false;
         return of(defaultLayout);
       })
     );
@@ -199,12 +214,19 @@ export class WidgetConfigService {
   }
 
   private refreshData(): void {
-    this.getAllWidgets().subscribe();
-    this.getWidgetLayout().subscribe();
+    // Only refresh if not already loading
+    if (!this.isLoading) {
+      this.isLoading = true;
+      this.getAllWidgets().subscribe();
+      this.getWidgetLayout().subscribe();
+    }
   }
 
   initializeData(): void {
-    this.refreshData();
+    // Only initialize if not already loading and not initialized
+    if (!this.isLoading && !this.isInitialized()) {
+      this.refreshData();
+    }
   }
 
   forceRefresh(): void {
@@ -213,6 +235,12 @@ export class WidgetConfigService {
 
   getDefaultWidgets(): WidgetConfig[] {
     return this.defaultWidgets;
+  }
+
+  isInitialized(): boolean {
+    const layout = this.widgetLayoutSubject.value;
+    const widgets = this.widgetsSubject.value;
+    return layout !== null && widgets.length > 0;
   }
 
   saveOrUpdateWidget(widget: WidgetConfig): Observable<WidgetConfig> {

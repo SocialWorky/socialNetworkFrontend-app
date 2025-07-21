@@ -55,7 +55,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     const token = localStorage.getItem('token');
     
     if (token) {
@@ -72,7 +72,8 @@ export class AppComponent implements OnInit, OnDestroy {
     );
     this.applyCustomConfig();
 
-    this._widgetConfigService.initializeData();
+    // Only initialize widget data if user is authenticated
+    await this.checkAuthenticationAndInitializeWidgets();
 
     //TODO: Wait a little before subscribing to events, this is to give time for components to start before subscribing
     setTimeout(() => {
@@ -171,5 +172,16 @@ export class AppComponent implements OnInit, OnDestroy {
     link.rel = 'icon';
     link.href = logoUrl;
     document.getElementsByTagName('head')[0].appendChild(link);
+  }
+
+  private async checkAuthenticationAndInitializeWidgets(): Promise<void> {
+    try {
+      const isAuthenticated = await this._authService.isAuthenticated();
+      if (isAuthenticated) {
+        this._widgetConfigService.initializeData();
+      }
+    } catch (error) {
+      // Silent error - user is not authenticated, so widgets won't be initialized
+    }
   }
 }
