@@ -81,7 +81,7 @@
     overflow-x: auto;
   }
 
-  .thumbnail-list img {
+  .thumbnail-list worky-image {
     width: 80px;
     height: 80px;
     object-fit: cover;
@@ -91,12 +91,12 @@
     transition: transform 0.2s ease-in-out, box-shadow 0.2s;
   }
 
-  .thumbnail-list img:hover {
+  .thumbnail-list worky-image:hover {
     transform: scale(1.1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
-  .thumbnail-list img.active {
+  .thumbnail-list worky-image.active {
     border: 2px solid colors.$worky-color-greyLight;
   }
 }

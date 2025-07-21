@@ -1,12 +1,12 @@
 <div class="content-view-media-carousel">
   <div class="carousel-container">
 
-    <img *ngIf="isImage()"
+    <worky-image *ngIf="isImage() && imageSelected?.urlCompressed"
       (click)="openImage(imageSelected!)"
-      [src]="imageSelected?.urlCompressed"
-      class="main-image"
-      alt="Selected Image"
-      (error)="onImageError($event)" />
+      [src]="imageSelected!.urlCompressed"
+      cssClass="main-image"
+      alt="Selected Image">
+    </worky-image>
 
     <div class="main-video-container" (click)="$event.stopPropagation()">
       <video *ngIf="isVideo()"
@@ -29,13 +29,12 @@
   </div>
 
   <div *ngIf="!isMobile" class="thumbnail-list">
-    <img
+    <worky-image
       *ngFor="let image of images"
       [src]="image.urlThumbnail"
       (click)="selectImage(image)"
-      [class.active]="image._id === imageSelected?._id"
-      alt="Thumbnail"
-      (error)="onImageError($event)"
-    />
+      [cssClass]="image._id === imageSelected?._id ? 'active' : ''"
+      alt="Thumbnail">
+    </worky-image>
   </div>
 </div>

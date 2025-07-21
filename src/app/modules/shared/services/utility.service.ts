@@ -41,7 +41,74 @@ export class UtilityService {
    */
   handleImageError(event: Event, fallbackSrc: string): void {
     const imgElement = event.target as HTMLImageElement;
+    
+    // Prevent console errors by removing the error event listener
+    imgElement.onerror = null;
+    
+    // Set the fallback image
     imgElement.src = fallbackSrc;
+    
+    // Add error handling for the fallback image as well
+    imgElement.onerror = () => {
+      imgElement.onerror = null;
+      imgElement.style.display = 'none';
+    };
   }
+
+  /**
+   * Creates an image element with error handling to prevent console errors.
+   * This method is used to preload images and handle errors silently.
+   * @param src - The image source URL
+   * @param fallbackSrc - The fallback image URL
+   * @returns A promise that resolves with the successful image URL or rejects with the fallback URL
+   */
+  preloadImage(src: string, fallbackSrc: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      // Check if the URL is localhost and might fail
+      if (src.includes('localhost:3005')) {
+        // For localhost URLs, use fallback immediately to avoid connection errors
+        resolve(fallbackSrc);
+        return;
+      }
+
+      // For non-localhost URLs, use the original approach
+      const img = new Image();
+      const timeout = setTimeout(() => {
+        img.onload = null;
+        img.onerror = null;
+        resolve(fallbackSrc);
+      }, 3000); // 3 second timeout
+      
+      img.onload = () => {
+        clearTimeout(timeout);
+        resolve(src);
+      };
+      
+      img.onerror = () => {
+        clearTimeout(timeout);
+        // Try fallback image
+        const fallbackImg = new Image();
+        const fallbackTimeout = setTimeout(() => {
+          fallbackImg.onload = null;
+          fallbackImg.onerror = null;
+          reject(fallbackSrc);
+        }, 3000);
+        
+        fallbackImg.onload = () => {
+          clearTimeout(fallbackTimeout);
+          resolve(fallbackSrc);
+        };
+        fallbackImg.onerror = () => {
+          clearTimeout(fallbackTimeout);
+          reject(fallbackSrc);
+        };
+        fallbackImg.src = fallbackSrc;
+      };
+      
+      img.src = src;
+    });
+  }
+
+
 
 }

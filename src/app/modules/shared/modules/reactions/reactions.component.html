@@ -18,7 +18,7 @@
         (click)="deleteReaction(reactionUserInPublication._id)"
         (touchstart)="onTouchStart()"
         (touchend)="onTouchEnd()">
-      <img [src]="reactionUserInPublication.customReaction.emoji" [alt]="reactionUserInPublication.customReaction.name" (error)="onImageError($event)">
+      <worky-image [src]="reactionUserInPublication.customReaction.emoji" [alt]="reactionUserInPublication.customReaction.name"></worky-image>
       <div>{{ reactionUserInPublication.customReaction.name }}</div>
     </div>
 
@@ -34,7 +34,7 @@
           matTooltipPosition="above"
           matTooltipClass="extra-mat-tooltip"
           (click)="addReaction(reaction)">
-        <img class="reaction-image" [src]="reaction.emoji" [alt]="reaction.name" (error)="onImageError($event)">
+        <worky-image class="reaction-image" [src]="reaction.emoji" [alt]="reaction.name"></worky-image>
       </div>
     </div>
   </div>

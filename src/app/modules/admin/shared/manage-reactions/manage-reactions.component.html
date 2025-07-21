@@ -208,12 +208,11 @@
                 </td>
                 <td class="table-cell image-cell">
                   <div class="reaction-image">
-                    <img 
+                    <worky-image 
                       [src]="reaction.emoji" 
                       [alt]="reaction.name + ' icon'" 
-                      class="emoji-image"
-                      (error)="onImageError($event)"
-                    >
+                      cssClass="emoji-image">
+                    </worky-image>
                   </div>
                 </td>
                 <td class="table-cell actions-cell">

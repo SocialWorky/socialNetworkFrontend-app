@@ -12,12 +12,12 @@
       <div class="gallery-item" (click)="openViewMedia(image)"
           [attr.data-content]="i === 4 && images.length > 5 ? '+ ' + (images.length - 5) : ''">
         <ng-container *ngIf="isImageUrl(image.urlCompressed)">
-          <img [src]="image.urlCompressed" alt="Image" (error)="onImageError($event)">
+          <worky-image [src]="image.urlCompressed" alt="Image"></worky-image>
         </ng-container>
 
         <ng-container *ngIf="isVideoUrl(image.urlCompressed)">
           <div class="video-container">
-            <img [src]="image.urlThumbnail" alt="Image" (error)="onImageError($event)">
+            <worky-image [src]="image.urlThumbnail" alt="Image"></worky-image>
           </div>
         </ng-container>
       </div>

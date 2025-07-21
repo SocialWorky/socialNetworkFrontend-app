@@ -1,0 +1,58 @@
+@use 'src/assets/styles/worky-palettes.scss' as colors;
+
+.worky-image-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &.loading {
+    .image-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background-color: colors.$worky-color-light;
+      border-radius: 4px;
+
+      .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid colors.$worky-color-navy;
+        border-top: 2px solid transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+    }
+  }
+
+  &.error {
+    .image-error {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background-color: colors.$worky-color-light;
+      border-radius: 4px;
+      color: colors.$worky-color-navy;
+
+      i {
+        font-size: 24px;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+} 

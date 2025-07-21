@@ -293,10 +293,11 @@
       <div class="user-profile-full">
 
         <div class="cover-image">
-          <img 
+          <worky-image 
             [src]="selectedUser.profile.coverImage ? selectedUser.profile.coverImage : 'assets/img/shared/drag-drop-upload-add-file.webp'" 
-            alt="Portada" 
-            (error)="onImageError($event)" />
+            [fallbackSrc]="'assets/img/shared/drag-drop-upload-add-file.webp'"
+            alt="Portada">
+          </worky-image>
           <div class="profile-overlay">
             <div>
               <worky-avatar 
