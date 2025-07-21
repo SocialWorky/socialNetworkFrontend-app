@@ -241,6 +241,17 @@
           }
         }
 
+        &.clear-btn {
+          border-color: admin.$admin-warning;
+          color: admin.$admin-warning;
+
+          &:hover:not(:disabled) {
+            background: admin.$admin-warning;
+            color: white;
+            box-shadow: 0 4px 12px rgba(admin.$admin-warning, 0.3);
+          }
+        }
+
         i {
           font-size: 1.125rem;
         }

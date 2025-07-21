@@ -94,6 +94,16 @@
           Exportar
         </button>
         
+        <button 
+          class="action-btn clear-btn" 
+          (click)="clearFilters()" 
+          *ngIf="selectedLevel || searchTerm"
+          [disabled]="isLoading"
+        >
+          <i class="material-icons">clear</i>
+          Limpiar Filtros
+        </button>
+        
         <div class="auto-refresh-toggle">
           <label class="toggle-label">
             <input type="checkbox" [(ngModel)]="autoRefresh" (change)="toggleAutoRefresh()">
@@ -112,14 +122,14 @@
       [config]="loadingConfig">
     </worky-loading-spinner>
 
-    <div class="empty-state" *ngIf="!isLoading && filteredLogs.length === 0">
+    <div class="empty-state" *ngIf="!isLoading && logs.length === 0">
       <i class="material-icons empty-icon">info</i>
       <h3>No se encontraron logs</h3>
       <p>Intenta ajustar los filtros o actualizar la página</p>
     </div>
 
-    <div class="logs-container" *ngIf="!isLoading && filteredLogs.length > 0">
-      <div class="log-card" [class.expanded]="isExpanded(log._id)" *ngFor="let log of filteredLogs; trackBy: trackByLogId">
+    <div class="logs-container" *ngIf="!isLoading && logs.length > 0">
+      <div class="log-card" [class.expanded]="isExpanded(log._id)" *ngFor="let log of logs; trackBy: trackByLogId">
         <div class="log-header" (click)="toggleMetadata(log._id)">
           <div class="log-level-badge" [class]="'level-' + log.level">
             <i class="material-icons">{{ getLevelIcon(log.level) }}</i>

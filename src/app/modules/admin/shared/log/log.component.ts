@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { Subject, takeUntil } from 'rxjs';
 
-import { LogService } from './services/log.service';
+import { LogService, LogStats, LogsResponse } from './services/log.service';
 import { LogsList } from './interface/log.interface';
 import { GenericSnackbarService } from '@shared/services/generic-snackbar.service';
 import { LoadingSpinnerConfig } from '@admin/shared/components/loading-spinner/loading-spinner.component';
@@ -18,13 +18,27 @@ export class LogComponent implements OnInit, OnDestroy {
 
   logs: LogsList[] = [];
 
-  filteredLogs: LogsList[] = [];
-
   currentPage: number = 1;
 
   limit: number = 10;
 
   totalLogs: number = 0;
+
+  filteredTotal: number = 0;
+
+  totalPages: number = 0;
+
+  hasNextPage: boolean = false;
+
+  hasPrevPage: boolean = false;
+
+  logStats: LogStats = {
+    total: 0,
+    error: 0,
+    warn: 0,
+    info: 0,
+    debug: 0
+  };
 
   expandedMetadata: { [key: string]: boolean } = {};
 
@@ -46,8 +60,8 @@ export class LogComponent implements OnInit, OnDestroy {
   get paginationConfig(): PaginationConfig {
     return {
       currentPage: this.currentPage,
-      totalPages: Math.ceil(this.totalLogs / this.limit),
-      totalItems: this.totalLogs,
+      totalPages: this.totalPages,
+      totalItems: this.filteredTotal || this.totalLogs,
       itemsPerPage: this.limit,
       showInfo: true,
       showPageNumbers: true,
@@ -78,6 +92,7 @@ export class LogComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadLogs();
+    this.loadLogStats();
   }
 
   ngOnDestroy(): void {
@@ -90,45 +105,72 @@ export class LogComponent implements OnInit, OnDestroy {
 
   loadLogs() {
     this.isLoading = true;
-    this._logService.getLogs(this.currentPage, this.limit).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (res) => {
-        this.logs = res.logs;
-        this.totalLogs = res.total;
-        this.applyFilters();
+    this._logService.getLogs(
+      this.currentPage, 
+      this.limit, 
+      this.selectedLevel, 
+      this.searchTerm
+    ).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (response: LogsResponse) => {
+        
+        this.logs = response.logs;
+        this.totalLogs = response.total;
+        this.filteredTotal = response.filteredTotal;
+        this.totalPages = response.totalPages;
+        this.currentPage = response.currentPage;
+        this.hasNextPage = response.hasNextPage;
+        this.hasPrevPage = response.hasPrevPage;
+        
         this.isLoading = false;
         this._cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading logs:', error);
         this.isLoading = false;
-        this._genericSnackbarService.error('Error al cargar los logs');
         this._cdr.markForCheck();
+      }
+    });
+  }
+
+  loadLogStats() {
+    this._logService.getLogStats().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (stats) => {
+        this.logStats = stats;
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error loading log stats:', error);
       }
     });
   }
 
   refreshLogs() {
     this.loadLogs();
-  }
-
-  applyFilters() {
-    this.filteredLogs = this.logs.filter(log => {
-      const matchesLevel = !this.selectedLevel || log.level === this.selectedLevel;
-      const matchesSearch = !this.searchTerm || 
-        log.message.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        log.context.toLowerCase().includes(this.searchTerm.toLowerCase());
-      
-      return matchesLevel && matchesSearch;
-    });
+    this.loadLogStats();
   }
 
   filterByLevel(level: string) {
+    // If clicking the same level, clear the filter
+    if (this.selectedLevel === level) {
+      this.clearFilters();
+      return;
+    }
+    
     this.selectedLevel = level;
-    this.applyFilters();
+    this.currentPage = 1; // Reset to first page when filtering
+    this.loadLogs();
   }
 
   onSearchChange() {
-    this.applyFilters();
+    this.currentPage = 1; // Reset to first page when searching
+    this.loadLogs();
+  }
+
+  clearFilters() {
+    this.selectedLevel = '';
+    this.searchTerm = '';
+    this.currentPage = 1;
+    this.loadLogs();
   }
 
   onLimitChange() {
@@ -140,6 +182,7 @@ export class LogComponent implements OnInit, OnDestroy {
     if (this.autoRefresh) {
       this.autoRefreshTimer = setInterval(() => {
         this.loadLogs();
+        this.loadLogStats();
       }, 30000);
     } else {
       if (this.autoRefreshTimer) {
@@ -150,7 +193,7 @@ export class LogComponent implements OnInit, OnDestroy {
   }
 
   exportLogs() {
-    const dataToExport = this.filteredLogs.map(log => ({
+    const dataToExport = this.logs.map(log => ({
       timestamp: log.timestamp,
       level: log.level,
       message: log.message,
@@ -189,7 +232,8 @@ export class LogComponent implements OnInit, OnDestroy {
   }
 
   getLogCountByLevel(level: string): number {
-    return this.logs.filter(log => log.level === level).length;
+    // Use backend stats for accurate counts
+    return this.logStats[level as keyof LogStats] || 0;
   }
 
   getLevelIcon(level: string): string {
@@ -204,15 +248,37 @@ export class LogComponent implements OnInit, OnDestroy {
 
   changePage(newPage: number | string): void {
     const pageNumber = typeof newPage === 'string' ? parseInt(newPage, 10) : newPage;
-    if (pageNumber >= 1 && pageNumber <= Math.ceil(this.totalLogs / this.limit)) {
+    
+    if (pageNumber >= 1 && pageNumber <= this.totalPages) {
       this.currentPage = pageNumber;
       this.loadLogs();
     }
   }
 
   getPageNumbers(): number[] {
-    const totalPages = Math.ceil(this.totalLogs / this.limit);
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
+    const totalPages = this.totalPages;
+    const currentPage = this.currentPage;
+    const maxPageNumbers = 5;
+
+    if (totalPages <= maxPageNumbers) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    let startPage: number;
+    let endPage: number;
+
+    if (currentPage <= Math.ceil(maxPageNumbers / 2)) {
+      startPage = 1;
+      endPage = maxPageNumbers;
+    } else if (currentPage + Math.floor(maxPageNumbers / 2) >= totalPages) {
+      startPage = totalPages - maxPageNumbers + 1;
+      endPage = totalPages;
+    } else {
+      startPage = currentPage - Math.floor(maxPageNumbers / 2);
+      endPage = currentPage + Math.floor(maxPageNumbers / 2);
+    }
+
+    return Array.from({ length: (endPage - startPage + 1) }, (_, i) => startPage + i);
   }
 
   isPageActive(page: number): boolean {
@@ -224,37 +290,41 @@ export class LogComponent implements OnInit, OnDestroy {
   }
 
   isExpanded(logId: string): boolean {
-    return !!this.expandedMetadata[logId];
+    return this.expandedMetadata[logId] || false;
   }
 
   onCopy(data: any) {
-    const str = typeof data === 'object' ? JSON.stringify(data, null, 2) : data.toString();
-    this._clipboard.copy(str);
-    this._genericSnackbarService.info('Copiado al portapapeles');
+    this._clipboard.copy(JSON.stringify(data, null, 2));
+    this._genericSnackbarService.info('Metadata copied to clipboard!');
   }
 
   getVisiblePageNumbers(): number[] {
-    const totalPages = Math.ceil(this.totalLogs / this.limit);
-    const current = this.currentPage;
-    const maxVisible = 5;
-    
-    if (totalPages <= maxVisible) {
+    const totalPages = this.totalPages;
+    const currentPage = this.currentPage;
+    const maxPageNumbers = 5;
+
+    if (totalPages <= maxPageNumbers) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
-    
-    const half = Math.floor(maxVisible / 2);
-    let start = Math.max(1, current - half);
-    let end = Math.min(totalPages, start + maxVisible - 1);
-    
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
+
+    let startPage: number;
+    let endPage: number;
+
+    if (currentPage <= Math.ceil(maxPageNumbers / 2)) {
+      startPage = 1;
+      endPage = maxPageNumbers;
+    } else if (currentPage + Math.floor(maxPageNumbers / 2) >= totalPages) {
+      startPage = totalPages - maxPageNumbers + 1;
+      endPage = totalPages;
+    } else {
+      startPage = currentPage - Math.floor(maxPageNumbers / 2);
+      endPage = currentPage + Math.floor(maxPageNumbers / 2);
     }
-    
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+
+    return Array.from({ length: (endPage - startPage + 1) }, (_, i) => startPage + i);
   }
 
   trackByLogId(index: number, log: LogsList): string {
     return log._id;
   }
-
 }
