@@ -39,6 +39,7 @@ import { NotificationCenterService } from '@shared/services/core-apis/notificati
 import { NotificationType } from '@shared/modules/notifications-panel/enums/notificationsType.enum';
 import { GifSearchComponent } from '../gif-search/gif-search.component';
 import { TooltipsOnboardingService } from '@shared/services/tooltips-onboarding.service';
+import { UtilityService } from '@shared/services/utility.service';
 
 @Component({
     selector: 'worky-add-publication',
@@ -124,6 +125,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _emailNotificationService: EmailNotificationService,
     private _notificationCenterService: NotificationCenterService,
     private _tooltipsOnboardingService: TooltipsOnboardingService,
+    private _utilityService: UtilityService,
   ) { }
 
   async ngOnInit() {
@@ -616,4 +618,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     });
   }
 
+  onImageError(event: Event): void {
+    this._utilityService.handleImageError(event, 'assets/img/shared/handleImageError.png');
+  }
 }

@@ -5,7 +5,8 @@
       (click)="openImage(imageSelected!)"
       [src]="imageSelected?.urlCompressed"
       class="main-image"
-      alt="Selected Image" />
+      alt="Selected Image"
+      (error)="onImageError($event)" />
 
     <div class="main-video-container" (click)="$event.stopPropagation()">
       <video *ngIf="isVideo()"
@@ -34,6 +35,7 @@
       (click)="selectImage(image)"
       [class.active]="image._id === imageSelected?._id"
       alt="Thumbnail"
+      (error)="onImageError($event)"
     />
   </div>
 </div>

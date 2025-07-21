@@ -5,6 +5,7 @@ import { environment } from '@env/environment';
 import { MediaViewComponent } from './components/media-view/media-view.component';
 import { PublicationView, Comment } from '@shared/interfaces/publicationView.interface';
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
+import { UtilityService } from '@shared/services/utility.service';
 
 @Component({
     selector: 'worky-image-organizer',
@@ -41,7 +42,8 @@ export class ImageOrganizerComponent implements OnInit {
 
   constructor(
     private _dialog: MatDialog,
-    private _deviceDetectionService: DeviceDetectionService
+    private _deviceDetectionService: DeviceDetectionService,
+    private _utilityService: UtilityService
   ) { }
 
   ngOnInit(): void {
@@ -84,6 +86,10 @@ export class ImageOrganizerComponent implements OnInit {
 
   isVideoUrl(url: string): boolean {
     return /\.(mp4|ogg|webm|avi|mov)$/i.test(url);
+  }
+
+  onImageError(event: Event): void {
+    this._utilityService.handleImageError(event, 'assets/img/shared/handleImageError.png');
   }
 
   openLightbox(index: number): void {

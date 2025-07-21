@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angu
 import { ImageOrganizer } from '../../../interfaces/image-organizer.interface';
 import { environment } from '@env/environment';
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
+import { UtilityService } from '@shared/services/utility.service';
 
 @Component({
     selector: 'worky-image-loading',
@@ -24,7 +25,10 @@ export class ImageLoadingComponent implements OnInit, OnChanges {
 
   urlFilesService = environment.APIFILESERVICE;
 
-  constructor(private _deviceDetectionService: DeviceDetectionService) { }
+  constructor(
+    private _deviceDetectionService: DeviceDetectionService,
+    private _utilityService: UtilityService
+  ) { }
 
   ngOnInit(): void {}
 
@@ -75,5 +79,9 @@ export class ImageLoadingComponent implements OnInit, OnChanges {
 
   isVideo(): boolean {
     return this.imageSelected?.type === 'video';
+  }
+
+  onImageError(event: Event): void {
+    this._utilityService.handleImageError(event, 'assets/img/shared/handleImageError.png');
   }
 }

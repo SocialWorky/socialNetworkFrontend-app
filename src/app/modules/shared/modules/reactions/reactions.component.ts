@@ -13,6 +13,7 @@ import { EmailNotificationService } from '@shared/services/notifications/email-n
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { Token } from '@shared/interfaces/token.interface';
+import { UtilityService } from '@shared/services/utility.service';
 
 @Component({
     selector: 'worky-reactions',
@@ -57,7 +58,8 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
     private _authService: AuthService,
     private _publicationService: PublicationService,
     private _emailNotificationService: EmailNotificationService,
-    private _notificationService: NotificationService
+    private _notificationService: NotificationService,
+    private _utilityService: UtilityService
   ) {}
 
   ngOnInit() {
@@ -256,5 +258,9 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.touchTimeout) {
       clearTimeout(this.touchTimeout);
     }
+  }
+
+  onImageError(event: Event): void {
+    this._utilityService.handleImageError(event, 'assets/img/shared/handleImageError.png');
   }
 }
