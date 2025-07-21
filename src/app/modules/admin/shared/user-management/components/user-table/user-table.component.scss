@@ -1,0 +1,268 @@
+@use 'src/assets/styles/admin-global.scss' as admin;
+
+.users-section {
+  background: admin.$admin-card-bg;
+  border-radius: 12px;
+  border: 1px solid admin.$admin-border;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, rgba(admin.$admin-primary, 0.1), rgba(admin.$admin-info, 0.1));
+    border-bottom: 1px solid admin.$admin-border;
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: admin.$admin-text-primary;
+      gap: 1rem;
+      width: 100%;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      h2 {
+        color: admin.$admin-text-primary;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .user-count {
+        color: admin.$admin-text-secondary;
+        font-size: 0.875rem;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .table-container {
+    position: relative;
+    min-height: 400px;
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+
+    .loading-spinner {
+      text-align: center;
+      color: admin.$admin-text-secondary;
+
+      i {
+        font-size: 2rem;
+        color: admin.$admin-primary;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        margin: 0;
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .table-header {
+    display: grid;
+    grid-template-columns: 2.5fr 2.5fr 1.2fr 1.2fr 1.5fr 1.5fr 120px;
+    background: admin.$admin-dark-bg;
+    border-bottom: 1px solid admin.$admin-border;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
+      .header-cell:last-child { display: none; }
+    }
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    .header-cell {
+      padding: 1rem 1.2rem;
+      font-weight: 600;
+      color: admin.$admin-text-primary;
+      font-size: 0.875rem;
+      border-bottom: 1px solid admin.$admin-border;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .table-body {
+    .table-row {
+      display: grid;
+      grid-template-columns: 2.5fr 2.5fr 1.2fr 1.2fr 1.5fr 1.5fr 120px;
+      border-bottom: 1px solid admin.$admin-border;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background: rgba(admin.$admin-primary, 0.05);
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      @media (max-width: 1024px) {
+        grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
+        .table-cell:last-child { display: none; }
+      }
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 1rem;
+      }
+
+      .table-cell {
+        padding: 1rem 1.2rem;
+        vertical-align: middle;
+
+        &.user-info {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+
+          .user-avatar {
+            flex-shrink: 0;
+          }
+
+          .user-details {
+            .user-name {
+              font-weight: 600;
+              margin-bottom: 0.25rem;
+              color: admin.$admin-text-primary;
+            }
+
+            .user-username {
+              color: admin.$admin-text-secondary;
+              font-size: 0.75rem;
+            }
+          }
+        }
+
+        .email-info {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+
+          .email {
+            color: admin.$admin-text-primary;
+          }
+
+          .verified-icon {
+            color: admin.$admin-success;
+            font-size: 1rem;
+          }
+        }
+
+        .role-badge, .status-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+          padding: 0.25rem 0.5rem;
+          border-radius: 6px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
+
+          i {
+            font-size: 0.875rem;
+          }
+        }
+
+        .role-badge {
+          &.role-danger { background: rgba(admin.$admin-danger, 0.1); color: admin.$admin-danger; }
+          &.role-warning { background: rgba(admin.$admin-warning, 0.1); color: admin.$admin-warning; }
+          &.role-success { background: rgba(admin.$admin-success, 0.1); color: admin.$admin-success; }
+          &.role-info { background: rgba(admin.$admin-info, 0.1); color: admin.$admin-info; }
+        }
+
+        .status-badge {
+          &.status-success { background: rgba(admin.$admin-success, 0.1); color: admin.$admin-success; }
+          &.status-warning { background: rgba(admin.$admin-warning, 0.1); color: admin.$admin-warning; }
+          &.status-danger { background: rgba(admin.$admin-danger, 0.1); color: admin.$admin-danger; }
+          &.status-info { background: rgba(admin.$admin-info, 0.1); color: admin.$admin-info; }
+        }
+
+        .date-info {
+          color: admin.$admin-text-secondary;
+        }
+
+        .no-login {
+          color: admin.$admin-text-muted;
+          font-style: italic;
+        }
+
+        &.actions {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: admin.$admin-text-muted;
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  h3 {
+    color: admin.$admin-text-secondary;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+}
+
+.table-cell.actions button[mat-icon-button] {
+  background: admin.$admin-info;
+  color: #fff;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  transition: background 0.2s, color 0.2s;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+
+  mat-icon {
+    color: #fff !important;
+    font-size: 1.2rem;
+    transition: color 0.2s;
+  }
+
+  &:hover, &:focus {
+    background: color-mix(in srgb, admin.$admin-info 90%, black);
+    color: #fff;
+    mat-icon {
+      color: #fff !important;
+    }
+  }
+} 

@@ -1,0 +1,114 @@
+<div class="users-section">
+  <div class="section-header">
+    <div class="section-title">
+      <h2>Lista de Usuarios</h2>
+      <span class="user-count">{{ totalUsers }} usuarios encontrados</span>
+    </div>
+  </div>
+  
+  <div class="table-container">
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="loading-spinner">
+        <i class="material-icons rotating">refresh</i>
+        <p>Cargando usuarios...</p>
+      </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="users-table" *ngIf="!loading">
+      <div class="table-header">
+        <div class="header-cell">Usuario</div>
+        <div class="header-cell">Email</div>
+        <div class="header-cell">Rol</div>
+        <div class="header-cell">Estado</div>
+        <div class="header-cell">Fecha Registro</div>
+        <div class="header-cell">Último Login</div>
+        <div class="header-cell">Acciones</div>
+      </div>
+      
+      <div class="table-body">
+        <div class="table-row" *ngFor="let user of users; trackBy: trackByUserId">
+          <!-- User Info -->
+          <div class="table-cell user-info">
+            <div class="user-avatar">
+              <worky-avatar [size]="40" [img]="user.avatar" [name]="user.name + ' ' + user.lastName"></worky-avatar>
+            </div>
+            <div class="user-details">
+              <div class="user-name">{{ user.name }} {{ user.lastName }}</div>
+              <div class="user-username">usuario: {{ user.username }}</div>
+            </div>
+          </div>
+          
+          <!-- Email -->
+          <div class="table-cell">
+            <div class="email-info">
+              <span class="email">{{ user.email }}</span>
+              <i class="material-icons verified-icon" *ngIf="user.isVerified" title="Email verificado">
+                verified
+              </i>
+            </div>
+          </div>
+          
+          <!-- Role -->
+          <div class="table-cell">
+            <span class="role-badge" [class]="'role-' + getRoleColor(user.role)">
+              <i class="material-icons">{{ getRoleIcon(user.role) }}</i>
+              {{ user.role | titlecase }}
+            </span>
+          </div>
+          
+          <!-- Status -->
+          <div class="table-cell">
+            <span class="status-badge" [class]="'status-' + getStatusColor(user.isActive ? 'ACTIVE' : 'INACTIVE')">
+              <i class="material-icons">{{ getStatusIcon(user.isActive ? 'ACTIVE' : 'INACTIVE') }}</i>
+              {{ user.isActive ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+          
+          <!-- Created Date -->
+          <div class="table-cell">
+            <span class="date-info">{{ user.createdAt | date:'dd/MM/yyyy' }}</span>
+          </div>
+          
+          <!-- Last Login -->
+          <div class="table-cell">
+            <span class="no-login">{{ user.lastConnection ? (user.lastConnection | date:'dd/MM/yyyy HH:mm') : 'No disponible' }}</span>
+          </div>
+          
+          <!-- Actions -->
+          <div class="table-cell actions">
+            <button mat-icon-button [matMenuTriggerFor]="menuActions" aria-label="Acciones">
+              <i class="material-icons">more_vert</i>
+            </button>
+            <mat-menu #menuActions="matMenu">
+              <button mat-menu-item (click)="viewUserDetails.emit(user)">
+                <mat-icon>visibility</mat-icon>
+                <span>Ver detalles</span>
+              </button>
+              <button mat-menu-item (click)="editUser.emit(user)">
+                <mat-icon>edit</mat-icon>
+                <span>Editar usuario</span>
+              </button>
+              <button mat-menu-item (click)="toggleUserStatus.emit(user)" [disabled]="isTogglingStatus(user._id)">
+                <mat-icon>{{ user.isActive ? 'pause' : 'play_arrow' }}</mat-icon>
+                <span>{{ user.isActive ? 'Desactivar' : 'Activar' }}</span>
+              </button>
+              <button mat-menu-item *ngIf="!user.isVerified" (click)="sendVerificationEmail.emit(user)" [disabled]="isSendingVerification(user._id)">
+                <mat-icon>email</mat-icon>
+                <span>Reenviar email de verificación</span>
+              </button>
+            </mat-menu>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="users.length === 0 && !loading">
+        <i class="material-icons empty-icon">people_outline</i>
+        <h3>No se encontraron usuarios</h3>
+        <p>No hay usuarios que coincidan con los filtros aplicados</p>
+      </div>
+    </div>
+  </div>
+</div> 

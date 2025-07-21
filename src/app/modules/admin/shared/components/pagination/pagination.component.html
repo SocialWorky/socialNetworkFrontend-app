@@ -1,0 +1,62 @@
+<div class="pagination-container" *ngIf="config.totalPages > 1">
+  <div class="pagination-info" *ngIf="config.showInfo">
+    <span>{{ paginationInfo }}</span>
+  </div>
+  
+  <div class="pagination-controls">
+    <!-- First Page Button -->
+    <button 
+      class="pagination-btn first-page-btn" 
+      [disabled]="config.currentPage === 1"
+      (click)="onFirstPage()"
+      title="Primera página">
+      <i class="material-icons">first_page</i>
+    </button>
+    
+    <!-- Previous Page Button -->
+    <button 
+      class="pagination-btn" 
+      [disabled]="config.currentPage === 1"
+      (click)="onPreviousPage()"
+      title="Página anterior">
+      <i class="material-icons">chevron_left</i>
+    </button>
+    
+    <!-- Page Numbers -->
+    <div class="page-numbers" *ngIf="config.showPageNumbers">
+      <button 
+        class="page-btn" 
+        [class.active]="page === config.currentPage"
+        *ngFor="let page of visiblePageNumbers"
+        (click)="onPageChange(page)">
+        {{ page }}
+      </button>
+      
+      <!-- Ellipsis for large page counts -->
+      <span class="page-ellipsis" *ngIf="visiblePageNumbers.length > 0 && visiblePageNumbers[0] > 1">
+        ...
+      </span>
+      <span class="page-ellipsis" *ngIf="visiblePageNumbers.length > 0 && visiblePageNumbers[visiblePageNumbers.length - 1] < config.totalPages">
+        ...
+      </span>
+    </div>
+    
+    <!-- Next Page Button -->
+    <button 
+      class="pagination-btn" 
+      [disabled]="config.currentPage === config.totalPages"
+      (click)="onNextPage()"
+      title="Página siguiente">
+      <i class="material-icons">chevron_right</i>
+    </button>
+    
+    <!-- Last Page Button -->
+    <button 
+      class="pagination-btn last-page-btn" 
+      [disabled]="config.currentPage === config.totalPages"
+      (click)="onLastPage()"
+      title="Última página">
+      <i class="material-icons">last_page</i>
+    </button>
+  </div>
+</div> 

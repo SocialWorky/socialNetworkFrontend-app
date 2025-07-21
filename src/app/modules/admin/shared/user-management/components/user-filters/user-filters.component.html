@@ -1,0 +1,64 @@
+<div class="filters-section" *ngIf="showFilters">
+  <div class="filters-container">
+    <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label class="filter-label">Buscar</label>
+          <input 
+            type="text" 
+            formControlName="search" 
+            placeholder="Buscar por nombre, email o username"
+            class="filter-input">
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">Rol</label>
+          <select formControlName="role" class="filter-select">
+            <option value="">Todos los roles</option>
+            <option [value]="UserRole.ADMIN">Administrador</option>
+            <option [value]="UserRole.MODERATOR">Moderador</option>
+            <option [value]="UserRole.USER">Usuario</option>
+            <option [value]="UserRole.GUEST">Invitado</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">Estado</label>
+          <select formControlName="status" class="filter-select">
+            <option value="">Todos los estados</option>
+            <option [value]="UserStatus.ACTIVE">Activo</option>
+            <option [value]="UserStatus.INACTIVE">Inactivo</option>
+            <option [value]="UserStatus.PENDING_VERIFICATION">Pendiente de Verificación</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">Fecha desde</label>
+          <input 
+            type="date" 
+            formControlName="dateFrom" 
+            class="filter-input">
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">Fecha hasta</label>
+          <input 
+            type="date" 
+            formControlName="dateTo" 
+            class="filter-input">
+        </div>
+      </div>
+      
+      <div class="filters-actions">
+        <button type="submit" class="apply-btn">
+          <i class="material-icons">search</i>
+          <span>Aplicar Filtros</span>
+        </button>
+        <button type="button" (click)="clearFilters()" class="clear-btn">
+          <i class="material-icons">clear</i>
+          <span>Limpiar</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div> 

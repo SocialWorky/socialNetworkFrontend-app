@@ -20,6 +20,17 @@ import { LogComponent } from './shared/log/log.component';
 import { WebhooksComponent } from './shared/webhooks/webhooks.component';
 import { UserManagementComponent } from './shared/user-management/user-management.component';
 
+// User Management Components
+import { UserStatsComponent } from './shared/user-management/components/user-stats/user-stats.component';
+import { UserFiltersComponent } from './shared/user-management/components/user-filters/user-filters.component';
+import { UserTableComponent } from './shared/user-management/components/user-table/user-table.component';
+import { UserPaginationComponent } from './shared/user-management/components/user-pagination/user-pagination.component';
+import { UserDetailsModalComponent } from './shared/user-management/components/user-details-modal/user-details-modal.component';
+import { UserEditModalComponent } from './shared/user-management/components/user-edit-modal/user-edit-modal.component';
+
+// Shared Components Module
+import { AdminSharedComponentsModule } from './shared/components/admin-shared-components.module';
+
 import { AdminRoutingModule } from './admin-routing.module';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
 import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.module';
@@ -44,6 +55,13 @@ import { MaterialModule } from '@shared/modules/material/material.module';
     LogComponent,
     WebhooksComponent,
     UserManagementComponent,
+    // User Management Components
+    UserStatsComponent,
+    UserFiltersComponent,
+    UserTableComponent,
+    UserPaginationComponent,
+    UserDetailsModalComponent,
+    UserEditModalComponent,
   ],
   imports: [
     CommonModule,
@@ -57,7 +75,8 @@ import { MaterialModule } from '@shared/modules/material/material.module';
     FormBuilderModule,
     PipesSharedModule,
     SharedModule,
-    MaterialModule
+    MaterialModule,
+    AdminSharedComponentsModule
   ],
   exports: [TemplatesComponent],
 })

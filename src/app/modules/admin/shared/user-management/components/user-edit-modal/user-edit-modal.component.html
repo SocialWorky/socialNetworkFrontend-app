@@ -1,0 +1,100 @@
+<div class="modal-overlay" *ngIf="showModal" (click)="onCloseModal()">
+  <div class="modal-content edit-user-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Editar Usuario</h3>
+      <button class="close-btn" (click)="onCloseModal()">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="user">
+      <form #editForm="ngForm" (ngSubmit)="onSubmit()">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre de usuario</label>
+            <input type="text" name="username" [(ngModel)]="user.username" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" [value]="user.email" readonly>
+            <small class="form-help">El email no se puede editar</small>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" name="name" [(ngModel)]="user.name" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Apellido</label>
+            <input type="text" name="lastName" [(ngModel)]="user.lastName" required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="material-icons">admin_panel_settings</i> Rol <span class="editable-indicator">(Editable)</span></label>
+            <select name="role" [(ngModel)]="user.role" required>
+              <option value="admin">Administrador</option>
+              <option value="moderator">Moderador</option>
+              <option value="user">Usuario</option>
+              <option value="guest">Invitado</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label><i class="material-icons">toggle_on</i> Estado <span class="editable-indicator">(Editable)</span></label>
+            <select name="isActive" [(ngModel)]="user.isActive" required>
+              <option [ngValue]="true">Activo</option>
+              <option [ngValue]="false">Inactivo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="material-icons">verified</i> Verificación de email <span class="editable-indicator">(Editable)</span></label>
+            <select name="isVerified" [(ngModel)]="user.isVerified" required>
+              <option [ngValue]="true">Verificado</option>
+              <option [ngValue]="false">No verificado</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label><i class="material-icons">dark_mode</i> Modo oscuro <span class="editable-indicator">(Editable)</span></label>
+            <select name="isDarkMode" [(ngModel)]="user.isDarkMode" required>
+              <option [ngValue]="true">Activado</option>
+              <option [ngValue]="false">Desactivado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Avatar URL</label>
+          <input type="url" name="avatar" [(ngModel)]="user.avatar" placeholder="https://ejemplo.com/avatar.jpg">
+          <small class="form-help">URL de la imagen de perfil</small>
+        </div>
+
+        <div class="form-group">
+          <label>Nueva contraseña (opcional)</label>
+          <input type="password" name="password" [(ngModel)]="newPassword" placeholder="Dejar vacío para no cambiar">
+          <small class="form-help">Solo llenar si deseas cambiar la contraseña</small>
+        </div>
+        
+        <div class="modal-actions">
+          <button type="button" class="cancel-btn" (click)="onCloseModal()">
+            <i class="material-icons">close</i>
+            <span>Cancelar</span>
+          </button>
+          <button type="submit" class="save-btn" [disabled]="isUpdating">
+            <i class="material-icons" *ngIf="!isUpdating">save</i>
+            <i class="material-icons loading-spinner" *ngIf="isUpdating">hourglass_empty</i>
+            <span>{{ isUpdating ? 'Guardando...' : 'Guardar Cambios' }}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div> 

@@ -1,0 +1,79 @@
+<div class="modal-overlay" *ngIf="showModal" (click)="onCloseModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Detalles del Usuario</h3>
+      <button class="close-btn" (click)="onCloseModal()">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="user">
+      <div class="user-profile-full">
+        <div class="cover-image">
+          <worky-image 
+            [src]="user.profile.coverImage ? user.profile.coverImage : 'assets/img/shared/drag-drop-upload-add-file.webp'" 
+            [fallbackSrc]="'assets/img/shared/drag-drop-upload-add-file.webp'"
+            alt="Portada">
+          </worky-image>
+          <div class="profile-overlay">
+            <div>
+              <worky-avatar 
+                [size]="90" 
+                [img]="user.avatar" 
+                [name]="user.name + ' ' + user.lastName">
+              </worky-avatar>
+              <h4>{{ user.name }} {{ user.lastName }}</h4>
+              <p class="username">&#64;{{ user.username }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-details">
+          <div class="detail-item">
+            <i class="material-icons">badge</i>
+            <span class="label-detail">Nombre:</span>
+            <span>{{ user.name }}</span>
+          </div>
+          <div class="detail-item">
+            <i class="material-icons">badge</i>
+            <span class="label-detail">Apellido:</span>
+            <span>{{ user.lastName }}</span>
+          </div>
+          <div class="detail-item">
+            <i class="material-icons">person</i>
+            <span class="label-detail">Usuario:</span>
+            <span>{{ user.username }}</span>
+          </div>
+          <div class="detail-item">
+            <i class="material-icons">alternate_email</i>
+            <span class="label-detail">Email:</span>
+            <span>{{ user.email }}</span>
+          </div>
+          <div class="detail-item" *ngIf="user.profile?.dateOfBirth">
+            <i class="material-icons">cake</i>
+            <span class="label-detail">Fecha de nacimiento:</span>
+            <span>{{ user.profile.dateOfBirth | date: 'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="user.profile?.sex">
+            <i class="material-icons">person</i>
+            <span class="label-detail">Sexo:</span>
+            <span>{{ user.profile.sex }}</span>
+          </div>
+          <div class="detail-item">
+            <i class="material-icons">schedule</i>
+            <span class="label-detail">Fecha de registro:</span>
+            <span>{{ user.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+
+          <ng-container *ngIf="user.profile?.dynamicFields">
+            <div class="detail-item" *ngFor="let key of (user.profile.dynamicFields | keyvalue)">
+              <i class="material-icons">dynamic_form</i>
+              <span class="label-detail">{{ key.key }}:</span>
+              <span>{{ key.value }}</span>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

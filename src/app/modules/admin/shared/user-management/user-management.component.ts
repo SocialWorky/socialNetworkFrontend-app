@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { UserManagementService } from '@admin/services/user-management.service';
@@ -24,7 +23,6 @@ import {
 })
 export class UserManagementComponent implements OnInit, OnDestroy {
   users: User[] = [];
-  filteredUsers: User[] = [];
   loading = false;
   totalUsers = 0;
   currentPage = 1;
@@ -32,7 +30,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   totalPages = 0;
   
   // Filters
-  filtersForm: FormGroup;
   showFilters = false;
   
   // Actions
@@ -55,9 +52,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     toggleStatus: new Set<string>(),
     sendVerification: new Set<string>()
   };
-
-  // Form data
-  newPassword: string = '';
   
   // Enums for template
   UserRole = UserRole;
@@ -68,19 +62,10 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   constructor(
     private userService: UserManagementService,
     private alertService: AlertService,
-    private fb: FormBuilder,
     private _cdr: ChangeDetectorRef,
     private _logService: LogService,
     private _utilityService: UtilityService
-  ) {
-    this.filtersForm = this.fb.group({
-      search: [''],
-      role: [''],
-      status: [''],
-      dateFrom: [''],
-      dateTo: ['']
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -89,7 +74,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     // Subscribe to service observables
     this.userService.users$.pipe(takeUntil(this.destroy$)).subscribe(users => {
       this.users = users;
-      this.filteredUsers = users;
       this._cdr.markForCheck();
     });
     
@@ -110,9 +94,8 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   }
 
   loadUsers(): void {
-    const filters: UserFilters = this.filtersForm.value;
+    const filters: UserFilters = {};
     
-    // Use real service
     this.userService.getUsers(filters, this.currentPage, this.itemsPerPage)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -140,7 +123,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   }
 
   loadUserStats(): void {
-    // Get real statistics from service
     this.userService.getUsersCount().subscribe({
       next: (stats) => {
         this.userStats = {
@@ -162,14 +144,13 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     });
   }
 
-  applyFilters(): void {
+  onFiltersApplied(filters: UserFilters): void {
     this.currentPage = 1;
     this.loadUsers();
     this.showFilters = false;
   }
 
-  clearFilters(): void {
-    this.filtersForm.reset();
+  onFiltersCleared(): void {
     this.currentPage = 1;
     this.loadUsers();
   }
@@ -184,7 +165,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       ...user,
       isDarkMode: user.isDarkMode ?? false
     };
-    this.newPassword = '';
     this.showEditModal = true;
     this._cdr.markForCheck();
   }
@@ -195,23 +175,8 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
   }
 
-  updateUser(): void {
-    if (!this.selectedUser) return;
-
+  updateUser(updateRequest: UserUpdateRequest): void {
     this.loadingStates.updateUser = true;
-
-    const updateRequest: UserUpdateRequest = {
-      id: this.selectedUser._id,
-      username: this.selectedUser.username,
-      name: this.selectedUser.name,
-      lastName: this.selectedUser.lastName,
-      role: this.selectedUser.role,
-      isVerified: this.selectedUser.isVerified,
-      isActive: this.selectedUser.isActive,
-      avatar: this.selectedUser.avatar,
-      isDarkMode: this.selectedUser.isDarkMode,
-      ...(this.newPassword && { password: this.newPassword })
-    };
 
     this.userService.updateUser(updateRequest)
       .pipe(
@@ -240,7 +205,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
             LevelLogEnum.ERROR,
             'UserManagementComponent',
             'Error updating user',
-            { error: String(error), userId: this.selectedUser?._id }
+            { error: String(error), userId: updateRequest.id }
           );
           this.alertService.showAlert(
             'Error',
@@ -258,7 +223,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     const newStatus = !user.isActive;
     const action = newStatus ? 'activado' : 'desactivado';
 
-    // Add user to loading set
     this.loadingStates.toggleStatus.add(user._id);
 
     const updateRequest: UserUpdateRequest = {
@@ -309,7 +273,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   closeEditModal(): void {
     this.showEditModal = false;
     this.selectedUser = null;
-    this.newPassword = '';
     this._cdr.markForCheck();
   }
 
@@ -319,90 +282,16 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
   }
 
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'ACTIVE':
-        return 'success';
-      case 'INACTIVE':
-        return 'warning';
-      case 'SUSPENDED':
-        return 'danger';
-      case 'PENDING':
-        return 'info';
-      default:
-        return 'secondary';
-    }
-  }
-
-  getRoleColor(role: string): string {
-    switch (role) {
-      case 'admin':
-        return 'danger';
-      case 'editor':
-        return 'warning';
-      case 'user':
-        return 'success';
-      default:
-        return 'secondary';
-    }
-  }
-
-  getStatusIcon(status: string): string {
-    switch (status) {
-      case 'ACTIVE':
-        return 'check_circle';
-      case 'INACTIVE':
-        return 'pause_circle';
-      case 'SUSPENDED':
-        return 'block';
-      case 'PENDING':
-        return 'schedule';
-      default:
-        return 'help';
-    }
-  }
-
-  getRoleIcon(role: string): string {
-    switch (role) {
-      case 'admin':
-        return 'admin_panel_settings';
-      case 'editor':
-        return 'edit';
-      case 'user':
-        return 'person';
-      default:
-        return 'person';
-    }
-  }
-
   refreshUsers(): void {
     this.loadUsers();
     this.loadUserStats();
   }
 
-  trackByUserId(index: number, user: User): string {
-    return user._id;
-  }
-
-  // Helper methods for loading states
   isUpdatingUser(): boolean {
     return this.loadingStates.updateUser;
   }
 
-  isTogglingStatus(userId: string): boolean {
-    return this.loadingStates.toggleStatus.has(userId);
-  }
-
-  isSendingVerification(userId: string): boolean {
-    return this.loadingStates.sendVerification.has(userId);
-  }
-
-  onImageError(event: Event): void {
-    this._utilityService.handleImageError(event, 'assets/img/shared/drag-drop-upload-add-file.webp');
-  }
-
   sendVerificationEmail(user: User): void {
-    // Add user to loading set
     this.loadingStates.sendVerification.add(user._id);
 
     const request: SendVerificationEmailRequest = {
