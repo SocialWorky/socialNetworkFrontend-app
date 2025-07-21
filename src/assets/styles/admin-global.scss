@@ -900,9 +900,9 @@ $admin-text-muted: #9ca3af;
   }
 }
 
-// ===== MIXINS ADICIONALES PARA OPTIMIZACIÓN =====
+// ===== ADDITIONAL MIXINS FOR OPTIMIZATION =====
 
-// Mixin para loading spinner común
+// Common loading spinner mixin
 @mixin admin-loading-spinner {
   position: relative;
   width: 80px;

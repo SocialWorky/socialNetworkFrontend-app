@@ -99,8 +99,6 @@
   }
 }
 
-// Loading spinner styles removed - using shared component
-
 .error-container {
   display: flex;
   justify-content: center;
@@ -576,7 +574,6 @@
         }
       }
 
-      // Forzar el tamaño del contenedor worky-image
       worky-image {
         display: inline-block !important;
         width: 48px !important;
