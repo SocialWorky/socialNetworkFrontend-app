@@ -14,4 +14,5 @@ export interface User {
   updatedAt: string;
   profile: ProfileData;
   isDarkMode: boolean;
+  lastConnection: string;
 }

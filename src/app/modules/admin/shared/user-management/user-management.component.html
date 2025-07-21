@@ -206,46 +206,32 @@
             
             <!-- Last Login -->
             <div class="table-cell">
-              <span class="no-login">No disponible</span>
+              <span class="no-login">{{ user.lastConnection ? (user.lastConnection | date:'dd/MM/yyyy HH:mm') : 'No disponible' }}</span>
             </div>
             
             <!-- Actions -->
             <div class="table-cell actions">
-              <div class="action-buttons">
-                <button class="action-btn view-btn" (click)="viewUserDetails(user)" title="Ver detalles">
-                  <i class="material-icons">visibility</i>
+              <button mat-icon-button [matMenuTriggerFor]="menuActions" aria-label="Acciones">
+                <i class="material-icons">more_vert</i>
+              </button>
+              <mat-menu #menuActions="matMenu">
+                <button mat-menu-item (click)="viewUserDetails(user)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>Ver detalles</span>
                 </button>
-                
-                <button class="action-btn edit-btn" (click)="editUser(user)" title="Editar usuario">
-                  <i class="material-icons">edit</i>
+                <button mat-menu-item (click)="editUser(user)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Editar usuario</span>
                 </button>
-                
-                <button 
-                  class="action-btn status-btn" 
-                  [class]="user.isActive ? 'deactivate-btn' : 'activate-btn'"
-                  (click)="toggleUserStatus(user)" 
-                  [disabled]="isTogglingStatus(user._id)"
-                  [title]="user.isActive ? 'Desactivar' : 'Activar'">
-                  <i class="material-icons" *ngIf="!isTogglingStatus(user._id)">
-                    {{ user.isActive ? 'pause' : 'play_arrow' }}
-                  </i>
-                  <i class="material-icons loading-spinner" *ngIf="isTogglingStatus(user._id)">hourglass_empty</i>
+                <button mat-menu-item (click)="toggleUserStatus(user)" [disabled]="isTogglingStatus(user._id)">
+                  <mat-icon>{{ user.isActive ? 'pause' : 'play_arrow' }}</mat-icon>
+                  <span>{{ user.isActive ? 'Desactivar' : 'Activar' }}</span>
                 </button>
-                
-                <button 
-                  class="action-btn verify-btn" 
-                  *ngIf="!user.isVerified"
-                  (click)="sendVerificationEmail(user)" 
-                  [disabled]="isSendingVerification(user._id)"
-                  title="Reenviar email de verificación">
-                  <i class="material-icons" *ngIf="!isSendingVerification(user._id)">email</i>
-                  <i class="material-icons loading-spinner" *ngIf="isSendingVerification(user._id)">hourglass_empty</i>
+                <button mat-menu-item *ngIf="!user.isVerified" (click)="sendVerificationEmail(user)" [disabled]="isSendingVerification(user._id)">
+                  <mat-icon>email</mat-icon>
+                  <span>Reenviar email de verificación</span>
                 </button>
-                
-                <button class="action-btn delete-btn" (click)="deleteUser(user)" title="Eliminar usuario">
-                  <i class="material-icons">delete</i>
-                </button>
-              </div>
+              </mat-menu>
             </div>
           </div>
         </div>
@@ -295,57 +281,80 @@
 
 <!-- User Details Modal -->
 <div class="modal-overlay" *ngIf="showUserDetails" (click)="closeUserDetails()">
-  <div class="modal-content user-details-modal" (click)="$event.stopPropagation()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3>Detalles del Usuario</h3>
       <button class="close-btn" (click)="closeUserDetails()">
         <i class="material-icons">close</i>
       </button>
     </div>
+
     <div class="modal-body" *ngIf="selectedUser">
-      <div class="user-profile">
-        <div class="profile-header">
-          <worky-avatar [size]="80" [img]="selectedUser.avatar" [name]="selectedUser.name + ' ' + selectedUser.lastName"></worky-avatar>
-          <div class="profile-info">
-            <h4>{{ selectedUser.name }} {{ selectedUser.lastName }}</h4>
-            <p class="username">usuario: {{ selectedUser.username }}</p>
-            <div class="profile-badges">
-              <span class="role-badge" [class]="'role-' + getRoleColor(selectedUser.role)">
-                {{ selectedUser.role | titlecase }}
-              </span>
-              <span class="status-badge" [class]="'status-' + getStatusColor(selectedUser.isActive ? 'ACTIVE' : 'INACTIVE')">
-                {{ selectedUser.isActive ? 'Activo' : 'Inactivo' }}
-              </span>
+      <div class="user-profile-full">
+
+        <div class="cover-image">
+          <img [src]="selectedUser.profile.coverImage ? selectedUser.profile.coverImage : 'assets/img/shared/drag-drop-upload-add-file.webp'" alt="Portada" />
+          <div class="profile-overlay">
+            <div>
+              <worky-avatar 
+                [size]="90" 
+                [img]="selectedUser.avatar" 
+                [name]="selectedUser.name + ' ' + selectedUser.lastName">
+              </worky-avatar>
+              <h4>{{ selectedUser.name }} {{ selectedUser.lastName }}</h4>
+              <p class="username">&#64;{{ selectedUser.username }}</p>
             </div>
           </div>
         </div>
-        
+
         <div class="profile-details">
           <div class="detail-item">
-            <label>Email:</label>
-            <span>{{ selectedUser.email }}</span>
-            <i class="material-icons verified-icon" *ngIf="selectedUser.isVerified" title="Email verificado">
-              verified
-            </i>
+            <i class="material-icons">badge</i>
+            <span class="label-detail">Nombre:</span>
+            <span>{{ selectedUser.name }}</span>
           </div>
-          
           <div class="detail-item">
-            <label>Fecha de registro:</label>
+            <i class="material-icons">badge</i>
+            <span class="label-detail">Apellido:</span>
+            <span>{{ selectedUser.lastName }}</span>
+          </div>
+          <div class="detail-item">
+            <i class="material-icons">person</i>
+            <span class="label-detail">Usuario:</span>
+            <span>{{ selectedUser.username }}</span>
+          </div>
+          <div class="detail-item">
+            <i class="material-icons">alternate_email</i>
+            <span class="label-detail">Email:</span>
+            <span>{{ selectedUser.email }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedUser.profile?.dateOfBirth">
+            <i class="material-icons">cake</i>
+            <span class="label-detail">Fecha de nacimiento:</span>
+            <span>{{ selectedUser.profile.dateOfBirth | date: 'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedUser.profile?.sex">
+            <i class="material-icons">person</i>
+            <span class="label-detail">Sexo:</span>
+            <span>{{ selectedUser.profile.sex }}</span>
+          </div>
+          <div class="detail-item">
+            <i class="material-icons">schedule</i>
+            <span class="label-detail">Fecha de registro:</span>
             <span>{{ selectedUser.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
           </div>
-          
-          <div class="detail-item">
-            <label>Último login:</label>
-            <span class="no-login">No disponible</span>
-          </div>
-          
-          <div class="detail-item">
-            <label>Perfil completado:</label>
-            <span class="completed">Sí</span>
-          </div>
+
+          <ng-container *ngIf="selectedUser.profile?.dynamicFields">
+            <div class="detail-item" *ngFor="let key of (selectedUser.profile.dynamicFields | keyvalue)">
+              <i class="material-icons">dynamic_form</i>
+              <span class="label-detail">{{ key.key }}:</span>
+              <span>{{ key.value }}</span>
+            </div>
+          </ng-container>
         </div>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -450,34 +459,3 @@
     </div>
   </div>
 </div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
-  <div class="modal-content delete-user-modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Confirmar Eliminación</h3>
-      <button class="close-btn" (click)="closeDeleteModal()">
-        <i class="material-icons">close</i>
-      </button>
-    </div>
-    <div class="modal-body" *ngIf="selectedUser">
-      <div class="delete-warning">
-        <i class="material-icons warning-icon">warning</i>
-        <h4>¿Estás seguro de que quieres eliminar este usuario?</h4>
-        <p>Esta acción no se puede deshacer. El usuario <strong>{{ selectedUser.name }} {{ selectedUser.lastName }}</strong> será eliminado permanentemente.</p>
-      </div>
-      
-      <div class="modal-actions">
-        <button type="button" class="cancel-btn" (click)="closeDeleteModal()">
-          <i class="material-icons">close</i>
-          <span>Cancelar</span>
-        </button>
-        <button type="button" class="delete-btn" (click)="confirmDelete()" [disabled]="isDeletingUser()">
-          <i class="material-icons" *ngIf="!isDeletingUser()">delete</i>
-          <i class="material-icons loading-spinner" *ngIf="isDeletingUser()">hourglass_empty</i>
-          <span>{{ isDeletingUser() ? 'Eliminando...' : 'Eliminar Usuario' }}</span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div> 

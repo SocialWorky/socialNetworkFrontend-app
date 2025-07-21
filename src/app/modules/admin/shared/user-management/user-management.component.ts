@@ -37,7 +37,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   // Actions
   selectedUser: User | null = null;
   showEditModal = false;
-  showDeleteModal = false;
   showUserDetails = false;
   
   // Statistics
@@ -188,62 +187,10 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
   }
 
-  deleteUser(user: User): void {
-    this.selectedUser = user;
-    this.showDeleteModal = true;
-    this._cdr.markForCheck();
-  }
-
   viewUserDetails(user: User): void {
     this.selectedUser = user;
     this.showUserDetails = true;
     this._cdr.markForCheck();
-  }
-
-  confirmDelete(): void {
-    if (!this.selectedUser) return;
-
-    this.loadingStates.deleteUser = true;
-
-    this.userService.deleteUser(this.selectedUser._id)
-      .pipe(
-        takeUntil(this.destroy$),
-        finalize(() => {
-          this.loadingStates.deleteUser = false;
-          this._cdr.markForCheck();
-        })
-      )
-      .subscribe({
-        next: () => {
-          this.alertService.showAlert(
-            'Éxito',
-            'Usuario eliminado correctamente',
-            Alerts.SUCCESS,
-            Position.CENTER,
-            true,
-            'Aceptar'
-          );
-          this.closeDeleteModal();
-          this.loadUsers();
-          this.loadUserStats();
-        },
-        error: (error) => {
-          this._logService.log(
-            LevelLogEnum.ERROR,
-            'UserManagementComponent',
-            'Error deleting user',
-            { error: String(error), userId: this.selectedUser?._id }
-          );
-          this.alertService.showAlert(
-            'Error',
-            'Error al eliminar el usuario',
-            Alerts.ERROR,
-            Position.CENTER,
-            true,
-            'Aceptar'
-          );
-        }
-      });
   }
 
   updateUser(): void {
@@ -364,12 +311,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
   }
 
-  closeDeleteModal(): void {
-    this.showDeleteModal = false;
-    this.selectedUser = null;
-    this._cdr.markForCheck();
-  }
-
   closeUserDetails(): void {
     this.showUserDetails = false;
     this.selectedUser = null;
@@ -446,10 +387,6 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     return this.loadingStates.updateUser;
   }
 
-  isDeletingUser(): boolean {
-    return this.loadingStates.deleteUser;
-  }
-
   isTogglingStatus(userId: string): boolean {
     return this.loadingStates.toggleStatus.has(userId);
   }
@@ -517,4 +454,4 @@ export class UserManagementComponent implements OnInit, OnDestroy {
         }
       });
   }
-} 
+}

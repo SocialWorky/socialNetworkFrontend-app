@@ -1,4 +1,3 @@
-// User Management Component Styles
 @use 'src/assets/styles/admin-global.scss' as admin;
 
 .user-management-dashboard {
@@ -191,6 +190,53 @@
       gap: 1rem;
       justify-content: flex-end;
 
+      .apply-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: admin.$admin-success;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: background 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 8px rgba(admin.$admin-success, 0.08);
+
+        &:hover:not(:disabled) {
+          background: color-mix(in srgb, admin.$admin-success 90%, black);
+          box-shadow: 0 4px 12px rgba(admin.$admin-success, 0.18);
+        }
+        i {
+          font-size: 1.1rem;
+        }
+      }
+      .clear-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: admin.$admin-danger;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: background 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 8px rgba(admin.$admin-danger, 0.08);
+
+        &:hover:not(:disabled) {
+          background: color-mix(in srgb, admin.$admin-danger 90%, black);
+          box-shadow: 0 4px 12px rgba(admin.$admin-danger, 0.18);
+        }
+        i {
+          font-size: 1.1rem;
+        }
+      }
+
       @media (max-width: 768px) {
         flex-direction: column;
       }
@@ -270,233 +316,231 @@
     }
   }
 
-  .users-table {
-    width: 100%;
+  .table-header {
+    display: grid;
+    grid-template-columns: 2.5fr 2.5fr 1.2fr 1.2fr 1.5fr 1.5fr 120px;
+    background: admin.$admin-dark-bg;
+    border-bottom: 1px solid admin.$admin-border;
 
-    .table-header {
-      display: grid;
-      grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr 1fr;
-      background: admin.$admin-dark-bg;
+    @media (max-width: 1024px) {
+      grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
+      .header-cell:last-child { display: none; }
+    }
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+
+    .header-cell {
+      padding: 1rem 1.2rem;
+      font-weight: 600;
+      color: admin.$admin-text-primary;
+      font-size: 0.875rem;
       border-bottom: 1px solid admin.$admin-border;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .table-body {
+    .table-row {
+      display: grid;
+      grid-template-columns: 2.5fr 2.5fr 1.2fr 1.2fr 1.5fr 1.5fr 120px;
+      border-bottom: 1px solid admin.$admin-border;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background: rgba(admin.$admin-primary, 0.05);
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
 
       @media (max-width: 1024px) {
         grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
-        .header-cell:last-child { display: none; }
+        .table-cell:last-child { display: none; }
       }
 
       @media (max-width: 768px) {
         grid-template-columns: 1fr;
         gap: 0.5rem;
+        padding: 1rem;
       }
 
-      .header-cell {
-        padding: 1rem 1.5rem;
-        font-weight: 600;
-        color: admin.$admin-text-primary;
-        font-size: 0.875rem;
-        border-bottom: 1px solid admin.$admin-border;
-        white-space: nowrap;
-      }
-    }
+      .table-cell {
+        padding: 1rem 1.2rem;
+        vertical-align: middle;
 
-    .table-body {
-      .table-row {
-        display: grid;
-        grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr 1fr;
-        border-bottom: 1px solid admin.$admin-border;
-        transition: background-color 0.2s ease;
+        &.user-info {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
 
-        &:hover {
-          background: rgba(admin.$admin-primary, 0.05);
-        }
-
-        &:last-child {
-          border-bottom: none;
-        }
-
-        @media (max-width: 1024px) {
-          grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
-          .table-cell:last-child { display: none; }
-        }
-
-        @media (max-width: 768px) {
-          grid-template-columns: 1fr;
-          gap: 0.5rem;
-          padding: 1rem;
-        }
-
-        .table-cell {
-          padding: 1rem 1.5rem;
-          vertical-align: middle;
-
-          &.user-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-
-            .user-avatar {
-              flex-shrink: 0;
-            }
-
-            .user-details {
-              .user-name {
-                font-weight: 600;
-                margin-bottom: 0.25rem;
-                color: admin.$admin-text-primary;
-              }
-
-              .user-username {
-                color: admin.$admin-text-secondary;
-                font-size: 0.75rem;
-              }
-            }
+          .user-avatar {
+            flex-shrink: 0;
           }
 
-          .email-info {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-
-            .email {
+          .user-details {
+            .user-name {
+              font-weight: 600;
+              margin-bottom: 0.25rem;
               color: admin.$admin-text-primary;
             }
 
-            .verified-icon {
-              color: admin.$admin-success;
-              font-size: 1rem;
+            .user-username {
+              color: admin.$admin-text-secondary;
+              font-size: 0.75rem;
             }
           }
+        }
 
-          .role-badge, .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
+        .email-info {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
 
-            i {
-              font-size: 0.875rem;
+          .email {
+            color: admin.$admin-text-primary;
+          }
+
+          .verified-icon {
+            color: admin.$admin-success;
+            font-size: 1rem;
+          }
+        }
+
+        .role-badge, .status-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+          padding: 0.25rem 0.5rem;
+          border-radius: 6px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
+
+          i {
+            font-size: 0.875rem;
+          }
+        }
+
+        .role-badge {
+          &.role-danger { background: rgba(admin.$admin-danger, 0.1); color: admin.$admin-danger; }
+          &.role-warning { background: rgba(admin.$admin-warning, 0.1); color: admin.$admin-warning; }
+          &.role-success { background: rgba(admin.$admin-success, 0.1); color: admin.$admin-success; }
+          &.role-info { background: rgba(admin.$admin-info, 0.1); color: admin.$admin-info; }
+        }
+
+        .status-badge {
+          &.status-success { background: rgba(admin.$admin-success, 0.1); color: admin.$admin-success; }
+          &.status-warning { background: rgba(admin.$admin-warning, 0.1); color: admin.$admin-warning; }
+          &.status-danger { background: rgba(admin.$admin-danger, 0.1); color: admin.$admin-danger; }
+          &.status-info { background: rgba(admin.$admin-info, 0.1); color: admin.$admin-info; }
+        }
+
+        .date-info {
+          color: admin.$admin-text-secondary;
+        }
+
+        .no-login {
+          color: admin.$admin-text-muted;
+          font-style: italic;
+        }
+
+        &.actions {
+          .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+
+            @media (max-width: 768px) {
+              flex-wrap: wrap;
+              justify-content: center;
             }
-          }
 
-          .role-badge {
-            &.role-danger { background: rgba(admin.$admin-danger, 0.1); color: admin.$admin-danger; }
-            &.role-warning { background: rgba(admin.$admin-warning, 0.1); color: admin.$admin-warning; }
-            &.role-success { background: rgba(admin.$admin-success, 0.1); color: admin.$admin-success; }
-            &.role-info { background: rgba(admin.$admin-info, 0.1); color: admin.$admin-info; }
-          }
-
-          .status-badge {
-            &.status-success { background: rgba(admin.$admin-success, 0.1); color: admin.$admin-success; }
-            &.status-warning { background: rgba(admin.$admin-warning, 0.1); color: admin.$admin-warning; }
-            &.status-danger { background: rgba(admin.$admin-danger, 0.1); color: admin.$admin-danger; }
-            &.status-info { background: rgba(admin.$admin-info, 0.1); color: admin.$admin-info; }
-          }
-
-          .date-info {
-            color: admin.$admin-text-secondary;
-          }
-
-          .no-login {
-            color: admin.$admin-text-muted;
-            font-style: italic;
-          }
-
-          &.actions {
-            .action-buttons {
+            .action-btn {
+              width: 32px;
+              height: 32px;
+              border-radius: 6px;
+              border: none;
+              cursor: pointer;
               display: flex;
-              gap: 0.5rem;
+              align-items: center;
+              justify-content: center;
+              transition: all 0.2s ease;
 
-              @media (max-width: 768px) {
-                flex-wrap: wrap;
-                justify-content: center;
+              i {
+                font-size: 1rem;
               }
 
-              .action-btn {
-                width: 32px;
-                height: 32px;
-                border-radius: 6px;
-                border: none;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: all 0.2s ease;
+              &:hover {
+                transform: translateY(-1px);
+              }
 
-                i {
-                  font-size: 1rem;
+              &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+              }
+
+              &.view-btn {
+                background: rgba(admin.$admin-info, 0.1);
+                color: admin.$admin-info;
+
+                &:hover:not(:disabled) {
+                  background: admin.$admin-info;
+                  color: white;
                 }
+              }
 
-                &:hover {
-                  transform: translateY(-1px);
+              &.edit-btn {
+                background: rgba(admin.$admin-warning, 0.1);
+                color: admin.$admin-warning;
+
+                &:hover:not(:disabled) {
+                  background: admin.$admin-warning;
+                  color: white;
                 }
+              }
 
-                &:disabled {
-                  opacity: 0.6;
-                  cursor: not-allowed;
+              &.activate-btn {
+                background: rgba(admin.$admin-success, 0.1);
+                color: admin.$admin-success;
+
+                &:hover:not(:disabled) {
+                  background: admin.$admin-success;
+                  color: white;
                 }
+              }
 
-                &.view-btn {
-                  background: rgba(admin.$admin-info, 0.1);
-                  color: admin.$admin-info;
+              &.deactivate-btn {
+                background: rgba(admin.$admin-warning, 0.1);
+                color: admin.$admin-warning;
 
-                  &:hover:not(:disabled) {
-                    background: admin.$admin-info;
-                    color: white;
-                  }
+                &:hover:not(:disabled) {
+                  background: admin.$admin-warning;
+                  color: white;
                 }
+              }
 
-                &.edit-btn {
-                  background: rgba(admin.$admin-warning, 0.1);
-                  color: admin.$admin-warning;
+              &.verify-btn {
+                background: rgba(admin.$admin-info, 0.1);
+                color: admin.$admin-info;
 
-                  &:hover:not(:disabled) {
-                    background: admin.$admin-warning;
-                    color: white;
-                  }
+                &:hover:not(:disabled) {
+                  background: admin.$admin-info;
+                  color: white;
                 }
+              }
 
-                &.activate-btn {
-                  background: rgba(admin.$admin-success, 0.1);
-                  color: admin.$admin-success;
+              &.delete-btn {
+                background: rgba(admin.$admin-danger, 0.1);
+                color: admin.$admin-danger;
 
-                  &:hover:not(:disabled) {
-                    background: admin.$admin-success;
-                    color: white;
-                  }
-                }
-
-                &.deactivate-btn {
-                  background: rgba(admin.$admin-warning, 0.1);
-                  color: admin.$admin-warning;
-
-                  &:hover:not(:disabled) {
-                    background: admin.$admin-warning;
-                    color: white;
-                  }
-                }
-
-                &.verify-btn {
-                  background: rgba(admin.$admin-info, 0.1);
-                  color: admin.$admin-info;
-
-                  &:hover:not(:disabled) {
-                    background: admin.$admin-info;
-                    color: white;
-                  }
-                }
-
-                &.delete-btn {
-                  background: rgba(admin.$admin-danger, 0.1);
-                  color: admin.$admin-danger;
-
-                  &:hover:not(:disabled) {
-                    background: admin.$admin-danger;
-                    color: white;
-                  }
+                &:hover:not(:disabled) {
+                  background: admin.$admin-danger;
+                  color: white;
                 }
               }
             }
@@ -617,6 +661,34 @@
   }
 }
 
+.table-cell.actions button[mat-icon-button] {
+  background: admin.$admin-info;
+  color: #fff;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  transition: background 0.2s, color 0.2s;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+
+  mat-icon {
+    color: #fff !important;
+    font-size: 1.2rem;
+    transition: color 0.2s;
+  }
+
+  &:hover, &:focus {
+    background: color-mix(in srgb, admin.$admin-info 90%, black);
+    color: #fff;
+    mat-icon {
+      color: #fff !important;
+    }
+  }
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -628,367 +700,269 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 1rem;
-}
 
-.modal-content {
-  background: admin.$admin-card-bg;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  width: 90%;
-  max-width: 600px;
-  animation: modal-fade-in 0.3s ease;
-}
+  .modal-content {
+    background: admin.$admin-card-bg;
+    border-radius: 12px;
+    max-width: 600px;
+    animation: modal-fade-in 0.3s ease;
 
-.modal-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid admin.$admin-border;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin: 0;
-    color: admin.$admin-text-primary;
-  }
-
-  .close-btn {
-    background: transparent;
-    border: none;
-    color: admin.$admin-text-secondary;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: rgba(admin.$admin-text-secondary, 0.1);
-    }
-  }
-}
-
-.modal-body {
-  padding: 2rem;
-
-  .user-profile {
-    .profile-header {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-      padding-bottom: 1.5rem;
+    .modal-header {
       border-bottom: 1px solid admin.$admin-border;
+      h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: admin.$admin-text-primary;
+      }
 
-      .profile-info {
-        flex: 1;
+      .close-btn {
+        color: admin.$admin-text-secondary;
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
 
-        h4 {
-          color: admin.$admin-text-primary;
-          font-size: 1.5rem;
-          font-weight: 600;
-          margin: 0 0 0.5rem 0;
+        &:hover {
+          background: rgba(admin.$admin-text-secondary, 0.1);
         }
+      }
+    }
 
-        .username {
-          color: admin.$admin-text-secondary;
-          font-size: 1rem;
-          margin: 0 0 1rem 0;
-        }
-
-        .profile-badges {
-          display: flex;
-          gap: 0.5rem;
-
-          .role-badge, .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
+    .modal-body {
+      .user-profile-full {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        .cover-image {
+          position:relative;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          height: 180px;
+          overflow: hidden;
+          img {
+            width:100%;
+            height:200px;
+            object-fit:cover;
+            border-radius:20px;
+            display: block;
           }
+          .profile-overlay {
+            position:absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            div {
+              display:flex;
+              flex-direction:column;
+              align-items:center;
+              color: #fff;
+              background: #00000085;
+              padding: 10px;
+              border-radius: 8px;
+            }
+          }
+          .profile-header {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 1.5rem;
+            gap: 2rem;
+            .avatar-container {
+              margin-top: -40px;
+              margin-left: 1rem;
+              box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+              border-radius: 50%;
+              background: admin.$admin-card-bg;
+              padding: 4px;
+            }
+            .profile-info {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              h4 {
+                margin: 0;
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: admin.$admin-text-primary;
+              }
+              .username {
+                color: admin.$admin-text-secondary;
+                font-size: 1rem;
+                margin: 0.2rem 0 0.2rem 0;
+              }
+              span {
+                color: admin.$admin-text-muted;
+                font-size: 0.95rem;
+              }
+            }
+          }
+        }
 
-          .role-badge {
-            background: rgba(admin.$admin-primary, 0.1);
+        .profile-details {
+          display: flex;
+          flex-direction: column;
+          gap: 0.7rem;
+          .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-size: 1rem;
+            i.material-icons {
+              border-radius: 50%;
+              background: admin.$admin-dark-bg;
+              color: admin.$admin-info;
+              padding: 6px;
+              font-size: 1.2rem;
+              margin-right: 0.2rem;
+            }
+            .label-detail {
+              font-weight: 600;
+              color: admin.$admin-text-secondary;
+            }
+            span {
+              color: admin.$admin-text-primary;
+            }
+          }
+        }
+
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+
+        @media (max-width: 768px) {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+
+        label {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: admin.$admin-text-secondary;
+          margin-bottom: 0.5rem;
+
+          i {
+            font-size: 1rem;
             color: admin.$admin-primary;
           }
 
-          .status-badge {
-            background: rgba(admin.$admin-success, 0.1);
+          .editable-indicator {
+            font-size: 0.75rem;
             color: admin.$admin-success;
+            font-weight: 400;
+            margin-left: 0.5rem;
+            opacity: 0.8;
           }
         }
-      }
-    }
 
-    .profile-details {
-      .detail-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-        padding: 0.75rem;
-        background: admin.$admin-dark-bg;
-        border-radius: 8px;
-
-        label {
-          font-weight: 600;
-          color: admin.$admin-text-secondary;
-          min-width: 120px;
-        }
-
-        span {
+        input {
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid admin.$admin-border;
+          border-radius: 8px;
+          background: admin.$admin-dark-bg;
           color: admin.$admin-text-primary;
-          flex: 1;
+          font-size: 0.875rem;
+          transition: all 0.2s ease;
+          cursor: text;
+
+          &:focus {
+            outline: none;
+            border-color: admin.$admin-primary;
+            box-shadow: 0 0 0 3px rgba(admin.$admin-primary, 0.1);
+          }
+
+          &:read-only {
+            background: rgba(admin.$admin-secondary, 0.1);
+            color: admin.$admin-text-muted;
+            cursor: not-allowed;
+          }
+
+          &::placeholder {
+            color: admin.$admin-text-muted;
+          }
         }
 
-        .verified-icon {
-          color: admin.$admin-success;
-          font-size: 1rem;
+        select {
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid admin.$admin-border;
+          border-radius: 8px;
+          background: admin.$admin-dark-bg;
+          color: admin.$admin-text-primary;
+          font-size: 0.875rem;
+          transition: all 0.2s ease;
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+          background-position: right 0.5rem center;
+          background-repeat: no-repeat;
+          background-size: 1.5em 1.5em;
+          padding-right: 2.5rem;
+          appearance: none;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          cursor: pointer;
+          border: 2px solid admin.$admin-border;
+
+          &:hover {
+            border-color: admin.$admin-primary;
+            background-color: rgba(admin.$admin-primary, 0.05);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(admin.$admin-primary, 0.1);
+          }
+
+          &:focus {
+            border-color: admin.$admin-primary;
+            box-shadow: 0 0 0 3px rgba(admin.$admin-primary, 0.1);
+            background-color: admin.$admin-dark-bg;
+            outline: none;
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
+
+          option {
+            background: admin.$admin-dark-bg;
+            color: admin.$admin-text-primary;
+            padding: 0.5rem;
+          }
+
+          &[disabled] {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: rgba(admin.$admin-secondary, 0.1);
+            border-color: admin.$admin-border;
+            transform: none;
+            box-shadow: none;
+          }
         }
 
-        .no-login {
+        .form-help {
+          display: block;
+          font-size: 0.75rem;
           color: admin.$admin-text-muted;
+          margin-top: 0.25rem;
           font-style: italic;
         }
-
-        .completed {
-          color: admin.$admin-success;
-        }
-
-        .incomplete {
-          color: admin.$admin-warning;
-        }
-      }
-    }
-  }
-
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-
-    @media (max-width: 768px) {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .form-group {
-    margin-bottom: 1.5rem;
-
-    label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: admin.$admin-text-secondary;
-      margin-bottom: 0.5rem;
-
-      i {
-        font-size: 1rem;
-        color: admin.$admin-primary;
       }
 
-      .editable-indicator {
-        font-size: 0.75rem;
-        color: admin.$admin-success;
-        font-weight: 400;
-        margin-left: 0.5rem;
-        opacity: 0.8;
-      }
     }
 
-    input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid admin.$admin-border;
-      border-radius: 8px;
-      background: admin.$admin-dark-bg;
-      color: admin.$admin-text-primary;
-      font-size: 0.875rem;
-      transition: all 0.2s ease;
-      cursor: text;
-
-      &:focus {
-        outline: none;
-        border-color: admin.$admin-primary;
-        box-shadow: 0 0 0 3px rgba(admin.$admin-primary, 0.1);
-      }
-
-      &:read-only {
-        background: rgba(admin.$admin-secondary, 0.1);
-        color: admin.$admin-text-muted;
-        cursor: not-allowed;
-      }
-
-      &::placeholder {
-        color: admin.$admin-text-muted;
-      }
-    }
-
-    select {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid admin.$admin-border;
-      border-radius: 8px;
-      background: admin.$admin-dark-bg;
-      color: admin.$admin-text-primary;
-      font-size: 0.875rem;
-      transition: all 0.2s ease;
-      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-      background-position: right 0.5rem center;
-      background-repeat: no-repeat;
-      background-size: 1.5em 1.5em;
-      padding-right: 2.5rem;
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      cursor: pointer;
-      border: 2px solid admin.$admin-border;
-
-      &:hover {
-        border-color: admin.$admin-primary;
-        background-color: rgba(admin.$admin-primary, 0.05);
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(admin.$admin-primary, 0.1);
-      }
-
-      &:focus {
-        border-color: admin.$admin-primary;
-        box-shadow: 0 0 0 3px rgba(admin.$admin-primary, 0.1);
-        background-color: admin.$admin-dark-bg;
-        outline: none;
-      }
-
-      &:active {
-        transform: translateY(0);
-      }
-
-      option {
-        background: admin.$admin-dark-bg;
-        color: admin.$admin-text-primary;
-        padding: 0.5rem;
-      }
-
-      &[disabled] {
-        opacity: 0.6;
-        cursor: not-allowed;
-        background-color: rgba(admin.$admin-secondary, 0.1);
-        border-color: admin.$admin-border;
-        transform: none;
-        box-shadow: none;
-      }
-    }
-
-    .form-help {
-      display: block;
-      font-size: 0.75rem;
-      color: admin.$admin-text-muted;
-      margin-top: 0.25rem;
-      font-style: italic;
-    }
-  }
-
-  .delete-warning {
-    text-align: center;
-    margin-bottom: 2rem;
-
-    .warning-icon {
-      font-size: 3rem;
-      color: admin.$admin-warning;
-      margin-bottom: 1rem;
-    }
-
-    h4 {
-      color: admin.$admin-text-primary;
-      margin: 0 0 1rem 0;
-      font-size: 1.125rem;
-    }
-
-    p {
-      color: admin.$admin-text-secondary;
-      margin: 0;
-      line-height: 1.5;
-    }
   }
 }
-
-.modal-actions {
-  padding: 1.5rem;
-  border-top: 1px solid admin.$admin-border;
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
-
-  .cancel-btn, .save-btn, .delete-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.875rem;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-  }
-
-  .cancel-btn {
-    background: admin.$admin-secondary;
-    color: white;
-
-    &:hover:not(:disabled) {
-      background: color-mix(in srgb, admin.$admin-secondary 90%, black);
-    }
-  }
-
-  .save-btn {
-    background: admin.$admin-success;
-    color: white;
-
-    &:hover:not(:disabled) {
-      background: color-mix(in srgb, admin.$admin-success 90%, black);
-      box-shadow: 0 4px 12px rgba(admin.$admin-success, 0.4);
-    }
-  }
-
-  .delete-btn {
-    background: admin.$admin-danger;
-    color: white;
-
-    &:hover:not(:disabled) {
-      background: color-mix(in srgb, admin.$admin-danger 90%, black);
-      box-shadow: 0 4px 12px rgba(admin.$admin-danger, 0.4);
-    }
-  }
-}
-
-@keyframes modal-fade-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-} 
