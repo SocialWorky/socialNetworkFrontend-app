@@ -18,6 +18,7 @@ import { AuthService } from '@auth/services/auth.service';
 import { PwaUpdateService } from '@shared/services/pwa-update.service';
 import { EmojiEventsService } from '@shared/services/emoji-events.service';
 import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget-config.service';
+import { environment } from '@env/environment';
 
 @Component({
     selector: 'worky-root',
@@ -32,6 +33,8 @@ export class AppComponent implements OnInit, OnDestroy {
   showInstallPrompt = false;
 
   currentUserId: string = '';
+
+  environment = environment;
 
   private destroy$ = new Subject<void>();
 
@@ -184,4 +187,11 @@ export class AppComponent implements OnInit, OnDestroy {
       // Silent error - user is not authenticated, so widgets won't be initialized
     }
   }
+
+  // Test method for PWA update simulation (development only)
+  /*
+  testPwaUpdate(): void {
+    this._pwaUpdateService.simulateUpdate();
+  }
+  */
 }

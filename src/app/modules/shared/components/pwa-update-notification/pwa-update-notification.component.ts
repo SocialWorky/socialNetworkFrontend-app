@@ -2,139 +2,243 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 
 import { PwaUpdateService, UpdateInfo } from '@shared/services/pwa-update.service';
+import { environment } from '@env/environment';
 
 @Component({
   selector: 'app-pwa-update-notification',
   standalone: false,
   template: `
-    <div *ngIf="showNotification" class="update-notification" [class.show]="showNotification">
-      <ion-card class="update-card">
-        <ion-card-header>
-          <ion-card-title>
-            <ion-icon name="refresh-outline"></ion-icon>
-            Nueva versión disponible
-          </ion-card-title>
-        </ion-card-header>
-        
-        <ion-card-content>
-          <p>Se ha detectado una nueva versión de la aplicación.</p>
-          
-          <div class="version-info" *ngIf="updateInfo">
-            <small>
-              <strong>Versión actual:</strong> {{ updateInfo.currentVersion | slice:0:8 }}...<br>
-              <strong>Nueva versión:</strong> {{ updateInfo.newVersion | slice:0:8 }}...
-            </small>
+    <div *ngIf="showNotification" class="modal-backdrop" [class.show]="showNotification">
+      <div class="modal-container" [class.show]="showNotification">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div class="header-icon">
+              <ion-icon name="refresh-outline"></ion-icon>
+            </div>
+            <h2 class="modal-title">Actualización Disponible</h2>
           </div>
 
-          <div class="auto-update-toggle">
-            <ion-toggle 
-              [(ngModel)]="autoUpdateEnabled"
-              (ionChange)="toggleAutoUpdate($event)"
-              labelPlacement="end">
-              Actualización automática
-            </ion-toggle>
-          </div>
-        </ion-card-content>
+          <div class="modal-body">
+            <div class="update-message">
+              <p>Una nueva versión de la aplicación está lista para instalar.</p>
+            </div>
 
-        <ion-card-content class="action-buttons">
-          <ion-button 
-            fill="outline" 
-            (click)="dismiss()"
-            class="dismiss-btn">
-            Más tarde
-          </ion-button>
-          
-          <ion-button 
-            (click)="applyUpdate()"
-            [disabled]="isUpdating"
-            class="update-btn">
-            <ion-spinner *ngIf="isUpdating" name="crescent"></ion-spinner>
-            {{ isUpdating ? 'Actualizando...' : 'Actualizar ahora' }}
-          </ion-button>
-        </ion-card-content>
-      </ion-card>
+            <div class="update-info" *ngIf="updateInfo">
+              <div class="info-item">
+                <span class="label">Versión actual:</span>
+                <span class="value">{{ updateInfo.currentVersion | slice:0:8 }}...</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Nueva versión:</span>
+                <span class="value new-version">{{ updateInfo.newVersion | slice:0:8 }}...</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <ion-button 
+              expand="block"
+              (click)="applyUpdate()"
+              [disabled]="isUpdating"
+              class="update-button">
+              <ion-spinner *ngIf="isUpdating" name="crescent"></ion-spinner>
+              <ion-icon *ngIf="!isUpdating" name="download-outline"></ion-icon>
+              {{ isUpdating ? 'Actualizando...' : 'Actualizar ahora' }}
+            </ion-button>
+          </div>
+        </div>
+      </div>
     </div>
   `,
   styles: [`
-    .update-notification {
+    .modal-backdrop {
       position: fixed;
-      top: 20px;
-      right: 20px;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
       z-index: 9999;
-      max-width: 400px;
-      transform: translateX(100%);
-      transition: transform 0.3s ease-in-out;
-    }
-
-    .update-notification.show {
-      transform: translateX(0);
-    }
-
-    .update-card {
-      margin: 0;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .update-card ion-card-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border-radius: 12px 12px 0 0;
-    }
-
-    .update-card ion-card-title {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 1.1rem;
-      font-weight: 600;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease-in-out;
     }
 
-    .version-info {
-      background: #f8f9fa;
-      padding: 8px 12px;
-      border-radius: 6px;
-      margin: 12px 0;
+    .modal-backdrop.show {
+      opacity: 1;
+      visibility: visible;
     }
 
-    .auto-update-toggle {
-      margin: 16px 0;
+    .modal-container {
+      width: 100%;
+      max-width: 400px;
+      margin: 20px;
+      transform: scale(0.9) translateY(-10px);
+      transition: all 0.3s ease-in-out;
     }
 
-    .action-buttons {
+    .modal-container.show {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-content {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      color: white;
+      padding: 24px 20px 20px;
+      text-align: center;
+    }
+
+    .header-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
       display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-      padding-top: 0;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
     }
 
-    .dismiss-btn {
-      --color: #6c757d;
-      --border-color: #6c757d;
+    .header-icon ion-icon {
+      font-size: 24px;
+      color: white;
     }
 
-    .update-btn {
-      --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .modal-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
     }
 
-    @media (max-width: 768px) {
-      .update-notification {
-        top: 10px;
-        right: 10px;
-        left: 10px;
+    .modal-body {
+      padding: 20px;
+    }
+
+    .update-message {
+      margin-bottom: 16px;
+    }
+
+    .update-message p {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.5;
+      color: #374151;
+      text-align: center;
+    }
+
+    .update-info {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .info-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .label {
+      font-weight: 500;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .value {
+      font-weight: 600;
+      color: #111827;
+      font-size: 14px;
+    }
+
+    .new-version {
+      color: #047857;
+    }
+
+    .modal-footer {
+      padding: 0 20px 20px;
+    }
+
+    .update-button {
+      --background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      --color: white;
+      --border-radius: 8px;
+      --padding-top: 14px;
+      --padding-bottom: 14px;
+      font-weight: 600;
+      font-size: 15px;
+      height: 48px;
+      --box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
+    }
+
+    .update-button:hover {
+      --box-shadow: 0 6px 16px rgba(107, 114, 128, 0.3);
+    }
+
+    .update-button ion-icon {
+      margin-right: 6px;
+    }
+
+    @media (max-width: 480px) {
+      .modal-container {
+        margin: 16px;
         max-width: none;
       }
-      
-      .action-buttons {
-        flex-direction: column;
+
+      .modal-header {
+        padding: 20px 16px 16px;
       }
+
+      .modal-body {
+        padding: 16px;
+      }
+
+      .modal-footer {
+        padding: 0 16px 16px;
+      }
+
+      .modal-title {
+        font-size: 18px;
+      }
+
+      .header-icon {
+        width: 40px;
+        height: 40px;
+      }
+
+      .header-icon ion-icon {
+        font-size: 20px;
+      }
+    }
+
+    ion-spinner {
+      --color: white;
+    }
+
+    :host-context(body.modal-open) {
+      overflow: hidden;
     }
   `]
 })
 export class PwaUpdateNotificationComponent implements OnInit, OnDestroy {
   showNotification = false;
   updateInfo: UpdateInfo | null = null;
-  autoUpdateEnabled = false;
   isUpdating = false;
   
   private destroy$ = new Subject<void>();
@@ -148,32 +252,33 @@ export class PwaUpdateNotificationComponent implements OnInit, OnDestroy {
         if (updateInfo.available) {
           this.updateInfo = updateInfo;
           this.showNotification = true;
+          document.body.classList.add('modal-open');
         }
       });
-
-    this.autoUpdateEnabled = this.pwaUpdateService.getAutoUpdateStatus();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    document.body.classList.remove('modal-open');
   }
 
   async applyUpdate(): Promise<void> {
     try {
       this.isUpdating = true;
+      
+      // Handle simulated updates in development
+      if (!environment.PRODUCTION && this.updateInfo?.currentVersion === 'abc12345') {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+        return;
+      }
+      
       await this.pwaUpdateService.applyUpdate();
     } catch (error) {
-      console.error('Error al aplicar la actualización:', error);
+      console.error('Error applying update:', error);
       this.isUpdating = false;
     }
-  }
-
-  dismiss(): void {
-    this.showNotification = false;
-  }
-
-  toggleAutoUpdate(event: any): void {
-    this.pwaUpdateService.setAutoUpdate(event.detail.checked);
   }
 } 

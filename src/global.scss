@@ -729,3 +729,25 @@ img, video {
     bottom: env(safe-area-inset-bottom) !important;
   }
 }
+
+/* PWA Update Modal Styles */
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Ensure modal is always on top */
+.modal-backdrop {
+  z-index: 99999 !important;
+}
+
+/* Prevent any interaction with background when modal is open */
+body.modal-open .content-worky {
+  pointer-events: none;
+}
+
+body.modal-open .modal-backdrop {
+  pointer-events: auto;
+}

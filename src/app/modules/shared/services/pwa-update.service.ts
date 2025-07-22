@@ -177,4 +177,21 @@ export class PwaUpdateService {
   public forceCheck(): Promise<boolean> {
     return this.checkForUpdates();
   }
+
+  /**
+   * Método de prueba para simular una actualización disponible
+   * Solo usar en desarrollo
+   */
+  public simulateUpdate(): void {
+    if (!environment.PRODUCTION) {
+      const mockUpdateInfo: UpdateInfo = {
+        available: true,
+        currentVersion: 'abc12345',
+        newVersion: 'def67890',
+        timestamp: new Date()
+      };
+      
+      this.updateAvailable$.next(mockUpdateInfo);
+    }
+  }
 }
