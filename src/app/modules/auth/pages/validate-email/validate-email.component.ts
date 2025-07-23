@@ -83,10 +83,7 @@ export class ValidateEmailComponent implements OnInit {
   }
 
   goToLogin(): void {
-    console.log('Navigating to login...');
-    this.router.navigate(['/auth/login']).then(() => {
-      console.log('Navigation completed');
-    }).catch(error => {
+    this.router.navigate(['/auth/login']).catch(error => {
       console.error('Navigation error:', error);
     });
   }

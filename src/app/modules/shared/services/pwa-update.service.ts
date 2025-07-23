@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { SwUpdate } from '@angular/service-worker';
-import { BehaviorSubject, interval, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, interval } from 'rxjs';
 import { environment } from '@env/environment';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 export interface UpdateInfo {
   available: boolean;
@@ -11,7 +12,7 @@ export interface UpdateInfo {
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class PwaUpdateService {
   private updateAvailable$ = new BehaviorSubject<UpdateInfo>({
@@ -22,46 +23,34 @@ export class PwaUpdateService {
   private isChecking = false;
   private checkInterval: any;
 
-  constructor(private swUpdate: SwUpdate) {
+  constructor(
+    private swUpdate: SwUpdate,
+    private _logService: LogService
+  ) {
     this.initializeUpdateDetection();
   }
 
-  /**
-   * Observable que emite cuando hay una actualización disponible
-   */
   get updateAvailable(): Observable<UpdateInfo> {
     return this.updateAvailable$.asObservable();
   }
 
-  /**
-   * Inicializa la detección de actualizaciones
-   */
   private initializeUpdateDetection(): void {
-    if (!this.swUpdate.isEnabled) {
-      return;
-    }
-
-    this.swUpdate.versionUpdates.subscribe(event => {
-      
-      switch (event.type) {
-        case 'VERSION_READY':
+    if (this.swUpdate.isEnabled) {
+      this.swUpdate.versionUpdates.subscribe(event => {
+        if (event.type === 'VERSION_READY') {
           this.handleVersionReady(event);
-          break;
-        case 'VERSION_INSTALLATION_FAILED':
-          console.error('Error al instalar la nueva versión:', event);
-          break;
-        case 'NO_NEW_VERSION_DETECTED':
-          //console.log('No hay nuevas versiones disponibles');
-          break;
-      }
-    });
+        }
+      });
 
-    this.startPeriodicChecks();
+      // Start periodic checks if auto-update is enabled
+      if (this.shouldAutoUpdate()) {
+        this.startPeriodicChecks();
+      }
+    } else {
+      // Log removed to avoid spam - service workers status is checked frequently
+    }
   }
 
-  /**
-   * Maneja cuando una nueva versión está lista
-   */
   private handleVersionReady(event: any): void {
     const updateInfo: UpdateInfo = {
       available: true,
@@ -70,31 +59,31 @@ export class PwaUpdateService {
       timestamp: new Date()
     };
 
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'PwaUpdateService',
+      'New version available',
+      { 
+        currentVersion: updateInfo.currentVersion,
+        newVersion: updateInfo.newVersion 
+      }
+    );
+
     this.updateAvailable$.next(updateInfo);
-    
+
+    // Auto-update if enabled
     if (this.shouldAutoUpdate()) {
       this.applyUpdate();
     }
   }
 
-  /**
-   * Inicia verificaciones periódicas de actualizaciones
-   */
   private startPeriodicChecks(): void {
-    const checkIntervalMs = environment.PRODUCTION ? 30 * 60 * 1000 : 5 * 60 * 1000;
-    
-    this.checkInterval = interval(checkIntervalMs).subscribe(() => {
+    // Check for updates every 30 minutes
+    this.checkInterval = interval(30 * 60 * 1000).subscribe(() => {
       this.checkForUpdates();
     });
-
-    setTimeout(() => {
-      this.checkForUpdates();
-    }, 60000);
   }
 
-  /**
-   * Verifica si debe actualizar automáticamente
-   */
   private shouldAutoUpdate(): boolean {
     const autoUpdate = localStorage.getItem('pwa-auto-update');
     return autoUpdate === 'true';
@@ -110,7 +99,7 @@ export class PwaUpdateService {
 
     // Check if service workers are enabled
     if (!this.swUpdate.isEnabled) {
-      console.log('Service workers no están habilitados en este navegador');
+      // Log removed to avoid spam - service workers status is checked frequently
       return Promise.resolve(false);
     }
 
@@ -137,6 +126,11 @@ export class PwaUpdateService {
   public applyUpdate(): Promise<void> {
     return this.swUpdate.activateUpdate()
       .then(() => {
+        this._logService.log(
+          LevelLogEnum.INFO,
+          'PwaUpdateService',
+          'Update applied successfully, reloading page'
+        );
         setTimeout(() => {
           window.location.reload();
         }, 1000);
@@ -152,6 +146,12 @@ export class PwaUpdateService {
    */
   public setAutoUpdate(enabled: boolean): void {
     localStorage.setItem('pwa-auto-update', enabled.toString());
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'PwaUpdateService',
+      'Auto-update setting changed',
+      { enabled }
+    );
   }
 
   /**

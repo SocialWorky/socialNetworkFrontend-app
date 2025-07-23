@@ -1,19 +1,19 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Subject, takeUntil, filter } from 'rxjs';
-
-import { Token } from '@shared/interfaces/token.interface'
 import { AuthService } from '@auth/services/auth.service';
+import { Token } from '@shared/interfaces/token.interface';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
-import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service'
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { MessageService } from 'src/app/modules/pages/messages/services/message.service';
+import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service';
 import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
-    selector: 'worky-sidebar-menu',
-    templateUrl: './sidebar-menu.component.html',
-    styleUrls: ['./sidebar-menu.component.scss'],
-    standalone: false
+  selector: 'worky-sidebar-menu',
+  templateUrl: './sidebar-menu.component.html',
+  styleUrls: ['./sidebar-menu.component.scss'],
+  standalone: false
 })
 export class SideBarMenuComponent implements OnInit, OnDestroy{
   private unsubscribe$ = new Subject<void>();
@@ -35,21 +35,15 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
     private _notificationService: NotificationService,
     private _messageService: MessageService,
     private _notificationPanelService: NotificationPanelService,
-    private _notificationMessageChatService: NotificationMessageChatService
+    private _notificationMessageChatService: NotificationMessageChatService,
+    private _logService: LogService
   ) { }
 
   ngOnInit() {
     this.decodedToken = this._authService.getDecodedToken()!;
-    this.userName = this.decodedToken.name;
-    
-    this._notificationService.notification$.pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: () => {
-        this.getNotification();
-        this.getUnreadMessagesCount();
-      },
-      error: (error) => {
-        console.error('Error getting notifications', error);
-      }
+    this.userName = this.decodedToken.username;
+    this._authService.isAuthenticated().then(isAuth => {
+      this.isAuthenticated = isAuth;
     });
 
     this._notificationMessageChatService.notificationMessageChat$
@@ -59,7 +53,12 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
       )
       .subscribe({
         next: (message: any) => {
-          console.log('Nueva notificación de mensaje recibida:', message);
+          this._logService.log(
+            LevelLogEnum.INFO,
+            'SideBarMenuComponent',
+            'New message notification received',
+            { messageId: message._id, senderId: message.senderId }
+          );
           this.updateUnreadCountForNewMessage(message);
         },
         error: (error) => {
@@ -139,10 +138,7 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
         .subscribe({
           next: (syncedMessage) => {
             if (syncedMessage) {
-              console.log('Mensaje sincronizado exitosamente');
               this.getUnreadMessagesCount();
-            } else {
-              console.log('No se pudo sincronizar el mensaje');
             }
           },
           error: (error) => {
@@ -150,18 +146,16 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
           }
         });
     } else {
-      console.log('Mensaje del usuario actual, no se actualiza conteo');
+      this._logService.log(
+        LevelLogEnum.DEBUG,
+        'SideBarMenuComponent',
+        'Message from current user, not updating count',
+        { messageId: message._id, senderId: message.senderId }
+      );
     }
   }
 
   updateUnreadCountWhenMessagesRead() {
-    // Decrementar el conteo local inmediatamente
-    if (this.messages > 0) {
-      this.messages--;
-      this._cdr.markForCheck();
-    }
-    
-    // Luego obtener el conteo exacto del servidor
     this.getUnreadMessagesCount();
   }
 }

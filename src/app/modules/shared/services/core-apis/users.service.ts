@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { LogService, LevelLogEnum } from './log.service';
 
 import { User } from '@shared/interfaces/user.interface';
@@ -62,7 +62,23 @@ export class UserService {
 
   userEdit(id: string, data: any): Observable<User> {
     const url = `${this.baseUrl}/user/edit/${id}`;
+    
+    this.logService.log(
+      LevelLogEnum.INFO,
+      'UserService',
+      'User edit initiated',
+      { userId: id, fieldsUpdated: Object.keys(data) }
+    );
+    
     return this.http.put<User>(url, data).pipe(
+      tap((updatedUser) => {
+        this.logService.log(
+          LevelLogEnum.INFO,
+          'UserService',
+          'User updated successfully',
+          { userId: id, email: updatedUser.email }
+        );
+      }),
       catchError(this.handleError)
     );
   }

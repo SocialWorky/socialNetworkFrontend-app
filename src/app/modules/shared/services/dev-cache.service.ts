@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CacheService } from './cache.service';
 import { environment } from '@env/environment';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,10 @@ export class DevCacheService {
   private isDev = !environment.PRODUCTION;
   private cacheDebug = environment.CACHE_DEBUG === 'true';
 
-  constructor(private cacheService: CacheService) {
+  constructor(
+    private cacheService: CacheService,
+    private _logService: LogService
+  ) {
     if (this.isDev) {
       this.setupDevTools();
     }
@@ -64,15 +68,22 @@ export class DevCacheService {
         timestamp: new Date().toISOString()
       }
     ]);
+
+    // Log removed to avoid spam - mock data generation is frequent in development
   }
 
   logCacheOperation(operation: string, key: string, data?: any): void {
     if (this.cacheDebug) {
-      console.group(`🔧 Cache ${operation}`);
-      console.log('Key:', key);
-      if (data) console.log('Data:', data);
-      console.log('Timestamp:', new Date().toISOString());
-      console.groupEnd();
+      this._logService.log(
+        LevelLogEnum.DEBUG,
+        'DevCacheService',
+        `Cache ${operation}`,
+        { 
+          key, 
+          dataSize: data ? JSON.stringify(data).length : 0,
+          timestamp: new Date().toISOString()
+        }
+      );
     }
   }
 } 

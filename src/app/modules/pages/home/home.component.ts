@@ -22,6 +22,7 @@ import { NotificationPublicationService } from '@shared/services/notifications/n
 import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
 import { Token } from '@shared/interfaces/token.interface';
 import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
     selector: 'worky-home',
@@ -88,7 +89,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private _titleService: Title,
     private _configService: ConfigService,
     private _notificationPublicationService: NotificationPublicationService,
-    private _pullToRefreshService: PullToRefreshService
+    private _pullToRefreshService: PullToRefreshService,
+    private _logService: LogService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Home');
@@ -437,7 +439,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async forceRefreshPublications() {
-    console.log('Forzando actualización de publicaciones...');
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'HomeComponent',
+      'Force refresh publications initiated',
+      { page: this.page, pageSize: this.pageSize }
+    );
     
     this.loaderPublications = true;
     this.resetPagination();
@@ -490,7 +497,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async manualRefreshPublications() {
-    console.log('Sincronización manual iniciada...');
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'HomeComponent',
+      'Manual refresh publications initiated',
+      { currentPublicationsCount: this.publications().length }
+    );
     
     this.loaderPublications = true;
     
@@ -503,7 +515,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       );
       
       if (updatedPublications.length > 0) {
-        console.log(`${updatedPublications.length} publicaciones actualizadas`);
+        this._logService.log(
+          LevelLogEnum.INFO,
+          'HomeComponent',
+          'Publications updated successfully',
+          { updatedCount: updatedPublications.length, totalCount: currentPublications.length }
+        );
         
         const updatedMap = new Map(updatedPublications.map(pub => [pub._id, pub]));
         
@@ -514,7 +531,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.publications.set(refreshedPublications);
         this._cdr.markForCheck();
       } else {
-        console.log('No hay publicaciones para actualizar');
+        this._logService.log(
+          LevelLogEnum.INFO,
+          'HomeComponent',
+          'No publications to update',
+          { totalCount: currentPublications.length }
+        );
       }
       
       this.loaderPublications = false;

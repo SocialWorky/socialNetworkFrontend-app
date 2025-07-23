@@ -730,7 +730,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private async handlePullToRefresh(): Promise<void> {
-    console.log('Pull-to-refresh activado en profiles');
     if (this.isRefreshing) return;
     
     this.isRefreshing = true;

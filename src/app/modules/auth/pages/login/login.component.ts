@@ -23,6 +23,7 @@ import { MetaTagService } from '@shared/services/meta-tag.service';
 import { DatabaseManagerService } from '@shared/services/database/database-manager.service';
 import { LoginMethods } from './interfaces/login.interface';
 import { User } from '@shared/interfaces/user.interface';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
     selector: 'worky-login',
@@ -69,6 +70,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     private _configService: ConfigService,
     private _metaTagService: MetaTagService,
     private _databaseManager: DatabaseManagerService,
+    private _logService: LogService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       const title = configData.settings.title + ' - Login';
@@ -211,6 +213,18 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
           // Initialize user databases after successful login
           await this._databaseManager.initializeForUser(tokenResponse.id);
 
+          this._logService.log(
+            LevelLogEnum.INFO,
+            'LoginComponent',
+            'User login successful',
+            { 
+              userId: tokenResponse.id, 
+              email: tokenResponse.email, 
+              role: tokenResponse.role,
+              isDarkMode: response.user.isDarkMode 
+            }
+          );
+
           this._cdr.markForCheck();
 
           if (tokenResponse?.role === 'admin' && !this._deviceDetectionService.isMobile()) {
@@ -221,6 +235,17 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       },
       error: (e: any) => {
+        this._logService.log(
+          LevelLogEnum.WARN,
+          'LoginComponent',
+          'User login failed',
+          { 
+            email: credentials.email, 
+            error: e.error?.message || e.message,
+            status: e.status 
+          }
+        );
+
         if (e.error.message === 'User is not verified') {
           this._alertService.showAlert(
             translations['alert.title_emailValidated_error'],
@@ -320,9 +345,30 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       // Initialize user databases after successful Google login
       await this._databaseManager.initializeForUser(tokenResponse.id);
 
+      this._logService.log(
+        LevelLogEnum.INFO,
+        'LoginComponent',
+        'Google login successful',
+        { 
+          userId: tokenResponse.id, 
+          email: tokenResponse.email, 
+          role: tokenResponse.role,
+          isDarkMode: response.user.isDarkMode,
+          hasAvatar: !!tokenResponse.avatar
+        }
+      );
+
       this._cdr.markForCheck();
       this._router.navigate(['/home']);
     } catch (error) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'LoginComponent',
+        'Google login failed',
+        { 
+          error: error instanceof Error ? error.message : String(error)
+        }
+      );
       console.error('Error during Google login:', error);
     } finally {
       loading.dismiss();

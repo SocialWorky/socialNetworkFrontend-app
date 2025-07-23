@@ -170,7 +170,6 @@ export class PublicationService {
           publication.comment = comments;
           publication.updatedAt = new Date();
           this._publicationDatabase.updatePublication(publication);
-          console.log(`Comentarios sincronizados para publicación ${publicationId}`);
         }
       }
     });
@@ -185,7 +184,6 @@ export class PublicationService {
           publication.reaction = reactions;
           publication.updatedAt = new Date();
           this._publicationDatabase.updatePublication(publication);
-          console.log(`Reacciones sincronizadas para publicación ${publicationId}`);
         }
       }
     });
@@ -244,7 +242,6 @@ export class PublicationService {
   }
 
   forceSyncPublications(page: number, size: number, type: string = 'all', consultId: string = ''): Observable<Publication> {
-    console.log('Forzando sincronización completa');
     return this.getAllPublicationsFromServer(page, size, type, consultId);
   }
 

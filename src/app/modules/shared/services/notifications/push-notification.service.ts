@@ -3,13 +3,14 @@ import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { environment } from '@env/environment';
 import firebase from 'firebase/compat/app';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PushNotificationService {
 
-  constructor() {
+  constructor(private _logService: LogService) {
     this.initFirebase();
   }
 
@@ -55,30 +56,59 @@ export class PushNotificationService {
       if (permission === 'granted') {
         messaging?.getToken({ vapidKey: environment.FIREBASE_VAPID_KEY })
           .then(token => {
-
+            this._logService.log(
+              LevelLogEnum.INFO,
+              'PushNotificationService',
+              'Web push token obtained successfully',
+              { platform: 'web', tokenLength: token?.length }
+            );
           });
       } else {
-        console.log('Permiso denegado');
+        this._logService.log(
+          LevelLogEnum.WARN,
+          'PushNotificationService',
+          'Push notification permission denied',
+          { platform: 'web', permission }
+        );
       }
     });
 
     messaging?.onMessage(payload => {
-      console.log('Mensaje recibido en primer plano:', payload);
+      this._logService.log(
+        LevelLogEnum.INFO,
+        'PushNotificationService',
+        'Foreground message received',
+        { platform: 'web', messageId: payload.messageId }
+      );
     });
   }
 
   private listenToNativeEvents() {
     PushNotifications.addListener('registration', token => {
-      console.log('Token Nativo:', token.value);
-      // Send this token to your backend
+      this._logService.log(
+        LevelLogEnum.INFO,
+        'PushNotificationService',
+        'Native push token obtained',
+        { platform: 'native', tokenLength: token.value?.length }
+      );
     });
 
     PushNotifications.addListener('pushNotificationReceived', notification => {
-      console.log('Notificación recibida:', notification);
+      this._logService.log(
+        LevelLogEnum.INFO,
+        'PushNotificationService',
+        'Native notification received',
+        { platform: 'native', notificationId: notification.id }
+      );
     });
 
     PushNotifications.addListener('pushNotificationActionPerformed', notification => {
-      console.log('Acción realizada:', notification.actionId, notification.notification);
+      this._logService.log(
+        LevelLogEnum.INFO,
+        'PushNotificationService',
+        'Native notification action performed',
+        { platform: 'native', actionId: notification.actionId, notificationId: notification.notification.id }
+      );
     });
   }
 }

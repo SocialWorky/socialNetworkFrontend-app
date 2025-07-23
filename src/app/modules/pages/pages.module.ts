@@ -3,6 +3,7 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { RouterModule } from '@angular/router';
 
 import { PagesRoutingModule } from './pages-routing.module';
 import { HomeComponent } from './home/home.component';
@@ -64,6 +65,7 @@ import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.mod
     FormsModule,
     ScrollingModule,
     ReactiveFormsModule,
+    RouterModule,
     PagesRoutingModule,
     WorkyDropdownModule,
     TranslationsModule,

@@ -171,11 +171,27 @@ export class AuthService {
   }
 
   logout() {
+    const user = this.getDecodedToken();
+    this.logService.log(
+      LevelLogEnum.INFO,
+      'AuthService',
+      'User logout initiated',
+      { userId: user?.id, email: user?.email }
+    );
+    
     this._authGoogleService.logout();
     this.clearSession();
   }
 
   clearSession() {
+    const user = this.getDecodedToken();
+    this.logService.log(
+      LevelLogEnum.INFO,
+      'AuthService',
+      'Session cleared',
+      { userId: user?.id, email: user?.email }
+    );
+    
     // Clean up user databases before clearing session
     this.databaseCleanup.cleanupOnLogout();
 
