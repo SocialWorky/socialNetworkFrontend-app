@@ -116,7 +116,6 @@ export class AuthService {
   getDecodedToken(): Token | null {
     const token = localStorage.getItem('token');
     if (!token || token === 'undefined' || token === 'null') {
-      this.clearSession();
       return null;
     }
     
@@ -129,7 +128,6 @@ export class AuthService {
         'Failed to decode token',
         { error: error instanceof Error ? error.message : String(error) }
       );
-      this.clearSession();
       return null;
     }
   }
@@ -184,12 +182,22 @@ export class AuthService {
   }
 
   clearSession() {
-    const user = this.getDecodedToken();
+    // Get user info before clearing session to avoid recursion
+    let userInfo: Token | null = null;
+    try {
+      const token = localStorage.getItem('token');
+      if (token && token !== 'undefined' && token !== 'null') {
+        userInfo = jwtDecode(token) as Token;
+      }
+    } catch (error) {
+      // Ignore decode errors during session cleanup
+    }
+    
     this.logService.log(
       LevelLogEnum.INFO,
       'AuthService',
       'Session cleared',
-      { userId: user?.id, email: user?.email }
+      { userId: userInfo?.id, email: userInfo?.email }
     );
     
     // Clean up user databases before clearing session
