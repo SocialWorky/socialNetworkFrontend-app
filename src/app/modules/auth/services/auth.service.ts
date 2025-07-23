@@ -9,6 +9,8 @@ import { environment } from '@env/environment';
 import { Token } from '../../shared/interfaces/token.interface';
 import { AuthGoogleService } from './auth-google.service';
 import { UserService } from '../../shared/services/core-apis/users.service';
+import { DatabaseCleanupService } from '@shared/services/database/database-cleanup.service';
+
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({
@@ -23,7 +25,8 @@ export class AuthService {
     private _authGoogleService: AuthGoogleService,
     private _router: Router,
     private _userService: UserService,
-    private logService: LogService
+    private logService: LogService,
+    private databaseCleanup: DatabaseCleanupService
   ) {}
 
   async isAuthenticated(): Promise<boolean> {
@@ -173,6 +176,9 @@ export class AuthService {
   }
 
   clearSession() {
+    // Clean up user databases before clearing session
+    this.databaseCleanup.cleanupOnLogout();
+
     localStorage.removeItem('token');
     localStorage.removeItem('lastLogin');
     sessionStorage.clear();

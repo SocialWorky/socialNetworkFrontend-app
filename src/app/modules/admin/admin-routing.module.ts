@@ -12,6 +12,7 @@ import { WidgetManagementComponent } from './shared/widget-management/widget-man
 import { WebhooksComponent } from './shared/webhooks/webhooks.component';
 import { UserManagementComponent } from './shared/user-management/user-management.component';
 
+
 export const routes: Routes = [
   {
     path: '',
@@ -31,6 +32,7 @@ export const routes: Routes = [
           { title: 'CSS', path: 'custom-css', component: CustomCssComponent },
           { title: 'Invitaciones', path: 'invitations-code', component: InvitationsCodeComponent },
           { title: 'Webhooks', path: 'webhooks', component: WebhooksComponent },
+        
         ],
       },
       { title: 'Gestión de Usuarios', path: 'user-management', component: UserManagementComponent },

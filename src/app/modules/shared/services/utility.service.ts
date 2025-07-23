@@ -125,6 +125,97 @@ export class UtilityService {
   }
 
   /**
+   * Database management utilities
+   */
+  
+  /**
+   * Check if IndexedDB is supported
+   */
+  isIndexedDBSupported(): boolean {
+    return 'indexedDB' in window;
+  }
+
+  /**
+   * Get database size in bytes
+   */
+  async getDatabaseSize(dbName: string): Promise<number> {
+    if (!this.isIndexedDBSupported()) {
+      return 0;
+    }
+
+    return new Promise((resolve) => {
+      const request = indexedDB.open(dbName);
+      request.onsuccess = () => {
+        const db = request.result;
+        let size = 0;
+        
+        // Estimate size by iterating through object stores
+        Array.from(db.objectStoreNames).forEach(storeName => {
+          const transaction = db.transaction(storeName, 'readonly');
+          const store = transaction.objectStore(storeName);
+          const countRequest = store.count();
+          
+          countRequest.onsuccess = () => {
+            // Rough estimate: 1KB per record
+            size += countRequest.result * 1024;
+          };
+        });
+        
+        db.close();
+        resolve(size);
+      };
+      request.onerror = () => resolve(0);
+    });
+  }
+
+  /**
+   * Clean up old databases for users that no longer exist
+   */
+  async cleanupOrphanedDatabases(currentUserId: string): Promise<void> {
+    if (!this.isIndexedDBSupported()) {
+      return;
+    }
+
+    try {
+      const databases = await indexedDB.databases();
+      const currentUserDatabases = databases.filter(db => 
+        db.name?.includes('Worky') && !db.name?.includes(currentUserId)
+      );
+
+      for (const db of currentUserDatabases) {
+        if (db.name) {
+          await this.deleteDatabase(db.name);
+        }
+      }
+
+      this.logService.log(
+        LevelLogEnum.INFO,
+        'UtilityService',
+        'Cleaned up orphaned databases',
+        { cleanedCount: currentUserDatabases.length }
+      );
+    } catch (error) {
+      this.logService.log(
+        LevelLogEnum.ERROR,
+        'UtilityService',
+        'Error cleaning up orphaned databases',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
+    }
+  }
+
+  /**
+   * Delete a specific database
+   */
+  private async deleteDatabase(dbName: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.deleteDatabase(dbName);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  /**
    * Preload crítico para red social
    */
   preloadCriticalAssets(): void {

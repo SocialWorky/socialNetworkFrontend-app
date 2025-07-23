@@ -1,19 +1,68 @@
 import { Injectable } from '@angular/core';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PublicationDatabaseService {
-  private readonly DB_NAME = 'WorkyPublicationsDB';
+  private readonly DB_BASE_NAME = 'WorkyPublicationsDB';
   private readonly DB_VERSION = 1;
   private readonly STORE_NAME = 'publications';
   private readonly MAX_PUBLICATIONS = 150;
   private db: IDBDatabase | null = null;
+  private currentUserId: string | null = null;
+
+  constructor(
+    private logService: LogService
+  ) {}
+
+  /**
+   * Get database name with user ID
+   */
+  private getDatabaseName(): string {
+    // Get user ID from localStorage to avoid circular dependency
+    const token = localStorage.getItem('token');
+    if (token && token !== 'undefined' && token !== 'null') {
+      try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        const userId = decodedToken.id;
+        return userId ? `${this.DB_BASE_NAME}_${userId}` : this.DB_BASE_NAME;
+      } catch (error) {
+        return this.DB_BASE_NAME;
+      }
+    }
+    return this.DB_BASE_NAME;
+  }
+
+  /**
+   * Check if user has changed and close current database
+   */
+  private checkUserChange(): void {
+    // Get user ID from localStorage to avoid circular dependency
+    const token = localStorage.getItem('token');
+    let userId = null;
+    
+    if (token && token !== 'undefined' && token !== 'null') {
+      try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        userId = decodedToken.id;
+      } catch (error) {
+        userId = null;
+      }
+    }
+    
+    if (userId !== this.currentUserId) {
+      this.currentUserId = userId;
+      this.db = null; // Force re-initialization
+    }
+  }
 
   async initDatabase(): Promise<void> {
+    this.checkUserChange();
+    
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+      const request = indexedDB.open(this.getDatabaseName(), this.DB_VERSION);
 
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
@@ -145,6 +194,79 @@ export class PublicationDatabaseService {
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
+  }
+
+  /**
+   * Delete the entire database for the current user
+   */
+  /**
+   * Close database connection without deleting the database
+   */
+  async closeConnection(): Promise<void> {
+    try {
+      if (this.db) {
+        this.db.close();
+        this.db = null;
+        this.logService.log(
+          LevelLogEnum.INFO,
+          'PublicationDatabaseService',
+          'Database connection closed',
+          { dbName: this.getDatabaseName() }
+        );
+      }
+    } catch (error) {
+      this.logService.log(
+        LevelLogEnum.ERROR,
+        'PublicationDatabaseService',
+        'Error closing database connection',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
+    }
+  }
+
+  async deleteDatabase(): Promise<void> {
+    try {
+      // Close current connection
+      if (this.db) {
+        this.db.close();
+        this.db = null;
+      }
+
+      // Delete the database
+      const dbName = this.getDatabaseName();
+      const deleteRequest = indexedDB.deleteDatabase(dbName);
+      
+      return new Promise((resolve, reject) => {
+        deleteRequest.onsuccess = () => {
+          this.logService.log(
+            LevelLogEnum.INFO,
+            'PublicationDatabaseService',
+            'Database deleted successfully',
+            { dbName }
+          );
+          this.currentUserId = null;
+          resolve();
+        };
+        
+        deleteRequest.onerror = () => {
+          this.logService.log(
+            LevelLogEnum.ERROR,
+            'PublicationDatabaseService',
+            'Error deleting database',
+            { dbName, error: deleteRequest.error }
+          );
+          reject(deleteRequest.error);
+        };
+      });
+    } catch (error) {
+      this.logService.log(
+        LevelLogEnum.ERROR,
+        'PublicationDatabaseService',
+        'Error in deleteDatabase',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
+      throw error;
+    }
   }
 
   private async ensureMaxPublications(): Promise<void> {

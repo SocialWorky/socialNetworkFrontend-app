@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
+import { IonicModule } from '@ionic/angular';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
@@ -67,6 +68,7 @@ import { MaterialModule } from '@shared/modules/material/material.module';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    IonicModule,
     MonacoEditorModule.forRoot(),
     NgxJsonViewerModule,
     AdminRoutingModule,

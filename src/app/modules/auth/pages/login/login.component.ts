@@ -20,6 +20,7 @@ import { NotificationUsersService } from '@shared/services/notifications/notific
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { MetaTagService } from '@shared/services/meta-tag.service';
+import { DatabaseManagerService } from '@shared/services/database/database-manager.service';
 import { LoginMethods } from './interfaces/login.interface';
 import { User } from '@shared/interfaces/user.interface';
 
@@ -67,6 +68,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     private _emailNotificationService: EmailNotificationService,
     private _configService: ConfigService,
     private _metaTagService: MetaTagService,
+    private _databaseManager: DatabaseManagerService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       const title = configData.settings.title + ' - Login';
@@ -206,6 +208,9 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
           this._notificationUsersService.loginUser();
 
+          // Initialize user databases after successful login
+          await this._databaseManager.initializeForUser(tokenResponse.id);
+
           this._cdr.markForCheck();
 
           if (tokenResponse?.role === 'admin' && !this._deviceDetectionService.isMobile()) {
@@ -311,6 +316,9 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
       this._socketService.emitEvent('loginUser', localStorage.getItem('token'));
       this._notificationUsersService.loginUser();
+
+      // Initialize user databases after successful Google login
+      await this._databaseManager.initializeForUser(tokenResponse.id);
 
       this._cdr.markForCheck();
       this._router.navigate(['/home']);
