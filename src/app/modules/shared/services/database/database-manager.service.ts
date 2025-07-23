@@ -47,8 +47,6 @@ export class DatabaseManagerService {
     // This prevents deleting current user's databases on page refresh
   }
 
-
-
     /**
    * Clean up orphaned databases for a specific user (called during login)
    * ESTRATEGIA REAL: Eliminar realmente las bases de datos que existen
@@ -58,8 +56,12 @@ export class DatabaseManagerService {
       this.logService.log(
         LevelLogEnum.INFO,
         'DatabaseManagerService',
-        'Starting REAL cleanup - Keep only current user databases',
-        { currentUserId: userId }
+        'Starting database cleanup for user change.',
+        { 
+          newUserId: userId, 
+          previousUserId: this.currentUserId,
+          userAgent: navigator.userAgent 
+        }
       );
 
       // Define the "allow-list" of databases that should be kept for the current user.
@@ -72,7 +74,7 @@ export class DatabaseManagerService {
         LevelLogEnum.INFO,
         'DatabaseManagerService',
         'Allow-list defined. These databases will be preserved.',
-        { databasesToKeep, currentUserId: userId }
+        { databasesToKeep, count: databasesToKeep.length, newUserId: userId }
       );
 
       // Step 1: Close all existing connections to prevent locking issues.
@@ -81,34 +83,21 @@ export class DatabaseManagerService {
       if (this.publicationDatabase) await this.publicationDatabase.closeConnection();
 
       // Step 2: Get all existing Worky-related databases directly from the browser.
-      this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Step 2: Getting all existing Worky databases from the browser.');
+      this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Step 2: Detecting all existing Worky databases.');
       const existingDatabases = await this.getExistingWorkyDatabases();
       
       this.logService.log(
         LevelLogEnum.INFO,
         'DatabaseManagerService',
-        'Found existing databases to check against allow-list.',
-        { existingDatabases, count: existingDatabases.length, currentUserId: userId }
+        'Detection complete. Found databases to check against allow-list.',
+        { existingDatabases, count: existingDatabases.length, newUserId: userId }
       );
 
       // Step 3: Decide which databases to delete by comparing against the allow-list.
       const databasesToDelete: string[] = [];
       for (const dbName of existingDatabases) {
         if (!databasesToKeep.includes(dbName)) {
-          this.logService.log(
-            LevelLogEnum.INFO,
-            'DatabaseManagerService',
-            'Will DELETE: Database is not in the allow-list.',
-            { dbName, currentUserId: userId, reason: 'not_in_user_allow_list' }
-          );
           databasesToDelete.push(dbName);
-        } else {
-          this.logService.log(
-            LevelLogEnum.INFO,
-            'DatabaseManagerService',
-            'Will PRESERVE: Database is in the allow-list.',
-            { dbName, currentUserId: userId, reason: 'in_user_allow_list' }
-          );
         }
       }
 
@@ -116,32 +105,49 @@ export class DatabaseManagerService {
         LevelLogEnum.INFO,
         'DatabaseManagerService',
         'Final Deletion Plan',
-        { databasesToDelete, databasesToKeep, note: 'Only databases not on the allow-list will be deleted.' }
+        { 
+          toDelete: databasesToDelete,
+          toDeleteCount: databasesToDelete.length,
+          toKeep: databasesToKeep,
+          toKeepCount: databasesToKeep.length,
+          note: 'Only databases not on the allow-list will be deleted.' 
+        }
       );
 
       // Step 4: Execute the deletion plan.
       if (databasesToDelete.length > 0) {
         this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Step 4: Executing deletion plan.');
         for (const dbName of databasesToDelete) {
+          // Individual deletion logs are in deleteDatabaseByName
           await this.deleteDatabaseByName(dbName);
         }
       } else {
-        this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Step 4: No databases to delete.');
+        this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Step 4: No databases to delete. Cleanup not needed.');
       }
 
       this.logService.log(
         LevelLogEnum.INFO,
         'DatabaseManagerService',
-        'REAL cleanup completed successfully.',
-        { currentUserId: userId, deletedCount: databasesToDelete.length }
+        'Database cleanup completed successfully.',
+        { 
+          newUserId: userId, 
+          deletedCount: databasesToDelete.length,
+          keptCount: databasesToKeep.length 
+        }
       );
 
     } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
       this.logService.log(
         LevelLogEnum.ERROR,
         'DatabaseManagerService',
-        'Error during REAL cleanup',
-        { currentUserId: userId, error: error instanceof Error ? error.message : String(error) }
+        'Error during database cleanup.',
+        { 
+          userId,
+          errorMessage: err.message,
+          errorStack: err.stack,
+          errorObject: err
+        }
       );
     }
   }
@@ -151,28 +157,39 @@ export class DatabaseManagerService {
    * This is the most reliable way to find all relevant databases.
    */
   private async getExistingWorkyDatabases(): Promise<string[]> {
-    this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Attempting to get all IndexedDB databases.');
+    this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Detecting existing databases...');
     
-    // The modern, standard way to get all database names.
-    if ('databases' in indexedDB && typeof indexedDB.databases === 'function') {
+    const apiAvailable = 'databases' in indexedDB && typeof indexedDB.databases === 'function';
+    this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Checking for indexedDB.databases() API support.', { apiAvailable });
+
+    if (apiAvailable) {
       try {
         const allDbs = await indexedDB.databases();
-        this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Got all databases from indexedDB.databases()', { allDbs });
+        const dbNames = allDbs.map(db => db.name).filter((name): name is string => !!name);
         
-        const workyDbs = allDbs
-          .map(db => db.name)
-          .filter((name): name is string => name !== undefined && name.startsWith('Worky'));
+        this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Successfully fetched database list via modern API.', {
+          totalFound: dbNames.length,
+          databaseNames: dbNames
+        });
+        
+        const workyDbs = dbNames.filter(name => name.startsWith('Worky'));
           
-        this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Filtered for Worky databases', { workyDbs });
+        this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Filtered for Worky-specific databases.', { 
+          workyDbCount: workyDbs.length,
+          workyDbNames: workyDbs
+        });
         return workyDbs;
       } catch (error) {
-        this.logService.log(LevelLogEnum.WARN, 'DatabaseManagerService', 'Could not get databases using indexedDB.databases(), falling back to legacy method.', { error });
+        const err = error instanceof Error ? error : new Error(String(error));
+        this.logService.log(LevelLogEnum.WARN, 'DatabaseManagerService', 'Modern API indexedDB.databases() failed, falling back to legacy method.', { 
+          errorMessage: err.message,
+          errorStack: err.stack 
+        });
       }
     }
 
     // Fallback for older browsers or environments where indexedDB.databases() is not available.
-    // This method is less reliable as it depends on guessing names.
-    this.logService.log(LevelLogEnum.WARN, 'DatabaseManagerService', 'Using legacy fallback to find databases.');
+    this.logService.log(LevelLogEnum.WARN, 'DatabaseManagerService', 'Using legacy fallback method to find databases by guessing names.');
     const knownUserIds = this.getKnownUserIds();
     const legacyDbNames = ['WorkyMessagesDB', 'WorkyPublicationsDB'];
     const userDbNames = knownUserIds.flatMap(id => [`WorkyMessagesDB_${id}`, `WorkyPublicationsDB_${id}`]);
@@ -184,7 +201,10 @@ export class DatabaseManagerService {
         existingDatabases.push(dbName);
       }
     }
-    this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Found databases using legacy fallback.', { existingDatabases });
+    this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Found databases using legacy name-guessing method.', { 
+      foundCount: existingDatabases.length,
+      foundDbNames: existingDatabases 
+    });
     return existingDatabases;
   }
 
@@ -221,8 +241,6 @@ export class DatabaseManagerService {
       await this.deleteDatabaseByName(dbName);
     }
   }
-
-
 
   /**
    * Get user IDs that might be stored in various places
@@ -302,8 +320,6 @@ export class DatabaseManagerService {
     
     return uniqueUserIds;
   }
-
-
 
   /**
    * Extracts the user ID from a database name (e.g., "WorkyMessagesDB_USER_ID").
@@ -444,45 +460,47 @@ export class DatabaseManagerService {
    * Delete a specific database by name
    */
   private async deleteDatabaseByName(dbName: string): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       this.logService.log(
         LevelLogEnum.INFO,
         'DatabaseManagerService',
-        'Attempting to delete database',
+        'Attempting to delete database.',
         { dbName }
       );
 
       const deleteRequest = indexedDB.deleteDatabase(dbName);
       
-      deleteRequest.onsuccess = () => {
+      deleteRequest.onsuccess = (event) => {
         this.logService.log(
           LevelLogEnum.INFO,
           'DatabaseManagerService',
-          'Database deleted successfully',
-          { dbName }
+          'Database deletion request successful.',
+          { dbName, event }
         );
         resolve();
       };
       
-      deleteRequest.onerror = () => {
-        // Don't treat errors as failures - database might not exist
+      deleteRequest.onerror = (event) => {
+        const error = (event.target as IDBRequest)?.error;
         this.logService.log(
-          LevelLogEnum.INFO,
+          LevelLogEnum.ERROR,
           'DatabaseManagerService',
-          'Database deletion attempted (might not exist)',
-          { dbName, error: deleteRequest.error }
+          'Error during database deletion attempt.',
+          { dbName, errorMessage: error?.message, errorObject: error, event }
         );
-        resolve(); // Resolve anyway to continue with cleanup
+        reject(error);
       };
 
-      deleteRequest.onblocked = () => {
+      deleteRequest.onblocked = (event) => {
         this.logService.log(
           LevelLogEnum.WARN,
           'DatabaseManagerService',
-          'Database deletion blocked (connection still open)',
-          { dbName }
+          'Database deletion blocked, likely due to an open connection.',
+          { dbName, event }
         );
-        resolve(); // Resolve anyway to continue with cleanup
+        // Even if blocked, we might want to resolve to not halt the entire cleanup process.
+        // However, rejecting helps to know that the cleanup was not fully successful.
+        reject(new Error(`Deletion of database ${dbName} was blocked.`));
       };
     });
   }
@@ -715,4 +733,4 @@ export class DatabaseManagerService {
       };
     }
   }
-} 
+}
