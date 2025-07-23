@@ -49,12 +49,13 @@
       "name": "api-freshness",
       "urls": [
         "/api/users/**",
-        "/api/notifications/**"
+        "/api/notifications/**",
+        "/api/messages/**"
       ],
       "cacheConfig": {
         "strategy": "freshness",
-        "maxSize": 100,
-        "maxAge": "3h",
+        "maxSize": 200,
+        "maxAge": "1h",
         "timeout": "10s"
       }
     },
@@ -62,7 +63,20 @@
       "name": "api-performance",
       "urls": [
         "/api/static/**",
-        "/api/config/**"
+        "/api/config/**",
+        "/api/publications/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 500,
+        "maxAge": "2h"
+      }
+    },
+    {
+      "name": "api-long-term",
+      "urls": [
+        "/api/user-profiles/**",
+        "/api/settings/**"
       ],
       "cacheConfig": {
         "strategy": "performance",

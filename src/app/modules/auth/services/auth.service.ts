@@ -3,6 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 import { environment } from '@env/environment';
 import { Token } from '../../shared/interfaces/token.interface';
@@ -22,36 +23,65 @@ export class AuthService {
     private _authGoogleService: AuthGoogleService,
     private _router: Router,
     private _userService: UserService,
+    private logService: LogService
   ) {}
 
   async isAuthenticated(): Promise<boolean> {
     const token = localStorage.getItem('token');
-    if (token && token !== 'undefined') {
+    
+    if (!token || token === 'undefined' || token === 'null') {
+      this.clearSession();
+      return false;
+    }
+
+    try {
+      const decodedToken: any = jwtDecode(token);
+      const currentTime = Math.floor(Date.now() / 1000);
+
+      if (!decodedToken || !decodedToken.exp || decodedToken.exp <= currentTime) {
+        this.logService.log(
+          LevelLogEnum.WARN,
+          'AuthService',
+          'Token expired or invalid',
+          { tokenExp: decodedToken?.exp, currentTime }
+        );
+        this.clearSession();
+        return false;
+      }
+
+      // Try to get user data to verify token is still valid
       try {
-        const decodedToken: any = jwtDecode(token);
-        const currentTime = Math.floor(Date.now() / 1000);
-
-        if (!decodedToken || !decodedToken.exp || decodedToken.exp <= currentTime) {
-          this.clearSession();
-          this._router.navigate(['/auth/login']);
-          return false;
-        }
-
         const user = await firstValueFrom(this._userService.getUserById(decodedToken.id));
         if (user) {
           return true;
         } else {
+          this.logService.log(
+            LevelLogEnum.WARN,
+            'AuthService',
+            'User not found in database',
+            { userId: decodedToken.id }
+          );
           this.clearSession();
-          this._router.navigate(['/auth/login']);
           return false;
         }
-      } catch (error) {
-        console.error('Error verifying authentication:', error);
+      } catch (userError) {
+        // If user fetch fails, token might be invalid
+        this.logService.log(
+          LevelLogEnum.ERROR,
+          'AuthService',
+          'Failed to verify user with token',
+          { userId: decodedToken.id, error: userError }
+        );
         this.clearSession();
-        this._router.navigate(['/auth/login']);
         return false;
       }
-    } else {
+    } catch (error) {
+      this.logService.log(
+        LevelLogEnum.ERROR,
+        'AuthService',
+        'Token decode failed',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
       this.clearSession();
       return false;
     }
@@ -61,24 +91,44 @@ export class AuthService {
     const token = localStorage.getItem('token');
     const url = `${environment.API_URL}/user/renewtoken/${_id}`;
     try {
-      const response: any = await this.http.get(url, { headers: { Authorization: `Bearer ${token}` }, responseType: 'text' }).toPromise();
+      const response: any = await this.http.get(url, { 
+        headers: { Authorization: `Bearer ${token}` }, 
+        responseType: 'text' 
+      }).toPromise();
+      
       const newToken = response;
       localStorage.setItem('token', newToken);
       return newToken;
     } catch (error) {
-      console.error('Error al renovar el token:', error);
+      this.logService.log(
+        LevelLogEnum.ERROR,
+        'AuthService',
+        'Failed to renew token',
+        { userId: _id, error: error instanceof Error ? error.message : String(error) }
+      );
       throw error;
     }
   }
 
   getDecodedToken(): Token | null {
     const token = localStorage.getItem('token');
-    if (!token || token === 'undefined') {
-      this._router.navigate(['/auth/login']);
+    if (!token || token === 'undefined' || token === 'null') {
       this.clearSession();
       return null;
     }
-    return jwtDecode(token);
+    
+    try {
+      return jwtDecode(token);
+    } catch (error) {
+      this.logService.log(
+        LevelLogEnum.ERROR,
+        'AuthService',
+        'Failed to decode token',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
+      this.clearSession();
+      return null;
+    }
   }
 
   getUseFromToken(token: string): Token {

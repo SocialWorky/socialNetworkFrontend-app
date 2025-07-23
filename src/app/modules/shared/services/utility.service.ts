@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { LogService, LevelLogEnum } from './core-apis/log.service';
 
 @Injectable({
   providedIn: 'root',
@@ -8,7 +9,7 @@ export class UtilityService {
 
   private unsubscribe$ = new Subject<void>();
 
-  constructor() {}
+  constructor(private logService: LogService) {}
 
   /**
    * Pausa la ejecución durante un tiempo determinado.
@@ -109,6 +110,63 @@ export class UtilityService {
     });
   }
 
+  /**
+   * Optimiza el almacenamiento de datos según el tipo y frecuencia de uso
+   */
+  optimizeStorage(key: string, data: any, type: 'frequent' | 'occasional' | 'rare'): void {
+    const storageConfig = {
+      frequent: { type: 'memory' as const, duration: 5 * 60 * 1000 }, // 5 min
+      occasional: { type: 'localStorage' as const },
+      rare: { type: 'cookie' as const, duration: 24 * 60 * 60 * 1000 } // 24 horas
+    };
 
+    const config = storageConfig[type];
+    // Aquí podrías usar el StorageService
+  }
+
+  /**
+   * Preload crítico para red social
+   */
+  preloadCriticalAssets(): void {
+    const criticalAssets = [
+      '/assets/img/shared/handleImageError.png',
+      '/assets/icons/icon-worky-72x72.png'
+    ];
+
+    criticalAssets.forEach(asset => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = asset.endsWith('.png') ? 'image' : 'fetch';
+      link.href = asset;
+      document.head.appendChild(link);
+    });
+  }
+
+  /**
+   * Limpia caché obsoleto
+   */
+  cleanupOldCache(): void {
+    const now = Date.now();
+    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 días
+
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('cache_')) {
+        try {
+          const item = JSON.parse(localStorage.getItem(key) || '{}');
+          if (item.timestamp && (now - item.timestamp) > maxAge) {
+            localStorage.removeItem(key);
+          }
+        } catch (error) {
+          this.logService.log(
+            LevelLogEnum.ERROR,
+            'UtilityService',
+            'Failed to parse cache item during cleanup',
+            { key, error: error instanceof Error ? error.message : String(error) }
+          );
+          localStorage.removeItem(key);
+        }
+      }
+    });
+  }
 
 }

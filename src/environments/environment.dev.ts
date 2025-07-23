@@ -1,8 +1,5 @@
 export const environment = {
-  PRODUCTION: true,
-  APP_PORT: 4200,
-  GIT_SHA: 'GIT_SHA',
-  // Replace the following with your own environment variables.
+  PRODUCTION: false,
   BASE_URL: import.meta.env.NG_APP_BASE_URL,
   API_URL: import.meta.env.NG_APP_API_URL,
   CLIEN_ID_GOOGLE: import.meta.env.NG_APP_CLIEN_ID_GOOGLE,
@@ -45,4 +42,4 @@ export const environment = {
   FIREBASE_VAPID_KEY: import.meta.env.NG_APP_FIREBASE_VAPID_KEY,
   CACHE_DEBUG: import.meta.env.NG_APP_CACHE_DEBUG || 'false',
   CACHE_ENABLED: import.meta.env.NG_APP_CACHE_ENABLED || 'false',
-};
+}; 

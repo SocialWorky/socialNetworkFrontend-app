@@ -22,7 +22,12 @@
     "ios:dev": "npm run pwa:dev:watch & npx cap sync ios && npx cap open ios",
     "ios:build": "ng build --configuration development && npx cap sync ios",
     "sw:clear": "node scripts/force-sw-update.js",
-    "sw:status": "node -e \"console.log('Usa PWAUtils.showServiceWorkerStatus() en la consola del navegador')\""
+    "sw:status": "node -e \"console.log('Usa PWAUtils.showServiceWorkerStatus() en la consola del navegador')\"",
+    "start:dev": "ng serve --configuration development",
+    "start:dev:cache": "CACHE_DEBUG=true ng serve --configuration development",
+    "dev:mock": "ng serve --configuration development && node scripts/mock-api.js",
+    "cache:clear": "node scripts/clear-cache.js",
+    "cache:inspect": "node scripts/inspect-cache.js"
   },
   "private": true,
   "dependencies": {

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { LogService, LevelLogEnum } from './core-apis/log.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +12,7 @@ export class NetworkService {
 
   private testImageUrl = 'https://static.vecteezy.com/system/resources/previews/004/948/022/non_2x/flat-illustration-of-internet-speed-test-gauge-suitable-for-design-element-of-internet-performance-test-connection-speed-information-and-network-speedometer-free-vector.jpg';
 
-  constructor() {
+  constructor(private logService: LogService) {
     this.initNetworkStatusListener();
     this.checkConnectionSpeed();
   }
@@ -60,7 +61,12 @@ export class NetworkService {
         this.connectionSpeed$.next('unknown');
       }
     } catch (error) {
-      console.error('Error checking connection speed:', error);
+      this.logService.log(
+        LevelLogEnum.ERROR,
+        'NetworkService',
+        'Failed to check connection speed',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
       this.connectionSpeed$.next('offline');
     }
   }

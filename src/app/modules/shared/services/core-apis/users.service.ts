@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { LogService, LevelLogEnum } from './log.service';
 
 import { User } from '@shared/interfaces/user.interface';
 import { environment } from '@env/environment';
@@ -12,10 +13,22 @@ import { environment } from '@env/environment';
 export class UserService {
   private baseUrl = environment.API_URL;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private logService: LogService
+  ) {}
 
   private handleError(error: any) {
-    console.error('An error occurred', error);
+    this.logService.log(
+      LevelLogEnum.ERROR,
+      'UserService',
+      'API request failed',
+      { 
+        url: error.url, 
+        status: error.status, 
+        error: error instanceof Error ? error.message : String(error) 
+      }
+    );
     return throwError(() => new Error('Something went wrong; please try again later.'));
   }
 

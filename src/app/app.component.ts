@@ -19,6 +19,8 @@ import { PwaUpdateService } from '@shared/services/pwa-update.service';
 import { EmojiEventsService } from '@shared/services/emoji-events.service';
 import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget-config.service';
 import { environment } from '@env/environment';
+import { DevCacheService } from '@shared/services/dev-cache.service';
+import { CacheService } from '@shared/services/cache.service';
 
 @Component({
     selector: 'worky-root',
@@ -52,16 +54,21 @@ export class AppComponent implements OnInit, OnDestroy {
     private _authService: AuthService,
     private _pwaUpdateService: PwaUpdateService,
     private _emojiEventsService: EmojiEventsService,
-    private _widgetConfigService: WidgetConfigService
+    private _widgetConfigService: WidgetConfigService,
+    private devCacheService: DevCacheService,
+    private cacheService: CacheService
   ) {
     this._notificationUsersService.setupInactivityListeners();
     if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();
   }
 
   async ngOnInit(): Promise<void> {
+    // Clear invalid tokens first
+    this.cleanInvalidTokens();
+    
     const token = localStorage.getItem('token');
     
-    if (token) {
+    if (token && token !== 'undefined' && token !== 'null') {
       this._socketService.updateToken(token);
     } else {
       this._socketService.connectToWebSocket();
@@ -110,6 +117,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this._pwaUpdateService.checkForUpdates().catch(() => {
       // Silent error if updates cannot be verified
     });
+
+    if (!environment.PRODUCTION) {
+      // Solo en desarrollo
+      this.setupDevMode();
+    }
   }
 
   ngOnDestroy() {
@@ -184,7 +196,8 @@ export class AppComponent implements OnInit, OnDestroy {
         this._widgetConfigService.initializeData();
       }
     } catch (error) {
-      // Silent error - user is not authenticated, so widgets won't be initialized
+      // User is not authenticated, widgets won't be initialized
+      // This is expected behavior for non-authenticated users
     }
   }
 
@@ -194,4 +207,21 @@ export class AppComponent implements OnInit, OnDestroy {
     this._pwaUpdateService.simulateUpdate();
   }
   */
+
+  private setupDevMode(): void {
+    // Generar datos mock para desarrollo
+    this.devCacheService.generateMockData();
+    
+    // Log de operaciones de caché
+    this.devCacheService.logCacheOperation('init', 'app-startup');
+  }
+
+  private cleanInvalidTokens(): void {
+    const token = localStorage.getItem('token');
+    if (token === 'undefined' || token === 'null' || !token) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('lastLogin');
+      sessionStorage.clear();
+    }
+  }
 }
