@@ -157,15 +157,10 @@
     }
   }
 
-  // Positions
+  // Positions - Simplified
   &.position-bottom-left {
     right: auto;
     left: 0;
-  }
-
-  &.position-bottom-right {
-    right: 0;
-    left: auto;
   }
 
   &.position-top-left {
@@ -177,39 +172,13 @@
     margin-bottom: 0.5rem;
   }
 
-  &.position-top-right {
-    bottom: 100%;
-    top: auto;
-    right: 0;
-    left: auto;
-    margin-top: 0;
-    margin-bottom: 0.5rem;
-  }
-
-  // Sizes
+  // Sizes - Simplified
   &.size-small {
     min-width: 160px;
 
     .menu-item .menu-item-content {
       padding: 0.5rem 0.75rem;
       font-size: 0.8rem;
-
-      i {
-        font-size: 1rem;
-      }
-    }
-  }
-
-  &.size-large {
-    min-width: 240px;
-
-    .menu-item .menu-item-content {
-      padding: 1rem 1.25rem;
-      font-size: 1rem;
-
-      i {
-        font-size: 1.25rem;
-      }
     }
   }
 }

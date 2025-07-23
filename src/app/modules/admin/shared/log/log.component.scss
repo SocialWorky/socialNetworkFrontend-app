@@ -29,56 +29,56 @@
       display: flex;
       gap: 1rem;
 
-      .stat-card {
-        @extend .admin-stat-card;
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-        min-width: 120px;
-
-        .stat-icon {
-          @extend .admin-card-icon;
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
-          margin-right: 0.75rem;
-
-          &.total {
-            background: linear-gradient(135deg, admin.$admin-primary, admin.$admin-primary-dark);
-          }
-
-          &.error {
-            background: linear-gradient(135deg, admin.$admin-danger, color.adjust(admin.$admin-danger, $lightness: -10%));
-          }
-
-          &.warning {
-            background: linear-gradient(135deg, admin.$admin-warning, color.adjust(admin.$admin-warning, $lightness: -10%));
-          }
-
-          i {
-            font-size: 1.25rem;
-          }
-        }
-
-        .stat-info {
+              .stat-card {
+          @extend .admin-stat-card;
           display: flex;
-          flex-direction: column;
+          align-items: center;
+          padding: 0.75rem 1rem;
+          min-width: 120px;
 
-          .stat-number {
-            font-size: 1.5rem;
-            font-weight: 700;
-            line-height: 1;
-            color: admin.$admin-text-primary;
+          .stat-icon {
+            @extend .admin-card-icon;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            margin-right: 0.75rem;
+
+            &.total {
+              background: admin.$admin-primary;
+            }
+
+            &.error {
+              background: admin.$admin-danger;
+            }
+
+            &.warning {
+              background: admin.$admin-warning;
+            }
+
+            i {
+              font-size: 1.25rem;
+            }
           }
 
-          .stat-label {
-            font-size: 0.75rem;
-            color: admin.$admin-text-secondary;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+          .stat-info {
+            display: flex;
+            flex-direction: column;
+
+            .stat-number {
+              font-size: 1.5rem;
+              font-weight: 700;
+              line-height: 1;
+              color: admin.$admin-text-primary;
+            }
+
+            .stat-label {
+              font-size: 0.75rem;
+              color: admin.$admin-text-secondary;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
           }
         }
-      }
     }
   }
 
@@ -600,6 +600,14 @@
                 font-size: 1rem;
               }
             }
+            ::ng-deep .ngx-json-viewer {
+              .segment-key {
+                color: admin.$admin-text-primary !important;
+              }
+              .segment-value {
+                color: admin.$admin-success;
+              }
+            }
           }
         }
       }
@@ -609,57 +617,14 @@
   // Pagination styles removed - using shared component
 }
 
+// Simplified ngx-json-viewer styles
 ::ng-deep .ngx-json-viewer {
   background: transparent !important;
   color: admin.$admin-text-primary !important;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  font-family: monospace !important;
   font-size: 0.875rem !important;
   max-width: 100% !important;
   overflow-x: auto !important;
-  word-wrap: break-word !important;
-  word-break: break-word !important;
-
-  .segment {
-    .segment-main {
-      .segment-key {
-        color: #60a5fa !important;
-        font-weight: 600 !important;
-      }
-
-      .segment-value {
-        color: admin.$admin-text-primary !important;
-      }
-    }
-
-    .segment-type-string > .segment-main > .segment-value {
-      color: #a7f3d0 !important;
-    }
-
-    .segment-type-number > .segment-main > .segment-value {
-      color: #fbbf24 !important;
-    }
-
-    .segment-type-boolean > .segment-main > .segment-value {
-      color: #f472b6 !important;
-    }
-
-    .segment-type-null > .segment-main > .segment-value {
-      color: #94a3b8 !important;
-      background-color: transparent !important;
-    }
-
-    .segment-type-object > .segment-main > .segment-value {
-      color: #818cf8 !important;
-    }
-
-    .segment-type-array > .segment-main > .segment-value {
-      color: #f59e0b !important;
-    }
-  }
-
-  .segment-expand {
-    color: admin.$admin-primary !important;
-  }
 }
 
 @keyframes spin {

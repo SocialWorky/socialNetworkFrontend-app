@@ -3,7 +3,7 @@
 
 .manage-reactions-dashboard {
   min-height: 100vh;
-  background: linear-gradient(135deg, admin.$admin-darker-bg 0%, admin.$admin-dark-bg 100%);
+  background: admin.$admin-dark-bg;
   padding: 2rem;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
@@ -40,10 +40,6 @@
       font-weight: 700;
       color: admin.$admin-text-primary;
       margin: 0 0 0.5rem 0;
-      background: linear-gradient(135deg, admin.$admin-primary, admin.$admin-info);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
     }
 
     .subtitle {
@@ -193,16 +189,12 @@
     width: 48px;
     height: 48px;
     border-radius: 12px;
-    background: linear-gradient(135deg, admin.$admin-primary, admin.$admin-info);
+    background: admin.$admin-primary;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 1.25rem;
-
-    i {
-      font-size: 1.25rem;
-    }
   }
 
   .section-info {

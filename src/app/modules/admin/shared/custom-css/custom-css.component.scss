@@ -24,8 +24,8 @@
 
   .loading-spinner {
     position: relative;
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
 
     .spinner-ring {
       position: absolute;
@@ -33,22 +33,8 @@
       height: 100%;
       border: 3px solid transparent;
       border-radius: 50%;
-      animation: spin 1.5s linear infinite;
-
-      &:nth-child(1) {
-        border-top-color: admin.$admin-primary;
-        animation-delay: 0s;
-      }
-
-      &:nth-child(2) {
-        border-right-color: admin.$admin-info;
-        animation-delay: 0.5s;
-      }
-
-      &:nth-child(3) {
-        border-bottom-color: admin.$admin-success;
-        animation-delay: 1s;
-      }
+      border-top-color: admin.$admin-primary;
+      animation: spin 1s linear infinite;
     }
   }
 
@@ -261,7 +247,7 @@
   }
 }
 
-// Preview Modal
+// Preview Modal - Simplified
 .preview-modal {
   position: fixed;
   top: 0;
@@ -281,7 +267,6 @@
     border: 1px solid admin.$admin-border;
     max-width: 500px;
     width: 100%;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 
     .preview-header {
       display: flex;
@@ -289,7 +274,6 @@
       align-items: center;
       padding: 1.5rem 2rem;
       border-bottom: 1px solid admin.$admin-border;
-      background: linear-gradient(135deg, rgba(admin.$admin-primary, 0.1), rgba(admin.$admin-info, 0.1));
 
       h3 {
         color: admin.$admin-text-primary;
@@ -302,15 +286,9 @@
         background: none;
         border: none;
         color: admin.$admin-text-secondary;
-        font-size: 1.25rem;
         cursor: pointer;
         padding: 0.5rem;
         border-radius: 6px;
-        transition: all 0.2s ease;
-
-        i {
-          font-size: 1.25rem;
-        }
 
         &:hover {
           background: rgba(admin.$admin-danger, 0.1);
@@ -333,10 +311,6 @@
         margin-bottom: 1.5rem;
         color: admin.$admin-info;
         font-size: 0.875rem;
-
-        i {
-          font-size: 1rem;
-        }
       }
 
       .preview-actions {
@@ -354,31 +328,16 @@
           font-size: 0.875rem;
           border: none;
           cursor: pointer;
-          transition: all 0.2s ease;
-
-          i {
-            font-size: 1.125rem;
-          }
         }
 
         .apply-btn {
           background: admin.$admin-success;
           color: white;
-
-          &:hover {
-            background: color-mix(in srgb, admin.$admin-success 90%, black);
-            transform: translateY(-1px);
-          }
         }
 
         .cancel-btn {
           background: admin.$admin-secondary;
           color: white;
-
-          &:hover {
-            background: color-mix(in srgb, admin.$admin-secondary 90%, black);
-            transform: translateY(-1px);
-          }
         }
       }
     }
