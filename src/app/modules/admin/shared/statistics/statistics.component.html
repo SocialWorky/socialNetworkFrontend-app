@@ -1,17 +1,23 @@
-<div class="statistics-dashboard">
-  <div class="dashboard-header">
-    <div class="header-content">
-      <div class="header-title">
-        <h1 class="title">Dashboard de Estadísticas</h1>
-        <p class="subtitle">Métricas en tiempo real de la plataforma</p>
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-inter">
+  <!-- Dashboard Header -->
+  <div class="bg-slate-700/95 backdrop-blur-lg border border-slate-600 rounded-xl p-6 mb-8 shadow-lg">
+    <div class="flex justify-between items-center gap-8 mb-4 lg:flex-row flex-col lg:items-center lg:text-left text-center">
+      <div class="flex-1">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+          Dashboard de Estadísticas
+        </h1>
+        <p class="text-slate-300 text-lg">Métricas en tiempo real de la plataforma</p>
       </div>
-      <div class="header-actions">
-        <button class="refresh-btn" (click)="refreshStatistics()" [disabled]="isLoading">
-          <i class="material-icons" [class.rotating]="isLoading">refresh</i>
-          <span class="btn-text">Actualizar</span>
+      <div class="flex gap-6 items-center lg:flex-row flex-col lg:w-auto w-full">
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm border border-blue-500 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+          (click)="refreshStatistics()" 
+          [disabled]="isLoading">
+          <i class="material-icons" [class.animate-spin]="isLoading">refresh</i>
+          <span>Actualizar</span>
         </button>
-        <div class="last-updated">
-          <i class="material-icons">schedule</i>
+        <div class="flex items-center gap-2 text-slate-400 text-sm">
+          <i class="material-icons text-slate-500">schedule</i>
           <span>Última actualización: {{ lastUpdated | workyDate:'short' }}</span>
         </div>
       </div>
@@ -19,312 +25,330 @@
   </div>
 
   <!-- Loading State -->
-  <div class="loading-container" *ngIf="isLoading">
-    <div class="loading-content">
-      <div class="loading-spinner">
-        <div class="spinner-ring"></div>
-        <div class="spinner-ring"></div>
-        <div class="spinner-ring"></div>
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="isLoading">
+    <div class="flex flex-col items-center gap-8 text-center max-w-md">
+      <div class="relative w-20 h-20">
+        <div class="absolute w-full h-full border-3 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
+        <div class="absolute w-full h-full border-3 border-transparent border-r-cyan-500 rounded-full animate-spin" style="animation-delay: 0.5s"></div>
+        <div class="absolute w-full h-full border-3 border-transparent border-b-emerald-500 rounded-full animate-spin" style="animation-delay: 1s"></div>
       </div>
-      <div class="loading-text">
-        <h3>Cargando métricas</h3>
-        <p>Recopilando estadísticas en tiempo real...</p>
-        <div class="loading-dots">
-          <span></span>
-          <span></span>
-          <span></span>
+      <div>
+        <h3 class="text-2xl font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+          Cargando métricas
+        </h3>
+        <p class="text-slate-300 mb-6">Recopilando estadísticas en tiempo real...</p>
+        <div class="flex justify-center gap-2">
+          <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+          <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.2s"></span>
+          <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.4s"></span>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="error-container" *ngIf="error && !isLoading">
-    <div class="error-content">
-      <div class="error-icon">
+  <!-- Error State -->
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="error && !isLoading">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-6xl text-red-500/80">
         <i class="material-icons">error_outline</i>
       </div>
-      <div class="error-text">
-        <h3>Error al cargar métricas</h3>
-        <p>{{ error }}</p>
-        <button class="retry-btn" (click)="refreshStatistics()">
-          <i class="material-icons">refresh</i>
+      <div>
+        <h3 class="text-2xl font-semibold text-slate-100 mb-2">Error al cargar métricas</h3>
+        <p class="text-slate-300 mb-6 leading-relaxed">{{ error }}</p>
+        <button 
+          class="flex items-center gap-2 px-6 py-3 border border-red-500 rounded-lg bg-red-500/10 text-red-400 font-semibold text-sm hover:bg-red-500 hover:text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/30"
+          (click)="refreshStatistics()">
+          <i class="material-icons text-lg">refresh</i>
           Reintentar
         </button>
       </div>
     </div>
   </div>
 
-  <div class="statistics-grid" *ngIf="!isLoading && !error">
-    <div class="stat-card primary">
-      <div class="card-header">
-        <div class="card-icon">
+  <!-- Statistics Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-8" *ngIf="!isLoading && !error">
+    <!-- Users Card -->
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20 relative overflow-hidden group">
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-30"></div>
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white text-2xl">
           <i class="material-icons">people</i>
         </div>
-        <div class="card-info">
-          <h3 class="card-title">Usuarios Registrados</h3>
-          <p class="card-subtitle">Total de usuarios en la plataforma</p>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">Usuarios Registrados</h3>
+          <p class="text-sm text-slate-400">Total de usuarios en la plataforma</p>
         </div>
       </div>
-      <div class="card-content">
-        <div class="main-stat" *ngIf="!isLoadingUsers; else usersLoading">
-          <span class="stat-number">{{ allUsersLength | number }}</span>
-          <span class="stat-label">usuarios</span>
+      <div>
+        <div class="flex items-baseline gap-2 mb-4" *ngIf="!isLoadingUsers; else usersLoading">
+          <span class="text-5xl font-bold text-slate-100">{{ allUsersLength | number }}</span>
+          <span class="text-lg text-slate-400">usuarios</span>
         </div>
         <ng-template #usersLoading>
-          <div class="main-stat loading">
-            <div class="stat-skeleton"></div>
-            <span class="stat-label">usuarios</span>
+          <div class="flex items-baseline gap-2 mb-4">
+            <div class="w-20 h-12 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
+            <span class="text-lg text-slate-400">usuarios</span>
           </div>
         </ng-template>
-        <div class="stat-details" *ngIf="!isLoadingUsers; else usersDetailsLoading">
-          <div class="detail-item">
-            <span class="detail-label">Activos:</span>
-            <span class="detail-value">{{ activeUsersCount | number }}</span>
+        <div class="flex flex-col gap-2" *ngIf="!isLoadingUsers; else usersDetailsLoading">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-400">Activos:</span>
+            <span class="text-sm font-semibold text-slate-100">{{ activeUsersCount | number }}</span>
           </div>
-          <div class="detail-item">
-            <span class="detail-label">Pendientes:</span>
-            <span class="detail-value">{{ pendingUsersCount | number }}</span>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-400">Pendientes:</span>
+            <span class="text-sm font-semibold text-slate-100">{{ pendingUsersCount | number }}</span>
           </div>
         </div>
         <ng-template #usersDetailsLoading>
-          <div class="stat-details">
-            <div class="detail-item">
-              <span class="detail-label">Activos:</span>
-              <div class="detail-skeleton"></div>
+          <div class="flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-slate-400">Activos:</span>
+              <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Pendientes:</span>
-              <div class="detail-skeleton"></div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-slate-400">Pendientes:</span>
+              <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
           </div>
         </ng-template>
       </div>
     </div>
 
-    <div class="stat-card success">
-      <div class="card-header">
-        <div class="card-icon">
+    <!-- Publications Card -->
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20 relative overflow-hidden group">
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-30"></div>
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center text-white text-2xl">
           <i class="material-icons">article</i>
         </div>
-        <div class="card-info">
-          <h3 class="card-title">Publicaciones</h3>
-          <p class="card-subtitle">Contenido generado por usuarios</p>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">Publicaciones</h3>
+          <p class="text-sm text-slate-400">Contenido generado por usuarios</p>
         </div>
       </div>
-      <div class="card-content">
-        <div class="main-stat" *ngIf="!isLoadingPublications; else publicationsLoading">
-          <span class="stat-number">{{ countPublications | number }}</span>
-          <span class="stat-label">publicaciones</span>
+      <div>
+        <div class="flex items-baseline gap-2 mb-4" *ngIf="!isLoadingPublications; else publicationsLoading">
+          <span class="text-5xl font-bold text-slate-100">{{ countPublications | number }}</span>
+          <span class="text-lg text-slate-400">publicaciones</span>
         </div>
         <ng-template #publicationsLoading>
-          <div class="main-stat loading">
-            <div class="stat-skeleton"></div>
-            <span class="stat-label">publicaciones</span>
+          <div class="flex items-baseline gap-2 mb-4">
+            <div class="w-20 h-12 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
+            <span class="text-lg text-slate-400">publicaciones</span>
           </div>
         </ng-template>
-        <div class="stat-details" *ngIf="!isLoadingPublications; else publicationsDetailsLoading">
-          <div class="detail-item">
-            <span class="detail-label">Con media:</span>
-            <span class="detail-value">{{ publicationsWithMedia | number }}</span>
+        <div class="flex flex-col gap-2" *ngIf="!isLoadingPublications; else publicationsDetailsLoading">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-400">Con media:</span>
+            <span class="text-sm font-semibold text-slate-100">{{ publicationsWithMedia | number }}</span>
           </div>
-          <div class="detail-item">
-            <span class="detail-label">Hoy:</span>
-            <span class="detail-value">{{ todayPublications | number }}</span>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-400">Hoy:</span>
+            <span class="text-sm font-semibold text-slate-100">{{ todayPublications | number }}</span>
           </div>
         </div>
         <ng-template #publicationsDetailsLoading>
-          <div class="stat-details">
-            <div class="detail-item">
-              <span class="detail-label">Con media:</span>
-              <div class="detail-skeleton"></div>
+          <div class="flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-slate-400">Con media:</span>
+              <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Hoy:</span>
-              <div class="detail-skeleton"></div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-slate-400">Hoy:</span>
+              <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
           </div>
         </ng-template>
       </div>
     </div>
 
-    <div class="stat-card info">
-      <div class="card-header">
-        <div class="card-icon">
+    <!-- Comments Card -->
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20 relative overflow-hidden group">
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-30"></div>
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center text-white text-2xl">
           <i class="material-icons">chat_bubble</i>
         </div>
-        <div class="card-info">
-          <h3 class="card-title">Comentarios</h3>
-          <p class="card-subtitle">Interacciones en publicaciones</p>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">Comentarios</h3>
+          <p class="text-sm text-slate-400">Interacciones en publicaciones</p>
         </div>
       </div>
-      <div class="card-content">
-        <div class="main-stat" *ngIf="!isLoadingComments; else commentsLoading">
-          <span class="stat-number">{{ totalComments | number }}</span>
-          <span class="stat-label">comentarios</span>
+      <div>
+        <div class="flex items-baseline gap-2 mb-4" *ngIf="!isLoadingComments; else commentsLoading">
+          <span class="text-5xl font-bold text-slate-100">{{ totalComments | number }}</span>
+          <span class="text-lg text-slate-400">comentarios</span>
         </div>
         <ng-template #commentsLoading>
-          <div class="main-stat loading">
-            <div class="stat-skeleton"></div>
-            <span class="stat-label">comentarios</span>
+          <div class="flex items-baseline gap-2 mb-4">
+            <div class="w-20 h-12 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
+            <span class="text-lg text-slate-400">comentarios</span>
           </div>
         </ng-template>
-        <div class="stat-details" *ngIf="!isLoadingComments; else commentsDetailsLoading">
-          <div class="detail-item">
-            <span class="detail-label">Promedio por pub:</span>
-            <span class="detail-value">{{ avgCommentsPerPublication | number:'1.1-1' }}</span>
+        <div class="flex flex-col gap-2" *ngIf="!isLoadingComments; else commentsDetailsLoading">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-400">Promedio por pub:</span>
+            <span class="text-sm font-semibold text-slate-100">{{ avgCommentsPerPublication | number:'1.1-1' }}</span>
           </div>
-          <div class="detail-item">
-            <span class="detail-label">Hoy:</span>
-            <span class="detail-value">{{ todayComments | number }}</span>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-400">Hoy:</span>
+            <span class="text-sm font-semibold text-slate-100">{{ todayComments | number }}</span>
           </div>
         </div>
         <ng-template #commentsDetailsLoading>
-          <div class="stat-details">
-            <div class="detail-item">
-              <span class="detail-label">Promedio por pub:</span>
-              <div class="detail-skeleton"></div>
+          <div class="flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-slate-400">Promedio por pub:</span>
+              <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Hoy:</span>
-              <div class="detail-skeleton"></div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-slate-400">Hoy:</span>
+              <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
           </div>
         </ng-template>
       </div>
     </div>
 
-    <div class="stat-card warning">
-      <div class="card-header">
-        <div class="card-icon">
+    <!-- Reactions Card -->
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20 relative overflow-hidden group">
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-30"></div>
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center text-white text-2xl">
           <i class="material-icons">favorite</i>
         </div>
-        <div class="card-info">
-          <h3 class="card-title">Reacciones</h3>
-          <p class="card-subtitle">Engagement de usuarios</p>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">Reacciones</h3>
+          <p class="text-sm text-slate-400">Engagement de usuarios</p>
         </div>
       </div>
-      <div class="card-content">
-        <div class="main-stat" *ngIf="!isLoadingReactions; else reactionsLoading">
-          <span class="stat-number">{{ totalReactions | number }}</span>
-          <span class="stat-label">reacciones</span>
+      <div>
+        <div class="flex items-baseline gap-2 mb-4" *ngIf="!isLoadingReactions; else reactionsLoading">
+          <span class="text-5xl font-bold text-slate-100">{{ totalReactions | number }}</span>
+          <span class="text-lg text-slate-400">reacciones</span>
         </div>
         <ng-template #reactionsLoading>
-          <div class="main-stat loading">
-            <div class="stat-skeleton"></div>
-            <span class="stat-label">reacciones</span>
+          <div class="flex items-baseline gap-2 mb-4">
+            <div class="w-20 h-12 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
+            <span class="text-lg text-slate-400">reacciones</span>
           </div>
         </ng-template>
-        <div class="stat-details" *ngIf="!isLoadingReactions; else reactionsDetailsLoading">
-          <div class="detail-item">
-            <span class="detail-label">Promedio por pub:</span>
-            <span class="detail-value">{{ avgReactionsPerPublication | number:'1.1-1' }}</span>
+        <div class="flex flex-col gap-2" *ngIf="!isLoadingReactions; else reactionsDetailsLoading">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-400">Promedio por pub:</span>
+            <span class="text-sm font-semibold text-slate-100">{{ avgReactionsPerPublication | number:'1.1-1' }}</span>
           </div>
-          <div class="detail-item">
-            <span class="detail-label">Hoy:</span>
-            <span class="detail-value">{{ todayReactions | number }}</span>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-400">Hoy:</span>
+            <span class="text-sm font-semibold text-slate-100">{{ todayReactions | number }}</span>
           </div>
         </div>
         <ng-template #reactionsDetailsLoading>
-          <div class="stat-details">
-            <div class="detail-item">
-              <span class="detail-label">Promedio por pub:</span>
-              <div class="detail-skeleton"></div>
+          <div class="flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-slate-400">Promedio por pub:</span>
+              <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Hoy:</span>
-              <div class="detail-skeleton"></div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-slate-400">Hoy:</span>
+              <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
           </div>
         </ng-template>
       </div>
     </div>
 
-    <div class="stat-card danger">
-      <div class="card-header">
-        <div class="card-icon">
+    <!-- Reports Card -->
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20 relative overflow-hidden group">
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-30"></div>
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center text-white text-2xl">
           <i class="material-icons">flag</i>
         </div>
-        <div class="card-info">
-          <h3 class="card-title">Reportes</h3>
-          <p class="card-subtitle">Contenido reportado por usuarios</p>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">Reportes</h3>
+          <p class="text-sm text-slate-400">Contenido reportado por usuarios</p>
         </div>
       </div>
-      <div class="card-content">
-        <div class="main-stat" *ngIf="!isLoadingReports; else reportsLoading">
-          <span class="stat-number">{{ ReportsStatusPendingCount | number }}</span>
-          <span class="stat-label">pendientes</span>
+      <div>
+        <div class="flex items-baseline gap-2 mb-4" *ngIf="!isLoadingReports; else reportsLoading">
+          <span class="text-5xl font-bold text-slate-100">{{ ReportsStatusPendingCount | number }}</span>
+          <span class="text-lg text-slate-400">pendientes</span>
         </div>
         <ng-template #reportsLoading>
-          <div class="main-stat loading">
-            <div class="stat-skeleton"></div>
-            <span class="stat-label">pendientes</span>
+          <div class="flex items-baseline gap-2 mb-4">
+            <div class="w-20 h-12 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
+            <span class="text-lg text-slate-400">pendientes</span>
           </div>
         </ng-template>
-        <div class="stat-details" *ngIf="!isLoadingReports; else reportsDetailsLoading">
-          <div class="detail-item">
-            <span class="detail-label">Resueltos:</span>
-            <span class="detail-value">{{ resolvedReports | number }}</span>
+        <div class="flex flex-col gap-2" *ngIf="!isLoadingReports; else reportsDetailsLoading">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-400">Resueltos:</span>
+            <span class="text-sm font-semibold text-slate-100">{{ resolvedReports | number }}</span>
           </div>
-          <div class="detail-item">
-            <span class="detail-label">Hoy:</span>
-            <span class="detail-value">{{ todayReports | number }}</span>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-400">Hoy:</span>
+            <span class="text-sm font-semibold text-slate-100">{{ todayReports | number }}</span>
           </div>
         </div>
         <ng-template #reportsDetailsLoading>
-          <div class="stat-details">
-            <div class="detail-item">
-              <span class="detail-label">Resueltos:</span>
-              <div class="detail-skeleton"></div>
+          <div class="flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-slate-400">Resueltos:</span>
+              <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Hoy:</span>
-              <div class="detail-skeleton"></div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-slate-400">Hoy:</span>
+              <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
           </div>
         </ng-template>
       </div>
     </div>
 
-    <div class="stat-card secondary">
-      <div class="card-header">
-        <div class="card-icon">
+    <!-- Messages Card -->
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20 relative overflow-hidden group">
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-slate-500 to-transparent opacity-30"></div>
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-12 bg-gradient-to-br from-slate-500 to-slate-600 rounded-xl flex items-center justify-center text-white text-2xl">
           <i class="material-icons">email</i>
         </div>
-        <div class="card-info">
-          <h3 class="card-title">Mensajes</h3>
-          <p class="card-subtitle">Comunicación entre usuarios</p>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">Mensajes</h3>
+          <p class="text-sm text-slate-400">Comunicación entre usuarios</p>
         </div>
       </div>
-      <div class="card-content">
-        <div class="main-stat" *ngIf="!isLoadingMessages; else messagesLoading">
-          <span class="stat-number">{{ totalMessages | number }}</span>
-          <span class="stat-label">mensajes</span>
+      <div>
+        <div class="flex items-baseline gap-2 mb-4" *ngIf="!isLoadingMessages; else messagesLoading">
+          <span class="text-5xl font-bold text-slate-100">{{ totalMessages | number }}</span>
+          <span class="text-lg text-slate-400">mensajes</span>
         </div>
         <ng-template #messagesLoading>
-          <div class="main-stat loading">
-            <div class="stat-skeleton"></div>
-            <span class="stat-label">mensajes</span>
+          <div class="flex items-baseline gap-2 mb-4">
+            <div class="w-20 h-12 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
+            <span class="text-lg text-slate-400">mensajes</span>
           </div>
         </ng-template>
-        <div class="stat-details" *ngIf="!isLoadingMessages; else messagesDetailsLoading">
-          <div class="detail-item">
-            <span class="detail-label">No leídos:</span>
-            <span class="detail-value">{{ unreadMessages | number }}</span>
+        <div class="flex flex-col gap-2" *ngIf="!isLoadingMessages; else messagesDetailsLoading">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-400">No leídos:</span>
+            <span class="text-sm font-semibold text-slate-100">{{ unreadMessages | number }}</span>
           </div>
-          <div class="detail-item">
-            <span class="detail-label">Conversaciones:</span>
-            <span class="detail-value">{{ activeConversations | number }}</span>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-slate-400">Conversaciones:</span>
+            <span class="text-sm font-semibold text-slate-100">{{ activeConversations | number }}</span>
           </div>
         </div>
         <ng-template #messagesDetailsLoading>
-          <div class="stat-details">
-            <div class="detail-item">
-              <span class="detail-label">No leídos:</span>
-              <div class="detail-skeleton"></div>
+          <div class="flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-slate-400">No leídos:</span>
+              <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
-            <div class="detail-item">
-              <span class="detail-label">Conversaciones:</span>
-              <div class="detail-skeleton"></div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-slate-400">Conversaciones:</span>
+              <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
           </div>
         </ng-template>
@@ -333,78 +357,73 @@
   </div>
 
   <!-- Additional Metrics Section -->
-  <div class="additional-metrics" *ngIf="!isLoading">
-    <h2 class="section-title">Métricas Adicionales</h2>
+  <div class="p-6 border-t border-slate-600 mt-8" *ngIf="!isLoading">
+    <h2 class="text-2xl font-semibold text-slate-100 mb-6">Métricas Adicionales</h2>
     
-    <div class="metrics-grid">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <!-- Engagement Rate -->
-      <div class="metric-card">
-        <div class="metric-header">
-          <i class="material-icons metric-icon">trending_up</i>
-          <h4>Tasa de Engagement</h4>
+      <div class="bg-white/3 border border-white/5 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/10">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400">
+            <i class="material-icons">trending_up</i>
+          </div>
+          <h4 class="text-base font-semibold text-slate-100">Tasa de Engagement</h4>
         </div>
-        <div class="metric-value">
-          <span class="percentage">{{ engagementRate | number:'1.1-1' }}%</span>
+        <div class="mb-3">
+          <span class="text-3xl font-bold text-emerald-500">{{ engagementRate | number:'1.1-1' }}%</span>
         </div>
-        <div class="metric-description">
+        <div class="text-sm text-slate-400 leading-relaxed">
           Porcentaje de usuarios activos que interactúan con el contenido
         </div>
       </div>
 
       <!-- Content Growth -->
-      <div class="metric-card">
-        <div class="metric-header">
-          <i class="material-icons metric-icon">arrow_upward</i>
-          <h4>Crecimiento de Contenido</h4>
+      <div class="bg-white/3 border border-white/5 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/10">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center text-emerald-400">
+            <i class="material-icons">arrow_upward</i>
+          </div>
+          <h4 class="text-base font-semibold text-slate-100">Crecimiento de Contenido</h4>
         </div>
-        <div class="metric-value">
-          <span class="percentage">{{ contentGrowthRate | number:'1.1-1' }}%</span>
+        <div class="mb-3">
+          <span class="text-3xl font-bold text-emerald-500">{{ contentGrowthRate | number:'1.1-1' }}%</span>
         </div>
-        <div class="metric-description">
+        <div class="text-sm text-slate-400 leading-relaxed">
           Incremento de publicaciones en los últimos 7 días
         </div>
       </div>
 
       <!-- User Activity -->
-      <div class="metric-card">
-        <div class="metric-header">
-          <i class="material-icons metric-icon">access_time</i>
-          <h4>Actividad de Usuarios</h4>
+      <div class="bg-white/3 border border-white/5 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/10">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center text-amber-400">
+            <i class="material-icons">access_time</i>
+          </div>
+          <h4 class="text-base font-semibold text-slate-100">Actividad de Usuarios</h4>
         </div>
-        <div class="metric-value">
-          <span class="percentage">{{ userActivityRate | number:'1.1-1' }}%</span>
+        <div class="mb-3">
+          <span class="text-3xl font-bold text-emerald-500">{{ userActivityRate | number:'1.1-1' }}%</span>
         </div>
-        <div class="metric-description">
+        <div class="text-sm text-slate-400 leading-relaxed">
           Usuarios que han interactuado en las últimas 24 horas
         </div>
       </div>
 
       <!-- Response Time -->
-      <div class="metric-card">
-        <div class="metric-header">
-          <i class="material-icons metric-icon">timer</i>
-          <h4>Tiempo de Respuesta</h4>
+      <div class="bg-white/3 border border-white/5 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/10">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center text-amber-400">
+            <i class="material-icons">timer</i>
+          </div>
+          <h4 class="text-base font-semibold text-slate-100">Tiempo de Respuesta</h4>
         </div>
-        <div class="metric-value">
-          <span class="time">{{ avgResponseTime | number:'1.0-0' }}h</span>
+        <div class="mb-3">
+          <span class="text-3xl font-bold text-amber-500">{{ avgResponseTime | number:'1.0-0' }}h</span>
         </div>
-        <div class="metric-description">
+        <div class="text-sm text-slate-400 leading-relaxed">
           Tiempo promedio de respuesta a reportes
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- Error State -->
-  <div class="error-state" *ngIf="error">
-    <div class="error-content">
-      <i class="material-icons error-icon">warning</i>
-      <h3>Error al cargar estadísticas</h3>
-      <p>{{ error }}</p>
-      <button class="refresh-btn primary" (click)="refreshStatistics()">
-        <i class="material-icons">refresh</i>
-        <span>Intentar de nuevo</span>
-      </button>
     </div>
   </div>
 </div>

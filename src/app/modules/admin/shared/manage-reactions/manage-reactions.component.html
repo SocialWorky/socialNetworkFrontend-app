@@ -1,15 +1,18 @@
-<div class="manage-reactions-dashboard">
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-inter">
   <!-- Header Section -->
-  <div class="dashboard-header">
-    <div class="header-content">
-      <div class="header-title">
-        <h1 class="title">Gestión de Reacciones</h1>
-        <p class="subtitle">Crea y administra reacciones personalizadas para la plataforma</p>
+  <div class="bg-slate-700/95 backdrop-blur-lg border border-slate-600 rounded-xl p-6 mb-8 shadow-lg">
+    <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
+      <div class="flex-1">
+        <h1 class="text-4xl font-bold text-slate-100 mb-2">Gestión de Reacciones</h1>
+        <p class="text-slate-300 text-lg">Crea y administra reacciones personalizadas para la plataforma</p>
       </div>
-      <div class="header-actions">
-        <button class="refresh-btn" (click)="listReactions()" [disabled]="loadReactionsButtons">
-          <i class="material-icons" [class.rotating]="loadReactionsButtons">refresh</i>
-          <span class="btn-text">Recargar</span>
+      <div class="flex gap-4 items-center lg:flex-row flex-col lg:w-auto w-full">
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg"
+          (click)="listReactions()" 
+          [disabled]="loadReactionsButtons">
+          <i class="material-icons" [class.animate-spin]="loadReactionsButtons">refresh</i>
+          <span>Recargar</span>
         </button>
       </div>
     </div>
@@ -22,16 +25,18 @@
   </worky-loading-spinner>
 
   <!-- Error State -->
-  <div class="error-container" *ngIf="error && !isLoading">
-    <div class="error-content">
-      <div class="error-icon">
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="error && !isLoading">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-6xl text-red-500/80">
         <i class="material-icons">error_outline</i>
       </div>
-      <div class="error-text">
-        <h3>Error al cargar reacciones</h3>
-        <p>{{ error }}</p>
-        <button class="retry-btn" (click)="listReactions()">
-          <i class="material-icons">refresh</i>
+      <div>
+        <h3 class="text-2xl font-semibold text-slate-100 mb-2">Error al cargar reacciones</h3>
+        <p class="text-slate-300 mb-6 leading-relaxed">{{ error }}</p>
+        <button 
+          class="flex items-center gap-2 px-6 py-3 border border-red-500 rounded-lg bg-red-500/10 text-red-400 font-semibold text-sm hover:bg-red-500 hover:text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/30"
+          (click)="listReactions()">
+          <i class="material-icons text-lg">refresh</i>
           Reintentar
         </button>
       </div>
@@ -45,96 +50,96 @@
   </worky-loading-spinner>
 
   <!-- Main Content -->
-  <div class="reactions-content" *ngIf="!isLoading && !error">
+  <div class="flex flex-col gap-8" *ngIf="!isLoading && !error">
     
     <!-- Create Reaction Section -->
-    <div class="create-section">
-      <div class="section-header">
-        <div class="section-icon">
+    <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+      <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
           <i class="material-icons">add_circle</i>
         </div>
-        <div class="section-info">
-          <h3 class="section-title">Crear Nueva Reacción</h3>
-          <p class="section-description">Agrega una nueva reacción personalizada al sistema</p>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">Crear Nueva Reacción</h3>
+          <p class="text-sm text-slate-400">Agrega una nueva reacción personalizada al sistema</p>
         </div>
       </div>
       
-      <div class="section-content">
-        <form [formGroup]="reactionForm" (ngSubmit)="createCustomReaction()" class="create-form">
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="name" class="form-label">
-                <i class="material-icons">label</i>
+      <div class="p-6">
+        <form [formGroup]="reactionForm" (ngSubmit)="createCustomReaction()" class="space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label for="name" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">label</i>
                 Nombre de la Reacción
               </label>
               <input 
                 formControlName="name" 
                 id="name" 
                 type="text" 
-                class="form-input"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500"
                 placeholder="Ej: Me encanta, Increíble, etc."
               >
-              <div class="error-message" *ngIf="reactionForm.controls['name'].invalid && reactionForm.controls['name'].touched">
-                <i class="material-icons">error</i>
+              <div class="flex items-center gap-2 text-red-400 text-xs" *ngIf="reactionForm.controls['name'].invalid && reactionForm.controls['name'].touched">
+                <i class="material-icons text-sm">error</i>
                 El nombre es requerido
               </div>
             </div>
 
-            <div class="form-group">
-              <label for="emoji" class="form-label">
-                <i class="material-icons">emoji_emotions</i>
+            <div class="space-y-2">
+              <label for="emoji" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">emoji_emotions</i>
                 Emoji o URL de Imagen
               </label>
               <input 
                 formControlName="emoji" 
                 id="emoji" 
                 type="text" 
-                class="form-input"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500"
                 placeholder="😍 o https://ejemplo.com/imagen.png"
               >
-              <div class="error-message" *ngIf="reactionForm.controls['emoji'].invalid && reactionForm.controls['emoji'].touched">
-                <i class="material-icons">error</i>
+              <div class="flex items-center gap-2 text-red-400 text-xs" *ngIf="reactionForm.controls['emoji'].invalid && reactionForm.controls['emoji'].touched">
+                <i class="material-icons text-sm">error</i>
                 El emoji es requerido
               </div>
             </div>
+          </div>
 
-            <div class="form-group full-width">
-              <label for="image" class="form-label">
-                <i class="material-icons">upload</i>
-                Subir Imagen
-              </label>
-              <div class="file-upload-container">
-                <input 
-                  id="image" 
-                  type="file"
-                  (change)="onFileChange($event)"
-                  accept="image/*"
-                  class="form-file-input"
-                >
-                <div class="file-upload-info" *ngIf="!imagePreview">
-                  <i class="material-icons">cloud_upload</i>
-                  <span>Haz clic para seleccionar una imagen o arrastra aquí</span>
+          <div class="space-y-2">
+            <label for="image" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+              <i class="material-icons text-blue-500 text-base">upload</i>
+              Subir Imagen
+            </label>
+            <div class="relative border-2 border-dashed border-slate-600 rounded-lg bg-slate-800 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5 cursor-pointer">
+              <input 
+                id="image" 
+                type="file"
+                (change)="onFileChange($event)"
+                accept="image/*"
+                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              >
+              <div class="flex flex-col items-center gap-2 p-8 text-slate-400 text-center" *ngIf="!imagePreview">
+                <i class="material-icons text-3xl text-blue-500">cloud_upload</i>
+                <span class="text-sm">Haz clic para seleccionar una imagen o arrastra aquí</span>
+              </div>
+              <div class="p-4" *ngIf="imagePreview">
+                <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-600">
+                  <span class="text-sm font-semibold text-slate-100 truncate max-w-[200px]">{{ selectedFileName }}</span>
+                  <button type="button" class="flex items-center justify-center w-6 h-6 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-200 hover:scale-110" (click)="removeSelectedFile()">
+                    <i class="material-icons text-sm">close</i>
+                  </button>
                 </div>
-                <div class="file-preview" *ngIf="imagePreview">
-                  <div class="preview-header">
-                    <span class="file-name">{{ selectedFileName }}</span>
-                    <button type="button" class="remove-file-btn" (click)="removeSelectedFile()">
-                      <i class="material-icons">close</i>
-                    </button>
-                  </div>
-                  <div class="preview-image">
-                    <img [src]="imagePreview" [alt]="selectedFileName" class="preview-img">
-                  </div>
+                <div class="flex justify-center items-center min-h-[120px] bg-slate-700 rounded-lg border border-slate-600">
+                  <img [src]="imagePreview" [alt]="selectedFileName" class="max-w-full max-h-[120px] object-contain rounded transition-all duration-200 hover:scale-105">
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="form-actions">
+          <div class="flex justify-end pt-6 border-t border-slate-600">
             <button 
               type="submit" 
               [disabled]="reactionForm.invalid || loadReactionsButtons"
-              class="submit-btn"
+              class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30"
             >
               <i class="material-icons">add</i>
               <span>Crear Reacción</span>
@@ -145,64 +150,70 @@
     </div>
 
     <!-- Reactions List Section -->
-    <div class="reactions-list-section">
-      <div class="section-header">
-        <div class="section-icon">
+    <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+      <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
           <i class="material-icons">list</i>
         </div>
-        <div class="section-info">
-          <h3 class="section-title">Reacciones Disponibles</h3>
-          <p class="section-description">Lista de todas las reacciones personalizadas creadas</p>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">Reacciones Disponibles</h3>
+          <p class="text-sm text-slate-400">Lista de todas las reacciones personalizadas creadas</p>
         </div>
-        <div class="section-stats">
-          <span class="stat-badge">{{ reactionsList.length }} reacciones</span>
+        <div class="bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-full text-sm font-semibold border border-emerald-500/30">
+          {{ reactionsList.length }} reacciones
         </div>
       </div>
       
-      <div class="section-content">
-        <div class="reactions-table-container">
-          <table class="reactions-table">
+      <div class="p-6">
+        <div class="overflow-x-auto border border-slate-600 rounded-xl bg-slate-800/50">
+          <table class="w-full border-collapse">
             <thead>
-              <tr>
-                <th class="table-header">
-                  <i class="material-icons">label</i>
-                  Nombre
+              <tr class="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b-2 border-slate-600">
+                <th class="px-6 py-4 text-left font-semibold text-slate-100 text-sm w-[60%]">
+                  <div class="flex items-center gap-2">
+                    <i class="material-icons text-blue-500">label</i>
+                    Nombre
+                  </div>
                 </th>
-                <th class="table-header">
-                  <i class="material-icons">image</i>
-                  Imagen
+                <th class="px-6 py-4 text-center font-semibold text-slate-100 text-sm w-[20%]">
+                  <div class="flex items-center justify-center gap-2">
+                    <i class="material-icons text-blue-500">image</i>
+                    Imagen
+                  </div>
                 </th>
-                <th class="table-header actions-header">
-                  <i class="material-icons">settings</i>
-                  Acciones
+                <th class="px-6 py-4 text-center font-semibold text-slate-100 text-sm w-[20%]">
+                  <div class="flex items-center justify-center gap-2">
+                    <i class="material-icons text-blue-500">settings</i>
+                    Acciones
+                  </div>
                 </th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let reaction of reactionsList" class="table-row">
-                <td class="table-cell name-cell">
-                  <div class="reaction-name">
-                    <span class="name-text">{{ reaction.name }}</span>
+              <tr *ngFor="let reaction of reactionsList" class="border-b border-slate-600 transition-all duration-200 hover:bg-blue-500/5 hover:-translate-y-0.5 hover:shadow-lg">
+                <td class="px-6 py-4">
+                  <div class="text-slate-100 font-semibold text-sm">
+                    <span>{{ reaction.name }}</span>
                   </div>
                 </td>
-                <td class="table-cell image-cell">
-                  <div class="reaction-image">
+                <td class="px-6 py-4 text-center">
+                  <div class="flex justify-center items-center">
                     <worky-image 
                       [src]="reaction.emoji" 
                       [alt]="reaction.name + ' icon'" 
-                      cssClass="emoji-image">
+                      cssClass="w-12 h-12 max-w-[70px] max-h-[70px] object-contain rounded-lg transition-all duration-200 hover:scale-120 hover:border-2 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/30">
                     </worky-image>
                   </div>
                 </td>
-                <td class="table-cell actions-cell">
-                  <div class="action-buttons">
+                <td class="px-6 py-4 text-center">
+                  <div class="flex justify-center">
                     <button 
-                      class="delete-btn"
+                      class="flex items-center gap-2 px-4 py-2 border border-red-500 rounded-lg bg-red-500/10 text-red-400 text-xs font-semibold hover:bg-red-500 hover:text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/30"
                       (click)="deleteReaction(reaction._id)"
                       [title]="'Eliminar ' + reaction.name"
                     >
-                      <i class="material-icons">delete</i>
-                      <span class="btn-text">Eliminar</span>
+                      <i class="material-icons text-sm">delete</i>
+                      <span class="hidden sm:inline">Eliminar</span>
                     </button>
                   </div>
                 </td>
@@ -211,11 +222,11 @@
           </table>
 
           <!-- Empty State -->
-          <div class="empty-state" *ngIf="reactionsList.length === 0">
-            <div class="empty-content">
-              <i class="material-icons empty-icon">emoji_emotions</i>
-              <h3>No hay reacciones creadas</h3>
-              <p>Crea tu primera reacción personalizada usando el formulario de arriba</p>
+          <div class="flex justify-center items-center min-h-[300px] p-12" *ngIf="reactionsList.length === 0">
+            <div class="text-center max-w-md">
+              <i class="material-icons text-6xl text-cyan-500/70 mb-6">emoji_emotions</i>
+              <h3 class="text-2xl font-semibold text-slate-100 mb-3">No hay reacciones creadas</h3>
+              <p class="text-slate-400 leading-relaxed">Crea tu primera reacción personalizada usando el formulario de arriba</p>
             </div>
           </div>
         </div>
@@ -224,12 +235,14 @@
   </div>
 
   <!-- Error State -->
-  <div class="error-state" *ngIf="error">
-    <div class="error-content">
-      <i class="material-icons error-icon">warning</i>
-      <h3>Error al cargar reacciones</h3>
-      <p>{{ error }}</p>
-      <button class="refresh-btn primary" (click)="listReactions()">
+  <div class="flex justify-center items-center min-h-[200px]" *ngIf="error">
+    <div class="text-center text-slate-400">
+      <i class="material-icons text-5xl text-red-500 mb-4">warning</i>
+      <h3 class="text-xl font-semibold text-slate-100 mb-2">Error al cargar reacciones</h3>
+      <p class="mb-6 text-sm">{{ error }}</p>
+      <button 
+        class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
+        (click)="listReactions()">
         <i class="material-icons">refresh</i>
         <span>Intentar de nuevo</span>
       </button>
