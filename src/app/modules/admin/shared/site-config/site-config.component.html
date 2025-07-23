@@ -1,55 +1,67 @@
-<div class="site-config-dashboard">
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-inter">
   <!-- Header Section -->
-  <div class="dashboard-header">
-    <div class="header-content">
-      <div class="header-title">
-        <h1 class="title">Configuración del Sitio</h1>
-        <p class="subtitle">Gestiona la configuración general de la plataforma</p>
+  <div class="bg-slate-700/95 backdrop-blur-lg border border-slate-600 rounded-xl p-6 mb-8 shadow-lg">
+    <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
+      <div class="flex-1">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+          Configuración del Sitio
+        </h1>
+        <p class="text-slate-300 text-lg">Gestiona la configuración general de la plataforma</p>
       </div>
-      <div class="header-actions">
-        <button class="save-btn" (click)="updateConfig()" [disabled]="loadUpdateConfigButtons || !configForm.valid">
-          <i class="material-icons" [class.rotating]="loadUpdateConfigButtons">save</i>
-          <span class="btn-text">Guardar Cambios</span>
+      <div class="flex gap-4 items-center lg:flex-row flex-col lg:w-auto w-full">
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30"
+          (click)="updateConfig()" 
+          [disabled]="loadUpdateConfigButtons || !configForm.valid">
+          <i class="material-icons" [class.animate-spin]="loadUpdateConfigButtons">save</i>
+          <span>Guardar Cambios</span>
         </button>
-        <button class="refresh-btn" (click)="getSiteConfig()" [disabled]="loadUpdateConfigButtons">
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg"
+          (click)="getSiteConfig()" 
+          [disabled]="loadUpdateConfigButtons">
           <i class="material-icons">refresh</i>
-          <span class="btn-text">Recargar</span>
+          <span>Recargar</span>
         </button>
       </div>
     </div>
   </div>
 
   <!-- Initial Loading State -->
-  <div class="loading-container" *ngIf="isLoading">
-    <div class="loading-content">
-      <div class="loading-spinner">
-        <div class="spinner-ring"></div>
-        <div class="spinner-ring"></div>
-        <div class="spinner-ring"></div>
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="isLoading">
+    <div class="flex flex-col items-center gap-8 text-center max-w-md">
+      <div class="relative w-20 h-20">
+        <div class="absolute w-full h-full border-3 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
+        <div class="absolute w-full h-full border-3 border-transparent border-r-cyan-500 rounded-full animate-spin" style="animation-delay: 0.5s"></div>
+        <div class="absolute w-full h-full border-3 border-transparent border-b-emerald-500 rounded-full animate-spin" style="animation-delay: 1s"></div>
       </div>
-      <div class="loading-text">
-        <h3>Cargando configuración</h3>
-        <p>Recopilando datos del sitio...</p>
-        <div class="loading-dots">
-          <span></span>
-          <span></span>
-          <span></span>
+      <div>
+        <h3 class="text-2xl font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+          Cargando configuración
+        </h3>
+        <p class="text-slate-300 mb-6">Recopilando datos del sitio...</p>
+        <div class="flex justify-center gap-2">
+          <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+          <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.2s"></span>
+          <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.4s"></span>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Error State -->
-  <div class="error-container" *ngIf="error && !isLoading">
-    <div class="error-content">
-      <div class="error-icon">
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="error && !isLoading">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-6xl text-red-500/80">
         <i class="material-icons">error_outline</i>
       </div>
-      <div class="error-text">
-        <h3>Error al cargar configuración</h3>
-        <p>{{ error }}</p>
-        <button class="retry-btn" (click)="getSiteConfig()">
-          <i class="material-icons">refresh</i>
+      <div>
+        <h3 class="text-2xl font-semibold text-slate-100 mb-2">Error al cargar configuración</h3>
+        <p class="text-slate-300 mb-6 leading-relaxed">{{ error }}</p>
+        <button 
+          class="flex items-center gap-2 px-6 py-3 border border-red-500 rounded-lg bg-red-500/10 text-red-400 font-semibold text-sm hover:bg-red-500 hover:text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/30"
+          (click)="getSiteConfig()">
+          <i class="material-icons text-lg">refresh</i>
           Reintentar
         </button>
       </div>
@@ -57,87 +69,87 @@
   </div>
 
   <!-- Saving Loading State -->
-  <div class="saving-container" *ngIf="loadUpdateConfigButtons && !isLoading">
-    <div class="saving-content">
-      <div class="saving-spinner">
-        <i class="material-icons rotating">save</i>
+  <div class="flex justify-center items-center min-h-[40vh] p-8" *ngIf="loadUpdateConfigButtons && !isLoading">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-5xl text-emerald-500">
+        <i class="material-icons animate-spin">save</i>
       </div>
-      <div class="saving-text">
-        <h3>Guardando configuración</h3>
-        <p>Actualizando datos del sitio...</p>
+      <div>
+        <h3 class="text-xl font-semibold text-slate-100 mb-2">Guardando configuración</h3>
+        <p class="text-slate-300">Actualizando datos del sitio...</p>
       </div>
     </div>
   </div>
 
   <!-- Main Configuration Form -->
-  <div class="config-content" *ngIf="!isLoading && !error">
-    <form [formGroup]="configForm" class="config-form">
+  <div class="flex flex-col gap-8" *ngIf="!isLoading && !error">
+    <form [formGroup]="configForm" class="space-y-8">
       
       <!-- Basic Information Section -->
-      <div class="config-section">
-        <div class="section-header">
-          <div class="section-icon">
+      <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+        <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+          <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
             <i class="material-icons">info</i>
           </div>
-          <div class="section-info">
-            <h3 class="section-title">Información Básica</h3>
-            <p class="section-description">Configuración general del sitio web</p>
+          <div class="flex-1">
+            <h3 class="text-xl font-semibold text-slate-100 mb-1">Información Básica</h3>
+            <p class="text-sm text-slate-400">Configuración general del sitio web</p>
           </div>
         </div>
         
-        <div class="section-content">
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="title" class="form-label">
-                <i class="material-icons">title</i>
+        <div class="p-6">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label for="title" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">title</i>
                 Título del Sitio
               </label>
               <input 
                 formControlName="title" 
                 id="title" 
                 type="text" 
-                class="form-input"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500"
                 placeholder="Ingresa el título de tu sitio"
               >
             </div>
 
-            <div class="form-group">
-              <label for="urlSite" class="form-label">
-                <i class="material-icons">link</i>
+            <div class="space-y-2">
+              <label for="urlSite" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">link</i>
                 URL del Sitio
               </label>
               <input 
                 formControlName="urlSite" 
                 id="urlSite" 
                 type="url" 
-                class="form-input"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500"
                 placeholder="https://tusitio.com"
               >
             </div>
 
-            <div class="form-group">
-              <label for="contactEmail" class="form-label">
-                <i class="material-icons">email</i>
+            <div class="space-y-2">
+              <label for="contactEmail" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">email</i>
                 Email de Contacto
               </label>
               <input 
                 formControlName="contactEmail" 
                 id="contactEmail" 
                 type="email" 
-                class="form-input"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500"
                 placeholder="contacto@tusitio.com"
               >
             </div>
 
-            <div class="form-group full-width">
-              <label for="description" class="form-label">
-                <i class="material-icons">description</i>
+            <div class="space-y-2 lg:col-span-2">
+              <label for="description" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">description</i>
                 Descripción de la App
               </label>
               <textarea 
                 formControlName="description" 
                 id="description" 
-                class="form-textarea"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500 resize-vertical min-h-[100px]"
                 rows="3"
                 placeholder="Describe brevemente tu aplicación..."
               ></textarea>
@@ -147,59 +159,57 @@
       </div>
 
       <!-- Branding Section -->
-      <div class="config-section">
-        <div class="section-header">
-          <div class="section-icon">
+      <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+        <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+          <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
             <i class="material-icons">palette</i>
           </div>
-          <div class="section-info">
-            <h3 class="section-title">Identidad Visual</h3>
-            <p class="section-description">Logo y elementos visuales del sitio</p>
+          <div class="flex-1">
+            <h3 class="text-xl font-semibold text-slate-100 mb-1">Identidad Visual</h3>
+            <p class="text-sm text-slate-400">Logo y elementos visuales del sitio</p>
           </div>
         </div>
         
-        <div class="section-content">
-          <div class="branding-grid">
-            <div class="logo-section">
-              <div class="logo-preview-container">
-                <img
-                  [src]="imagePreview || configForm.get('logoUrl')?.value || defaultLogo"
-                  alt="Vista previa del logo"
-                  class="logo-preview"
-                />
-                <div class="logo-overlay">
-                  <i class="material-icons">image</i>
-                </div>
+        <div class="p-6">
+          <div class="flex gap-8 items-start lg:flex-row flex-col lg:items-start items-center">
+            <div class="relative w-36 h-36 border-2 border-slate-600 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center group cursor-pointer">
+              <img
+                [src]="imagePreview || configForm.get('logoUrl')?.value || defaultLogo"
+                alt="Vista previa del logo"
+                class="w-full h-full object-contain p-4"
+              />
+              <div class="absolute inset-0 bg-slate-800/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <i class="material-icons text-3xl text-slate-400">image</i>
+              </div>
+            </div>
+            
+            <div class="flex-1 space-y-4 w-full">
+              <div class="space-y-2">
+                <label for="logoUrl" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                  <i class="material-icons text-blue-500 text-base">link</i>
+                  URL del Logo
+                </label>
+                <input 
+                  formControlName="logoUrl" 
+                  id="logoUrl" 
+                  type="url" 
+                  class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500"
+                  placeholder="https://ejemplo.com/logo.png"
+                >
               </div>
               
-              <div class="logo-actions">
-                <div class="form-group">
-                  <label for="logoUrl" class="form-label">
-                    <i class="material-icons">link</i>
-                    URL del Logo
-                  </label>
-                  <input 
-                    formControlName="logoUrl" 
-                    id="logoUrl" 
-                    type="url" 
-                    class="form-input"
-                    placeholder="https://ejemplo.com/logo.png"
-                  >
-                </div>
-                
-                <div class="form-group">
-                  <label for="image" class="form-label">
-                    <i class="material-icons">upload</i>
-                    Subir Logo
-                  </label>
-                  <input 
-                    id="image" 
-                    type="file" 
-                    (change)="onFileChange($event)"
-                    accept="image/*"
-                    class="form-file-input"
-                  >
-                </div>
+              <div class="space-y-2">
+                <label for="image" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                  <i class="material-icons text-blue-500 text-base">upload</i>
+                  Subir Logo
+                </label>
+                <input 
+                  id="image" 
+                  type="file" 
+                  (change)="onFileChange($event)"
+                  accept="image/*"
+                  class="w-full px-4 py-3 border-2 border-dashed border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+                >
               </div>
             </div>
           </div>
@@ -207,27 +217,27 @@
       </div>
 
       <!-- Legal Section -->
-      <div class="config-section">
-        <div class="section-header">
-          <div class="section-icon">
+      <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+        <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+          <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
             <i class="material-icons">gavel</i>
           </div>
-          <div class="section-info">
-            <h3 class="section-title">Información Legal</h3>
-            <p class="section-description">Políticas y términos legales</p>
+          <div class="flex-1">
+            <h3 class="text-xl font-semibold text-slate-100 mb-1">Información Legal</h3>
+            <p class="text-sm text-slate-400">Políticas y términos legales</p>
           </div>
         </div>
         
-        <div class="section-content">
-          <div class="form-group">
-            <label for="privacyPolicy" class="form-label">
-              <i class="material-icons">security</i>
+        <div class="p-6">
+          <div class="space-y-2">
+            <label for="privacyPolicy" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+              <i class="material-icons text-blue-500 text-base">security</i>
               Política de Privacidad
             </label>
             <textarea 
               formControlName="privacyPolicy" 
               id="privacyPolicy" 
-              class="form-textarea"
+              class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500 resize-vertical min-h-[150px]"
               rows="6"
               placeholder="Ingresa tu política de privacidad..."
             ></textarea>
@@ -236,70 +246,70 @@
       </div>
 
       <!-- Authentication Section -->
-      <div class="config-section">
-        <div class="section-header">
-          <div class="section-icon">
+      <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+        <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+          <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
             <i class="material-icons">lock</i>
           </div>
-          <div class="section-info">
-            <h3 class="section-title">Autenticación</h3>
-            <p class="section-description">Configuración de métodos de acceso</p>
+          <div class="flex-1">
+            <h3 class="text-xl font-semibold text-slate-100 mb-1">Autenticación</h3>
+            <p class="text-sm text-slate-400">Configuración de métodos de acceso</p>
           </div>
         </div>
         
-        <div class="section-content">
-          <div class="auth-grid">
-            <div class="auth-methods">
-              <h4 class="auth-subtitle">Métodos de Inicio de Sesión</h4>
+        <div class="p-6">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="space-y-4">
+              <h4 class="text-lg font-semibold text-slate-100 pb-2 border-b border-slate-600">Métodos de Inicio de Sesión</h4>
               
-              <div formGroupName="loginMethods" class="toggle-group">
-                <div class="toggle-item">
-                  <label class="toggle-switch">
+              <div formGroupName="loginMethods" class="space-y-4">
+                <div class="flex items-center gap-4 p-4 bg-slate-800 rounded-lg border border-slate-600 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5">
+                  <label class="relative inline-flex items-center cursor-pointer">
                     <input 
                       type="checkbox"
                       formControlName="email"
-                      class="toggle-input"
+                      class="sr-only peer"
                     >
-                    <span class="toggle-slider"></span>
+                    <div class="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                   </label>
-                  <div class="toggle-info">
-                    <span class="toggle-label">Iniciar sesión con Email</span>
-                    <span class="toggle-description">Permitir registro con email y contraseña</span>
+                  <div class="flex-1">
+                    <span class="block text-sm font-semibold text-slate-100">Iniciar sesión con Email</span>
+                    <span class="block text-xs text-slate-400">Permitir registro con email y contraseña</span>
                   </div>
                 </div>
 
-                <div class="toggle-item">
-                  <label class="toggle-switch">
+                <div class="flex items-center gap-4 p-4 bg-slate-800 rounded-lg border border-slate-600 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5">
+                  <label class="relative inline-flex items-center cursor-pointer">
                     <input 
                       type="checkbox"
                       formControlName="google"
-                      class="toggle-input"
+                      class="sr-only peer"
                     >
-                    <span class="toggle-slider"></span>
+                    <div class="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                   </label>
-                  <div class="toggle-info">
-                    <span class="toggle-label">Iniciar sesión con Google</span>
-                    <span class="toggle-description">Permitir registro con cuenta de Google</span>
+                  <div class="flex-1">
+                    <span class="block text-sm font-semibold text-slate-100">Iniciar sesión con Google</span>
+                    <span class="block text-xs text-slate-400">Permitir registro con cuenta de Google</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div class="registration-settings">
-              <h4 class="auth-subtitle">Configuración de Registro</h4>
+            <div class="space-y-4">
+              <h4 class="text-lg font-semibold text-slate-100 pb-2 border-b border-slate-600">Configuración de Registro</h4>
               
-              <div class="toggle-item">
-                <label class="toggle-switch">
+              <div class="flex items-center gap-4 p-4 bg-slate-800 rounded-lg border border-slate-600 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5">
+                <label class="relative inline-flex items-center cursor-pointer">
                   <input 
                     type="checkbox"
                     formControlName="invitationCode"
-                    class="toggle-input"
+                    class="sr-only peer"
                   >
-                  <span class="toggle-slider"></span>
+                  <div class="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                 </label>
-                <div class="toggle-info">
-                  <span class="toggle-label">Registro con Código de Invitación</span>
-                  <span class="toggle-description">Requerir código de invitación para registrarse</span>
+                <div class="flex-1">
+                  <span class="block text-sm font-semibold text-slate-100">Registro con Código de Invitación</span>
+                  <span class="block text-xs text-slate-400">Requerir código de invitación para registrarse</span>
                 </div>
               </div>
             </div>
@@ -311,12 +321,14 @@
   </div>
 
   <!-- Error State -->
-  <div class="error-state" *ngIf="error">
-    <div class="error-content">
-      <i class="material-icons error-icon">warning</i>
-      <h3>Error al cargar configuración</h3>
-      <p>{{ error }}</p>
-      <button class="refresh-btn primary" (click)="getSiteConfig()">
+  <div class="flex justify-center items-center min-h-[200px]" *ngIf="error">
+    <div class="text-center text-slate-400">
+      <i class="material-icons text-5xl text-red-500 mb-4">warning</i>
+      <h3 class="text-xl font-semibold text-slate-100 mb-2">Error al cargar configuración</h3>
+      <p class="mb-6 text-sm">{{ error }}</p>
+      <button 
+        class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
+        (click)="getSiteConfig()">
         <i class="material-icons">refresh</i>
         <span>Intentar de nuevo</span>
       </button>

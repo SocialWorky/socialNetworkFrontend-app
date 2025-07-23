@@ -1,150 +1,208 @@
-<div class="content-webhooks">
-  <div class="bg-gray-900 text-white py-12">
-    <div class="max-w-6xl mx-auto bg-gray-800 p-8 rounded-lg shadow-lg">
-      <h2 class="text-3xl font-semibold mb-6">GESTIÓN DE WEBHOOKS</h2>
-      <p class="text-gray-400 mb-8">Configura los webhooks para recibir notificaciones de eventos del sistema</p>
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-inter">
+  <!-- Header Section -->
+  <div class="bg-slate-700/95 backdrop-blur-lg border border-slate-600 rounded-xl p-6 mb-8 shadow-lg">
+    <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
+      <div class="flex-1">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+          Gestión de Webhooks
+        </h1>
+        <p class="text-slate-300 text-lg">Configura los webhooks para recibir notificaciones de eventos del sistema</p>
+      </div>
+    </div>
+  </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Formulario de Webhook -->
-        <div class="bg-gray-700 p-6 rounded-lg">
-          <h3 class="text-xl font-semibold mb-4 text-indigo-400">
+  <!-- Main Content -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Formulario de Webhook -->
+    <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+      <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+          <i class="material-icons">add</i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">
             {{ editingWebhook ? 'Editar Webhook' : 'Crear Nuevo Webhook' }}
           </h3>
-          <form [formGroup]="webhookForm" (ngSubmit)="saveWebhook()">
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Evento</label>
-                <select formControlName="event" 
-                        class="w-full bg-gray-600 text-white border border-gray-500 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-                  <option value="">Seleccionar evento</option>
-                  <option *ngFor="let event of availableEvents" [value]="event.value">
-                    {{ event.label }}
-                  </option>
-                </select>
-                <div *ngIf="webhookForm.get('event')?.invalid && webhookForm.get('event')?.touched" 
-                     class="text-red-500 text-sm mt-1">El evento es requerido.</div>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">URL del Webhook</label>
-                <input formControlName="url" type="url" placeholder="https://tu-servidor.com/webhook"
-                       class="w-full bg-gray-600 text-white border border-gray-500 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-                <div *ngIf="webhookForm.get('url')?.invalid && webhookForm.get('url')?.touched" 
-                     class="text-red-500 text-sm mt-1">La URL es requerida y debe ser válida.</div>
-              </div>
-              
-              <div class="mt-6 flex gap-3">
-                <button type="submit" 
-                        [disabled]="webhookForm.invalid || loadWebhookButtons"
-                        class="flex-1 bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed">
-                  <div *ngIf="loadWebhookButtons" class="loader"></div>
-                  <span *ngIf="!loadWebhookButtons">{{ editingWebhook ? 'Actualizar' : 'Crear' }} Webhook</span>
-                </button>
-                <button type="button" 
-                        (click)="cancelEdit()"
-                        class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 focus:outline-none focus:bg-gray-500 transition-colors">
-                  Cancelar
-                </button>
-              </div>
-            </div>
-          </form>
+          <p class="text-sm text-slate-400">Configura un nuevo webhook para recibir notificaciones</p>
         </div>
-
-        <!-- Lista de Webhooks -->
-        <div class="bg-gray-700 p-6 rounded-lg">
-          <h3 class="text-xl font-semibold mb-4 text-indigo-400">Webhooks Configurados</h3>
+      </div>
+      
+      <div class="p-6">
+        <form [formGroup]="webhookForm" (ngSubmit)="saveWebhook()" class="space-y-6">
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+              <i class="material-icons text-blue-500 text-base">event</i>
+              Evento
+            </label>
+            <select formControlName="event" 
+                    class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+              <option value="">Seleccionar evento</option>
+              <option *ngFor="let event of availableEvents" [value]="event.value">
+                {{ event.label }}
+              </option>
+            </select>
+            <div *ngIf="webhookForm.get('event')?.invalid && webhookForm.get('event')?.touched" 
+                 class="text-red-400 text-sm mt-1 flex items-center gap-1">
+              <i class="material-icons text-sm">error</i>
+              El evento es requerido.
+            </div>
+          </div>
           
-          <!-- Loading State -->
-          <div *ngIf="isLoading" class="loading-container">
-            <div class="loading-content">
-              <div class="loading-spinner">
-                <div class="spinner-ring"></div>
-                <div class="spinner-ring"></div>
-                <div class="spinner-ring"></div>
-              </div>
-              <div class="loading-text">
-                <h3>Cargando webhooks</h3>
-                <p>Recopilando configuraciones...</p>
-                <div class="loading-dots">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+              <i class="material-icons text-blue-500 text-base">link</i>
+              URL del Webhook
+            </label>
+            <input formControlName="url" 
+                   type="url" 
+                   placeholder="https://tu-servidor.com/webhook"
+                   class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
+            <div *ngIf="webhookForm.get('url')?.invalid && webhookForm.get('url')?.touched" 
+                 class="text-red-400 text-sm mt-1 flex items-center gap-1">
+              <i class="material-icons text-sm">error</i>
+              La URL es requerida y debe ser válida.
+            </div>
+          </div>
+          
+          <div class="flex gap-3 pt-4">
+            <button type="submit" 
+                    [disabled]="webhookForm.invalid || loadWebhookButtons"
+                    class="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30">
+              <div *ngIf="loadWebhookButtons" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span *ngIf="!loadWebhookButtons">{{ editingWebhook ? 'Actualizar' : 'Crear' }} Webhook</span>
+            </button>
+            <button type="button" 
+                    (click)="cancelEdit()"
+                    class="px-6 py-3 rounded-lg font-semibold text-sm bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Lista de Webhooks -->
+    <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+      <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+          <i class="material-icons">list</i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">Webhooks Configurados</h3>
+          <p class="text-sm text-slate-400">Lista de webhooks activos en el sistema</p>
+        </div>
+      </div>
+      
+      <div class="p-6">
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="flex justify-center items-center min-h-[200px]">
+          <div class="flex flex-col items-center gap-6 text-center max-w-md">
+            <div class="relative w-16 h-16">
+              <div class="absolute w-full h-full border-3 border-transparent border-t-blue-500 rounded-full animate-spin"></div>
+              <div class="absolute w-full h-full border-3 border-transparent border-r-cyan-500 rounded-full animate-spin" style="animation-delay: 0.5s"></div>
+              <div class="absolute w-full h-full border-3 border-transparent border-b-emerald-500 rounded-full animate-spin" style="animation-delay: 1s"></div>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+                Cargando webhooks
+              </h3>
+              <p class="text-slate-300 mb-4">Recopilando configuraciones...</p>
+              <div class="flex justify-center gap-2">
+                <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.2s"></span>
+                <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.4s"></span>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Webhooks List -->
-          <div *ngIf="!isLoading" class="space-y-4">
-            <div *ngFor="let webhook of webhooks; trackBy: trackByWebhook" 
-                 class="webhook-item bg-gray-600 rounded-lg p-4">
-              
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center space-x-3">
-                  <div class="w-3 h-3 rounded-full" 
-                       [class]="webhook.isActive ? 'bg-green-500' : 'bg-red-500'"></div>
-                  <span class="font-medium text-white">{{ getEventLabel(webhook.event) }}</span>
-                </div>
-                
-                <div class="flex space-x-2">
-                  <button (click)="toggleWebhookStatus(webhook)" 
-                          class="p-1 text-gray-400 hover:text-indigo-400 transition-colors"
-                          [title]="webhook.isActive ? 'Desactivar' : 'Activar'">
-                    <i class="material-icons text-sm">
-                      {{ webhook.isActive ? 'pause' : 'play_arrow' }}
-                    </i>
-                  </button>
-                  <button (click)="editWebhook(webhook)" 
-                          class="p-1 text-gray-400 hover:text-indigo-400 transition-colors"
-                          title="Editar">
-                    <i class="material-icons text-sm">edit</i>
-                  </button>
-                  <button (click)="deleteWebhook(webhook._id)" 
-                          class="p-1 text-gray-400 hover:text-red-400 transition-colors"
-                          title="Eliminar">
-                    <i class="material-icons text-sm">delete</i>
-                  </button>
-                </div>
+        <!-- Webhooks List -->
+        <div *ngIf="!isLoading" class="space-y-4">
+          <div *ngFor="let webhook of webhooks; trackBy: trackByWebhook" 
+               class="bg-slate-800/50 border border-slate-600 rounded-lg p-4 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5">
+            
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full" 
+                     [class]="webhook.isActive ? 'bg-emerald-500' : 'bg-red-500'"></div>
+                <span class="font-semibold text-slate-100">{{ getEventLabel(webhook.event) }}</span>
               </div>
               
-              <div class="text-sm text-gray-300 mb-2">
-                <span class="font-medium">URL:</span> 
-                <span class="break-all">{{ webhook.url }}</span>
-              </div>
-              
-              <div class="text-xs text-gray-400">
-                <span class="font-medium">Creado:</span> {{ webhook.createdAt | date:'dd/MM/yyyy HH:mm' }}
-                <span class="ml-4 font-medium">Estado:</span> 
-                <span [class]="webhook.isActive ? 'text-green-400' : 'text-red-400'">
-                  {{ webhook.isActive ? 'Activo' : 'Inactivo' }}
-                </span>
+              <div class="flex gap-2">
+                <button (click)="toggleWebhookStatus(webhook)" 
+                        class="p-2 text-slate-400 hover:text-blue-400 transition-all duration-200 hover:bg-blue-500/10 rounded-lg"
+                        [title]="webhook.isActive ? 'Desactivar' : 'Activar'">
+                  <i class="material-icons text-sm">
+                    {{ webhook.isActive ? 'pause' : 'play_arrow' }}
+                  </i>
+                </button>
+                <button (click)="editWebhook(webhook)" 
+                        class="p-2 text-slate-400 hover:text-blue-400 transition-all duration-200 hover:bg-blue-500/10 rounded-lg"
+                        title="Editar">
+                  <i class="material-icons text-sm">edit</i>
+                </button>
+                <button (click)="deleteWebhook(webhook._id)" 
+                        class="p-2 text-slate-400 hover:text-red-400 transition-all duration-200 hover:bg-red-500/10 rounded-lg"
+                        title="Eliminar">
+                  <i class="material-icons text-sm">delete</i>
+                </button>
               </div>
             </div>
             
-            <div *ngIf="webhooks.length === 0" class="empty-state">
-              <div class="empty-content">
-                <i class="material-icons empty-icon">webhook</i>
-                <h3>Sin webhooks configurados</h3>
-                <p>Crea tu primer webhook para recibir notificaciones de eventos del sistema</p>
-              </div>
+            <div class="text-sm text-slate-300 mb-2">
+              <span class="font-semibold">URL:</span> 
+              <span class="break-all">{{ webhook.url }}</span>
+            </div>
+            
+            <div class="text-xs text-slate-400 flex items-center gap-4">
+              <span class="flex items-center gap-1">
+                <i class="material-icons text-xs">schedule</i>
+                <span class="font-semibold">Creado:</span> {{ webhook.createdAt | date:'dd/MM/yyyy HH:mm' }}
+              </span>
+              <span class="flex items-center gap-1">
+                <i class="material-icons text-xs">circle</i>
+                <span class="font-semibold">Estado:</span> 
+                <span [class]="webhook.isActive ? 'text-emerald-400' : 'text-red-400'">
+                  {{ webhook.isActive ? 'Activo' : 'Inactivo' }}
+                </span>
+              </span>
+            </div>
+          </div>
+          
+          <div *ngIf="webhooks.length === 0" class="flex justify-center items-center min-h-[200px]">
+            <div class="text-center text-slate-400">
+              <i class="material-icons text-5xl text-slate-500 mb-4">webhook</i>
+              <h3 class="text-lg font-semibold text-slate-100 mb-2">Sin webhooks configurados</h3>
+              <p class="text-sm">Crea tu primer webhook para recibir notificaciones de eventos del sistema</p>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Información de Eventos -->
-      <div class="mt-8 bg-gray-700 p-6 rounded-lg">
-        <h3 class="text-xl font-semibold mb-4 text-indigo-400">Eventos Disponibles</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div *ngFor="let event of availableEvents" 
-               class="bg-gray-600 p-4 rounded-lg">
-            <div class="flex items-center space-x-2 mb-2">
-              <i class="material-icons text-indigo-400 text-sm">event</i>
-              <span class="font-medium text-white">{{ event.label }}</span>
-            </div>
-            <p class="text-sm text-gray-300">{{ event.description }}</p>
-            <code class="text-xs text-gray-400 mt-2 block">{{ event.value }}</code>
+  <!-- Información de Eventos -->
+  <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+    <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+      <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+        <i class="material-icons">info</i>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-xl font-semibold text-slate-100 mb-1">Eventos Disponibles</h3>
+        <p class="text-sm text-slate-400">Descripción de todos los eventos que puedes configurar</p>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div *ngFor="let event of availableEvents" 
+             class="bg-slate-800/50 border border-slate-600 rounded-lg p-4 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5">
+          <div class="flex items-center gap-2 mb-3">
+            <i class="material-icons text-blue-500 text-base">event</i>
+            <span class="font-semibold text-slate-100">{{ event.label }}</span>
           </div>
+          <p class="text-sm text-slate-300 mb-3 leading-relaxed">{{ event.description }}</p>
+          <code class="text-xs text-slate-400 bg-slate-900 px-2 py-1 rounded block">{{ event.value }}</code>
         </div>
       </div>
     </div>

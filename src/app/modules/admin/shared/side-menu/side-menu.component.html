@@ -1,85 +1,107 @@
-<div class="side-menu-container">
+<div class="h-full bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 flex flex-col shadow-2xl">
   <!-- Header Section -->
-  <div class="menu-header">
-    <div class="logo-section">
-      <div class="logo-icon">
-        <i class="material-icons">admin_panel_settings</i>
+  <div class="p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/50 to-slate-700/50 backdrop-blur-sm">
+    <div class="flex items-center gap-4">
+      <div class="relative">
+        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-white text-xl shadow-lg shadow-blue-500/25">
+          <i class="material-icons">admin_panel_settings</i>
+        </div>
+        <div class="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-900 animate-pulse"></div>
       </div>
-      <div class="logo-content">
-        <h1 class="logo-title">{{ title }}</h1>
-        <p class="logo-subtitle">{{ subTitle }}</p>
+      <div class="flex-1 min-w-0">
+        <h1 class="text-lg font-bold bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent truncate">{{ title }}</h1>
+        <p class="text-sm text-slate-400 truncate">{{ subTitle }}</p>
       </div>
     </div>
   </div>
 
   <!-- User Profile Section -->
-  <div class="user-profile">
-    <div class="profile-info">
-      <div class="welcome-text">{{ 'admin.sideMenu-welcome' | workyTranslations }}</div>
-      <div class="user-info">
-        <div class="avatar-container">
+  <div class="p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/30 to-slate-700/30">
+    <div class="space-y-4">
+      <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ 'admin.sideMenu-welcome' | workyTranslations }}</div>
+      <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+        <div class="relative">
           <worky-avatar [size]="48"></worky-avatar>
-          <div class="online-indicator"></div>
+          <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-900 shadow-lg">
+            <div class="w-full h-full bg-emerald-400 rounded-full animate-ping opacity-75"></div>
+          </div>
         </div>
-        <div class="user-details">
-          <span class="user-name">{{ userName }}</span>
-          <span class="user-role">Administrator</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-semibold text-slate-100 truncate">{{ userName }}</div>
+          <div class="flex items-center gap-2 mt-1">
+            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+            <div class="text-xs text-slate-400">Administrator</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Navigation Menu -->
-  <nav class="menu-navigation">
-    <div class="nav-section">
-      <div class="section-title">
-        <i class="material-icons">dashboard</i>
+  <nav class="flex-1 p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
+    <div class="space-y-8">
+      <div class="flex items-center gap-3 text-xs font-bold text-slate-400 uppercase tracking-wider">
+        <div class="w-8 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"></div>
         <span>Navigation</span>
+        <div class="flex-1 h-0.5 bg-gradient-to-r from-slate-600 to-transparent rounded-full"></div>
       </div>
       
-      <div class="menu-items">
+      <div class="space-y-2">
         @for (item of menuItems; track $index) {
-          <div class="menu-item-wrapper">
+          <div class="space-y-1">
             <!-- Parent Menu Item with Children -->
             @if (item.children && item.children.length > 0) {
               <button
-                class="menu-item parent-item"
-                [class.expanded]="expandedMenus[item.title?.toString() || 'Untitled']"
+                class="w-full group relative overflow-hidden"
                 (click)="toggleMenu(item.title?.toString() || 'Untitled')"
               >
-                <div class="item-content">
-                  <div class="item-icon">
-                    <i class="material-icons">{{ getMenuIcon(item.title?.toString()) }}</i>
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl"></div>
+                <div class="relative flex items-center justify-between p-4 rounded-xl border border-transparent group-hover:border-slate-600 transition-all duration-300"
+                     [class.bg-slate-800]="expandedMenus[item.title?.toString() || 'Untitled']"
+                     [class.border-blue-500]="expandedMenus[item.title?.toString() || 'Untitled']">
+                  <div class="flex items-center gap-4 flex-1 min-w-0">
+                    <div class="relative">
+                      <div class="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-600 rounded-lg flex items-center justify-center text-slate-300 group-hover:text-white transition-all duration-300 shadow-lg"
+                           [class.from-blue-500]="expandedMenus[item.title?.toString() || 'Untitled']"
+                           [class.to-cyan-500]="expandedMenus[item.title?.toString() || 'Untitled']">
+                        <i class="material-icons text-lg">{{ getMenuIcon(item.title?.toString()) }}</i>
+                      </div>
+                      <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors duration-300 truncate">{{ item.title || 'Untitled' }}</div>
+                      <div class="text-xs text-slate-500 mt-0.5">Menu section</div>
+                    </div>
                   </div>
-                  <div class="item-text">
-                    <span class="item-title">{{ item.title || 'Untitled' }}</span>
-                  </div>
-                  <div class="item-arrow">
-                    <span class="submenu-count">{{ item.children.length || 0 }}</span>
-                    <i class="material-icons" [class.rotated]="expandedMenus[item.title?.toString() || 'Untitled']">
-                      expand_more
-                    </i>
+                  <div class="flex flex-col items-center gap-1">
+                    <span class="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded-full border border-slate-600">{{ item.children.length || 0 }}</span>
+                    <div class="w-6 h-6 bg-slate-700 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:bg-slate-600">
+                      <i class="material-icons text-sm text-slate-400 transition-transform duration-300" 
+                         [class.rotate-180]="expandedMenus[item.title?.toString() || 'Untitled']">
+                        expand_more
+                      </i>
+                    </div>
                   </div>
                 </div>
               </button>
 
               <!-- Submenu Items -->
               @if (expandedMenus[item.title?.toString() || 'Untitled']) {
-                <div class="submenu-container">
+                <div class="ml-6 space-y-0.5 animate-in slide-in-from-top-2 duration-300">
                   @for (child of item.children; track $index) {
                     <a
-                      class="menu-item submenu-item"
+                      class="group relative block"
                       [routerLink]="child.path"
-                      routerLinkActive="active"
-                    >
-                      <div class="item-content">
-                        <div class="item-icon">
-                          <i class="material-icons">{{ getSubmenuIcon(child.title?.toString()) }}</i>
+                      routerLinkActive="active">
+                      <div class="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg"></div>
+                      <div class="relative flex items-center gap-3 p-2 rounded-lg border border-transparent group-hover:border-slate-600 transition-all duration-300">
+                        <div class="w-6 h-6 bg-slate-700 rounded flex items-center justify-center text-slate-400 group-hover:text-slate-200 transition-all duration-300">
+                          <i class="material-icons text-xs">{{ getSubmenuIcon(child.title?.toString()) }}</i>
                         </div>
-                        <div class="item-text">
-                          <span class="item-title">{{ child.title || 'Untitled' }}</span>
-                          <span class="item-description">{{ child.path }}</span>
+                        <div class="flex-1 min-w-0">
+                          <div class="text-xs font-medium text-slate-300 group-hover:text-slate-100 transition-colors duration-300 truncate">{{ child.title || 'Untitled' }}</div>
                         </div>
+                        <div class="w-1.5 h-1.5 bg-slate-600 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
                       </div>
                     </a>
                   }
@@ -90,18 +112,22 @@
             <!-- Single Menu Item -->
             @if (!item.children || item.children.length === 0) {
               <a
-                class="menu-item single-item"
+                class="group relative block"
                 [routerLink]="item.path"
-                routerLinkActive="active"
-              >
-                <div class="item-content">
-                  <div class="item-icon">
-                    <i class="material-icons">{{ getMenuIcon(item.title?.toString()) }}</i>
+                routerLinkActive="active">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl"></div>
+                <div class="relative flex items-center gap-4 p-4 rounded-xl border border-transparent group-hover:border-slate-600 transition-all duration-300">
+                  <div class="relative">
+                    <div class="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-600 rounded-lg flex items-center justify-center text-slate-300 group-hover:text-white transition-all duration-300 shadow-lg">
+                      <i class="material-icons text-lg">{{ getMenuIcon(item.title?.toString()) }}</i>
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                   </div>
-                  <div class="item-text">
-                    <span class="item-title">{{ item.title || 'Untitled' }}</span>
-                    <span class="item-description">{{ item.path }}</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors duration-300 truncate">{{ item.title || 'Untitled' }}</div>
+                    <div class="text-xs text-slate-500 mt-0.5 font-mono truncate">{{ item.path }}</div>
                   </div>
+                  <div class="w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
                 </div>
               </a>
             }
@@ -112,17 +138,83 @@
   </nav>
 
   <!-- Footer Section -->
-  <div class="menu-footer">
-    <div class="footer-section">
-      <div class="section-title">
-        <i class="material-icons">account_circle</i>
+  <div class="p-6 border-t border-slate-700/50 bg-gradient-to-r from-slate-800/30 to-slate-700/30">
+    <div class="space-y-4">
+      <div class="flex items-center gap-3 text-xs font-bold text-slate-400 uppercase tracking-wider">
+        <div class="w-8 h-0.5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full"></div>
         <span>Account</span>
+        <div class="flex-1 h-0.5 bg-gradient-to-r from-slate-600 to-transparent rounded-full"></div>
       </div>
       
-      <button class="logout-item" (click)="logout()">
-        <i class="material-icons">logout</i>
-        <span>Logout</span>
+      <button 
+        class="w-full group relative overflow-hidden"
+        (click)="logout()">
+        <div class="absolute inset-0 bg-gradient-to-r from-red-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl"></div>
+        <div class="relative flex items-center gap-4 p-4 rounded-xl border border-transparent group-hover:border-red-500 transition-all duration-300">
+          <div class="relative">
+            <div class="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-600 rounded-lg flex items-center justify-center text-slate-300 group-hover:text-red-400 transition-all duration-300 shadow-lg">
+              <i class="material-icons text-lg">logout</i>
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-semibold text-slate-200 group-hover:text-red-400 transition-colors duration-300">Logout</div>
+            <div class="text-xs text-slate-500 mt-0.5">Sign out of your account</div>
+          </div>
+          <div class="w-2 h-2 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+        </div>
       </button>
     </div>
   </div>
 </div>
+
+<style>
+/* Custom scrollbar styles */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.5);
+  border-radius: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(71, 85, 105, 0.8);
+}
+
+/* Active state styles */
+.active .relative {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+.active .w-10 {
+  background: linear-gradient(135deg, #3b82f6, #06b6d4) !important;
+  color: white !important;
+}
+
+.active .text-slate-200 {
+  color: #3b82f6 !important;
+}
+
+/* Animation classes */
+@keyframes slide-in-from-top-2 {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: slide-in-from-top-2 0.3s ease-out;
+}
+</style>

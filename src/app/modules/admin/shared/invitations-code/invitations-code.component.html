@@ -1,64 +1,71 @@
-<div class="invitations-code-dashboard">
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-inter">
   <!-- Header Section -->
-  <div class="dashboard-header">
-    <div class="header-content">
-      <div class="header-title">
-        <h1 class="title">Gestión de Códigos de Invitación</h1>
-        <p class="subtitle">Crea y administra códigos de invitación para nuevos usuarios</p>
+  <div class="bg-slate-700/95 backdrop-blur-lg border border-slate-600 rounded-xl p-6 mb-8 shadow-lg">
+    <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
+      <div class="flex-1">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+          Gestión de Códigos de Invitación
+        </h1>
+        <p class="text-slate-300 text-lg">Crea y administra códigos de invitación para nuevos usuarios</p>
       </div>
-      <div class="header-actions">
-        <button class="refresh-btn" (click)="getInvitationsCode()" [disabled]="loadInvitationsButtons">
-          <i class="material-icons" [class.spinning]="loadInvitationsButtons">refresh</i>
-          <span class="btn-text">Actualizar</span>
+      <div class="flex gap-4 items-center lg:flex-row flex-col lg:w-auto w-full">
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg"
+          (click)="getInvitationsCode()" 
+          [disabled]="loadInvitationsButtons">
+          <i class="material-icons" [class.animate-spin]="loadInvitationsButtons">refresh</i>
+          <span>Actualizar</span>
         </button>
-        <button class="stats-btn" (click)="showStats()" [disabled]="loadInvitationsButtons">
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
+          (click)="showStats()" 
+          [disabled]="loadInvitationsButtons">
           <i class="material-icons">bar_chart</i>
-          <span class="btn-text">Estadísticas</span>
+          <span>Estadísticas</span>
         </button>
       </div>
     </div>
   </div>
 
   <!-- Create Invitation Section -->
-  <div class="create-section">
-    <div class="section-header">
-      <div class="section-icon">
+  <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg mb-8">
+    <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+      <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
         <i class="material-icons">add_circle</i>
       </div>
-      <div class="section-info">
-        <h3 class="section-title">Crear Nueva Invitación</h3>
-        <p class="section-description">Genera un código de invitación y envíalo por email</p>
+      <div class="flex-1">
+        <h3 class="text-xl font-semibold text-slate-100 mb-1">Crear Nueva Invitación</h3>
+        <p class="text-sm text-slate-400">Genera un código de invitación y envíalo por email</p>
       </div>
     </div>
     
-    <div class="section-content">
-      <form [formGroup]="invitationsForm" (ngSubmit)="createInvitations()" class="create-form">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="email" class="form-label">
-              <i class="material-icons">email</i>
-              <span>Email del Invitado</span>
-            </label>
-            <input 
-              formControlName="email" 
-              id="email" 
-              type="email" 
-              class="form-input"
-              placeholder="ejemplo@correo.com"
-              [class.error]="invitationsForm.controls['email'].invalid && invitationsForm.controls['email'].touched">
-            <div *ngIf="invitationsForm.controls['email'].invalid && invitationsForm.controls['email'].touched" class="error-message">
-              <i class="material-icons">error</i>
-              <span>El email es requerido y debe ser válido</span>
-            </div>
+    <div class="p-6">
+      <form [formGroup]="invitationsForm" (ngSubmit)="createInvitations()" class="space-y-6">
+        <div class="space-y-2">
+          <label for="email" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+            <i class="material-icons text-blue-500 text-base">email</i>
+            <span>Email del Invitado</span>
+          </label>
+          <input 
+            formControlName="email" 
+            id="email" 
+            type="email" 
+            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500"
+            placeholder="ejemplo@correo.com"
+            [class.border-red-500]="invitationsForm.controls['email'].invalid && invitationsForm.controls['email'].touched">
+          <div *ngIf="invitationsForm.controls['email'].invalid && invitationsForm.controls['email'].touched" 
+               class="flex items-center gap-1 text-red-400 text-sm mt-1">
+            <i class="material-icons text-sm">error</i>
+            <span>El email es requerido y debe ser válido</span>
           </div>
         </div>
         
-        <div class="form-actions">
+        <div class="flex justify-end">
           <button 
             type="submit" 
             [disabled]="invitationsForm.invalid || loadInvitationsButtons" 
-            class="submit-btn">
-            <i class="material-icons" [class.spinning]="loadInvitationsButtons">send</i>
+            class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30">
+            <i class="material-icons" [class.animate-spin]="loadInvitationsButtons">send</i>
             <span>Enviar Invitación</span>
           </button>
         </div>
@@ -67,84 +74,102 @@
   </div>
 
   <!-- Invitations List Section -->
-  <div class="list-section">
-    <div class="section-header">
-      <div class="section-icon">
-        <i class="material-icons">list</i>
-      </div>
-      <div class="section-info">
-        <h3 class="section-title">Invitaciones Enviadas</h3>
-        <p class="section-description">Historial de todos los códigos de invitación generados</p>
-      </div>
-      <div class="section-actions">
-        <div class="invitations-count">
-          <span class="count-number">{{ listInvitationsCode.length }}</span>
-          <span class="count-label">Invitaciones</span>
+  <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+    <div class="flex items-center justify-between gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+          <i class="material-icons">list</i>
         </div>
+        <div>
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">Invitaciones Enviadas</h3>
+          <p class="text-sm text-slate-400">Historial de todos los códigos de invitación generados</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-600">
+        <span class="text-2xl font-bold text-blue-400">{{ listInvitationsCode.length }}</span>
+        <span class="text-sm text-slate-400">Invitaciones</span>
       </div>
     </div>
     
-    <div class="section-content">
-      <div class="table-container">
-        <table class="invitations-table">
+    <div class="p-6">
+      <div class="overflow-x-auto">
+        <table class="w-full">
           <thead>
-            <tr class="table-header">
-              <th class="header-cell">
-                <i class="material-icons">tag</i>
-                <span>ID</span>
+            <tr class="border-b border-slate-600">
+              <th class="text-left py-4 px-4 font-semibold text-slate-300">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-blue-400 text-base">tag</i>
+                  <span>ID</span>
+                </div>
               </th>
-              <th class="header-cell">
-                <i class="material-icons">vpn_key</i>
-                <span>Código</span>
+              <th class="text-left py-4 px-4 font-semibold text-slate-300">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-blue-400 text-base">vpn_key</i>
+                  <span>Código</span>
+                </div>
               </th>
-              <th class="header-cell">
-                <i class="material-icons">email</i>
-                <span>Email</span>
+              <th class="text-left py-4 px-4 font-semibold text-slate-300">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-blue-400 text-base">email</i>
+                  <span>Email</span>
+                </div>
               </th>
-              <th class="header-cell">
-                <i class="material-icons">schedule</i>
-                <span>Fecha de Envío</span>
+              <th class="text-left py-4 px-4 font-semibold text-slate-300">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-blue-400 text-base">schedule</i>
+                  <span>Fecha de Envío</span>
+                </div>
               </th>
-              <th class="header-cell">
-                <i class="material-icons">settings</i>
-                <span>Acciones</span>
+              <th class="text-left py-4 px-4 font-semibold text-slate-300">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-blue-400 text-base">settings</i>
+                  <span>Acciones</span>
+                </div>
               </th>
             </tr>
           </thead>
-          <tbody class="table-body">
-            <tr *ngFor="let invitation of listInvitationsCode; trackBy: trackByInvitation" class="table-row">
-              <td class="table-cell">
-                <div class="id-cell">
-                  <span class="id-number">#{{ invitation._id }}</span>
+          <tbody>
+            <tr *ngFor="let invitation of listInvitationsCode; trackBy: trackByInvitation" 
+                class="border-b border-slate-700/50 hover:bg-slate-800/30 transition-all duration-200">
+              <td class="py-4 px-4">
+                <div class="flex items-center">
+                  <span class="text-sm font-semibold text-slate-400">#{{ invitation._id }}</span>
                 </div>
               </td>
-              <td class="table-cell">
-                <div class="code-cell">
-                  <span class="code-text">{{ invitation.code }}</span>
-                  <button class="copy-btn" (click)="copyCode(invitation.code)" title="Copiar código">
-                    <i class="material-icons">content_copy</i>
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-mono text-slate-100 bg-slate-800 px-2 py-1 rounded">{{ invitation.code }}</span>
+                  <button class="p-1 text-slate-400 hover:text-blue-400 transition-all duration-200 hover:bg-blue-500/10 rounded" 
+                          (click)="copyCode(invitation.code)" 
+                          title="Copiar código">
+                    <i class="material-icons text-sm">content_copy</i>
                   </button>
                 </div>
               </td>
-              <td class="table-cell">
-                <div class="email-cell">
-                  <i class="material-icons email-icon">email</i>
-                  <span class="email-text">{{ invitation.email }}</span>
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-slate-400 text-sm">email</i>
+                  <span class="text-sm text-slate-100">{{ invitation.email }}</span>
                 </div>
               </td>
-              <td class="table-cell">
-                <div class="date-cell">
-                  <i class="material-icons date-icon">schedule</i>
-                  <span class="date-text">{{ invitation.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-slate-400 text-sm">schedule</i>
+                  <span class="text-sm text-slate-100">{{ invitation.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
                 </div>
               </td>
-              <td class="table-cell">
-                <div class="actions-cell">
-                  <button class="action-btn resend-btn" (click)="resendInvitation(invitation)" title="Reenviar invitación">
-                    <i class="material-icons">refresh</i>
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-2">
+                  <button class="p-2 text-slate-400 hover:text-blue-400 transition-all duration-200 hover:bg-blue-500/10 rounded" 
+                          (click)="resendInvitation(invitation)" 
+                          title="Reenviar invitación">
+                    <i class="material-icons text-sm">refresh</i>
                   </button>
-                  <button class="action-btn delete-btn" (click)="deleteInvitation(invitation._id)" title="Eliminar invitación" [disabled]="loadInvitationsButtons">
-                    <i class="material-icons">delete</i>
+                  <button class="p-2 text-slate-400 hover:text-red-400 transition-all duration-200 hover:bg-red-500/10 rounded" 
+                          (click)="deleteInvitation(invitation._id)" 
+                          title="Eliminar invitación" 
+                          [disabled]="loadInvitationsButtons">
+                    <i class="material-icons text-sm">delete</i>
                   </button>
                 </div>
               </td>
@@ -153,62 +178,67 @@
         </table>
         
         <!-- Empty State -->
-        <div *ngIf="listInvitationsCode.length === 0" class="empty-state">
-          <div class="empty-icon">
-            <i class="material-icons">inbox</i>
+        <div *ngIf="listInvitationsCode.length === 0" class="flex justify-center items-center py-16">
+          <div class="text-center text-slate-400">
+            <i class="material-icons text-5xl text-slate-500 mb-4">inbox</i>
+            <h3 class="text-lg font-semibold text-slate-100 mb-2">No hay invitaciones</h3>
+            <p class="text-sm">Crea tu primera invitación usando el formulario de arriba</p>
           </div>
-          <h3>No hay invitaciones</h3>
-          <p>Crea tu primera invitación usando el formulario de arriba</p>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Stats Modal -->
-  <div class="stats-modal" *ngIf="showStatsModal" (click)="closeStats()">
-    <div class="stats-content" (click)="$event.stopPropagation()">
-      <div class="stats-header">
-        <h3>Estadísticas de Invitaciones</h3>
-        <button class="close-btn" (click)="closeStats()">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
+       *ngIf="showStatsModal" 
+       (click)="closeStats()">
+    <div class="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl max-w-2xl w-full" 
+         (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-slate-600">
+        <h3 class="text-xl font-semibold text-slate-100">Estadísticas de Invitaciones</h3>
+        <button 
+          class="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-700 rounded-lg transition-all duration-200"
+          (click)="closeStats()">
           <i class="material-icons">close</i>
         </button>
       </div>
-      <div class="stats-body">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">
+      <div class="p-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 text-center">
+            <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl mx-auto mb-3">
               <i class="material-icons">send</i>
             </div>
-            <div class="stat-info">
-              <span class="stat-number">{{ listInvitationsCode.length }}</span>
-              <span class="stat-label">Total Enviadas</span>
+            <div>
+              <span class="block text-2xl font-bold text-slate-100">{{ listInvitationsCode.length }}</span>
+              <span class="block text-sm text-slate-400">Total Enviadas</span>
             </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon">
+          <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 text-center">
+            <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white text-xl mx-auto mb-3">
               <i class="material-icons">today</i>
             </div>
-            <div class="stat-info">
-              <span class="stat-number">{{ getTodayInvitations() }}</span>
-              <span class="stat-label">Hoy</span>
+            <div>
+              <span class="block text-2xl font-bold text-slate-100">{{ getTodayInvitations() }}</span>
+              <span class="block text-sm text-slate-400">Hoy</span>
             </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon">
+          <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 text-center">
+            <div class="w-12 h-12 bg-cyan-500 rounded-xl flex items-center justify-center text-white text-xl mx-auto mb-3">
               <i class="material-icons">view_week</i>
             </div>
-            <div class="stat-info">
-              <span class="stat-number">{{ getThisWeekInvitations() }}</span>
-              <span class="stat-label">Esta Semana</span>
+            <div>
+              <span class="block text-2xl font-bold text-slate-100">{{ getThisWeekInvitations() }}</span>
+              <span class="block text-sm text-slate-400">Esta Semana</span>
             </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon">
+          <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 text-center">
+            <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center text-white text-xl mx-auto mb-3">
               <i class="material-icons">calendar_month</i>
             </div>
-            <div class="stat-info">
-              <span class="stat-number">{{ getThisMonthInvitations() }}</span>
-              <span class="stat-label">Este Mes</span>
+            <div>
+              <span class="block text-2xl font-bold text-slate-100">{{ getThisMonthInvitations() }}</span>
+              <span class="block text-sm text-slate-400">Este Mes</span>
             </div>
           </div>
         </div>
@@ -217,32 +247,46 @@
   </div>
 
   <!-- Loading State -->
-  <div class="loading-container" *ngIf="loadInvitationsButtons">
-    <div class="loading-spinner">
-      <i class="material-icons spinning">refresh</i>
-      <p>Procesando invitación...</p>
+  <div class="flex justify-center items-center min-h-[40vh] p-8" *ngIf="loadInvitationsButtons">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-5xl text-blue-500">
+        <i class="material-icons animate-spin">refresh</i>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold text-slate-100 mb-2">Procesando invitación</h3>
+        <p class="text-slate-300">Procesando invitación...</p>
+      </div>
     </div>
   </div>
 
   <!-- Success State -->
-  <div class="success-state" *ngIf="successMessage">
-    <div class="success-content">
-      <i class="material-icons success-icon">check_circle</i>
-      <h3>Operación exitosa</h3>
-      <p>{{ successMessage }}</p>
+  <div class="fixed top-4 right-4 bg-emerald-500 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm" 
+       *ngIf="successMessage">
+    <div class="flex items-center gap-3">
+      <i class="material-icons text-2xl">check_circle</i>
+      <div>
+        <h3 class="font-semibold">Operación exitosa</h3>
+        <p class="text-sm opacity-90">{{ successMessage }}</p>
+      </div>
     </div>
   </div>
 
   <!-- Error State -->
-  <div class="error-state" *ngIf="error">
-    <div class="error-content">
-      <i class="material-icons error-icon">error</i>
-      <h3>Error en la operación</h3>
-      <p>{{ error }}</p>
-      <button class="refresh-btn primary" (click)="getInvitationsCode()">
-        <i class="material-icons">refresh</i>
-        <span>Intentar de nuevo</span>
-      </button>
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="error">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-6xl text-red-500/80">
+        <i class="material-icons">error</i>
+      </div>
+      <div>
+        <h3 class="text-2xl font-semibold text-slate-100 mb-2">Error en la operación</h3>
+        <p class="text-slate-300 mb-6 leading-relaxed">{{ error }}</p>
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
+          (click)="getInvitationsCode()">
+          <i class="material-icons">refresh</i>
+          <span>Intentar de nuevo</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>

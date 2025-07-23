@@ -1,161 +1,220 @@
-<div class="content-config">
-  <div class="bg-gray-900 text-white py-12">
-    <div class="max-w-6xl mx-auto bg-gray-800 p-8 rounded-lg shadow-lg">
-      <h2 class="text-3xl font-semibold mb-6">GESTIÓN DE WIDGETS</h2>
-      <p class="text-gray-400 mb-8">Configura la ubicación y estado de los widgets del sistema</p>
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-inter">
+  <!-- Header Section -->
+  <div class="bg-slate-700/95 backdrop-blur-lg border border-slate-600 rounded-xl p-6 mb-8 shadow-lg">
+    <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
+      <div class="flex-1">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+          Gestión de Widgets
+        </h1>
+        <p class="text-slate-300 text-lg">Configura la ubicación y estado de los widgets del sistema</p>
+      </div>
+    </div>
+  </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Formulario de Widget -->
-        <div class="bg-gray-700 p-6 rounded-lg">
-          <h3 class="text-xl font-semibold mb-4 text-indigo-400">Configurar Widget</h3>
-          <form [formGroup]="widgetForm" (ngSubmit)="saveWidget()">
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Widget</label>
-                <select formControlName="selector" (change)="onWidgetSelect($event)" 
-                        class="w-full bg-gray-600 text-white border border-gray-500 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-                  <option value="">Seleccionar widget</option>
-                  <option *ngFor="let widget of availableWidgets" [value]="widget.selector">
-                    {{ widget.name }}
-                  </option>
-                </select>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Nombre</label>
-                <input formControlName="name" type="text" placeholder="Nombre del widget"
-                       class="w-full bg-gray-600 text-white border border-gray-500 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Descripción</label>
-                <textarea formControlName="description" placeholder="Descripción del widget" rows="3"
-                          class="w-full bg-gray-600 text-white border border-gray-500 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"></textarea>
-              </div>
-              
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-300 mb-2">Posición</label>
-                  <select formControlName="position"
-                          class="w-full bg-gray-600 text-white border border-gray-500 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-                    <option *ngFor="let pos of allowedPositionsForSelectedWidget" [value]="pos">
-                      {{ pos | titlecase }} ({{ getPositionInfo(pos) }})
-                    </option>
-                  </select>
-                  <p class="text-xs text-gray-400 mt-1" *ngIf="allowedPositionsForSelectedWidget.length === 0">
-                    Selecciona un widget para ver las posiciones disponibles
-                  </p>
-                </div>
-                
-                <div>
-                  <label class="block text-sm font-medium text-gray-300 mb-2">Orden</label>
-                  <input formControlName="order" type="number" min="0"
-                         class="w-full bg-gray-600 text-white border border-gray-500 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-                </div>
-              </div>
-              
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-300 mb-2">Estado</label>
-                  <select formControlName="status"
-                          class="w-full bg-gray-600 text-white border border-gray-500 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-                    <option *ngFor="let status of availableStatuses" [value]="status">
-                      {{ status | titlecase }}
-                    </option>
-                  </select>
-                </div>
-              </div>
-              
-              <div class="form-group">
-                <label>Posiciones Permitidas</label>
-                <div class="grid grid-cols-3 gap-2 bg-gray-600 p-3 rounded">
-                  <div *ngFor="let pos of widgetForm.get('allowedPositions')?.value" class="flex items-center">
-                    <i class="material-icons mr-2 text-indigo-400 text-sm">
-                      {{ pos === 'top' ? 'expand_less' : pos === 'left' ? 'chevron_left' : 'chevron_right' }}
-                    </i>
-                    <span class="text-sm text-gray-300">{{ pos | titlecase }}</span>
-                  </div>
-                </div>
-                <p class="text-xs text-gray-400 mt-1">Definido por el desarrollador</p>
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Icono</label>
-                <input formControlName="icon" type="text" placeholder="material-icons"
-                       class="w-full bg-gray-600 text-white border border-gray-500 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-              </div>
+  <!-- Main Content -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Formulario de Widget -->
+    <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+      <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+          <i class="material-icons">settings</i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">Configurar Widget</h3>
+          <p class="text-sm text-slate-400">Crea y configura nuevos widgets para el sistema</p>
+        </div>
+      </div>
+      
+      <div class="p-6">
+        <form [formGroup]="widgetForm" (ngSubmit)="saveWidget()" class="space-y-6">
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+              <i class="material-icons text-blue-500 text-base">widgets</i>
+              Widget
+            </label>
+            <select formControlName="selector" 
+                    (change)="onWidgetSelect($event)"
+                    class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+              <option value="">Seleccionar widget</option>
+              <option *ngFor="let widget of availableWidgets" [value]="widget.selector">
+                {{ widget.name }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+              <i class="material-icons text-blue-500 text-base">title</i>
+              Nombre
+            </label>
+            <input formControlName="name" 
+                   type="text" 
+                   placeholder="Nombre del widget"
+                   class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
+          </div>
+          
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+              <i class="material-icons text-blue-500 text-base">description</i>
+              Descripción
+            </label>
+            <textarea formControlName="description" 
+                      placeholder="Descripción del widget" 
+                      rows="3"
+                      class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500 resize-vertical min-h-[80px]"></textarea>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">place</i>
+                Posición
+              </label>
+              <select formControlName="position"
+                      class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                <option *ngFor="let pos of allowedPositionsForSelectedWidget" [value]="pos">
+                  {{ pos | titlecase }} ({{ getPositionInfo(pos) }})
+                </option>
+              </select>
+              <p class="text-xs text-slate-500 mt-1" *ngIf="allowedPositionsForSelectedWidget.length === 0">
+                Selecciona un widget para ver las posiciones disponibles
+              </p>
             </div>
             
-            <div class="mt-6 flex gap-3">
-              <button type="submit" 
-                      [disabled]="widgetForm.invalid || isSaving"
-                      class="flex-1 bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
-                <i class="material-icons rotating mr-2" *ngIf="isSaving">refresh</i>
-                <span>{{ isSaving ? 'Guardando...' : 'Guardar Widget' }}</span>
-              </button>
-              <button type="button" 
-                      [disabled]="isSaving"
-                      (click)="widgetForm.reset()"
-                      class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500 focus:outline-none focus:bg-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                Limpiar
-              </button>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">sort</i>
+                Orden
+              </label>
+              <input formControlName="order" 
+                     type="number" 
+                     min="0"
+                     class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
             </div>
-          </form>
-        </div>
-
-        <!-- Lista de Widgets por Posición -->
-        <div class="bg-gray-700 p-6 rounded-lg">
-          <h3 class="text-xl font-semibold mb-4 text-indigo-400">Widgets Configurados</h3>
+          </div>
           
-          <div class="space-y-6">
-            <div *ngFor="let position of availablePositions" class="border border-gray-600 rounded-lg p-4">
-              <h4 class="text-lg font-medium mb-3 text-gray-200 flex items-center">
-                <i class="material-icons mr-2 text-indigo-400">
-                  {{ position === 'top' ? 'expand_less' : position === 'left' ? 'chevron_left' : 'chevron_right' }}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">toggle_on</i>
+                Estado
+              </label>
+              <select formControlName="status"
+                      class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                <option *ngFor="let status of availableStatuses" [value]="status">
+                  {{ status | titlecase }}
+                </option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+              <i class="material-icons text-blue-500 text-base">list</i>
+              Posiciones Permitidas
+            </label>
+            <div class="grid grid-cols-3 gap-2 bg-slate-800 p-3 rounded-lg border border-slate-600">
+              <div *ngFor="let pos of widgetForm.get('allowedPositions')?.value" 
+                   class="flex items-center gap-2 p-2 bg-slate-700 rounded">
+                <i class="material-icons text-blue-400 text-sm">
+                  {{ pos === 'top' ? 'expand_less' : pos === 'left' ? 'chevron_left' : 'chevron_right' }}
                 </i>
-                {{ position | titlecase }} ({{ getPositionInfo(position) }})
-              </h4>
-              
-              <div class="space-y-2">
-                <div class="widget-item bg-gray-600 rounded-lg p-3 flex items-center justify-between" 
-                     *ngFor="let widget of getWidgetsByPosition(position); trackBy: trackByWidget">
-                  
-                  <div class="flex items-center space-x-3">
-                    <i class="material-icons text-indigo-400">{{ widget.icon || 'widgets' }}</i>
-                    <div>
-                      <div class="font-medium text-white">{{ widget.name }}</div>
-                      <div class="text-sm text-gray-400">{{ widget.selector }}</div>
-                      <span class="inline-block px-2 py-1 text-xs rounded-full" 
-                            [class]="widget.status === 'enabled' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'">
-                        {{ widget.status }}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div class="flex space-x-2">
-                    <button (click)="editWidget(widget)" 
-                            [disabled]="isSaving || isDeleting"
-                            class="p-1 text-gray-400 hover:text-indigo-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                      <i class="material-icons text-sm">edit</i>
-                    </button>
-                    <button (click)="deleteWidget(widget.selector)" 
-                            [disabled]="isSaving || isDeleting"
-                            class="p-1 text-gray-400 hover:text-red-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
-                      <i class="material-icons text-sm rotating" *ngIf="isDeleting">refresh</i>
-                      <i class="material-icons text-sm" *ngIf="!isDeleting">delete</i>
-                    </button>
+                <span class="text-sm text-slate-300">{{ pos | titlecase }}</span>
+              </div>
+            </div>
+            <p class="text-xs text-slate-500">Definido por el desarrollador</p>
+          </div>
+          
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+              <i class="material-icons text-blue-500 text-base">image</i>
+              Icono
+            </label>
+            <input formControlName="icon" 
+                   type="text" 
+                   placeholder="material-icons"
+                   class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
+          </div>
+          
+          <div class="flex gap-3 pt-4">
+            <button type="submit" 
+                    [disabled]="widgetForm.invalid || isSaving"
+                    class="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30">
+              <i class="material-icons animate-spin" *ngIf="isSaving">refresh</i>
+              <span>{{ isSaving ? 'Guardando...' : 'Guardar Widget' }}</span>
+            </button>
+            <button type="button" 
+                    [disabled]="isSaving"
+                    (click)="widgetForm.reset()"
+                    class="px-6 py-3 rounded-lg font-semibold text-sm bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg">
+              Limpiar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Lista de Widgets por Posición -->
+    <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+      <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+          <i class="material-icons">list</i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">Widgets Configurados</h3>
+          <p class="text-sm text-slate-400">Lista de widgets organizados por posición</p>
+        </div>
+      </div>
+      
+      <div class="p-6">
+        <div class="space-y-6">
+          <div *ngFor="let position of availablePositions" 
+               class="border border-slate-600 rounded-lg p-4 bg-slate-800/30">
+            <h4 class="text-lg font-semibold mb-4 text-slate-200 flex items-center gap-2">
+              <i class="material-icons text-blue-400">
+                {{ position === 'top' ? 'expand_less' : position === 'left' ? 'chevron_left' : 'chevron_right' }}
+              </i>
+              {{ position | titlecase }} ({{ getPositionInfo(position) }})
+            </h4>
+            
+            <div class="space-y-3">
+              <div class="bg-slate-800/50 border border-slate-600 rounded-lg p-4 flex items-center justify-between transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5" 
+                   *ngFor="let widget of getWidgetsByPosition(position); trackBy: trackByWidget">
+                
+                <div class="flex items-center gap-3">
+                  <i class="material-icons text-blue-400">{{ widget.icon || 'widgets' }}</i>
+                  <div>
+                    <div class="font-semibold text-slate-100">{{ widget.name }}</div>
+                    <div class="text-sm text-slate-400">{{ widget.selector }}</div>
+                    <span class="inline-block px-2 py-1 text-xs rounded-full font-semibold" 
+                          [class]="widget.status === 'enabled' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'">
+                      {{ widget.status }}
+                    </span>
                   </div>
                 </div>
                 
-                <div class="text-center py-4 text-gray-500" *ngIf="getWidgetsByPosition(position).length === 0">
-                  <i class="material-icons text-2xl mb-2">inbox</i>
-                  <p>No hay widgets en esta posición</p>
+                <div class="flex gap-2">
+                  <button (click)="editWidget(widget)" 
+                          [disabled]="isSaving || isDeleting"
+                          class="p-2 text-slate-400 hover:text-blue-400 transition-all duration-200 hover:bg-blue-500/10 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="material-icons text-sm">edit</i>
+                  </button>
+                  <button (click)="deleteWidget(widget.selector)" 
+                          [disabled]="isSaving || isDeleting"
+                          class="p-2 text-slate-400 hover:text-red-400 transition-all duration-200 hover:bg-red-500/10 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
+                    <i class="material-icons text-sm animate-spin" *ngIf="isDeleting">refresh</i>
+                    <i class="material-icons text-sm" *ngIf="!isDeleting">delete</i>
+                  </button>
                 </div>
+              </div>
+              
+              <div class="text-center py-8 text-slate-500" *ngIf="getWidgetsByPosition(position).length === 0">
+                <i class="material-icons text-4xl mb-3 text-slate-600">inbox</i>
+                <p class="text-sm">No hay widgets en esta posición</p>
               </div>
             </div>
           </div>
         </div>
-  
       </div>
     </div>
   </div>

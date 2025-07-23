@@ -1,79 +1,125 @@
-<div class="admin-custom-fields-dashboard">
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-inter">
   <!-- Header Section -->
-  <div class="dashboard-header">
-    <div class="header-content">
-      <div class="header-title">
-        <h1 class="title">Constructor de Formularios</h1>
-        <p class="subtitle">Crea y personaliza campos personalizados para perfiles y registro</p>
+  <div class="bg-slate-700/95 backdrop-blur-lg border border-slate-600 rounded-xl p-6 mb-8 shadow-lg">
+    <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
+      <div class="flex-1">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+          Constructor de Formularios
+        </h1>
+        <p class="text-slate-300 text-lg">Crea y personaliza campos personalizados para perfiles y registro</p>
       </div>
-      <div class="header-actions">
-        <button class="help-btn" (click)="showHelp()">
+      <div class="flex gap-4 items-center lg:flex-row flex-col lg:w-auto w-full">
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
+          (click)="showHelp()">
           <i class="material-icons">help</i>
-          <span class="btn-text">Ayuda</span>
+          <span>Ayuda</span>
         </button>
-        <button class="refresh-btn" (click)="refreshFormBuilder()">
-          <i class="material-icons" [class.rotating]="isLoading">refresh</i>
-          <span class="btn-text">Recargar</span>
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+          (click)="refreshFormBuilder()">
+          <i class="material-icons" [class.animate-spin]="isLoading">refresh</i>
+          <span>Recargar</span>
         </button>
       </div>
     </div>
   </div>
 
   <!-- Help Modal -->
-  <div class="help-modal" *ngIf="showHelpModal" (click)="closeHelp()">
-    <div class="help-content" (click)="$event.stopPropagation()">
-      <div class="help-header">
-        <h3>Guía de Uso del Constructor</h3>
-        <button class="close-btn" (click)="closeHelp()">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
+       *ngIf="showHelpModal" 
+       (click)="closeHelp()">
+    <div class="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden" 
+         (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-slate-600">
+        <h3 class="text-xl font-semibold text-slate-100">Guía de Uso del Constructor</h3>
+        <button 
+          class="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-700 rounded-lg transition-all duration-200"
+          (click)="closeHelp()">
           <i class="material-icons">close</i>
         </button>
       </div>
-      <div class="help-body">
-        <div class="help-section">
-          <h4><i class="material-icons">drag_indicator</i> Arrastrar y Soltar</h4>
-          <p>Arrastra los campos desde el panel izquierdo hacia el área de formulario para agregarlos.</p>
+      <div class="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+        <div class="flex items-start gap-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+          <i class="material-icons text-blue-400 text-xl mt-0.5">drag_indicator</i>
+          <div>
+            <h4 class="text-lg font-semibold text-slate-100 mb-2">Arrastrar y Soltar</h4>
+            <p class="text-slate-300 leading-relaxed">Arrastra los campos desde el panel izquierdo hacia el área de formulario para agregarlos.</p>
+          </div>
         </div>
-        <div class="help-section">
-          <h4><i class="material-icons">settings</i> Configuración</h4>
-          <p>Haz clic en el ícono de configuración para personalizar cada campo: etiqueta, validaciones, opciones, etc.</p>
+        <div class="flex items-start gap-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+          <i class="material-icons text-blue-400 text-xl mt-0.5">settings</i>
+          <div>
+            <h4 class="text-lg font-semibold text-slate-100 mb-2">Configuración</h4>
+            <p class="text-slate-300 leading-relaxed">Haz clic en el ícono de configuración para personalizar cada campo: etiqueta, validaciones, opciones, etc.</p>
+          </div>
         </div>
-        <div class="help-section">
-          <h4><i class="material-icons">save</i> Guardar</h4>
-          <p>Los cambios se guardan automáticamente cuando arrastras campos o modificas configuraciones.</p>
+        <div class="flex items-start gap-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+          <i class="material-icons text-emerald-400 text-xl mt-0.5">save</i>
+          <div>
+            <h4 class="text-lg font-semibold text-slate-100 mb-2">Guardar</h4>
+            <p class="text-slate-300 leading-relaxed">Los cambios se guardan automáticamente cuando arrastras campos o modificas configuraciones.</p>
+          </div>
         </div>
-        <div class="help-section">
-          <h4><i class="material-icons">delete</i> Eliminar</h4>
-          <p>Usa el ícono de eliminar para quitar campos del formulario.</p>
+        <div class="flex items-start gap-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+          <i class="material-icons text-red-400 text-xl mt-0.5">delete</i>
+          <div>
+            <h4 class="text-lg font-semibold text-slate-100 mb-2">Eliminar</h4>
+            <p class="text-slate-300 leading-relaxed">Usa el ícono de eliminar para quitar campos del formulario.</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Main Content -->
-  <div class="form-builder-container">
-    <div class="form-builder-wrapper">
-      <worky-form-builder></worky-form-builder>
+  <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+    <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+      <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+        <i class="material-icons">build</i>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-xl font-semibold text-slate-100 mb-1">Constructor de Formularios</h3>
+        <p class="text-sm text-slate-400">Arrastra y configura campos personalizados</p>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <div class="form-builder-wrapper">
+        <worky-form-builder></worky-form-builder>
+      </div>
     </div>
   </div>
 
   <!-- Loading State -->
-  <div class="loading-container" *ngIf="isLoading">
-    <div class="loading-spinner">
-      <i class="material-icons rotating">refresh</i>
-      <p>Cargando constructor de formularios...</p>
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="isLoading">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-5xl text-blue-500">
+        <i class="material-icons animate-spin">refresh</i>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold text-slate-100 mb-2">Cargando constructor</h3>
+        <p class="text-slate-300">Cargando constructor de formularios...</p>
+      </div>
     </div>
   </div>
 
   <!-- Error State -->
-  <div class="error-state" *ngIf="error">
-    <div class="error-content">
-      <i class="material-icons error-icon">warning</i>
-      <h3>Error al cargar el constructor</h3>
-      <p>{{ error }}</p>
-      <button class="refresh-btn primary" (click)="refreshFormBuilder()">
-        <i class="material-icons">refresh</i>
-        <span>Intentar de nuevo</span>
-      </button>
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="error">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-6xl text-red-500/80">
+        <i class="material-icons">warning</i>
+      </div>
+      <div>
+        <h3 class="text-2xl font-semibold text-slate-100 mb-2">Error al cargar el constructor</h3>
+        <p class="text-slate-300 mb-6 leading-relaxed">{{ error }}</p>
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
+          (click)="refreshFormBuilder()">
+          <i class="material-icons">refresh</i>
+          <span>Intentar de nuevo</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
