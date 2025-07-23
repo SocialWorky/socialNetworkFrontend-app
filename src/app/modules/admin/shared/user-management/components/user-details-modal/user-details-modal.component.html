@@ -1,78 +1,229 @@
-<div class="modal-overlay" *ngIf="showModal" (click)="onCloseModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Detalles del Usuario</h3>
-      <button class="close-btn" (click)="onCloseModal()">
+<div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" *ngIf="showModal" (click)="onCloseModal()">
+  <div class="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 rounded-2xl max-w-4xl w-full mx-auto animate-in fade-in-0 zoom-in-95 duration-300 shadow-2xl" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-sm rounded-t-2xl">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+          <i class="material-icons text-white text-lg">person</i>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent">Detalles del Usuario</h3>
+          <p class="text-slate-400 text-sm">Información completa del perfil</p>
+        </div>
+      </div>
+      <button 
+        class="text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-105" 
+        (click)="onCloseModal()">
         <i class="material-icons">close</i>
       </button>
     </div>
 
-    <div class="modal-body" *ngIf="user">
-      <div class="user-profile-full">
-        <div class="cover-image">
+    <div class="p-6" *ngIf="user">
+      <div class="space-y-6">
+        <!-- Hero Section with Cover and Avatar -->
+        <div class="relative h-56 overflow-hidden rounded-2xl border border-slate-700/50">
           <worky-image 
             [src]="user.profile.coverImage ? user.profile.coverImage : 'assets/img/shared/drag-drop-upload-add-file.webp'" 
             [fallbackSrc]="'assets/img/shared/drag-drop-upload-add-file.webp'"
-            alt="Portada">
+            alt="Portada"
+            class="w-full h-full object-cover">
           </worky-image>
-          <div class="profile-overlay">
-            <div>
-              <worky-avatar 
-                [size]="90" 
-                [img]="user.avatar" 
-                [name]="user.name + ' ' + user.lastName">
-              </worky-avatar>
-              <h4>{{ user.name }} {{ user.lastName }}</h4>
-              <p class="username">&#64;{{ user.username }}</p>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          <div class="absolute bottom-0 left-0 right-0 p-6">
+            <div class="flex items-end gap-4">
+              <div class="relative">
+                <worky-avatar 
+                  [size]="80" 
+                  [img]="user.avatar" 
+                  [name]="user.name + ' ' + user.lastName"
+                  class="border-4 border-slate-800 shadow-xl">
+                </worky-avatar>
+                <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 border-2 border-slate-800 rounded-full" *ngIf="user.isActive"></div>
+                <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-red-500 border-2 border-slate-800 rounded-full" *ngIf="!user.isActive"></div>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-2xl font-bold text-white mb-1">{{ user.name }} {{ user.lastName }}</h4>
+                <p class="text-slate-300 text-lg mb-2">&#64;{{ user.username }}</p>
+                <div class="flex items-center gap-3">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                    <i class="material-icons text-xs">verified</i>
+                    {{ user.isVerified ? 'Verificado' : 'Pendiente' }}
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                        [ngClass]="{
+                          'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20': user.isActive,
+                          'bg-red-500/15 text-red-400 border border-red-500/20': !user.isActive
+                        }">
+                    <i class="material-icons text-xs">{{ user.isActive ? 'check_circle' : 'cancel' }}</i>
+                    {{ user.isActive ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="profile-details">
-          <div class="detail-item">
-            <i class="material-icons">badge</i>
-            <span class="label-detail">Nombre:</span>
-            <span>{{ user.name }}</span>
-          </div>
-          <div class="detail-item">
-            <i class="material-icons">badge</i>
-            <span class="label-detail">Apellido:</span>
-            <span>{{ user.lastName }}</span>
-          </div>
-          <div class="detail-item">
-            <i class="material-icons">person</i>
-            <span class="label-detail">Usuario:</span>
-            <span>{{ user.username }}</span>
-          </div>
-          <div class="detail-item">
-            <i class="material-icons">alternate_email</i>
-            <span class="label-detail">Email:</span>
-            <span>{{ user.email }}</span>
-          </div>
-          <div class="detail-item" *ngIf="user.profile?.dateOfBirth">
-            <i class="material-icons">cake</i>
-            <span class="label-detail">Fecha de nacimiento:</span>
-            <span>{{ user.profile.dateOfBirth | date: 'dd/MM/yyyy' }}</span>
-          </div>
-          <div class="detail-item" *ngIf="user.profile?.sex">
-            <i class="material-icons">person</i>
-            <span class="label-detail">Sexo:</span>
-            <span>{{ user.profile.sex }}</span>
-          </div>
-          <div class="detail-item">
-            <i class="material-icons">schedule</i>
-            <span class="label-detail">Fecha de registro:</span>
-            <span>{{ user.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        <!-- User Information Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Personal Information -->
+          <div class="space-y-4">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <i class="material-icons text-white text-sm">person</i>
+              </div>
+              <h5 class="text-lg font-semibold text-slate-200">Información Personal</h5>
+            </div>
+            
+            <div class="space-y-3">
+              <div class="bg-gradient-to-r from-slate-700/50 to-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/70 transition-all duration-200">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                    <i class="material-icons text-blue-400 text-sm">badge</i>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Nombre</div>
+                    <div class="text-slate-100 font-medium">{{ user.name }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-r from-slate-700/50 to-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/70 transition-all duration-200">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                    <i class="material-icons text-purple-400 text-sm">badge</i>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Apellido</div>
+                    <div class="text-slate-100 font-medium">{{ user.lastName }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-r from-slate-700/50 to-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/70 transition-all duration-200">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-cyan-500/20 rounded-lg flex items-center justify-center">
+                    <i class="material-icons text-cyan-400 text-sm">alternate_email</i>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Email</div>
+                    <div class="text-slate-100 font-medium">{{ user.email }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-r from-slate-700/50 to-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/70 transition-all duration-200" *ngIf="user.profile?.dateOfBirth">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-pink-500/20 rounded-lg flex items-center justify-center">
+                    <i class="material-icons text-pink-400 text-sm">cake</i>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Fecha de Nacimiento</div>
+                    <div class="text-slate-100 font-medium">{{ user.profile.dateOfBirth | date: 'dd/MM/yyyy' }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-r from-slate-700/50 to-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/70 transition-all duration-200" *ngIf="user.profile?.sex">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                    <i class="material-icons text-indigo-400 text-sm">wc</i>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Sexo</div>
+                    <div class="text-slate-100 font-medium">{{ user.profile.sex }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <ng-container *ngIf="user.profile?.dynamicFields">
-            <div class="detail-item" *ngFor="let key of (user.profile.dynamicFields | keyvalue)">
-              <i class="material-icons">dynamic_form</i>
-              <span class="label-detail">{{ key.key }}:</span>
-              <span>{{ key.value }}</span>
+          <!-- Account Information -->
+          <div class="space-y-4">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                <i class="material-icons text-white text-sm">account_circle</i>
+              </div>
+              <h5 class="text-lg font-semibold text-slate-200">Información de Cuenta</h5>
             </div>
-          </ng-container>
+            
+            <div class="space-y-3">
+              <div class="bg-gradient-to-r from-slate-700/50 to-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/70 transition-all duration-200">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                    <i class="material-icons text-amber-400 text-sm">person</i>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Usuario</div>
+                    <div class="text-slate-100 font-medium">&#64;{{ user.username }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-r from-slate-700/50 to-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/70 transition-all duration-200">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                    <i class="material-icons text-emerald-400 text-sm">schedule</i>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Fecha de Registro</div>
+                    <div class="text-slate-100 font-medium">{{ user.createdAt | date:'dd/MM/yyyy' }}</div>
+                    <div class="text-slate-500 text-xs">{{ user.createdAt | date:'HH:mm' }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-r from-slate-700/50 to-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/70 transition-all duration-200">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                    <i class="material-icons text-blue-400 text-sm">security</i>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Rol</div>
+                    <div class="text-slate-100 font-medium">{{ user.role | titlecase }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-r from-slate-700/50 to-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/70 transition-all duration-200">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                    <i class="material-icons text-emerald-400 text-sm">verified</i>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Estado de Verificación</div>
+                    <div class="text-slate-100 font-medium">{{ user.isVerified ? 'Email Verificado' : 'Email Pendiente' }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- Dynamic Fields Section -->
+        <ng-container *ngIf="user.profile?.dynamicFields && (user.profile.dynamicFields | keyvalue).length > 0">
+          <div class="border-t border-slate-700/50 pt-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <i class="material-icons text-white text-sm">dynamic_form</i>
+              </div>
+              <h5 class="text-lg font-semibold text-slate-200">Campos Personalizados</h5>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="bg-gradient-to-r from-slate-700/50 to-slate-800/50 backdrop-blur-sm border border-slate-600/50 rounded-xl p-4 hover:bg-slate-700/70 transition-all duration-200" *ngFor="let key of (user.profile.dynamicFields | keyvalue)">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                    <i class="material-icons text-indigo-400 text-sm">custom_fields</i>
+                  </div>
+                  <div class="flex-1">
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{{ key.key }}</div>
+                    <div class="text-slate-100 font-medium">{{ key.value }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
       </div>
     </div>
   </div>

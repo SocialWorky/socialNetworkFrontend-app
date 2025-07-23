@@ -1,19 +1,21 @@
-<div class="filters-section" *ngIf="showFilters">
-  <div class="filters-container">
+<div class="bg-slate-800 border border-slate-700 rounded-xl shadow-lg mb-8 overflow-hidden" *ngIf="showFilters">
+  <div class="p-8">
     <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()">
-      <div class="filters-grid">
-        <div class="filter-group">
-          <label class="filter-label">Buscar</label>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-6">
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-300">Buscar</label>
           <input 
             type="text" 
             formControlName="search" 
             placeholder="Buscar por nombre, email o username"
-            class="filter-input">
+            class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
         </div>
         
-        <div class="filter-group">
-          <label class="filter-label">Rol</label>
-          <select formControlName="role" class="filter-select">
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-300">Rol</label>
+          <select 
+            formControlName="role" 
+            class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 20 20%27%3e%3cpath stroke=%27%236b7280%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%271.5%27 d=%27m6 8 4 4 4-4%27/%3e%3c/svg%3e')] bg-[length:1.5em_1.5em] bg-[right_0.5rem_center] bg-no-repeat pr-10 hover:border-blue-500 hover:bg-slate-600/50">
             <option value="">Todos los roles</option>
             <option [value]="UserRole.ADMIN">Administrador</option>
             <option [value]="UserRole.MODERATOR">Moderador</option>
@@ -22,9 +24,11 @@
           </select>
         </div>
         
-        <div class="filter-group">
-          <label class="filter-label">Estado</label>
-          <select formControlName="status" class="filter-select">
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-300">Estado</label>
+          <select 
+            formControlName="status" 
+            class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 20 20%27%3e%3cpath stroke=%27%236b7280%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%271.5%27 d=%27m6 8 4 4 4-4%27/%3e%3c/svg%3e')] bg-[length:1.5em_1.5em] bg-[right_0.5rem_center] bg-no-repeat pr-10 hover:border-blue-500 hover:bg-slate-600/50">
             <option value="">Todos los estados</option>
             <option [value]="UserStatus.ACTIVE">Activo</option>
             <option [value]="UserStatus.INACTIVE">Inactivo</option>
@@ -32,29 +36,34 @@
           </select>
         </div>
         
-        <div class="filter-group">
-          <label class="filter-label">Fecha desde</label>
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-300">Fecha desde</label>
           <input 
             type="date" 
             formControlName="dateFrom" 
-            class="filter-input">
+            class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
         </div>
         
-        <div class="filter-group">
-          <label class="filter-label">Fecha hasta</label>
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-300">Fecha hasta</label>
           <input 
             type="date" 
             formControlName="dateTo" 
-            class="filter-input">
+            class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
         </div>
       </div>
       
-      <div class="filters-actions">
-        <button type="submit" class="apply-btn">
+      <div class="flex gap-4 justify-end">
+        <button 
+          type="submit" 
+          class="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/20">
           <i class="material-icons">search</i>
           <span>Aplicar Filtros</span>
         </button>
-        <button type="button" (click)="clearFilters()" class="clear-btn">
+        <button 
+          type="button" 
+          (click)="clearFilters()" 
+          class="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-500 text-white rounded-lg font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/20">
           <i class="material-icons">clear</i>
           <span>Limpiar</span>
         </button>

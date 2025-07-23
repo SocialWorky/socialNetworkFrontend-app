@@ -1,11 +1,12 @@
-<div class="action-menu-container" (clickOutside)="onOutsideClick()">
+<div class="relative inline-block" (clickOutside)="onOutsideClick()">
   <button 
     [class]="triggerClasses"
     (click)="toggleMenu()"
     [disabled]="disabled"
-    [title]="config.triggerText">
+    [title]="config.triggerText"
+    class="flex items-center gap-2 px-3 py-2 border border-slate-600 bg-slate-700 text-slate-100 rounded-lg cursor-pointer transition-all hover:bg-slate-600 hover:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
     
-    <i class="material-icons" *ngIf="config.showTriggerIcon">
+    <i class="material-icons text-lg" *ngIf="config.showTriggerIcon">
       {{ config.triggerIcon }}
     </i>
     
@@ -14,20 +15,24 @@
     </span>
   </button>
 
-  <div [class]="menuClasses" *ngIf="isOpen">
+  <div [class]="menuClasses" *ngIf="isOpen" class="absolute top-full right-0 min-w-[200px] bg-slate-700 border border-slate-600 rounded-lg shadow-2xl z-50 mt-2 overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200">
     <div 
-      class="menu-item"
-      [class]="getItemClasses(item)"
+      class="cursor-pointer transition-all hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+      [ngClass]="{
+        'hover:bg-red-500/10': item.type === 'danger',
+        'hover:bg-amber-500/10': item.type === 'warning',
+        'hover:bg-emerald-500/10': item.type === 'success'
+      }"
       *ngFor="let item of items"
       (click)="onActionClick(item)"
       [title]="item.tooltip">
       
-      <div class="menu-item-content" *ngIf="!item.divider">
-        <i class="material-icons" *ngIf="item.icon">{{ item.icon }}</i>
-        <span class="menu-item-label">{{ item.label }}</span>
+      <div class="flex items-center gap-3 px-4 py-3" *ngIf="!item.divider">
+        <i class="material-icons text-lg text-slate-400 w-5 text-center" *ngIf="item.icon">{{ item.icon }}</i>
+        <span class="text-sm text-slate-100 flex-1">{{ item.label }}</span>
       </div>
       
-      <div class="menu-divider" *ngIf="item.divider"></div>
+      <div class="h-px bg-slate-600 mx-2 my-1" *ngIf="item.divider"></div>
     </div>
   </div>
 </div> 
