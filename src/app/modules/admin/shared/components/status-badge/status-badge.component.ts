@@ -12,7 +12,6 @@ export interface StatusBadgeConfig {
 @Component({
   selector: 'worky-status-badge',
   templateUrl: './status-badge.component.html',
-  styleUrls: ['./status-badge.component.scss'],
   standalone: false
 })
 export class StatusBadgeComponent {
@@ -27,9 +26,30 @@ export class StatusBadgeComponent {
   @Input() icon = '';
 
   get badgeClasses(): string {
-    const classes = ['status-badge'];
-    if (this.config.size) classes.push(`size-${this.config.size}`);
-    if (this.config.type) classes.push(`type-${this.config.type}`);
+    const classes = [];
+    
+    // Size classes
+    if (this.config.size === 'small') {
+      classes.push('px-2 py-0.5 text-xs');
+    } else if (this.config.size === 'large') {
+      classes.push('px-4 py-2 text-sm');
+    } else {
+      classes.push('px-3 py-1 text-xs'); // medium default
+    }
+    
+    // Type classes
+    if (this.config.type === 'success') {
+      classes.push('bg-emerald-500/10 text-emerald-400 border border-emerald-500/20');
+    } else if (this.config.type === 'warning') {
+      classes.push('bg-amber-500/10 text-amber-400 border border-amber-500/20');
+    } else if (this.config.type === 'danger') {
+      classes.push('bg-red-500/10 text-red-400 border border-red-500/20');
+    } else if (this.config.type === 'info') {
+      classes.push('bg-blue-500/10 text-blue-400 border border-blue-500/20');
+    } else {
+      classes.push('bg-slate-500/10 text-slate-400 border border-slate-500/20'); // neutral
+    }
+    
     return classes.join(' ');
   }
 

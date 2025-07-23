@@ -1,23 +1,23 @@
-<div class="search-container" [style.width]="config.width">
-  <div [class]="inputClasses">
-    <div class="search-icon" *ngIf="config.showSearchIcon">
-      <i class="material-icons">search</i>
+<div class="relative inline-block" [style.width]="config.width">
+  <div [class]="inputClasses" class="relative flex items-center bg-slate-700 border border-slate-600 rounded-lg transition-all duration-200 overflow-hidden focus-within:border-blue-500 focus-within:shadow-[0_0_0_3px_rgba(59,130,246,0.1)]">
+    <div class="flex items-center justify-center px-3 text-slate-400 pointer-events-none" *ngIf="config.showSearchIcon">
+      <i class="material-icons text-lg">search</i>
     </div>
     
     <input
       type="text"
       [formControl]="searchControl"
       [placeholder]="config.placeholder"
-      class="search-field"
+      class="flex-1 border-none bg-transparent text-slate-100 text-sm py-3 outline-none placeholder:text-slate-500"
       (focus)="onFocus()"
       (blur)="onBlur()">
     
     <button 
-      class="clear-btn" 
+      class="flex items-center justify-center w-8 h-8 border-none bg-transparent text-slate-400 cursor-pointer rounded mr-2 transition-all duration-200 hover:bg-slate-600 hover:text-slate-200" 
       *ngIf="config.showClearButton && searchControl.value"
       (click)="onClear()"
       title="Limpiar búsqueda">
-      <i class="material-icons">close</i>
+      <i class="material-icons text-base">close</i>
     </button>
   </div>
 </div> 

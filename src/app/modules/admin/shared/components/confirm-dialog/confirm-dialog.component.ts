@@ -13,7 +13,6 @@ export interface ConfirmDialogConfig {
 @Component({
   selector: 'worky-confirm-dialog',
   templateUrl: './confirm-dialog.component.html',
-  styleUrls: ['./confirm-dialog.component.scss'],
   standalone: false
 })
 export class ConfirmDialogComponent {
@@ -33,8 +32,19 @@ export class ConfirmDialogComponent {
   @Output() close = new EventEmitter<void>();
 
   get dialogClasses(): string {
-    const classes = ['confirm-dialog'];
-    if (this.config.type) classes.push(`type-${this.config.type}`);
+    const classes = [];
+    
+    // Type classes for border accent
+    if (this.config.type === 'danger') {
+      classes.push('border-l-4 border-l-red-500');
+    } else if (this.config.type === 'warning') {
+      classes.push('border-l-4 border-l-amber-500');
+    } else if (this.config.type === 'info') {
+      classes.push('border-l-4 border-l-blue-500');
+    } else if (this.config.type === 'success') {
+      classes.push('border-l-4 border-l-emerald-500');
+    }
+    
     return classes.join(' ');
   }
 

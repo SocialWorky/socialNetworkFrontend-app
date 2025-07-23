@@ -15,7 +15,6 @@ export interface SearchInputConfig {
 @Component({
   selector: 'worky-search-input',
   templateUrl: './search-input.component.html',
-  styleUrls: ['./search-input.component.scss'],
   standalone: false
 })
 export class SearchInputComponent implements OnInit, OnDestroy {
@@ -37,8 +36,17 @@ export class SearchInputComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   get inputClasses(): string {
-    const classes = ['search-input'];
-    if (this.config.size) classes.push(`size-${this.config.size}`);
+    const classes = [];
+    
+    // Size classes
+    if (this.config.size === 'small') {
+      classes.push('py-2 text-sm');
+    } else if (this.config.size === 'large') {
+      classes.push('py-4 text-base');
+    } else {
+      classes.push('py-3 text-sm'); // medium default
+    }
+    
     return classes.join(' ');
   }
 
