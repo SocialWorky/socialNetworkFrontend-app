@@ -122,12 +122,48 @@ export class AppComponent implements OnInit, OnDestroy {
       // Solo en desarrollo
       this.setupDevMode();
     }
+
+    // Setup accessibility fix for Ionic overlays
+    this.setupAccessibilityFix();
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
     this._pwaUpdateService.destroy();
+  }
+
+  private setupAccessibilityFix(): void {
+    // Create a MutationObserver to watch for aria-hidden changes on the root element
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'aria-hidden') {
+          const target = mutation.target as HTMLElement;
+          if (target.getAttribute('aria-hidden') === 'true') {
+            // Check if there are any focused elements within the root
+            const focusedElement = this.document.activeElement;
+            if (focusedElement && target.contains(focusedElement)) {
+              // If there's a focused element inside, remove aria-hidden to prevent accessibility issues
+              this._renderer.removeAttribute(target, 'aria-hidden');
+            }
+          }
+        }
+      });
+    });
+
+    // Start observing the root element
+    const rootElement = this.document.querySelector('worky-root');
+    if (rootElement) {
+      observer.observe(rootElement, {
+        attributes: true,
+        attributeFilter: ['aria-hidden']
+      });
+    }
+
+    // Clean up observer on destroy
+    this.destroy$.subscribe(() => {
+      observer.disconnect();
+    });
   }
 
   private handlePostUpdate(publicationId: string): void {

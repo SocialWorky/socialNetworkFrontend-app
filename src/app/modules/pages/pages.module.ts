@@ -39,6 +39,7 @@ import { UserOnlineModule } from '@shared/modules/user-online/user-online.module
 import { NotificationsPanelModule } from '@shared/modules/notifications-panel/notifications-panel.module';
 import { ProcessingMediaModule } from '@shared/modules/processing-media/processing-media.module';
 import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.module';
+import { SharedModule } from '@shared/shared.module';
 
 
 @NgModule({
@@ -84,6 +85,7 @@ import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.mod
     PipesSharedModule,
     ProcessingMediaModule,
     FormBuilderModule,
+    SharedModule,
   ]
 })
 export class PagesModule { }

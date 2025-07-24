@@ -1,0 +1,134 @@
+.accessible-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 20px;
+  
+  &:focus {
+    outline: none;
+  }
+  
+  &.fullscreen {
+    position: fixed;
+    z-index: 999999;
+  }
+}
+
+.accessible-loading-content {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.loading-spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 20px;
+  
+  .spinner-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin 1.5s linear infinite;
+    
+    &:nth-child(1) {
+      border-top-color: #007bff;
+      animation-delay: 0s;
+    }
+    
+    &:nth-child(2) {
+      border-right-color: #28a745;
+      animation-delay: 0.5s;
+    }
+    
+    &:nth-child(3) {
+      border-bottom-color: #ffc107;
+      animation-delay: 1s;
+    }
+  }
+}
+
+.loading-message {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.loading-sub-message {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .accessible-loading-content {
+    background: rgba(30, 30, 30, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .loading-message {
+    color: #fff;
+  }
+  
+  .loading-sub-message {
+    color: #ccc;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .accessible-loading-overlay {
+    background: rgba(0, 0, 0, 0.9);
+  }
+  
+  .accessible-loading-content {
+    background: #fff;
+    border: 2px solid #000;
+  }
+  
+  .loading-message {
+    color: #000;
+  }
+  
+  .loading-sub-message {
+    color: #333;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .spinner-ring {
+    animation: none;
+    border-color: #007bff !important;
+    opacity: 0.7;
+  }
+} 

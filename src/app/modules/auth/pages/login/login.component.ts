@@ -1,9 +1,9 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { async, last, Subject, takeUntil } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { AuthGoogleService } from '@auth/services/auth-google.service';
@@ -24,6 +24,7 @@ import { DatabaseManagerService } from '@shared/services/database/database-manag
 import { LoginMethods } from './interfaces/login.interface';
 import { User } from '@shared/interfaces/user.interface';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { LoadingService } from '@shared/services/loading.service';
 
 @Component({
     selector: 'worky-login',
@@ -71,6 +72,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     private _metaTagService: MetaTagService,
     private _databaseManager: DatabaseManagerService,
     private _logService: LogService,
+    private _loadingService: LoadingService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       const title = configData.settings.title + ' - Login';
@@ -86,6 +88,10 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  get isMobile(): boolean {
+    return this._deviceDetectionService.isMobile();
+  }
+
   get isIOS(): boolean {
     return /iPad|iPhone|iPod/.test(navigator.userAgent);
   }
@@ -95,35 +101,22 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
+    this.initForm();
     this.checkLastLogin();
     this.checkSessionGoogle();
+  }
+
+  private initForm() {
     this.loginForm = this._formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
-
-    if (this.isIPhoneWithNotch) {
-      document.body.classList.add('iphone-with-notch');
-    }
-
-    this._cdr.markForCheck();
   }
 
   async ngAfterViewInit() {
-
-    const tokenValidate = await this._activatedRoute.snapshot.paramMap.get('token');
-    const tokenPassword = await this._activatedRoute.snapshot.paramMap.get('tokenPassword');
-
-    if (tokenValidate) this.validateEmailWithToken(tokenValidate);
-
-    this._dialog.afterOpened.pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
-      this._dialog.openDialogs.forEach(dialog => {
-        dialog.id === 'mat-mdc-dialog-1' ? dialog.close() : null;
-      });
-    });
-
-    if (tokenPassword ) {
-      this.openResetPasswordModal(tokenPassword);
+    const token = this._activatedRoute.snapshot.queryParams['token'];
+    if (token) {
+      await this.validateEmailWithToken(token);
     }
   }
 
@@ -135,14 +128,13 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   private checkLastLogin() {
     const lastLogin = localStorage.getItem('lastLogin');
     if (lastLogin) {
-      const lastLoginDate = new Date(lastLogin);
-      const currentDate = new Date();
-      const difference = currentDate.getTime() - lastLoginDate.getTime();
-      if (difference > this.storageThreshold) {
+      const lastLoginTime = new Date(lastLogin).getTime();
+      const currentTime = new Date().getTime();
+      const timeDifference = currentTime - lastLoginTime;
+
+      if (timeDifference > this.storageThreshold) {
         localStorage.clear();
         sessionStorage.clear();
-      } else {
-        localStorage.setItem('lastLogin', new Date().toISOString());
       }
     }
   }
@@ -162,7 +154,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     const email = this.loginForm.get('email')?.value;
     const password = this.loginForm.get('password')?.value;
 
-    if (!this.loginForm.valid) {
+    if (!this.loginForm.valid || !email || !password) {
       this._alertService.showAlert(
         translations['alert.title_error_credentials'],
         translations['login.emailOrPasswordIncorrect'],
@@ -175,15 +167,16 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     const credentials: LoginData = {
-      email: email.toLowerCase(),
+      email: email.toLowerCase().trim(),
       password: password,
     };
 
-    const loading = await this._loadingCtrl.create({
-      message: translations['login.messageLoading'],
-    });
-
-    await loading.present();
+    // Usar el nuevo sistema de loading accesible
+    const accessibleLoading = this._loadingService.createAccessibleLoading(
+      translations['login.messageLoading'],
+      'Verificando credenciales...'
+    );
+    const loadingElement = accessibleLoading.show();
 
     await this._authApiService.loginUser(credentials).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (response: any) => {
@@ -232,6 +225,9 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
           } else {
             this._router.navigate(['/home']);
           }
+          
+          // Ocultar el loading en caso de éxito
+          accessibleLoading.hide(loadingElement);
         }
       },
       error: (e: any) => {
@@ -255,7 +251,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             true,
             translations['button.ok'],
           );
-          loading.dismiss();
+          accessibleLoading.hide(loadingElement);
         }
         if (e.error.message === 'Unauthorized access. Please provide valid credentials to access this resource') {
           this._alertService.showAlert(
@@ -266,7 +262,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             true,
             translations['button.ok'],
           );
-          loading.dismiss();
+          accessibleLoading.hide(loadingElement);
         }
         if (e.status === 500) {
           this._alertService.showAlert(
@@ -277,20 +273,22 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             true,
             translations['button.ok'],
           );
-          loading.dismiss();
+          accessibleLoading.hide(loadingElement);
         }
       },
       complete: () => {
-        loading.dismiss();
+        accessibleLoading.hide(loadingElement);
       }
     });
   }
 
   async loginGoogle() {
-    const loading = await this._loadingCtrl.create({
-      message: translations['login.messageLoading'],
-    });
-    await loading.present();
+    // Usar el nuevo sistema de loading accesible
+    const accessibleLoading = this._loadingService.createAccessibleLoading(
+      translations['login.messageLoading'],
+      'Iniciando sesión con Google...'
+    );
+    const loadingElement = accessibleLoading.show();
 
     try {
       const loginDataGoogle: any = this._authGoogleService.getProfile();
@@ -371,15 +369,13 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       );
       console.error('Error during Google login:', error);
     } finally {
-      loading.dismiss();
+      accessibleLoading.hide(loadingElement);
     }
   }
 
   async validateEmailWithToken(tokenValidate: string) {
-    const loading = await this._loadingCtrl.create({
-      message: translations['login.messageValidationEmailLoading'],
-    });
-    await loading.present();
+    // Usar el nuevo sistema de loading accesible
+    const loading = await this._loadingService.showLoading(translations['login.messageValidationEmailLoading']);
 
     await this._authApiService.validateEmailWithToken(tokenValidate).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: any) => {
@@ -403,10 +399,10 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
           true,
           translations['button.ok'],
         );
-        loading.dismiss();
+        this._loadingService.hideLoading();
       },
       complete: () => {
-        loading.dismiss();
+        this._loadingService.hideLoading();
       }
     });
   }
@@ -431,11 +427,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const emailResponse = await this._emailNotificationService.sendEmailToRecoverPassword(email);
 
-    const loading = await this._loadingCtrl.create({
-      message: translations['login.messageResetPasswordLoading'],
-    });
-
-    await loading.present();
+    // Usar el nuevo sistema de loading accesible
+    const loading = await this._loadingService.showLoading(translations['login.messageResetPasswordLoading']);
 
     await this._authApiService.forgotPassword(emailResponse).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: any) => {
@@ -463,7 +456,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             true,
             translations['button.ok'],
           );
-          loading.dismiss();
+          this._loadingService.hideLoading();
         }
         if (e.error.message === 'Failed to send email') {
           this._alertService.showAlert(
@@ -474,11 +467,11 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             true,
             translations['button.ok'],
           );
-          loading.dismiss();
+          this._loadingService.hideLoading();
         }
       },
       complete: () => {
-        loading.dismiss();
+        this._loadingService.hideLoading();
       }
     });
   }

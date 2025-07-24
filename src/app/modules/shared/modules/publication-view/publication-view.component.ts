@@ -27,6 +27,7 @@ import { Reactions } from './interfaces/reactions.interface';
 import { Colors } from '@shared/interfaces/colors.enum';
 import { ScrollService } from '@shared/services/scroll.service';
 import { Token } from '@shared/interfaces/token.interface';
+import { LoadingService } from '@shared/services/loading.service';
 
 @Component({
     selector: 'worky-publication-view',
@@ -92,7 +93,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     public _dialog: MatDialog,
     private _emailNotificationService: EmailNotificationService,
     private _notificationService: NotificationService,
-    private _scrollService: ScrollService
+    private _scrollService: ScrollService,
+    private _loadingService: LoadingService
   ) {}
 
   async ngAfterViewInit() {
@@ -107,12 +109,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this.routeUrl = this._router.url;
     this.isProfile = this.routeUrl.includes('profile');
 
-    this._notificationService.notification$
-      .pipe(
-        distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
-        debounceTime(300),
-        takeUntil(this.destroy$)
-      )
+          this._notificationService.notification$
+        .pipe(
+          distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+          debounceTime(300),
+          takeUntil(this.destroy$)
+        )
       .subscribe({
         next: (data: any) => {
           if (data?._id === this.publication._id) {
@@ -229,42 +231,38 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async deletePublications(publication: PublicationView) {
-    const loadingDeletePublication = await this._loadingCtrl.create({
-      message: translations['publicationsView.loadingDeletePublication'],
-    });
-
-    await loadingDeletePublication.present();
+    // Usar el nuevo sistema de loading accesible
+    const loading = await this._loadingService.showLoading(translations['publicationsView.loadingDeletePublication']);
 
     this._publicationService.deletePublication(publication._id).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: () => {
         this._publicationService.updatePublicationsDeleted([publication]);
-        loadingDeletePublication.dismiss();
+        this._loadingService.hideLoading();
       },
       error: (error) => {
         console.error(error);
-        loadingDeletePublication.dismiss();
+        this._loadingService.hideLoading();
       },
     });
   }
 
   async fixedPublications(publication: PublicationView) {
-    const loadingFixedPublication = await this._loadingCtrl.create({
-      message: !publication.fixed ? translations['publicationsView.loadingFixedPublication'] : translations['publicationsView.loadingUnfixedPublication'],
-    });
-
-    await loadingFixedPublication.present();
+    // Usar el nuevo sistema de loading accesible
+    const loading = await this._loadingService.showLoading(
+      !publication.fixed ? translations['publicationsView.loadingFixedPublication'] : translations['publicationsView.loadingUnfixedPublication']
+    );
 
     this._publicationService.updatePublicationById(publication._id, { fixed: !publication.fixed }).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.refreshPublications(publication._id);
-        loadingFixedPublication.dismiss();
+        this._loadingService.hideLoading();
         this._scrollService.scrollToTop();
       },
       error: (error) => {
         console.error(error);
-        loadingFixedPublication.dismiss();
+        this._loadingService.hideLoading();
       },
     });
   }
@@ -363,11 +361,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     const dialogRef = this._dialog.open(ReportResponseComponent, {});
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (result: any) => {
       if (result) {
-        const loadingCreateReport = await this._loadingCtrl.create({
-          message: 'Creando reporte...',
-        });
-
-        await loadingCreateReport.present();
+        // Usar el nuevo sistema de loading accesible
+        const loading = await this._loadingService.showLoading('Creando reporte...');
 
         const report: ReportCreate = {
           type: ReportType.POST,
@@ -378,13 +373,13 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         };
         this._reportsService.createReport(report).pipe(takeUntil(this.destroy$)).subscribe({
           next: (data) => {
-            loadingCreateReport.dismiss();
+            this._loadingService.hideLoading();
             this._emailNotificationService.sendEmailNotificationReport(publication, result);
             this._cdr.markForCheck();
           },
           error: (error) => {
             console.error('Error creating report:', error);
-            loadingCreateReport.dismiss();
+            this._loadingService.hideLoading();
           }
         });
       }
@@ -392,20 +387,17 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async deleteComment(_id: string, id_publication: string) {
-    const loadingDeleteComment = await this._loadingCtrl.create({
-      message: 'Eliminando comentario...',
-    });
-
-    await loadingDeleteComment.present();
+    // Usar el nuevo sistema de loading accesible
+    const loading = await this._loadingService.showLoading('Eliminando comentario...');
 
     this._commentService.deleteComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.refreshPublications(id_publication);
-        loadingDeleteComment.dismiss();
+        this._loadingService.hideLoading();
       },
       error: (error) => {
         console.error('Error deleting comment:', error);
-        loadingDeleteComment.dismiss();
+        this._loadingService.hideLoading();
       }
     });
   }

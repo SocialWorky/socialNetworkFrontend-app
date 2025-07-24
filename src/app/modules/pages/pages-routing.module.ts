@@ -5,6 +5,7 @@ import { ProfilesComponent } from './profiles/profiles.component';
 import { LoyautComponent } from './templates/loyaut/loyaut.component';
 import { MessagesComponent } from './messages/messages.component';
 
+
 const routes: Routes = [
   {
     path: '',
@@ -16,6 +17,7 @@ const routes: Routes = [
       { path: 'profile/:profileId', component: ProfilesComponent },
       { path: 'messages', component: MessagesComponent },
       { path: 'messages/:userIdMessages', component: MessagesComponent },
+
       { path: '**', redirectTo: '', pathMatch: 'full' }
     ],
   },
