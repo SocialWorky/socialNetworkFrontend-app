@@ -12,7 +12,7 @@
         <div class="user-name-content">
           <div class="content-name-geo">
             <span class="name"> {{ user.name }} {{ user.lastName }} </span>
-            <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">está en </p> <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span>
+            <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">{{ 'addPublication.location.isIn' | workyTranslations }} </p> <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span>
           </div>
 
           <div class="dropdown-privacy" *ngIf="!typePublishing.POST_PROFILE || (idUserProfile === userToken && typePublishing.POST_PROFILE) || (typePublishing.POST && !idUserProfile)">
@@ -86,49 +86,49 @@
 
         <div class="markdown-help">
           <div class="extra-content-item"
-              matTooltip="Negrita"
+              matTooltip="{{ 'addPublication.tooltip.bold' | workyTranslations }}"
               matTooltipClass="extra-mat-tooltip"
               (click)="insertText('**placeholder**')">
             <i class="material-icons">format_bold</i>
           </div>
           <div class="extra-content-item"
-              matTooltip="Cursiva"
+              matTooltip="{{ 'addPublication.tooltip.italic' | workyTranslations }}"
               matTooltipClass="extra-mat-tooltip"
               (click)="insertText('*placeholder*')">
             <i class="material-icons">format_italic</i>
           </div>
           <div class="extra-content-item"
-              matTooltip="Tachado"
+              matTooltip="{{ 'addPublication.tooltip.strikethrough' | workyTranslations }}"
               matTooltipClass="extra-mat-tooltip"
               (click)="insertText('~~placeholder~~')">
             <i class="material-icons">format_strikethrough</i>
           </div>
           <div class="extra-content-item"
-              matTooltip="Insertar Enlace"
+              matTooltip="{{ 'addPublication.tooltip.link' | workyTranslations }}"
               matTooltipClass="extra-mat-tooltip"
               (click)="insertText('[placeholder](url)')">
             <i class="material-icons">link</i>
           </div>
           <div class="extra-content-item"
-              matTooltip="Insertar Imagen desde URL"
+              matTooltip="{{ 'addPublication.tooltip.image' | workyTranslations }}"
               matTooltipClass="extra-mat-tooltip"
               (click)="insertText('![placeholder](url)')">
             <i class="material-icons">image</i>
           </div>
           <div class="extra-content-item"
-              matTooltip="Insertar Código"
+              matTooltip="{{ 'addPublication.tooltip.code' | workyTranslations }}"
               matTooltipClass="extra-mat-tooltip"
               (click)="insertText('```placeholder```')">
             <i class="material-icons">code</i>
           </div>
           <div class="extra-content-item"
-              matTooltip="Citar Texto"
+              matTooltip="{{ 'addPublication.tooltip.quote' | workyTranslations }}"
               matTooltipClass="extra-mat-tooltip"
               (click)="insertText('> placeholder')">
             <i class="material-icons">label</i>
           </div>
           <div class="extra-content-item"
-              matTooltip="Listar Elementos"
+              matTooltip="{{ 'addPublication.tooltip.list' | workyTranslations }}"
               matTooltipClass="extra-mat-tooltip"
               (click)="insertText('- placeholder')">
             <i class="material-icons">list</i>
@@ -138,7 +138,7 @@
         <div class="options-items">
           <!-- Botón para buscar GIFs -->
           <div id="gif-icon" class="extra-content-item gif-icon"
-              matTooltip="Buscar GIF"
+              matTooltip="{{ 'addPublication.tooltip.gif' | workyTranslations }}"
               matTooltipClass="extra-mat-tooltip" (click)="openGifSearch()">
             <i class="material-icons">gif</i>
           </div>
@@ -146,7 +146,7 @@
           <!-- Otros botones y opciones -->
           <div *ngIf="type !== typePublishing.IMAGE_VIEW"
               class="extra-content-item file-upload"
-              matTooltip="Subir Imagen"
+              matTooltip="{{ 'addPublication.tooltip.upload' | workyTranslations }}"
               matTooltipClass="extra-mat-tooltip"
               (click)="openUploadModal()">
             <i class="material-icons">add_photo_alternate</i>
@@ -154,14 +154,14 @@
 
           <div *ngIf="type === typePublishing.POST || type === typePublishing.POST_PROFILE"
               class="extra-content-item location-on"
-              matTooltip="Estoy Aquí"
+              matTooltip="{{ 'addPublication.tooltip.location' | workyTranslations }}"
               matTooltipClass="extra-mat-tooltip"
               (click)="openLocationSearch()">
             <i class="material-icons">location_on</i>
           </div>
 
           <div class="extra-content-item emoji-icon"
-              matTooltip="Agrega Emoji"
+              matTooltip="{{ 'addPublication.tooltip.emoji' | workyTranslations }}"
               matTooltipClass="extra-mat-tooltip">
             <i class="material-icons" (click)="toggleEmojiMenu()">mood</i>
             <div *ngIf="showEmojiMenu" class="emoji-menu" (click)="preventClose($event)">

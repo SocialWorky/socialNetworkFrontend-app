@@ -7,6 +7,7 @@ import { AlertService } from '@shared/services/alert.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { Subject, takeUntil } from 'rxjs';
 import { ReactiveFormsModule } from '@angular/forms';
+import { translations } from '@translations/translations';
 
 @Component({
   selector: 'worky-webhooks',
@@ -24,68 +25,68 @@ export class WebhooksComponent implements OnInit, OnDestroy {
 
   availableEvents = [
     // User events
-    { value: 'user_registered', label: 'Usuario Registrado', description: 'Se activa cuando un usuario se registra.' },
-    { value: 'user_login', label: 'Usuario Inició Sesión', description: 'Se activa cuando un usuario inicia sesión.' },
-    { value: 'user_edited', label: 'Usuario Editado', description: 'Se activa cuando un usuario edita su perfil.' },
-    { value: 'user_deleted', label: 'Usuario Eliminado', description: 'Se activa cuando un usuario es eliminado.' },
-    { value: 'user_email_verified', label: 'Email Verificado', description: 'Se activa cuando un usuario verifica su email.' },
-    { value: 'user_password_reset', label: 'Password Reseteado', description: 'Se activa cuando un usuario resetea su contraseña.' },
-    { value: 'user_profile_updated', label: 'Perfil Actualizado', description: 'Se activa cuando un usuario actualiza su perfil.' },
-    { value: 'user_avatar_updated', label: 'Avatar Actualizado', description: 'Se activa cuando un usuario actualiza su avatar.' },
-    { value: 'user_device_registered', label: 'Dispositivo Registrado', description: 'Se activa cuando un usuario registra un nuevo dispositivo.' },
+    { value: 'user_registered', label: translations['admin.webhooks.events.user_registered'], description: translations['admin.webhooks.events.user_registered.description'] },
+    { value: 'user_login', label: translations['admin.webhooks.events.user_login'], description: translations['admin.webhooks.events.user_login.description'] },
+    { value: 'user_edited', label: translations['admin.webhooks.events.user_edited'], description: translations['admin.webhooks.events.user_edited.description'] },
+    { value: 'user_deleted', label: translations['admin.webhooks.events.user_deleted'], description: translations['admin.webhooks.events.user_deleted.description'] },
+    { value: 'user_email_verified', label: translations['admin.webhooks.events.user_email_verified'], description: translations['admin.webhooks.events.user_email_verified.description'] },
+    { value: 'user_password_reset', label: translations['admin.webhooks.events.user_password_reset'], description: translations['admin.webhooks.events.user_password_reset.description'] },
+    { value: 'user_profile_updated', label: translations['admin.webhooks.events.user_profile_updated'], description: translations['admin.webhooks.events.user_profile_updated.description'] },
+    { value: 'user_avatar_updated', label: translations['admin.webhooks.events.user_avatar_updated'], description: translations['admin.webhooks.events.user_avatar_updated.description'] },
+    { value: 'user_device_registered', label: translations['admin.webhooks.events.user_device_registered'], description: translations['admin.webhooks.events.user_device_registered.description'] },
 
     // Publication events
-    { value: 'publication_created', label: 'Publicación Creada', description: 'Se activa cuando se crea una publicación.' },
-    { value: 'publication_edited', label: 'Publicación Editada', description: 'Se activa cuando se edita una publicación.' },
-    { value: 'publication_deleted', label: 'Publicación Eliminada', description: 'Se activa cuando se elimina una publicación.' },
-    { value: 'publication_liked', label: 'Publicación Likeada', description: 'Se activa cuando se da like a una publicación.' },
-    { value: 'publication_unliked', label: 'Publicación Dislikeada', description: 'Se activa cuando se quita el like de una publicación.' },
-    { value: 'publication_commented', label: 'Comentario en Publicación', description: 'Se activa cuando se comenta una publicación.' },
-    { value: 'publication_comment_deleted', label: 'Comentario Eliminado de Publicación', description: 'Se activa cuando se elimina un comentario de una publicación.' },
-    { value: 'publication_comment_liked', label: 'Comentario de Publicación Likeado', description: 'Se activa cuando se da like a un comentario de publicación.' },
-    { value: 'publication_comment_unliked', label: 'Comentario de Publicación Dislikeado', description: 'Se activa cuando se quita el like de un comentario de publicación.' },
+    { value: 'publication_created', label: translations['admin.webhooks.events.publication_created'], description: translations['admin.webhooks.events.publication_created.description'] },
+    { value: 'publication_edited', label: translations['admin.webhooks.events.publication_edited'], description: translations['admin.webhooks.events.publication_edited.description'] },
+    { value: 'publication_deleted', label: translations['admin.webhooks.events.publication_deleted'], description: translations['admin.webhooks.events.publication_deleted.description'] },
+    { value: 'publication_liked', label: translations['admin.webhooks.events.publication_liked'], description: translations['admin.webhooks.events.publication_liked.description'] },
+    { value: 'publication_unliked', label: translations['admin.webhooks.events.publication_unliked'], description: translations['admin.webhooks.events.publication_unliked.description'] },
+    { value: 'publication_commented', label: translations['admin.webhooks.events.publication_commented'], description: translations['admin.webhooks.events.publication_commented.description'] },
+    { value: 'publication_comment_deleted', label: translations['admin.webhooks.events.publication_comment_deleted'], description: translations['admin.webhooks.events.publication_comment_deleted.description'] },
+    { value: 'publication_comment_liked', label: translations['admin.webhooks.events.publication_comment_liked'], description: translations['admin.webhooks.events.publication_comment_liked.description'] },
+    { value: 'publication_comment_unliked', label: translations['admin.webhooks.events.publication_comment_unliked'], description: translations['admin.webhooks.events.publication_comment_unliked.description'] },
 
     // Comment events
-    { value: 'comment_created', label: 'Comentario Creado', description: 'Se activa cuando se crea un comentario.' },
-    { value: 'comment_edited', label: 'Comentario Editado', description: 'Se activa cuando se edita un comentario.' },
-    { value: 'comment_deleted', label: 'Comentario Eliminado', description: 'Se activa cuando se elimina un comentario.' },
-    { value: 'comment_liked', label: 'Comentario Likeado', description: 'Se activa cuando se da like a un comentario.' },
-    { value: 'comment_unliked', label: 'Comentario Dislikeado', description: 'Se activa cuando se quita el like de un comentario.' },
+    { value: 'comment_created', label: translations['admin.webhooks.events.comment_created'], description: translations['admin.webhooks.events.comment_created.description'] },
+    { value: 'comment_edited', label: translations['admin.webhooks.events.comment_edited'], description: translations['admin.webhooks.events.comment_edited.description'] },
+    { value: 'comment_deleted', label: translations['admin.webhooks.events.comment_deleted'], description: translations['admin.webhooks.events.comment_deleted.description'] },
+    { value: 'comment_liked', label: translations['admin.webhooks.events.comment_liked'], description: translations['admin.webhooks.events.comment_liked.description'] },
+    { value: 'comment_unliked', label: translations['admin.webhooks.events.comment_unliked'], description: translations['admin.webhooks.events.comment_unliked.description'] },
 
     // Reaction events
-    { value: 'reaction_created', label: 'Reacción Creada', description: 'Se activa cuando se crea una reacción.' },
-    { value: 'reaction_updated', label: 'Reacción Actualizada', description: 'Se activa cuando se actualiza una reacción.' },
-    { value: 'reaction_deleted', label: 'Reacción Eliminada', description: 'Se activa cuando se elimina una reacción.' },
+    { value: 'reaction_created', label: translations['admin.webhooks.events.reaction_created'], description: translations['admin.webhooks.events.reaction_created.description'] },
+    { value: 'reaction_updated', label: translations['admin.webhooks.events.reaction_updated'], description: translations['admin.webhooks.events.reaction_updated.description'] },
+    { value: 'reaction_deleted', label: translations['admin.webhooks.events.reaction_deleted'], description: translations['admin.webhooks.events.reaction_deleted.description'] },
 
     // Friend events
-    { value: 'friend_request_sent', label: 'Solicitud de Amistad Enviada', description: 'Se activa cuando se envía una solicitud de amistad.' },
-    { value: 'friend_request_accepted', label: 'Solicitud de Amistad Aceptada', description: 'Se activa cuando se acepta una solicitud de amistad.' },
-    { value: 'friend_request_rejected', label: 'Solicitud de Amistad Rechazada', description: 'Se activa cuando se rechaza una solicitud de amistad.' },
-    { value: 'friend_removed', label: 'Amigo Eliminado', description: 'Se activa cuando se elimina un amigo.' },
-    { value: 'user_blocked', label: 'Usuario Bloqueado', description: 'Se activa cuando se bloquea un usuario.' },
-    { value: 'user_unblocked', label: 'Usuario Desbloqueado', description: 'Se activa cuando se desbloquea un usuario.' },
+    { value: 'friend_request_sent', label: translations['admin.webhooks.events.friend_request_sent'], description: translations['admin.webhooks.events.friend_request_sent.description'] },
+    { value: 'friend_request_accepted', label: translations['admin.webhooks.events.friend_request_accepted'], description: translations['admin.webhooks.events.friend_request_accepted.description'] },
+    { value: 'friend_request_rejected', label: translations['admin.webhooks.events.friend_request_rejected'], description: translations['admin.webhooks.events.friend_request_rejected.description'] },
+    { value: 'friend_removed', label: translations['admin.webhooks.events.friend_removed'], description: translations['admin.webhooks.events.friend_removed.description'] },
+    { value: 'user_blocked', label: translations['admin.webhooks.events.user_blocked'], description: translations['admin.webhooks.events.user_blocked.description'] },
+    { value: 'user_unblocked', label: translations['admin.webhooks.events.user_unblocked'], description: translations['admin.webhooks.events.user_unblocked.description'] },
 
     // Mail events
-    { value: 'email_sent', label: 'Email Enviado', description: 'Se activa cuando se envía un email.' },
-    { value: 'email_failed', label: 'Fallo de Email', description: 'Se activa cuando falla el envío de un email.' },
-    { value: 'welcome_email_sent', label: 'Email de Bienvenida Enviado', description: 'Se activa cuando se envía un email de bienvenida.' },
-    { value: 'password_reset_email_sent', label: 'Email de Reseteo de Contraseña Enviado', description: 'Se activa cuando se envía un email de reseteo de contraseña.' },
-    { value: 'verification_email_sent', label: 'Email de Verificación Enviado', description: 'Se activa cuando se envía un email de verificación.' },
+    { value: 'email_sent', label: translations['admin.webhooks.events.email_sent'], description: translations['admin.webhooks.events.email_sent.description'] },
+    { value: 'email_failed', label: translations['admin.webhooks.events.email_failed'], description: translations['admin.webhooks.events.email_failed.description'] },
+    { value: 'welcome_email_sent', label: translations['admin.webhooks.events.welcome_email_sent'], description: translations['admin.webhooks.events.welcome_email_sent.description'] },
+    { value: 'password_reset_email_sent', label: translations['admin.webhooks.events.password_reset_email_sent'], description: translations['admin.webhooks.events.password_reset_email_sent.description'] },
+    { value: 'verification_email_sent', label: translations['admin.webhooks.events.verification_email_sent'], description: translations['admin.webhooks.events.verification_email_sent.description'] },
 
     // Report events
-    { value: 'report_created', label: 'Reporte Creado', description: 'Se activa cuando se crea un reporte.' },
-    { value: 'report_updated', label: 'Reporte Actualizado', description: 'Se activa cuando se actualiza un reporte.' },
-    { value: 'report_resolved', label: 'Reporte Resuelto', description: 'Se activa cuando se resuelve un reporte.' },
+    { value: 'report_created', label: translations['admin.webhooks.events.report_created'], description: translations['admin.webhooks.events.report_created.description'] },
+    { value: 'report_updated', label: translations['admin.webhooks.events.report_updated'], description: translations['admin.webhooks.events.report_updated.description'] },
+    { value: 'report_resolved', label: translations['admin.webhooks.events.report_resolved'], description: translations['admin.webhooks.events.report_resolved.description'] },
 
     // Invitation events
-    { value: 'invitation_code_created', label: 'Código de Invitación Creado', description: 'Se activa cuando se crea un código de invitación.' },
-    { value: 'invitation_code_used', label: 'Código de Invitación Usado', description: 'Se activa cuando se usa un código de invitación.' },
-    { value: 'invitation_code_expired', label: 'Código de Invitación Expirado', description: 'Se activa cuando expira un código de invitación.' },
+    { value: 'invitation_code_created', label: translations['admin.webhooks.events.invitation_code_created'], description: translations['admin.webhooks.events.invitation_code_created.description'] },
+    { value: 'invitation_code_used', label: translations['admin.webhooks.events.invitation_code_used'], description: translations['admin.webhooks.events.invitation_code_used.description'] },
+    { value: 'invitation_code_expired', label: translations['admin.webhooks.events.invitation_code_expired'], description: translations['admin.webhooks.events.invitation_code_expired.description'] },
 
     // System events
-    { value: 'system_maintenance', label: 'Mantenimiento del Sistema', description: 'Se activa cuando el sistema entra en mantenimiento.' },
-    { value: 'system_error', label: 'Error del Sistema', description: 'Se activa cuando ocurre un error en el sistema.' },
-    { value: 'log_cleanup', label: 'Limpieza de Logs', description: 'Se activa cuando se realiza una limpieza de logs.' },
+    { value: 'system_maintenance', label: translations['admin.webhooks.events.system_maintenance'], description: translations['admin.webhooks.events.system_maintenance.description'] },
+    { value: 'system_error', label: translations['admin.webhooks.events.system_error'], description: translations['admin.webhooks.events.system_error.description'] },
+    { value: 'log_cleanup', label: translations['admin.webhooks.events.log_cleanup'], description: translations['admin.webhooks.events.log_cleanup.description'] },
   ];
 
   private destroy$ = new Subject<void>();
@@ -141,7 +142,7 @@ export class WebhooksComponent implements OnInit, OnDestroy {
     if (this.editingWebhook) {
       this.webhookService.editWebhook(this.editingWebhook._id, data).pipe(takeUntil(this.destroy$)).subscribe({
         next: () => {
-          this.alertService.showAlert('Éxito', 'Webhook actualizado correctamente', Alerts.SUCCESS, Position.CENTER, true, 'Aceptar');
+          this.alertService.showAlert(translations['alert.success'], translations['admin.webhooks.messages.success.updated'], Alerts.SUCCESS, Position.CENTER, true, translations['button.ok']);
           this.webhookForm.reset();
           this.editingWebhook = null;
           this.loadWebhooks();
@@ -154,14 +155,14 @@ export class WebhooksComponent implements OnInit, OnDestroy {
             'Error updating webhook',
             { error: String(error), webhookId: this.editingWebhook?._id }
           );
-          this.alertService.showAlert('Error', 'No se pudo actualizar el webhook', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
+          this.alertService.showAlert(translations['alert.error'], translations['admin.webhooks.messages.error.update'], Alerts.ERROR, Position.CENTER, true, translations['button.ok']);
           this.loadWebhookButtons = false;
         }
       });
     } else {
       this.webhookService.registerWebhook(data).pipe(takeUntil(this.destroy$)).subscribe({
         next: () => {
-          this.alertService.showAlert('Éxito', 'Webhook creado correctamente', Alerts.SUCCESS, Position.CENTER, true, 'Aceptar');
+          this.alertService.showAlert(translations['alert.success'], translations['admin.webhooks.messages.success.created'], Alerts.SUCCESS, Position.CENTER, true, translations['button.ok']);
           this.webhookForm.reset();
           this.loadWebhooks();
           this.loadWebhookButtons = false;
@@ -173,7 +174,7 @@ export class WebhooksComponent implements OnInit, OnDestroy {
             'Error creating webhook',
             { error: String(error), webhookData: data }
           );
-          this.alertService.showAlert('Error', 'No se pudo crear el webhook', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
+          this.alertService.showAlert(translations['alert.error'], translations['admin.webhooks.messages.error.create'], Alerts.ERROR, Position.CENTER, true, translations['button.ok']);
           this.loadWebhookButtons = false;
         }
       });
@@ -197,7 +198,7 @@ export class WebhooksComponent implements OnInit, OnDestroy {
   deleteWebhook(id: string) {
     this.webhookService.deleteWebhook(id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
-        this.alertService.showAlert('Éxito', 'Webhook eliminado correctamente', Alerts.SUCCESS, Position.CENTER, true, 'Aceptar');
+        this.alertService.showAlert(translations['alert.success'], translations['admin.webhooks.messages.success.deleted'], Alerts.SUCCESS, Position.CENTER, true, translations['button.ok']);
         this.loadWebhooks();
       },
       error: (error) => {
@@ -207,7 +208,7 @@ export class WebhooksComponent implements OnInit, OnDestroy {
           'Error deleting webhook',
           { error: String(error), webhookId: id }
         );
-        this.alertService.showAlert('Error', 'No se pudo eliminar el webhook', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
+        this.alertService.showAlert(translations['alert.error'], translations['admin.webhooks.messages.error.delete'], Alerts.ERROR, Position.CENTER, true, translations['button.ok']);
       }
     });
   }
@@ -215,7 +216,7 @@ export class WebhooksComponent implements OnInit, OnDestroy {
   toggleWebhookStatus(webhook: Webhook) {
     this.webhookService.toggleWebhook(webhook._id, { isActive: !webhook.isActive }).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
-        this.alertService.showAlert('Éxito', `Webhook ${webhook.isActive ? 'desactivado' : 'activado'} correctamente`, Alerts.SUCCESS, Position.CENTER, true, 'Aceptar');
+        this.alertService.showAlert(translations['alert.success'], webhook.isActive ? translations['admin.webhooks.messages.success.deactivated'] : translations['admin.webhooks.messages.success.activated'], Alerts.SUCCESS, Position.CENTER, true, translations['button.ok']);
         this.loadWebhooks();
       },
       error: (error) => {
@@ -225,7 +226,7 @@ export class WebhooksComponent implements OnInit, OnDestroy {
           'Error toggling webhook status',
           { error: String(error), webhookId: webhook._id, newStatus: !webhook.isActive }
         );
-        this.alertService.showAlert('Error', 'No se pudo cambiar el estado del webhook', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
+        this.alertService.showAlert(translations['alert.error'], translations['admin.webhooks.messages.error.toggle'], Alerts.ERROR, Position.CENTER, true, translations['button.ok']);
       }
     });
   }

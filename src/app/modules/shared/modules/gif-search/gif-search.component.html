@@ -1,6 +1,6 @@
 <div class="content-search-gif">
   <div class="search-term">
-    <input type="text" [formControl]="searchTerm" placeholder="Search GIFs" />
+    <input type="text" [formControl]="searchTerm" placeholder="{{ 'gifSearch.placeholder' | workyTranslations }}" />
     <div class="content-options">
       <label>
         <input type="radio" name="size" (click)="setImageSize('fixed_height')" checked /> Altura Fija

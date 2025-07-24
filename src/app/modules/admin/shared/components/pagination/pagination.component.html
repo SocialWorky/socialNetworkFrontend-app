@@ -9,7 +9,7 @@
       class="w-9 h-9 rounded-lg border border-slate-600 bg-slate-700 text-slate-100 cursor-pointer flex items-center justify-center transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none min-w-9 hidden sm:flex" 
       [disabled]="config.currentPage === 1"
       (click)="onFirstPage()"
-      title="Primera página">
+      title="{{ 'admin.shared.pagination.firstPage' | workyTranslations }}">
       <i class="material-icons text-lg">first_page</i>
     </button>
     
@@ -18,7 +18,7 @@
       class="w-9 h-9 rounded-lg border border-slate-600 bg-slate-700 text-slate-100 cursor-pointer flex items-center justify-center transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none min-w-9" 
       [disabled]="config.currentPage === 1"
       (click)="onPreviousPage()"
-      title="Página anterior">
+      title="{{ 'admin.shared.pagination.previousPage' | workyTranslations }}">
       <i class="material-icons text-lg">chevron_left</i>
     </button>
     
@@ -48,7 +48,7 @@
       class="w-9 h-9 rounded-lg border border-slate-600 bg-slate-700 text-slate-100 cursor-pointer flex items-center justify-center transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none min-w-9" 
       [disabled]="config.currentPage === config.totalPages"
       (click)="onNextPage()"
-      title="Página siguiente">
+      title="{{ 'admin.shared.pagination.nextPage' | workyTranslations }}">
       <i class="material-icons text-lg">chevron_right</i>
     </button>
     
@@ -57,7 +57,7 @@
       class="w-9 h-9 rounded-lg border border-slate-600 bg-slate-700 text-slate-100 cursor-pointer flex items-center justify-center transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none min-w-9 hidden sm:flex" 
       [disabled]="config.currentPage === config.totalPages"
       (click)="onLastPage()"
-      title="Última página">
+      title="{{ 'admin.shared.pagination.lastPage' | workyTranslations }}">
       <i class="material-icons text-lg">last_page</i>
     </button>
   </div>

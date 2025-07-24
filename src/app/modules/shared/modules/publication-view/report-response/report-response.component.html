@@ -1,6 +1,6 @@
 <div class="content-create-report">
   <div class="content-create-report__header">
-    <h3 class="content-create-report__title">Reportar Publicación</h3>
+    <h3 class="content-create-report__title">{{ 'shared.reportResponse.title' | workyTranslations }}</h3>
   </div>
 
   <div class="content-create-report__body">
@@ -9,7 +9,7 @@
       <div class="form-report-content">
         <div class="form-input">
           <mat-form-field class="worky-input worky-accent">
-            <mat-label>Motivo del reporte</mat-label>
+            <mat-label>{{ 'shared.reportResponse.reason' | workyTranslations }}</mat-label>
             <textarea id="detail_report" formControlName="detail_report" matInput></textarea>
           </mat-form-field>
 
@@ -21,7 +21,7 @@
               [theme]="WorkyButtonTheme.Accent"
               (click)="createReportForm.valid && createReport()"
               [width]="'100%'">
-              <span basic-button-text>Enviar Reporte</span>
+              <span basic-button-text>{{ 'shared.reportResponse.send' | workyTranslations }}</span>
             </worky-buttons>
           </div>
         </div>

@@ -7,8 +7,8 @@
           <i class="material-icons text-white text-lg">person</i>
         </div>
         <div>
-          <h3 class="text-xl font-bold bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent">Detalles del Usuario</h3>
-          <p class="text-slate-400 text-sm">Información completa del perfil</p>
+          <h3 class="text-xl font-bold bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent">{{ 'admin.userManagement.details.title' | workyTranslations }}</h3>
+          <p class="text-slate-400 text-sm">{{ 'admin.userManagement.details.subtitle' | workyTranslations }}</p>
         </div>
       </div>
       <button 
@@ -47,7 +47,7 @@
                 <div class="flex items-center gap-3">
                   <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
                     <i class="material-icons text-xs">verified</i>
-                    {{ user.isVerified ? 'Verificado' : 'Pendiente' }}
+                    {{ user.isVerified ? ('admin.userManagement.details.verified' | workyTranslations) : ('admin.userManagement.details.pending' | workyTranslations) }}
                   </span>
                   <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
                         [ngClass]="{
@@ -55,7 +55,7 @@
                           'bg-red-500/15 text-red-400 border border-red-500/20': !user.isActive
                         }">
                     <i class="material-icons text-xs">{{ user.isActive ? 'check_circle' : 'cancel' }}</i>
-                    {{ user.isActive ? 'Activo' : 'Inactivo' }}
+                    {{ user.isActive ? ('admin.userManagement.details.active' | workyTranslations) : ('admin.userManagement.details.inactive' | workyTranslations) }}
                   </span>
                 </div>
               </div>
@@ -71,7 +71,7 @@
               <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
                 <i class="material-icons text-white text-sm">person</i>
               </div>
-              <h5 class="text-lg font-semibold text-slate-200">Información Personal</h5>
+              <h5 class="text-lg font-semibold text-slate-200">{{ 'admin.userManagement.details.personalInfo' | workyTranslations }}</h5>
             </div>
             
             <div class="space-y-3">
@@ -81,7 +81,7 @@
                     <i class="material-icons text-blue-400 text-sm">badge</i>
                   </div>
                   <div class="flex-1">
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Nombre</div>
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{{ 'admin.userManagement.details.fields.name' | workyTranslations }}</div>
                     <div class="text-slate-100 font-medium">{{ user.name }}</div>
                   </div>
                 </div>
@@ -93,7 +93,7 @@
                     <i class="material-icons text-purple-400 text-sm">badge</i>
                   </div>
                   <div class="flex-1">
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Apellido</div>
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{{ 'admin.userManagement.details.fields.lastName' | workyTranslations }}</div>
                     <div class="text-slate-100 font-medium">{{ user.lastName }}</div>
                   </div>
                 </div>
@@ -105,7 +105,7 @@
                     <i class="material-icons text-cyan-400 text-sm">alternate_email</i>
                   </div>
                   <div class="flex-1">
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Email</div>
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{{ 'admin.userManagement.details.fields.email' | workyTranslations }}</div>
                     <div class="text-slate-100 font-medium">{{ user.email }}</div>
                   </div>
                 </div>
@@ -117,7 +117,7 @@
                     <i class="material-icons text-pink-400 text-sm">cake</i>
                   </div>
                   <div class="flex-1">
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Fecha de Nacimiento</div>
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{{ 'admin.userManagement.details.fields.dateOfBirth' | workyTranslations }}</div>
                     <div class="text-slate-100 font-medium">{{ user.profile.dateOfBirth | date: 'dd/MM/yyyy' }}</div>
                   </div>
                 </div>
@@ -129,7 +129,7 @@
                     <i class="material-icons text-indigo-400 text-sm">wc</i>
                   </div>
                   <div class="flex-1">
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Sexo</div>
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{{ 'admin.userManagement.details.fields.sex' | workyTranslations }}</div>
                     <div class="text-slate-100 font-medium">{{ user.profile.sex }}</div>
                   </div>
                 </div>
@@ -143,7 +143,7 @@
               <div class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center">
                 <i class="material-icons text-white text-sm">account_circle</i>
               </div>
-              <h5 class="text-lg font-semibold text-slate-200">Información de Cuenta</h5>
+              <h5 class="text-lg font-semibold text-slate-200">{{ 'admin.userManagement.details.accountInfo' | workyTranslations }}</h5>
             </div>
             
             <div class="space-y-3">
@@ -153,7 +153,7 @@
                     <i class="material-icons text-amber-400 text-sm">person</i>
                   </div>
                   <div class="flex-1">
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Usuario</div>
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{{ 'admin.userManagement.details.fields.username' | workyTranslations }}</div>
                     <div class="text-slate-100 font-medium">&#64;{{ user.username }}</div>
                   </div>
                 </div>
@@ -165,7 +165,7 @@
                     <i class="material-icons text-emerald-400 text-sm">schedule</i>
                   </div>
                   <div class="flex-1">
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Fecha de Registro</div>
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{{ 'admin.userManagement.details.fields.registrationDate' | workyTranslations }}</div>
                     <div class="text-slate-100 font-medium">{{ user.createdAt | date:'dd/MM/yyyy' }}</div>
                     <div class="text-slate-500 text-xs">{{ user.createdAt | date:'HH:mm' }}</div>
                   </div>
@@ -178,7 +178,7 @@
                     <i class="material-icons text-blue-400 text-sm">security</i>
                   </div>
                   <div class="flex-1">
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Rol</div>
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{{ 'admin.userManagement.details.fields.role' | workyTranslations }}</div>
                     <div class="text-slate-100 font-medium">{{ user.role | titlecase }}</div>
                   </div>
                 </div>
@@ -190,8 +190,8 @@
                     <i class="material-icons text-emerald-400 text-sm">verified</i>
                   </div>
                   <div class="flex-1">
-                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Estado de Verificación</div>
-                    <div class="text-slate-100 font-medium">{{ user.isVerified ? 'Email Verificado' : 'Email Pendiente' }}</div>
+                    <div class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">{{ 'admin.userManagement.details.verificationStatus' | workyTranslations }}</div>
+                    <div class="text-slate-100 font-medium">{{ user.isVerified ? ('admin.userManagement.details.emailVerified' | workyTranslations) : ('admin.userManagement.details.emailPending' | workyTranslations) }}</div>
                   </div>
                 </div>
               </div>
@@ -206,7 +206,7 @@
               <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <i class="material-icons text-white text-sm">dynamic_form</i>
               </div>
-              <h5 class="text-lg font-semibold text-slate-200">Campos Personalizados</h5>
+              <h5 class="text-lg font-semibold text-slate-200">{{ 'admin.userManagement.details.customFields' | workyTranslations }}</h5>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">

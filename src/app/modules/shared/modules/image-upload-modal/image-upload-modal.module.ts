@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { WorkyButtonsModule } from '../buttons/buttons.module';
 import { MaterialModule } from '../material/material.module';
 import { ImageUploadModalComponent } from './image-upload-modal.component';
+import { TranslationsModule } from '../translations/translations.module';
 
 @NgModule({
   declarations: [ImageUploadModalComponent],
@@ -10,6 +11,7 @@ import { ImageUploadModalComponent } from './image-upload-modal.component';
     CommonModule,
     WorkyButtonsModule,
     MaterialModule,
+    TranslationsModule,
   ],
   exports: [ImageUploadModalComponent]
 })

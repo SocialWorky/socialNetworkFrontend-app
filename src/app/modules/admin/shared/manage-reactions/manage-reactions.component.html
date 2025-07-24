@@ -3,8 +3,8 @@
   <div class="bg-slate-700/95 backdrop-blur-lg border border-slate-600 rounded-xl p-6 mb-8 shadow-lg">
     <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
       <div class="flex-1">
-        <h1 class="text-4xl font-bold text-slate-100 mb-2">Gestión de Reacciones</h1>
-        <p class="text-slate-300 text-lg">Crea y administra reacciones personalizadas para la plataforma</p>
+        <h1 class="text-4xl font-bold text-slate-100 mb-2">{{ 'admin.manageReactions.title' | workyTranslations }}</h1>
+        <p class="text-slate-300 text-lg">{{ 'admin.manageReactions.subtitle' | workyTranslations }}</p>
       </div>
       <div class="flex gap-4 items-center lg:flex-row flex-col lg:w-auto w-full">
         <button 
@@ -12,7 +12,7 @@
           (click)="listReactions()" 
           [disabled]="loadReactionsButtons">
           <i class="material-icons" [class.animate-spin]="loadReactionsButtons">refresh</i>
-          <span>Recargar</span>
+          <span>{{ 'admin.manageReactions.reload' | workyTranslations }}</span>
         </button>
       </div>
     </div>
@@ -31,13 +31,13 @@
         <i class="material-icons">error_outline</i>
       </div>
       <div>
-        <h3 class="text-2xl font-semibold text-slate-100 mb-2">Error al cargar reacciones</h3>
+        <h3 class="text-2xl font-semibold text-slate-100 mb-2">{{ 'admin.manageReactions.error.title' | workyTranslations }}</h3>
         <p class="text-slate-300 mb-6 leading-relaxed">{{ error }}</p>
         <button 
           class="flex items-center gap-2 px-6 py-3 border border-red-500 rounded-lg bg-red-500/10 text-red-400 font-semibold text-sm hover:bg-red-500 hover:text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/30"
           (click)="listReactions()">
           <i class="material-icons text-lg">refresh</i>
-          Reintentar
+          {{ 'admin.manageReactions.error.retry' | workyTranslations }}
         </button>
       </div>
     </div>
@@ -59,8 +59,8 @@
           <i class="material-icons">add_circle</i>
         </div>
         <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">Crear Nueva Reacción</h3>
-          <p class="text-sm text-slate-400">Agrega una nueva reacción personalizada al sistema</p>
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.manageReactions.create.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.manageReactions.create.subtitle' | workyTranslations }}</p>
         </div>
       </div>
       
@@ -70,36 +70,36 @@
             <div class="space-y-2">
               <label for="name" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
                 <i class="material-icons text-blue-500 text-base">label</i>
-                Nombre de la Reacción
+                {{ 'admin.manageReactions.create.name' | workyTranslations }}
               </label>
               <input 
                 formControlName="name" 
                 id="name" 
                 type="text" 
                 class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500"
-                placeholder="Ej: Me encanta, Increíble, etc."
+                placeholder="{{ 'admin.manageReactions.create.name.placeholder' | workyTranslations }}"
               >
               <div class="flex items-center gap-2 text-red-400 text-xs" *ngIf="reactionForm.controls['name'].invalid && reactionForm.controls['name'].touched">
                 <i class="material-icons text-sm">error</i>
-                El nombre es requerido
+                {{ 'admin.manageReactions.create.name.required' | workyTranslations }}
               </div>
             </div>
 
             <div class="space-y-2">
               <label for="emoji" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
                 <i class="material-icons text-blue-500 text-base">emoji_emotions</i>
-                Emoji o URL de Imagen
+                {{ 'admin.manageReactions.create.emoji' | workyTranslations }}
               </label>
               <input 
                 formControlName="emoji" 
                 id="emoji" 
                 type="text" 
                 class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500"
-                placeholder="😍 o https://ejemplo.com/imagen.png"
+                placeholder="{{ 'admin.manageReactions.emojiPlaceholder' | workyTranslations }}"
               >
               <div class="flex items-center gap-2 text-red-400 text-xs" *ngIf="reactionForm.controls['emoji'].invalid && reactionForm.controls['emoji'].touched">
                 <i class="material-icons text-sm">error</i>
-                El emoji es requerido
+                {{ 'admin.manageReactions.create.emoji.required' | workyTranslations }}
               </div>
             </div>
           </div>
@@ -107,7 +107,7 @@
           <div class="space-y-2">
             <label for="image" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
               <i class="material-icons text-blue-500 text-base">upload</i>
-              Subir Imagen
+              {{ 'admin.manageReactions.create.uploadImage' | workyTranslations }}
             </label>
             <div class="relative border-2 border-dashed border-slate-600 rounded-lg bg-slate-800 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5 cursor-pointer">
               <input 
@@ -119,7 +119,7 @@
               >
               <div class="flex flex-col items-center gap-2 p-8 text-slate-400 text-center" *ngIf="!imagePreview">
                 <i class="material-icons text-3xl text-blue-500">cloud_upload</i>
-                <span class="text-sm">Haz clic para seleccionar una imagen o arrastra aquí</span>
+                <span class="text-sm">{{ 'admin.manageReactions.upload.text' | workyTranslations }}</span>
               </div>
               <div class="p-4" *ngIf="imagePreview">
                 <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-600">
@@ -142,7 +142,7 @@
               class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30"
             >
               <i class="material-icons">add</i>
-              <span>Crear Reacción</span>
+                              <span>{{ 'admin.manageReactions.create.button' | workyTranslations }}</span>
             </button>
           </div>
         </form>
@@ -156,11 +156,11 @@
           <i class="material-icons">list</i>
         </div>
         <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">Reacciones Disponibles</h3>
-          <p class="text-sm text-slate-400">Lista de todas las reacciones personalizadas creadas</p>
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.manageReactions.list.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.manageReactions.list.subtitle' | workyTranslations }}</p>
         </div>
         <div class="bg-emerald-500/20 text-emerald-400 px-4 py-2 rounded-full text-sm font-semibold border border-emerald-500/30">
-          {{ reactionsList.length }} reacciones
+          {{ reactionsList.length }} {{ 'admin.manageReactions.list.unit' | workyTranslations }}
         </div>
       </div>
       
@@ -172,19 +172,19 @@
                 <th class="px-6 py-4 text-left font-semibold text-slate-100 text-sm w-[60%]">
                   <div class="flex items-center gap-2">
                     <i class="material-icons text-blue-500">label</i>
-                    Nombre
+                    {{ 'admin.manageReactions.list.name' | workyTranslations }}
                   </div>
                 </th>
                 <th class="px-6 py-4 text-center font-semibold text-slate-100 text-sm w-[20%]">
                   <div class="flex items-center justify-center gap-2">
                     <i class="material-icons text-blue-500">image</i>
-                    Imagen
+                    {{ 'admin.manageReactions.list.image' | workyTranslations }}
                   </div>
                 </th>
                 <th class="px-6 py-4 text-center font-semibold text-slate-100 text-sm w-[20%]">
                   <div class="flex items-center justify-center gap-2">
                     <i class="material-icons text-blue-500">settings</i>
-                    Acciones
+                    {{ 'admin.manageReactions.list.actions' | workyTranslations }}
                   </div>
                 </th>
               </tr>
@@ -213,7 +213,7 @@
                       [title]="'Eliminar ' + reaction.name"
                     >
                       <i class="material-icons text-sm">delete</i>
-                      <span class="hidden sm:inline">Eliminar</span>
+                      <span class="hidden sm:inline">{{ 'admin.manageReactions.list.delete' | workyTranslations }}</span>
                     </button>
                   </div>
                 </td>
@@ -225,8 +225,8 @@
           <div class="flex justify-center items-center min-h-[300px] p-12" *ngIf="reactionsList.length === 0">
             <div class="text-center max-w-md">
               <i class="material-icons text-6xl text-cyan-500/70 mb-6">emoji_emotions</i>
-              <h3 class="text-2xl font-semibold text-slate-100 mb-3">No hay reacciones creadas</h3>
-              <p class="text-slate-400 leading-relaxed">Crea tu primera reacción personalizada usando el formulario de arriba</p>
+              <h3 class="text-2xl font-semibold text-slate-100 mb-3">{{ 'admin.manageReactions.empty.title' | workyTranslations }}</h3>
+              <p class="text-slate-400 leading-relaxed">{{ 'admin.manageReactions.empty.text' | workyTranslations }}</p>
             </div>
           </div>
         </div>
@@ -238,13 +238,13 @@
   <div class="flex justify-center items-center min-h-[200px]" *ngIf="error">
     <div class="text-center text-slate-400">
       <i class="material-icons text-5xl text-red-500 mb-4">warning</i>
-      <h3 class="text-xl font-semibold text-slate-100 mb-2">Error al cargar reacciones</h3>
+      <h3 class="text-xl font-semibold text-slate-100 mb-2">{{ 'admin.manageReactions.error.loading.title' | workyTranslations }}</h3>
       <p class="mb-6 text-sm">{{ error }}</p>
       <button 
         class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
         (click)="listReactions()">
         <i class="material-icons">refresh</i>
-        <span>Intentar de nuevo</span>
+        <span>{{ 'admin.manageReactions.retry' | workyTranslations }}</span>
       </button>
     </div>
   </div>

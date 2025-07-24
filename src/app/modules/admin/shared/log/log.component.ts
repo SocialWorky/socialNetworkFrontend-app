@@ -53,7 +53,7 @@ export class LogComponent implements OnInit, OnDestroy {
   // Configuraciones para componentes compartidos
   loadingConfig: LoadingSpinnerConfig = {
     size: 'medium',
-    text: 'Cargando logs...',
+    text: 'admin.log.loading',
     overlay: true
   };
 
@@ -72,11 +72,11 @@ export class LogComponent implements OnInit, OnDestroy {
   private autoRefreshTimer?: any;
 
   logLevels = [
-    { value: '', label: 'Todos', icon: 'list' },
-    { value: 'error', label: 'Errores', icon: 'error' },
-    { value: 'warn', label: 'Advertencias', icon: 'warning' },
-    { value: 'info', label: 'Información', icon: 'info' },
-    { value: 'debug', label: 'Debug', icon: 'bug_report' }
+    { value: '', label: 'admin.log.levels.all', icon: 'list' },
+    { value: 'error', label: 'admin.log.levels.error', icon: 'error' },
+    { value: 'warn', label: 'admin.log.levels.warn', icon: 'warning' },
+    { value: 'info', label: 'admin.log.levels.info', icon: 'info' },
+    { value: 'debug', label: 'admin.log.levels.debug', icon: 'bug_report' }
   ];
 
   Math = Math;

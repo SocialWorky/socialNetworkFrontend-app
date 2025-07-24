@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { TranslationsModule } from '@shared/modules/translations/translations.module';
 import { Subject, takeUntil } from 'rxjs';
 import { WidgetConfig, WidgetPosition, WidgetStatus } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
 import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget-config.service';
@@ -8,12 +9,13 @@ import { AlertService } from '@shared/services/alert.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { WidgetLayout } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
+import { translations } from '@translations/translations';
 
 @Component({
   selector: 'worky-widget-management',
   templateUrl: './widget-management.component.html',
   styleUrls: ['./widget-management.component.scss'],
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslationsModule],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -165,7 +167,7 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
-            this.alertService.showAlert('Éxito', 'Widget guardado correctamente', Alerts.SUCCESS, Position.CENTER, true, 'Aceptar');
+            this.alertService.showAlert(translations['admin.widgetManagement.success.title'], translations['admin.widgetManagement.success.saved'], Alerts.SUCCESS, Position.CENTER, true, translations['button.ok']);
             this.widgetForm.reset();
             this.widgetConfigService.forceRefresh();
             this.isSaving = false;
@@ -178,7 +180,7 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
               'Error saving widget',
               { error: String(error), widgetConfig }
             );
-            this.alertService.showAlert('Error', 'Error al guardar widget', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
+            this.alertService.showAlert(translations['admin.widgetManagement.errors.title'], translations['admin.widgetManagement.errors.saveError'], Alerts.ERROR, Position.CENTER, true, translations['button.ok']);
             this.isSaving = false;
             this._cdr.markForCheck();
           }
@@ -211,7 +213,7 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.alertService.showAlert('Éxito', 'Widget eliminado correctamente', Alerts.SUCCESS, Position.CENTER, true, 'Aceptar');
+          this.alertService.showAlert(translations['admin.widgetManagement.success.title'], translations['admin.widgetManagement.success.deleted'], Alerts.SUCCESS, Position.CENTER, true, translations['button.ok']);
           this.widgetConfigService.forceRefresh();
           this.isDeleting = false;
           this._cdr.markForCheck();
@@ -223,7 +225,7 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
             'Error deleting widget',
             { error: String(error), widgetSelector: selector }
           );
-          this.alertService.showAlert('Error', 'Error al eliminar widget', Alerts.ERROR, Position.CENTER, true, 'Aceptar');
+                      this.alertService.showAlert(translations['admin.widgetManagement.errors.title'], translations['admin.widgetManagement.errors.deleteError'], Alerts.ERROR, Position.CENTER, true, translations['button.ok']);
           this.isDeleting = false;
           this._cdr.markForCheck();
         }
@@ -233,8 +235,8 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
   private validateWidgetConstraints(widget: WidgetConfig): boolean {
     if (!widget.allowedPositions.includes(widget.position)) {
       this.alertService.showAlert(
-        'Error',
-        `Este widget no puede ir en la posición ${widget.position}`,
+        translations['admin.widgetManagement.errors.title'],
+        translations['admin.widgetManagement.errors.invalidPosition'].replace('{position}', widget.position),
         Alerts.ERROR,
         Position.CENTER,
         true
@@ -249,12 +251,15 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
         const current = this.widgetConfigService.getWidgetsCountInPosition(widget.position);
         
         this.alertService.showAlert(
-          'Error',
-          `Máximo ${limit} widgets permitidos en ${widget.position}. Actualmente hay ${current} widgets habilitados.`,
+          translations['admin.widgetManagement.errors.title'],
+          translations['admin.widgetManagement.errors.maxWidgetsReached']
+            .replace('{limit}', limit.toString())
+            .replace('{position}', widget.position)
+            .replace('{current}', current.toString()),
           Alerts.ERROR,
           Position.CENTER,
           true,
-          'Aceptar'
+          translations['button.ok']
         );
         return false;
       }
@@ -271,7 +276,7 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
   getPositionInfo(position: WidgetPosition): string {
     const current = this.widgetConfigService.getWidgetsCountInPosition(position);
     const limit = this.widgetConfigService.getPositionLimit(position);
-    return `${current}/${limit} widgets`;
+    return translations['admin.widgetManagement.positionInfo'].replace('{current}', current.toString()).replace('{limit}', limit.toString());
   }
 
   trackByWidget(index: number, widget: WidgetConfig): string {

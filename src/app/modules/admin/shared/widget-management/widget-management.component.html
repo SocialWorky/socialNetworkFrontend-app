@@ -4,9 +4,9 @@
     <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
       <div class="flex-1">
         <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
-          Gestión de Widgets
+          {{ 'admin.widgetManagement.title' | workyTranslations }}
         </h1>
-        <p class="text-slate-300 text-lg">Configura la ubicación y estado de los widgets del sistema</p>
+        <p class="text-slate-300 text-lg">{{ 'admin.widgetManagement.subtitle' | workyTranslations }}</p>
       </div>
     </div>
   </div>
@@ -20,8 +20,8 @@
           <i class="material-icons">settings</i>
         </div>
         <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">Configurar Widget</h3>
-          <p class="text-sm text-slate-400">Crea y configura nuevos widgets para el sistema</p>
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.widgetManagement.configure.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.widgetManagement.configure.subtitle' | workyTranslations }}</p>
         </div>
       </div>
       
@@ -30,12 +30,12 @@
           <div class="space-y-2">
             <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
               <i class="material-icons text-blue-500 text-base">widgets</i>
-              Widget
+              {{ 'admin.widgetManagement.fields.widget' | workyTranslations }}
             </label>
             <select formControlName="selector" 
                     (change)="onWidgetSelect($event)"
                     class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
-              <option value="">Seleccionar widget</option>
+              <option value="">{{ 'admin.widgetManagement.fields.selectWidget' | workyTranslations }}</option>
               <option *ngFor="let widget of availableWidgets" [value]="widget.selector">
                 {{ widget.name }}
               </option>
@@ -45,21 +45,21 @@
           <div class="space-y-2">
             <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
               <i class="material-icons text-blue-500 text-base">title</i>
-              Nombre
+              {{ 'admin.widgetManagement.fields.name' | workyTranslations }}
             </label>
             <input formControlName="name" 
                    type="text" 
-                   placeholder="Nombre del widget"
+                   placeholder="{{ 'admin.widgetManagement.namePlaceholder' | workyTranslations }}"
                    class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
           </div>
           
           <div class="space-y-2">
             <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
               <i class="material-icons text-blue-500 text-base">description</i>
-              Descripción
+              {{ 'admin.widgetManagement.fields.description' | workyTranslations }}
             </label>
             <textarea formControlName="description" 
-                      placeholder="Descripción del widget" 
+                      placeholder="{{ 'admin.widgetManagement.description.placeholder' | workyTranslations }}" 
                       rows="3"
                       class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500 resize-vertical min-h-[80px]"></textarea>
           </div>
@@ -68,7 +68,7 @@
             <div class="space-y-2">
               <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
                 <i class="material-icons text-blue-500 text-base">place</i>
-                Posición
+                {{ 'admin.widgetManagement.fields.position' | workyTranslations }}
               </label>
               <select formControlName="position"
                       class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
@@ -77,14 +77,14 @@
                 </option>
               </select>
               <p class="text-xs text-slate-500 mt-1" *ngIf="allowedPositionsForSelectedWidget.length === 0">
-                Selecciona un widget para ver las posiciones disponibles
+                {{ 'admin.widgetManagement.fields.selectWidgetForPositions' | workyTranslations }}
               </p>
             </div>
             
             <div class="space-y-2">
               <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
                 <i class="material-icons text-blue-500 text-base">sort</i>
-                Orden
+                {{ 'admin.widgetManagement.fields.order' | workyTranslations }}
               </label>
               <input formControlName="order" 
                      type="number" 
@@ -97,7 +97,7 @@
             <div class="space-y-2">
               <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
                 <i class="material-icons text-blue-500 text-base">toggle_on</i>
-                Estado
+                {{ 'admin.widgetManagement.fields.status' | workyTranslations }}
               </label>
               <select formControlName="status"
                       class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
@@ -111,7 +111,7 @@
           <div class="space-y-2">
             <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
               <i class="material-icons text-blue-500 text-base">list</i>
-              Posiciones Permitidas
+              {{ 'admin.widgetManagement.fields.allowedPositions' | workyTranslations }}
             </label>
             <div class="grid grid-cols-3 gap-2 bg-slate-800 p-3 rounded-lg border border-slate-600">
               <div *ngFor="let pos of widgetForm.get('allowedPositions')?.value" 
@@ -122,17 +122,17 @@
                 <span class="text-sm text-slate-300">{{ pos | titlecase }}</span>
               </div>
             </div>
-            <p class="text-xs text-slate-500">Definido por el desarrollador</p>
+            <p class="text-xs text-slate-500">{{ 'admin.widgetManagement.definedByDeveloper' | workyTranslations }}</p>
           </div>
           
           <div class="space-y-2">
             <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
               <i class="material-icons text-blue-500 text-base">image</i>
-              Icono
+              {{ 'admin.widgetManagement.fields.icon' | workyTranslations }}
             </label>
             <input formControlName="icon" 
                    type="text" 
-                   placeholder="material-icons"
+                   placeholder="{{ 'admin.widgetManagement.iconPlaceholder' | workyTranslations }}"
                    class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
           </div>
           
@@ -141,13 +141,13 @@
                     [disabled]="widgetForm.invalid || isSaving"
                     class="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30">
               <i class="material-icons animate-spin" *ngIf="isSaving">refresh</i>
-              <span>{{ isSaving ? 'Guardando...' : 'Guardar Widget' }}</span>
+              <span>{{ isSaving ? ('admin.widgetManagement.buttons.saving' | workyTranslations) : ('admin.widgetManagement.buttons.saveWidget' | workyTranslations) }}</span>
             </button>
             <button type="button" 
                     [disabled]="isSaving"
                     (click)="widgetForm.reset()"
                     class="px-6 py-3 rounded-lg font-semibold text-sm bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg">
-              Limpiar
+              {{ 'admin.widgetManagement.buttons.clear' | workyTranslations }}
             </button>
           </div>
         </form>
@@ -161,8 +161,8 @@
           <i class="material-icons">list</i>
         </div>
         <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">Widgets Configurados</h3>
-          <p class="text-sm text-slate-400">Lista de widgets organizados por posición</p>
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.widgetManagement.configured.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.widgetManagement.list.subtitle' | workyTranslations }}</p>
         </div>
       </div>
       
@@ -210,7 +210,7 @@
               
               <div class="text-center py-8 text-slate-500" *ngIf="getWidgetsByPosition(position).length === 0">
                 <i class="material-icons text-4xl mb-3 text-slate-600">inbox</i>
-                <p class="text-sm">No hay widgets en esta posición</p>
+                <p class="text-sm">{{ 'admin.widgetManagement.empty.text' | workyTranslations }}</p>
               </div>
             </div>
           </div>

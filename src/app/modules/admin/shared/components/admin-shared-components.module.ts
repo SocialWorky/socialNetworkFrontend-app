@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
+import { TranslationsModule } from '@shared/modules/translations/translations.module';
 
 // Components
 import { PaginationComponent } from './pagination/pagination.component';
@@ -21,7 +22,8 @@ import { ActionMenuComponent } from './action-menu/action-menu.component';
   ],
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TranslationsModule
   ],
   exports: [
     PaginationComponent,

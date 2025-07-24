@@ -59,7 +59,7 @@
                     [theme]="WorkyButtonTheme.Accent"
                     [width]="'100%'"
                     (click)="acceptFriendship(idPendingFriend)">
-                    <span basic-button-text>Aceptar Amistad</span>
+                    <span basic-button-text>{{ 'profiles.acceptFriendship' | workyTranslations }}</span>
                 </worky-buttons>
 
                 <worky-buttons *ngIf="isFriend && !isCurrentUser"
@@ -67,7 +67,7 @@
                     [theme]="WorkyButtonTheme.Basic"
                     [width]="'100%'"
                     (click)="cancelFriendship(idPendingFriend)">
-                    <span basic-button-text>Dejar de Seguir</span>
+                    <span basic-button-text>{{ 'profiles.unfollow' | workyTranslations }}</span>
                 </worky-buttons>
 
               </div>
@@ -86,7 +86,7 @@
                       [width]="'100%'"
                       (click)="sendMessage(userData._id)">
                       <span prefix-icon><i class="material-icons">chat</i></span>
-                      <span basic-button-text>Enviar Mensaje</span>
+                      <span basic-button-text>{{ 'profiles.sendMessage' | workyTranslations }}</span>
                     </worky-buttons>
 
                   <img *ngIf="userData.profile.whatsapp?.isViewable"

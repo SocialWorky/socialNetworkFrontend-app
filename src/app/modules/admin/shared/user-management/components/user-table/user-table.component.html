@@ -4,13 +4,13 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h2 class="text-2xl font-bold bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent">
-          Gestión de Usuarios
+          {{ 'admin.userManagement.table.title' | workyTranslations }}
         </h2>
-        <p class="text-slate-400 text-sm mt-1">Administra y supervisa todos los usuarios del sistema</p>
+        <p class="text-slate-400 text-sm mt-1">{{ 'admin.userManagement.table.subtitle' | workyTranslations }}</p>
       </div>
       <div class="flex items-center gap-3">
         <div class="bg-slate-700/50 rounded-lg px-4 py-2 border border-slate-600/50">
-          <span class="text-slate-300 text-sm font-medium">{{ totalUsers }} usuarios</span>
+          <span class="text-slate-300 text-sm font-medium">{{ totalUsers }} {{ 'admin.userManagement.table.users' | workyTranslations }}</span>
         </div>
       </div>
     </div>
@@ -24,8 +24,8 @@
         <div class="w-16 h-16 border-4 border-slate-600 border-t-blue-500 rounded-full animate-spin"></div>
         <div class="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-blue-400 rounded-full animate-spin" style="animation-delay: 0.2s;"></div>
       </div>
-      <p class="text-slate-400 text-lg font-medium mt-6">Cargando usuarios...</p>
-      <p class="text-slate-500 text-sm mt-2">Preparando la información</p>
+      <p class="text-slate-400 text-lg font-medium mt-6">{{ 'admin.userManagement.table.loading' | workyTranslations }}</p>
+      <p class="text-slate-500 text-sm mt-2">{{ 'admin.userManagement.table.preparing' | workyTranslations }}</p>
     </div>
 
     <!-- Users Table -->
@@ -35,22 +35,22 @@
         <!-- Table Header -->
         <div class="grid grid-cols-10 gap-4 bg-gradient-to-r from-slate-900/80 to-slate-800/80 backdrop-blur-sm border-b border-slate-600/50 px-6 py-4">
           <div class="col-span-3">
-            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">Usuario</span>
+            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">{{ 'admin.userManagement.table.headers.user' | workyTranslations }}</span>
           </div>
           <div class="col-span-3">
-            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">Contacto</span>
+            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">{{ 'admin.userManagement.table.headers.contact' | workyTranslations }}</span>
           </div>
           <div class="col-span-1">
-            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">Rol</span>
+            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">{{ 'admin.userManagement.table.headers.role' | workyTranslations }}</span>
           </div>
           <div class="col-span-1">
-            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">Estado</span>
+            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">{{ 'admin.userManagement.table.headers.status' | workyTranslations }}</span>
           </div>
           <div class="col-span-1">
-            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">Registro</span>
+            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">{{ 'admin.userManagement.table.headers.registration' | workyTranslations }}</span>
           </div>
           <div class="col-span-1 flex justify-center items-center">
-            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider text-center">Acciones</span>
+            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider text-center">{{ 'admin.userManagement.table.headers.actions' | workyTranslations }}</span>
           </div>
         </div>
         
@@ -82,8 +82,8 @@
                   <i class="material-icons text-emerald-500 text-sm" *ngIf="user.isVerified" title="Email verificado">
                     verified
                   </i>
-                  <span class="text-xs text-slate-500" *ngIf="user.isVerified">Verificado</span>
-                  <span class="text-xs text-amber-500" *ngIf="!user.isVerified">Pendiente</span>
+                  <span class="text-xs text-slate-500" *ngIf="user.isVerified">{{ 'admin.userManagement.table.verified' | workyTranslations }}</span>
+                  <span class="text-xs text-amber-500" *ngIf="!user.isVerified">{{ 'admin.userManagement.table.pending' | workyTranslations }}</span>
                 </div>
               </div>
             </div>
@@ -112,7 +112,7 @@
                       'bg-blue-500/15 text-blue-400 border border-blue-500/20': getStatusColor(user.isActive ? 'ACTIVE' : 'INACTIVE') === 'info'
                     }">
                 <i class="material-icons text-xs">{{ getStatusIcon(user.isActive ? 'ACTIVE' : 'INACTIVE') }}</i>
-                {{ user.isActive ? 'Activo' : 'Inactivo' }}
+                {{ user.isActive ? ('admin.userManagement.table.status.active' | workyTranslations) : ('admin.userManagement.table.status.inactive' | workyTranslations) }}
               </span>
             </div>
             
@@ -137,19 +137,19 @@
               <mat-menu #menuActions="matMenu" class="bg-slate-800 border border-slate-600 rounded-lg shadow-2xl">
                 <button mat-menu-item (click)="viewUserDetails.emit(user)" class="text-slate-100 hover:bg-slate-700">
                   <mat-icon class="text-blue-400">visibility</mat-icon>
-                  <span>Ver detalles</span>
+                  <span>{{ 'admin.userManagement.table.actions.viewDetails' | workyTranslations }}</span>
                 </button>
                 <button mat-menu-item (click)="editUser.emit(user)" class="text-slate-100 hover:bg-slate-700">
                   <mat-icon class="text-emerald-400">edit</mat-icon>
-                  <span>Editar usuario</span>
+                  <span>{{ 'admin.userManagement.table.actions.editUser' | workyTranslations }}</span>
                 </button>
                 <button mat-menu-item (click)="toggleUserStatus.emit(user)" [disabled]="isTogglingStatus(user._id)" class="text-slate-100 hover:bg-slate-700">
                   <mat-icon class="text-amber-400">{{ user.isActive ? 'pause' : 'play_arrow' }}</mat-icon>
-                  <span>{{ user.isActive ? 'Desactivar' : 'Activar' }}</span>
+                  <span>{{ user.isActive ? ('admin.userManagement.table.actions.deactivate' | workyTranslations) : ('admin.userManagement.table.actions.activate' | workyTranslations) }}</span>
                 </button>
                 <button mat-menu-item *ngIf="!user.isVerified" (click)="sendVerificationEmail.emit(user)" [disabled]="isSendingVerification(user._id)" class="text-slate-100 hover:bg-slate-700">
                   <mat-icon class="text-cyan-400">email</mat-icon>
-                  <span>Reenviar verificación</span>
+                  <span>{{ 'admin.userManagement.table.resendVerification' | workyTranslations }}</span>
                 </button>
               </mat-menu>
             </div>
@@ -182,19 +182,19 @@
             <mat-menu #menuActionsMobile="matMenu" class="bg-slate-800 border border-slate-600 rounded-lg shadow-2xl">
               <button mat-menu-item (click)="viewUserDetails.emit(user)" class="text-slate-100 hover:bg-slate-700">
                 <mat-icon class="text-blue-400">visibility</mat-icon>
-                <span>Ver detalles</span>
+                <span>{{ 'admin.userManagement.table.actions.viewDetails' | workyTranslations }}</span>
               </button>
               <button mat-menu-item (click)="editUser.emit(user)" class="text-slate-100 hover:bg-slate-700">
                 <mat-icon class="text-emerald-400">edit</mat-icon>
-                <span>Editar usuario</span>
+                <span>{{ 'admin.userManagement.table.actions.editUser' | workyTranslations }}</span>
               </button>
               <button mat-menu-item (click)="toggleUserStatus.emit(user)" [disabled]="isTogglingStatus(user._id)" class="text-slate-100 hover:bg-slate-700">
                 <mat-icon class="text-amber-400">{{ user.isActive ? 'pause' : 'play_arrow' }}</mat-icon>
-                <span>{{ user.isActive ? 'Desactivar' : 'Activar' }}</span>
+                <span>{{ user.isActive ? ('admin.userManagement.table.actions.deactivate' | workyTranslations) : ('admin.userManagement.table.actions.activate' | workyTranslations) }}</span>
               </button>
               <button mat-menu-item *ngIf="!user.isVerified" (click)="sendVerificationEmail.emit(user)" [disabled]="isSendingVerification(user._id)" class="text-slate-100 hover:bg-slate-700">
                 <mat-icon class="text-cyan-400">email</mat-icon>
-                <span>Reenviar verificación</span>
+                <span>{{ 'admin.userManagement.table.resendVerification' | workyTranslations }}</span>
               </button>
             </mat-menu>
           </div>
@@ -203,18 +203,18 @@
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-3">
               <div>
-                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Email</div>
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">{{ 'admin.userManagement.table.mobile.email' | workyTranslations }}</div>
                 <div class="text-slate-100 text-sm font-medium">{{ user.email }}</div>
                 <div class="flex items-center gap-1 mt-1">
                   <i class="material-icons text-emerald-500 text-xs" *ngIf="user.isVerified">verified</i>
                   <span class="text-xs" [ngClass]="user.isVerified ? 'text-emerald-400' : 'text-amber-400'">
-                    {{ user.isVerified ? 'Verificado' : 'Pendiente' }}
+                    {{ user.isVerified ? ('admin.userManagement.table.verified' | workyTranslations) : ('admin.userManagement.table.pending' | workyTranslations) }}
                   </span>
                 </div>
               </div>
               
               <div>
-                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Registro</div>
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">{{ 'admin.userManagement.table.mobile.registration' | workyTranslations }}</div>
                 <div class="text-slate-100 text-sm font-medium">{{ user.createdAt | date:'dd/MM/yyyy' }}</div>
                 <div class="text-slate-500 text-xs">{{ user.createdAt | date:'HH:mm' }}</div>
               </div>
@@ -222,7 +222,7 @@
             
             <div class="space-y-3">
               <div>
-                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Rol</div>
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">{{ 'admin.userManagement.table.mobile.role' | workyTranslations }}</div>
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
                       [ngClass]="{
                         'bg-red-500/15 text-red-400 border border-red-500/20': getRoleColor(user.role) === 'danger',
@@ -236,7 +236,7 @@
               </div>
               
               <div>
-                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Estado</div>
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">{{ 'admin.userManagement.table.mobile.status' | workyTranslations }}</div>
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
                       [ngClass]="{
                         'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20': getStatusColor(user.isActive ? 'ACTIVE' : 'INACTIVE') === 'success',
@@ -245,7 +245,7 @@
                         'bg-blue-500/15 text-blue-400 border border-blue-500/20': getStatusColor(user.isActive ? 'ACTIVE' : 'INACTIVE') === 'info'
                       }">
                   <i class="material-icons text-xs">{{ getStatusIcon(user.isActive ? 'ACTIVE' : 'INACTIVE') }}</i>
-                  {{ user.isActive ? 'Activo' : 'Inactivo' }}
+                  {{ user.isActive ? ('admin.userManagement.table.status.active' | workyTranslations) : ('admin.userManagement.table.status.inactive' | workyTranslations) }}
                 </span>
               </div>
             </div>
@@ -263,14 +263,14 @@
           </div>
           <div class="absolute inset-0 w-24 h-24 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full mx-auto animate-pulse"></div>
         </div>
-        <h3 class="text-2xl font-bold text-slate-200 mb-3">No se encontraron usuarios</h3>
+        <h3 class="text-2xl font-bold text-slate-200 mb-3">{{ 'admin.userManagement.table.empty.title' | workyTranslations }}</h3>
         <p class="text-slate-400 text-lg leading-relaxed">
-          No hay usuarios que coincidan con los criterios de búsqueda actuales.
+          {{ 'admin.userManagement.table.empty.description' | workyTranslations }}
         </p>
         <div class="mt-6">
           <div class="inline-flex items-center gap-2 px-4 py-2 bg-slate-700/50 rounded-lg border border-slate-600/50">
             <i class="material-icons text-slate-400 text-sm">search</i>
-            <span class="text-slate-400 text-sm">Intenta ajustar los filtros</span>
+            <span class="text-slate-400 text-sm">{{ 'admin.userManagement.table.empty.adjustFilters' | workyTranslations }}</span>
           </div>
         </div>
       </div>

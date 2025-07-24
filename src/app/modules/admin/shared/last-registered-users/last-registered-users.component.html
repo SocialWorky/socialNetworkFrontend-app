@@ -8,9 +8,9 @@
         </div>
         <div>
           <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-1">
-            Últimos usuarios registrados
+            {{ 'admin.lastRegisteredUsers.title' | workyTranslations }}
           </h1>
-          <p class="text-slate-300">Gestión y monitoreo de usuarios recientes</p>
+          <p class="text-slate-300">{{ 'admin.lastRegisteredUsers.subtitle' | workyTranslations }}</p>
         </div>
       </div>
       <div class="flex gap-4 items-center lg:flex-row flex-col lg:w-auto w-full">
@@ -32,7 +32,7 @@
         </div>
         <div>
           <span class="block text-2xl font-bold text-emerald-400">{{ activeUsersCount }}</span>
-          <span class="block text-sm text-slate-400">Usuarios Activos</span>
+          <span class="block text-sm text-slate-400">{{ 'admin.lastRegisteredUsers.stats.active' | workyTranslations }}</span>
         </div>
       </div>
       <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-center gap-4">
@@ -41,7 +41,7 @@
         </div>
         <div>
           <span class="block text-2xl font-bold text-amber-400">{{ pendingUsersCount }}</span>
-          <span class="block text-sm text-slate-400">Pendiente de Verificación</span>
+          <span class="block text-sm text-slate-400">{{ 'admin.lastRegisteredUsers.stats.pending' | workyTranslations }}</span>
         </div>
       </div>
       <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-4">
@@ -50,7 +50,7 @@
         </div>
         <div>
           <span class="block text-2xl font-bold text-red-400">{{ inactiveUsersCount }}</span>
-          <span class="block text-sm text-slate-400">Usuarios Desactivados</span>
+          <span class="block text-sm text-slate-400">{{ 'admin.lastRegisteredUsers.stats.inactive' | workyTranslations }}</span>
         </div>
       </div>
     </div>
@@ -63,7 +63,7 @@
         <i class="material-icons animate-spin">refresh</i>
       </div>
       <div>
-        <h3 class="text-xl font-semibold text-slate-100 mb-2">Cargando usuarios</h3>
+        <h3 class="text-xl font-semibold text-slate-100 mb-2">{{ 'admin.lastRegisteredUsers.loading.title' | workyTranslations }}</h3>
         <p class="text-slate-300">{{ 'loadingUsers' | workyTranslations }}</p>
       </div>
     </div>
@@ -95,17 +95,17 @@
           <div class="space-y-3">
             <div class="flex items-center gap-3 text-sm">
               <i class="material-icons text-slate-400 text-base">calendar_today</i>
-              <span class="text-slate-400">Fecha de registro:</span>
+              <span class="text-slate-400">{{ 'admin.lastRegisteredUsers.user.registrationDate' | workyTranslations }}</span>
               <span class="text-slate-100">{{ user.createdAt | date:'longDate':'':'es' }}</span>
             </div>
             <div class="flex items-center gap-3 text-sm">
               <i class="material-icons text-slate-400 text-base">access_time</i>
-              <span class="text-slate-400">Último ingreso:</span>
+              <span class="text-slate-400">{{ 'admin.lastRegisteredUsers.user.lastLogin' | workyTranslations }}</span>
               <span class="text-slate-100">{{ user.updatedAt | date:'medium':'':'es' }}</span>
             </div>
             <div class="flex items-center gap-3 text-sm">
               <i class="material-icons text-slate-400 text-base">security</i>
-              <span class="text-slate-400">Rol:</span>
+              <span class="text-slate-400">{{ 'admin.lastRegisteredUsers.user.role' | workyTranslations }}</span>
               <span class="px-2 py-1 text-xs rounded-full font-semibold" 
                     [class]="getRoleClass(user.role) === 'admin' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'">
                 {{ user.role | titlecase }}
@@ -117,12 +117,12 @@
             <div class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold" 
                  [class]="user.isVerified ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'">
               <i class="material-icons text-base">{{ user.isVerified ? 'verified' : 'warning' }}</i>
-              <span>{{ user.isVerified ? 'Verificado' : 'Pendiente de verificación' }}</span>
+              <span>{{ user.isVerified ? ('admin.lastRegisteredUsers.user.verified' | workyTranslations) : ('admin.lastRegisteredUsers.user.pendingVerification' | workyTranslations) }}</span>
             </div>
           </div>
 
           <div class="flex items-center justify-between pt-4 border-t border-slate-600">
-            <span class="text-sm text-slate-400">{{ user.isActive ? 'Activo' : 'Inactivo' }}</span>
+            <span class="text-sm text-slate-400">{{ user.isActive ? ('admin.lastRegisteredUsers.user.active' | workyTranslations) : ('admin.lastRegisteredUsers.user.inactive' | workyTranslations) }}</span>
             <label class="relative inline-flex items-center cursor-pointer">
               <input 
                 type="checkbox" 

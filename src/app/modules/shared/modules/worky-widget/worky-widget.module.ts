@@ -7,6 +7,7 @@ import { WeatherComponent } from './worky-weather/worky-weather.component';
 import { WorkyButtonsModule } from '../buttons/buttons.module';
 import { WorkyNewsComponent } from './worky-news/worky-news.component';
 import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
+import { TranslationsModule } from '../translations/translations.module';
 
 
 @NgModule({
@@ -15,7 +16,8 @@ import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
     CommonModule,
     FormsModule,
     WorkyButtonsModule,
-    PipesSharedModule
+    PipesSharedModule,
+    TranslationsModule
   ],
   exports: [WeatherComponent, WorkyNewsComponent, WidgetContainerComponent]
 })

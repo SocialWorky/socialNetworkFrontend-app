@@ -11,6 +11,7 @@ import { LogComponent } from './shared/log/log.component';
 import { WidgetManagementComponent } from './shared/widget-management/widget-management.component';
 import { WebhooksComponent } from './shared/webhooks/webhooks.component';
 import { UserManagementComponent } from './shared/user-management/user-management.component';
+import { translations } from '@translations/translations';
 
 
 export const routes: Routes = [
@@ -19,24 +20,24 @@ export const routes: Routes = [
     component: TemplatesComponent,
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
-      { title: 'Ir al Muro', path: 'publications', redirectTo: '../' },
-      { title: 'Métricas', path: 'home', component: HomeAdminComponent },
+      { title: translations['admin.sideMenu.items.goToWall'], path: 'publications', redirectTo: '../' },
+      { title: translations['admin.sideMenu.items.metrics'], path: 'home', component: HomeAdminComponent },
       {
-        title: 'Configuraciones',
+        title: translations['admin.sideMenu.items.configurations'],
         path: '',
         children: [
-          { title: 'Del Sistema', path: 'site-config', component: SiteConfigComponent },
-          { title: 'Reacciones', path: 'manage-reactions', component: ManageReactionsComponent },
-          { title: 'Campos Personalizados', path: 'custom-fields', component: AdminCustomFieldsComponent },
-          { title: 'Widgets Gestión', path: 'widget-management', component: WidgetManagementComponent },
-          { title: 'CSS', path: 'custom-css', component: CustomCssComponent },
-          { title: 'Invitaciones', path: 'invitations-code', component: InvitationsCodeComponent },
-          { title: 'Webhooks', path: 'webhooks', component: WebhooksComponent },
+          { title: translations['admin.sideMenu.items.systemConfig'], path: 'site-config', component: SiteConfigComponent },
+          { title: translations['admin.sideMenu.items.reactions'], path: 'manage-reactions', component: ManageReactionsComponent },
+          { title: translations['admin.sideMenu.items.customFields'], path: 'custom-fields', component: AdminCustomFieldsComponent },
+          { title: translations['admin.sideMenu.items.widgetManagement'], path: 'widget-management', component: WidgetManagementComponent },
+          { title: translations['admin.sideMenu.items.css'], path: 'custom-css', component: CustomCssComponent },
+          { title: translations['admin.sideMenu.items.invitations'], path: 'invitations-code', component: InvitationsCodeComponent },
+          { title: translations['admin.sideMenu.items.webhooks'], path: 'webhooks', component: WebhooksComponent },
         
         ],
       },
-      { title: 'Gestión de Usuarios', path: 'user-management', component: UserManagementComponent },
-      { title: 'Logs', path: 'logs', component: LogComponent },
+      { title: translations['admin.sideMenu.items.userManagement'], path: 'user-management', component: UserManagementComponent },
+      { title: translations['admin.sideMenu.items.logs'], path: 'logs', component: LogComponent },
     ],
   },
 ];

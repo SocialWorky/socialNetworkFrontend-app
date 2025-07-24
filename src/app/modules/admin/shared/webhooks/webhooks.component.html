@@ -4,9 +4,9 @@
     <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
       <div class="flex-1">
         <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
-          Gestión de Webhooks
+          {{ 'admin.webhooks.title' | workyTranslations }}
         </h1>
-        <p class="text-slate-300 text-lg">Configura los webhooks para recibir notificaciones de eventos del sistema</p>
+        <p class="text-slate-300 text-lg">{{ 'admin.webhooks.subtitle' | workyTranslations }}</p>
       </div>
     </div>
   </div>
@@ -21,9 +21,9 @@
         </div>
         <div class="flex-1">
           <h3 class="text-xl font-semibold text-slate-100 mb-1">
-            {{ editingWebhook ? 'Editar Webhook' : 'Crear Nuevo Webhook' }}
+            {{ editingWebhook ? ('admin.webhooks.edit.title' | workyTranslations) : ('admin.webhooks.create.title' | workyTranslations) }}
           </h3>
-          <p class="text-sm text-slate-400">Configura un nuevo webhook para recibir notificaciones</p>
+          <p class="text-sm text-slate-400">{{ 'admin.webhooks.create.subtitle' | workyTranslations }}</p>
         </div>
       </div>
       
@@ -32,11 +32,11 @@
           <div class="space-y-2">
             <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
               <i class="material-icons text-blue-500 text-base">event</i>
-              Evento
+              {{ 'admin.webhooks.form.event' | workyTranslations }}
             </label>
             <select formControlName="event" 
                     class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
-              <option value="">Seleccionar evento</option>
+              <option value="">{{ 'admin.webhooks.selectEvent' | workyTranslations }}</option>
               <option *ngFor="let event of availableEvents" [value]="event.value">
                 {{ event.label }}
               </option>
@@ -44,23 +44,23 @@
             <div *ngIf="webhookForm.get('event')?.invalid && webhookForm.get('event')?.touched" 
                  class="text-red-400 text-sm mt-1 flex items-center gap-1">
               <i class="material-icons text-sm">error</i>
-              El evento es requerido.
+              {{ 'admin.webhooks.form.event.required' | workyTranslations }}
             </div>
           </div>
           
           <div class="space-y-2">
             <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
               <i class="material-icons text-blue-500 text-base">link</i>
-              URL del Webhook
+              {{ 'admin.webhooks.form.url' | workyTranslations }}
             </label>
             <input formControlName="url" 
                    type="url" 
-                   placeholder="https://tu-servidor.com/webhook"
+                   placeholder="{{ 'admin.webhooks.urlPlaceholder' | workyTranslations }}"
                    class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
             <div *ngIf="webhookForm.get('url')?.invalid && webhookForm.get('url')?.touched" 
                  class="text-red-400 text-sm mt-1 flex items-center gap-1">
               <i class="material-icons text-sm">error</i>
-              La URL es requerida y debe ser válida.
+              {{ 'admin.webhooks.form.url.required' | workyTranslations }}
             </div>
           </div>
           
@@ -69,12 +69,12 @@
                     [disabled]="webhookForm.invalid || loadWebhookButtons"
                     class="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30">
               <div *ngIf="loadWebhookButtons" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span *ngIf="!loadWebhookButtons">{{ editingWebhook ? 'Actualizar' : 'Crear' }} Webhook</span>
+              <span *ngIf="!loadWebhookButtons">{{ editingWebhook ? ('admin.webhooks.update' | workyTranslations) : ('admin.webhooks.create' | workyTranslations) }} Webhook</span>
             </button>
             <button type="button" 
                     (click)="cancelEdit()"
                     class="px-6 py-3 rounded-lg font-semibold text-sm bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
-              Cancelar
+              {{ 'admin.webhooks.form.cancel' | workyTranslations }}
             </button>
           </div>
         </form>
@@ -88,8 +88,8 @@
           <i class="material-icons">list</i>
         </div>
         <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">Webhooks Configurados</h3>
-          <p class="text-sm text-slate-400">Lista de webhooks activos en el sistema</p>
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.webhooks.configured.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.webhooks.list.subtitle' | workyTranslations }}</p>
         </div>
       </div>
       
@@ -104,9 +104,9 @@
             </div>
             <div>
               <h3 class="text-lg font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
-                Cargando webhooks
+                {{ 'admin.webhooks.loading.title' | workyTranslations }}
               </h3>
-              <p class="text-slate-300 mb-4">Recopilando configuraciones...</p>
+              <p class="text-slate-300 mb-4">{{ 'admin.webhooks.loading' | workyTranslations }}</p>
               <div class="flex justify-center gap-2">
                 <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
                 <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.2s"></span>
@@ -131,39 +131,39 @@
               <div class="flex gap-2">
                 <button (click)="toggleWebhookStatus(webhook)" 
                         class="p-2 text-slate-400 hover:text-blue-400 transition-all duration-200 hover:bg-blue-500/10 rounded-lg"
-                        [title]="webhook.isActive ? 'Desactivar' : 'Activar'">
+                        [title]="webhook.isActive ? ('admin.webhooks.actions.deactivate' | workyTranslations) : ('admin.webhooks.actions.activate' | workyTranslations)">
                   <i class="material-icons text-sm">
                     {{ webhook.isActive ? 'pause' : 'play_arrow' }}
                   </i>
                 </button>
                 <button (click)="editWebhook(webhook)" 
                         class="p-2 text-slate-400 hover:text-blue-400 transition-all duration-200 hover:bg-blue-500/10 rounded-lg"
-                        title="Editar">
+                        [title]="'admin.webhooks.actions.edit' | workyTranslations">
                   <i class="material-icons text-sm">edit</i>
                 </button>
                 <button (click)="deleteWebhook(webhook._id)" 
                         class="p-2 text-slate-400 hover:text-red-400 transition-all duration-200 hover:bg-red-500/10 rounded-lg"
-                        title="Eliminar">
+                        [title]="'admin.webhooks.actions.delete' | workyTranslations">
                   <i class="material-icons text-sm">delete</i>
                 </button>
               </div>
             </div>
             
             <div class="text-sm text-slate-300 mb-2">
-              <span class="font-semibold">URL:</span> 
+              <span class="font-semibold">{{ 'admin.webhooks.url' | workyTranslations }}:</span> 
               <span class="break-all">{{ webhook.url }}</span>
             </div>
             
             <div class="text-xs text-slate-400 flex items-center gap-4">
               <span class="flex items-center gap-1">
                 <i class="material-icons text-xs">schedule</i>
-                <span class="font-semibold">Creado:</span> {{ webhook.createdAt | date:'dd/MM/yyyy HH:mm' }}
+                <span class="font-semibold">{{ 'admin.webhooks.created' | workyTranslations }}:</span> {{ webhook.createdAt | date:'dd/MM/yyyy HH:mm' }}
               </span>
               <span class="flex items-center gap-1">
                 <i class="material-icons text-xs">circle</i>
-                <span class="font-semibold">Estado:</span> 
+                <span class="font-semibold">{{ 'admin.webhooks.status' | workyTranslations }}:</span> 
                 <span [class]="webhook.isActive ? 'text-emerald-400' : 'text-red-400'">
-                  {{ webhook.isActive ? 'Activo' : 'Inactivo' }}
+                  {{ webhook.isActive ? ('admin.webhooks.status.active' | workyTranslations) : ('admin.webhooks.status.inactive' | workyTranslations) }}
                 </span>
               </span>
             </div>
@@ -172,8 +172,8 @@
           <div *ngIf="webhooks.length === 0" class="flex justify-center items-center min-h-[200px]">
             <div class="text-center text-slate-400">
               <i class="material-icons text-5xl text-slate-500 mb-4">webhook</i>
-              <h3 class="text-lg font-semibold text-slate-100 mb-2">Sin webhooks configurados</h3>
-              <p class="text-sm">Crea tu primer webhook para recibir notificaciones de eventos del sistema</p>
+              <h3 class="text-lg font-semibold text-slate-100 mb-2">{{ 'admin.webhooks.empty.title' | workyTranslations }}</h3>
+              <p class="text-sm">{{ 'admin.webhooks.empty.subtitle' | workyTranslations }}</p>
             </div>
           </div>
         </div>
@@ -188,8 +188,8 @@
         <i class="material-icons">info</i>
       </div>
       <div class="flex-1">
-        <h3 class="text-xl font-semibold text-slate-100 mb-1">Eventos Disponibles</h3>
-        <p class="text-sm text-slate-400">Descripción de todos los eventos que puedes configurar</p>
+        <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.webhooks.events.title' | workyTranslations }}</h3>
+        <p class="text-sm text-slate-400">{{ 'admin.webhooks.events.description' | workyTranslations }}</p>
       </div>
     </div>
     

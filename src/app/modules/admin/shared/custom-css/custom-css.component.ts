@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { Subject, takeUntil } from 'rxjs';
+import { translations } from '@translations/translations';
 
 @Component({
     selector: 'worky-custom-css',
@@ -65,7 +66,7 @@ export class CustomCssComponent implements OnDestroy {
           'Error saving CSS',
           { error: String(error), cssLength: this.customCss.length }
         );
-        this.error = 'Error al guardar el CSS personalizado. Por favor, intenta de nuevo.';
+        this.error = translations['admin.customCss.errors.saveError'];
         this.customCssLoader = false;
         this._cdr.markForCheck();
       },
@@ -99,7 +100,7 @@ export class CustomCssComponent implements OnDestroy {
           'Error loading CSS',
           { error: String(error) }
         );
-        this.error = 'Error al cargar el CSS personalizado. Por favor, intenta de nuevo.';
+        this.error = translations['admin.customCss.errors.loadError'];
         this.isLoading = false;
         this._cdr.markForCheck();
       }
@@ -157,7 +158,7 @@ export class CustomCssComponent implements OnDestroy {
         'Error formatting CSS',
         { error: String(error), cssLength: this.customCss.length }
       );
-      this.error = 'Error al formatear el CSS. Verifica la sintaxis.';
+      this.error = translations['admin.customCss.errors.formatError'];
       this._cdr.markForCheck();
     }
   }

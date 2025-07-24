@@ -8,6 +8,7 @@ import { AlertService } from '@shared/services/alert.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { environment } from '@env/environment';
+import { translations } from '@translations/translations';
 
 @Component({
     selector: 'worky-invitations-code',
@@ -62,7 +63,7 @@ export class InvitationsCodeComponent implements OnInit, OnDestroy {
           'Error loading invitations',
           { error: String(error) }
         );
-        this.error = 'Error al cargar las invitaciones. Por favor, intenta de nuevo.';
+        this.error = translations['admin.invitationsCode.errors.loadError'];
         this._cdr.markForCheck();
       }
     });
@@ -88,7 +89,7 @@ export class InvitationsCodeComponent implements OnInit, OnDestroy {
             'Error creating invitation',
             { error: String(error), email: this.invitationsForm.value.email }
           );
-          this.error = 'Error al crear la invitación. Por favor, intenta de nuevo.';
+          this.error = translations['admin.invitationsCode.errors.createError'];
           this.loadInvitationsButtons = false;
           this._cdr.markForCheck();
         }
@@ -103,14 +104,12 @@ export class InvitationsCodeComponent implements OnInit, OnDestroy {
   }
 
   private sendEmailCode(email: string, code: string) {
-    const subject = `Invitación a ${environment.META_TITLE}`;
-    const title = 'Código de invitación';
-    const greet = 'Hola';
-    const message = 'Has sido invitado a unirte a nuestra plataforma';
-    const subMessage = `Tu código de invitación es: ${code} <br>
-                        recuerda usar el mismo correo electrónico para registrarte. <br>
-                        Puedes unirte a nuestra plataforma haciendo click en el siguiente botón:`;
-    const buttonMessage = 'Unirme';
+    const subject = translations['admin.invitationsCode.email.subject'].replace('{platform}', environment.META_TITLE);
+    const title = translations['admin.invitationsCode.email.title'];
+    const greet = translations['admin.invitationsCode.email.greet'];
+    const message = translations['admin.invitationsCode.email.message'];
+    const subMessage = translations['admin.invitationsCode.email.subMessage'].replace('{code}', code);
+    const buttonMessage = translations['admin.invitationsCode.email.buttonMessage'];
     const urlSlug = 'auth/register';
 
     this._emailNotificationService.sendGeneralEmailing(

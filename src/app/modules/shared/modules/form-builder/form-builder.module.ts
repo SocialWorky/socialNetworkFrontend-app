@@ -6,6 +6,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MaterialModule } from '../material/material.module';
 import { FormBuilderComponent } from './form-builder.component';
 import { InputComponent, TextareaComponent, SelectComponent } from './fields/index';
+import { TranslationsModule } from '../translations/translations.module';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { InputComponent, TextareaComponent, SelectComponent } from './fields/ind
     DragDropModule,
     ReactiveFormsModule,
     FormsModule,
-    MaterialModule
+    MaterialModule,
+    TranslationsModule
   ],
   exports: [FormBuilderComponent, InputComponent, TextareaComponent, SelectComponent]
 })

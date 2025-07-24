@@ -4,13 +4,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { AuthService } from '@auth/services/auth.service';
+import { TranslationsModule } from '@shared/modules/translations/translations.module';
 
 @Component({
   selector: 'worky-validate-email',
   templateUrl: './validate-email.component.html',
   styleUrls: ['./validate-email.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, TranslationsModule]
 })
 export class ValidateEmailComponent implements OnInit {
   loading = true;

@@ -23,12 +23,12 @@
     <!-- Indicador de carga de mensajes antiguos -->
     <div *ngIf="loadingMoreMessages" class="loading-messages">
       <div class="loader"></div>
-      <span>Cargando mensajes anteriores...</span>
+      <span>{{ 'message.loadingPrevious' | workyTranslations }}</span>
     </div>
 
     <!-- Mensaje cuando no hay más mensajes -->
     <div *ngIf="!loadingMoreMessages && !hasMoreMessages && messages.length > 0" class="no-more-messages">
-      <span>No hay más mensajes que mostrar</span>
+      <span>{{ 'message.noMoreMessages' | workyTranslations }}</span>
     </div>
 
     <div class="messages-container fadeIn fast">
@@ -65,7 +65,7 @@
 
               <div *ngIf="message.type === MediaType.IMAGE || message.type === MediaType.VIDEO">
                 <div class="media-wrapper" (click)="openUrl(message.urlFile!)">
-                  <img [src]="getThumbnail(message.content)" class="thumbnail" alt="Miniatura" />
+                  <img [src]="getThumbnail(message.content)" class="thumbnail" alt="{{ 'message.thumbnail' | workyTranslations }}" />
                   <div class="play-button" *ngIf="message.type === MediaType.VIDEO">▶</div>
                 </div>
               </div>
@@ -105,7 +105,7 @@
     *ngIf="showScrollToBottomButton" 
     class="scroll-to-bottom-button"
     (click)="scrollToBottomSmooth()"
-    matTooltip="Ir al final"
+    matTooltip="{{ 'message.scrollToBottom' | workyTranslations }}"
     matTooltipClass="scroll-tooltip">
     <i class="material-icons">keyboard_arrow_down</i>
   </div>
@@ -152,21 +152,21 @@
     <div class="content-footer-bar">
 
         <div class="extra-content-item gif-icon"
-            matTooltip="Buscar GIF"
+            matTooltip="{{ 'message.searchGif' | workyTranslations }}"
             matTooltipClass="extra-mat-tooltip"
             (click)="openGifSearch()">
           <i class="material-icons">gif</i>
         </div>
 
         <div class="extra-content-item file-upload"
-            matTooltip="Subir Imagen"
+            matTooltip="{{ 'message.uploadImage' | workyTranslations }}"
             matTooltipClass="extra-mat-tooltip"
             (click)="openUploadModal()">
           <i class="material-icons">add_photo_alternate</i>
         </div>
 
       <div class="emoji-wrapper"
-          matTooltip="Emojis"
+          matTooltip="{{ 'message.emojis' | workyTranslations }}"
           matTooltipClass="extra-mat-tooltip"
           (click)="toggleEmojiPicker()">
         <i class="material-icons">moods</i>

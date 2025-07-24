@@ -4,22 +4,22 @@
     <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
       <div class="flex-1">
         <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
-          Constructor de Formularios
+          {{ 'admin.customFields.title' | workyTranslations }}
         </h1>
-        <p class="text-slate-300 text-lg">Crea y personaliza campos personalizados para perfiles y registro</p>
+        <p class="text-slate-300 text-lg">{{ 'admin.customFields.subtitle' | workyTranslations }}</p>
       </div>
       <div class="flex gap-4 items-center lg:flex-row flex-col lg:w-auto w-full">
         <button 
           class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
           (click)="showHelp()">
           <i class="material-icons">help</i>
-          <span>Ayuda</span>
+          <span>{{ 'admin.customFields.help' | workyTranslations }}</span>
         </button>
         <button 
           class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
           (click)="refreshFormBuilder()">
           <i class="material-icons" [class.animate-spin]="isLoading">refresh</i>
-          <span>Recargar</span>
+          <span>{{ 'admin.customFields.reload' | workyTranslations }}</span>
         </button>
       </div>
     </div>
@@ -32,7 +32,7 @@
     <div class="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden" 
          (click)="$event.stopPropagation()">
       <div class="flex items-center justify-between p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-slate-600">
-        <h3 class="text-xl font-semibold text-slate-100">Guía de Uso del Constructor</h3>
+        <h3 class="text-xl font-semibold text-slate-100">{{ 'admin.customFields.helpModal.title' | workyTranslations }}</h3>
         <button 
           class="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-700 rounded-lg transition-all duration-200"
           (click)="closeHelp()">
@@ -43,29 +43,29 @@
         <div class="flex items-start gap-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
           <i class="material-icons text-blue-400 text-xl mt-0.5">drag_indicator</i>
           <div>
-            <h4 class="text-lg font-semibold text-slate-100 mb-2">Arrastrar y Soltar</h4>
-            <p class="text-slate-300 leading-relaxed">Arrastra los campos desde el panel izquierdo hacia el área de formulario para agregarlos.</p>
+            <h4 class="text-lg font-semibold text-slate-100 mb-2">{{ 'admin.customFields.helpModal.dragDrop.title' | workyTranslations }}</h4>
+            <p class="text-slate-300 leading-relaxed">{{ 'admin.customFields.helpModal.dragDrop.description' | workyTranslations }}</p>
           </div>
         </div>
         <div class="flex items-start gap-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
           <i class="material-icons text-blue-400 text-xl mt-0.5">settings</i>
           <div>
-            <h4 class="text-lg font-semibold text-slate-100 mb-2">Configuración</h4>
-            <p class="text-slate-300 leading-relaxed">Haz clic en el ícono de configuración para personalizar cada campo: etiqueta, validaciones, opciones, etc.</p>
+            <h4 class="text-lg font-semibold text-slate-100 mb-2">{{ 'admin.customFields.helpModal.configuration.title' | workyTranslations }}</h4>
+            <p class="text-slate-300 leading-relaxed">{{ 'admin.customFields.helpModal.configuration.description' | workyTranslations }}</p>
           </div>
         </div>
         <div class="flex items-start gap-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
           <i class="material-icons text-emerald-400 text-xl mt-0.5">save</i>
           <div>
-            <h4 class="text-lg font-semibold text-slate-100 mb-2">Guardar</h4>
-            <p class="text-slate-300 leading-relaxed">Los cambios se guardan automáticamente cuando arrastras campos o modificas configuraciones.</p>
+            <h4 class="text-lg font-semibold text-slate-100 mb-2">{{ 'admin.customFields.helpModal.save.title' | workyTranslations }}</h4>
+            <p class="text-slate-300 leading-relaxed">{{ 'admin.customFields.helpModal.save.description' | workyTranslations }}</p>
           </div>
         </div>
         <div class="flex items-start gap-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
           <i class="material-icons text-red-400 text-xl mt-0.5">delete</i>
           <div>
-            <h4 class="text-lg font-semibold text-slate-100 mb-2">Eliminar</h4>
-            <p class="text-slate-300 leading-relaxed">Usa el ícono de eliminar para quitar campos del formulario.</p>
+            <h4 class="text-lg font-semibold text-slate-100 mb-2">{{ 'admin.customFields.helpModal.delete.title' | workyTranslations }}</h4>
+            <p class="text-slate-300 leading-relaxed">{{ 'admin.customFields.helpModal.delete.description' | workyTranslations }}</p>
           </div>
         </div>
       </div>
@@ -79,8 +79,8 @@
         <i class="material-icons">build</i>
       </div>
       <div class="flex-1">
-        <h3 class="text-xl font-semibold text-slate-100 mb-1">Constructor de Formularios</h3>
-        <p class="text-sm text-slate-400">Arrastra y configura campos personalizados</p>
+        <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.customFields.mainTitle' | workyTranslations }}</h3>
+        <p class="text-sm text-slate-400">{{ 'admin.customFields.mainSubtitle' | workyTranslations }}</p>
       </div>
     </div>
     
@@ -98,8 +98,8 @@
         <i class="material-icons animate-spin">refresh</i>
       </div>
       <div>
-        <h3 class="text-xl font-semibold text-slate-100 mb-2">Cargando constructor</h3>
-        <p class="text-slate-300">Cargando constructor de formularios...</p>
+        <h3 class="text-xl font-semibold text-slate-100 mb-2">{{ 'admin.customFields.loading.title' | workyTranslations }}</h3>
+        <p class="text-slate-300">{{ 'admin.customFields.loading.subtitle' | workyTranslations }}</p>
       </div>
     </div>
   </div>
@@ -111,13 +111,13 @@
         <i class="material-icons">warning</i>
       </div>
       <div>
-        <h3 class="text-2xl font-semibold text-slate-100 mb-2">Error al cargar el constructor</h3>
+        <h3 class="text-2xl font-semibold text-slate-100 mb-2">{{ 'admin.customFields.error.title' | workyTranslations }}</h3>
         <p class="text-slate-300 mb-6 leading-relaxed">{{ error }}</p>
         <button 
           class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
           (click)="refreshFormBuilder()">
           <i class="material-icons">refresh</i>
-          <span>Intentar de nuevo</span>
+          <span>{{ 'admin.customFields.retry' | workyTranslations }}</span>
         </button>
       </div>
     </div>

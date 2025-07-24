@@ -16,7 +16,7 @@
       class="flex items-center justify-center w-8 h-8 border-none bg-transparent text-slate-400 cursor-pointer rounded mr-2 transition-all duration-200 hover:bg-slate-600 hover:text-slate-200" 
       *ngIf="config.showClearButton && searchControl.value"
       (click)="onClear()"
-      title="Limpiar búsqueda">
+      title="{{ 'admin.shared.searchInput.clearSearch' | workyTranslations }}">
       <i class="material-icons text-base">close</i>
     </button>
   </div>

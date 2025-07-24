@@ -4,9 +4,9 @@
     <div class="flex justify-between items-center gap-8 mb-4 lg:flex-row flex-col lg:items-center lg:text-left text-center">
       <div class="flex-1">
         <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
-          Dashboard de Estadísticas
+          {{ 'admin.statistics.title' | workyTranslations }}
         </h1>
-        <p class="text-slate-300 text-lg">Métricas en tiempo real de la plataforma</p>
+        <p class="text-slate-300 text-lg">{{ 'admin.statistics.subtitle' | workyTranslations }}</p>
       </div>
       <div class="flex gap-6 items-center lg:flex-row flex-col lg:w-auto w-full">
         <button 
@@ -14,11 +14,11 @@
           (click)="refreshStatistics()" 
           [disabled]="isLoading">
           <i class="material-icons" [class.animate-spin]="isLoading">refresh</i>
-          <span>Actualizar</span>
+          <span>{{ 'admin.statistics.refresh' | workyTranslations }}</span>
         </button>
         <div class="flex items-center gap-2 text-slate-400 text-sm">
           <i class="material-icons text-slate-500">schedule</i>
-          <span>Última actualización: {{ lastUpdated | workyDate:'short' }}</span>
+          <span>{{ 'admin.statistics.lastUpdate' | workyTranslations }} {{ lastUpdated | workyDate:'short' }}</span>
         </div>
       </div>
     </div>
@@ -34,9 +34,9 @@
       </div>
       <div>
         <h3 class="text-2xl font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
-          Cargando métricas
+          {{ 'admin.statistics.loading.title' | workyTranslations }}
         </h3>
-        <p class="text-slate-300 mb-6">Recopilando estadísticas en tiempo real...</p>
+        <p class="text-slate-300 mb-6">{{ 'admin.statistics.collecting' | workyTranslations }}</p>
         <div class="flex justify-center gap-2">
           <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
           <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style="animation-delay: 0.2s"></span>
@@ -53,13 +53,13 @@
         <i class="material-icons">error_outline</i>
       </div>
       <div>
-        <h3 class="text-2xl font-semibold text-slate-100 mb-2">Error al cargar métricas</h3>
+        <h3 class="text-2xl font-semibold text-slate-100 mb-2">{{ 'admin.statistics.error.title' | workyTranslations }}</h3>
         <p class="text-slate-300 mb-6 leading-relaxed">{{ error }}</p>
         <button 
           class="flex items-center gap-2 px-6 py-3 border border-red-500 rounded-lg bg-red-500/10 text-red-400 font-semibold text-sm hover:bg-red-500 hover:text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-red-500/30"
           (click)="refreshStatistics()">
           <i class="material-icons text-lg">refresh</i>
-          Reintentar
+          {{ 'admin.statistics.retry' | workyTranslations }}
         </button>
       </div>
     </div>
@@ -75,39 +75,39 @@
           <i class="material-icons">people</i>
         </div>
         <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">Usuarios Registrados</h3>
-          <p class="text-sm text-slate-400">Total de usuarios en la plataforma</p>
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.statistics.users.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.statistics.users.subtitle' | workyTranslations }}</p>
         </div>
       </div>
       <div>
         <div class="flex items-baseline gap-2 mb-4" *ngIf="!isLoadingUsers; else usersLoading">
           <span class="text-5xl font-bold text-slate-100">{{ allUsersLength | number }}</span>
-          <span class="text-lg text-slate-400">usuarios</span>
+          <span class="text-lg text-slate-400">{{ 'admin.statistics.users.unit' | workyTranslations }}</span>
         </div>
         <ng-template #usersLoading>
           <div class="flex items-baseline gap-2 mb-4">
             <div class="w-20 h-12 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
-            <span class="text-lg text-slate-400">usuarios</span>
+            <span class="text-lg text-slate-400">{{ 'admin.statistics.users.unit' | workyTranslations }}</span>
           </div>
         </ng-template>
         <div class="flex flex-col gap-2" *ngIf="!isLoadingUsers; else usersDetailsLoading">
           <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-400">Activos:</span>
+            <span class="text-sm text-slate-400">{{ 'admin.statistics.users.active' | workyTranslations }}:</span>
             <span class="text-sm font-semibold text-slate-100">{{ activeUsersCount | number }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-400">Pendientes:</span>
+            <span class="text-sm text-slate-400">{{ 'admin.statistics.users.pending' | workyTranslations }}:</span>
             <span class="text-sm font-semibold text-slate-100">{{ pendingUsersCount | number }}</span>
           </div>
         </div>
         <ng-template #usersDetailsLoading>
           <div class="flex flex-col gap-2">
             <div class="flex justify-between items-center">
-              <span class="text-sm text-slate-400">Activos:</span>
+              <span class="text-sm text-slate-400">{{ 'admin.statistics.users.active' | workyTranslations }}:</span>
               <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-sm text-slate-400">Pendientes:</span>
+              <span class="text-sm text-slate-400">{{ 'admin.statistics.users.pending' | workyTranslations }}:</span>
               <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
           </div>
@@ -123,39 +123,39 @@
           <i class="material-icons">article</i>
         </div>
         <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">Publicaciones</h3>
-          <p class="text-sm text-slate-400">Contenido generado por usuarios</p>
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.statistics.publications.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.statistics.publications.subtitle' | workyTranslations }}</p>
         </div>
       </div>
       <div>
         <div class="flex items-baseline gap-2 mb-4" *ngIf="!isLoadingPublications; else publicationsLoading">
           <span class="text-5xl font-bold text-slate-100">{{ countPublications | number }}</span>
-          <span class="text-lg text-slate-400">publicaciones</span>
+          <span class="text-lg text-slate-400">{{ 'admin.statistics.publications.unit' | workyTranslations }}</span>
         </div>
         <ng-template #publicationsLoading>
           <div class="flex items-baseline gap-2 mb-4">
             <div class="w-20 h-12 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
-            <span class="text-lg text-slate-400">publicaciones</span>
+            <span class="text-lg text-slate-400">{{ 'admin.statistics.publications.unit' | workyTranslations }}</span>
           </div>
         </ng-template>
         <div class="flex flex-col gap-2" *ngIf="!isLoadingPublications; else publicationsDetailsLoading">
           <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-400">Con media:</span>
+            <span class="text-sm text-slate-400">{{ 'admin.statistics.publications.withMedia' | workyTranslations }}:</span>
             <span class="text-sm font-semibold text-slate-100">{{ publicationsWithMedia | number }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-400">Hoy:</span>
+            <span class="text-sm text-slate-400">{{ 'admin.statistics.today' | workyTranslations }}:</span>
             <span class="text-sm font-semibold text-slate-100">{{ todayPublications | number }}</span>
           </div>
         </div>
         <ng-template #publicationsDetailsLoading>
           <div class="flex flex-col gap-2">
             <div class="flex justify-between items-center">
-              <span class="text-sm text-slate-400">Con media:</span>
+              <span class="text-sm text-slate-400">{{ 'admin.statistics.publications.withMedia' | workyTranslations }}:</span>
               <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-sm text-slate-400">Hoy:</span>
+              <span class="text-sm text-slate-400">{{ 'admin.statistics.today' | workyTranslations }}:</span>
               <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
           </div>
@@ -171,39 +171,39 @@
           <i class="material-icons">chat_bubble</i>
         </div>
         <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">Comentarios</h3>
-          <p class="text-sm text-slate-400">Interacciones en publicaciones</p>
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.statistics.comments.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.statistics.comments.subtitle' | workyTranslations }}</p>
         </div>
       </div>
       <div>
         <div class="flex items-baseline gap-2 mb-4" *ngIf="!isLoadingComments; else commentsLoading">
           <span class="text-5xl font-bold text-slate-100">{{ totalComments | number }}</span>
-          <span class="text-lg text-slate-400">comentarios</span>
+          <span class="text-lg text-slate-400">{{ 'admin.statistics.comments.unit' | workyTranslations }}</span>
         </div>
         <ng-template #commentsLoading>
           <div class="flex items-baseline gap-2 mb-4">
             <div class="w-20 h-12 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
-            <span class="text-lg text-slate-400">comentarios</span>
+            <span class="text-lg text-slate-400">{{ 'admin.statistics.comments.unit' | workyTranslations }}</span>
           </div>
         </ng-template>
         <div class="flex flex-col gap-2" *ngIf="!isLoadingComments; else commentsDetailsLoading">
           <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-400">Promedio por pub:</span>
+            <span class="text-sm text-slate-400">{{ 'admin.statistics.comments.avgPerPub' | workyTranslations }}:</span>
             <span class="text-sm font-semibold text-slate-100">{{ avgCommentsPerPublication | number:'1.1-1' }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-400">Hoy:</span>
+            <span class="text-sm text-slate-400">{{ 'admin.statistics.today' | workyTranslations }}:</span>
             <span class="text-sm font-semibold text-slate-100">{{ todayComments | number }}</span>
           </div>
         </div>
         <ng-template #commentsDetailsLoading>
           <div class="flex flex-col gap-2">
             <div class="flex justify-between items-center">
-              <span class="text-sm text-slate-400">Promedio por pub:</span>
+              <span class="text-sm text-slate-400">{{ 'admin.statistics.comments.avgPerPub' | workyTranslations }}:</span>
               <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-sm text-slate-400">Hoy:</span>
+              <span class="text-sm text-slate-400">{{ 'admin.statistics.today' | workyTranslations }}:</span>
               <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
           </div>
@@ -219,39 +219,39 @@
           <i class="material-icons">favorite</i>
         </div>
         <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">Reacciones</h3>
-          <p class="text-sm text-slate-400">Engagement de usuarios</p>
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.statistics.reactions.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.statistics.reactions.subtitle' | workyTranslations }}</p>
         </div>
       </div>
       <div>
         <div class="flex items-baseline gap-2 mb-4" *ngIf="!isLoadingReactions; else reactionsLoading">
           <span class="text-5xl font-bold text-slate-100">{{ totalReactions | number }}</span>
-          <span class="text-lg text-slate-400">reacciones</span>
+          <span class="text-lg text-slate-400">{{ 'admin.statistics.reactions.unit' | workyTranslations }}</span>
         </div>
         <ng-template #reactionsLoading>
           <div class="flex items-baseline gap-2 mb-4">
             <div class="w-20 h-12 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
-            <span class="text-lg text-slate-400">reacciones</span>
+            <span class="text-lg text-slate-400">{{ 'admin.statistics.reactions.unit' | workyTranslations }}</span>
           </div>
         </ng-template>
         <div class="flex flex-col gap-2" *ngIf="!isLoadingReactions; else reactionsDetailsLoading">
           <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-400">Promedio por pub:</span>
+            <span class="text-sm text-slate-400">{{ 'admin.statistics.reactions.avgPerPub' | workyTranslations }}:</span>
             <span class="text-sm font-semibold text-slate-100">{{ avgReactionsPerPublication | number:'1.1-1' }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-400">Hoy:</span>
+            <span class="text-sm text-slate-400">{{ 'admin.statistics.today' | workyTranslations }}:</span>
             <span class="text-sm font-semibold text-slate-100">{{ todayReactions | number }}</span>
           </div>
         </div>
         <ng-template #reactionsDetailsLoading>
           <div class="flex flex-col gap-2">
             <div class="flex justify-between items-center">
-              <span class="text-sm text-slate-400">Promedio por pub:</span>
+              <span class="text-sm text-slate-400">{{ 'admin.statistics.reactions.avgPerPub' | workyTranslations }}:</span>
               <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-sm text-slate-400">Hoy:</span>
+              <span class="text-sm text-slate-400">{{ 'admin.statistics.today' | workyTranslations }}:</span>
               <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
           </div>
@@ -267,39 +267,39 @@
           <i class="material-icons">flag</i>
         </div>
         <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">Reportes</h3>
-          <p class="text-sm text-slate-400">Contenido reportado por usuarios</p>
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.statistics.reports.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.statistics.reports.subtitle' | workyTranslations }}</p>
         </div>
       </div>
       <div>
         <div class="flex items-baseline gap-2 mb-4" *ngIf="!isLoadingReports; else reportsLoading">
           <span class="text-5xl font-bold text-slate-100">{{ ReportsStatusPendingCount | number }}</span>
-          <span class="text-lg text-slate-400">pendientes</span>
+          <span class="text-lg text-slate-400">{{ 'admin.statistics.reports.pending' | workyTranslations }}</span>
         </div>
         <ng-template #reportsLoading>
           <div class="flex items-baseline gap-2 mb-4">
             <div class="w-20 h-12 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
-            <span class="text-lg text-slate-400">pendientes</span>
+            <span class="text-lg text-slate-400">{{ 'admin.statistics.reports.pending' | workyTranslations }}</span>
           </div>
         </ng-template>
         <div class="flex flex-col gap-2" *ngIf="!isLoadingReports; else reportsDetailsLoading">
           <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-400">Resueltos:</span>
+            <span class="text-sm text-slate-400">{{ 'admin.statistics.reports.resolved' | workyTranslations }}:</span>
             <span class="text-sm font-semibold text-slate-100">{{ resolvedReports | number }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-400">Hoy:</span>
+            <span class="text-sm text-slate-400">{{ 'admin.statistics.today' | workyTranslations }}:</span>
             <span class="text-sm font-semibold text-slate-100">{{ todayReports | number }}</span>
           </div>
         </div>
         <ng-template #reportsDetailsLoading>
           <div class="flex flex-col gap-2">
             <div class="flex justify-between items-center">
-              <span class="text-sm text-slate-400">Resueltos:</span>
+              <span class="text-sm text-slate-400">{{ 'admin.statistics.reports.resolved' | workyTranslations }}:</span>
               <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-sm text-slate-400">Hoy:</span>
+              <span class="text-sm text-slate-400">{{ 'admin.statistics.today' | workyTranslations }}:</span>
               <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
           </div>
@@ -315,39 +315,39 @@
           <i class="material-icons">email</i>
         </div>
         <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">Mensajes</h3>
-          <p class="text-sm text-slate-400">Comunicación entre usuarios</p>
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.statistics.messages.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.statistics.messages.subtitle' | workyTranslations }}</p>
         </div>
       </div>
       <div>
         <div class="flex items-baseline gap-2 mb-4" *ngIf="!isLoadingMessages; else messagesLoading">
           <span class="text-5xl font-bold text-slate-100">{{ totalMessages | number }}</span>
-          <span class="text-lg text-slate-400">mensajes</span>
+          <span class="text-lg text-slate-400">{{ 'admin.statistics.messages.unit' | workyTranslations }}</span>
         </div>
         <ng-template #messagesLoading>
           <div class="flex items-baseline gap-2 mb-4">
             <div class="w-20 h-12 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
-            <span class="text-lg text-slate-400">mensajes</span>
+            <span class="text-lg text-slate-400">{{ 'admin.statistics.messages.unit' | workyTranslations }}</span>
           </div>
         </ng-template>
         <div class="flex flex-col gap-2" *ngIf="!isLoadingMessages; else messagesDetailsLoading">
           <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-400">No leídos:</span>
+            <span class="text-sm text-slate-400">{{ 'admin.statistics.unread' | workyTranslations }}</span>
             <span class="text-sm font-semibold text-slate-100">{{ unreadMessages | number }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-slate-400">Conversaciones:</span>
+            <span class="text-sm text-slate-400">{{ 'admin.statistics.messages.conversations' | workyTranslations }}:</span>
             <span class="text-sm font-semibold text-slate-100">{{ activeConversations | number }}</span>
           </div>
         </div>
         <ng-template #messagesDetailsLoading>
           <div class="flex flex-col gap-2">
             <div class="flex justify-between items-center">
-              <span class="text-sm text-slate-400">No leídos:</span>
+              <span class="text-sm text-slate-400">{{ 'admin.statistics.unread' | workyTranslations }}</span>
               <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
             <div class="flex justify-between items-center">
-              <span class="text-sm text-slate-400">Conversaciones:</span>
+              <span class="text-sm text-slate-400">{{ 'admin.statistics.messages.conversations' | workyTranslations }}:</span>
               <div class="w-10 h-4 bg-gradient-to-r from-white/10 via-white/20 to-white/10 bg-[length:200px_100%] animate-pulse rounded"></div>
             </div>
           </div>
@@ -358,7 +358,7 @@
 
   <!-- Additional Metrics Section -->
   <div class="p-6 border-t border-slate-600 mt-8" *ngIf="!isLoading">
-    <h2 class="text-2xl font-semibold text-slate-100 mb-6">Métricas Adicionales</h2>
+    <h2 class="text-2xl font-semibold text-slate-100 mb-6">{{ 'admin.statistics.additionalMetrics' | workyTranslations }}</h2>
     
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <!-- Engagement Rate -->
@@ -367,13 +367,13 @@
           <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400">
             <i class="material-icons">trending_up</i>
           </div>
-          <h4 class="text-base font-semibold text-slate-100">Tasa de Engagement</h4>
+          <h4 class="text-base font-semibold text-slate-100">{{ 'admin.statistics.metrics.engagement.title' | workyTranslations }}</h4>
         </div>
         <div class="mb-3">
           <span class="text-3xl font-bold text-emerald-500">{{ engagementRate | number:'1.1-1' }}%</span>
         </div>
         <div class="text-sm text-slate-400 leading-relaxed">
-          Porcentaje de usuarios activos que interactúan con el contenido
+          {{ 'admin.statistics.metrics.engagement.description' | workyTranslations }}
         </div>
       </div>
 
@@ -383,13 +383,13 @@
           <div class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center text-emerald-400">
             <i class="material-icons">arrow_upward</i>
           </div>
-          <h4 class="text-base font-semibold text-slate-100">Crecimiento de Contenido</h4>
+          <h4 class="text-base font-semibold text-slate-100">{{ 'admin.statistics.metrics.contentGrowth.title' | workyTranslations }}</h4>
         </div>
         <div class="mb-3">
           <span class="text-3xl font-bold text-emerald-500">{{ contentGrowthRate | number:'1.1-1' }}%</span>
         </div>
         <div class="text-sm text-slate-400 leading-relaxed">
-          Incremento de publicaciones en los últimos 7 días
+          {{ 'admin.statistics.metrics.contentGrowth.description' | workyTranslations }}
         </div>
       </div>
 
@@ -399,13 +399,13 @@
           <div class="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center text-amber-400">
             <i class="material-icons">access_time</i>
           </div>
-          <h4 class="text-base font-semibold text-slate-100">Actividad de Usuarios</h4>
+          <h4 class="text-base font-semibold text-slate-100">{{ 'admin.statistics.metrics.userActivity.title' | workyTranslations }}</h4>
         </div>
         <div class="mb-3">
           <span class="text-3xl font-bold text-emerald-500">{{ userActivityRate | number:'1.1-1' }}%</span>
         </div>
         <div class="text-sm text-slate-400 leading-relaxed">
-          Usuarios que han interactuado en las últimas 24 horas
+          {{ 'admin.statistics.metrics.userActivity.description' | workyTranslations }}
         </div>
       </div>
 
@@ -415,13 +415,13 @@
           <div class="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center text-amber-400">
             <i class="material-icons">timer</i>
           </div>
-          <h4 class="text-base font-semibold text-slate-100">Tiempo de Respuesta</h4>
+          <h4 class="text-base font-semibold text-slate-100">{{ 'admin.statistics.metrics.responseTime.title' | workyTranslations }}</h4>
         </div>
         <div class="mb-3">
           <span class="text-3xl font-bold text-amber-500">{{ avgResponseTime | number:'1.0-0' }}h</span>
         </div>
         <div class="text-sm text-slate-400 leading-relaxed">
-          Tiempo promedio de respuesta a reportes
+          {{ 'admin.statistics.metrics.responseTime.description' | workyTranslations }}
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ import { CustomFieldType, CustomFieldDestination, CustomField} from './interface
 import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { AuthService } from '@auth/services/auth.service';
+import { translations } from '@translations/translations';
 
 @Component({
     selector: 'worky-form-builder',
@@ -30,9 +31,9 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
   enumCustomFieldType = CustomFieldType;
 
   availableFields: Field[] = [
-    { type: CustomFieldType.TEXT, id: this.generateId(), idName: '', label: 'Campo de Texto', destination: CustomFieldDestination.PROFILE },
-    { type: CustomFieldType.TEXTAREA, id: this.generateId(), idName: '', label: 'Área de Texto', destination: CustomFieldDestination.PROFILE },
-    { type: CustomFieldType.SELECT, id: this.generateId(), idName: '', label: 'Select', options: [], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.TEXT, id: this.generateId(), idName: '', label: translations['formBuilder.textField'], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.TEXTAREA, id: this.generateId(), idName: '', label: translations['formBuilder.textArea'], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.SELECT, id: this.generateId(), idName: '', label: translations['formBuilder.selectField'], options: [], destination: CustomFieldDestination.PROFILE },
   ];
 
   formFields: Field[] = [];

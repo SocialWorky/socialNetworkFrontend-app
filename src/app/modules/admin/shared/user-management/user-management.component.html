@@ -4,9 +4,9 @@
     <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
       <div class="flex-1">
         <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
-          Gestión de Usuarios
+          {{ 'admin.userManagement.title' | workyTranslations }}
         </h1>
-        <p class="text-slate-300 text-lg">Administra y gestiona todos los usuarios de la plataforma</p>
+        <p class="text-slate-300 text-lg">{{ 'admin.userManagement.subtitle' | workyTranslations }}</p>
       </div>
       <div class="flex gap-4 items-center lg:flex-row flex-col lg:w-auto w-full">
         <button 
@@ -14,13 +14,13 @@
           (click)="refreshUsers()" 
           [disabled]="loading">
           <i class="material-icons" [class.animate-spin]="loading">refresh</i>
-          <span>Actualizar</span>
+          <span>{{ 'admin.userManagement.refresh' | workyTranslations }}</span>
         </button>
         <button 
           class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm border border-cyan-500 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/30"
           (click)="showFilters = !showFilters">
           <i class="material-icons">filter_list</i>
-          <span>Filtros</span>
+          <span>{{ 'admin.userManagement.filters' | workyTranslations }}</span>
         </button>
       </div>
     </div>

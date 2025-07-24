@@ -1,7 +1,7 @@
 <div class="fixed inset-0 bg-black/80 flex items-center justify-center z-50" *ngIf="showModal" (click)="onCloseModal()">
   <div class="bg-slate-800 border border-slate-700 rounded-xl max-w-2xl w-full mx-4 animate-in fade-in-0 zoom-in-95 duration-300" (click)="$event.stopPropagation()">
     <div class="flex items-center justify-between p-6 border-b border-slate-700">
-      <h3 class="text-xl font-semibold text-slate-100">Editar Usuario</h3>
+      <h3 class="text-xl font-semibold text-slate-100">{{ 'admin.userManagement.edit.title' | workyTranslations }}</h3>
       <button class="text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 w-9 h-9 rounded-lg flex items-center justify-center transition-colors" (click)="onCloseModal()">
         <i class="material-icons">close</i>
       </button>
@@ -10,7 +10,7 @@
       <form #editForm="ngForm" (ngSubmit)="onSubmit()" class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-2">
-            <label class="block text-sm font-semibold text-slate-300">Nombre de usuario</label>
+            <label class="block text-sm font-semibold text-slate-300">{{ 'admin.userManagement.edit.username' | workyTranslations }}</label>
             <input 
               type="text" 
               name="username" 
@@ -20,20 +20,20 @@
           </div>
           
           <div class="space-y-2">
-            <label class="block text-sm font-semibold text-slate-300">Email</label>
+            <label class="block text-sm font-semibold text-slate-300">{{ 'admin.userManagement.edit.email' | workyTranslations }}</label>
             <input 
               type="email" 
               name="email" 
               [value]="user.email" 
               readonly
               class="w-full px-4 py-3 bg-slate-600/50 border border-slate-600 rounded-lg text-slate-400 cursor-not-allowed">
-            <small class="text-xs text-slate-400 italic">El email no se puede editar</small>
+            <small class="text-xs text-slate-400 italic">{{ 'admin.userManagement.edit.emailReadonly' | workyTranslations }}</small>
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-2">
-            <label class="block text-sm font-semibold text-slate-300">Nombre</label>
+            <label class="block text-sm font-semibold text-slate-300">{{ 'admin.userManagement.edit.name' | workyTranslations }}</label>
             <input 
               type="text" 
               name="name" 
@@ -43,7 +43,7 @@
           </div>
           
           <div class="space-y-2">
-            <label class="block text-sm font-semibold text-slate-300">Apellido</label>
+            <label class="block text-sm font-semibold text-slate-300">{{ 'admin.userManagement.edit.lastName' | workyTranslations }}</label>
             <input 
               type="text" 
               name="lastName" 
@@ -57,34 +57,34 @@
           <div class="space-y-2">
             <label class="flex items-center gap-2 text-sm font-semibold text-slate-300">
               <i class="material-icons text-blue-400 text-lg">admin_panel_settings</i> 
-              Rol 
-              <span class="text-xs text-emerald-400 font-normal opacity-80">(Editable)</span>
+              {{ 'admin.userManagement.edit.role' | workyTranslations }}
+              <span class="text-xs text-emerald-400 font-normal opacity-80">({{ 'admin.userManagement.edit.editable' | workyTranslations }})</span>
             </label>
             <select 
               name="role" 
               [(ngModel)]="user.role" 
               required
               class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 20 20%27%3e%3cpath stroke=%27%236b7280%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%271.5%27 d=%27m6 8 4 4 4-4%27/%3e%3c/svg%3e')] bg-[length:1.5em_1.5em] bg-[right_0.5rem_center] bg-no-repeat pr-10 hover:border-blue-500 hover:bg-slate-600/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/10">
-              <option value="admin">Administrador</option>
-              <option value="moderator">Moderador</option>
-              <option value="user">Usuario</option>
-              <option value="guest">Invitado</option>
+              <option value="admin">{{ 'admin.userManagement.edit.role.admin' | workyTranslations }}</option>
+              <option value="moderator">{{ 'admin.userManagement.edit.role.moderator' | workyTranslations }}</option>
+              <option value="user">{{ 'admin.userManagement.edit.role.user' | workyTranslations }}</option>
+              <option value="guest">{{ 'admin.userManagement.edit.role.guest' | workyTranslations }}</option>
             </select>
           </div>
           
           <div class="space-y-2">
             <label class="flex items-center gap-2 text-sm font-semibold text-slate-300">
               <i class="material-icons text-purple-400 text-lg">toggle_on</i> 
-              Estado 
-              <span class="text-xs text-emerald-400 font-normal opacity-80">(Editable)</span>
+              {{ 'admin.userManagement.edit.status' | workyTranslations }}
+              <span class="text-xs text-emerald-400 font-normal opacity-80">({{ 'admin.userManagement.edit.editable' | workyTranslations }})</span>
             </label>
             <select 
               name="isActive" 
               [(ngModel)]="user.isActive" 
               required
               class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 20 20%27%3e%3cpath stroke=%27%236b7280%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%271.5%27 d=%27m6 8 4 4 4-4%27/%3e%3c/svg%3e')] bg-[length:1.5em_1.5em] bg-[right_0.5rem_center] bg-no-repeat pr-10 hover:border-blue-500 hover:bg-slate-600/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/10">
-              <option [ngValue]="true">Activo</option>
-              <option [ngValue]="false">Inactivo</option>
+              <option [ngValue]="true">{{ 'admin.userManagement.edit.status.active' | workyTranslations }}</option>
+              <option [ngValue]="false">{{ 'admin.userManagement.edit.status.inactive' | workyTranslations }}</option>
             </select>
           </div>
         </div>
@@ -93,56 +93,56 @@
           <div class="space-y-2">
             <label class="flex items-center gap-2 text-sm font-semibold text-slate-300">
               <i class="material-icons text-emerald-400 text-lg">verified</i> 
-              Verificación de email 
-              <span class="text-xs text-emerald-400 font-normal opacity-80">(Editable)</span>
+              {{ 'admin.userManagement.edit.emailVerification' | workyTranslations }}
+              <span class="text-xs text-emerald-400 font-normal opacity-80">({{ 'admin.userManagement.edit.editable' | workyTranslations }})</span>
             </label>
             <select 
               name="isVerified" 
               [(ngModel)]="user.isVerified" 
               required
               class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 20 20%27%3e%3cpath stroke=%27%236b7280%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%271.5%27 d=%27m6 8 4 4 4-4%27/%3e%3c/svg%3e')] bg-[length:1.5em_1.5em] bg-[right_0.5rem_center] bg-no-repeat pr-10 hover:border-blue-500 hover:bg-slate-600/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/10">
-              <option [ngValue]="true">Verificado</option>
-              <option [ngValue]="false">No verificado</option>
+              <option [ngValue]="true">{{ 'admin.userManagement.edit.verified' | workyTranslations }}</option>
+              <option [ngValue]="false">{{ 'admin.userManagement.edit.notVerified' | workyTranslations }}</option>
             </select>
           </div>
           
           <div class="space-y-2">
             <label class="flex items-center gap-2 text-sm font-semibold text-slate-300">
               <i class="material-icons text-amber-400 text-lg">dark_mode</i> 
-              Modo oscuro 
-              <span class="text-xs text-emerald-400 font-normal opacity-80">(Editable)</span>
+              {{ 'admin.userManagement.edit.darkMode' | workyTranslations }}
+              <span class="text-xs text-emerald-400 font-normal opacity-80">({{ 'admin.userManagement.edit.editable' | workyTranslations }})</span>
             </label>
             <select 
               name="isDarkMode" 
               [(ngModel)]="user.isDarkMode" 
               required
               class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 20 20%27%3e%3cpath stroke=%27%236b7280%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%271.5%27 d=%27m6 8 4 4 4-4%27/%3e%3c/svg%3e')] bg-[length:1.5em_1.5em] bg-[right_0.5rem_center] bg-no-repeat pr-10 hover:border-blue-500 hover:bg-slate-600/50 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/10">
-              <option [ngValue]="true">Activado</option>
-              <option [ngValue]="false">Desactivado</option>
+              <option [ngValue]="true">{{ 'admin.userManagement.edit.enabled' | workyTranslations }}</option>
+              <option [ngValue]="false">{{ 'admin.userManagement.edit.disabled' | workyTranslations }}</option>
             </select>
           </div>
         </div>
 
         <div class="space-y-2">
-          <label class="block text-sm font-semibold text-slate-300">Avatar URL</label>
+          <label class="block text-sm font-semibold text-slate-300">{{ 'admin.userManagement.edit.avatarUrl' | workyTranslations }}</label>
           <input 
             type="url" 
             name="avatar" 
             [(ngModel)]="user.avatar" 
-            placeholder="https://ejemplo.com/avatar.jpg"
+            placeholder="{{ 'admin.userManagement.edit.avatarUrlPlaceholder' | workyTranslations }}"
             class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-          <small class="text-xs text-slate-400 italic">URL de la imagen de perfil</small>
+          <small class="text-xs text-slate-400 italic">{{ 'admin.userManagement.edit.avatarUrlHelp' | workyTranslations }}</small>
         </div>
 
         <div class="space-y-2">
-          <label class="block text-sm font-semibold text-slate-300">Nueva contraseña (opcional)</label>
+                      <label class="block text-sm font-semibold text-slate-300">{{ 'admin.userManagement.edit.newPassword' | workyTranslations }}</label>
           <input 
             type="password" 
             name="password" 
             [(ngModel)]="newPassword" 
-            placeholder="Dejar vacío para no cambiar"
+            placeholder="{{ 'admin.userManagement.edit.newPasswordHelp' | workyTranslations }}"
             class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-          <small class="text-xs text-slate-400 italic">Solo llenar si deseas cambiar la contraseña</small>
+          <small class="text-xs text-slate-400 italic">{{ 'admin.userManagement.edit.newPasswordHelp' | workyTranslations }}</small>
         </div>
         
         <div class="flex gap-4 justify-end pt-6 border-t border-slate-700">
@@ -151,7 +151,7 @@
             (click)="onCloseModal()"
             class="flex items-center gap-2 px-6 py-3 bg-slate-600 hover:bg-slate-500 text-slate-100 rounded-lg font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg">
             <i class="material-icons">close</i>
-            <span>Cancelar</span>
+            <span>{{ 'admin.userManagement.edit.cancel' | workyTranslations }}</span>
           </button>
           <button 
             type="submit" 
@@ -159,7 +159,7 @@
             class="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:transform-none disabled:shadow-none">
             <i class="material-icons" *ngIf="!isUpdating">save</i>
             <i class="material-icons animate-spin" *ngIf="isUpdating">hourglass_empty</i>
-            <span>{{ isUpdating ? 'Guardando...' : 'Guardar Cambios' }}</span>
+            <span>{{ isUpdating ? ('admin.userManagement.edit.saving' | workyTranslations) : ('admin.userManagement.edit.saveChanges' | workyTranslations) }}</span>
           </button>
         </div>
       </form>

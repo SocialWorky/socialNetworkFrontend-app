@@ -15,7 +15,7 @@
             <input
               type="search"
               class="form-control"
-              placeholder="Search"
+              placeholder="{{ 'navbar.search' | workyTranslations }}"
               [(ngModel)]="searchTerm"
               (input)="onInputChange($event)"
               autocomplete="off"

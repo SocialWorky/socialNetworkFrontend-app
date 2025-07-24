@@ -64,7 +64,7 @@
         </ng-template>
 
       </div>
-      <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">está en </p><a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
+      <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">{{ 'shared.publicationView.location.isIn' | workyTranslations }} </p><a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
       <div class="publication-date">
         <span>{{ publication.createdAt! | workyDate:'relative' }}</span>
         <ng-container *ngIf="publication.privacy === typePrivacy.PUBLIC">

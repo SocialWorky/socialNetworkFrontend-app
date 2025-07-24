@@ -3,8 +3,8 @@
   <div class="bg-slate-800 rounded-xl p-8 mb-8 shadow-lg border border-slate-700">
     <div class="flex justify-between items-center gap-8 mb-6">
       <div>
-        <h1 class="text-3xl font-bold text-white mb-2">Sistema de Logs</h1>
-        <p class="text-slate-400">Monitoreo y análisis de eventos del sistema</p>
+        <h1 class="text-3xl font-bold text-white mb-2">{{ 'admin.log.title' | workyTranslations }}</h1>
+        <p class="text-slate-400">{{ 'admin.log.subtitle' | workyTranslations }}</p>
       </div>
       
       <div class="flex gap-4">
@@ -14,7 +14,7 @@
           </div>
           <div class="flex flex-col">
             <span class="text-2xl font-bold text-white leading-none">{{ totalLogs }}</span>
-            <span class="text-xs text-slate-400 uppercase tracking-wider">Total Logs</span>
+            <span class="text-xs text-slate-400 uppercase tracking-wider">{{ 'admin.log.stats.total' | workyTranslations }}</span>
           </div>
         </div>
         
@@ -24,7 +24,7 @@
           </div>
           <div class="flex flex-col">
             <span class="text-2xl font-bold text-white leading-none">{{ getLogCountByLevel('error') }}</span>
-            <span class="text-xs text-slate-400 uppercase tracking-wider">Errores</span>
+            <span class="text-xs text-slate-400 uppercase tracking-wider">{{ 'admin.log.stats.errors' | workyTranslations }}</span>
           </div>
         </div>
         
@@ -34,7 +34,7 @@
           </div>
           <div class="flex flex-col">
             <span class="text-2xl font-bold text-white leading-none">{{ getLogCountByLevel('warn') }}</span>
-            <span class="text-xs text-slate-400 uppercase tracking-wider">Advertencias</span>
+            <span class="text-xs text-slate-400 uppercase tracking-wider">{{ 'admin.log.stats.warnings' | workyTranslations }}</span>
           </div>
         </div>
       </div>
@@ -44,7 +44,7 @@
     <div class="space-y-4">
       <div class="flex gap-6 mb-4 flex-wrap">
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Nivel de Log:</label>
+          <label class="text-sm font-semibold text-slate-400 uppercase tracking-wider">{{ 'admin.log.filters.level' | workyTranslations }}</label>
           <div class="flex gap-2 flex-wrap">
             <button 
               *ngFor="let level of logLevels" 
@@ -63,18 +63,18 @@
               (click)="filterByLevel(level.value)"
             >
               <i class="material-icons text-base">{{ level.icon }}</i>
-              {{ level.label }}
+              {{ level.label | workyTranslations }}
             </button>
           </div>
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Búsqueda:</label>
+          <label class="text-sm font-semibold text-slate-400 uppercase tracking-wider">{{ 'admin.log.filters.search' | workyTranslations }}</label>
           <div class="relative">
             <i class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">search</i>
             <input 
               type="text" 
-              placeholder="Buscar en mensajes o contexto..."
+              placeholder="{{ 'admin.log.filters.search.placeholder' | workyTranslations }}"
               [(ngModel)]="searchTerm"
               (input)="onSearchChange()"
               class="pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm w-full focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -83,7 +83,7 @@
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Elementos por página:</label>
+          <label class="text-sm font-semibold text-slate-400 uppercase tracking-wider">{{ 'admin.log.filters.itemsPerPage' | workyTranslations }}</label>
           <select [(ngModel)]="limit" (change)="onLimitChange()" class="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm cursor-pointer focus:outline-none focus:border-blue-500">
             <option value="10">10</option>
             <option value="25">25</option>
@@ -100,7 +100,7 @@
           (click)="refreshLogs()"
         >
           <i class="material-icons">refresh</i>
-          {{ isLoading ? 'Actualizando...' : 'Actualizar' }}
+          {{ isLoading ? ('admin.log.buttons.refreshing' | workyTranslations) : ('admin.log.buttons.refresh' | workyTranslations) }}
         </button>
         
         <button 
@@ -108,7 +108,7 @@
           (click)="exportLogs()"
         >
           <i class="material-icons">download</i>
-          Exportar
+          {{ 'admin.log.buttons.export' | workyTranslations }}
         </button>
         
         <button 
@@ -118,14 +118,14 @@
           (click)="clearFilters()"
         >
           <i class="material-icons">clear</i>
-          Limpiar Filtros
+          {{ 'admin.log.buttons.clearFilters' | workyTranslations }}
         </button>
         
         <div class="flex items-center gap-3">
           <label class="flex items-center gap-3 cursor-pointer text-sm text-slate-400">
             <input type="checkbox" [(ngModel)]="autoRefresh" (change)="toggleAutoRefresh()" class="hidden">
             <span class="relative w-12 h-6 bg-slate-600 rounded-full transition-colors duration-300 before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-5 before:h-5 before:bg-white before:rounded-full before:transition-transform before:duration-300" [class.bg-blue-500]="autoRefresh" [class.before:translate-x-6]="autoRefresh"></span>
-            Auto-refresh (30s)
+            {{ 'admin.log.autoRefresh' | workyTranslations }}
           </label>
         </div>
       </div>
@@ -141,8 +141,8 @@
 
     <div class="flex flex-col items-center justify-center h-full gap-4 text-center" *ngIf="!isLoading && logs.length === 0">
       <i class="material-icons text-6xl text-slate-500">info</i>
-      <h3 class="text-2xl font-semibold text-white m-0">No se encontraron logs</h3>
-      <p class="text-slate-400 text-base m-0">Intenta ajustar los filtros o actualizar la página</p>
+      <h3 class="text-2xl font-semibold text-white m-0">{{ 'admin.log.empty.title' | workyTranslations }}</h3>
+      <p class="text-slate-400 text-base m-0">{{ 'admin.log.empty.subtitle' | workyTranslations }}</p>
     </div>
 
     <div class="flex flex-col gap-0 flex-1 overflow-y-auto pr-2 min-h-0 mb-4" *ngIf="!isLoading && logs.length > 0">
@@ -172,10 +172,10 @@
               {{ log.timestamp | date: 'dd/MM/yy HH:mm:ss' }}
             </div>
             <div class="flex gap-2">
-              <button class="w-8 h-8 border border-slate-600 rounded-md bg-slate-700/50 text-slate-400 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white" (click)="onCopy(log); $event.stopPropagation()" title="Copiar log">
+              <button class="w-8 h-8 border border-slate-600 rounded-md bg-slate-700/50 text-slate-400 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white" (click)="onCopy(log); $event.stopPropagation()" [title]="'admin.log.actions.copyLog' | workyTranslations">
                 <i class="material-icons text-lg">content_copy</i>
               </button>
-              <button class="w-8 h-8 border border-slate-600 rounded-md bg-slate-700/50 text-slate-400 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white" (click)="toggleMetadata(log._id); $event.stopPropagation()" title="Ver metadata">
+              <button class="w-8 h-8 border border-slate-600 rounded-md bg-slate-700/50 text-slate-400 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white" (click)="toggleMetadata(log._id); $event.stopPropagation()" [title]="'admin.log.actions.viewMetadata' | workyTranslations">
                 <i class="material-icons text-lg transition-transform duration-200" [class.rotate-180]="isExpanded(log._id)">expand_more</i>
               </button>
             </div>
@@ -186,13 +186,13 @@
           <div class="p-4">
             <h4 class="flex items-center gap-2 text-base font-semibold m-0 mb-4 text-white">
               <i class="material-icons text-blue-500">code</i>
-              Metadata
+              {{ 'admin.log.metadata.title' | workyTranslations }}
             </h4>
             <div class="relative bg-slate-900/30 rounded-lg p-4 max-h-[500px] overflow-y-auto overflow-x-auto">
               <ngx-json-viewer [depth]="2" [json]="log.metadata"></ngx-json-viewer>
               <button class="absolute top-3 right-3 flex items-center gap-2 px-4 py-2 border border-slate-600 rounded-md bg-slate-900/80 text-slate-400 text-sm cursor-pointer transition-all duration-200 hover:bg-slate-700 hover:border-slate-500 hover:text-white" (click)="onCopy(log.metadata)">
                 <i class="material-icons text-base">content_copy</i>
-                Copiar JSON
+                {{ 'admin.log.metadata.copyJson' | workyTranslations }}
               </button>
             </div>
           </div>

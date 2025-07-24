@@ -27,6 +27,8 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
   imagePreview: string | ArrayBuffer | null = null;
 
+  selectedFileName: string = '';
+
   urlApiFile = `${environment.APIFILESERVICE}config/`;
 
   isLoading = true;
@@ -118,7 +120,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
           'Error loading site configuration',
           { error: String(error) }
         );
-        this.error = 'Error al cargar la configuración del sitio. Por favor, intenta de nuevo.';
+        this.error = translations['admin.siteConfig.errors.loadError'];
         this.isLoading = false;
         this._cdr.markForCheck();
       }
@@ -145,10 +147,10 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
               { error: String(error) }
             );
             this.loadUpdateConfigButtons = false;
-            this.error = 'Error al subir el archivo. Por favor, intenta de nuevo.';
+            this.error = translations['admin.siteConfig.errors.uploadError'];
             this._alertService.showAlert(
-              'Error',
-              'Error al subir archivo, intente de nuevo.',
+              translations['admin.siteConfig.errors.title'],
+              translations['admin.siteConfig.errors.uploadError'],
               Alerts.ERROR,
               Position.CENTER,
               true,
@@ -162,14 +164,14 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       }
     } else {
       this.loadUpdateConfigButtons = false;
-      this.error = 'Por favor, completa todos los campos requeridos.';
+      this.error = translations['admin.siteConfig.errors.requiredFields'];
       this._cdr.markForCheck();
     }
   }
 
   async submitUpdateConfig() {
     const loadingReaction = await this._loadingCtrl.create({
-      message: 'Actualizando Configuración...',
+      message: translations['admin.siteConfig.updating'],
     });
 
     await loadingReaction.present();
@@ -181,8 +183,8 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
     this._configService.updateConfig(config).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
         this._alertService.showAlert(
-          'Éxito',
-          'Configuración actualizada correctamente',
+          translations['admin.siteConfig.success.title'],
+          translations['admin.siteConfig.success.message'],
           Alerts.SUCCESS,
           Position.CENTER,
           true,
@@ -202,7 +204,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
           'Error updating site configuration',
           { error: String(error) }
         );
-        this.error = 'Error al actualizar la configuración. Por favor, intenta de nuevo.';
+        this.error = translations['admin.siteConfig.errors.updateError'];
         loadingReaction.dismiss();
         this.loadUpdateConfigButtons = false;
         this._cdr.markForCheck();
@@ -214,6 +216,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
     const file = event.target.files[0];
     if (file) {
       this.imageFile = file;
+      this.selectedFileName = file.name;
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.imagePreview = e.target.result;
@@ -224,6 +227,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       this.configForm.patchValue({ logoUrl: '' });
     } else {
       this.imagePreview = null;
+      this.selectedFileName = '';
     }
   }
 }
