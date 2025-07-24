@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectorRef, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { UtilityService } from '@shared/services/utility.service';
 
@@ -13,6 +13,7 @@ import { UtilityService } from '@shared/services/utility.service';
         [class]="cssClass"
         (load)="onImageLoad()"
         (error)="onImageError()"
+        (click)="onImageClick($event)"
       />
       
       <div *ngIf="isLoading" class="image-loading">
@@ -27,11 +28,12 @@ import { UtilityService } from '@shared/services/utility.service';
   styleUrls: ['./worky-image.component.scss'],
   standalone: false
 })
-export class WorkyImageComponent implements OnInit, OnDestroy {
+export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
   @Input() src: string = '';
   @Input() fallbackSrc: string = 'assets/img/shared/handleImageError.png';
   @Input() alt: string = '';
   @Input() cssClass: string = '';
+  @Output() imageClick = new EventEmitter<MouseEvent>();
 
   currentSrc: string = '';
   isLoading: boolean = true;
@@ -46,6 +48,12 @@ export class WorkyImageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadImage();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['src'] && !changes['src'].firstChange) {
+      this.loadImage();
+    }
   }
 
   ngOnDestroy(): void {
@@ -70,7 +78,7 @@ export class WorkyImageComponent implements OnInit, OnDestroy {
         this.isLoading = false;
         this._cdr.markForCheck();
       })
-      .catch(() => {
+      .catch((error) => {
         this.setError();
       });
   }
@@ -90,5 +98,9 @@ export class WorkyImageComponent implements OnInit, OnDestroy {
 
   onImageError(): void {
     this.setError();
+  }
+
+  onImageClick(event: MouseEvent): void {
+    this.imageClick.emit(event);
   }
 } 

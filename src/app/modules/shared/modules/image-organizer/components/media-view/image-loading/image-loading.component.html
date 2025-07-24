@@ -1,19 +1,20 @@
 <div class="content-view-media-carousel">
   <div class="carousel-container">
 
-    <worky-image *ngIf="isImage() && imageSelected?.urlCompressed"
-      (click)="openImage(imageSelected!)"
-      [src]="imageSelected!.urlCompressed"
+    <worky-image *ngIf="isImage() && currentImage?.urlCompressed"
+      (imageClick)="openImage(currentImage!)"
+      [src]="getImageUrl(currentImage)"
       cssClass="main-image"
-      alt="Selected Image">
+      alt="Selected Image"
+      [attr.data-image-id]="currentImage?._id">
     </worky-image>
 
     <div class="main-video-container" (click)="$event.stopPropagation()">
       <video *ngIf="isVideo()"
         class="main-video"
-        [src]="imageSelected?.urlCompressed"
+        [src]="getVideoUrl(currentImage)"
         controls
-        [poster]="imageSelected?.urlThumbnail">
+        [poster]="getVideoPosterUrl(currentImage)">
         Tu navegador no soporta el elemento de video.
       </video>
     </div>
@@ -30,10 +31,10 @@
 
   <div *ngIf="!isMobile" class="thumbnail-list">
     <worky-image
-      *ngFor="let image of images"
-      [src]="image.urlThumbnail"
-      (click)="selectImage(image)"
-      [cssClass]="image._id === imageSelected?._id ? 'active' : ''"
+      *ngFor="let image of images; trackBy: trackByImageId"
+      [src]="getImageUrl(image, 'thumbnail')"
+      (imageClick)="selectImage(image)"
+      [cssClass]="image._id === currentImage?._id ? 'active' : ''"
       alt="Thumbnail">
     </worky-image>
   </div>

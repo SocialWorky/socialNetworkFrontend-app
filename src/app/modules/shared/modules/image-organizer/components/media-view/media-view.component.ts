@@ -67,7 +67,11 @@ export class MediaViewComponent  implements OnInit {
 
   onImageChanged(imageId: string) {
     this.imageSelected = imageId;
-    this._cdr.detectChanges();
+    const selectedImage = this.data.images.find(img => img._id === imageId);
+    if (selectedImage) {
+      this.data.imageSelected = selectedImage;
+    }
+    this._cdr.markForCheck();
   }
 
   close(): void {
