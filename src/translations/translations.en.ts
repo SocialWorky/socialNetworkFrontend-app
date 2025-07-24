@@ -991,4 +991,10 @@ export const translations = {
   'admin.webhooks.status': 'Status',
   'admin.webhooks.empty.title': 'No webhooks configured',
   'admin.webhooks.empty.subtitle': 'Create your first webhook to receive system event notifications',
+  
+  // ===== SOCIAL MEDIA =====
+  'social.facebook': 'Facebook',
+  'social.twitter': 'X (Twitter)',
+  'social.linkedin': 'LinkedIn',
+  'social.whatsapp': 'WhatsApp',
 };

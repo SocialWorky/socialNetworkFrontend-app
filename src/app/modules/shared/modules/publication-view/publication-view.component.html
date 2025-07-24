@@ -101,7 +101,12 @@
     <div class="publication-footer-content">
       <div class="publication-footer-content-item" *ngIf="publication.reaction.length">
         <div class="reactions-img-container" *ngFor="let emoji of listReaction; let i = index;">
-          <img class="reactions-img" [src]="emoji" style="--i: {{ i }};">
+          <img
+            class="reactions-img"
+            [src]="emoji"
+            [alt]="'Reacción ' + (i + 1)"
+            [style.--i]="i"
+            (error)="onEmojiError($event)">
         </div>
         <span>{{ publication.reaction.length }}</span>
 

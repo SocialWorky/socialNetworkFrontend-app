@@ -32,6 +32,7 @@ import { NotificationNewPublication } from '@shared/interfaces/notificationPubli
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
 import { UtilityService } from '@shared/services/utility.service';
+import { ImageLoadOptions } from '@shared/services/image.service';
 
 @Component({
     selector: 'worky-profiles',
@@ -51,6 +52,13 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   WorkyButtonType = WorkyButtonType;
 
   WorkyButtonTheme = WorkyButtonTheme;
+
+  imageOptions: ImageLoadOptions = {
+    maxRetries: 2,
+    retryDelay: 1000,
+    timeout: 10000,
+    fallbackUrl: '/assets/images/placeholder.jpg'
+  };
 
   paramPublication: boolean = false;
 

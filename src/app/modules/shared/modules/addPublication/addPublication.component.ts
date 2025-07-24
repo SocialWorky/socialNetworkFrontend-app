@@ -40,6 +40,7 @@ import { NotificationType } from '@shared/modules/notifications-panel/enums/noti
 import { GifSearchComponent } from '../gif-search/gif-search.component';
 import { TooltipsOnboardingService } from '@shared/services/tooltips-onboarding.service';
 import { UtilityService } from '@shared/services/utility.service';
+import { ImageLoadOptions } from '../../services/image.service';
 
 @Component({
     selector: 'worky-add-publication',
@@ -106,6 +107,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   @Input() idUserProfile?: string;
 
   @Input() idMedia?: string;
+  imageOptions: ImageLoadOptions = {
+    maxRetries: 2,
+    retryDelay: 1000,
+    timeout: 10000,
+    fallbackUrl: '/assets/images/placeholder.jpg'
+  };
 
   @ViewChild('postTextRef', { static: false }) postTextRef!: IonTextarea;
 

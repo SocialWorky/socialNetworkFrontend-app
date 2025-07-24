@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { NewsService } from './service/apiNews';
 import { NewsArticle } from './interface/dataNews.interface';
 import { of } from 'rxjs';

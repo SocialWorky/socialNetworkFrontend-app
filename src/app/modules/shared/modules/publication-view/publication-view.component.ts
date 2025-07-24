@@ -28,6 +28,7 @@ import { Colors } from '@shared/interfaces/colors.enum';
 import { ScrollService } from '@shared/services/scroll.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { LoadingService } from '@shared/services/loading.service';
+import { ImageLoadOptions } from '../../services/image.service';
 
 @Component({
     selector: 'worky-publication-view',
@@ -48,6 +49,13 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   typePublishing = TypePublishing;
 
   typePrivacy = TypePrivacy;
+
+  emojiImageOptions: ImageLoadOptions = {
+    maxRetries: 1,
+    retryDelay: 300,
+    timeout: 3000,
+    fallbackUrl: '/assets/images/emoji-placeholder.png'
+  };
 
   dataLinkActions: DropdownDataLink<any>[] = [];
 
@@ -209,23 +217,23 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       {
         img: 'assets/img/logos/svg-facebook.svg',
         linkUrl: `https://web.facebook.com/sharer.php?u=${url}`,
-        title: 'Facebook'
+        title: translations['social.facebook']
       },
       {
         img: 'assets/img/logos/twitter-x.svg',
         linkUrl: `https://twitter.com/intent/tweet?url=${url}`,
-        title: 'X (Twitter)'
+        title: translations['social.twitter']
       },
       // TODO: Uncomment when the linkedin share is ready
       // {
       //   img: 'assets/img/logos/linkedin.svg',
       //   linkUrl: `https://www.linkedin.com/shareArticle?url=${url}`,
-      //   title: 'Linkedin'
+      //   title: translations['social.linkedin']
       // },
       {
         img: 'assets/img/logos/svg-whatsapp.svg',
         linkUrl: `whatsapp://send?text=${url}`,
-        title: 'Whatsapp'
+        title: translations['social.whatsapp']
       },
     ];
   }
@@ -361,8 +369,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     const dialogRef = this._dialog.open(ReportResponseComponent, {});
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (result: any) => {
       if (result) {
-        // Usar el nuevo sistema de loading accesible
-        const loading = await this._loadingService.showLoading('Creando reporte...');
+        const loading = await this._loadingService.showLoading(translations['shared.reportResponse.title']);
 
         const report: ReportCreate = {
           type: ReportType.POST,
@@ -387,8 +394,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async deleteComment(_id: string, id_publication: string) {
-    // Usar el nuevo sistema de loading accesible
-    const loading = await this._loadingService.showLoading('Eliminando comentario...');
+    const loading = await this._loadingService.showLoading(translations['publicationsView.loadingDeletePublication']);
 
     this._commentService.deleteComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
@@ -400,6 +406,11 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         this._loadingService.hideLoading();
       }
     });
+  }
+
+  onEmojiError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
   }
 
   private updatePublicationIfNeeded(updatedData: any) {

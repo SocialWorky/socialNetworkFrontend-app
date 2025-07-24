@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+
 import { Subject, Subscription, interval, firstValueFrom, of } from 'rxjs';
 import { switchMap, takeUntil, catchError } from 'rxjs/operators';
 

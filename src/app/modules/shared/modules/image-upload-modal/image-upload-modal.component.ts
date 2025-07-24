@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild, ElementRef, Input, Inject, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ViewChild, ElementRef, ChangeDetectorRef, Inject } from '@angular/core';
+import { ImageLoadOptions } from '../../services/image.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { AlertService } from '@shared/services/alert.service';

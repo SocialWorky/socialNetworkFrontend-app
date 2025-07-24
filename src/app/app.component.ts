@@ -248,7 +248,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // Generar datos mock para desarrollo
     this.devCacheService.generateMockData();
     
-    // Log de operaciones de caché
+    // Cache operations log
     this.devCacheService.logCacheOperation('init', 'app-startup');
   }
 

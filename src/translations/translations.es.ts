@@ -931,4 +931,10 @@ export const translations = {
   'userOnline.title': 'Usuarios Online',
   'contacts.title': 'Contactos',
   'contacts.exampleName': 'Nombre de Ejemplo',
+  
+  // ===== SOCIAL MEDIA =====
+  'social.facebook': 'Facebook',
+  'social.twitter': 'X (Twitter)',
+  'social.linkedin': 'LinkedIn',
+  'social.whatsapp': 'WhatsApp',
 };

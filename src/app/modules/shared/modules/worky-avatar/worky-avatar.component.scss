@@ -5,10 +5,18 @@
   align-items: center;
   border-radius: 50%;
   overflow: hidden;
-  min-width: 30px; /* Tamaño mínimo del contenedor */
-  min-height: 30px; /* Tamaño mínimo del contenedor */
-  max-width: 100px; /* Tamaño máximo del contenedor */
-  max-height: 100px; /* Tamaño máximo del contenedor */
+  min-width: 30px;
+  min-height: 30px;
+  max-width: 100px;
+  max-height: 100px;
+
+  .avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    border-radius: 50%;
+  }
 }
 
 .initials {

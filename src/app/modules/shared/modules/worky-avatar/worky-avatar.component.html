@@ -1,9 +1,9 @@
-<div class="avatar">
+<div class="avatar" [style.width.px]="size" [style.height.px]="size">
   <img
     *ngIf="imageData"
     [src]="imageData"
-    alt="Avatar"
-    [style.width.px]="size"
+    [alt]="'Avatar de ' + (name || username)"
+    class="avatar-image"
     (error)="onImageError()"
   />
 

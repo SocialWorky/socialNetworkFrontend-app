@@ -226,7 +226,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
             this._router.navigate(['/home']);
           }
           
-          // Ocultar el loading en caso de éxito
+          // Hide loading on success
           accessibleLoading.hide(loadingElement);
         }
       },
@@ -286,7 +286,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     // Usar el nuevo sistema de loading accesible
     const accessibleLoading = this._loadingService.createAccessibleLoading(
       translations['login.messageLoading'],
-      'Iniciando sesión con Google...'
+      translations['login.signInWithGoogle']
     );
     const loadingElement = accessibleLoading.show();
 

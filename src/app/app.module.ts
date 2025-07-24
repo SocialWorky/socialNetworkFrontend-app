@@ -14,6 +14,7 @@ import { environment } from '@env/environment';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AuthInterceptor } from './auth.interceptor';
+import { TimeoutInterceptor } from './timeout.interceptor';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { PwaUpdateNotificationComponent } from '@shared/components/pwa-update-notification/pwa-update-notification.component';
 import { PwaSettingsComponent } from '@shared/components/pwa-settings/pwa-settings.component';
@@ -57,6 +58,11 @@ const config: SocketIoConfig = {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TimeoutInterceptor,
       multi: true,
     },
     provideHttpClient(withInterceptorsFromDi()),

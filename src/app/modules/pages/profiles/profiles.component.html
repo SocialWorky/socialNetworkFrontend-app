@@ -89,9 +89,10 @@
                       <span basic-button-text>{{ 'profiles.sendMessage' | workyTranslations }}</span>
                     </worky-buttons>
 
-                  <img *ngIf="userData.profile.whatsapp?.isViewable"
+                  <img
+                    src="/assets/img/logos/svg-whatsapp.svg"
+                    alt="WhatsApp"
                     class="whatsapp-icon"
-                    src="assets/img/logos/svg-whatsapp.svg" alt="whatsapp"
                     (click)="openWhatsApp()">
 
                   </div>

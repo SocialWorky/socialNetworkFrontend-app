@@ -4,12 +4,14 @@ import { CommonModule } from '@angular/common';
 import { PullToRefreshService } from './services/pull-to-refresh.service';
 import { WorkyImageModule } from './modules/worky-image/worky-image.module';
 import { AccessibleLoadingComponent } from './components/accessible-loading/accessible-loading.component';
+import { OptimizedImageComponent } from './components/optimized-image/optimized-image.component';
 
 @NgModule({
   imports: [
     CommonModule,
     ScrollingModule,
-    WorkyImageModule
+    WorkyImageModule,
+    OptimizedImageComponent
   ],
   declarations: [
     AccessibleLoadingComponent
@@ -18,7 +20,8 @@ import { AccessibleLoadingComponent } from './components/accessible-loading/acce
     CommonModule,
     ScrollingModule,
     WorkyImageModule,
-    AccessibleLoadingComponent
+    AccessibleLoadingComponent,
+    OptimizedImageComponent
   ],
   providers: [
     PullToRefreshService

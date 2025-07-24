@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, Output, EventEmitter } from '@angular/core';
+import { ImageLoadOptions } from '../../services/image.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';

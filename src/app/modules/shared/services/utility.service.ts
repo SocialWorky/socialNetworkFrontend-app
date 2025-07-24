@@ -121,7 +121,7 @@ export class UtilityService {
     };
 
     const config = storageConfig[type];
-    // Aquí podrías usar el StorageService
+    // You could use StorageService here
   }
 
   /**
@@ -238,7 +238,7 @@ export class UtilityService {
    */
   cleanupOldCache(): void {
     const now = Date.now();
-    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 días
+    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
 
     Object.keys(localStorage).forEach(key => {
       if (key.startsWith('cache_')) {

@@ -1,4 +1,5 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ElementRef, Renderer2 } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, Output, EventEmitter, ElementRef, Renderer2, ChangeDetectorRef } from '@angular/core';
+import { ImageLoadOptions } from '../../services/image.service';
 import { firstValueFrom, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ActionSheetController } from '@ionic/angular';
@@ -37,6 +38,12 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   @Input() isMenu?: boolean = true;
 
   @Input() menuTitle?: string;
+  imageOptions: ImageLoadOptions = {
+    maxRetries: 2,
+    retryDelay: 1000,
+    timeout: 10000,
+    fallbackUrl: '/assets/images/placeholder.jpg'
+  };
 
   @Output() linkClicked = new EventEmitter<DropdownDataLink<any>>();
 

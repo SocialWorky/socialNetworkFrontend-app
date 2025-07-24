@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular/core';
 import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
+import { ImageLoadOptions } from '../../services/image.service';
 
 @Component({
     selector: 'worky-avatar',
@@ -20,6 +21,15 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
   backgroundColor = '';
 
   fontSize: number | null = null;
+
+  isGeneratedAvatar = false;
+
+  imageOptions: ImageLoadOptions = {
+    maxRetries: 2,
+    retryDelay: 500,
+    timeout: 5000,
+    fallbackUrl: '/assets/images/avatar-placeholder.jpg'
+  };
 
   private _size = 30;
 
@@ -82,6 +92,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
   }
 
   private validateAndSetImage(imageUrl: string): void {
+    this.isGeneratedAvatar = false;
     const img = new Image();
     img.src = imageUrl;
 
@@ -101,6 +112,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
   }
 
   private generateAvatar() {
+    this.isGeneratedAvatar = true;
     const canvas = document.createElement('canvas');
 
     const ctx = canvas.getContext('2d');
