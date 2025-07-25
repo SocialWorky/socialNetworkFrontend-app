@@ -362,4 +362,28 @@ export class PublicationDatabaseService {
       total: allPublications.length
     };
   }
+
+  /**
+   * Sincroniza publicaciones específicas con el servidor
+   */
+  async syncSpecificPublications(publicationIds: string[]): Promise<PublicationView[]> {
+    if (publicationIds.length === 0) {
+      return [];
+    }
+
+    const updatedPublications: PublicationView[] = [];
+    
+    for (const id of publicationIds) {
+      try {
+        const publication = await this.getPublication(id);
+        if (publication) {
+          updatedPublications.push(publication);
+        }
+      } catch (error) {
+        this.logService.log(LevelLogEnum.ERROR, 'PublicationDatabaseService', 'Error sincronizando publicación', { id, error });
+      }
+    }
+
+    return updatedPublications;
+  }
 } 

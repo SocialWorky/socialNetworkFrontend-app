@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { signal } from '@angular/core';
-import { catchError, map, Observable, Subject, throwError, from, of, switchMap, tap, forkJoin, firstValueFrom } from 'rxjs';
+import { catchError, map, Observable, Subject, throwError, from, of, switchMap, tap, forkJoin, firstValueFrom, filter } from 'rxjs';
 
 import { environment } from '@env/environment';
 import { CreatePost } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { EditPublication, Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { PublicationDatabaseService } from '@shared/services/database/publication-database.service';
+import { LogService, LevelLogEnum } from './log.service';
 
 @Injectable({
   providedIn: 'root',
@@ -33,6 +34,7 @@ export class PublicationService {
     private http: HttpClient,
     private _notificationPublicationService: NotificationPublicationService,
     private _publicationDatabase: PublicationDatabaseService,
+    private logService: LogService,
   ) {
     this._publicationDatabase.initDatabase();
   }
@@ -195,20 +197,121 @@ export class PublicationService {
       switchMap((localData) => {
         
         if (localData.publications.length > 0) {
+          // Cargar datos locales inmediatamente
+          const localResult = {
+            publications: localData.publications,
+            total: localData.total
+          };
+
+          // Si es la primera página, sincronizar en segundo plano
           if (page === 1) {
-            this.getTotalFromServer(type, consultId).then((serverTotal) => {
+            this.syncPublicationsInBackground(type, consultId).subscribe({
+              next: (syncResult) => {
+                if (syncResult.hasChanges) {
+                  // Notificar cambios a través del signal
+                  this.publications.set(syncResult.updatedPublications);
+                }
+              },
+              error: (error) => {
+                this.logService.log(LevelLogEnum.ERROR, 'PublicationService', 'Error en sincronización en segundo plano', { error });
+              }
             });
           }
           
-          return of({
-            publications: localData.publications,
-            total: localData.total
-          });
+          return of(localResult);
         } else {
+          // Si no hay datos locales, cargar del servidor
           return this.getAllPublicationsFromServer(page, size, type, consultId);
         }
       }),
       catchError((error) => {
+        this.logService.log(LevelLogEnum.ERROR, 'PublicationService', 'Error cargando publicaciones locales', { error });
+        return this.getAllPublicationsFromServer(page, size, type, consultId);
+      })
+    );
+  }
+
+  /**
+   * Sincroniza publicaciones en segundo plano sin bloquear la UI
+   */
+  private syncPublicationsInBackground(type: string = 'all', consultId: string = ''): Observable<{
+    hasChanges: boolean;
+    updatedPublications: PublicationView[];
+    newPublications: PublicationView[];
+    updatedCount: number;
+  }> {
+    const url = `${this.baseUrl}/publications/all?page=1&pageSize=50&type=${type}&consultId=${consultId}`;
+    
+    return this.http.get<Publication>(url).pipe(
+      switchMap((serverResponse) => {
+        if (!serverResponse.publications || serverResponse.publications.length === 0) {
+          return of({ hasChanges: false, updatedPublications: [], newPublications: [], updatedCount: 0 });
+        }
+
+        return from(this._publicationDatabase.updatePublicationsIfChanged(serverResponse.publications)).pipe(
+          map((syncResult) => {
+            const hasChanges = syncResult.new.length > 0 || syncResult.updated.length > 0;
+            
+            if (hasChanges) {
+              // Obtener todas las publicaciones actualizadas
+              return from(this._publicationDatabase.getAllPublications()).pipe(
+                map((allPublications) => ({
+                  hasChanges: true,
+                  updatedPublications: allPublications,
+                  newPublications: syncResult.new,
+                  updatedCount: syncResult.new.length + syncResult.updated.length
+                }))
+              );
+            } else {
+              return of({ hasChanges: false, updatedPublications: [], newPublications: [], updatedCount: 0 });
+            }
+          }),
+          switchMap(result => result)
+        );
+      }),
+      catchError((error) => {
+        this.logService.log(LevelLogEnum.ERROR, 'PublicationService', 'Error en sincronización en segundo plano', { error });
+        return of({ hasChanges: false, updatedPublications: [], newPublications: [], updatedCount: 0 });
+      })
+    );
+  }
+
+  /**
+   * Método para sincronización inteligente que combina datos locales y del servidor
+   */
+  getAllPublicationsWithSmartSync(page: number, size: number, type: string = 'all', consultId: string = ''): Observable<Publication> {
+    return from(this._publicationDatabase.getLocalPublicationsPaginated(page, size)).pipe(
+      switchMap((localData) => {
+        if (localData.publications.length > 0) {
+          // Retornar datos locales inmediatamente
+          const localResult = {
+            publications: localData.publications,
+            total: localData.total
+          };
+
+          // Sincronizar en segundo plano y emitir actualizaciones
+          this.syncPublicationsInBackground(type, consultId).pipe(
+            filter(result => result.hasChanges)
+          ).subscribe({
+            next: (syncResult) => {
+              // Emitir las publicaciones actualizadas
+              this.publications.set(syncResult.updatedPublications);
+              
+              this.logService.log(LevelLogEnum.INFO, 'PublicationService', 'Publicaciones sincronizadas', {
+                nuevas: syncResult.newPublications.length,
+                actualizadas: syncResult.updatedCount - syncResult.newPublications.length
+              });
+            }
+          });
+
+          return of(localResult);
+        } else {
+          // Si no hay datos locales, cargar del servidor
+          return this.getAllPublicationsFromServer(page, size, type, consultId);
+        }
+      }),
+      catchError((error) => {
+        this.logService.log(LevelLogEnum.ERROR, 'PublicationService', 'Error en sincronización inteligente', { error });
         return this.getAllPublicationsFromServer(page, size, type, consultId);
       })
     );

@@ -114,13 +114,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.resetPagination();
 
-    const isOnline = await firstValueFrom(this.isOnline$);
-    if (isOnline) {
-      await this.loadPublications();
-      await this.checkForMorePublications();
-    } else {
-      await this.loadFromLocalCache();
-    }
+    // Siempre cargar publicaciones usando el método inteligente
+    // que maneja automáticamente datos locales y sincronización
+    await this.loadPublications();
+    await this.checkForMorePublications();
 
     this.subscribeToNotificationNewPublication();
     this.subscribeToNotificationDeletePublication();
@@ -180,8 +177,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.showConnectionOverlay = !isOnline;
     this.connectionStatusMessage = isOnline ? '' : 'Estás offline - Usando cache local';
     
-    if (!isOnline && this.publications().length === 0) {
-      this.loadFromLocalCache();
+    // Si no hay publicaciones cargadas, intentar cargar usando el método inteligente
+    if (this.publications().length === 0) {
+      this.loadPublications();
     }
   }
 
@@ -206,8 +204,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loaderPublications = true;
     
     try {
+      // Usar el nuevo método de sincronización inteligente
       const newPublicationsResponse = await firstValueFrom(
-        this._publicationService.getAllPublicationsSmart(this.page, this.pageSize, TypePublishing.ALL)
+        this._publicationService.getAllPublicationsWithSmartSync(this.page, this.pageSize, TypePublishing.ALL)
       );
 
       const currentPublications = this.publications();
@@ -244,6 +243,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       await this.checkForMorePublications();
 
     } catch (error) {
+      this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error cargando publicaciones', { error });
       this.loaderPublications = false;
     }
   }

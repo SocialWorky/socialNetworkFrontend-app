@@ -40,6 +40,7 @@ import { NotificationsPanelModule } from '@shared/modules/notifications-panel/no
 import { ProcessingMediaModule } from '@shared/modules/processing-media/processing-media.module';
 import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.module';
 import { SharedModule } from '@shared/shared.module';
+import { SyncIndicatorComponent } from '@shared/components/sync-indicator/sync-indicator.component';
 
 
 @NgModule({
@@ -86,6 +87,7 @@ import { SharedModule } from '@shared/shared.module';
     ProcessingMediaModule,
     FormBuilderModule,
     SharedModule,
+    SyncIndicatorComponent,
   ]
 })
 export class PagesModule { }
