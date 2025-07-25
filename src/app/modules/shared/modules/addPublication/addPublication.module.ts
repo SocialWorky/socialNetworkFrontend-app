@@ -13,6 +13,10 @@ import { WorkyAvatarModule } from '../worky-avatar/worky-avatar.module';
 import { LocationSearchModule } from '../location-search/location-search.module';
 import { ImageUploadModalModule } from '../image-upload-modal/image-upload-modal.module';
 import { GifSearchModule } from '../gif-search/gif-search.module';
+import { ImageSkeletonComponent } from '../../components/skeleton/image-skeleton.component';
+import { TextSkeletonComponent } from '../../components/skeleton/text-skeleton.component';
+import { AvatarSkeletonComponent } from '../../components/skeleton/avatar-skeleton.component';
+import { ButtonSkeletonComponent } from '../../components/skeleton/button-skeleton.component';
 
 
 @NgModule({
@@ -30,7 +34,11 @@ import { GifSearchModule } from '../gif-search/gif-search.module';
     WorkyAvatarModule,
     LocationSearchModule,
     ImageUploadModalModule,
-    GifSearchModule
+    GifSearchModule,
+    ImageSkeletonComponent,
+    TextSkeletonComponent,
+    AvatarSkeletonComponent,
+    ButtonSkeletonComponent
   ],
   exports: [
     AddPublicationComponent,

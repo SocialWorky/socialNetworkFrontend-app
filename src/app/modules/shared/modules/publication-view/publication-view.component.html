@@ -12,15 +12,25 @@
   </div>
 
   <div class="publication-header">
-    <worky-avatar *ngIf="publication.author.name && publication.author.lastName"
+    <!-- Avatar con skeleton individual -->
+    <div *ngIf="avatarLoading" class="avatar-container">
+      <worky-avatar-skeleton size="40px"></worky-avatar-skeleton>
+    </div>
+    <worky-avatar *ngIf="!avatarLoading"
       [size]="40"
       [img]="publication.author.avatar"
-      [name]="publication.author.name + ' ' + publication.author.lastName">
+      [name]="publication.author.name + ' ' + publication.author.lastName"
+      (load)="onAvatarLoad()"
+      (error)="onAvatarError()">
     </worky-avatar>
 
     <div class="publication-header-content">
       <div class="user-name-content">
-        <div class="user-name" *ngIf="publication.isMyFriend || (dataUser?.id === publication.userReceiving?._id && !publication.isMyFriend) || (dataUser?.id === publication.author._id && !publication.isMyFriend); else notFriend">
+        <!-- Nombre con skeleton individual -->
+        <div *ngIf="nameLoading" class="name-skeleton">
+          <worky-text-skeleton width="120px"></worky-text-skeleton>
+        </div>
+        <div class="user-name" *ngIf="!nameLoading && (publication.isMyFriend || (dataUser?.id === publication.userReceiving?._id && !publication.isMyFriend) || (dataUser?.id === publication.author._id && !publication.isMyFriend)); else notFriend">
           <span (click)="viewProfile(publication.author._id)" class="name link-name">
             {{ publication.author.name }} {{ publication.author.lastName }}
           </span>
@@ -64,9 +74,17 @@
         </ng-template>
 
       </div>
-      <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">{{ 'shared.publicationView.location.isIn' | workyTranslations }} </p><a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
+      <!-- Ubicación con skeleton individual -->
+      <div *ngIf="locationLoading" class="location-skeleton">
+        <worky-text-skeleton width="150px"></worky-text-skeleton>
+      </div>
+      <span class="geoLocationName" *ngIf="nameGeoLocation !== '' && !locationLoading"> <p class="is-in">{{ 'shared.publicationView.location.isIn' | workyTranslations }} </p><a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
       <div class="publication-date">
-        <span>{{ publication.createdAt! | workyDate:'relative' }}</span>
+        <!-- Fecha con skeleton individual -->
+        <div *ngIf="dateLoading" class="date-skeleton">
+          <worky-text-skeleton width="80px"></worky-text-skeleton>
+        </div>
+        <span *ngIf="!dateLoading">{{ publication.createdAt! | workyDate:'relative' }}</span>
         <ng-container *ngIf="publication.privacy === typePrivacy.PUBLIC">
           <i class="material-icons">public</i>
         </ng-container>
@@ -81,8 +99,14 @@
   </div>
 
   <div class="publication-body">
-    <div class="publication-content">
-      <div class="content markdown" *ngIf="(publication.content | workyPreviewHtml | async) as result">
+    <div class="publication-content" *ngIf="publication.content">
+      <!-- Contenido con skeleton individual -->
+      <div *ngIf="contentLoading" class="content-skeleton">
+        <worky-text-skeleton width="100%"></worky-text-skeleton>
+        <worky-text-skeleton width="80%"></worky-text-skeleton>
+        <worky-text-skeleton width="60%"></worky-text-skeleton>
+      </div>
+      <div class="content markdown" *ngIf="!contentLoading && (publication.content | workyPreviewHtml | async) as result">
         <div class="publication-markdown-view" [innerHTML]="result.markdownHtml"></div>
         <div class="publication-youtube-preview" [innerHTML]="result.youTubeHtml"></div>
         <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
@@ -91,7 +115,11 @@
 
     <worky-processing-media *ngIf="!publication.media.length && publication.containsMedia"></worky-processing-media>
 
-    <worky-image-organizer *ngIf="publication.media.length"
+    <!-- Media con skeleton individual -->
+    <div *ngIf="publication.media.length && mediaLoading" class="media-skeleton">
+      <worky-image-skeleton width="100%" height="300px"></worky-image-skeleton>
+    </div>
+    <worky-image-organizer *ngIf="publication.media.length && !mediaLoading"
       [publication]="publication"
       type="publication">
     </worky-image-organizer>
@@ -118,7 +146,11 @@
     </div>
 
     <div class="publication-footer-actions">
-      <div class="publication-footer-actions-item">
+      <!-- Botones de acción con skeleton individual -->
+      <div class="publication-footer-actions-item" *ngIf="actionsLoading">
+        <worky-button-skeleton width="60px" height="30px"></worky-button-skeleton>
+      </div>
+      <div class="publication-footer-actions-item" *ngIf="!actionsLoading">
         <worky-reactions
           [type]="type"
           [userProfile]="userProfile"
@@ -126,11 +158,19 @@
           [reactionsToPublication]="publication.reaction">
         </worky-reactions>
       </div>
-      <div class="publication-footer-actions-item no-select-text" (click)="commentOn(indexPublication!)">
+      
+      <div class="publication-footer-actions-item" *ngIf="actionsLoading">
+        <worky-button-skeleton width="80px" height="30px"></worky-button-skeleton>
+      </div>
+      <div class="publication-footer-actions-item no-select-text" *ngIf="!actionsLoading" (click)="commentOn(indexPublication!)">
         <i class="material-icons">comment</i>
         <span>{{ 'publicationsView.spanComment' | workyTranslations }}</span>
       </div>
-      <div class="publication-footer-actions-item no-select-text">
+      
+      <div class="publication-footer-actions-item" *ngIf="actionsLoading">
+        <worky-button-skeleton width="60px" height="30px"></worky-button-skeleton>
+      </div>
+            <div class="publication-footer-actions-item no-select-text" *ngIf="!actionsLoading">
         <worky-dropdown
           icon="share"
           [title]="'publicationsView.spanShare' | workyTranslations"

@@ -40,7 +40,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   pageSize = 10;
 
-  loaderPublications: boolean = false;
+  loaderPublications: boolean = false; // Iniciar en false para permitir carga
 
   paramPublication: boolean = false;
 
@@ -72,6 +72,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   trackById(index: number, publication: PublicationView): string {
     return publication._id;
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 
   constructor(

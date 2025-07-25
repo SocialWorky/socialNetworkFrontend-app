@@ -87,6 +87,15 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     return content.trim().startsWith('```');
   }
 
+  // Estados de carga individuales para skeletons
+  avatarLoading: boolean = true;
+  nameLoading: boolean = true;
+  contentLoading: boolean = true;
+  mediaLoading: boolean = true;
+  locationLoading: boolean = true;
+  dateLoading: boolean = true;
+  actionsLoading: boolean = true;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -132,6 +141,74 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       });
     this.loadReactionsImg();
     this._cdr.markForCheck();
+    
+    // Simular carga progresiva de elementos
+    this.simulateProgressiveLoading();
+  }
+
+  // Métodos para manejar la carga de elementos individuales
+  onAvatarLoad() {
+    this.avatarLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onAvatarError() {
+    this.avatarLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onNameLoad() {
+    this.nameLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onContentLoad() {
+    this.contentLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onMediaLoad() {
+    this.mediaLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onLocationLoad() {
+    this.locationLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onDateLoad() {
+    this.dateLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onActionsLoad() {
+    this.actionsLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  // Simular carga progresiva para demostración
+  private simulateProgressiveLoading() {
+    // Load basic elements first
+    this.onNameLoad();
+    this.onDateLoad();
+    this.onLocationLoad();
+    this.onActionsLoad();
+    
+    // Load content if exists
+    if (this.publication.content) {
+      this.onContentLoad();
+    }
+    
+    // Load avatar if exists
+    if (this.publication.author.avatar) {
+      this.onAvatarLoad();
+    }
+    
+    // Load media if exists
+    if (this.publication.media.length > 0) {
+      this.onMediaLoad();
+    }
   }
 
   ngOnDestroy(): void {

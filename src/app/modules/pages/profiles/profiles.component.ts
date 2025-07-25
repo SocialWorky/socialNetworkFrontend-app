@@ -63,7 +63,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   paramPublication: boolean = false;
 
-  loaderPublications: boolean = false;
+  loaderPublications: boolean = false; // Iniciar en false para permitir carga
 
   userData: User | undefined;
 
@@ -735,6 +735,12 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     this._router.navigate(['/messages/', _id]);
   }
 
+  sendMessageToUser() {
+    if (this.userData?._id) {
+      this.sendMessage(this.userData._id);
+    }
+  }
+
   onScroll(event: any) {
     const threshold = 100;
     const position = event.target.scrollTop + event.target.clientHeight;
@@ -888,5 +894,9 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onImageError(event: Event): void {
     this._utilityService.handleImageError(event, this.imgCoverDefault);
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 }

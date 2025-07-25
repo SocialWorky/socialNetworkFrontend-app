@@ -94,6 +94,15 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     userReceivingId: [''],
   });
 
+  avatarLoading: boolean = true;
+  nameLoading: boolean = true;
+  privacyLoading: boolean = true;
+  textareaLoading: boolean = true;
+  locationLoading: boolean = true;
+  markdownButtonsLoading: boolean = true;
+  optionsButtonsLoading: boolean = true;
+  publishButtonLoading: boolean = true;
+
   private unsubscribe$ = new Subject<void>();
   private mailSendNotification: MailSendValidateData = {} as MailSendValidateData;
   private subscription?: Subscription;
@@ -151,6 +160,67 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         this.startOnboarding();
       }
       , 1000);
+
+    this.simulateProgressiveLoading();
+  }
+
+  onAvatarLoad() {
+    this.avatarLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onAvatarError() {
+    this.avatarLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onNameLoad() {
+    this.nameLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onPrivacyLoad() {
+    this.privacyLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onTextareaLoad() {
+    this.textareaLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onLocationLoad() {
+    this.locationLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onMarkdownButtonsLoad() {
+    this.markdownButtonsLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onOptionsButtonsLoad() {
+    this.optionsButtonsLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onPublishButtonLoad() {
+    this.publishButtonLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  private simulateProgressiveLoading() {
+    this.onNameLoad();
+    this.onPrivacyLoad();
+    this.onTextareaLoad();
+    this.onLocationLoad();
+    this.onMarkdownButtonsLoad();
+    this.onOptionsButtonsLoad();
+    this.onPublishButtonLoad();
+    
+    if (this.profileImageUrl) {
+      this.onAvatarLoad();
+    }
   }
 
   ngOnDestroy(): void {
@@ -224,6 +294,10 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
           this.profileImageUrl = response.avatar;
           this.user = response;
           this._cdr.markForCheck();
+          
+          if (this.profileImageUrl) {
+            this.onAvatarLoad();
+          }
         },
         error: console.error,
       });

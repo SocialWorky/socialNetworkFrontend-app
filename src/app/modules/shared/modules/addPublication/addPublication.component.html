@@ -3,7 +3,10 @@
     <div class="publishing-header">
 
       <ng-container *ngIf="type === typePublishing.POST || type === typePublishing.POST_PROFILE">
-        <worky-avatar *ngIf="user.name && user.lastName"
+        <div *ngIf="avatarLoading" class="avatar-skeleton">
+          <worky-avatar-skeleton size="60px"></worky-avatar-skeleton>
+        </div>
+        <worky-avatar *ngIf="!avatarLoading && user.name && user.lastName"
           [size]="60"
           img="{{ profileImageUrl }}"
           name="{{ user.name}} {{ user.lastName }}">
@@ -11,11 +14,21 @@
 
         <div class="user-name-content">
           <div class="content-name-geo">
-            <span class="name"> {{ user.name }} {{ user.lastName }} </span>
-            <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">{{ 'addPublication.location.isIn' | workyTranslations }} </p> <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span>
+            <div *ngIf="nameLoading" class="name-skeleton">
+              <worky-text-skeleton width="150px"></worky-text-skeleton>
+            </div>
+            <span class="name" *ngIf="!nameLoading"> {{ user.name }} {{ user.lastName }} </span>
+            
+            <div *ngIf="locationLoading" class="location-skeleton">
+              <worky-text-skeleton width="120px"></worky-text-skeleton>
+            </div>
+            <span class="geoLocationName" *ngIf="nameGeoLocation !== '' && !locationLoading"> <p class="is-in">{{ 'addPublication.location.isIn' | workyTranslations }} </p> <a [href]="dataGeoLocation" target="_blank">{{ nameGeoLocation }}</a></span>
           </div>
 
-          <div class="dropdown-privacy" *ngIf="!typePublishing.POST_PROFILE || (idUserProfile === userToken && typePublishing.POST_PROFILE) || (typePublishing.POST && !idUserProfile)">
+          <div *ngIf="privacyLoading" class="privacy-skeleton">
+            <worky-button-skeleton width="100px" height="35px"></worky-button-skeleton>
+          </div>
+          <div class="dropdown-privacy" *ngIf="!privacyLoading && (!typePublishing.POST_PROFILE || (idUserProfile === userToken && typePublishing.POST_PROFILE) || (typePublishing.POST && !idUserProfile))">
             <div class="form-select" [innerHTML]="privacyFront"
               data-bs-toggle="dropdown"
               aria-expanded="false">
@@ -59,7 +72,11 @@
           name="{{ user.name}} {{ user.lastName }}">
         </worky-avatar>
 
+        <div *ngIf="textareaLoading" class="textarea-skeleton">
+          <worky-text-skeleton width="100%" height="80px"></worky-text-skeleton>
+        </div>
         <ion-textarea
+          *ngIf="!textareaLoading"
           #postTextRef
           class="publishing-textarea"
           (input)="onTextareaInput()"
@@ -83,107 +100,126 @@
       </div>
 
       <div class="extra-content">
-
         <div class="markdown-help">
-          <div class="extra-content-item"
-              matTooltip="{{ 'addPublication.tooltip.bold' | workyTranslations }}"
-              matTooltipClass="extra-mat-tooltip"
-              (click)="insertText('**placeholder**')">
-            <i class="material-icons">format_bold</i>
+          <div *ngIf="markdownButtonsLoading" class="markdown-skeleton">
+            <worky-button-skeleton width="30px" height="30px"></worky-button-skeleton>
+            <worky-button-skeleton width="30px" height="30px"></worky-button-skeleton>
+            <worky-button-skeleton width="30px" height="30px"></worky-button-skeleton>
+            <worky-button-skeleton width="30px" height="30px"></worky-button-skeleton>
+            <worky-button-skeleton width="30px" height="30px"></worky-button-skeleton>
+            <worky-button-skeleton width="30px" height="30px"></worky-button-skeleton>
+            <worky-button-skeleton width="30px" height="30px"></worky-button-skeleton>
+            <worky-button-skeleton width="30px" height="30px"></worky-button-skeleton>
           </div>
-          <div class="extra-content-item"
-              matTooltip="{{ 'addPublication.tooltip.italic' | workyTranslations }}"
-              matTooltipClass="extra-mat-tooltip"
-              (click)="insertText('*placeholder*')">
-            <i class="material-icons">format_italic</i>
-          </div>
-          <div class="extra-content-item"
-              matTooltip="{{ 'addPublication.tooltip.strikethrough' | workyTranslations }}"
-              matTooltipClass="extra-mat-tooltip"
-              (click)="insertText('~~placeholder~~')">
-            <i class="material-icons">format_strikethrough</i>
-          </div>
-          <div class="extra-content-item"
-              matTooltip="{{ 'addPublication.tooltip.link' | workyTranslations }}"
-              matTooltipClass="extra-mat-tooltip"
-              (click)="insertText('[placeholder](url)')">
-            <i class="material-icons">link</i>
-          </div>
-          <div class="extra-content-item"
-              matTooltip="{{ 'addPublication.tooltip.image' | workyTranslations }}"
-              matTooltipClass="extra-mat-tooltip"
-              (click)="insertText('![placeholder](url)')">
-            <i class="material-icons">image</i>
-          </div>
-          <div class="extra-content-item"
-              matTooltip="{{ 'addPublication.tooltip.code' | workyTranslations }}"
-              matTooltipClass="extra-mat-tooltip"
-              (click)="insertText('```placeholder```')">
-            <i class="material-icons">code</i>
-          </div>
-          <div class="extra-content-item"
-              matTooltip="{{ 'addPublication.tooltip.quote' | workyTranslations }}"
-              matTooltipClass="extra-mat-tooltip"
-              (click)="insertText('> placeholder')">
-            <i class="material-icons">label</i>
-          </div>
-          <div class="extra-content-item"
-              matTooltip="{{ 'addPublication.tooltip.list' | workyTranslations }}"
-              matTooltipClass="extra-mat-tooltip"
-              (click)="insertText('- placeholder')">
-            <i class="material-icons">list</i>
-          </div>
-        </div>
-
-        <div class="options-items">
-          <!-- Botón para buscar GIFs -->
-          <div id="gif-icon" class="extra-content-item gif-icon"
-              matTooltip="{{ 'addPublication.tooltip.gif' | workyTranslations }}"
-              matTooltipClass="extra-mat-tooltip" (click)="openGifSearch()">
-            <i class="material-icons">gif</i>
-          </div>
-
-          <!-- Otros botones y opciones -->
-          <div *ngIf="type !== typePublishing.IMAGE_VIEW"
-              class="extra-content-item file-upload"
-              matTooltip="{{ 'addPublication.tooltip.upload' | workyTranslations }}"
-              matTooltipClass="extra-mat-tooltip"
-              (click)="openUploadModal()">
-            <i class="material-icons">add_photo_alternate</i>
-          </div>
-
-          <div *ngIf="type === typePublishing.POST || type === typePublishing.POST_PROFILE"
-              class="extra-content-item location-on"
-              matTooltip="{{ 'addPublication.tooltip.location' | workyTranslations }}"
-              matTooltipClass="extra-mat-tooltip"
-              (click)="openLocationSearch()">
-            <i class="material-icons">location_on</i>
-          </div>
-
-          <div class="extra-content-item emoji-icon"
-              matTooltip="{{ 'addPublication.tooltip.emoji' | workyTranslations }}"
-              matTooltipClass="extra-mat-tooltip">
-            <i class="material-icons" (click)="toggleEmojiMenu()">mood</i>
-            <div *ngIf="showEmojiMenu" class="emoji-menu" (click)="preventClose($event)">
-              <emoji-mart
-                [darkMode]="false"
-                [showPreview]="true"
-                [enableSearch]="true"
-                [perLine]="7"
-                [emojiSize]="24"
-                (emojiSelect)="onEmojiClick($event)">
-              </emoji-mart>
+          <div *ngIf="!markdownButtonsLoading" class="markdown-buttons-container">
+            <div class="extra-content-item"
+                matTooltip="{{ 'addPublication.tooltip.bold' | workyTranslations }}"
+                matTooltipClass="extra-mat-tooltip"
+                (click)="insertText('**placeholder**')">
+              <i class="material-icons">format_bold</i>
+            </div>
+            <div class="extra-content-item"
+                matTooltip="{{ 'addPublication.tooltip.italic' | workyTranslations }}"
+                matTooltipClass="extra-mat-tooltip"
+                (click)="insertText('*placeholder*')">
+              <i class="material-icons">format_italic</i>
+            </div>
+            <div class="extra-content-item"
+                matTooltip="{{ 'addPublication.tooltip.strikethrough' | workyTranslations }}"
+                matTooltipClass="extra-mat-tooltip"
+                (click)="insertText('~~placeholder~~')">
+              <i class="material-icons">format_strikethrough</i>
+            </div>
+            <div class="extra-content-item"
+                matTooltip="{{ 'addPublication.tooltip.link' | workyTranslations }}"
+                matTooltipClass="extra-mat-tooltip"
+                (click)="insertText('[placeholder](url)')">
+              <i class="material-icons">link</i>
+            </div>
+            <div class="extra-content-item"
+                matTooltip="{{ 'addPublication.tooltip.image' | workyTranslations }}"
+                matTooltipClass="extra-mat-tooltip"
+                (click)="insertText('![placeholder](url)')">
+              <i class="material-icons">image</i>
+            </div>
+            <div class="extra-content-item"
+                matTooltip="{{ 'addPublication.tooltip.code' | workyTranslations }}"
+                matTooltipClass="extra-mat-tooltip"
+                (click)="insertText('```placeholder```')">
+              <i class="material-icons">code</i>
+            </div>
+            <div class="extra-content-item"
+                matTooltip="{{ 'addPublication.tooltip.quote' | workyTranslations }}"
+                matTooltipClass="extra-mat-tooltip"
+                (click)="insertText('> placeholder')">
+              <i class="material-icons">label</i>
+            </div>
+            <div class="extra-content-item"
+                matTooltip="{{ 'addPublication.tooltip.list' | workyTranslations }}"
+                matTooltipClass="extra-mat-tooltip"
+                (click)="insertText('- placeholder')">
+              <i class="material-icons">list</i>
             </div>
           </div>
         </div>
 
+        <div class="options-items">
+          <div *ngIf="optionsButtonsLoading" class="options-skeleton">
+            <worky-button-skeleton width="30px" height="30px"></worky-button-skeleton>
+            <worky-button-skeleton width="30px" height="30px"></worky-button-skeleton>
+            <worky-button-skeleton width="30px" height="30px"></worky-button-skeleton>
+            <worky-button-skeleton width="30px" height="30px"></worky-button-skeleton>
+          </div>
+          <div *ngIf="!optionsButtonsLoading" class="options-buttons-container">
+            <div id="gif-icon" class="extra-content-item gif-icon"
+                matTooltip="{{ 'addPublication.tooltip.gif' | workyTranslations }}"
+                matTooltipClass="extra-mat-tooltip" (click)="openGifSearch()">
+              <i class="material-icons">gif</i>
+            </div>
+
+            <div *ngIf="type !== typePublishing.IMAGE_VIEW"
+                class="extra-content-item file-upload"
+                matTooltip="{{ 'addPublication.tooltip.upload' | workyTranslations }}"
+                matTooltipClass="extra-mat-tooltip"
+                (click)="openUploadModal()">
+              <i class="material-icons">add_photo_alternate</i>
+            </div>
+
+            <div *ngIf="type === typePublishing.POST || type === typePublishing.POST_PROFILE"
+                class="extra-content-item location-on"
+                matTooltip="{{ 'addPublication.tooltip.location' | workyTranslations }}"
+                matTooltipClass="extra-mat-tooltip"
+                (click)="openLocationSearch()">
+              <i class="material-icons">location_on</i>
+            </div>
+
+            <div class="extra-content-item emoji-icon"
+                matTooltip="{{ 'addPublication.tooltip.emoji' | workyTranslations }}"
+                matTooltipClass="extra-mat-tooltip">
+              <i class="material-icons" (click)="toggleEmojiMenu()">mood</i>
+              <div *ngIf="showEmojiMenu" class="emoji-menu" (click)="preventClose($event)">
+                <emoji-mart
+                  [darkMode]="false"
+                  [showPreview]="true"
+                  [enableSearch]="true"
+                  [perLine]="7"
+                  [emojiSize]="24"
+                  (emojiSelect)="onEmojiClick($event)">
+                </emoji-mart>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>
 
     <div class="publishing-footer">
       <div>
-        <worky-buttons *ngIf="!loaderSavePublication && myForm.valid || previews.length && !loaderSavePublication"
+        <div *ngIf="publishButtonLoading" class="publish-skeleton">
+          <worky-button-skeleton width="100%" height="40px"></worky-button-skeleton>
+        </div>
+        <worky-buttons *ngIf="!publishButtonLoading && !loaderSavePublication && myForm.valid || previews.length && !loaderSavePublication"
           type="submit"
           [workyButtonType]="WorkyButtonType.Flat"
           [theme]="WorkyButtonTheme.Accent"

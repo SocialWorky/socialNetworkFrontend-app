@@ -19,18 +19,18 @@
     </div>
   </ng-container>
 
+  <div *ngIf="loaderPublications" class="loader"></div> 
+
+  <ng-container *ngIf="!loaderPublications && publications().length === 0">
+    <span>{{ 'home.notPublications' | workyTranslations }}</span>
+  </ng-container>
+
   <button 
     *ngIf="showScrollToTopButton"
     (click)="scrollToTop()"
     class="floating-button">
     <i class="material-icons">arrow_upward</i>
   </button>
-
-  <div *ngIf="loaderPublications" class="loader"></div> 
-
-  <ng-container *ngIf="!loaderPublications && publications().length === 0">
-    <span>{{ 'home.notPublications' | workyTranslations }}</span>
-  </ng-container>
 </div>
 
 <!-- Connection Overlay -->

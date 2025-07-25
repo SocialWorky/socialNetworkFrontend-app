@@ -1,10 +1,10 @@
 <div *ngIf="!userData" class="loader"></div>
 
 <div *ngIf="userData" #contentContainer 
-  class="profile-container"
-  [class.refreshing]="isRefreshing"
-  [class.mobile-container]="isMobile"
-  (scroll)="onScroll($event)">
+    class="profile-container"
+    [class.refreshing]="isRefreshing"
+    [class.mobile-container]="isMobile"
+    (scroll)="onScroll($event)">
 
   <div class="content-header-profile">
       <div class="image-container">
@@ -84,7 +84,7 @@
                       [workyButtonType]="WorkyButtonType.Outline"
                       [theme]="WorkyButtonTheme.Basic"
                       [width]="'100%'"
-                      (click)="sendMessage(userData._id)">
+                      (click)="sendMessageToUser()">
                       <span prefix-icon><i class="material-icons">chat</i></span>
                       <span basic-button-text>{{ 'profiles.sendMessage' | workyTranslations }}</span>
                     </worky-buttons>
@@ -124,8 +124,6 @@
 
       </div>
 
-      <div *ngIf="loaderPublications" class="loader"></div>
-
       @for(publication of publicationsProfile(); track publication; let i = $index ) {
         <div [ngClass]="{'worky-module-container': true, 'last-publication': i === publicationsProfile().length - 1}"
           [attr.id]="i === 0 ? 'first-publication' : null">
@@ -149,7 +147,5 @@
     class="floating-button">
     <i class="material-icons">arrow_upward</i>
   </button>
-
-  <div *ngIf="loaderPublications" class="loader"></div>
 
 </div>

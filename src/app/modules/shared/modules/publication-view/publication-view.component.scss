@@ -97,6 +97,18 @@
           color: colors.$worky-color-text;
         }
 
+        // Estilos para skeletons
+        .name-skeleton {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+
+        .avatar-container {
+          display: flex;
+          align-items: center;
+        }
+
 
       }
       .geoLocationName {
@@ -117,6 +129,13 @@
           font-weight: 500;
         }
       }
+      
+      // Estilos para skeleton de ubicación
+      .location-skeleton {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
       .publication-date {
         display: flex;
         align-items: center;
@@ -125,6 +144,13 @@
         gap: 5px;
         i {
           font-size: variables.$worky-font-size-2;
+        }
+        
+        // Estilos para skeleton de fecha
+        .date-skeleton {
+          display: flex;
+          align-items: center;
+          gap: 5px;
         }
       }
     }
@@ -138,6 +164,18 @@
       padding: 16px;
       color: colors.$worky-color-text;
       overflow: hidden;
+      
+      // Estilos para skeleton de contenido
+      .content-skeleton {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+    
+    // Estilos para skeleton de media
+    .media-skeleton {
+      padding: 16px;
     }
   }
 

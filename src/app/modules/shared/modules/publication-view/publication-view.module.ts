@@ -17,6 +17,10 @@ import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
 import { ProcessingMediaModule } from '@shared/modules/processing-media/processing-media.module';
 import { OptimizedImageComponent } from '../../components/optimized-image/optimized-image.component';
 import { OptimizedVideoComponent } from '../../components/optimized-video/optimized-video.component';
+import { ImageSkeletonComponent } from '../../components/skeleton/image-skeleton.component';
+import { TextSkeletonComponent } from '../../components/skeleton/text-skeleton.component';
+import { AvatarSkeletonComponent } from '../../components/skeleton/avatar-skeleton.component';
+import { ButtonSkeletonComponent } from '../../components/skeleton/button-skeleton.component';
 
 @NgModule({
   declarations: [PublicationViewComponent, ReportResponseComponent],
@@ -37,6 +41,10 @@ import { OptimizedVideoComponent } from '../../components/optimized-video/optimi
     ProcessingMediaModule,
     OptimizedImageComponent,
     OptimizedVideoComponent,
+    ImageSkeletonComponent,
+    TextSkeletonComponent,
+    AvatarSkeletonComponent,
+    ButtonSkeletonComponent,
   ],
 })
 export class PublicationViewModule {}

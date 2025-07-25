@@ -6,6 +6,13 @@ import { WorkyImageModule } from './modules/worky-image/worky-image.module';
 import { AccessibleLoadingComponent } from './components/accessible-loading/accessible-loading.component';
 import { OptimizedImageComponent } from './components/optimized-image/optimized-image.component';
 import { OptimizedVideoComponent } from './components/optimized-video/optimized-video.component';
+import { SkeletonComponent } from './components/skeleton/skeleton.component';
+import { SkeletonListComponent } from './components/skeleton/skeleton-list.component';
+import { SkeletonWrapperComponent } from './components/skeleton/skeleton-wrapper.component';
+import { ImageSkeletonComponent } from './components/skeleton/image-skeleton.component';
+import { TextSkeletonComponent } from './components/skeleton/text-skeleton.component';
+import { AvatarSkeletonComponent } from './components/skeleton/avatar-skeleton.component';
+import { ButtonSkeletonComponent } from './components/skeleton/button-skeleton.component';
 
 @NgModule({
   imports: [
@@ -13,7 +20,14 @@ import { OptimizedVideoComponent } from './components/optimized-video/optimized-
     ScrollingModule,
     WorkyImageModule,
     OptimizedImageComponent,
-    OptimizedVideoComponent
+    OptimizedVideoComponent,
+    SkeletonComponent,
+    SkeletonListComponent,
+    SkeletonWrapperComponent,
+    ImageSkeletonComponent,
+    TextSkeletonComponent,
+    AvatarSkeletonComponent,
+    ButtonSkeletonComponent
   ],
   declarations: [
     AccessibleLoadingComponent
@@ -24,7 +38,14 @@ import { OptimizedVideoComponent } from './components/optimized-video/optimized-
     WorkyImageModule,
     AccessibleLoadingComponent,
     OptimizedImageComponent,
-    OptimizedVideoComponent
+    OptimizedVideoComponent,
+    SkeletonComponent,
+    SkeletonListComponent,
+    SkeletonWrapperComponent,
+    ImageSkeletonComponent,
+    TextSkeletonComponent,
+    AvatarSkeletonComponent,
+    ButtonSkeletonComponent
   ],
   providers: [
     PullToRefreshService
