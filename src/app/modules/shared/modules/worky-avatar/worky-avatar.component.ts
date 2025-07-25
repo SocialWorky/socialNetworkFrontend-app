@@ -44,6 +44,8 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   @Input() img?: string | null;
 
+  @Input() showInitials: boolean = true;
+
   @Input()
   set size(value: number) {
     if (value >= 10 && value <= 100) {

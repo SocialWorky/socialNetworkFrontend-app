@@ -20,6 +20,7 @@
       [size]="40"
       [img]="publication.author.avatar"
       [name]="publication.author.name + ' ' + publication.author.lastName"
+      [showInitials]="true"
       (load)="onAvatarLoad()"
       (error)="onAvatarError()">
     </worky-avatar>
@@ -27,10 +28,10 @@
     <div class="publication-header-content">
       <div class="user-name-content">
         <!-- Nombre con skeleton individual -->
-        <div *ngIf="nameLoading" class="name-skeleton">
+        <div *ngIf="nameLoading || avatarLoading" class="name-skeleton">
           <worky-text-skeleton width="120px"></worky-text-skeleton>
         </div>
-        <div class="user-name" *ngIf="!nameLoading && (publication.isMyFriend || (dataUser?.id === publication.userReceiving?._id && !publication.isMyFriend) || (dataUser?.id === publication.author._id && !publication.isMyFriend)); else notFriend">
+        <div class="user-name" *ngIf="!nameLoading && !avatarLoading && (publication.isMyFriend || (dataUser?.id === publication.userReceiving?._id && !publication.isMyFriend) || (dataUser?.id === publication.author._id && !publication.isMyFriend)); else notFriend">
           <span (click)="viewProfile(publication.author._id)" class="name link-name">
             {{ publication.author.name }} {{ publication.author.lastName }}
           </span>
@@ -43,7 +44,7 @@
         </div>
 
         <ng-template #notFriend>
-          <div class="content-actions-follow">
+          <div class="content-actions-follow" *ngIf="!avatarLoading">
             <span (click)="viewProfile(publication.author._id)" class="name link-name">
               {{ publication.author.name }} {{ publication.author.lastName }}
             </span>

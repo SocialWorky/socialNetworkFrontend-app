@@ -6,13 +6,26 @@ import { marked } from 'marked';
 import hljs from 'highlight.js';
 
 import { environment } from '@env/environment';
+import { LazyCssService } from './core-apis/lazy-css.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ContentService {
 
-  constructor(private http: HttpClient) {
+  private highlightJsLoaded = false;
+
+  constructor(
+    private http: HttpClient,
+    private lazyCssService: LazyCssService
+  ) {
+    this.initializeMarked();
+  }
+
+  private async initializeMarked() {
+    // Cargar CSS de highlight.js de forma lazy
+    await this.loadHighlightJsCss();
+    
     const renderer = new marked.Renderer();
     renderer.code = ({ text, lang, escaped }: { text: string; lang?: string; escaped?: boolean }) => {
       const validLanguage = lang && hljs.getLanguage(lang) ? lang : 'plaintext';
@@ -32,6 +45,20 @@ export class ContentService {
         return hljs.highlight(code, { language }).value;
       },
     });
+  }
+
+  /**
+   * Carga CSS de highlight.js solo cuando se necesite
+   */
+  private async loadHighlightJsCss() {
+    if (!this.highlightJsLoaded) {
+      try {
+        await this.lazyCssService.loadHighlightJs();
+        this.highlightJsLoaded = true;
+      } catch (error) {
+        console.warn('Error cargando CSS de highlight.js:', error);
+      }
+    }
   }
 
   fetchMetadata(linkUrl: string): Observable<any> {

@@ -10,6 +10,8 @@ import { AuthService } from '@auth/services/auth.service';
 import { environment } from '@env/environment';
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { UtilityService } from '@shared/services/utility.service';
+import { LazyCssService } from '@shared/services/core-apis/lazy-css.service';
+import { FontLoaderService } from '@shared/services/core-apis/font-loader.service';
 
 @Component({
     selector: 'worky-edit-img-profile',
@@ -55,7 +57,9 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     private _profileService: ProfileService,
     private _authService: AuthService,
     private _deviceDetectionService: DeviceDetectionService,
-    private _utilityService: UtilityService
+    private _utilityService: UtilityService,
+    private _lazyCssService: LazyCssService,
+    private _fontLoaderService: FontLoaderService
   ) {}
 
   ngAfterViewInit(): void {

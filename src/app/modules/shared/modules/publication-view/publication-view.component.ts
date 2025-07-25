@@ -189,25 +189,25 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   // Simular carga progresiva para demostración
   private simulateProgressiveLoading() {
-    // Load basic elements first
-    this.onNameLoad();
-    this.onDateLoad();
-    this.onLocationLoad();
-    this.onActionsLoad();
+    // Load basic elements first with delays
+    setTimeout(() => this.onNameLoad(), 100);
+    setTimeout(() => this.onDateLoad(), 200);
+    setTimeout(() => this.onLocationLoad(), 300);
+    setTimeout(() => this.onActionsLoad(), 400);
     
     // Load content if exists
     if (this.publication.content) {
-      this.onContentLoad();
+      setTimeout(() => this.onContentLoad(), 500);
     }
     
     // Load avatar if exists
     if (this.publication.author.avatar) {
-      this.onAvatarLoad();
+      setTimeout(() => this.onAvatarLoad(), 600);
     }
     
     // Load media if exists
     if (this.publication.media.length > 0) {
-      this.onMediaLoad();
+      setTimeout(() => this.onMediaLoad(), 700);
     }
   }
 

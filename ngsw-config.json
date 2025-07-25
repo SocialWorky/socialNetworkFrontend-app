@@ -8,38 +8,73 @@
   ],
   "assetGroups": [
     {
-      "name": "app",
+      "name": "app-critical",
       "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
         "files": [
-          "/assets/icon/favicon.ico",
           "/index.html",
           "/manifest.json",
-          "/assets/img/**",
-          "/assets/icons/**",
-          "/**/*.css",
+          "/assets/icon/favicon.ico",
+          "/assets/icons/**"
+        ]
+      }
+    },
+    {
+      "name": "app-styles",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/**/*.css"
+        ]
+      }
+    },
+    {
+      "name": "app-scripts",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
           "/**/*.js",
           "!/ngsw-worker.js"
         ]
       }
     },
     {
-      "name": "assets",
+      "name": "assets-images",
       "installMode": "lazy",
       "updateMode": "prefetch",
       "resources": {
         "files": [
-          "/assets/**",
-          "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
+          "/assets/img/**",
+          "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif)"
+        ]
+      }
+    },
+    {
+      "name": "assets-fonts",
+      "installMode": "lazy",
+      "updateMode": "lazy",
+      "resources": {
+        "files": [
+          "/*.(otf|ttf|woff|woff2)"
         ],
         "urls": [
-          "https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap",
-          "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap",
-          "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap",
-          "https://fonts.googleapis.com/icon?family=Material+Icons&display=swap",
-          "https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap",
-          "https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+          "https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+        ]
+      }
+    },
+    {
+      "name": "assets-third-party",
+      "installMode": "lazy",
+      "updateMode": "lazy",
+      "resources": {
+        "files": [
+          "/assets/emoji-mart/**",
+          "/assets/cropper/**",
+          "/assets/driver/**",
+          "/assets/highlight-js/**"
         ]
       }
     }

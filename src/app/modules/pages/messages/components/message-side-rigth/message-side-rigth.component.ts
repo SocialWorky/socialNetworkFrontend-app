@@ -22,6 +22,8 @@ import { TypePublishing } from '@shared/modules/addPublication/enum/addPublicati
 import { SocketService } from '@shared/services/socket.service';
 import { ExternalMessage } from '@shared/interfaces/notification-external-message.interface';
 import { MediaType } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
+import { LazyCssService } from '@shared/services/core-apis/lazy-css.service';
+import { FontLoaderService } from '@shared/services/core-apis/font-loader.service';
 
 @Component({
     selector: 'worky-message-side-rigth',
@@ -99,6 +101,8 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
     private _fileUploadService: FileUploadService,
     private _loadingCtrl: LoadingController,
     private _socketService: SocketService,
+    private _lazyCssService: LazyCssService,
+    private _fontLoaderService: FontLoaderService,
   ) { }
 
   async ngOnInit() {
@@ -600,6 +604,38 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
       }
     } catch (error) {
       console.error('Error forzando sincronización:', error);
+    }
+  }
+
+  /**
+   * Carga recursos necesarios de forma lazy
+   */
+  private async loadRequiredResources() {
+    try {
+      // Cargar Material Icons si no están cargadas
+      if (!this._fontLoaderService.isFontLoaded('material-icons')) {
+        await this._fontLoaderService.loadMaterialIcons();
+      }
+
+      // Cargar CSS de emoji-mart solo cuando se necesite
+      if (!this._lazyCssService.isLoaded('emoji-mart')) {
+        // Se cargará cuando se abra el emoji picker
+      }
+    } catch (error) {
+      // this._logService.error('Error cargando recursos lazy', 'MessageSideRigthComponent'); // Original code had this line commented out
+    }
+  }
+
+  /**
+   * Carga CSS de emoji-mart solo cuando se abre el picker
+   */
+  private async loadEmojiMartCss() {
+    try {
+      if (!this._lazyCssService.isLoaded('emoji-mart')) {
+        await this._lazyCssService.loadEmojiMartCss();
+      }
+    } catch (error) {
+      // this._logService.error('Error cargando CSS de emoji-mart', 'MessageSideRigthComponent'); // Original code had this line commented out
     }
   }
 

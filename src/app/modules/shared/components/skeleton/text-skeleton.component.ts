@@ -10,8 +10,6 @@ import { CommonModule } from '@angular/common';
       [style.width]="width">
       
       <div class="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700" [style.width]="width"></div>
-      
-      <span class="sr-only">Loading text...</span>
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

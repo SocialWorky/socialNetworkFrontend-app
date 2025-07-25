@@ -5,10 +5,14 @@ import {
   OnInit,
   OnDestroy,
   ViewChild,
+  ElementRef,
+  AfterViewInit,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonTextarea, LoadingController } from '@ionic/angular';
-import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
+import { Subject, Subscription, lastValueFrom, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import {
   WorkyButtonType,
@@ -41,6 +45,10 @@ import { GifSearchComponent } from '../gif-search/gif-search.component';
 import { TooltipsOnboardingService } from '@shared/services/tooltips-onboarding.service';
 import { UtilityService } from '@shared/services/utility.service';
 import { ImageLoadOptions } from '../../services/image.service';
+import { Router } from '@angular/router';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { LazyCssService } from '@shared/services/core-apis/lazy-css.service';
+import { FontLoaderService } from '@shared/services/core-apis/font-loader.service';
 
 @Component({
     selector: 'worky-add-publication',
@@ -50,8 +58,6 @@ import { ImageLoadOptions } from '../../services/image.service';
 })
 export class AddPublicationComponent implements OnInit, OnDestroy {
   WorkyButtonType = WorkyButtonType;
-
-  WorkyButtonTheme = WorkyButtonTheme;
 
   typePrivacy = TypePrivacy;
 
@@ -64,8 +70,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   nameGeoLocation = '';
 
   dataGeoLocation = '';
-
-  showEmojiMenu = false;
 
   privacy = TypePrivacy.PUBLIC;
 
@@ -125,6 +129,24 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   @ViewChild('postTextRef', { static: false }) postTextRef!: IonTextarea;
 
+  @ViewChild('textarea', { static: false }) textarea!: ElementRef;
+
+  content: string = '';
+
+  showEmojiMenu: boolean = false;
+
+  showUploadModal: boolean = false;
+
+  showLocationSearch: boolean = false;
+
+  isLoading: boolean = false;
+
+  readonly TypePublishing = TypePublishing;
+
+  readonly WorkyButtonTheme = WorkyButtonTheme;
+
+  private destroy$ = new Subject<void>();
+
   constructor(
     private _fb: FormBuilder,
     private _authService: AuthService,
@@ -142,6 +164,10 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _notificationCenterService: NotificationCenterService,
     private _tooltipsOnboardingService: TooltipsOnboardingService,
     private _utilityService: UtilityService,
+    private _router: Router,
+    private _logService: LogService,
+    private _lazyCssService: LazyCssService,
+    private _fontLoaderService: FontLoaderService
   ) { }
 
   async ngOnInit() {
@@ -162,6 +188,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       , 1000);
 
     this.simulateProgressiveLoading();
+    // Cargar recursos necesarios de forma lazy
+    this.loadRequiredResources();
   }
 
   onAvatarLoad() {
@@ -210,16 +238,17 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   private simulateProgressiveLoading() {
-    this.onNameLoad();
-    this.onPrivacyLoad();
-    this.onTextareaLoad();
-    this.onLocationLoad();
-    this.onMarkdownButtonsLoad();
-    this.onOptionsButtonsLoad();
-    this.onPublishButtonLoad();
+    // Simular carga progresiva con retrasos reales
+    setTimeout(() => this.onNameLoad(), 100);
+    setTimeout(() => this.onPrivacyLoad(), 200);
+    setTimeout(() => this.onTextareaLoad(), 300);
+    setTimeout(() => this.onLocationLoad(), 400);
+    setTimeout(() => this.onMarkdownButtonsLoad(), 500);
+    setTimeout(() => this.onOptionsButtonsLoad(), 600);
+    setTimeout(() => this.onPublishButtonLoad(), 700);
     
     if (this.profileImageUrl) {
-      this.onAvatarLoad();
+      setTimeout(() => this.onAvatarLoad(), 800);
     }
   }
 
@@ -305,6 +334,11 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   toggleEmojiMenu() {
     this.showEmojiMenu = !this.showEmojiMenu;
+    
+    // Cargar CSS de emoji-mart solo cuando se abre
+    if (this.showEmojiMenu) {
+      this.loadEmojiMartCss();
+    }
   }
 
   preventClose(event: Event) {
@@ -701,5 +735,37 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   onImageError(event: Event): void {
     this._utilityService.handleImageError(event, 'assets/img/shared/handleImageError.png');
+  }
+
+  /**
+   * Carga recursos necesarios de forma lazy
+   */
+  private async loadRequiredResources() {
+    try {
+      // Cargar Material Icons si no están cargadas
+      if (!this._fontLoaderService.isFontLoaded('material-icons')) {
+        await this._fontLoaderService.loadMaterialIcons();
+      }
+
+      // Cargar Material Symbols si no están cargadas
+      if (!this._fontLoaderService.isFontLoaded('material-symbols-sharp')) {
+        await this._fontLoaderService.loadMaterialSymbolsSharp();
+      }
+    } catch (error) {
+      this._logService.log(LevelLogEnum.ERROR, 'AddPublicationComponent', 'Error cargando recursos lazy');
+    }
+  }
+
+  /**
+   * Carga CSS de emoji-mart solo cuando se abre el menú
+   */
+  private async loadEmojiMartCss() {
+    try {
+      if (!this._lazyCssService.isLoaded('emoji-mart')) {
+        await this._lazyCssService.loadEmojiMartCss();
+      }
+    } catch (error) {
+      this._logService.log(LevelLogEnum.ERROR, 'AddPublicationComponent', 'Error cargando CSS de emoji-mart');
+    }
   }
 }

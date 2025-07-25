@@ -11,8 +11,6 @@ import { CommonModule } from '@angular/common';
       [style.height]="height">
       
       <div class="w-full h-full bg-gray-200 rounded-lg dark:bg-gray-700"></div>
-      
-      <span class="sr-only">Loading button...</span>
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
