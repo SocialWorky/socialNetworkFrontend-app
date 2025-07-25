@@ -27,7 +27,10 @@
     "analyze:prod": "ng build --configuration=production --stats-json && npx webpack-bundle-analyzer dist/socialNetworkFrontend-app/stats.json",
     "size-check": "npm run build:prod && du -sh dist/socialNetworkFrontend-app/*.js dist/socialNetworkFrontend-app/*.css",
     "optimize:css": "npm run build:prod && echo 'CSS optimizado generado' && du -sh dist/socialNetworkFrontend-app/*.css",
-    "preview:prod": "npm run build:prod && npx http-server dist/socialNetworkFrontend-app -p 8080 -o"
+    "preview:prod": "npm run build:prod && npx http-server dist/socialNetworkFrontend-app -p 8080 -o",
+    "prepare-meta": "node prepare-meta-tags.js",
+    "generate-manifest": "node generate-manifest.js",
+    "generate-icons": "node generate-icons.js"
   },
   "private": true,
   "dependencies": {
