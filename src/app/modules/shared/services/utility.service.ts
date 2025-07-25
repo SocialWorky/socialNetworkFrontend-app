@@ -260,4 +260,32 @@ export class UtilityService {
     });
   }
 
+  /**
+   * Normalize image URL to prevent double base URL prefixing
+   * @param url The image URL to normalize
+   * @param baseUrl The base URL to check against
+   * @returns Normalized URL
+   */
+  normalizeImageUrl(url: string, baseUrl: string): string {
+    if (!url) return '';
+    
+    // If URL already starts with http/https, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    
+    // If URL already contains the base URL, return as is
+    if (url.includes(baseUrl)) {
+      return url;
+    }
+    
+    // Clean base URL (remove trailing slash)
+    const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    
+    // Add leading slash to URL if not present
+    const cleanUrl = url.startsWith('/') ? url : '/' + url;
+    
+    return cleanBaseUrl + cleanUrl;
+  }
+
 }

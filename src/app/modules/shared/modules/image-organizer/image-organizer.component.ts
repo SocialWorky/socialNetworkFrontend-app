@@ -62,13 +62,13 @@ export class ImageOrganizerComponent implements OnInit {
     this.galleryItems = this.images.map(image => {
       if (this.isImageUrl(image.urlCompressed)) {
         return {
-          src: this.urlMediaApi + image.urlCompressed,
+          src: this._utilityService.normalizeImageUrl(image.urlCompressed, this.urlMediaApi),
           isImage: true,
           isVideo: false
         };
       } else if (this.isVideoUrl(image.url)) {
         return {
-          src: this.urlMediaApi + image.url,
+          src: this._utilityService.normalizeImageUrl(image.url, this.urlMediaApi),
           isImage: false,
           isVideo: true
         };
@@ -101,9 +101,9 @@ export class ImageOrganizerComponent implements OnInit {
 
     const mediaUrls = this.images.map(image => {
       if (this.isImageUrl(image.urlCompressed)) {
-        return this.urlMediaApi + image.urlCompressed;
+        return this._utilityService.normalizeImageUrl(image.urlCompressed, this.urlMediaApi);
       } else if (this.isVideoUrl(image.url)) {
-        return this.urlMediaApi + image.url;
+        return this._utilityService.normalizeImageUrl(image.url, this.urlMediaApi);
       }
       return null;
     }).filter(url => url !== null);

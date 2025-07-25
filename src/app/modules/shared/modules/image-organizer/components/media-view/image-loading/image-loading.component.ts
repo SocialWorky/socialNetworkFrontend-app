@@ -115,48 +115,21 @@ export class ImageLoadingComponent implements OnInit, OnChanges, OnDestroy {
     const url = type === 'compressed' ? image.urlCompressed : image.urlThumbnail;
     if (!url) return '';
     
-    // Verificar si la URL ya contiene el prefijo del servicio
-    if (url.startsWith('http')) {
-      return url;
-    }
-    
-    // Si no tiene el prefijo, agregarlo
-    const baseUrl = this.urlFilesService.endsWith('/') ? this.urlFilesService.slice(0, -1) : this.urlFilesService;
-    const imagePath = url.startsWith('/') ? url : '/' + url;
-    
-    return baseUrl + imagePath;
+    return this._utilityService.normalizeImageUrl(url, this.urlFilesService);
   }
 
   getVideoUrl(image: ImageOrganizer | undefined): string {
     if (!image) return '';
     if (!image.urlCompressed) return '';
     
-    // Verificar si la URL ya contiene el prefijo del servicio
-    if (image.urlCompressed.startsWith('http')) {
-      return image.urlCompressed;
-    }
-    
-    // Si no tiene el prefijo, agregarlo
-    const baseUrl = this.urlFilesService.endsWith('/') ? this.urlFilesService.slice(0, -1) : this.urlFilesService;
-    const imagePath = image.urlCompressed.startsWith('/') ? image.urlCompressed : '/' + image.urlCompressed;
-    
-    return baseUrl + imagePath;
+    return this._utilityService.normalizeImageUrl(image.urlCompressed, this.urlFilesService);
   }
 
   getVideoPosterUrl(image: ImageOrganizer | undefined): string {
     if (!image) return '';
     if (!image.urlThumbnail) return '';
     
-    // Verificar si la URL ya contiene el prefijo del servicio
-    if (image.urlThumbnail.startsWith('http')) {
-      return image.urlThumbnail;
-    }
-    
-    // Si no tiene el prefijo, agregarlo
-    const baseUrl = this.urlFilesService.endsWith('/') ? this.urlFilesService.slice(0, -1) : this.urlFilesService;
-    const imagePath = image.urlThumbnail.startsWith('/') ? image.urlThumbnail : '/' + image.urlThumbnail;
-    
-    return baseUrl + imagePath;
+    return this._utilityService.normalizeImageUrl(image.urlThumbnail, this.urlFilesService);
   }
 
   /**
