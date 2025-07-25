@@ -3,6 +3,7 @@ import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms'
 import { LoadingController } from '@ionic/angular';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { map, Subject, takeUntil } from 'rxjs';
+import { translations } from '@translations/translations';
 
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { ProfileService } from '../../services/profile.service';
@@ -78,6 +79,7 @@ export class EditInfoProfileDetailComponent implements OnInit {
 
   ngOnInit() {
     this.getDynamicFieldsFormControls();
+    this.toggleWhatsApp();
   }
 
   getDynamicFieldsFormControls(): void {
@@ -130,9 +132,20 @@ export class EditInfoProfileDetailComponent implements OnInit {
   }
 
   toggleWhatsApp() {
-    const isViewable = this.editProfileDetailForm.get('whatsapp.isViewable')?.value;
-    if (isViewable) {
-      isViewable.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe();
+    const isViewableControl = this.editProfileDetailForm.get('whatsapp.isViewable');
+    if (isViewableControl) {
+      isViewableControl.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe((value) => {
+        // Trigger change detection when toggle changes
+        this._cdr.markForCheck();
+      });
+    }
+  }
+
+  onWhatsAppToggleChange(event: any) {
+    const isViewableControl = this.editProfileDetailForm.get('whatsapp.isViewable');
+    if (isViewableControl) {
+      isViewableControl.setValue(event.target.checked);
+      this._cdr.markForCheck();
     }
   }
 
@@ -143,7 +156,7 @@ export class EditInfoProfileDetailComponent implements OnInit {
 
     try {
       const loadingProfile = await this._loadingCtrl.create({
-        message: 'Editando perfil...',
+        message: translations['pages.editInfoProfile.loading'],
       });
       await loadingProfile.present();
       const dataBasicProfile = this.prepareBasicProfileData();

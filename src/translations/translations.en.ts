@@ -92,6 +92,7 @@ export const translations = {
   'pages.editInfoProfile.whatsapp.enable': 'Enable WhatsApp',
   'pages.editInfoProfile.whatsapp.number': 'WhatsApp Number',
   'pages.editInfoProfile.saveChanges': 'Save Changes',
+  'pages.editInfoProfile.loading': 'Editing profile...',
   
   // ===== PUBLICATIONS MODULE =====
   // PUBLICATIONS COMPONENT
