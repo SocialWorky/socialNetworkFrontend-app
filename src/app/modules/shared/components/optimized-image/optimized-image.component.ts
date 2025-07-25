@@ -1,15 +1,13 @@
-import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectorRef, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
+import { ImageService, ImageLoadOptions } from '@shared/services/image.service';
+import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 import { CommonModule } from '@angular/common';
-import { MediaCacheService, MediaCacheOptions } from '../../services/media-cache.service';
-import { ConnectionQualityService } from '../../services/connection-quality.service';
-import { LogService, LevelLogEnum } from '../../services/core-apis/log.service';
-import { ImageService, ImageLoadOptions } from '../../services/image.service';
 
 @Component({
   selector: 'worky-optimized-image',
   template: `
-    <div class="image-container" [class.loading]="isLoading" [class.error]="hasError">
+    <div class="optimized-image-container" [class.loading]="isLoading" [class.error]="hasError">
       <!-- Skeleton while loading -->
       <div *ngIf="isLoading && !hasError" class="image-skeleton">
         <div 
@@ -23,16 +21,14 @@ import { ImageService, ImageLoadOptions } from '../../services/image.service';
             </svg>
           </div>
         </div>
-        <div class="loading-text" *ngIf="isSlowConnection">
-          <small>Loading on slow connection...</small>
-        </div>
       </div>
       
       <!-- Real image - hidden until fully loaded -->
-      <img
+      <img 
         *ngIf="!hasError && !isLoading && imageFullyLoaded"
-        [src]="imageUrl"
+        [src]="currentSrc" 
         [alt]="alt"
+        [class]="cssClass"
         [class.loaded]="!isLoading"
         [class.low-quality]="isLowQuality"
         (load)="onImageLoad()"
@@ -41,10 +37,11 @@ import { ImageService, ImageLoadOptions } from '../../services/image.service';
       />
       
       <!-- Hidden image for preloading -->
-      <img
+      <img 
         *ngIf="!hasError && !imageFullyLoaded"
-        [src]="imageUrl"
+        [src]="currentSrc" 
         [alt]="alt"
+        [class]="cssClass"
         [class.loaded]="!isLoading"
         [class.low-quality]="isLowQuality"
         (load)="onImageLoad()"
@@ -53,7 +50,8 @@ import { ImageService, ImageLoadOptions } from '../../services/image.service';
         style="position: absolute; opacity: 0; pointer-events: none;"
       />
       
-      <div class="error-placeholder" *ngIf="hasError">
+      <!-- Error placeholder only when there's a real error -->
+      <div *ngIf="hasError" class="error-placeholder">
         <i class="material-icons">image</i>
         <span class="error-text">Image not available</span>
         <button *ngIf="canRetry" (click)="retryLoad()" class="retry-button">
@@ -61,126 +59,107 @@ import { ImageService, ImageLoadOptions } from '../../services/image.service';
           Retry
         </button>
       </div>
-
-      <div class="quality-indicator" *ngIf="showQualityIndicator && isLowQuality">
-        <i class="material-icons">signal_cellular_alt</i>
-        <span>Data saving mode</span>
-      </div>
     </div>
   `,
   styleUrls: ['./optimized-image.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule]
 })
-export class OptimizedImageComponent implements OnInit, OnDestroy {
-  @Input() src!: string;
+export class OptimizedImageComponent implements OnInit, OnDestroy, OnChanges {
+  @Input() src: string = '';
+  @Input() fallbackSrc: string = 'assets/img/shared/handleImageError.png';
   @Input() alt: string = '';
-  @Input() options: MediaCacheOptions = {};
+  @Input() cssClass: string = '';
   @Input() lazy: boolean = true;
-  @Input() showQualityIndicator: boolean = true;
-  @Input() fallbackSrc: string = '/assets/img/shared/handleImageError.png';
   @Input() skeletonWidth: string = '100%';
   @Input() skeletonHeight: string = '200px';
   @Input() skeletonRounded: boolean = true;
-  @Input() maxRetries: number = 3;
+  @Input() maxRetries: number = 2;
+  @Input() priority: 'high' | 'medium' | 'low' = 'medium';
+  @Output() imageLoad = new EventEmitter<string>();
+  @Output() imageError = new EventEmitter<string>();
 
-  imageUrl: string = '';
+  currentSrc: string = '';
   isLoading: boolean = true;
   hasError: boolean = false;
-  isLowQuality: boolean = false;
-  isSlowConnection: boolean = false;
   canRetry: boolean = false;
-  retryCount: number = 0;
+  isLowQuality: boolean = false;
   imageFullyLoaded: boolean = false; // Track when image is fully loaded
+  private retryCount: number = 0;
 
   private destroy$ = new Subject<void>();
 
   constructor(
-    private mediaCacheService: MediaCacheService,
-    private connectionQualityService: ConnectionQualityService,
-    private imageService: ImageService,
-    private logService: LogService,
-    private cdr: ChangeDetectorRef
+    private _imageService: ImageService,
+    private _mobileCacheService: MobileImageCacheService,
+    private _cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.loadImage();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['src'] && !changes['src'].firstChange) {
+      this.loadImage();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private loadImage(): void {
     if (!this.src) {
       this.setError();
       return;
     }
 
-    this.setupConnectionMonitoring();
-    this.loadImage();
-  }
-
-  private setupConnectionMonitoring(): void {
-    this.connectionQualityService.getConnectionQuality().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(quality => {
-      this.isSlowConnection = quality === 'slow';
-      this.isLowQuality = quality === 'slow';
-      this.cdr.markForCheck();
-    });
-  }
-
-  private loadImage(): void {
     this.isLoading = true;
     this.hasError = false;
     this.canRetry = false;
     this.imageFullyLoaded = false; // Reset fully loaded flag
-    this.cdr.markForCheck();
+    this._cdr.markForCheck();
 
-    const connectionOptions = this.connectionQualityService.getOptimizedMediaOptions();
-    const finalOptions: MediaCacheOptions = {
-      ...connectionOptions,
-      ...this.options
-    };
+    // Use mobile-optimized cache service if available
+    const imageService = this._mobileCacheService.isMobile() ? this._mobileCacheService : this._imageService;
 
-    const qualityMap = { low: 'slow', medium: 'medium', high: 'fast' } as const;
-    const optimizedUrl = this.mediaCacheService.getOptimizedUrl(this.src, qualityMap[connectionOptions.quality]);
-
-    // Use improved image service
-    const imageOptions: ImageLoadOptions = {
+    const options: ImageLoadOptions = {
       maxRetries: this.maxRetries,
       retryDelay: 1000,
       fallbackUrl: this.fallbackSrc,
-      timeout: 15000,
-      showSkeleton: true
+      timeout: 10000,
+      showSkeleton: true,
+      useServiceWorkerCache: true,
+      priority: this.priority
     };
 
-    this.imageService.loadImageWithSkeleton(optimizedUrl, imageOptions).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (result) => {
-        if (result.success) {
-          this.imageUrl = result.url;
+    // Use the appropriate service for loading
+    imageService.loadImage(this.src, options)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (url) => {
+          this.currentSrc = url;
           // Don't set isLoading to false here - wait for onImageLoad
           this.hasError = false;
-          this.isLowQuality = finalOptions.quality === 'low';
           this.retryCount = 0;
-          this.cdr.markForCheck();
-
-          this.logService.log(LevelLogEnum.INFO, 'OptimizedImageComponent', 'Image loaded successfully', {
-            originalUrl: this.src,
-            optimizedUrl,
-            quality: finalOptions.quality,
-            connectionQuality: this.connectionQualityService.getConnectionInfo().quality
-          });
-        } else {
+          this._cdr.markForCheck();
+        },
+        error: (error) => {
           this.setError();
         }
-      },
-      error: (error) => {
-        this.logService.log(LevelLogEnum.ERROR, 'OptimizedImageComponent', 'Failed to load image', {
-          url: this.src,
-          error: error.message,
-          retryCount: this.retryCount
-        });
+      });
+  }
 
-        this.setError();
-      }
-    });
+  private setError(): void {
+    this.currentSrc = this.fallbackSrc;
+    this.isLoading = false;
+    this.hasError = true;
+    this.imageFullyLoaded = false;
+    this.canRetry = this.retryCount < this.maxRetries;
+    this._cdr.markForCheck();
+    this.imageError.emit(this.src);
   }
 
   retryLoad(): void {
@@ -190,35 +169,24 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
     }
   }
 
-  private setError(): void {
-    this.imageUrl = this.fallbackSrc;
-    this.isLoading = false;
-    this.hasError = true;
-    this.imageFullyLoaded = false;
-    this.canRetry = this.retryCount < this.maxRetries;
-    this.cdr.markForCheck();
-  }
-
   onImageLoad(): void {
     // Only hide skeleton when image is fully loaded and ready to display
     this.isLoading = false;
     this.hasError = false;
     this.imageFullyLoaded = true; // Mark as fully loaded
     this.retryCount = 0;
-    this.cdr.markForCheck();
+    this._cdr.markForCheck();
+    this.imageLoad.emit(this.currentSrc);
   }
 
   onImageError(): void {
-    if (this.retryCount < this.maxRetries) {
+    // Only show error if retries are exhausted
+    if (this.retryCount >= this.maxRetries) {
+      this.setError();
+    } else {
+      // Retry automatically
       this.retryCount++;
       this.loadImage();
-    } else {
-      this.setError();
     }
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 } 

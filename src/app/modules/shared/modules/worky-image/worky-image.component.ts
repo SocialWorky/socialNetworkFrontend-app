@@ -2,6 +2,7 @@ import { Component, Input, OnInit, OnDestroy, ChangeDetectorRef, Output, EventEm
 import { Subject, takeUntil } from 'rxjs';
 import { UtilityService } from '@shared/services/utility.service';
 import { ImageService, ImageLoadOptions } from '@shared/services/image.service';
+import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -70,6 +71,7 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
   @Input() skeletonRounded: boolean = true;
   @Input() loadingTimeout: number = 10000; // 10 seconds timeout
   @Input() maxRetries: number = 2;
+  @Input() priority: 'high' | 'medium' | 'low' = 'medium';
   @Output() imageClick = new EventEmitter<MouseEvent>();
 
   currentSrc: string = '';
@@ -84,6 +86,7 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
   constructor(
     private _utilityService: UtilityService,
     private _imageService: ImageService,
+    private _mobileCacheService: MobileImageCacheService,
     private _cdr: ChangeDetectorRef
   ) {}
 
@@ -114,27 +117,28 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
     this.imageFullyLoaded = false; // Reset fully loaded flag
     this._cdr.markForCheck();
 
+    // Use mobile-optimized cache service if available
+    const imageService = this._mobileCacheService.isMobile() ? this._mobileCacheService : this._imageService;
+
     const options: ImageLoadOptions = {
       maxRetries: this.maxRetries,
       retryDelay: 1000,
       fallbackUrl: this.fallbackSrc,
       timeout: this.loadingTimeout,
-      showSkeleton: true
+      showSkeleton: true,
+      useServiceWorkerCache: true,
+      priority: this.priority
     };
 
-    // Use image service with skeleton
-    this._imageService.loadImageWithSkeleton(this.src, options)
+    // Use the appropriate service for loading
+    imageService.loadImage(this.src, options)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (result) => {
-          if (result.success) {
-            this.currentSrc = result.url;
-            // Don't set isLoading to false here - wait for onImageLoad
-            this.hasError = false;
-            this.retryCount = 0;
-          } else {
-            this.setError();
-          }
+        next: (url) => {
+          this.currentSrc = url;
+          // Don't set isLoading to false here - wait for onImageLoad
+          this.hasError = false;
+          this.retryCount = 0;
           this._cdr.markForCheck();
         },
         error: (error) => {

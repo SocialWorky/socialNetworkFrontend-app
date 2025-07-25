@@ -30,7 +30,11 @@
     "preview:prod": "npm run build:prod && npx http-server dist/socialNetworkFrontend-app -p 8080 -o",
     "prepare-meta": "node prepare-meta-tags.js",
     "generate-manifest": "node generate-manifest.js",
-    "generate-icons": "node generate-icons.js"
+    "generate-icons": "node generate-icons.js",
+    "mobile:optimize": "node scripts/optimize-mobile-cache.js",
+    "mobile:cleanup": "node scripts/cleanup-mobile-cache.js",
+    "mobile:build": "npm run mobile:optimize && npm run build",
+    "mobile:dev": "npm run mobile:optimize && npm start"
   },
   "private": true,
   "dependencies": {

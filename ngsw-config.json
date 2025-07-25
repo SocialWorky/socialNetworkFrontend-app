@@ -42,6 +42,20 @@
       }
     },
     {
+      "name": "critical-images",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/assets/img/shared/handleImageError.png",
+          "/assets/img/logo_worky-100.png",
+          "/assets/img/logo_worky-100.jpg",
+          "/assets/img/login/worky-login.svg",
+          "/assets/img/navbar/worky-your-logo.png"
+        ]
+      }
+    },
+    {
       "name": "assets-images",
       "installMode": "lazy",
       "updateMode": "prefetch",
@@ -117,6 +131,73 @@
         "strategy": "performance",
         "maxSize": 100,
         "maxAge": "1d"
+      }
+    },
+    {
+      "name": "user-images-cache",
+      "urls": [
+        "/api/images/**",
+        "/api/avatars/**",
+        "/api/media/**",
+        "/api/uploads/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 50,
+        "maxAge": 604800000,
+        "timeout": "30s"
+      }
+    },
+    {
+      "name": "publication-images-cache",
+      "urls": [
+        "/api/publications/*/images/**",
+        "/api/publications/*/media/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 50,
+        "maxAge": 604800000,
+        "timeout": "20s"
+      }
+    },
+    {
+      "name": "profile-images-cache",
+      "urls": [
+        "/api/profiles/*/avatar/**",
+        "/api/profiles/*/cover/**",
+        "/api/users/*/avatar/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 50,
+        "maxAge": 604800000,
+        "timeout": "15s"
+      }
+    },
+    {
+      "name": "mobile-critical-images",
+      "urls": [
+        "/assets/img/shared/handleImageError.png",
+        "/assets/img/logo_worky-100.png",
+        "/assets/img/logo_worky-100.jpg"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 10,
+        "maxAge": "30d"
+      }
+    },
+    {
+      "name": "mobile-user-avatars",
+      "urls": [
+        "/api/users/*/avatar/**",
+        "/api/profiles/*/avatar/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 100,
+        "maxAge": "14d"
       }
     }
   ],
