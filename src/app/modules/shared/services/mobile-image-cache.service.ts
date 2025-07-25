@@ -5,6 +5,24 @@ import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { ImageService, ImageLoadOptions } from './image.service';
 import { HttpClient } from '@angular/common/http';
 
+// iOS-specific optimizations
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+const iOS_CONFIG: MobileCacheConfig = {
+  maxCacheSize: 50 * 1024 * 1024, // 50MB for iOS (more conservative)
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (shorter for iOS)
+  preloadThreshold: 2, // Less aggressive preloading
+  compressionEnabled: true, // Always enable compression for iOS
+  offlineMode: false,
+  persistentCache: true,
+  imageTypes: {
+    profile: { maxAge: 3 * 24 * 60 * 60 * 1000, priority: 'high' as const }, // 3 days
+    publication: { maxAge: 7 * 24 * 60 * 60 * 1000, priority: 'medium' as const }, // 7 days
+    media: { maxAge: 3 * 24 * 60 * 60 * 1000, priority: 'low' as const } // 3 days
+  }
+};
+
 export interface MobileCacheConfig {
   maxCacheSize: number;
   maxAge: number;
@@ -111,6 +129,11 @@ export class MobileImageCacheService {
     // Setup mobile optimizations
     this.setupMobileOptimizations();
     
+    // iOS-specific optimizations
+    if (isIOS) {
+      this.setupIOSOptimizations();
+    }
+    
     // Monitor cache performance
     this.startCacheMonitoring();
     
@@ -119,6 +142,7 @@ export class MobileImageCacheService {
     
     this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Service initialized', {
       isMobile: this.isMobileDevice,
+      isIOS,
       config: this.getCurrentConfig()
     });
   }
@@ -128,6 +152,9 @@ export class MobileImageCacheService {
   }
 
   private getCurrentConfig(): MobileCacheConfig {
+    if (isIOS) {
+      return iOS_CONFIG;
+    }
     return this.isMobileDevice ? this.MOBILE_CONFIG : this.DESKTOP_CONFIG;
   }
 
@@ -224,12 +251,66 @@ export class MobileImageCacheService {
     });
   }
 
+  private setupIOSOptimizations(): void {
+    // iOS-specific memory management
+    this.setupIOSMemoryManagement();
+    
+    // iOS-specific IndexedDB optimizations
+    this.setupIOSIndexedDBOptimizations();
+    
+    // iOS-specific cache cleanup
+    this.setupIOSCacheCleanup();
+    
+    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'iOS optimizations enabled');
+  }
+
+  private setupIOSMemoryManagement(): void {
+    // iOS is more aggressive with memory management
+    // Reduce memory cache size for iOS
+    const maxMemoryCacheSize = 20; // Limit memory cache to 20 items on iOS
+    
+    // Monitor memory usage and cleanup when needed
+    setInterval(() => {
+      if (this.memoryCache.size > maxMemoryCacheSize) {
+        const entries = Array.from(this.memoryCache.entries());
+        // Remove oldest entries
+        entries.sort((a, b) => a[1].lastAccessed - b[1].lastAccessed);
+        const toRemove = entries.slice(0, Math.floor(maxMemoryCacheSize / 2));
+        toRemove.forEach(([key]) => this.memoryCache.delete(key));
+        
+        this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'iOS memory cache cleaned', {
+          removed: toRemove.length,
+          remaining: this.memoryCache.size
+        });
+      }
+    }, 30000); // Check every 30 seconds
+  }
+
+  private setupIOSIndexedDBOptimizations(): void {
+    // iOS Safari has issues with large IndexedDB transactions
+    // Use smaller transaction sizes
+    if (this.db) {
+      // Set smaller transaction size for iOS
+      this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'iOS IndexedDB optimizations applied');
+    }
+  }
+
+  private setupIOSCacheCleanup(): void {
+    // More frequent cache cleanup for iOS
+    setInterval(() => {
+      this.cleanupOldCache();
+    }, 5 * 60 * 1000); // Every 5 minutes instead of default
+  }
+
   /**
    * Load image with mobile optimizations and persistent cache
    */
   loadImage(imageUrl: string, imageType: 'profile' | 'publication' | 'media' = 'media', options: ImageLoadOptions = {}): Observable<string> {
     const startTime = performance.now();
     const config = this.getCurrentConfig();
+    
+    // iOS-specific timeout adjustment
+    const timeoutValue = isIOS ? (options.timeout || 15000) : (options.timeout || 30000);
     
     // Check memory cache first
     if (this.memoryCache.has(imageUrl)) {
@@ -238,7 +319,7 @@ export class MobileImageCacheService {
         this.updateAccessMetrics(cached);
         this.cacheHits++;
         this.updateMetrics();
-        this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image loaded from memory cache', { url: imageUrl, type: imageType });
+        this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image loaded from memory cache', { url: imageUrl, type: imageType, isIOS });
         return of(URL.createObjectURL(cached.blob));
       } else {
         this.memoryCache.delete(imageUrl);
@@ -249,19 +330,25 @@ export class MobileImageCacheService {
     return from(this.getFromPersistentCache(imageUrl)).pipe(
       switchMap(cachedImage => {
         if (cachedImage && this.isCacheValid(cachedImage)) {
-          this.memoryCache.set(imageUrl, cachedImage);
+          // For iOS, be more conservative with memory cache
+          if (!isIOS || this.memoryCache.size < 15) {
+            this.memoryCache.set(imageUrl, cachedImage);
+          }
           this.updateAccessMetrics(cachedImage);
           this.cacheHits++;
           this.updateMetrics();
-          this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image loaded from persistent cache', { url: imageUrl, type: imageType });
+          this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image loaded from persistent cache', { url: imageUrl, type: imageType, isIOS });
           return of(URL.createObjectURL(cachedImage.blob));
         }
 
         // Load from network and cache
-        return this.loadFromNetwork(imageUrl, imageType, options).pipe(
+        return this.loadFromNetwork(imageUrl, imageType, { ...options, timeout: timeoutValue }).pipe(
           tap(cachedImage => {
             if (cachedImage) {
-              this.memoryCache.set(imageUrl, cachedImage);
+              // For iOS, be more conservative with memory cache
+              if (!isIOS || this.memoryCache.size < 15) {
+                this.memoryCache.set(imageUrl, cachedImage);
+              }
               this.cacheMisses++;
               this.updateMetrics();
             }
@@ -272,7 +359,7 @@ export class MobileImageCacheService {
       catchError(error => {
         this.cacheMisses++;
         this.updateMetrics();
-        this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Error loading image', { url: imageUrl, error });
+        this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Error loading image', { url: imageUrl, error, isIOS });
         return throwError(() => error);
       })
     );

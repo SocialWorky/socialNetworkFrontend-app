@@ -33,6 +33,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
   <meta name="format-detection" content="telephone=no" />
   <meta name="msapplication-tap-highlight" content="no" />
+  
+  <!-- iOS-specific optimizations -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Worky" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  
+  <!-- iOS performance optimizations -->
+  <meta name="apple-touch-fullscreen" content="yes" />
+  <meta name="apple-mobile-web-app-orientations" content="portrait" />
 
   <link rel="manifest" href="manifest.json" />
 
@@ -95,6 +105,39 @@
     #loading-screen img {
       max-width: 200px;
       max-height: 200px;
+    }
+    
+    /* iOS-specific optimizations */
+    @supports (-webkit-touch-callout: none) {
+      /* iOS Safari specific styles */
+      body {
+        -webkit-overflow-scrolling: touch;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      
+      /* Improve scrolling performance on iOS */
+      * {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+      }
+      
+      /* Optimize images for iOS */
+      img {
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+      }
+      
+      /* Prevent zoom on input focus */
+      input, textarea, select {
+        font-size: 16px !important;
+        -webkit-appearance: none;
+        border-radius: 0;
+      }
     }
   </style>
 </head>
