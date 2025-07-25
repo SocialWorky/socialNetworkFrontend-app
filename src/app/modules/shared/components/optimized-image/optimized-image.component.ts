@@ -1,192 +1,336 @@
-import { Component, Input, OnInit, OnDestroy, ChangeDetectorRef, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
-import { ImageService, ImageLoadOptions } from '@shared/services/image.service';
-import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
+import { Component, Input, OnInit, OnDestroy, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subject, takeUntil } from 'rxjs';
+import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { TranslationsModule } from '@shared/modules/translations/translations.module';
+
+export interface OptimizedImageOptions {
+  type?: 'profile' | 'publication' | 'media';
+  fallbackUrl?: string;
+  showSkeleton?: boolean;
+  lazyLoad?: boolean;
+  priority?: 'high' | 'medium' | 'low';
+  quality?: 'low' | 'medium' | 'high';
+}
 
 @Component({
   selector: 'worky-optimized-image',
+  standalone: true,
+  imports: [CommonModule, TranslationsModule],
   template: `
     <div class="optimized-image-container" [class.loading]="isLoading" [class.error]="hasError">
-      <!-- Skeleton while loading -->
-      <div *ngIf="isLoading && !hasError" class="image-skeleton">
-        <div 
-          class="skeleton-placeholder animate-pulse"
-          [style.width]="skeletonWidth"
-          [style.height]="skeletonHeight"
-          [class.rounded-lg]="skeletonRounded">
-          <div class="w-full h-full bg-gray-200 rounded-lg dark:bg-gray-700 flex items-center justify-center">
-            <svg class="w-8 h-8 text-gray-300 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-              <path d="M18 0H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm4.376 10.481A1 1 0 0 1 16 15H4a1 1 0 0 1-.895-1.447l3.5-7A1 1 0 0 1 7.468 6a.965.965 0 0 1 .9.5l2.775 4.757 1.546-1.887a1 1 0 0 1 1.618.1l2.541 4a1 1 0 0 1 .028 1.011Z"/>
-            </svg>
-          </div>
-        </div>
+      <!-- Skeleton loader -->
+      <div *ngIf="showSkeleton && isLoading" class="image-skeleton">
+        <div class="skeleton-placeholder"></div>
       </div>
-      
-      <!-- Real image - hidden until fully loaded -->
+
+      <!-- Error placeholder -->
+      <div *ngIf="hasError" class="image-error">
+        <i class="fas fa-image"></i>
+        <span>{{ 'common.imageError' | workyTranslations }}</span>
+      </div>
+
+      <!-- Actual image -->
       <img 
-        *ngIf="!hasError && !isLoading && imageFullyLoaded"
-        [src]="currentSrc" 
+        #imageElement
+        [src]="imageSrc" 
         [alt]="alt"
-        [class]="cssClass"
-        [class.loaded]="!isLoading"
-        [class.low-quality]="isLowQuality"
+        [class.loaded]="!isLoading && !hasError"
+        [class.lazy]="lazyLoad"
         (load)="onImageLoad()"
         (error)="onImageError()"
-        [loading]="lazy ? 'lazy' : 'eager'"
-      />
-      
-      <!-- Hidden image for preloading -->
-      <img 
-        *ngIf="!hasError && !imageFullyLoaded"
-        [src]="currentSrc" 
-        [alt]="alt"
-        [class]="cssClass"
-        [class.loaded]="!isLoading"
-        [class.low-quality]="isLowQuality"
-        (load)="onImageLoad()"
-        (error)="onImageError()"
-        [loading]="lazy ? 'lazy' : 'eager'"
-        style="position: absolute; opacity: 0; pointer-events: none;"
-      />
-      
-      <!-- Error placeholder only when there's a real error -->
-      <div *ngIf="hasError" class="error-placeholder">
-        <i class="material-icons">image</i>
-        <span class="error-text">Image not available</span>
-        <button *ngIf="canRetry" (click)="retryLoad()" class="retry-button">
-          <i class="material-icons">refresh</i>
-          Retry
-        </button>
-      </div>
+        [style.display]="isLoading || hasError ? 'none' : 'block'"
+        loading="{{ lazyLoad ? 'lazy' : 'eager' }}"
+        decoding="async">
     </div>
   `,
-  styleUrls: ['./optimized-image.component.scss'],
-  standalone: true,
-  imports: [CommonModule]
-})
-export class OptimizedImageComponent implements OnInit, OnDestroy, OnChanges {
-  @Input() src: string = '';
-  @Input() fallbackSrc: string = 'assets/img/shared/handleImageError.png';
-  @Input() alt: string = '';
-  @Input() cssClass: string = '';
-  @Input() lazy: boolean = true;
-  @Input() skeletonWidth: string = '100%';
-  @Input() skeletonHeight: string = '200px';
-  @Input() skeletonRounded: boolean = true;
-  @Input() maxRetries: number = 2;
-  @Input() priority: 'high' | 'medium' | 'low' = 'medium';
-  @Output() imageLoad = new EventEmitter<string>();
-  @Output() imageError = new EventEmitter<string>();
+  styles: [`
+    .optimized-image-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--worky-background-color, #f8f9fa);
+      border-radius: 8px;
+    }
 
-  currentSrc: string = '';
-  isLoading: boolean = true;
-  hasError: boolean = false;
-  canRetry: boolean = false;
-  isLowQuality: boolean = false;
-  imageFullyLoaded: boolean = false; // Track when image is fully loaded
-  private retryCount: number = 0;
+    .optimized-image-container.loading {
+      background: var(--worky-skeleton-color, #e9ecef);
+    }
+
+    .optimized-image-container.error {
+      background: var(--worky-error-background, #f8d7da);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: var(--worky-error-color, #721c24);
+    }
+
+    .image-skeleton {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .skeleton-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .image-error {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .image-error i {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      opacity: 0.6;
+    }
+
+    .image-error span {
+      font-size: 0.875rem;
+      opacity: 0.8;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+      transition: opacity 0.3s ease;
+      opacity: 0;
+    }
+
+    img.loaded {
+      opacity: 1;
+    }
+
+    img.lazy {
+      opacity: 0;
+    }
+
+    img.lazy.loaded {
+      opacity: 1;
+    }
+
+    /* Profile image specific styles */
+    .optimized-image-container.profile-image {
+      border-radius: 50%;
+    }
+
+    .optimized-image-container.profile-image img {
+      border-radius: 50%;
+    }
+
+    .optimized-image-container.profile-image .skeleton-placeholder {
+      border-radius: 50%;
+    }
+
+    /* Publication image specific styles */
+    .optimized-image-container.publication-image {
+      border-radius: 12px;
+    }
+
+    .optimized-image-container.publication-image img {
+      border-radius: 12px;
+    }
+
+    .optimized-image-container.publication-image .skeleton-placeholder {
+      border-radius: 12px;
+    }
+
+    /* Media image specific styles */
+    .optimized-image-container.media-image {
+      border-radius: 8px;
+    }
+
+    .optimized-image-container.media-image img {
+      border-radius: 8px;
+    }
+
+    .optimized-image-container.media-image .skeleton-placeholder {
+      border-radius: 8px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .optimized-image-container {
+        border-radius: 6px;
+      }
+
+      .optimized-image-container img {
+        border-radius: 6px;
+      }
+
+      .optimized-image-container .skeleton-placeholder {
+        border-radius: 6px;
+      }
+    }
+  `]
+})
+export class OptimizedImageComponent implements OnInit, OnDestroy {
+  @Input() src: string = '';
+  @Input() alt: string = '';
+  @Input() options: OptimizedImageOptions = {};
+  @Input() width?: string;
+  @Input() height?: string;
+  @Input() type: 'profile' | 'publication' | 'media' = 'media';
+
+  @ViewChild('imageElement', { static: false }) imageElement!: ElementRef<HTMLImageElement>;
+
+  imageSrc: string = '';
+  isLoading = true;
+  hasError = false;
+  showSkeleton = true;
+  lazyLoad = true;
 
   private destroy$ = new Subject<void>();
+  private imageLoadTimeout: any;
 
   constructor(
-    private _imageService: ImageService,
-    private _mobileCacheService: MobileImageCacheService,
-    private _cdr: ChangeDetectorRef
+    private mobileImageCache: MobileImageCacheService,
+    private logService: LogService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.initializeOptions();
     this.loadImage();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['src'] && !changes['src'].firstChange) {
-      this.loadImage();
-    }
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    
+    if (this.imageLoadTimeout) {
+      clearTimeout(this.imageLoadTimeout);
+    }
+  }
+
+  private initializeOptions(): void {
+    const defaultOptions: OptimizedImageOptions = {
+      type: this.type,
+      fallbackUrl: '/assets/img/shared/handleImageError.png',
+      showSkeleton: true,
+      lazyLoad: true,
+      priority: 'medium',
+      quality: 'medium'
+    };
+
+    this.options = { ...defaultOptions, ...this.options };
+    this.showSkeleton = this.options.showSkeleton ?? true;
+    this.lazyLoad = this.options.lazyLoad ?? true;
   }
 
   private loadImage(): void {
     if (!this.src) {
-      this.setError();
+      this.handleError();
       return;
     }
 
     this.isLoading = true;
     this.hasError = false;
-    this.canRetry = false;
-    this.imageFullyLoaded = false; // Reset fully loaded flag
-    this._cdr.markForCheck();
+    this.cdr.markForCheck();
 
-    // Use mobile-optimized cache service if available
-    const imageService = this._mobileCacheService.isMobile() ? this._mobileCacheService : this._imageService;
+    // Set loading timeout
+    this.imageLoadTimeout = setTimeout(() => {
+      if (this.isLoading) {
+        this.logService.log(LevelLogEnum.WARN, 'OptimizedImageComponent', 'Image load timeout', { src: this.src });
+        this.handleError();
+      }
+    }, 30000); // 30 seconds timeout
 
-    const options: ImageLoadOptions = {
-      maxRetries: this.maxRetries,
-      retryDelay: 1000,
-      fallbackUrl: this.fallbackSrc,
-      timeout: 10000,
-      showSkeleton: true,
-      useServiceWorkerCache: true,
-      priority: this.priority
-    };
-
-    // Use the appropriate service for loading
-    imageService.loadImage(this.src, options)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (url) => {
-          this.currentSrc = url;
-          // Don't set isLoading to false here - wait for onImageLoad
-          this.hasError = false;
-          this.retryCount = 0;
-          this._cdr.markForCheck();
-        },
-        error: (error) => {
-          this.setError();
+    // Load image using mobile cache service
+    this.mobileImageCache.loadImage(this.src, this.options.type || 'media', {
+      priority: this.options.priority,
+      timeout: 30000
+    }).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (cachedUrl) => {
+        this.imageSrc = cachedUrl;
+        this.isLoading = false;
+        this.hasError = false;
+        
+        if (this.imageLoadTimeout) {
+          clearTimeout(this.imageLoadTimeout);
         }
-      });
-  }
-
-  private setError(): void {
-    this.currentSrc = this.fallbackSrc;
-    this.isLoading = false;
-    this.hasError = true;
-    this.imageFullyLoaded = false;
-    this.canRetry = this.retryCount < this.maxRetries;
-    this._cdr.markForCheck();
-    this.imageError.emit(this.src);
-  }
-
-  retryLoad(): void {
-    if (this.canRetry) {
-      this.retryCount = 0;
-      this.loadImage();
-    }
+        
+        this.cdr.markForCheck();
+        
+        this.logService.log(LevelLogEnum.INFO, 'OptimizedImageComponent', 'Image loaded successfully', { 
+          src: this.src, 
+          type: this.options.type 
+        });
+      },
+      error: (error) => {
+        this.logService.log(LevelLogEnum.ERROR, 'OptimizedImageComponent', 'Failed to load image', { 
+          src: this.src, 
+          error: error.message 
+        });
+        this.handleError();
+      }
+    });
   }
 
   onImageLoad(): void {
-    // Only hide skeleton when image is fully loaded and ready to display
     this.isLoading = false;
     this.hasError = false;
-    this.imageFullyLoaded = true; // Mark as fully loaded
-    this.retryCount = 0;
-    this._cdr.markForCheck();
-    this.imageLoad.emit(this.currentSrc);
+    this.cdr.markForCheck();
   }
 
   onImageError(): void {
-    // Only show error if retries are exhausted
-    if (this.retryCount >= this.maxRetries) {
-      this.setError();
-    } else {
-      // Retry automatically
-      this.retryCount++;
-      this.loadImage();
+    this.handleError();
+  }
+
+  private handleError(): void {
+    this.isLoading = false;
+    this.hasError = true;
+    
+    if (this.imageLoadTimeout) {
+      clearTimeout(this.imageLoadTimeout);
+    }
+
+    // Use fallback image if available
+    if (this.options.fallbackUrl) {
+      this.imageSrc = this.options.fallbackUrl;
+      this.hasError = false;
+    }
+    
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Reload the image (useful for retry functionality)
+   */
+  reload(): void {
+    this.loadImage();
+  }
+
+  /**
+   * Preload this image
+   */
+  preload(): void {
+    if (this.src) {
+      this.mobileImageCache.preloadImages([this.src], this.options.type || 'media', this.options.priority || 'medium');
     }
   }
 } 

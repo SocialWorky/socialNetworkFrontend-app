@@ -23,7 +23,7 @@ import { NotificationNewPublication } from '@shared/interfaces/notificationPubli
 import { Token } from '@shared/interfaces/token.interface';
 import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
-import { PreloadService } from '@shared/services/preload.service';
+import { ImagePreloadService } from '@shared/services/image-preload.service';
 
 @Component({
     selector: 'worky-home',
@@ -96,7 +96,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private _notificationPublicationService: NotificationPublicationService,
     private _pullToRefreshService: PullToRefreshService,
     private _logService: LogService,
-    private _preloadService: PreloadService
+    private _imagePreloadService: ImagePreloadService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Home');
@@ -612,7 +612,20 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     const publications = this.publications();
     if (publications.length === 0) return;
 
-    this._preloadService.preloadForPage('home', { publications });
+    // Preload images for the most recent publications
+    const recentPublications = publications.slice(0, 5); // Preload first 5 publications
+    recentPublications.forEach(publication => {
+      this._imagePreloadService.preloadPublicationImages(publication);
+    });
+
+    // Also preload profile images
+    this._imagePreloadService.preloadImages({
+      profileImages: true,
+      publicationImages: false,
+      mediaImages: false,
+      priority: 'medium',
+      maxImages: 10
+    });
   }
 
   private async handlePullToRefresh(): Promise<void> {

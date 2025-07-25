@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, from, throwError } from 'rxjs';
+import { catchError, map, switchMap, tap, timeout } from 'rxjs/operators';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { ImageService, ImageLoadOptions } from './image.service';
+import { HttpClient } from '@angular/common/http';
 
 export interface MobileCacheConfig {
   maxCacheSize: number;
@@ -9,6 +11,12 @@ export interface MobileCacheConfig {
   preloadThreshold: number;
   compressionEnabled: boolean;
   offlineMode: boolean;
+  persistentCache: boolean;
+  imageTypes: {
+    profile: { maxAge: number; priority: 'high' | 'medium' | 'low' };
+    publication: { maxAge: number; priority: 'high' | 'medium' | 'low' };
+    media: { maxAge: number; priority: 'high' | 'medium' | 'low' };
+  };
 }
 
 export interface CacheMetrics {
@@ -18,6 +26,19 @@ export interface CacheMetrics {
   missRate: number;
   averageLoadTime: number;
   mobileOptimized: boolean;
+  persistentCacheSize: number;
+}
+
+export interface CachedImage {
+  url: string;
+  blob: Blob;
+  type: 'profile' | 'publication' | 'media';
+  size: number;
+  timestamp: number;
+  lastAccessed: number;
+  accessCount: number;
+  etag?: string;
+  expiresAt: number;
 }
 
 @Injectable({
@@ -25,51 +46,76 @@ export interface CacheMetrics {
 })
 export class MobileImageCacheService {
   private readonly MOBILE_CONFIG: MobileCacheConfig = {
-    maxCacheSize: 50 * 1024 * 1024, // 50MB for mobile
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    preloadThreshold: 3, // Preload next 3 images
+    maxCacheSize: 100 * 1024 * 1024, // 100MB for mobile
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    preloadThreshold: 3,
     compressionEnabled: true,
-    offlineMode: false
+    offlineMode: false,
+    persistentCache: true,
+    imageTypes: {
+      profile: { maxAge: 7 * 24 * 60 * 60 * 1000, priority: 'high' }, // 7 days for profile images
+      publication: { maxAge: 14 * 24 * 60 * 60 * 1000, priority: 'medium' }, // 14 days for publication images
+      media: { maxAge: 7 * 24 * 60 * 60 * 1000, priority: 'low' } // 7 days for media
+    }
   };
 
   private readonly DESKTOP_CONFIG: MobileCacheConfig = {
-    maxCacheSize: 100 * 1024 * 1024, // 100MB for desktop
-    maxAge: 14 * 24 * 60 * 60 * 1000, // 14 days
-    preloadThreshold: 5, // Preload next 5 images
+    maxCacheSize: 200 * 1024 * 1024, // 200MB for desktop
+    maxAge: 60 * 24 * 60 * 60 * 1000, // 60 days
+    preloadThreshold: 5,
     compressionEnabled: false,
-    offlineMode: false
+    offlineMode: false,
+    persistentCache: true,
+    imageTypes: {
+      profile: { maxAge: 14 * 24 * 60 * 60 * 1000, priority: 'high' },
+      publication: { maxAge: 30 * 24 * 60 * 60 * 1000, priority: 'medium' },
+      media: { maxAge: 14 * 24 * 60 * 60 * 1000, priority: 'low' }
+    }
   };
 
   private isMobileDevice = false;
+  private db: IDBDatabase | null = null;
+  private readonly DB_NAME = 'MobileImageCacheDB';
+  private readonly DB_VERSION = 1;
+  private readonly STORE_NAME = 'images';
+  
   private cacheMetrics = new BehaviorSubject<CacheMetrics>({
     totalImages: 0,
     cacheSize: 0,
     hitRate: 0,
     missRate: 0,
     averageLoadTime: 0,
-    mobileOptimized: false
+    mobileOptimized: false,
+    persistentCacheSize: 0
   });
 
   private cacheHits = 0;
   private cacheMisses = 0;
   private loadTimes: number[] = [];
+  private memoryCache = new Map<string, CachedImage>();
 
   constructor(
     private imageService: ImageService,
-    private logService: LogService
+    private logService: LogService,
+    private http: HttpClient
   ) {
     this.initializeService();
   }
 
-  private initializeService(): void {
-    // Detect mobile device
+  private async initializeService(): Promise<void> {
     this.isMobileDevice = this.detectMobileDevice();
+    
+    // Initialize IndexedDB
+    await this.initDatabase();
     
     // Setup mobile optimizations
     this.setupMobileOptimizations();
     
     // Monitor cache performance
     this.startCacheMonitoring();
+    
+    // Load cache metrics
+    await this.updateMetrics();
     
     this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Service initialized', {
       isMobile: this.isMobileDevice,
@@ -85,21 +131,39 @@ export class MobileImageCacheService {
     return this.isMobileDevice ? this.MOBILE_CONFIG : this.DESKTOP_CONFIG;
   }
 
+  private async initDatabase(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        this.db = request.result;
+        resolve();
+      };
+
+      request.onupgradeneeded = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        
+        if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+          const store = db.createObjectStore(this.STORE_NAME, { keyPath: 'url' });
+          store.createIndex('type', 'type', { unique: false });
+          store.createIndex('timestamp', 'timestamp', { unique: false });
+          store.createIndex('lastAccessed', 'lastAccessed', { unique: false });
+          store.createIndex('expiresAt', 'expiresAt', { unique: false });
+        }
+      };
+    });
+  }
+
   private setupMobileOptimizations(): void {
     if (this.isMobileDevice) {
-      // Enable aggressive caching for mobile
       this.enableAggressiveCaching();
-      
-      // Setup connection monitoring
       this.setupConnectionMonitoring();
-      
-      // Enable offline mode detection
       this.setupOfflineModeDetection();
     }
   }
 
   private enableAggressiveCaching(): void {
-    // Configure Service Worker for aggressive caching
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then(registration => {
         this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Aggressive caching enabled for mobile');
@@ -115,7 +179,6 @@ export class MobileImageCacheService {
         this.adjustCacheStrategy(connection.effectiveType);
       });
       
-      // Initial adjustment
       this.adjustCacheStrategy(connection.effectiveType);
     }
   }
@@ -162,61 +225,155 @@ export class MobileImageCacheService {
   }
 
   /**
-   * Load image with mobile optimizations
+   * Load image with mobile optimizations and persistent cache
    */
-  loadImage(imageUrl: string, options: ImageLoadOptions = {}): Observable<string> {
+  loadImage(imageUrl: string, imageType: 'profile' | 'publication' | 'media' = 'media', options: ImageLoadOptions = {}): Observable<string> {
     const startTime = performance.now();
     const config = this.getCurrentConfig();
     
-    // Mobile-specific options
-    const mobileOptions: ImageLoadOptions = {
-      ...options,
-      useServiceWorkerCache: true,
-      timeout: this.isMobileDevice ? 15000 : 10000,
-      maxRetries: this.isMobileDevice ? 2 : 3
-    };
+    // Check memory cache first
+    if (this.memoryCache.has(imageUrl)) {
+      const cached = this.memoryCache.get(imageUrl)!;
+      if (this.isCacheValid(cached)) {
+        this.updateAccessMetrics(cached);
+        this.cacheHits++;
+        this.updateMetrics();
+        this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image loaded from memory cache', { url: imageUrl, type: imageType });
+        return of(URL.createObjectURL(cached.blob));
+      } else {
+        this.memoryCache.delete(imageUrl);
+      }
+    }
 
-    return this.imageService.loadImage(imageUrl, mobileOptions).pipe(
-      // Track performance
-      (source) => {
-        return new Observable(observer => {
-          source.subscribe({
-            next: (url) => {
-              const loadTime = performance.now() - startTime;
-              this.trackLoadTime(loadTime);
-              this.cacheHits++;
-              this.updateMetrics();
-              observer.next(url);
-              observer.complete();
-            },
-            error: (error) => {
-              const loadTime = performance.now() - startTime;
-              this.trackLoadTime(loadTime);
+    // Check persistent cache
+    return from(this.getFromPersistentCache(imageUrl)).pipe(
+      switchMap(cachedImage => {
+        if (cachedImage && this.isCacheValid(cachedImage)) {
+          this.memoryCache.set(imageUrl, cachedImage);
+          this.updateAccessMetrics(cachedImage);
+          this.cacheHits++;
+          this.updateMetrics();
+          this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image loaded from persistent cache', { url: imageUrl, type: imageType });
+          return of(URL.createObjectURL(cachedImage.blob));
+        }
+
+        // Load from network and cache
+        return this.loadFromNetwork(imageUrl, imageType, options).pipe(
+          tap(cachedImage => {
+            if (cachedImage) {
+              this.memoryCache.set(imageUrl, cachedImage);
               this.cacheMisses++;
               this.updateMetrics();
-              observer.error(error);
             }
-          });
-        });
-      }
+          }),
+          map(cachedImage => URL.createObjectURL(cachedImage.blob))
+        );
+      }),
+      catchError(error => {
+        this.cacheMisses++;
+        this.updateMetrics();
+        this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Error loading image', { url: imageUrl, error });
+        return throwError(() => error);
+      })
     );
+  }
+
+  private async getFromPersistentCache(imageUrl: string): Promise<CachedImage | null> {
+    if (!this.db) return null;
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const request = store.get(imageUrl);
+
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  private loadFromNetwork(imageUrl: string, imageType: 'profile' | 'publication' | 'media', options: ImageLoadOptions): Observable<CachedImage> {
+    const config = this.getCurrentConfig();
+    const imageConfig = config.imageTypes[imageType];
+
+    return this.http.get(imageUrl, { responseType: 'blob' }).pipe(
+      timeout(options.timeout || 30000),
+      map(blob => {
+        const cachedImage: CachedImage = {
+          url: imageUrl,
+          blob,
+          type: imageType,
+          size: blob.size,
+          timestamp: Date.now(),
+          lastAccessed: Date.now(),
+          accessCount: 1,
+          expiresAt: Date.now() + imageConfig.maxAge
+        };
+
+        // Store in persistent cache
+        this.storeInPersistentCache(cachedImage);
+
+        this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image loaded from network and cached', { 
+          url: imageUrl, 
+          type: imageType,
+          size: blob.size 
+        });
+
+        return cachedImage;
+      }),
+      catchError(error => {
+        this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Failed to load image from network', { 
+          url: imageUrl, 
+          error: error.message 
+        });
+        return throwError(() => error);
+      })
+    );
+  }
+
+  private async storeInPersistentCache(cachedImage: CachedImage): Promise<void> {
+    if (!this.db) return;
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const request = store.put(cachedImage);
+
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  private isCacheValid(cachedImage: CachedImage): boolean {
+    return Date.now() < cachedImage.expiresAt;
+  }
+
+  private updateAccessMetrics(cachedImage: CachedImage): void {
+    cachedImage.lastAccessed = Date.now();
+    cachedImage.accessCount++;
+    
+    // Update in persistent cache
+    this.storeInPersistentCache(cachedImage);
   }
 
   /**
    * Preload images for better mobile experience
    */
-  preloadImages(imageUrls: string[], priority: 'high' | 'medium' | 'low' = 'medium'): void {
+  preloadImages(imageUrls: string[], imageType: 'profile' | 'publication' | 'media' = 'media', priority: 'high' | 'medium' | 'low' = 'medium'): void {
     const config = this.getCurrentConfig();
     const urlsToPreload = imageUrls.slice(0, config.preloadThreshold);
     
     this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Preloading images', {
       total: imageUrls.length,
       preloading: urlsToPreload.length,
+      type: imageType,
       priority
     });
 
     urlsToPreload.forEach(url => {
-      this.imageService.preloadImage(url, { priority });
+      this.loadImage(url, imageType, { priority }).subscribe({
+        next: () => this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image preloaded', { url, type: imageType }),
+        error: (error) => this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Image preload failed', { url, error })
+      });
     });
   }
 
@@ -230,21 +387,27 @@ export class MobileImageCacheService {
   /**
    * Clear cache
    */
-  clearCache(): void {
-    this.imageService.clearCache();
+  async clearCache(): Promise<void> {
+    this.memoryCache.clear();
     this.cacheHits = 0;
     this.cacheMisses = 0;
     this.loadTimes = [];
-    this.updateMetrics();
     
+    if (this.db) {
+      const transaction = this.db.transaction([this.STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(this.STORE_NAME);
+      await store.clear();
+    }
+    
+    await this.updateMetrics();
     this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Cache cleared');
   }
 
   /**
    * Get cache statistics
    */
-  getCacheStats(): any {
-    const stats = this.imageService.getCacheStats();
+  async getCacheStats(): Promise<any> {
+    const stats = await this.getPersistentCacheStats();
     const config = this.getCurrentConfig();
     
     return {
@@ -255,18 +418,43 @@ export class MobileImageCacheService {
     };
   }
 
+  private async getPersistentCacheStats(): Promise<any> {
+    if (!this.db) return { size: 0, items: 0 };
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        const items = request.result as CachedImage[];
+        const totalSize = items.reduce((sum, item) => sum + item.size, 0);
+        resolve({
+          size: totalSize,
+          items: items.length,
+          byType: {
+            profile: items.filter(item => item.type === 'profile').length,
+            publication: items.filter(item => item.type === 'publication').length,
+            media: items.filter(item => item.type === 'media').length
+          }
+        });
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
   /**
    * Optimize cache for mobile
    */
-  optimizeForMobile(): void {
+  async optimizeForMobile(): Promise<void> {
     if (!this.isMobileDevice) return;
     
-    // Clear old cache entries
-    this.cleanupOldCache();
+    // Cleanup old cache entries
+    await this.cleanupOldCache();
     
     // Compress cached images if enabled
     if (this.getCurrentConfig().compressionEnabled) {
-      this.compressCachedImages();
+      await this.compressCachedImages();
     }
     
     this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Mobile optimization completed');
@@ -285,8 +473,8 @@ export class MobileImageCacheService {
   /**
    * Monitor cache size
    */
-  private monitorCacheSize(): void {
-    const stats = this.imageService.getCacheStats();
+  private async monitorCacheSize(): Promise<void> {
+    const stats = await this.getPersistentCacheStats();
     const config = this.getCurrentConfig();
     
     if (stats.size > config.maxCacheSize) {
@@ -296,22 +484,40 @@ export class MobileImageCacheService {
       });
       
       // Trigger cleanup
-      this.cleanupOldCache();
+      await this.cleanupOldCache();
     }
   }
 
   /**
    * Cleanup old cache entries
    */
-  private cleanupOldCache(): void {
-    // This would be implemented based on your cache implementation
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Cache cleanup triggered');
+  private async cleanupOldCache(): Promise<void> {
+    if (!this.db) return;
+
+    const transaction = this.db.transaction([this.STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(this.STORE_NAME);
+    const index = store.index('expiresAt');
+    
+    const request = index.openCursor();
+    
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (cursor) {
+        const cachedImage = cursor.value as CachedImage;
+        if (Date.now() > cachedImage.expiresAt) {
+          cursor.delete();
+        }
+        cursor.continue();
+      }
+    };
+
+    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Cache cleanup completed');
   }
 
   /**
    * Compress cached images
    */
-  private compressCachedImages(): void {
+  private async compressCachedImages(): Promise<void> {
     // This would be implemented based on your image compression strategy
     this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image compression triggered');
   }
@@ -331,7 +537,7 @@ export class MobileImageCacheService {
   /**
    * Update metrics
    */
-  private updateMetrics(): void {
+  private async updateMetrics(): Promise<void> {
     const totalRequests = this.cacheHits + this.cacheMisses;
     const hitRate = totalRequests > 0 ? this.cacheHits / totalRequests : 0;
     const missRate = totalRequests > 0 ? this.cacheMisses / totalRequests : 0;
@@ -339,15 +545,16 @@ export class MobileImageCacheService {
       ? this.loadTimes.reduce((a, b) => a + b, 0) / this.loadTimes.length 
       : 0;
 
-    const stats = this.imageService.getCacheStats();
+    const stats = await this.getPersistentCacheStats();
     
     this.cacheMetrics.next({
-      totalImages: stats.size,
+      totalImages: stats.items,
       cacheSize: stats.size,
       hitRate,
       missRate,
       averageLoadTime,
-      mobileOptimized: this.isMobileDevice
+      mobileOptimized: this.isMobileDevice,
+      persistentCacheSize: stats.size
     });
   }
 
@@ -368,8 +575,8 @@ export class MobileImageCacheService {
   /**
    * Force cache optimization
    */
-  forceOptimization(): void {
-    this.optimizeForMobile();
+  async forceOptimization(): Promise<void> {
+    await this.optimizeForMobile();
     this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Forced optimization completed');
   }
 } 

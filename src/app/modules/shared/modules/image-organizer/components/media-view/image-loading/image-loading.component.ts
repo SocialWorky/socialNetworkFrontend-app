@@ -1,8 +1,10 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, ChangeDetectorRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { ImageOrganizer } from '../../../interfaces/image-organizer.interface';
 import { environment } from '@env/environment';
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { UtilityService } from '@shared/services/utility.service';
+import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 
 @Component({
     selector: 'worky-image-loading',
@@ -10,7 +12,7 @@ import { UtilityService } from '@shared/services/utility.service';
     styleUrls: ['./image-loading.component.scss'],
     standalone: false
 })
-export class ImageLoadingComponent implements OnInit, OnChanges {
+export class ImageLoadingComponent implements OnInit, OnChanges, OnDestroy {
   get isMobile(): boolean {
     return this._deviceDetectionService.isMobile();
   }
@@ -26,16 +28,27 @@ export class ImageLoadingComponent implements OnInit, OnChanges {
 
   urlFilesService = environment.APIFILESERVICE;
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private _deviceDetectionService: DeviceDetectionService,
     private _utilityService: UtilityService,
-    private _cdr: ChangeDetectorRef
+    private _cdr: ChangeDetectorRef,
+    private _mobileCacheService: MobileImageCacheService
   ) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // Preload all images in the modal for better performance
+    this.preloadModalImages();
+  }
 
   ngOnChanges(): void {
     this.updateSelectedImage();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   updateSelectedImage(): void {
@@ -144,5 +157,33 @@ export class ImageLoadingComponent implements OnInit, OnChanges {
     const imagePath = image.urlThumbnail.startsWith('/') ? image.urlThumbnail : '/' + image.urlThumbnail;
     
     return baseUrl + imagePath;
+  }
+
+  /**
+   * Preload all images in the modal for better performance
+   */
+  private preloadModalImages(): void {
+    if (!this._mobileCacheService.isMobile()) return;
+
+    const imageUrls: string[] = [];
+
+    // Collect all image URLs from the modal
+    this.images.forEach(image => {
+      if (image.type === 'image') {
+        const compressedUrl = this.getImageUrl(image, 'compressed');
+        const thumbnailUrl = this.getImageUrl(image, 'thumbnail');
+        
+        if (compressedUrl) imageUrls.push(compressedUrl);
+        if (thumbnailUrl) imageUrls.push(thumbnailUrl);
+      } else if (image.type === 'video' && image.urlThumbnail) {
+        const posterUrl = this.getVideoPosterUrl(image);
+        if (posterUrl) imageUrls.push(posterUrl);
+      }
+    });
+
+    // Preload images with high priority since they're already visible
+    if (imageUrls.length > 0) {
+      this._mobileCacheService.preloadImages(imageUrls, 'publication', 'high');
+    }
   }
 }

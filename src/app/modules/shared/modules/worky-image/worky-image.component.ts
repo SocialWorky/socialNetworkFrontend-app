@@ -131,17 +131,21 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
     };
 
     // Use the appropriate service for loading
-    imageService.loadImage(this.src, options)
+    const imageObservable = this._mobileCacheService.isMobile() 
+      ? this._mobileCacheService.loadImage(this.src, 'media', options)
+      : this._imageService.loadImage(this.src, options);
+
+    imageObservable
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (url) => {
+        next: (url: string) => {
           this.currentSrc = url;
           // Don't set isLoading to false here - wait for onImageLoad
           this.hasError = false;
           this.retryCount = 0;
           this._cdr.markForCheck();
         },
-        error: (error) => {
+        error: (error: any) => {
           this.setError();
         }
       });

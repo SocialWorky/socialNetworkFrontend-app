@@ -1,7 +1,9 @@
-import { ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnInit, OnDestroy } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { ImageLoadOptions } from '../../services/image.service';
+import { MobileImageCacheService } from '../../services/mobile-image-cache.service';
 
 @Component({
     selector: 'worky-avatar',
@@ -9,7 +11,7 @@ import { ImageLoadOptions } from '../../services/image.service';
     styleUrls: ['./worky-avatar.component.scss'],
     standalone: false
 })
-export class WorkyAvatarComponent implements OnInit, OnChanges {
+export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
   token?: Token;
 
   userAvatar = '';
@@ -24,12 +26,18 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   isGeneratedAvatar = false;
 
+  isLoading = true;
+
+  hasError = false;
+
   imageOptions: ImageLoadOptions = {
     maxRetries: 2,
     retryDelay: 500,
     timeout: 5000,
     fallbackUrl: '/assets/images/avatar-placeholder.jpg'
   };
+
+  private destroy$ = new Subject<void>();
 
   private _size = 30;
 
@@ -57,7 +65,11 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
     return this._size;
   }
 
-  constructor(private _authService: AuthService, private _cdr: ChangeDetectorRef) {}
+  constructor(
+    private _authService: AuthService, 
+    private _cdr: ChangeDetectorRef,
+    private _mobileCacheService: MobileImageCacheService
+  ) {}
 
   ngOnInit() {
     this.token = this._authService.getDecodedToken()!;
@@ -70,6 +82,11 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   ngOnChanges(): void {
     this.loadImageUser();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private loadImageUser() {
@@ -95,17 +112,45 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   private validateAndSetImage(imageUrl: string): void {
     this.isGeneratedAvatar = false;
-    const img = new Image();
-    img.src = imageUrl;
+    this.isLoading = true;
+    this.hasError = false;
+    this._cdr.markForCheck();
 
-    img.onload = () => {
-      this.imageData = imageUrl;
-      this._cdr.markForCheck();
-    };
+    // Use mobile cache service for better performance
+    if (this._mobileCacheService.isMobile()) {
+      this._mobileCacheService.loadImage(imageUrl, 'profile', this.imageOptions)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (cachedUrl) => {
+            this.imageData = cachedUrl;
+            this.isLoading = false;
+            this.hasError = false;
+            this._cdr.markForCheck();
+          },
+          error: () => {
+            this.isLoading = false;
+            this.hasError = true;
+            this.generateAvatar();
+          }
+        });
+    } else {
+      // Fallback for desktop
+      const img = new Image();
+      img.src = imageUrl;
 
-    img.onerror = () => {
-      this.generateAvatar();
-    };
+      img.onload = () => {
+        this.imageData = imageUrl;
+        this.isLoading = false;
+        this.hasError = false;
+        this._cdr.markForCheck();
+      };
+
+      img.onerror = () => {
+        this.isLoading = false;
+        this.hasError = true;
+        this.generateAvatar();
+      };
+    }
   }
 
   onImageError(): void {

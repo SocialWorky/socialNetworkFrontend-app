@@ -21,6 +21,7 @@ import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget
 import { environment } from '@env/environment';
 import { DevCacheService } from '@shared/services/dev-cache.service';
 import { CacheService } from '@shared/services/cache.service';
+import { CacheOptimizationService } from '@shared/services/cache-optimization.service';
 
 @Component({
     selector: 'worky-root',
@@ -56,7 +57,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private _emojiEventsService: EmojiEventsService,
     private _widgetConfigService: WidgetConfigService,
     private devCacheService: DevCacheService,
-    private cacheService: CacheService
+    private cacheService: CacheService,
+    private _cacheOptimizationService: CacheOptimizationService
   ) {
     this._notificationUsersService.setupInactivityListeners();
     if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();
