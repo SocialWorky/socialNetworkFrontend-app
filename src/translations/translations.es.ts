@@ -54,6 +54,7 @@ export const translations = {
   'button.ok': 'Aceptar',
   'button.register': 'Registro',
   'button.reset': 'Restablecer',
+  'button.close': 'Cerrar',
   
   // NAVBAR COMPONENT
   'navbar.logout': 'Cerrar sesión',
@@ -368,10 +369,32 @@ export const translations = {
   'admin.manageReactions.error.loading.title': 'Error al cargar reacciones',
   'admin.manageReactions.retry': 'Intentar de nuevo',
   
+  // ADMIN MANAGE REACTIONS ERRORS
+  'admin.manageReactions.errors.title': 'Error',
+  'admin.manageReactions.errors.uploadError': 'Error al subir archivo, intente de nuevo con otro formato o tamaño.',
+  'admin.manageReactions.errors.requiredFields': 'Por favor, completa todos los campos requeridos.',
+  'admin.manageReactions.errors.createError': 'Error al crear la reacción. Por favor, intenta de nuevo.',
+  
+  // ADMIN MANAGE REACTIONS LOADING
+  'admin.manageReactions.loading.creating': 'Creando reacción...',
+  
+  // ADMIN MANAGE REACTIONS SUCCESS
+  'admin.manageReactions.success.title': 'Éxito',
+  'admin.manageReactions.success.created': 'Reacción creada exitosamente',
+  'admin.manageReactions.success.deleted': 'Reacción eliminada exitosamente',
+  
   // WEATHER WIDGET
   'weather.currentTemperature': 'Temperatura Actual',
   'weather.min': 'Min',
   'weather.max': 'Max',
+  
+  // IMAGE UPLOAD MODAL
+  'imageUpload.dragDropText': 'Arrastra tus archivos aquí o haz clic para seleccionar',
+  'imageUpload.selectedFiles': 'Archivos seleccionados',
+  'imageUpload.of': 'de',
+  'imageUpload.upload': 'Subir',
+  'imageUpload.imagePreview': 'Vista previa de imagen',
+  'imageUpload.fileTypeNotAllowed': 'Tipo de archivo no permitido',
   
   // ADMIN CUSTOM CSS
   'admin.customCss.editor.title': 'Editor de Código CSS',

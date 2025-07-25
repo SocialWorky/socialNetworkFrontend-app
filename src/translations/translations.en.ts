@@ -54,6 +54,7 @@ export const translations = {
   'button.ok': 'OK',
   'button.register': 'Register',
   'button.reset': 'Reset',
+  'button.close': 'Close',
   
   // NAVBAR COMPONENT
   'navbar.logout': 'Logout',
@@ -294,8 +295,10 @@ export const translations = {
   // IMAGE UPLOAD MODAL
   'imageUpload.dragDropText': 'Drag your files here or click to select',
   'imageUpload.selectedFiles': 'Selected files',
+  'imageUpload.of': 'of',
   'imageUpload.upload': 'Upload',
   'imageUpload.imagePreview': 'Image preview',
+  'imageUpload.fileTypeNotAllowed': 'File type not allowed',
   
   // ===== FORM BUILDER MODULE =====
   // FORM BUILDER COMPONENT
@@ -397,6 +400,8 @@ export const translations = {
   'admin.manageReactions.create.emoji.placeholder': '😍 or https://example.com/image.png',
   'admin.manageReactions.create.emoji.required': 'Emoji is required',
   'admin.manageReactions.create.uploadImage': 'Upload Image',
+  'admin.manageReactions.upload.text': 'Click to select an image or drag here',
+  'admin.manageReactions.create.button': 'Create Reaction',
   'admin.manageReactions.list.title': 'Available Reactions',
   'admin.manageReactions.list.subtitle': 'List of all custom reactions created',
   'admin.manageReactions.list.unit': 'reactions',
@@ -407,6 +412,20 @@ export const translations = {
   'admin.manageReactions.empty.title': 'No reactions created',
   'admin.manageReactions.error.loading.title': 'Error loading reactions',
   'admin.manageReactions.retry': 'Try again',
+  
+  // ADMIN MANAGE REACTIONS ERRORS
+  'admin.manageReactions.errors.title': 'Error',
+  'admin.manageReactions.errors.uploadError': 'Error uploading file. Please try again with a different format or size.',
+  'admin.manageReactions.errors.requiredFields': 'Please complete all required fields.',
+  'admin.manageReactions.errors.createError': 'Error creating reaction. Please try again.',
+  
+  // ADMIN MANAGE REACTIONS LOADING
+  'admin.manageReactions.loading.creating': 'Creating reaction...',
+  
+  // ADMIN MANAGE REACTIONS SUCCESS
+  'admin.manageReactions.success.title': 'Success',
+  'admin.manageReactions.success.created': 'Reaction created successfully',
+  'admin.manageReactions.success.deleted': 'Reaction deleted successfully',
   
   // WEATHER WIDGET
   'weather.currentTemperature': 'Current Temperature',

@@ -19,7 +19,7 @@
   </div>
 
   <div class="buttons">
-    <p>{{ 'imageUpload.selectedFiles' | workyTranslations }} {{ selectedFiles.length }} de {{ maxFiles }}</p>
+    <p>{{ 'imageUpload.selectedFiles' | workyTranslations }} {{ selectedFiles.length }} {{ 'imageUpload.of' | workyTranslations }} {{ maxFiles }}</p>
     <worky-buttons *ngIf="selectedFiles.length"
       [workyButtonType]="WorkyButtonType.Outline"
       [theme]="WorkyButtonTheme.Accent"

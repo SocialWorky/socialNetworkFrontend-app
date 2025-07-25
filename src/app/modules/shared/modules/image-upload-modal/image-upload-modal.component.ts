@@ -68,7 +68,7 @@ export class ImageUploadModalComponent implements OnInit {
         reader.readAsDataURL(file);
         validFiles.push(file);
       } else {
-        this.showAlert('Tipo de archivo no permitido: ' + file.name);
+        this.showAlert('imageUpload.fileTypeNotAllowed' + ': ' + file.name);
         this.loading = false;
       }
 
@@ -87,7 +87,7 @@ export class ImageUploadModalComponent implements OnInit {
       Alerts.ERROR,
       Position.CENTER,
       true,
-      'Cerrar',
+      'button.close',
     );
   }
 

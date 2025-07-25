@@ -237,12 +237,12 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
               { error: String(err), fileName: this.imageFile?.name }
             );
             this.loadReactionsButtons = false;
-            this.error = 'Error al subir archivo, intente de nuevo. Con otro formato o tamaño.';
+            this.error = translations['admin.manageReactions.errors.uploadError'];
             this._cdr.markForCheck();
 
             this._alertService.showAlert(
-              'Error',
-              'Error al subir archivo, intente de nuevo. Con otro formato o tamaño.',
+              translations['admin.manageReactions.errors.title'],
+              translations['admin.manageReactions.errors.uploadError'],
               Alerts.ERROR,
               Position.CENTER,
               true,
@@ -255,7 +255,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
       }
     } else {
       this.loadReactionsButtons = false;
-      this.error = 'Por favor, completa todos los campos requeridos.';
+      this.error = translations['admin.manageReactions.errors.requiredFields'];
       this._cdr.markForCheck();
     }
   }
@@ -269,7 +269,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
 
   async submitReaction() {
     const loadingReaction = await this._loadingCtrl.create({
-      message: 'Creating reaction...',
+      message: translations['admin.manageReactions.loading.creating'],
     });
 
     await loadingReaction.present();
@@ -281,8 +281,8 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this._alertService.showAlert(
-            'Exito',
-            'Reaction created successfully',
+            translations['admin.manageReactions.success.title'],
+            translations['admin.manageReactions.success.created'],
             Alerts.SUCCESS,
             Position.CENTER,
             true,
@@ -307,7 +307,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
             'Failed to create reaction',
             { error: String(err), reactionData: this.reactionForm.value }
           );
-          this.error = 'Error al crear la reacción. Por favor, intenta de nuevo.';
+          this.error = translations['admin.manageReactions.errors.createError'];
           loadingReaction.dismiss();
           this.loadReactionsButtons = false;
           this._cdr.markForCheck();
@@ -322,8 +322,8 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this._alertService.showAlert(
-            'Exito',
-            'Reaction deleted successfully',
+            translations['admin.manageReactions.success.title'],
+            translations['admin.manageReactions.success.deleted'],
             Alerts.SUCCESS,
             Position.CENTER,
             true,
