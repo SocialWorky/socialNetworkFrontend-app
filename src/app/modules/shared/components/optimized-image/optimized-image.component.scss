@@ -24,22 +24,72 @@
   }
 
   &.loading {
-    .loading-spinner {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .image-skeleton {
+      display: block;
       width: 100%;
       height: 100%;
-      background-color: colors.$worky-color-light;
-      border-radius: 4px;
 
-      .spinner {
-        width: 20px;
-        height: 20px;
-        border: 2px solid colors.$worky-color-navy;
-        border-top: 2px solid transparent;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
+      .skeleton-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: colors.$worky-color-light;
+        border-radius: 4px;
+        overflow: hidden;
+
+        &.rounded-lg {
+          border-radius: 8px;
+        }
+
+        .w-full {
+          width: 100%;
+        }
+
+        .h-full {
+          height: 100%;
+        }
+
+        .bg-gray-200 {
+          background-color: #e5e7eb;
+        }
+
+        .dark\:bg-gray-700 {
+          @media (prefers-color-scheme: dark) {
+            background-color: #374151;
+          }
+        }
+
+        .flex {
+          display: flex;
+        }
+
+        .items-center {
+          align-items: center;
+        }
+
+        .justify-center {
+          justify-content: center;
+        }
+
+        .w-8 {
+          width: 2rem;
+        }
+
+        .h-8 {
+          height: 2rem;
+        }
+
+        .text-gray-300 {
+          color: #d1d5db;
+        }
+
+        .dark\:text-gray-600 {
+          @media (prefers-color-scheme: dark) {
+            color: #4b5563;
+          }
+        }
       }
 
       .loading-text {
@@ -54,6 +104,7 @@
   &.error {
     .error-placeholder {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       width: 100%;
@@ -61,31 +112,43 @@
       background-color: colors.$worky-color-light;
       border-radius: 4px;
       color: colors.$worky-color-navy;
+      padding: 1rem;
+      text-align: center;
 
       i {
-        font-size: 24px;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.7;
+      }
+
+      .error-text {
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.75rem;
+        color: colors.$worky-color-navy;
       }
 
       .retry-button {
         display: flex;
         align-items: center;
-        gap: 4px;
-        padding: 8px 16px;
-                 background-color: colors.$worky-color-primary;
-         color: white;
-         border: none;
-         border-radius: 4px;
-         font-size: 12px;
-         cursor: pointer;
-         transition: background-color 0.2s ease;
-         margin-top: 8px;
+        gap: 0.25rem;
+        padding: 0.5rem 1rem;
+        background-color: colors.$worky-color-primary;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        margin-top: 0.5rem;
 
-         &:hover {
-           background-color: colors.$worky-color-grey;
-         }
+        &:hover {
+          background-color: colors.$worky-color-grey;
+        }
 
         i {
-          font-size: 16px;
+          font-size: 1rem;
+          margin: 0;
           opacity: 1;
         }
       }
@@ -97,24 +160,32 @@
   position: absolute;
   top: 8px;
   right: 8px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  border-radius: 12px;
-  font-size: 10px;
-  z-index: 10;
 
   i {
-    font-size: 12px;
+    font-size: 1rem;
   }
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+// Animación de pulse para el skeleton
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @media (max-width: 768px) {

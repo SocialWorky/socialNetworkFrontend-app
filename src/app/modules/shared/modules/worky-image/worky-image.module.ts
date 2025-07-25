@@ -3,11 +3,9 @@ import { CommonModule } from '@angular/common';
 import { WorkyImageComponent } from './worky-image.component';
 
 @NgModule({
-  declarations: [
-    WorkyImageComponent
-  ],
   imports: [
-    CommonModule
+    CommonModule,
+    WorkyImageComponent // Importar el componente standalone
   ],
   exports: [
     WorkyImageComponent

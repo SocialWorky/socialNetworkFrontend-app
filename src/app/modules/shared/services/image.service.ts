@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError, timer } from 'rxjs';
-import { retryWhen, delayWhen, take, catchError, switchMap } from 'rxjs/operators';
+import { retryWhen, delayWhen, take, catchError, switchMap, timeout } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 
@@ -9,6 +9,14 @@ export interface ImageLoadOptions {
   retryDelay?: number;
   fallbackUrl?: string;
   timeout?: number;
+  showSkeleton?: boolean;
+}
+
+export interface ImageLoadResult {
+  url: string;
+  success: boolean;
+  error?: string;
+  retryCount: number;
 }
 
 @Injectable({
@@ -18,8 +26,9 @@ export class ImageService {
   private readonly DEFAULT_OPTIONS: ImageLoadOptions = {
     maxRetries: 3,
     retryDelay: 1000,
-    fallbackUrl: '/assets/images/placeholder.jpg',
-    timeout: 10000
+    fallbackUrl: '/assets/img/shared/handleImageError.png',
+    timeout: 10000,
+    showSkeleton: true
   };
 
   private imageCache = new Map<string, string>();
@@ -53,6 +62,7 @@ export class ImageService {
 
     // For images, we'll use the original URL directly with retry logic
     return of(imageUrl).pipe(
+      timeout(finalOptions.timeout!),
       switchMap(() => {
         this.imageCache.set(imageUrl, imageUrl);
         loadingSubject.next(false);
@@ -84,6 +94,62 @@ export class ImageService {
   }
 
   /**
+   * Load image with skeleton support and better error handling
+   */
+  loadImageWithSkeleton(imageUrl: string, options: ImageLoadOptions = {}): Observable<ImageLoadResult> {
+    const finalOptions = { ...this.DEFAULT_OPTIONS, ...options };
+    
+    return new Observable(observer => {
+      let retryCount = 0;
+      
+      const attemptLoad = () => {
+        this.loadImage(imageUrl, finalOptions).subscribe({
+          next: (url) => {
+            observer.next({
+              url,
+              success: true,
+              retryCount
+            });
+            observer.complete();
+          },
+          error: (error) => {
+            retryCount++;
+            
+            if (retryCount <= finalOptions.maxRetries!) {
+              this.logService.log(LevelLogEnum.WARN, 'ImageService', 'Retrying image load', {
+                url: imageUrl,
+                retryCount,
+                maxRetries: finalOptions.maxRetries
+              });
+              
+              // Retry after delay
+              timer(finalOptions.retryDelay!).subscribe(() => {
+                attemptLoad();
+              });
+            } else {
+              this.logService.log(LevelLogEnum.ERROR, 'ImageService', 'Image load failed after all retries', {
+                url: imageUrl,
+                retryCount,
+                error: error.message
+              });
+              
+              observer.next({
+                url: finalOptions.fallbackUrl || '',
+                success: false,
+                error: error.message,
+                retryCount
+              });
+              observer.complete();
+            }
+          }
+        });
+      };
+      
+      attemptLoad();
+    });
+  }
+
+  /**
    * Preload image without blocking UI
    */
   preloadImage(imageUrl: string, options: ImageLoadOptions = {}): void {
@@ -94,25 +160,37 @@ export class ImageService {
   }
 
   /**
+   * Check if image URL is valid and accessible
+   */
+  validateImageUrl(imageUrl: string): Observable<boolean> {
+    if (!imageUrl) {
+      return of(false);
+    }
+
+    return this.http.head(imageUrl, { observe: 'response' }).pipe(
+      switchMap(response => {
+        const contentType = response.headers.get('content-type');
+        return of(contentType?.startsWith('image/') || false);
+      }),
+      catchError(() => of(false))
+    );
+  }
+
+  /**
    * Clear image cache
    */
   clearCache(): void {
-    this.imageCache.forEach(url => URL.revokeObjectURL(url));
     this.imageCache.clear();
-    this.loadingImages.clear();
+    this.logService.log(LevelLogEnum.INFO, 'ImageService', 'Image cache cleared');
   }
 
   /**
-   * Get loading state for an image
+   * Get cache statistics
    */
-  getLoadingState(imageUrl: string): Observable<boolean> {
-    return this.loadingImages.get(imageUrl)?.asObservable() || of(false);
-  }
-
-  /**
-   * Check if image is cached
-   */
-  isCached(imageUrl: string): boolean {
-    return this.imageCache.has(imageUrl);
+  getCacheStats(): { size: number; entries: string[] } {
+    return {
+      size: this.imageCache.size,
+      entries: Array.from(this.imageCache.keys())
+    };
   }
 } 
