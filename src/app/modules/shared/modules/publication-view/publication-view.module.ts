@@ -16,6 +16,7 @@ import { MaterialModule } from '@shared/modules/material/material.module';
 import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
 import { ProcessingMediaModule } from '@shared/modules/processing-media/processing-media.module';
 import { OptimizedImageComponent } from '../../components/optimized-image/optimized-image.component';
+import { OptimizedVideoComponent } from '../../components/optimized-video/optimized-video.component';
 
 @NgModule({
   declarations: [PublicationViewComponent, ReportResponseComponent],
@@ -35,6 +36,7 @@ import { OptimizedImageComponent } from '../../components/optimized-image/optimi
     PipesSharedModule,
     ProcessingMediaModule,
     OptimizedImageComponent,
+    OptimizedVideoComponent,
   ],
 })
 export class PublicationViewModule {}

@@ -23,6 +23,7 @@ import { NotificationNewPublication } from '@shared/interfaces/notificationPubli
 import { Token } from '@shared/interfaces/token.interface';
 import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { PreloadService } from '@shared/services/preload.service';
 
 @Component({
     selector: 'worky-home',
@@ -90,7 +91,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private _configService: ConfigService,
     private _notificationPublicationService: NotificationPublicationService,
     private _pullToRefreshService: PullToRefreshService,
-    private _logService: LogService
+    private _logService: LogService,
+    private _preloadService: PreloadService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Home');
@@ -234,6 +236,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.loaderPublications = false;
       this._cdr.markForCheck();
 
+      this.preloadPublicationsMedia();
       await this.checkForMorePublications();
 
     } catch (error) {
@@ -599,6 +602,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     } catch (error) {
       console.error('Error verificando total de publicaciones:', error);
     }
+  }
+
+  private preloadPublicationsMedia(): void {
+    const publications = this.publications();
+    if (publications.length === 0) return;
+
+    this._preloadService.preloadForPage('home', { publications });
   }
 
   private async handlePullToRefresh(): Promise<void> {

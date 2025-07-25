@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { MediaCacheService, MediaCacheOptions } from '../../services/media-cache.service';
@@ -6,9 +6,9 @@ import { ConnectionQualityService } from '../../services/connection-quality.serv
 import { LogService, LevelLogEnum } from '../../services/core-apis/log.service';
 
 @Component({
-  selector: 'worky-optimized-image',
+  selector: 'worky-optimized-video',
   template: `
-    <div class="image-container" [class.loading]="isLoading" [class.error]="hasError">
+    <div class="video-container" [class.loading]="isLoading" [class.error]="hasError">
       <div class="loading-spinner" *ngIf="isLoading">
         <div class="spinner"></div>
         <div class="loading-text" *ngIf="isSlowConnection">
@@ -16,20 +16,27 @@ import { LogService, LevelLogEnum } from '../../services/core-apis/log.service';
         </div>
       </div>
       
-      <img
+      <video
         *ngIf="!hasError"
-        [src]="imageUrl"
-        [alt]="alt"
+        #videoElement
+        [src]="videoUrl"
+        [poster]="posterUrl"
+        [controls]="controls"
+        [autoplay]="autoplay"
+        [muted]="muted"
+        [loop]="loop"
+        [preload]="preload"
         [class.loaded]="!isLoading"
         [class.low-quality]="isLowQuality"
-        (load)="onImageLoad()"
-        (error)="onImageError()"
+        (loadstart)="onLoadStart()"
+        (canplay)="onCanPlay()"
+        (error)="onVideoError()"
         [style.display]="isLoading ? 'none' : 'block'"
-        [loading]="lazy ? 'lazy' : 'eager'"
-      />
+      ></video>
       
       <div class="error-placeholder" *ngIf="hasError">
-        <i class="material-icons">image</i>
+        <i class="material-icons">video_library</i>
+        <span>Video not available</span>
         <button *ngIf="canRetry" (click)="retryLoad()" class="retry-button">
           <i class="material-icons">refresh</i>
           Retry
@@ -40,22 +47,35 @@ import { LogService, LevelLogEnum } from '../../services/core-apis/log.service';
         <i class="material-icons">signal_cellular_alt</i>
         <span>Data saving mode</span>
       </div>
+
+      <div class="play-button-overlay" *ngIf="!isLoading && !hasError && !controls">
+        <button (click)="playVideo()" class="play-button">
+          <i class="material-icons">play_arrow</i>
+        </button>
+      </div>
     </div>
   `,
-  styleUrls: ['./optimized-image.component.scss'],
+  styleUrls: ['./optimized-video.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule]
 })
-export class OptimizedImageComponent implements OnInit, OnDestroy {
+export class OptimizedVideoComponent implements OnInit, OnDestroy {
   @Input() src!: string;
-  @Input() alt: string = '';
+  @Input() poster?: string;
+  @Input() controls: boolean = true;
+  @Input() autoplay: boolean = false;
+  @Input() muted: boolean = false;
+  @Input() loop: boolean = false;
+  @Input() preload: 'none' | 'metadata' | 'auto' = 'metadata';
   @Input() options: MediaCacheOptions = {};
-  @Input() lazy: boolean = true;
   @Input() showQualityIndicator: boolean = true;
-  @Input() fallbackSrc: string = '/assets/img/shared/handleImageError.png';
+  @Input() fallbackSrc: string = '/assets/img/shared/video-error.png';
 
-  imageUrl: string = '';
+  @ViewChild('videoElement', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
+
+  videoUrl: string = '';
+  posterUrl: string = '';
   isLoading: boolean = true;
   hasError: boolean = false;
   isLowQuality: boolean = false;
@@ -80,7 +100,7 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
     }
 
     this.setupConnectionMonitoring();
-    this.loadImage();
+    this.loadVideo();
   }
 
   private setupConnectionMonitoring(): void {
@@ -93,7 +113,7 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
     });
   }
 
-  private loadImage(): void {
+  private loadVideo(): void {
     this.isLoading = true;
     this.hasError = false;
     this.canRetry = false;
@@ -112,14 +132,14 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe({
       next: (url) => {
-        this.imageUrl = url;
+        this.videoUrl = url;
         this.isLoading = false;
         this.hasError = false;
         this.isLowQuality = finalOptions.quality === 'low';
         this.retryCount = 0;
         this.cdr.markForCheck();
 
-        this.logService.log(LevelLogEnum.INFO, 'OptimizedImageComponent', 'Image loaded successfully', {
+        this.logService.log(LevelLogEnum.INFO, 'OptimizedVideoComponent', 'Video loaded successfully', {
           originalUrl: this.src,
           optimizedUrl,
           quality: finalOptions.quality,
@@ -127,7 +147,7 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
         });
       },
       error: (error) => {
-        this.logService.log(LevelLogEnum.ERROR, 'OptimizedImageComponent', 'Failed to load image', {
+        this.logService.log(LevelLogEnum.ERROR, 'OptimizedVideoComponent', 'Failed to load video', {
           url: this.src,
           error: error.message,
           retryCount: this.retryCount
@@ -142,30 +162,63 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
         }
       }
     });
+
+    if (this.poster) {
+      this.loadPoster();
+    }
+  }
+
+  private loadPoster(): void {
+    const connectionOptions = this.connectionQualityService.getOptimizedMediaOptions();
+    const qualityMap = { low: 'slow', medium: 'medium', high: 'fast' } as const;
+    const optimizedPosterUrl = this.mediaCacheService.getOptimizedUrl(this.poster!, qualityMap[connectionOptions.quality]);
+
+    this.mediaCacheService.loadMedia(optimizedPosterUrl, { quality: 'low' }).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (url) => {
+        this.posterUrl = url;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.posterUrl = this.poster!;
+      }
+    });
   }
 
   retryLoad(): void {
     if (this.canRetry && this.retryCount < this.MAX_RETRIES) {
-      this.loadImage();
+      this.loadVideo();
+    }
+  }
+
+  playVideo(): void {
+    if (this.videoElement && this.videoElement.nativeElement) {
+      this.videoElement.nativeElement.play();
     }
   }
 
   private setError(): void {
-    this.imageUrl = this.fallbackSrc;
+    this.videoUrl = this.fallbackSrc;
     this.isLoading = false;
     this.hasError = true;
     this.canRetry = false;
     this.cdr.markForCheck();
   }
 
-  onImageLoad(): void {
+  onLoadStart(): void {
+    this.isLoading = true;
+    this.cdr.markForCheck();
+  }
+
+  onCanPlay(): void {
     this.isLoading = false;
     this.hasError = false;
     this.cdr.markForCheck();
   }
 
-  onImageError(): void {
-    if (this.imageUrl !== this.fallbackSrc) {
+  onVideoError(): void {
+    if (this.videoUrl !== this.fallbackSrc) {
       this.setError();
     }
   }

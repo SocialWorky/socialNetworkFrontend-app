@@ -9,8 +9,8 @@ import { FormsModule } from '@angular/forms';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 
-import { AuthModule } from '@auth/auth.module';
-import { environment } from '@env/environment';
+import { AuthModule } from './modules/auth/auth.module';
+import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AuthInterceptor } from './auth.interceptor';

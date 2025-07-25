@@ -6,6 +6,7 @@ import { MediaViewComponent } from './components/media-view/media-view.component
 import { PublicationView, Comment } from '@shared/interfaces/publicationView.interface';
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { UtilityService } from '@shared/services/utility.service';
+import { PreloadService } from '@shared/services/preload.service';
 
 @Component({
     selector: 'worky-image-organizer',
@@ -43,7 +44,8 @@ export class ImageOrganizerComponent implements OnInit {
   constructor(
     private _dialog: MatDialog,
     private _deviceDetectionService: DeviceDetectionService,
-    private _utilityService: UtilityService
+    private _utilityService: UtilityService,
+    private _preloadService: PreloadService
   ) { }
 
   ngOnInit(): void {
@@ -77,7 +79,9 @@ export class ImageOrganizerComponent implements OnInit {
 
     this.images.map(image => {
       image.type = this.isImageUrl(image.url) ? MediaType.IMAGE : MediaType.VIDEO;
-    })
+    });
+
+    this.preloadMedia();
   }
 
   isImageUrl(url: string): boolean {
@@ -90,6 +94,23 @@ export class ImageOrganizerComponent implements OnInit {
 
   onImageError(event: Event): void {
     this._utilityService.handleImageError(event, 'assets/img/shared/handleImageError.png');
+  }
+
+  private preloadMedia(): void {
+    if (this.images.length === 0) return;
+
+    const mediaUrls = this.images.map(image => {
+      if (this.isImageUrl(image.urlCompressed)) {
+        return this.urlMediaApi + image.urlCompressed;
+      } else if (this.isVideoUrl(image.url)) {
+        return this.urlMediaApi + image.url;
+      }
+      return null;
+    }).filter(url => url !== null);
+
+    if (mediaUrls.length > 0) {
+      this._preloadService.addToPreloadQueue(mediaUrls);
+    }
   }
 
   openLightbox(index: number): void {

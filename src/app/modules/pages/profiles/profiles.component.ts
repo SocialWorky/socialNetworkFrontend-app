@@ -33,6 +33,7 @@ import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service
 import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
 import { UtilityService } from '@shared/services/utility.service';
 import { ImageLoadOptions } from '@shared/services/image.service';
+import { PreloadService } from '@shared/services/preload.service';
 
 @Component({
     selector: 'worky-profiles',
@@ -132,7 +133,8 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     private _notificationPublicationService: NotificationPublicationService,
     private _logService: LogService,
     private _pullToRefreshService: PullToRefreshService,
-    private _utilityService: UtilityService
+    private _utilityService: UtilityService,
+    private _preloadService: PreloadService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
@@ -249,6 +251,8 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       this.loaderPublications = false;
       this._cdr.markForCheck();
 
+      this.preloadProfileMedia();
+
     } catch (error) {
       this._logService.log(
         LevelLogEnum.ERROR,
@@ -261,6 +265,16 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       );
       this.loaderPublications = false;
     }
+  }
+
+  private preloadProfileMedia(): void {
+    const publications = this.publicationsProfile();
+    if (publications.length === 0) return;
+
+    this._preloadService.preloadForPage('profile', { 
+      publications,
+      profile: this.userData 
+    });
   }
 
   private async getDataProfile(): Promise<void> {
