@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input,  AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 
@@ -50,11 +50,12 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   pwaInstalled = false;
 
-  scrolledTop = false;
+  scrolledTop = true;
 
   isDarkMode = true;
 
   @Input() isMessages: boolean = false;
+  @Output() navbarStateChange = new EventEmitter<boolean>();
 
   constructor(
     private _router: Router,
@@ -109,12 +110,17 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this._scrollService.scrollEnd$.pipe(takeUntil(this.unsubscribe$)).subscribe((event) => {
-      if (event === 'showNavbar') {
-        this.scrolledTop = true;
-      } else if (event === 'hideNavbar') {
-        this.scrolledTop = false
+      if (this.isMobile) {
+        if (event === 'showNavbar') {
+          this.scrolledTop = true;
+          this.navbarStateChange.emit(true);
+          this._cdr.markForCheck();
+        } else if (event === 'hideNavbar') {
+          this.scrolledTop = false;
+          this.navbarStateChange.emit(false);
+          this._cdr.markForCheck();
+        }
       }
-
     });
   }
 

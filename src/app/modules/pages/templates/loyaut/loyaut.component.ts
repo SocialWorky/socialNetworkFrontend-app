@@ -22,6 +22,8 @@ export class LoyautComponent implements OnInit, OnDestroy {
 
   isMessages: boolean = false;
 
+  navbarVisible: boolean = true;
+
   WidgetPosition = WidgetPosition;
 
   private routeSub: Subscription | undefined;
@@ -98,5 +100,10 @@ export class LoyautComponent implements OnInit, OnDestroy {
     if (position >= height - threshold) {
       this._scrollService.notifyScrollEnd();
     }
+  }
+
+  onNavbarStateChange(isVisible: boolean) {
+    this.navbarVisible = isVisible;
+    this._cdr.markForCheck();
   }
 }

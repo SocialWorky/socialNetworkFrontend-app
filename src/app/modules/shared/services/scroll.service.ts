@@ -6,6 +6,9 @@ import { Subject } from 'rxjs';
 })
 export class ScrollService {
   private scrollEndSource = new Subject<string>();
+  private lastScrollTop = 0;
+  private scrollDirection = 'up';
+  private scrollThreshold = 5;
 
   scrollEnd$ = this.scrollEndSource.asObservable();
 
@@ -19,23 +22,32 @@ export class ScrollService {
     const scrollHeight = event.target.scrollHeight;
     const offsetHeight = event.target.offsetHeight;
 
-    // Mostrar/ocultar botón de scroll to top (umbral más sensible)
+    // Determine scroll direction
+    if (Math.abs(scrollTop - this.lastScrollTop) > this.scrollThreshold) {
+      this.scrollDirection = scrollTop > this.lastScrollTop ? 'down' : 'up';
+      this.lastScrollTop = scrollTop;
+    }
+
+    // Show/hide scroll to top button
     if (scrollTop >= 200) {
       this.scrollEndSource.next('showScrollToTopButton');
     } else {
       this.scrollEndSource.next('hideScrollToTopButton');
     }
 
-    // Mostrar/ocultar navbar
+    // Smart navbar behavior (Facebook style)
     if (scrollTop < 50) {
+      // At the top - always show navbar
+      this.scrollEndSource.next('showNavbar');
+    } else if (this.scrollDirection === 'up') {
+      // Scrolling up - show navbar
+      this.scrollEndSource.next('showNavbar');
+    } else if (this.scrollDirection === 'down' && scrollTop > 100) {
+      // Scrolling down and past threshold - hide navbar
       this.scrollEndSource.next('hideNavbar');
     }
 
-    if (scrollTop >= 50) {
-      this.scrollEndSource.next('showNavbar');
-    }
-
-    // Detectar fin de scroll para cargar más contenido
+    // Detect end of scroll for loading more content
     if (scrollTop + offsetHeight >= scrollHeight - threshold) {
       this.scrollEndSource.next('scrollEnd');
     }

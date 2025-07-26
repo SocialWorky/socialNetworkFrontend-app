@@ -3,14 +3,17 @@
   (scroll)="onScroll($event)">
 
   <worky-navbar class="navbar-content"
-    [isMessages]="isMessages">
+    [isMessages]="isMessages"
+    (navbarStateChange)="onNavbarStateChange($event)">
   </worky-navbar>
 
   <worky-widget-container [position]="WidgetPosition.TOP"></worky-widget-container>
 
   <div class="content-social-app" 
     [class.content-messages-app]="isMessages"
-    [class.content-profile-app]="isProfile" *ngIf="token">
+    [class.content-profile-app]="isProfile"
+    [class.navbar-hidden]="!navbarVisible && isMobile"
+    *ngIf="token">
     
       <worky-content-left-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-left-side>
       

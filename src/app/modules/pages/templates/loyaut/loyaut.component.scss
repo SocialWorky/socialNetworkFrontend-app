@@ -20,8 +20,8 @@
     
   @include breakpoints.below-sm {
     grid-template:
-    "header" 14vh
-    "main" 86dvh;
+    "header" 120px
+    "main" 1fr;
   }
 
   .navbar-content {
@@ -34,10 +34,11 @@
     overscroll-behavior: contain;
     
     @include breakpoints.below-sm {
-      position: sticky;
-      top: 0;
+      position: relative;
       z-index: 1000;
       background-color: color.$worky-color-light;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 0;
     }
   }
 }
@@ -57,6 +58,16 @@
     padding-top: 0px;
     flex-direction: column;
     align-items: center;
+    margin-top: 120px;
+    position: relative;
+    z-index: 1;
+    transition: margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &.navbar-hidden {
+    @include breakpoints.below-sm {
+      margin-top: 0px;
+    }
   }
 }
 
@@ -86,7 +97,7 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   @include breakpoints.below-sm {
-    height: 90dvh;
+    height: calc(100dvh - 120px);
     width: 100vw;
   }
 }
