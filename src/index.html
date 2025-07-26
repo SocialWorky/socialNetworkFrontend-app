@@ -139,7 +139,31 @@
         border-radius: 0;
       }
     }
+    
+    /* Initialize custom viewport height variable */
+    :root {
+      --vh: 1vh;
+    }
   </style>
+  
+  <script>
+    // Initialize viewport height for iOS
+    function setViewportHeight() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    
+    // Set initial value
+    setViewportHeight();
+    
+    // Update on resize
+    window.addEventListener('resize', setViewportHeight);
+    
+    // Update on orientation change
+    window.addEventListener('orientationchange', () => {
+      setTimeout(setViewportHeight, 100);
+    });
+  </script>
 </head>
 
 <body>

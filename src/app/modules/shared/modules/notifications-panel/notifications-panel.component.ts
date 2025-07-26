@@ -4,14 +4,16 @@ import { Router } from '@angular/router';
 
 import { AuthService } from '@auth/services/auth.service';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
-import { NotificationPanelService } from './services/notificationPanel.service'
-import { AdditionalDataComment, AdditionalDataLike, AdditionalDataFriendRequest, AdditionalDataFriendAccept, NotificationsData } from './interfaces/notificationsData.interface';
-import { NotificationType, NotificationStatus } from './enums/notificationsType.enum';
 import { NotificationService } from '@shared/services/notifications/notification.service';
-import { DropdownDataLink } from '../worky-dropdown/interfaces/dataLink.interface';
-import { Colors } from '@shared/interfaces/colors.enum';
-import { translations } from '@translations/translations';
+import { NotificationPanelService } from './services/notificationPanel.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { IOSViewportService } from '@shared/services/ios-viewport.service';
+import { translations } from '@translations/translations';
+import { Colors } from '@shared/interfaces/colors.enum';
+
+import { NotificationsData, AdditionalDataComment, AdditionalDataLike, AdditionalDataFriendRequest, AdditionalDataFriendAccept } from './interfaces/notificationsData.interface';
+import { NotificationType, NotificationStatus } from './enums/notificationsType.enum';
+import { DropdownDataLink } from '../worky-dropdown/interfaces/dataLink.interface';
 
 @Component({
     selector: 'worky-notifications-panel',
@@ -50,6 +52,7 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy {
     private _notificationService: NotificationService,
     private _notificationPanelService: NotificationPanelService,
     private _logService: LogService,
+    private _iosViewportService: IOSViewportService,
   ) {}
 
   async ngOnInit() {
@@ -57,6 +60,12 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy {
       this.isActive = isActive;
       if (this.isActive) {
         this.getNotifications();
+        // Force viewport update for iOS when panel opens
+        if (this._iosViewportService.isIOSDevice()) {
+          setTimeout(() => {
+            this._iosViewportService.forceViewportUpdate();
+          }, 100);
+        }
       }
       this._cdr.markForCheck();
     });

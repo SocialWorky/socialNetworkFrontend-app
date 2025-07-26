@@ -9,6 +9,7 @@
   right: -500px;
   width: 500px;
   height: 100dvh;
+  height: calc(var(--vh, 1vh) * 100);
   color: colors.$worky-color-text;
   background-color: colors.$worky-color-light;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
@@ -23,9 +24,23 @@
     width: 100%;
     right: -100%;
     height: 100dvh;
+    height: calc(var(--vh, 1vh) * 100);
     padding-top: max(env(safe-area-inset-top), 20px);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+  }
+
+  // iOS-specific fixes for viewport height issues
+  @supports (-webkit-touch-callout: none) {
+    height: 100vh;
+    height: -webkit-fill-available;
+    height: calc(var(--vh, 1vh) * 100);
+    
+    @include breakpoints.below-sm {
+      height: 100vh;
+      height: -webkit-fill-available;
+      height: calc(var(--vh, 1vh) * 100);
+    }
   }
 
   &.active {
@@ -92,10 +107,25 @@
     flex-direction: column;
     gap: 5px;
     height: calc(100dvh - 80px - env(safe-area-inset-top));
+    height: calc((var(--vh, 1vh) * 100) - 80px - env(safe-area-inset-top));
     overflow-y: auto;
 
     @include breakpoints.below-sm {
       height: calc(100dvh - 80px - max(env(safe-area-inset-top), 20px));
+      height: calc((var(--vh, 1vh) * 100) - 80px - max(env(safe-area-inset-top), 20px));
+    }
+
+    // iOS-specific fixes for content body height
+    @supports (-webkit-touch-callout: none) {
+      height: calc(100vh - 80px - env(safe-area-inset-top));
+      height: calc(-webkit-fill-available - 80px - env(safe-area-inset-top));
+      height: calc((var(--vh, 1vh) * 100) - 80px - env(safe-area-inset-top));
+      
+      @include breakpoints.below-sm {
+        height: calc(100vh - 80px - max(env(safe-area-inset-top), 20px));
+        height: calc(-webkit-fill-available - 80px - max(env(safe-area-inset-top), 20px));
+        height: calc((var(--vh, 1vh) * 100) - 80px - max(env(safe-area-inset-top), 20px));
+      }
     }
   }
 

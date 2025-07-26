@@ -729,6 +729,56 @@ img, video {
   }
 }
 
+/* iOS-specific viewport fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Fix for iOS viewport height issues */
+  html, body {
+    height: 100vh;
+    height: -webkit-fill-available;
+    overflow-x: hidden;
+  }
+  
+  /* Ensure modals take full height on iOS */
+  .notifications-panel {
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: calc(var(--vh, 1vh) * 100) !important;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Fix for iOS Safari 100vh issue */
+  .modal-backdrop,
+  .modal-container,
+  .modal-content {
+    height: 100vh;
+    height: -webkit-fill-available;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+  
+  /* Prevent iOS Safari from adjusting viewport on keyboard */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+  
+  /* Improve scrolling performance on iOS */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Use custom viewport height variable for better iOS support */
+  .full-height {
+    height: 100vh;
+    height: -webkit-fill-available;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+  
+  .full-height-dvh {
+    height: 100dvh;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+}
+
 /* PWA Update Modal Styles */
 body.modal-open {
   overflow: hidden !important;

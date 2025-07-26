@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PullToRefreshService } from './services/pull-to-refresh.service';
 import { IOSOptimizationsService } from './services/ios-optimizations.service';
+import { IOSViewportService } from './services/ios-viewport.service';
 import { WorkyImageModule } from './modules/worky-image/worky-image.module';
 import { AccessibleLoadingComponent } from './components/accessible-loading/accessible-loading.component';
 import { OptimizedImageComponent } from './components/optimized-image/optimized-image.component';
@@ -50,7 +51,8 @@ import { ButtonSkeletonComponent } from './components/skeleton/button-skeleton.c
   ],
   providers: [
     PullToRefreshService,
-    IOSOptimizationsService
+    IOSOptimizationsService,
+    IOSViewportService
   ]
 })
 
