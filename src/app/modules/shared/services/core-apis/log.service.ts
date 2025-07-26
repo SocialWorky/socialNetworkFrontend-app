@@ -1,13 +1,13 @@
-import { Injectable } from '@angular/core';
-import { environment } from '@env/environment';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '@env/environment';
 import { Subject, takeUntil } from 'rxjs';
 
 export enum LevelLogEnum {
-  INFO = 'info',
-  WARN = 'warn',
   ERROR = 'error',
-  DEBUG = 'debug',
+  WARN = 'warn',
+  INFO = 'info',
+  DEBUG = 'debug'
 }
 
 @Injectable({
@@ -15,14 +15,15 @@ export enum LevelLogEnum {
 })
 export class LogService {
   private _url: string;
-
   private _apiUrl: string;
-
   private _logs: any[] = [];
-
   private _timer: NodeJS.Timeout | null = null;
-
   private destroy$ = new Subject<void>();
+
+  // Configuración para evitar errores 413
+  private readonly MAX_BATCH_SIZE = 50; // Máximo 50 logs por batch
+  private readonly MAX_LOG_SIZE = 1000; // Máximo 1000 caracteres por log
+  private readonly BATCH_TIMEOUT = 15000; // 15 segundos en lugar de 30
 
   constructor(private http: HttpClient) {
     this._url = environment.API_URL;
@@ -30,39 +31,122 @@ export class LogService {
   }
 
   log(level: LevelLogEnum, context: string, message: string, metadata?: Record<string, any>) {
+    // Truncar mensaje si es muy largo
+    const truncatedMessage = message.length > this.MAX_LOG_SIZE 
+      ? message.substring(0, this.MAX_LOG_SIZE) + '...' 
+      : message;
+
+    // Limpiar metadata si es muy grande
+    const cleanMetadata = this.cleanMetadata(metadata);
+
     const logEntry = {
       level,
-      context,
-      message : `FRONT: ${message}`,
-      metadata,
+      context: context.substring(0, 100), // Limitar contexto a 100 caracteres
+      message: `FRONT: ${truncatedMessage}`,
+      metadata: cleanMetadata,
       timestamp: new Date().toISOString(),
     };
 
     this._logs.push(logEntry);
 
-    if (!this._timer) {
-      // Send logs every 30 seconds
-      this._timer = setTimeout(() => this.sendLogs(), 30000);
+    // Enviar logs inmediatamente si alcanzamos el límite
+    if (this._logs.length >= this.MAX_BATCH_SIZE) {
+      this.sendLogs();
+    } else if (!this._timer) {
+      // Enviar logs después del timeout
+      this._timer = setTimeout(() => this.sendLogs(), this.BATCH_TIMEOUT);
     }
+  }
+
+  private cleanMetadata(metadata?: Record<string, any>): Record<string, any> | undefined {
+    if (!metadata) return undefined;
+
+    const clean: Record<string, any> = {};
+    const maxValueLength = 500; // Máximo 500 caracteres por valor
+
+    for (const [key, value] of Object.entries(metadata)) {
+      if (typeof value === 'string' && value.length > maxValueLength) {
+        clean[key] = value.substring(0, maxValueLength) + '...';
+      } else if (typeof value === 'object' && value !== null) {
+        // Para objetos, convertir a string y truncar
+        const stringValue = JSON.stringify(value);
+        if (stringValue.length > maxValueLength) {
+          clean[key] = JSON.parse(stringValue.substring(0, maxValueLength) + '...');
+        } else {
+          clean[key] = value;
+        }
+      } else {
+        clean[key] = value;
+      }
+    }
+
+    return clean;
   }
 
   private sendLogs() {
     if (this._logs.length === 0) return;
 
     const logsToSend = [...this._logs];
+    this._logs = [];
 
     try {
-      this._logs = [];
-
-      this.http.post(this._apiUrl, { logs: logsToSend }).pipe(takeUntil(this.destroy$)).subscribe();
+      // Dividir en batches más pequeños si es necesario
+      const batches = this.chunkArray(logsToSend, this.MAX_BATCH_SIZE);
+      
+      batches.forEach(batch => {
+        this.http.post(this._apiUrl, { logs: batch })
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              // Log exitoso
+            },
+            error: (error) => {
+              // Si hay error 413, intentar con batch más pequeño
+              if (error.status === 413 && batch.length > 1) {
+                const smallerBatches = this.chunkArray(batch, Math.floor(batch.length / 2));
+                smallerBatches.forEach(smallBatch => {
+                  this.http.post(this._apiUrl, { logs: smallBatch })
+                    .pipe(takeUntil(this.destroy$))
+                    .subscribe();
+                });
+              } else {
+                console.warn('Error sending logs:', error);
+              }
+            }
+          });
+      });
 
     } catch (error) {
       console.error('Error al enviar logs:', error);
-      // yes, we need to send the logs again
-      this._logs = [...logsToSend, ...this._logs];
+      // Reintentar con logs más pequeños
+      if (logsToSend.length > 1) {
+        const smallerBatches = this.chunkArray(logsToSend, Math.floor(logsToSend.length / 2));
+        smallerBatches.forEach(batch => {
+          this._logs.push(...batch);
+        });
+      } else {
+        this._logs.push(...logsToSend);
+      }
     } finally {
       // Reset the timer
       this._timer = null;
+    }
+  }
+
+  private chunkArray<T>(array: T[], size: number): T[][] {
+    const chunks: T[][] = [];
+    for (let i = 0; i < array.length; i += size) {
+      chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    
+    if (this._timer) {
+      clearTimeout(this._timer);
     }
   }
 }

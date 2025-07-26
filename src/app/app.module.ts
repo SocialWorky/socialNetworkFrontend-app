@@ -1,4 +1,4 @@
-import { NgModule, isDevMode, LOCALE_ID } from '@angular/core';
+import { NgModule, isDevMode, LOCALE_ID, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouteReuseStrategy } from '@angular/router';
@@ -15,9 +15,14 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AuthInterceptor } from './auth.interceptor';
 import { TimeoutInterceptor } from './timeout.interceptor';
+import { SafariIOSErrorInterceptor } from './safari-ios-error.interceptor';
+import { GoogleImageErrorInterceptor } from './google-image-error.interceptor';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { PwaUpdateNotificationComponent } from '@shared/components/pwa-update-notification/pwa-update-notification.component';
 import { PwaSettingsComponent } from '@shared/components/pwa-settings/pwa-settings.component';
+import { SafariIOSErrorHandlerService } from '@shared/services/safari-ios-error-handler.service';
+import { GlobalErrorHandlerService } from '@shared/services/global-error-handler.service';
+import { SafariIOSDebugService } from '@shared/services/safari-ios-debug.service';
 
 // Register Spanish locale
 registerLocaleData(localeEs);
@@ -55,6 +60,7 @@ const config: SocketIoConfig = {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: Window, useValue: window },
     { provide: LOCALE_ID, useValue: 'es' },
+    { provide: ErrorHandler, useClass: GlobalErrorHandlerService },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
@@ -65,7 +71,19 @@ const config: SocketIoConfig = {
       useClass: TimeoutInterceptor,
       multi: true,
     },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: SafariIOSErrorInterceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: GoogleImageErrorInterceptor,
+      multi: true,
+    },
     provideHttpClient(withInterceptorsFromDi()),
+    SafariIOSErrorHandlerService,
+    SafariIOSDebugService,
   ],
   bootstrap: [AppComponent]
 })

@@ -6,7 +6,7 @@
 
   <!-- Avatar image -->
   <img
-    *ngIf="imageData && !isLoading"
+    *ngIf="imageData && !isLoading && !hasError"
     [src]="imageData"
     [alt]="'Avatar de ' + (name || username)"
     class="avatar-image"
@@ -15,9 +15,10 @@
 
   <!-- Generated avatar with initials -->
   <div
-    *ngIf="!imageData && !isLoading && showInitials && (isGeneratedAvatar || hasError)"
+    *ngIf="(!imageData || hasError) && !isLoading && showInitials && isGeneratedAvatar"
     class="avatar-initials"
     [style.background-color]="backgroundColor"
+    [style.font-size.px]="fontSize"
   >
     {{ initials }}
   </div>

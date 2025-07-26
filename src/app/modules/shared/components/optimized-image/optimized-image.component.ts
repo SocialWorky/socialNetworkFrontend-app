@@ -258,6 +258,13 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
       }
     }, 30000); // 30 seconds timeout
 
+    // Validate URL for Safari iOS
+    if (this.isSafariIOS() && !this.src.startsWith('http')) {
+      this.logService.log(LevelLogEnum.WARN, 'OptimizedImageComponent', 'Invalid image URL for Safari iOS', { src: this.src });
+      this.handleError();
+      return;
+    }
+
     // Load image using mobile cache service
     this.mobileImageCache.loadImage(this.src, this.options.type || 'media', {
       priority: this.options.priority,
@@ -291,6 +298,13 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
     });
   }
 
+  private isSafariIOS(): boolean {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    return isIOS && isSafari;
+  }
+
   onImageLoad(): void {
     this.isLoading = false;
     this.hasError = false;
@@ -298,6 +312,7 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
   }
 
   onImageError(): void {
+    this.logService.log(LevelLogEnum.WARN, 'OptimizedImageComponent', 'Image failed to load', { src: this.src });
     this.handleError();
   }
 
@@ -308,14 +323,19 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
     if (this.imageLoadTimeout) {
       clearTimeout(this.imageLoadTimeout);
     }
-
-    // Use fallback image if available
-    if (this.options.fallbackUrl) {
+    
+    // Try fallback URL if available
+    if (this.options.fallbackUrl && this.imageSrc !== this.options.fallbackUrl) {
+      this.logService.log(LevelLogEnum.INFO, 'OptimizedImageComponent', 'Trying fallback URL', { 
+        original: this.src, 
+        fallback: this.options.fallbackUrl 
+      });
       this.imageSrc = this.options.fallbackUrl;
       this.hasError = false;
+      this.cdr.markForCheck();
+    } else {
+      this.cdr.markForCheck();
     }
-    
-    this.cdr.markForCheck();
   }
 
   /**

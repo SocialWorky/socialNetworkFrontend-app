@@ -1,7 +1,12 @@
 <div class="content-sidebar">
   <div class="profile-info"
     [routerLink]="['/profile']">
-    <worky-avatar [size]="60" class="profile-img"></worky-avatar>
+    <worky-avatar 
+      [size]="60" 
+      class="profile-img"
+      [img]="userAvatar"
+      [name]="userFullName">
+    </worky-avatar>
     <span class="profile-name">{{userName}}</span>
   </div>
 

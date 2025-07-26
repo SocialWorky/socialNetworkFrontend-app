@@ -4,6 +4,8 @@ import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { ImageLoadOptions } from '../../services/image.service';
 import { MobileImageCacheService } from '../../services/mobile-image-cache.service';
+import { GoogleImageService } from '../../services/google-image.service';
+import { LogService, LevelLogEnum } from '../../services/core-apis/log.service';
 
 @Component({
     selector: 'worky-avatar',
@@ -34,7 +36,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     maxRetries: 2,
     retryDelay: 500,
     timeout: 5000,
-    fallbackUrl: '/assets/images/avatar-placeholder.jpg'
+    fallbackUrl: '/assets/img/shared/handleImageError.png'
   };
 
   private destroy$ = new Subject<void>();
@@ -66,22 +68,20 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   constructor(
-    private _authService: AuthService, 
-    private _cdr: ChangeDetectorRef,
-    private _mobileCacheService: MobileImageCacheService
+    private _authService: AuthService,
+    private _mobileCacheService: MobileImageCacheService,
+    private _googleImageService: GoogleImageService,
+    private _logService: LogService,
+    private _cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit() {
-    this.token = this._authService.getDecodedToken()!;
-
-    this.userAvatar = this.token?.avatar || '';
-
-    this.loadImageUser();
-
+  ngOnInit(): void {
+    this.token = this._authService.getDecodedToken() || undefined;
+    this.generateAvatar();
   }
 
   ngOnChanges(): void {
-    this.loadImageUser();
+    this.generateAvatar();
   }
 
   ngOnDestroy(): void {
@@ -89,25 +89,23 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadImageUser() {
-    this.img = this.img === 'null' ? null : this.img;
+  onImageError(): void {
+    this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Image error event triggered', { 
+      url: this.img || 'unknown' 
+    });
+    this.isLoading = false;
+    this.hasError = true;
+    this.imageData = ''; // Limpiar imagen fallida
+    this.generateInitialsAvatar();
+  }
 
-    if (!this.name && !this.img) {
-      if (this.name && !this.userAvatar) {
-        this.generateAvatar();
-      } else if (this.userAvatar) {
-        this.validateAndSetImage(this.userAvatar);
-      }
-    } else if (this.name && !this.img && this.name.length > 2) {
-      this.username = this.name;
-      this.generateAvatar();
-    }
-
-    if (this.img) {
+  private generateAvatar(): void {
+    // Si no hay imagen o la imagen está vacía, generar iniciales
+    if (!this.img || this.img.trim() === '' || this.img === 'null') {
+      this.generateInitialsAvatar();
+    } else {
       this.validateAndSetImage(this.img);
     }
-
-    this._cdr.markForCheck();
   }
 
   private validateAndSetImage(imageUrl: string): void {
@@ -116,108 +114,117 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     this.hasError = false;
     this._cdr.markForCheck();
 
-    // Use mobile cache service for better performance
-    if (this._mobileCacheService.isMobile()) {
-      this._mobileCacheService.loadImage(imageUrl, 'profile', this.imageOptions)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (cachedUrl) => {
-            this.imageData = cachedUrl;
-            this.isLoading = false;
-            this.hasError = false;
-            this._cdr.markForCheck();
-          },
-          error: () => {
-            this.isLoading = false;
-            this.hasError = true;
-            this.generateAvatar();
-          }
-        });
+    // Verificar si es una imagen de Google
+    if (this.isGoogleImage(imageUrl)) {
+      this.loadGoogleImage(imageUrl);
     } else {
-      // Fallback for desktop
-      const img = new Image();
-      img.src = imageUrl;
-
-      img.onload = () => {
-        this.imageData = imageUrl;
-        this.isLoading = false;
-        this.hasError = false;
-        this._cdr.markForCheck();
-      };
-
-      img.onerror = () => {
-        this.isLoading = false;
-        this.hasError = true;
-        this.generateAvatar();
-      };
-    }
-  }
-
-  onImageError(): void {
-    this.imageData = '';
-    this.generateAvatar();
-  }
-
-  private generateAvatar() {
-    this.isGeneratedAvatar = true;
-    const canvas = document.createElement('canvas');
-
-    const ctx = canvas.getContext('2d');
-
-    if (ctx) {
-      const scaledSize = this.size;
-
-      const fontSize = this.size / 2.3;
-
-      this.initials = this.getInitials(this.name || this.username)
-
-      if (this.initials) {
-        this.backgroundColor = this.getColor(this.initials[0]);
-
-        canvas.width = scaledSize;
-
-        canvas.height = scaledSize;
-
-        ctx.beginPath();
-        ctx.fillStyle = this.backgroundColor;
-        ctx.arc(scaledSize / 2, scaledSize / 2, scaledSize / 2, 0, 2 * Math.PI);
-        ctx.fill();
-
-        ctx.font = `${fontSize}px Roboto, sans-serif`;
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(this.initials, scaledSize / 2, scaledSize / 1.85);
-
-        const finalCanvas = document.createElement('canvas');
-        finalCanvas.width = this.size;
-        finalCanvas.height = this.size;
-        const finalCtx = finalCanvas.getContext('2d');
-
-        if (finalCtx) {
-          finalCtx.drawImage(canvas, 0, 0, scaledSize, scaledSize, 0, 0, this.size, this.size);
-          this.imageData = finalCanvas.toDataURL('image/png');
-        } else {
-          console.error('Error al obtener el contexto del canvas final');
-        }
+      // Usar mobile cache service para otras imágenes
+      if (this._mobileCacheService.isMobile()) {
+        this._mobileCacheService.loadImage(imageUrl, 'profile', this.imageOptions)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (cachedUrl) => {
+              this.imageData = cachedUrl;
+              this.isLoading = false;
+              this.hasError = false;
+              this._cdr.markForCheck();
+            },
+            error: (error) => {
+              this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image from mobile cache', { 
+                url: imageUrl, 
+                error: error.message 
+              });
+              this.isLoading = false;
+              this.hasError = true;
+              this.generateInitialsAvatar();
+            }
+          });
       } else {
-        console.error('Iniciales no válidas');
+        // Fallback para desktop
+        const img = new Image();
+        img.src = imageUrl;
+
+        img.onload = () => {
+          this.imageData = imageUrl;
+          this.isLoading = false;
+          this.hasError = false;
+          this._cdr.markForCheck();
+        };
+
+        img.onerror = () => {
+          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image', { url: imageUrl });
+          this.isLoading = false;
+          this.hasError = true;
+          this.generateInitialsAvatar();
+        };
       }
-    } else {
-      console.error('Error al obtener el contexto del canvas');
     }
   }
 
-  private getInitials(name: string): string {
-    const nameArray = name.split(' ');
-    return nameArray.length === 1
-      ? nameArray[0].charAt(0).toUpperCase()
-      : (nameArray[0].charAt(0) + nameArray[1].charAt(0)).toUpperCase();
+  private isGoogleImage(url: string): boolean {
+    return url.includes('lh3.googleusercontent.com') || 
+           url.includes('lh4.googleusercontent.com') || 
+           url.includes('lh5.googleusercontent.com') || 
+           url.includes('lh6.googleusercontent.com');
   }
 
-  private getColor(letter: string): string {
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const index = alphabet.indexOf(letter.toUpperCase());
-    return index !== -1 ? this.colors[index % this.colors.length] : this.colors[0];
+  private loadGoogleImage(imageUrl: string): void {
+    this._googleImageService.getGoogleImage(imageUrl, this.size)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (cachedUrl) => {
+          this.imageData = cachedUrl;
+          this.isLoading = false;
+          this.hasError = false;
+          this._cdr.markForCheck();
+        },
+        error: (error) => {
+          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load Google image', { 
+            url: imageUrl, 
+            error: error.message 
+          });
+          this.isLoading = false;
+          this.hasError = true;
+          this.generateInitialsAvatar();
+        }
+      });
+  }
+
+  private generateInitialsAvatar(): void {
+    this.isGeneratedAvatar = true;
+    this.isLoading = false;
+    this.hasError = false;
+    this.imageData = ''; // Asegurar que no hay imagen
+
+    const fullName = this.name || this.username || '';
+    const nameParts = fullName.trim().split(' ').filter(part => part.length > 0);
+    
+    if (nameParts.length >= 2) {
+      this.initials = (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+    } else if (nameParts.length === 1) {
+      this.initials = nameParts[0].charAt(0).toUpperCase();
+    } else {
+      this.initials = '?';
+    }
+
+    // Generar color de fondo basado en el nombre
+    const nameHash = this.hashCode(fullName);
+    this.backgroundColor = this.colors[Math.abs(nameHash) % this.colors.length];
+
+    // Calcular tamaño de fuente
+    this.fontSize = Math.max(12, Math.min(24, this.size * 0.4));
+
+    this._cdr.markForCheck();
+  }
+
+  private hashCode(str: string): number {
+    let hash = 0;
+    if (str.length === 0) return hash;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
   }
 }

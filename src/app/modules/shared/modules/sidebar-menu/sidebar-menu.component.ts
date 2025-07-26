@@ -19,6 +19,8 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
   private unsubscribe$ = new Subject<void>();
 
   userName: string = '';
+  userAvatar: string = '';
+  userFullName: string = '';
 
   decodedToken!: Token;
 
@@ -42,6 +44,9 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
   ngOnInit() {
     this.decodedToken = this._authService.getDecodedToken()!;
     this.userName = this.decodedToken.username;
+    this.userAvatar = this.decodedToken.avatar || '';
+    this.userFullName = this.decodedToken.name || '';
+    
     this._authService.isAuthenticated().then(isAuth => {
       this.isAuthenticated = isAuth;
     });
