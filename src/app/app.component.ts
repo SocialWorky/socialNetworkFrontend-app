@@ -17,6 +17,7 @@ import { CommentService } from '@shared/services/core-apis/comment.service';
 import { AuthService } from '@auth/services/auth.service';
 import { PwaUpdateService } from '@shared/services/pwa-update.service';
 import { EmojiEventsService } from '@shared/services/emoji-events.service';
+import { MediaEventsService } from '@shared/services/media-events.service';
 import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget-config.service';
 import { environment } from '@env/environment';
 import { DevCacheService } from '@shared/services/dev-cache.service';
@@ -55,6 +56,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private _authService: AuthService,
     private _pwaUpdateService: PwaUpdateService,
     private _emojiEventsService: EmojiEventsService,
+    private _mediaEventsService: MediaEventsService,
     private _widgetConfigService: WidgetConfigService,
     private devCacheService: DevCacheService,
     private cacheService: CacheService,
@@ -101,6 +103,12 @@ export class AppComponent implements OnInit, OnDestroy {
             break;
           case TypePublishing.EMOJI:
             this._emojiEventsService.notifyEmojiProcessed(message);
+            break;
+          case TypePublishing.POST:
+          case TypePublishing.COMMENT:
+            if (message.containsMedia) {
+              this._mediaEventsService.notifyMediaProcessed(message);
+            }
             break;
           default:
             break;

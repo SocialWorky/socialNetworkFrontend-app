@@ -29,6 +29,7 @@ import { ScrollService } from '@shared/services/scroll.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { LoadingService } from '@shared/services/loading.service';
 import { ImageLoadOptions } from '../../services/image.service';
+import { MediaEventsService } from '@shared/services/media-events.service';
 
 @Component({
     selector: 'worky-publication-view',
@@ -97,6 +98,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   actionsLoading: boolean = true;
 
   private destroy$ = new Subject<void>();
+  private mediaProcessingTimeout?: any;
 
   constructor(
     private _router: Router,
@@ -111,7 +113,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _emailNotificationService: EmailNotificationService,
     private _notificationService: NotificationService,
     private _scrollService: ScrollService,
-    private _loadingService: LoadingService
+    private _loadingService: LoadingService,
+    private _mediaEventsService: MediaEventsService
   ) {}
 
   async ngAfterViewInit() {
@@ -139,11 +142,23 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           }
         }
       });
+
+      this._mediaEventsService.mediaProcessed$
+        .pipe(
+          takeUntil(this.destroy$)
+        )
+      .subscribe({
+        next: (data: any) => {
+          if (data?.idReference === this.publication._id) {
+            this.handleMediaProcessed(data);
+          }
+        }
+      });
     this.loadReactionsImg();
     this._cdr.markForCheck();
     
-    // Simular carga progresiva de elementos
     this.simulateProgressiveLoading();
+    this.setupMediaProcessingTimeout();
   }
 
   // Métodos para manejar la carga de elementos individuales
@@ -214,6 +229,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    
+    if (this.mediaProcessingTimeout) {
+      clearTimeout(this.mediaProcessingTimeout);
+    }
   }
 
   loadReactionsImg(publication: PublicationView = this.publication){
@@ -423,11 +442,27 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           
           const updatedPublication = publication[0];
           
-          if (JSON.stringify(this.publication) !== JSON.stringify(updatedPublication)) {
+          const hasMediaChanges = 
+            this.publication.media.length !== updatedPublication.media.length ||
+            this.publication.containsMedia !== updatedPublication.containsMedia ||
+            JSON.stringify(this.publication.media) !== JSON.stringify(updatedPublication.media);
+          
+          const hasOtherChanges = 
+            this.publication.reaction.length !== updatedPublication.reaction.length ||
+            this.publication.comment.length !== updatedPublication.comment.length ||
+            this.publication.fixed !== updatedPublication.fixed ||
+            JSON.stringify(this.publication.reaction) !== JSON.stringify(updatedPublication.reaction);
+          
+          if (hasMediaChanges || hasOtherChanges) {
             this._publicationService.updatePublicationsLocal(publication);
             this.publication = updatedPublication;
             this.loadReactionsImg(updatedPublication);
             this.checkDataLink(updatedPublication._id);
+            
+            if (hasMediaChanges) {
+              this.mediaLoading = false;
+            }
+            
             this._cdr.markForCheck();
           }
         },
@@ -491,16 +526,70 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   private updatePublicationIfNeeded(updatedData: any) {
-    const hasRelevantChanges = 
+    const hasMediaChanges = 
+      this.publication.media.length !== updatedData.media?.length ||
+      this.publication.containsMedia !== updatedData.containsMedia ||
+      JSON.stringify(this.publication.media) !== JSON.stringify(updatedData.media);
+    
+    const hasOtherChanges = 
       this.publication.reaction.length !== updatedData.reaction?.length ||
       this.publication.comment.length !== updatedData.comment?.length ||
       this.publication.fixed !== updatedData.fixed ||
       JSON.stringify(this.publication.reaction) !== JSON.stringify(updatedData.reaction);
 
-    if (hasRelevantChanges) {
+    if (hasMediaChanges || hasOtherChanges) {
+      if (hasMediaChanges) {
+        this.handleMediaUpdate(updatedData);
+      }
+      
       this.refreshPublications(updatedData._id);
       this.loadReactionsImg(updatedData);
-      this._cdr.markForCheck();
+    }
+  }
+
+  private handleMediaUpdate(updatedData: any) {
+    this.publication.media = updatedData.media || [];
+    this.publication.containsMedia = updatedData.containsMedia || false;
+    
+    if (this.publication.media.length > 0) {
+      this.mediaLoading = false;
+    }
+    
+    this._cdr.markForCheck();
+    
+    console.log('Media updated:', {
+      mediaLength: this.publication.media.length,
+      containsMedia: this.publication.containsMedia,
+      mediaLoading: this.mediaLoading
+    });
+  }
+
+  private handleMediaProcessed(data: any) {
+    if (this.mediaProcessingTimeout) {
+      clearTimeout(this.mediaProcessingTimeout);
+    }
+    
+    this.publication.containsMedia = false;
+    this.mediaLoading = false;
+    
+    this._cdr.markForCheck();
+    this.refreshPublications(data.idReference);
+    
+    console.log('Media processed:', {
+      publicationId: data.idReference,
+      containsMedia: this.publication.containsMedia,
+      mediaLoading: this.mediaLoading
+    });
+  }
+
+  private setupMediaProcessingTimeout() {
+    if (this.publication.containsMedia && this.publication.media.length === 0) {
+      this.mediaProcessingTimeout = setTimeout(() => {
+        console.warn('Media processing timeout reached, forcing update');
+        this.publication.containsMedia = false;
+        this.mediaLoading = false;
+        this._cdr.markForCheck();
+      }, 30000);
     }
   }
 }
