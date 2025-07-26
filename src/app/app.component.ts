@@ -89,7 +89,6 @@ export class AppComponent implements OnInit, OnDestroy {
     // Only initialize widget data if user is authenticated
     await this.checkAuthenticationAndInitializeWidgets();
 
-    //TODO: Wait a little before subscribing to events, this is to give time for components to start before subscribing
     setTimeout(() => {
       this._socketService.listenEvent('newExternalMessage', (message: any) => {
         if (!message.idReference) return;
@@ -114,12 +113,12 @@ export class AppComponent implements OnInit, OnDestroy {
             break;
         }
       });
-    }, 1000);
+    }, 500);
 
     setTimeout(() => {
       this._loadingService.setLoading(false);
       document.getElementById('loading-screen')?.remove();
-    }, 4000);
+    }, 2000);
 
     if(localStorage.getItem('token')) this.currentUserId = this._authService.getDecodedToken()!.id;
 

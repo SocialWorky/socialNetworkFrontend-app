@@ -15,28 +15,24 @@ export class Translations {
 
   async initialize(): Promise<void> {
     try {
-      const languageCode = (await Device.getLanguageCode()).value;
-      if (languageCode) {
-        const lang = languageCode.split('-')[0];
-        const langSuffix = Translations.SUPPORTED_LANGUAGES.includes(lang)
-          ? lang
-          : Translations.DEFAULT_LANGUAGE;
+          const languageCode = navigator.language || 'es';
+    const lang = languageCode.split('-')[0];
+    const langSuffix = Translations.SUPPORTED_LANGUAGES.includes(lang)
+      ? lang
+      : Translations.DEFAULT_LANGUAGE;
 
-        const { translations: localTranslations } = await import(
-          `src/translations/translations.${langSuffix}`
-        );
+    const [translationsModule, dynamicTranslationsModule] = await Promise.all([
+      import(`src/translations/translations.${langSuffix}`),
+      import(`src/translations/dynamic-translations.${langSuffix}`)
+    ]);
 
-        const { dynamicTranslations: localDynamicTranslations } = await import(
-          `src/translations/dynamic-translations.${langSuffix}`
-        );
-
-        translationsLanguage = langSuffix;
-        translationsDictionary = { ...localTranslations };
-        dynamicTranslationsDictionary = { ...localDynamicTranslations };
-      }
-    } catch (e) {
-      console.error('Error initializing translations:', e);
-    }
+    translationsLanguage = langSuffix;
+    translationsDictionary = { ...translationsModule.translations };
+    dynamicTranslationsDictionary = { ...dynamicTranslationsModule.dynamicTranslations };
+  } catch (e) {
+    console.error('Error initializing translations:', e);
+    translationsLanguage = Translations.DEFAULT_LANGUAGE;
+  }
   }
 }
 

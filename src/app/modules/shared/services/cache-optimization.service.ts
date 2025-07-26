@@ -25,9 +25,9 @@ export interface PreloadStats {
 export class CacheOptimizationService implements OnDestroy {
   private readonly DEFAULT_CONFIG: CacheOptimizationConfig = {
     enableAutoPreload: true,
-    preloadInterval: 30, // 30 minutes
-    maxImagesPerBatch: 20,
-    preloadThreshold: 1000 // 1Mbps
+    preloadInterval: 30,
+    maxImagesPerBatch: 10,
+    preloadThreshold: 2000
   };
 
   private config = this.DEFAULT_CONFIG;
@@ -69,10 +69,9 @@ export class CacheOptimizationService implements OnDestroy {
         this.performAutoPreload();
       });
 
-    // Initial preload after 5 seconds
     setTimeout(() => {
       this.performAutoPreload();
-    }, 5000);
+    }, 10000);
   }
 
   /**
@@ -81,24 +80,29 @@ export class CacheOptimizationService implements OnDestroy {
   private async performAutoPreload(): Promise<void> {
     if (this.isPreloading) return;
 
+    const connectionInfo = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    if (connectionInfo && (connectionInfo.effectiveType === 'slow-2g' || connectionInfo.effectiveType === '2g')) {
+      this.logService.log(LevelLogEnum.INFO, 'CacheOptimizationService', 'Skipping preload due to slow connection', { 
+        effectiveType: connectionInfo.effectiveType 
+      });
+      return;
+    }
+
     this.isPreloading = true;
     this.logService.log(LevelLogEnum.INFO, 'CacheOptimizationService', 'Starting auto preload');
 
     try {
-      // Get recent publications
       const publications = await this.publicationDatabase.getAllPublications();
-      const recentPublications = publications.slice(0, 10); // Last 10 publications
+      const recentPublications = publications.slice(0, 5);
 
       const imageUrls: string[] = [];
 
-      // Collect profile images from recent publications
       recentPublications.forEach(pub => {
         if (pub.author?.avatar) {
           imageUrls.push(pub.author.avatar);
         }
       });
 
-      // Collect publication images
       recentPublications.forEach(pub => {
         if (pub.media && pub.media.length > 0) {
           pub.media.forEach(media => {
@@ -109,14 +113,12 @@ export class CacheOptimizationService implements OnDestroy {
         }
       });
 
-      // Remove duplicates and limit batch size
       const uniqueUrls = [...new Set(imageUrls)].slice(0, this.config.maxImagesPerBatch);
 
       if (uniqueUrls.length > 0) {
         this.preloadImages(uniqueUrls);
       }
 
-      // Update stats
       const currentStats = this.preloadStats.value;
       this.preloadStats.next({
         ...currentStats,

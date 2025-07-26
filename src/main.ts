@@ -46,35 +46,58 @@ async function initializeApp() {
     const injector = appModuleRef.injector;
     const _configService = injector.get(ConfigService);
 
-    _configService.getConfig().pipe(takeUntil(destroy$)).subscribe((configData) => {
-      localStorage.setItem('theme', configData.settings.themeColors);
-
-      const theme = JSON.parse(configData.settings.themeColors);
-      Object.keys(theme).forEach(variable => {
-        document.documentElement.style.setProperty(variable, theme[variable]);
-      });
-
-      if (configData.settings.title) {
-        document.title = configData.settings.title;
-      }
-
-      if (configData.settings.logoUrl) {
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) {
-          const imgElement = document.createElement('img');
-          imgElement.src = configData.settings.logoUrl;
-          imgElement.alt = 'Cargando...';
-          loadingScreen.innerHTML = '';
-          loadingScreen.appendChild(imgElement);
-        }
-      }
-
-      updateMetaTags(configData);
-
+    const configTimeout = setTimeout(() => {
+      console.warn('ConfigService timeout, using default configuration');
       const loadingScreen = document.getElementById('loading-screen');
       if (loadingScreen) {
         loadingScreen.style.opacity = '0';
         setTimeout(() => loadingScreen.remove(), 500);
+      }
+    }, 3000);
+
+    _configService.getConfig().pipe(takeUntil(destroy$)).subscribe({
+      next: (configData) => {
+        clearTimeout(configTimeout);
+        
+        localStorage.setItem('theme', configData.settings.themeColors);
+
+        const theme = JSON.parse(configData.settings.themeColors);
+        Object.keys(theme).forEach(variable => {
+          document.documentElement.style.setProperty(variable, theme[variable]);
+        });
+
+        if (configData.settings.title) {
+          document.title = configData.settings.title;
+        }
+
+        if (configData.settings.logoUrl) {
+          const loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            const imgElement = document.createElement('img');
+            imgElement.src = configData.settings.logoUrl;
+            imgElement.alt = 'Loading...';
+            loadingScreen.innerHTML = '';
+            loadingScreen.appendChild(imgElement);
+          }
+        }
+
+        updateMetaTags(configData);
+
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.style.opacity = '0';
+          setTimeout(() => loadingScreen.remove(), 500);
+        }
+      },
+      error: (error) => {
+        clearTimeout(configTimeout);
+        console.error('Error loading configuration:', error);
+        
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.style.opacity = '0';
+          setTimeout(() => loadingScreen.remove(), 500);
+        }
       }
     });
   } catch (error) {
