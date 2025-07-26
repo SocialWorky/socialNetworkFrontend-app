@@ -110,7 +110,8 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this._scrollService.scrollEnd$.pipe(takeUntil(this.unsubscribe$)).subscribe((event) => {
-      if (this.isMobile) {
+      // Only process navbar events on mobile devices
+      if (this.isMobile && (event === 'showNavbar' || event === 'hideNavbar')) {
         if (event === 'showNavbar') {
           this.scrolledTop = true;
           this.navbarStateChange.emit(true);
