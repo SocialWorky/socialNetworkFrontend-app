@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit, HostListener } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 
@@ -21,7 +21,7 @@ import { DropdownDataLink } from '../worky-dropdown/interfaces/dataLink.interfac
     styleUrls: ['./notifications-panel.component.scss'],
     standalone: false
 })
-export class NotificationsPanelComponent implements OnInit, OnDestroy {
+export class NotificationsPanelComponent implements OnInit, OnDestroy, AfterViewInit {
   isActive = false;
 
   currentTab: NotificationStatus = NotificationStatus.UNREAD;
@@ -64,11 +64,85 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy {
         if (this._iosViewportService.isIOSDevice()) {
           setTimeout(() => {
             this._iosViewportService.forceViewportUpdate();
+            // Additional fix for iPhone positioning
+            this.fixIPhonePositioning();
           }, 100);
         }
       }
       this._cdr.markForCheck();
     });
+  }
+
+  ngAfterViewInit() {
+    // Apply positioning fix after view is initialized
+    if (this._iosViewportService.isIOSDevice()) {
+      setTimeout(() => {
+        this.fixIPhonePositioning();
+      }, 50);
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    if (this.isActive && this._iosViewportService.isIOSDevice()) {
+      setTimeout(() => {
+        this.fixIPhonePositioning();
+      }, 100);
+    }
+  }
+
+  @HostListener('window:orientationchange')
+  onOrientationChange() {
+    if (this.isActive && this._iosViewportService.isIOSDevice()) {
+      setTimeout(() => {
+        this._iosViewportService.forceViewportUpdate();
+        this.fixIPhonePositioning();
+      }, 300);
+    }
+  }
+
+  private fixIPhonePositioning(): void {
+    // Specific fix for iPhone positioning issues
+    const notificationPanel = document.querySelector('.notifications-panel') as HTMLElement;
+    if (notificationPanel && this._iosViewportService.isIOSDevice()) {
+      // Ensure panel starts from the very top
+      notificationPanel.style.top = '0';
+      notificationPanel.style.marginTop = '0';
+      notificationPanel.style.position = 'fixed';
+      
+      // Set proper height for iPhone
+      const height = window.innerHeight;
+      notificationPanel.style.height = `${height}px`;
+      notificationPanel.style.height = '-webkit-fill-available';
+      notificationPanel.style.height = `calc(var(--vh, 1vh) * 100)`;
+      
+      // Update content body height
+      const contentBody = notificationPanel.querySelector('.content-body') as HTMLElement;
+      if (contentBody) {
+        const headerHeight = 80;
+        const safeAreaTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-top')) || 0;
+        const bodyHeight = height - headerHeight - safeAreaTop;
+        
+        contentBody.style.height = `${bodyHeight}px`;
+        contentBody.style.height = `calc(-webkit-fill-available - ${headerHeight}px - ${safeAreaTop}px)`;
+        contentBody.style.height = `calc((var(--vh, 1vh) * 100) - ${headerHeight}px - ${safeAreaTop}px)`;
+      }
+      
+      // Ensure header is properly positioned
+      const contentHeader = notificationPanel.querySelector('.content-header') as HTMLElement;
+      if (contentHeader) {
+        contentHeader.style.marginTop = '0';
+        contentHeader.style.top = '0';
+        contentHeader.style.position = 'relative';
+      }
+      
+      this._logService.log(
+        LevelLogEnum.INFO,
+        'NotificationsPanelComponent',
+        'iPhone positioning fix applied',
+        { height, isIOS: this._iosViewportService.isIOSDevice() }
+      );
+    }
   }
 
   switchTab(tab: NotificationStatus) {

@@ -20,6 +20,7 @@ export class IOSViewportService implements OnDestroy {
   private initializeIOSViewportFixes(): void {
     this.setupViewportHeightFix();
     this.setupOrientationChangeHandler();
+    this.setupNotificationPanelFix();
     
     this.logService.log(LevelLogEnum.INFO, 'IOSViewportService', 'iOS viewport fixes initialized');
   }
@@ -68,6 +69,55 @@ export class IOSViewportService implements OnDestroy {
       });
   }
 
+  private setupNotificationPanelFix(): void {
+    // Specific fix for notification panel on iOS
+    const fixNotificationPanel = () => {
+      const notificationPanel = document.querySelector('.notifications-panel') as HTMLElement;
+      if (notificationPanel) {
+        // Ensure panel starts from the very top
+        notificationPanel.style.top = '0';
+        notificationPanel.style.marginTop = '0';
+        
+        // Set proper height
+        const height = window.innerHeight;
+        notificationPanel.style.height = `${height}px`;
+        notificationPanel.style.height = '-webkit-fill-available';
+        notificationPanel.style.height = `calc(var(--vh, 1vh) * 100)`;
+        
+        // Update content body height
+        const contentBody = notificationPanel.querySelector('.content-body') as HTMLElement;
+        if (contentBody) {
+          const headerHeight = 80;
+          const safeAreaTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-top')) || 0;
+          const bodyHeight = height - headerHeight - safeAreaTop;
+          
+          contentBody.style.height = `${bodyHeight}px`;
+          contentBody.style.height = `calc(-webkit-fill-available - ${headerHeight}px - ${safeAreaTop}px)`;
+          contentBody.style.height = `calc((var(--vh, 1vh) * 100) - ${headerHeight}px - ${safeAreaTop}px)`;
+        }
+        
+        // Ensure header is properly positioned
+        const contentHeader = notificationPanel.querySelector('.content-header') as HTMLElement;
+        if (contentHeader) {
+          contentHeader.style.marginTop = '0';
+          contentHeader.style.top = '0';
+        }
+      }
+    };
+
+    // Apply fix immediately and on resize
+    fixNotificationPanel();
+    
+    fromEvent(window, 'resize')
+      .pipe(
+        takeUntil(this.destroy$),
+        debounceTime(100)
+      )
+      .subscribe(() => {
+        fixNotificationPanel();
+      });
+  }
+
   private updateModalHeights(): void {
     // Update notification panel height
     const notificationPanel = document.querySelector('.notifications-panel') as HTMLElement;
@@ -76,6 +126,11 @@ export class IOSViewportService implements OnDestroy {
       
       notificationPanel.style.height = `${height}px`;
       notificationPanel.style.height = '-webkit-fill-available';
+      notificationPanel.style.height = `calc(var(--vh, 1vh) * 100)`;
+      
+      // Ensure panel starts from the very top
+      notificationPanel.style.top = '0';
+      notificationPanel.style.marginTop = '0';
       
       // Update content body height
       const contentBody = notificationPanel.querySelector('.content-body') as HTMLElement;
@@ -85,6 +140,15 @@ export class IOSViewportService implements OnDestroy {
         const bodyHeight = height - headerHeight - safeAreaTop;
         
         contentBody.style.height = `${bodyHeight}px`;
+        contentBody.style.height = `calc(-webkit-fill-available - ${headerHeight}px - ${safeAreaTop}px)`;
+        contentBody.style.height = `calc((var(--vh, 1vh) * 100) - ${headerHeight}px - ${safeAreaTop}px)`;
+      }
+      
+      // Ensure header is properly positioned
+      const contentHeader = notificationPanel.querySelector('.content-header') as HTMLElement;
+      if (contentHeader) {
+        contentHeader.style.marginTop = '0';
+        contentHeader.style.top = '0';
       }
     }
   }
