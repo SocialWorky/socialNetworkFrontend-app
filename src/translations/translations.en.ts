@@ -126,6 +126,14 @@ export const translations = {
   'addPublication.tooltip.upload': 'Upload Image',
   'addPublication.tooltip.location': 'I am Here',
   'addPublication.tooltip.emoji': 'Add Emoji',
+  'addPublication.onboarding.uploadImages.title': 'Upload Images',
+  'addPublication.onboarding.uploadImages.description': 'You can upload image files to add to your publication.',
+  'addPublication.onboarding.location.title': 'Location',
+  'addPublication.onboarding.location.description': 'You can add the location of your publication.',
+  'addPublication.onboarding.emojis.title': 'Emojis',
+  'addPublication.onboarding.emojis.description': 'You can add emojis to your publication.',
+  'addPublication.onboarding.markdown.title': 'Markdown',
+  'addPublication.onboarding.markdown.description': 'You can see a quick Markdown guide to format your publication.',
   
   // PUBLICATIONS VIEW COMPONENT
   'publicationsView.spanComments': 'Comments',
@@ -422,6 +430,8 @@ export const translations = {
   
   // ADMIN MANAGE REACTIONS LOADING
   'admin.manageReactions.loading.creating': 'Creating reaction...',
+  'admin.manageReactions.loading.reactions': 'Loading reactions...',
+  'admin.manageReactions.loading.processing': 'Processing reaction...',
   
   // ADMIN MANAGE REACTIONS SUCCESS
   'admin.manageReactions.success.title': 'Success',

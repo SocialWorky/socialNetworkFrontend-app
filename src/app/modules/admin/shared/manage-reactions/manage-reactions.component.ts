@@ -43,13 +43,13 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
   // Configuraciones para componentes compartidos
   loadingConfig: LoadingSpinnerConfig = {
     size: 'large',
-    text: 'Cargando reacciones...',
+    text: translations['admin.manageReactions.loading.reactions'],
     overlay: true
   };
 
   processingConfig: LoadingSpinnerConfig = {
     size: 'medium',
-    text: 'Procesando reacción...',
+    text: translations['admin.manageReactions.loading.processing'],
     overlay: true
   };
 

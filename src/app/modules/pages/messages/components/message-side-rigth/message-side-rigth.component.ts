@@ -336,7 +336,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
         this._notificationService.sendNotification();
         this.newMessage = '';
 
-        if(type === 'procesando') {
+        if(type === MediaType.PROCESSING) {
           this._fileUploadService.uploadFile(this.selectedFiles, 'messages', msg._id, '', TypePublishing.MESSAGE).pipe(takeUntil(this.unsubscribe$)).subscribe();
         }
 
@@ -500,7 +500,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
 
     loadingUploadImage.present();
 
-    this.sendMessage('procesando', 'procesando');
+            this.sendMessage(MediaType.PROCESSING, MediaType.PROCESSING);
     loadingUploadImage.dismiss();
 
   }

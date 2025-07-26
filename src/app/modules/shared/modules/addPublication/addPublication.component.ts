@@ -277,31 +277,31 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       {
         element: '.file-upload',
         popover: {
-          title: 'Subir Imganes',
-          description: 'Puedes subir archivos de imagen para añadir a tu publicación.',
+          title: translations['addPublication.onboarding.uploadImages.title'],
+          description: translations['addPublication.onboarding.uploadImages.description'],
         },
       },
       {
         element: '.location-on',
         popover: {
-          title: 'Ubicación',
-          description: 'Puedes añadir la ubicación de tu publicación.',
+          title: translations['addPublication.onboarding.location.title'],
+          description: translations['addPublication.onboarding.location.description'],
           //side: 'right',
         },
       },
       {
         element: '.emoji-icon',
         popover: {
-          title: 'Emojis',
-          description: 'Puedes añadir emojis a tu publicación.',
+          title: translations['addPublication.onboarding.emojis.title'],
+          description: translations['addPublication.onboarding.emojis.description'],
           //side: 'right',
         },
       },
       {
         element: '.markdown-help',
         popover: {
-          title: 'Markdown',
-          description: 'Puedes ver una guía rápida de Markdown para dar formato a tu publicación.',
+          title: translations['addPublication.onboarding.markdown.title'],
+          description: translations['addPublication.onboarding.markdown.description'],
           //side: 'right',
         },
       }

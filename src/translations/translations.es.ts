@@ -126,6 +126,14 @@ export const translations = {
   'addPublication.tooltip.upload': 'Subir Imagen',
   'addPublication.tooltip.location': 'Estoy Aquí',
   'addPublication.tooltip.emoji': 'Agrega Emoji',
+  'addPublication.onboarding.uploadImages.title': 'Subir Imágenes',
+  'addPublication.onboarding.uploadImages.description': 'Puedes subir archivos de imagen para añadir a tu publicación.',
+  'addPublication.onboarding.location.title': 'Ubicación',
+  'addPublication.onboarding.location.description': 'Puedes añadir la ubicación de tu publicación.',
+  'addPublication.onboarding.emojis.title': 'Emojis',
+  'addPublication.onboarding.emojis.description': 'Puedes añadir emojis a tu publicación.',
+  'addPublication.onboarding.markdown.title': 'Markdown',
+  'addPublication.onboarding.markdown.description': 'Puedes ver una guía rápida de Markdown para dar formato a tu publicación.',
   
   // PUBLICATIONS VIEW COMPONENT
   'publicationsView.spanComments': 'Comentarios',
@@ -378,6 +386,8 @@ export const translations = {
   
   // ADMIN MANAGE REACTIONS LOADING
   'admin.manageReactions.loading.creating': 'Creando reacción...',
+  'admin.manageReactions.loading.reactions': 'Cargando reacciones...',
+  'admin.manageReactions.loading.processing': 'Procesando reacción...',
   
   // ADMIN MANAGE REACTIONS SUCCESS
   'admin.manageReactions.success.title': 'Éxito',
@@ -396,6 +406,11 @@ export const translations = {
   'imageUpload.upload': 'Subir',
   'imageUpload.imagePreview': 'Vista previa de imagen',
   'imageUpload.fileTypeNotAllowed': 'Tipo de archivo no permitido',
+  
+  // SHARED PROCESSING MEDIA
+  'shared.processingMedia.title': 'Procesando medios',
+  'shared.processingMedia.subtitle': 'Estamos preparando tus fotos o videos para que se vean geniales.',
+  'shared.processingMedia.message': '¡No tardaremos mucho! La publicación se actualizará automáticamente cuando estén listos 💫',
   
   // ADMIN CUSTOM CSS
   'admin.customCss.editor.title': 'Editor de Código CSS',
