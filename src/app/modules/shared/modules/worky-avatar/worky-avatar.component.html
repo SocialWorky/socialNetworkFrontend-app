@@ -1,25 +1,26 @@
 <div class="avatar" [style.width.px]="size" [style.height.px]="size">
   <!-- Skeleton while loading -->
-  <div *ngIf="isLoading && !hasError" class="avatar-skeleton">
+  <div *ngIf="isLoading" class="avatar-skeleton">
     <div class="skeleton-placeholder animate-pulse"></div>
   </div>
 
-  <!-- Avatar image -->
+  <!-- Avatar image - only show if successfully loaded -->
   <img
-    *ngIf="imageData && !isLoading && !hasError"
+    *ngIf="!isLoading && imageData && !isGeneratedAvatar && imageData !== ''"
     [src]="imageData"
     [alt]="'Avatar de ' + (name || username)"
     class="avatar-image"
+    (load)="onImageLoad()"
     (error)="onImageError()"
   />
 
-  <!-- Generated avatar with initials -->
+  <!-- Generated avatar with initials - always show as fallback -->
   <div
-    *ngIf="(!imageData || hasError) && !isLoading && showInitials && isGeneratedAvatar"
+    *ngIf="!isLoading && showInitials && (isGeneratedAvatar || !imageData || imageData === '')"
     class="avatar-initials"
     [style.background-color]="backgroundColor"
     [style.font-size.px]="fontSize"
   >
-    {{ initials }}
+    {{ initials || '?' }}
   </div>
 </div>

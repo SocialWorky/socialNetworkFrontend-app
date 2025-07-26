@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnChanges, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
@@ -56,6 +56,9 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() showInitials: boolean = true;
 
+  @Output() load = new EventEmitter<void>();
+  @Output() error = new EventEmitter<void>();
+
   @Input()
   set size(value: number) {
     if (value >= 10 && value <= 100) {
@@ -77,11 +80,23 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit(): void {
     this.token = this._authService.getDecodedToken() || undefined;
+    this.generateInitialsAvatar(); // Always generate initials first
     this.generateAvatar();
+    this.debugState();
   }
 
   ngOnChanges(): void {
+    this.isLoading = true;
+    this.hasError = false;
+    this.isGeneratedAvatar = false;
+    this.imageData = '';
+    this.initials = '';
+    this.backgroundColor = '';
+    this.fontSize = null;
+    
+    this.generateInitialsAvatar(); // Always generate initials first
     this.generateAvatar();
+    this.debugState();
   }
 
   ngOnDestroy(): void {
@@ -93,69 +108,112 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Image error event triggered', { 
       url: this.img || 'unknown' 
     });
-    this.isLoading = false;
-    this.hasError = true;
-    this.imageData = ''; // Limpiar imagen fallida
+    // Clear image data and keep initials
+    this.imageData = '';
+    this.isGeneratedAvatar = true;
+    this._cdr.markForCheck();
+  }
+
+  onImageLoad(): void {
+    this.load.emit();
+  }
+
+  public forceInitials(): void {
+    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Forcing initials generation');
+    this.imageData = '';
+    this.isGeneratedAvatar = true;
+    this._cdr.markForCheck();
+  }
+
+  // Test method to verify initials work
+  public testInitials(): void {
+    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Testing initials generation');
     this.generateInitialsAvatar();
+    this._cdr.markForCheck();
+  }
+
+  private debugState(): void {
+    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Component state', {
+      isLoading: this.isLoading,
+      hasError: this.hasError,
+      isGeneratedAvatar: this.isGeneratedAvatar,
+      imageData: this.imageData,
+      initials: this.initials,
+      showInitials: this.showInitials,
+      img: this.img,
+      name: this.name,
+      username: this.username
+    });
   }
 
   private generateAvatar(): void {
-    // Si no hay imagen o la imagen está vacía, generar iniciales
-    if (!this.img || this.img.trim() === '' || this.img === 'null') {
-      this.generateInitialsAvatar();
-    } else {
-      this.validateAndSetImage(this.img);
+    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Generating avatar', { 
+      img: this.img, 
+      name: this.name, 
+      username: this.username
+    });
+    
+    // Only try to load image if we have a valid URL
+    if (this.img && this.img.trim() !== '' && this.img !== 'null' && this.img !== 'undefined') {
+      this.tryLoadImage(this.img);
     }
   }
 
-  private validateAndSetImage(imageUrl: string): void {
-    this.isGeneratedAvatar = false;
+  private tryLoadImage(imageUrl: string): void {
     this.isLoading = true;
-    this.hasError = false;
     this._cdr.markForCheck();
 
-    // Verificar si es una imagen de Google
+    const timeout = setTimeout(() => {
+      if (this.isLoading) {
+        this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Image load timeout', { url: imageUrl });
+        this.isLoading = false;
+        this._cdr.markForCheck();
+      }
+    }, 3000);
+
     if (this.isGoogleImage(imageUrl)) {
-      this.loadGoogleImage(imageUrl);
+      this.loadGoogleImage(imageUrl, timeout);
     } else {
-      // Usar mobile cache service para otras imágenes
       if (this._mobileCacheService.isMobile()) {
         this._mobileCacheService.loadImage(imageUrl, 'profile', this.imageOptions)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (cachedUrl) => {
+              clearTimeout(timeout);
               this.imageData = cachedUrl;
               this.isLoading = false;
-              this.hasError = false;
+              this.isGeneratedAvatar = false;
               this._cdr.markForCheck();
+              this.load.emit();
             },
             error: (error) => {
+              clearTimeout(timeout);
               this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image from mobile cache', { 
                 url: imageUrl, 
                 error: error.message 
               });
               this.isLoading = false;
-              this.hasError = true;
-              this.generateInitialsAvatar();
+              this._cdr.markForCheck();
             }
           });
       } else {
-        // Fallback para desktop
         const img = new Image();
         img.src = imageUrl;
 
         img.onload = () => {
+          clearTimeout(timeout);
           this.imageData = imageUrl;
           this.isLoading = false;
-          this.hasError = false;
+          this.isGeneratedAvatar = false;
           this._cdr.markForCheck();
+          this.load.emit();
         };
 
         img.onerror = () => {
+          clearTimeout(timeout);
           this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image', { url: imageUrl });
           this.isLoading = false;
-          this.hasError = true;
-          this.generateInitialsAvatar();
+          this._cdr.markForCheck();
         };
       }
     }
@@ -168,24 +226,26 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
            url.includes('lh6.googleusercontent.com');
   }
 
-  private loadGoogleImage(imageUrl: string): void {
+  private loadGoogleImage(imageUrl: string, timeout: NodeJS.Timeout): void {
     this._googleImageService.getGoogleImage(imageUrl, this.size)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (cachedUrl) => {
+          clearTimeout(timeout);
           this.imageData = cachedUrl;
           this.isLoading = false;
-          this.hasError = false;
+          this.isGeneratedAvatar = false;
           this._cdr.markForCheck();
+          this.load.emit();
         },
         error: (error) => {
+          clearTimeout(timeout);
           this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load Google image', { 
             url: imageUrl, 
             error: error.message 
           });
           this.isLoading = false;
-          this.hasError = true;
-          this.generateInitialsAvatar();
+          this._cdr.markForCheck();
         }
       });
   }
@@ -194,7 +254,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     this.isGeneratedAvatar = true;
     this.isLoading = false;
     this.hasError = false;
-    this.imageData = ''; // Asegurar que no hay imagen
+    this.imageData = '';
 
     const fullName = this.name || this.username || '';
     const nameParts = fullName.trim().split(' ').filter(part => part.length > 0);
@@ -204,17 +264,37 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     } else if (nameParts.length === 1) {
       this.initials = nameParts[0].charAt(0).toUpperCase();
     } else {
-      this.initials = '?';
+      const username = this.username || '';
+      if (username.length > 0) {
+        this.initials = username.charAt(0).toUpperCase();
+      } else {
+        this.initials = '?';
+      }
     }
 
-    // Generar color de fondo basado en el nombre
-    const nameHash = this.hashCode(fullName);
+    const nameHash = this.hashCode(fullName || this.username || 'user');
     this.backgroundColor = this.colors[Math.abs(nameHash) % this.colors.length];
 
-    // Calcular tamaño de fuente
     this.fontSize = Math.max(12, Math.min(24, this.size * 0.4));
 
+    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Generated initials avatar', { 
+      fullName,
+      nameParts,
+      initials: this.initials,
+      backgroundColor: this.backgroundColor,
+      fontSize: this.fontSize,
+      isGeneratedAvatar: this.isGeneratedAvatar,
+      hasError: this.hasError,
+      imageData: this.imageData
+    });
+
     this._cdr.markForCheck();
+  }
+
+  // Force initials immediately for testing
+  public forceInitialsNow(): void {
+    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Forcing initials immediately');
+    this.generateInitialsAvatar();
   }
 
   private hashCode(str: string): number {

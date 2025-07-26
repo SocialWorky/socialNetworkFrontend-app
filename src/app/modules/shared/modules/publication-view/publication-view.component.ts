@@ -169,6 +169,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   onAvatarError() {
     this.avatarLoading = false;
+    // Force the avatar component to show initials when image fails
     this._cdr.markForCheck();
   }
 
@@ -215,10 +216,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       setTimeout(() => this.onContentLoad(), 500);
     }
     
-    // Load avatar if exists
-    if (this.publication.author.avatar) {
-      setTimeout(() => this.onAvatarLoad(), 600);
-    }
+    // Load avatar - always show avatar component (with or without image)
+    setTimeout(() => this.onAvatarLoad(), 600);
     
     // Load media if exists
     if (this.publication.media.length > 0) {
