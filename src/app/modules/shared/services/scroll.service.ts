@@ -19,12 +19,14 @@ export class ScrollService {
     const scrollHeight = event.target.scrollHeight;
     const offsetHeight = event.target.offsetHeight;
 
-    if (scrollTop >= 1500) {
+    // Mostrar/ocultar botón de scroll to top (umbral más sensible)
+    if (scrollTop >= 200) {
       this.scrollEndSource.next('showScrollToTopButton');
     } else {
       this.scrollEndSource.next('hideScrollToTopButton');
     }
 
+    // Mostrar/ocultar navbar
     if (scrollTop < 50) {
       this.scrollEndSource.next('hideNavbar');
     }
@@ -33,6 +35,7 @@ export class ScrollService {
       this.scrollEndSource.next('showNavbar');
     }
 
+    // Detectar fin de scroll para cargar más contenido
     if (scrollTop + offsetHeight >= scrollHeight - threshold) {
       this.scrollEndSource.next('scrollEnd');
     }
@@ -63,7 +66,8 @@ export class ScrollService {
       this.scrollEndSource.next('scrollEnd');
     }
 
-    if (position > 3500) {
+    // Mostrar/ocultar botón de scroll to top (umbral más sensible)
+    if (event.target.scrollTop > 200) {
       this.scrollEndSource.next('showScrollToTopButton');
     } else {
       this.scrollEndSource.next('hideScrollToTopButton');

@@ -190,8 +190,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       if(data === 'scrollEnd') {
         this.loadPublications();
       }
-      if(data === 'showScrollToTopButton') this.showScrollToTopButton = true;
-      if(data === 'hideScrollToTopButton') this.showScrollToTopButton = false;
+      if(data === 'showScrollToTopButton') {
+        this.showScrollToTopButton = true;
+      }
+      if(data === 'hideScrollToTopButton') {
+        this.showScrollToTopButton = false;
+      }
     });
   }
 
@@ -555,11 +559,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onScroll(event: any) {
+    // Usar el ScrollService para manejar el scroll de forma consistente
+    this._scrollService.onScroll(event);
+    
+    // Cargar más publicaciones cuando se llegue al final
     const threshold = 100;
     const position = event.target.scrollTop + event.target.clientHeight;
     const height = event.target.scrollHeight;
-
-    this.showScrollToTopButton = position > 3500;
 
     if (position >= height - threshold && !this.loaderPublications && this.hasMorePublications) {
       this.loadPublications();
