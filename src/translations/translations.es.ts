@@ -437,6 +437,10 @@ export const translations = {
   
   // ADMIN MANAGE REACTIONS SUCCESS
   'admin.manageReactions.success.title': 'Éxito',
+  
+  // WORKY NEWS WIDGET
+  'shared.workyNews.imageAlt': 'Imagen de noticia',
+  'shared.workyNews.readMore': 'Leer más',
   'admin.manageReactions.success.created': 'Reacción creada exitosamente',
   'admin.manageReactions.success.deleted': 'Reacción eliminada exitosamente',
   
