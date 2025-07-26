@@ -7,7 +7,8 @@ import { HttpClient } from '@angular/common/http';
 
 // iOS-specific optimizations
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+              (navigator.userAgent.includes('Safari') && navigator.userAgent.includes('Mac') && 'ontouchend' in document);
 
 const iOS_CONFIG: MobileCacheConfig = {
   maxCacheSize: 50 * 1024 * 1024, // 50MB for iOS (more conservative)
@@ -288,10 +289,27 @@ export class MobileImageCacheService {
 
   private setupIOSIndexedDBOptimizations(): void {
     // iOS Safari has issues with large IndexedDB transactions
-    // Use smaller transaction sizes
+    // Use smaller transaction sizes and handle iOS-specific quirks
     if (this.db) {
-      // Set smaller transaction size for iOS
+      // iOS Safari has a limit on IndexedDB transaction size
+      // We'll use smaller chunks for operations
       this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'iOS IndexedDB optimizations applied');
+    }
+    
+    // Handle iOS Safari IndexedDB quirks
+    if (isIOS && 'indexedDB' in window) {
+      // iOS Safari sometimes has issues with IndexedDB in private browsing
+      try {
+        const testRequest = indexedDB.open('test', 1);
+        testRequest.onerror = () => {
+          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'IndexedDB not available in iOS private browsing mode');
+        };
+        testRequest.onsuccess = () => {
+          indexedDB.deleteDatabase('test');
+        };
+      } catch (error) {
+        this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'IndexedDB test failed on iOS', { error });
+      }
     }
   }
 
@@ -300,6 +318,17 @@ export class MobileImageCacheService {
     setInterval(() => {
       this.cleanupOldCache();
     }, 5 * 60 * 1000); // Every 5 minutes instead of default
+    
+    // iOS-specific memory pressure handling
+    if (isIOS && 'memory' in performance) {
+      setInterval(() => {
+        const memory = (performance as any).memory;
+        if (memory && memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.8) {
+          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS memory pressure detected, cleaning memory cache');
+          this.memoryCache.clear();
+        }
+      }, 10000); // Check every 10 seconds
+    }
   }
 
   /**
@@ -311,6 +340,12 @@ export class MobileImageCacheService {
     
     // iOS-specific timeout adjustment
     const timeoutValue = isIOS ? (options.timeout || 15000) : (options.timeout || 30000);
+    
+    // iOS-specific URL validation
+    if (isIOS && !imageUrl.startsWith('http')) {
+      this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Invalid image URL for iOS', { url: imageUrl });
+      return throwError(() => new Error('Invalid image URL'));
+    }
     
     // Check memory cache first
     if (this.memoryCache.has(imageUrl)) {
@@ -369,12 +404,30 @@ export class MobileImageCacheService {
     if (!this.db) return null;
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
-      const store = transaction.objectStore(this.STORE_NAME);
-      const request = store.get(imageUrl);
+      try {
+        const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+        const store = transaction.objectStore(this.STORE_NAME);
+        const request = store.get(imageUrl);
 
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => {
+          // iOS Safari specific error handling
+          if (isIOS) {
+            this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS IndexedDB read failed, falling back to network', { url: imageUrl });
+            resolve(null); // Don't fail completely, fall back to network
+          } else {
+            reject(request.error);
+          }
+        };
+      } catch (error) {
+        // iOS Safari sometimes throws errors during IndexedDB operations
+        if (isIOS) {
+          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS IndexedDB operation failed, falling back to network', { error, url: imageUrl });
+          resolve(null); // Don't fail completely, fall back to network
+        } else {
+          reject(error);
+        }
+      }
     });
   }
 
@@ -382,7 +435,17 @@ export class MobileImageCacheService {
     const config = this.getCurrentConfig();
     const imageConfig = config.imageTypes[imageType];
 
-    return this.http.get(imageUrl, { responseType: 'blob' }).pipe(
+    // iOS-specific headers for better image loading
+    const headers: { [key: string]: string } = {};
+    if (isIOS) {
+      headers['Accept'] = 'image/webp,image/apng,image/*,*/*;q=0.8';
+      headers['Cache-Control'] = 'max-age=31536000';
+    }
+
+    return this.http.get(imageUrl, { 
+      responseType: 'blob',
+      headers
+    }).pipe(
       timeout(options.timeout || 30000),
       map(blob => {
         const cachedImage: CachedImage = {
@@ -402,7 +465,8 @@ export class MobileImageCacheService {
         this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image loaded from network and cached', { 
           url: imageUrl, 
           type: imageType,
-          size: blob.size 
+          size: blob.size,
+          isIOS 
         });
 
         return cachedImage;
@@ -410,7 +474,8 @@ export class MobileImageCacheService {
       catchError(error => {
         this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Failed to load image from network', { 
           url: imageUrl, 
-          error: error.message 
+          error: error.message,
+          isIOS 
         });
         return throwError(() => error);
       })
@@ -421,12 +486,35 @@ export class MobileImageCacheService {
     if (!this.db) return;
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.STORE_NAME], 'readwrite');
-      const store = transaction.objectStore(this.STORE_NAME);
-      const request = store.put(cachedImage);
+      try {
+        const transaction = this.db!.transaction([this.STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(this.STORE_NAME);
+        const request = store.put(cachedImage);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve();
+        request.onerror = () => {
+          // iOS Safari specific error handling
+          if (isIOS && request.error?.name === 'QuotaExceededError') {
+            this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS storage quota exceeded, cleaning up cache');
+            this.cleanupOldCache().then(() => {
+              // Retry after cleanup
+              const retryRequest = store.put(cachedImage);
+              retryRequest.onsuccess = () => resolve();
+              retryRequest.onerror = () => reject(retryRequest.error);
+            });
+          } else {
+            reject(request.error);
+          }
+        };
+      } catch (error) {
+        // iOS Safari sometimes throws errors during IndexedDB operations
+        if (isIOS) {
+          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS IndexedDB operation failed, falling back to memory cache', { error });
+          resolve(); // Don't fail completely, just use memory cache
+        } else {
+          reject(error);
+        }
+      }
     });
   }
 
@@ -666,4 +754,73 @@ export class MobileImageCacheService {
     await this.optimizeForMobile();
     this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Forced optimization completed');
   }
-} 
+
+  /**
+   * iOS-specific cache health check
+   */
+  async checkIOSCacheHealth(): Promise<{ healthy: boolean; issues: string[] }> {
+    const issues: string[] = [];
+    
+    if (!isIOS) {
+      return { healthy: true, issues: [] };
+    }
+    
+    // Check IndexedDB availability
+    if (!('indexedDB' in window)) {
+      issues.push('IndexedDB not available');
+    }
+    
+    // Check memory usage
+    if ('memory' in performance) {
+      const memory = (performance as any).memory;
+      if (memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.9) {
+        issues.push('High memory usage detected');
+      }
+    }
+    
+    // Check cache size
+    const stats = await this.getPersistentCacheStats();
+    const config = this.getCurrentConfig();
+    if (stats.size > config.maxCacheSize * 0.9) {
+      issues.push('Cache size approaching limit');
+    }
+    
+    // Check memory cache size
+    if (this.memoryCache.size > 20) {
+      issues.push('Memory cache size too large');
+    }
+    
+    const healthy = issues.length === 0;
+    
+    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'iOS cache health check completed', {
+      healthy,
+      issues,
+      memoryCacheSize: this.memoryCache.size,
+      persistentCacheSize: stats.size
+    });
+    
+    return { healthy, issues };
+  }
+
+  /**
+   * iOS-specific cache recovery
+   */
+  async recoverIOSCache(): Promise<void> {
+    if (!isIOS) return;
+    
+    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Starting iOS cache recovery');
+    
+    // Clear memory cache
+    this.memoryCache.clear();
+    
+    // Cleanup persistent cache
+    await this.cleanupOldCache();
+    
+    // Reinitialize database if needed
+    if (!this.db) {
+      await this.initDatabase();
+    }
+    
+    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'iOS cache recovery completed');
+  }
+}
