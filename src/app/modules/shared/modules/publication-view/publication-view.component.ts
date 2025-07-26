@@ -132,7 +132,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           this._notificationService.notification$
         .pipe(
           distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
-          debounceTime(300),
           takeUntil(this.destroy$)
         )
       .subscribe({
@@ -203,25 +202,25 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._cdr.markForCheck();
   }
 
-  // Simular carga progresiva para demostración
+  // Load all elements immediately without artificial delays
   private simulateProgressiveLoading() {
-    // Load basic elements first with delays
-    setTimeout(() => this.onNameLoad(), 100);
-    setTimeout(() => this.onDateLoad(), 200);
-    setTimeout(() => this.onLocationLoad(), 300);
-    setTimeout(() => this.onActionsLoad(), 400);
+    // Load all elements immediately
+    this.onNameLoad();
+    this.onDateLoad();
+    this.onLocationLoad();
+    this.onActionsLoad();
     
     // Load content if exists
     if (this.publication.content) {
-      setTimeout(() => this.onContentLoad(), 500);
+      this.onContentLoad();
     }
     
     // Load avatar - always show avatar component (with or without image)
-    setTimeout(() => this.onAvatarLoad(), 600);
+    this.onAvatarLoad();
     
     // Load media if exists
     if (this.publication.media.length > 0) {
-      setTimeout(() => this.onMediaLoad(), 700);
+      this.onMediaLoad();
     }
   }
 
@@ -431,8 +430,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   refreshPublications(_id?: string) {
     if (_id) {
       this._publicationService.getPublicationId(_id).pipe(
-        takeUntil(this.destroy$),
-        debounceTime(200)
+        takeUntil(this.destroy$)
       ).subscribe({
         next: (publication: PublicationView[]) => {
           if (!publication.length) {
@@ -582,13 +580,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   private setupMediaProcessingTimeout() {
+    // Removed artificial timeout - media will be handled by real events
     if (this.publication.containsMedia && this.publication.media.length === 0) {
-      this.mediaProcessingTimeout = setTimeout(() => {
-        console.warn('Media processing timeout reached, forcing update');
-        this.publication.containsMedia = false;
-        this.mediaLoading = false;
-        this._cdr.markForCheck();
-      }, 30000);
+      // Media processing will be handled by real events from MediaEventsService
+      // No artificial timeout needed
     }
   }
 }

@@ -238,17 +238,17 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   private simulateProgressiveLoading() {
-    // Simular carga progresiva con retrasos reales
-    setTimeout(() => this.onNameLoad(), 100);
-    setTimeout(() => this.onPrivacyLoad(), 200);
-    setTimeout(() => this.onTextareaLoad(), 300);
-    setTimeout(() => this.onLocationLoad(), 400);
-    setTimeout(() => this.onMarkdownButtonsLoad(), 500);
-    setTimeout(() => this.onOptionsButtonsLoad(), 600);
-    setTimeout(() => this.onPublishButtonLoad(), 700);
+    // Load all elements immediately without artificial delays
+    this.onNameLoad();
+    this.onPrivacyLoad();
+    this.onTextareaLoad();
+    this.onLocationLoad();
+    this.onMarkdownButtonsLoad();
+    this.onOptionsButtonsLoad();
+    this.onPublishButtonLoad();
     
     if (this.profileImageUrl) {
-      setTimeout(() => this.onAvatarLoad(), 800);
+      this.onAvatarLoad();
     }
   }
 

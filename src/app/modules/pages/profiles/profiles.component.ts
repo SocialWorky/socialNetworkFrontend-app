@@ -307,7 +307,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       .pipe(
         takeUntil(this.destroy$),
         filter((notifications: NotificationNewPublication[]) => !!notifications?.[0]?.publications?._id),
-        debounceTime(300),
+        // Removed debounceTime for immediate response
         distinctUntilChanged((prev, curr) => {
           if (!prev || !curr || prev.length === 0 || curr.length === 0) return false;
           return prev[0].publications._id === curr[0].publications._id;
@@ -380,7 +380,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     this._notificationPublicationService.notificationDeletePublication$
       .pipe(
         takeUntil(this.destroy$),
-        debounceTime(300),
+        // Removed debounceTime for immediate response
         distinctUntilChanged((prev, curr) => {
           if (!prev || !curr || prev.length === 0 || curr.length === 0) return false;
           return prev[0]._id === curr[0]._id;
@@ -497,7 +497,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     this._notificationCommentService.notificationComment$
      .pipe(
        takeUntil(this.destroy$),
-       debounceTime(300),
+       // Removed debounceTime for immediate response
        filter((data: any) => !!data?.postId)
      )
      .subscribe({
@@ -511,8 +511,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
           }
           
           this._publicationService.getPublicationId(data.postId).pipe(
-            takeUntil(this.destroy$),
-            debounceTime(200)
+            takeUntil(this.destroy$)
           ).subscribe({
             next: (publication: PublicationView[]) => {
               if (publication.length > 0) {

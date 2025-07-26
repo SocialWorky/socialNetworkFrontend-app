@@ -324,7 +324,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       .pipe(
         takeUntil(this.destroy$),
         filter((data: PublicationView[]) => !!data?.[0]?._id),
-        debounceTime(500),
+        // Removed debounceTime for immediate response
         distinctUntilChanged((prev, curr) => {
           if (!prev || !curr || prev.length === 0 || curr.length === 0) return false;
           return prev[0]._id === curr[0]._id && 
