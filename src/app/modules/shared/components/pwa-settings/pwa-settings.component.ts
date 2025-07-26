@@ -3,6 +3,7 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { PwaUpdateService } from '@shared/services/pwa-update.service';
 import { PwaInstallService } from '@shared/services/pwa-install.service';
+import { translations } from '@translations/translations';
 
 @Component({
   selector: 'app-pwa-settings',
@@ -12,37 +13,35 @@ import { PwaInstallService } from '@shared/services/pwa-install.service';
       <ion-card-header>
         <ion-card-title>
           <ion-icon name="settings-outline"></ion-icon>
-          Configuración de PWA
+          {{ translations['pwa.settings.title'] }}
         </ion-card-title>
       </ion-card-header>
       
       <ion-card-content>
         <div class="setting-item">
           <div class="setting-info">
-            <h3>Actualización automática</h3>
-            <p>La aplicación se actualizará automáticamente cuando haya una nueva versión disponible.</p>
+            <h3>{{ translations['pwa.settings.manualUpdate.title'] }}</h3>
+            <p>{{ translations['pwa.settings.manualUpdate.description'] }}</p>
           </div>
-          <ion-toggle 
-            [(ngModel)]="autoUpdateEnabled"
-            (ionChange)="toggleAutoUpdate($event)"
-            labelPlacement="end">
-          </ion-toggle>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-info">
-            <h3>Estado de instalación</h3>
-            <p>{{ isInstalled ? 'La aplicación está instalada' : 'La aplicación no está instalada' }}</p>
-          </div>
-          <ion-badge [color]="isInstalled ? 'success' : 'warning'">
-            {{ isInstalled ? 'Instalada' : 'No instalada' }}
+          <ion-badge color="info">
+            {{ translations['pwa.settings.manualUpdate.badge'] }}
           </ion-badge>
         </div>
 
         <div class="setting-item">
           <div class="setting-info">
-            <h3>Última verificación</h3>
-            <p>{{ lastCheckTime ? 'Hace ' + getTimeAgo(lastCheckTime) : 'Nunca' }}</p>
+            <h3>{{ translations['pwa.settings.installationStatus.title'] }}</h3>
+            <p>{{ isInstalled ? translations['pwa.settings.installationStatus.installed'] : translations['pwa.settings.installationStatus.notInstalled'] }}</p>
+          </div>
+          <ion-badge [color]="isInstalled ? 'success' : 'warning'">
+            {{ isInstalled ? translations['pwa.settings.installationStatus.badge.installed'] : translations['pwa.settings.installationStatus.badge.notInstalled'] }}
+          </ion-badge>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <h3>{{ translations['pwa.settings.lastCheck.title'] }}</h3>
+            <p>{{ lastCheckTime ? translations['pwa.settings.lastCheck.ago'] + ' ' + getTimeAgo(lastCheckTime) : translations['pwa.settings.lastCheck.never'] }}</p>
           </div>
           <ion-button 
             fill="outline" 
@@ -50,14 +49,14 @@ import { PwaInstallService } from '@shared/services/pwa-install.service';
             (click)="checkForUpdates()"
             [disabled]="isChecking">
             <ion-spinner *ngIf="isChecking" name="crescent"></ion-spinner>
-            {{ isChecking ? 'Verificando...' : 'Verificar ahora' }}
+            {{ isChecking ? translations['pwa.settings.lastCheck.checking'] : translations['pwa.settings.lastCheck.button'] }}
           </ion-button>
         </div>
 
         <div class="setting-item" *ngIf="updateInfo">
           <div class="setting-info">
-            <h3>Actualización disponible</h3>
-            <p>Hay una nueva versión lista para instalar.</p>
+            <h3>{{ translations['pwa.settings.updateAvailable.title'] }}</h3>
+            <p>{{ translations['pwa.settings.updateAvailable.description'] }}</p>
           </div>
           <ion-button 
             color="primary"
@@ -65,20 +64,20 @@ import { PwaInstallService } from '@shared/services/pwa-install.service';
             (click)="applyUpdate()"
             [disabled]="isUpdating">
             <ion-spinner *ngIf="isUpdating" name="crescent"></ion-spinner>
-            {{ isUpdating ? 'Actualizando...' : 'Actualizar' }}
+            {{ isUpdating ? translations['pwa.settings.updateAvailable.updating'] : translations['pwa.settings.updateAvailable.button'] }}
           </ion-button>
         </div>
 
         <div class="setting-item" *ngIf="!isInstalled && pwaSupported">
           <div class="setting-info">
-            <h3>Instalar aplicación</h3>
-            <p>Instala esta aplicación en tu dispositivo para una mejor experiencia.</p>
+            <h3>{{ translations['pwa.settings.install.title'] }}</h3>
+            <p>{{ translations['pwa.settings.install.description'] }}</p>
           </div>
           <ion-button 
             color="success"
             size="small"
             (click)="installPWA()">
-            Instalar
+            {{ translations['pwa.settings.install.button'] }}
           </ion-button>
         </div>
       </ion-card-content>
@@ -122,13 +121,14 @@ import { PwaInstallService } from '@shared/services/pwa-install.service';
   `]
 })
 export class PwaSettingsComponent implements OnInit, OnDestroy {
-  autoUpdateEnabled = false;
+  // autoUpdateEnabled removed - no automatic updates allowed
   isInstalled = false;
   pwaSupported = false;
   isChecking = false;
   isUpdating = false;
   lastCheckTime: Date | null = null;
   updateInfo: any = null;
+  translations = translations;
   
   private destroy$ = new Subject<void>();
 
@@ -138,9 +138,6 @@ export class PwaSettingsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Get automatic update status
-    this.autoUpdateEnabled = this.pwaUpdateService.getAutoUpdateStatus();
-    
     // Check if PWA is installed
     this.isInstalled = this.pwaInstallService.isAppInstalled();
     this.pwaSupported = this.pwaInstallService.isPwaSupported();
@@ -159,11 +156,9 @@ export class PwaSettingsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Cambia el estado de actualización automática
+   * Actualización automática no permitida
    */
-  toggleAutoUpdate(event: any): void {
-    this.pwaUpdateService.setAutoUpdate(event.detail.checked);
-  }
+  // toggleAutoUpdate method removed - no automatic updates allowed
 
   /**
    * Verifica manualmente si hay actualizaciones

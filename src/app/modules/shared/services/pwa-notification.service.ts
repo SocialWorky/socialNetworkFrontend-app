@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { AlertController, ToastController } from '@ionic/angular';
 import { PwaUpdateService, UpdateInfo } from './pwa-update.service';
 import { Subject, takeUntil } from 'rxjs';
+import { translations } from '@translations/translations';
 
 @Injectable({
   providedIn: 'root'
@@ -35,19 +36,19 @@ export class PwaNotificationService {
    */
   private async showUpdateNotification(updateInfo: UpdateInfo): Promise<void> {
     const toast = await this.toastController.create({
-      message: 'Nueva versión disponible. Toca para actualizar.',
+      message: translations['pwa.notification.toast.message'],
       duration: 5000,
       position: 'top',
       color: 'primary',
       buttons: [
         {
-          text: 'Actualizar',
+          text: translations['pwa.notification.toast.update'],
           handler: () => {
             this.pwaUpdateService.applyUpdate();
           }
         },
         {
-          text: 'Más tarde',
+          text: translations['pwa.notification.toast.later'],
           role: 'cancel'
         }
       ]
@@ -61,24 +62,24 @@ export class PwaNotificationService {
    */
   async showUpdateAlert(updateInfo: UpdateInfo): Promise<void> {
     const alert = await this.alertController.create({
-      header: 'Nueva versión disponible',
+      header: translations['pwa.notification.alert.title'],
       message: `
-        Se ha detectado una nueva versión de la aplicación.
+        ${translations['pwa.notification.alert.message']}
         <br><br>
-        <strong>Versión actual:</strong> ${updateInfo.currentVersion?.slice(0, 8)}...
+        <strong>${translations['pwa.notification.alert.currentVersion']}</strong> ${updateInfo.currentVersion?.slice(0, 8)}...
         <br>
-        <strong>Nueva versión:</strong> ${updateInfo.newVersion?.slice(0, 8)}...
+        <strong>${translations['pwa.notification.alert.newVersion']}</strong> ${updateInfo.newVersion?.slice(0, 8)}...
         <br><br>
-        ¿Deseas actualizar ahora?
+        ${translations['pwa.notification.alert.confirm']}
       `,
       buttons: [
         {
-          text: 'Más tarde',
+          text: translations['pwa.notification.toast.later'],
           role: 'cancel',
           cssClass: 'secondary'
         },
         {
-          text: 'Actualizar',
+          text: translations['pwa.notification.toast.update'],
           handler: () => {
             this.pwaUpdateService.applyUpdate();
           }
@@ -94,7 +95,7 @@ export class PwaNotificationService {
    */
   async showUpdateProgress(): Promise<void> {
     const toast = await this.toastController.create({
-      message: 'Actualizando aplicación...',
+      message: translations['pwa.notification.progress.message'],
       duration: 0,
       position: 'top',
       color: 'success',
@@ -109,7 +110,7 @@ export class PwaNotificationService {
    */
   async showUpdateError(error: string): Promise<void> {
     const toast = await this.toastController.create({
-      message: `Error al actualizar: ${error}`,
+      message: `${translations['pwa.notification.error.message']} ${error}`,
       duration: 4000,
       position: 'top',
       color: 'danger',
@@ -124,7 +125,7 @@ export class PwaNotificationService {
    */
   async showUpdateSuccess(): Promise<void> {
     const toast = await this.toastController.create({
-      message: 'Aplicación actualizada exitosamente',
+      message: translations['pwa.notification.success.message'],
       duration: 3000,
       position: 'top',
       color: 'success',

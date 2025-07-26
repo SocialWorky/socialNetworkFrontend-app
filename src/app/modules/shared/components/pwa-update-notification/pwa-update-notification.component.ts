@@ -3,6 +3,7 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { PwaUpdateService, UpdateInfo } from '@shared/services/pwa-update.service';
 import { environment } from '@env/environment';
+import { translations } from '@translations/translations';
 
 @Component({
   selector: 'app-pwa-update-notification',
@@ -15,21 +16,22 @@ import { environment } from '@env/environment';
             <div class="header-icon">
               <ion-icon name="refresh-outline"></ion-icon>
             </div>
-            <h2 class="modal-title">Actualización Disponible</h2>
+            <h2 class="modal-title">{{ translations['pwa.update.title'] }}</h2>
           </div>
 
           <div class="modal-body">
             <div class="update-message">
-              <p>Una nueva versión de la aplicación está lista para instalar.</p>
+              <p>{{ translations['pwa.update.message'] }}</p>
+              <p class="update-instruction">{{ translations['pwa.update.instruction'] }}</p>
             </div>
 
             <div class="update-info" *ngIf="updateInfo">
               <div class="info-item">
-                <span class="label">Versión actual:</span>
+                <span class="label">{{ translations['pwa.update.currentVersion'] }}</span>
                 <span class="value">{{ updateInfo.currentVersion | slice:0:8 }}...</span>
               </div>
               <div class="info-item">
-                <span class="label">Nueva versión:</span>
+                <span class="label">{{ translations['pwa.update.newVersion'] }}</span>
                 <span class="value new-version">{{ updateInfo.newVersion | slice:0:8 }}...</span>
               </div>
             </div>
@@ -43,7 +45,7 @@ import { environment } from '@env/environment';
               class="update-button">
               <ion-spinner *ngIf="isUpdating" name="crescent"></ion-spinner>
               <ion-icon *ngIf="!isUpdating" name="download-outline"></ion-icon>
-              {{ isUpdating ? 'Actualizando...' : 'Actualizar ahora' }}
+              {{ isUpdating ? translations['pwa.update.updating'] : translations['pwa.update.button'] }}
             </ion-button>
           </div>
         </div>
@@ -65,6 +67,7 @@ import { environment } from '@env/environment';
       opacity: 0;
       visibility: hidden;
       transition: all 0.3s ease-in-out;
+      pointer-events: auto;
     }
 
     .modal-backdrop.show {
@@ -135,6 +138,13 @@ import { environment } from '@env/environment';
       line-height: 1.5;
       color: #374151;
       text-align: center;
+    }
+
+    .update-instruction {
+      margin-top: 8px !important;
+      font-size: 14px !important;
+      color: #6b7280 !important;
+      font-weight: 500;
     }
 
     .update-info {
@@ -234,12 +244,37 @@ import { environment } from '@env/environment';
     :host-context(body.modal-open) {
       overflow: hidden;
     }
+
+    /* Ensure modal is always on top and blocking */
+    .modal-backdrop.show {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    /* Prevent any interaction with content behind modal */
+    body.modal-open {
+      overflow: hidden !important;
+      position: fixed !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    body.modal-open * {
+      pointer-events: none !important;
+    }
+
+    body.modal-open .modal-backdrop,
+    body.modal-open .modal-backdrop * {
+      pointer-events: auto !important;
+    }
   `]
 })
 export class PwaUpdateNotificationComponent implements OnInit, OnDestroy {
   showNotification = false;
   updateInfo: UpdateInfo | null = null;
   isUpdating = false;
+  translations = translations;
   
   private destroy$ = new Subject<void>();
 
@@ -281,4 +316,6 @@ export class PwaUpdateNotificationComponent implements OnInit, OnDestroy {
       this.isUpdating = false;
     }
   }
+
+
 } 

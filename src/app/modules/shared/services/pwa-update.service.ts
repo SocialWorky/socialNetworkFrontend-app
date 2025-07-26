@@ -42,10 +42,8 @@ export class PwaUpdateService {
         }
       });
 
-      // Start periodic checks if auto-update is enabled
-      if (this.shouldAutoUpdate()) {
-        this.startPeriodicChecks();
-      }
+      // No automatic periodic checks - user must manually check or wait for service worker detection
+      // this.startPeriodicChecks();
     } else {
       // Log removed to avoid spam - service workers status is checked frequently
     }
@@ -71,10 +69,8 @@ export class PwaUpdateService {
 
     this.updateAvailable$.next(updateInfo);
 
-    // Auto-update if enabled
-    if (this.shouldAutoUpdate()) {
-      this.applyUpdate();
-    }
+    // Remove auto-update logic - always require user interaction
+    // The modal will handle the update process when user clicks the button
   }
 
   private startPeriodicChecks(): void {
@@ -85,8 +81,8 @@ export class PwaUpdateService {
   }
 
   private shouldAutoUpdate(): boolean {
-    const autoUpdate = localStorage.getItem('pwa-auto-update');
-    return autoUpdate === 'true';
+    // Always return false - no automatic updates allowed
+    return false;
   }
 
   /**
