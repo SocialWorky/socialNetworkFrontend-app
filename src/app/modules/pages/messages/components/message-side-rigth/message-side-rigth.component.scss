@@ -12,6 +12,7 @@
   background-color: map.get(color.$worky-navy, 87);
   position: relative;
   overflow: hidden;
+  
   @include breakpoints.below-sm {
     height: 86dvh;
   }
@@ -21,21 +22,15 @@
     overflow-y: auto;
     scroll-behavior: smooth;
     
+    // Scrollbar styling
     &::-webkit-scrollbar {
       width: 6px;
-    }
-    
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    
-    &::-webkit-scrollbar-thumb {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 3px;
-    }
-    
-    &::-webkit-scrollbar-thumb:hover {
-      background: rgba(0, 0, 0, 0.3);
+      &-track { background: transparent; }
+      &-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+        &:hover { background: rgba(0, 0, 0, 0.3); }
+      }
     }
 
     .messages-container {
@@ -56,32 +51,31 @@
         }
       }
 
+      // Message triangle styles
       .message-triangle {
         position: relative;
-        right: 9px;
         height: 0;
         border-left: 10px solid transparent;
         border-right: 10px solid transparent;
         border-bottom: 10px solid map.get(color.$worky-navy, 87);
+        
+        &.sent {
+          right: 9px;
+          border-bottom-color: map.get(color.$worky-blue, 9);
+        }
+        
+        &.received {
+          left: 10px;
+          border-bottom-color: map.get(color.$worky-navy, 87);
+        }
       }
 
-      .message-sent .message-triangle {
-        border-bottom-color: map.get(color.$worky-blue, 9);
-      }
-
-      .message-received .message-triangle {
-        border-bottom-color: map.get(color.$worky-navy, 87);
-        left: 10px;
-      }
-
+      // Message container styles
       .message-sent,
       .message-received {
         margin-bottom: 0.1rem;
 
-        &.grouped {
-          margin-top: 0rem;
-        }
-
+        &.grouped { margin-top: 0; }
         &.no-avatar {
           padding-left: 60px;
           padding-right: 60px;
@@ -96,19 +90,17 @@
           max-width: 100%;
           word-break: break-word;
           box-shadow: -15px 1px 12px rgba(0, 0, 0, 0.1);
+          
           ::ng-deep markdown {
             display: flex;
             flex-direction: column;
             white-space: pre-wrap;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            
             img, video {
               max-width: 200px;
-            }
-            @include breakpoints.below-sm {
-              img, video {
-                max-width: 100%!important;
-              }
+              @include breakpoints.below-sm { max-width: 100% !important; }
             }
           }
 
@@ -117,13 +109,10 @@
             display: inline-block;
             cursor: pointer;
             max-width: 100%;
+            
             img, video {
               max-width: 200px;
-            }
-            @include breakpoints.below-sm {
-              img, video {
-                max-width: 100%!important;
-              }
+              @include breakpoints.below-sm { max-width: 100% !important; }
             }
           }
 
@@ -132,10 +121,8 @@
             height: auto;
             border-radius: 8px;
             transition: transform 0.2s;
-          }
-
-          .thumbnail:hover {
-            transform: scale(1.02);
+            
+            &:hover { transform: scale(1.02); }
           }
 
           .play-button {
@@ -158,71 +145,40 @@
         }
       }
 
-      .message-sent.first-group.last-group {
-        .sent-content {
-          border-radius: 1rem 0rem 1rem 1rem;
-        }
-      }
-
-      .message-received.first-group.last-group {
-        .received-content {
-          border-radius: 0rem 1rem 1rem 1rem;
-        }
-      }
-
-      .message-sent.first-group {
-        .sent-content {
-          border-radius: 1rem 0rem 0rem 1rem;
-        }
-      }
-
-      .message-received.first-group {
-        .received-content {
-          border-radius: 0rem 1rem 0rem 0rem;
-        }
-      }
-
-      .message-received.grouped {
-        .received-content {
-          border-radius: 0rem 1rem 1rem 0rem;
-        }
-      }
-
-      .message-sent.grouped {
-        .sent-content {
-          border-radius: 1rem 0rem 0rem 1rem;
-        }
-      }
-
-      .message-sent.last-group {
-        .sent-content {
-          border-radius: 1rem 0rem 1rem 1rem;
-          margin-bottom: 15px;
-        }
-      }
-
-      .message-received.last-group {
-        .received-content {
-          border-radius: 0rem 1rem 1rem 1rem;
-          margin-bottom: 15px;
-        }
-      }
-
+      // Border radius variations for grouped messages
       .message-sent {
         display: flex;
         justify-content: flex-end;
+        
         .sent-content {
           background-color: map.get(color.$worky-blue, 9);
           color: #fff;
+        }
+        
+        &.first-group.last-group .sent-content { border-radius: 1rem 0 1rem 1rem; }
+        &.first-group .sent-content { border-radius: 1rem 0 0 1rem; }
+        &.grouped .sent-content { border-radius: 1rem 0 0 1rem; }
+        &.last-group .sent-content { 
+          border-radius: 1rem 0 1rem 1rem;
+          margin-bottom: 15px;
         }
       }
 
       .message-received {
         display: flex;
         justify-content: flex-start;
+        
         .received-content {
           background-color: map.get(color.$worky-navy, 87);
           color: color.$worky-color-text;
+        }
+        
+        &.first-group.last-group .received-content { border-radius: 0 1rem 1rem 1rem; }
+        &.first-group .received-content { border-radius: 0 1rem 0 0; }
+        &.grouped .received-content { border-radius: 0 1rem 1rem 0; }
+        &.last-group .received-content { 
+          border-radius: 0 1rem 1rem 1rem;
+          margin-bottom: 15px;
         }
       }
 
@@ -231,9 +187,7 @@
         justify-content: flex-end;
         align-items: center;
         gap: 0.5rem;
-        i {
-          font-size: 18px;
-        }
+        i { font-size: 18px; }
       }
     }
   }
