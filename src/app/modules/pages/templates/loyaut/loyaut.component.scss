@@ -41,6 +41,14 @@
       margin-bottom: 0;
     }
   }
+
+  &.navbar-hidden .navbar-content {
+    @include breakpoints.below-sm {
+      transform: translateY(-100%);
+      height: 0;
+      overflow: hidden;
+    }
+  }
 }
 
 .content-social-app {
@@ -68,6 +76,12 @@
     @include breakpoints.below-sm {
       margin-top: 0px;
     }
+  }
+}
+
+.content-app.navbar-hidden .content-social-app {
+  @include breakpoints.below-sm {
+    margin-top: 0px;
   }
 }
 
@@ -99,6 +113,13 @@
   @include breakpoints.below-sm {
     height: calc(100dvh - 120px);
     width: 100vw;
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+.navbar-hidden .social-content-center {
+  @include breakpoints.below-sm {
+    height: 100dvh;
   }
 }
 

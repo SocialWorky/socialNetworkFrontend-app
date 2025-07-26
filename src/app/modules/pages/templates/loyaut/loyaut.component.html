@@ -1,5 +1,6 @@
 <div #contentApp class="content-app"
   [class.mobil-content-app]="isMobile"
+  [class.navbar-hidden]="!navbarVisible && isMobile"
   (scroll)="onScroll($event)">
 
   <worky-navbar class="navbar-content"
@@ -12,7 +13,6 @@
   <div class="content-social-app" 
     [class.content-messages-app]="isMessages"
     [class.content-profile-app]="isProfile"
-    [class.navbar-hidden]="!navbarVisible && isMobile"
     *ngIf="token">
     
       <worky-content-left-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-left-side>

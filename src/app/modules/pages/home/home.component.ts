@@ -59,6 +59,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   connectionStatusMessage = '';
 
   showScrollToTopButton = false;
+  navbarVisible = true; // Track navbar visibility
 
   private destroy$ = new Subject<void>();
 
@@ -195,6 +196,14 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       if(data === 'hideScrollToTopButton') {
         this.showScrollToTopButton = false;
+      }
+      if(data === 'showNavbar') {
+        this.navbarVisible = true;
+        this._cdr.markForCheck();
+      }
+      if(data === 'hideNavbar') {
+        this.navbarVisible = false;
+        this._cdr.markForCheck();
       }
     });
   }

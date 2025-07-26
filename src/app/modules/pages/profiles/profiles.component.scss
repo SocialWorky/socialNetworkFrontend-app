@@ -197,11 +197,16 @@
   }
   
   &.mobile-container {
-    height: 86dvh;
+    height: 100dvh;
     max-height: 100vh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    &.navbar-visible {
+      height: calc(100dvh - 120px);
+    }
   }
   
   &:not(.mobile-container) {
@@ -209,3 +214,5 @@
     overflow: visible;
   }
 }
+
+

@@ -15,7 +15,14 @@
   }
 
   @include breakpoints.below-md {
-    height: 86dvh;
+    height: 100dvh;
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  &.navbar-visible {
+    @include breakpoints.below-md {
+      height: calc(100dvh - 120px);
+    }
   }
 }
 
@@ -33,6 +40,14 @@
 .last-publication {
   @supports (padding-top: env(safe-area-inset-top)) {
     margin-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+  
+  /* iOS-specific safe area for iPhone */
+  @supports (-webkit-touch-callout: none) {
+    @include breakpoints.below-md {
+      margin-bottom: calc(20px + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
+    }
   }
 }
 
