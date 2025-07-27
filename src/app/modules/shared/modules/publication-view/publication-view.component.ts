@@ -360,7 +360,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       next: () => {
         this.refreshPublications(publication._id);
         this._loadingService.hideLoading();
-        this._scrollService.scrollToTop();
       },
       error: (error) => {
         console.error(error);

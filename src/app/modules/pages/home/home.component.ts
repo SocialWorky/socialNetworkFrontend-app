@@ -58,7 +58,6 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   connectionStatusMessage = '';
 
-  showScrollToTopButton = false;
   navbarVisible = true; // Track navbar visibility
 
   private destroy$ = new Subject<void>();
@@ -191,12 +190,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       if(data === 'scrollEnd') {
         this.loadPublications();
       }
-      if(data === 'showScrollToTopButton') {
-        this.showScrollToTopButton = true;
-      }
-      if(data === 'hideScrollToTopButton') {
-        this.showScrollToTopButton = false;
-      }
+
       if(data === 'showNavbar') {
         this.navbarVisible = true;
         this._cdr.markForCheck();
@@ -449,9 +443,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  scrollToTop() {
-    this._scrollService.scrollToTop();
-  }
+
 
   private resetPagination() {
     this.page = 1;

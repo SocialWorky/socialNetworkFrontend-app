@@ -101,7 +101,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   isMobile = this._deviceDetectionService.isMobile();
 
-  showScrollToTopButton = false;
   navbarVisible = true; // Track navbar visibility
 
   hasMorePublications = true;
@@ -201,12 +200,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       takeUntil(this.destroy$)
     ).subscribe((data) => {
       if(data === 'scrollEnd') this.loadPublications();
-      if(data === 'showScrollToTopButton') {
-        this.showScrollToTopButton = true;
-      }
-      if(data === 'hideScrollToTopButton') {
-        this.showScrollToTopButton = false;
-      }
+
       if(data === 'showNavbar') {
         this.navbarVisible = true;
         this._cdr.markForCheck();
@@ -767,9 +761,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  scrollToTop() {
-    this._scrollService.scrollToTop();
-  }
+
 
   private async handlePullToRefresh(): Promise<void> {
     if (this.isRefreshing) return;
