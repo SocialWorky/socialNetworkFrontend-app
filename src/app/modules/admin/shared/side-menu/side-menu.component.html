@@ -1,36 +1,38 @@
-<div class="h-full bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 flex flex-col shadow-2xl">
+<div class="h-full bg-gray-900 border-r border-gray-700 flex flex-col shadow-sm">
   <!-- Header Section -->
-  <div class="p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/50 to-slate-700/50 backdrop-blur-sm">
-    <div class="flex items-center gap-4">
+  <div class="p-4 border-b border-gray-700 bg-gray-800/50">
+    <div class="flex items-center gap-3">
       <div class="relative">
-        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-white text-xl shadow-lg shadow-blue-500/25">
-          <i class="material-icons">admin_panel_settings</i>
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-sm shadow-sm">
+          <i class="material-icons text-base">admin_panel_settings</i>
         </div>
-        <div class="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-900 animate-pulse"></div>
+        <div class="absolute -top-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
       </div>
       <div class="flex-1 min-w-0">
-        <h1 class="text-lg font-bold bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent truncate">{{ title }}</h1>
-        <p class="text-sm text-slate-400 truncate">{{ subTitle }}</p>
+        <h1 class="text-sm font-semibold text-gray-100 truncate">{{ title }}</h1>
+        <p class="text-xs text-gray-400 truncate">{{ subTitle }}</p>
       </div>
     </div>
   </div>
 
   <!-- User Profile Section -->
-  <div class="p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/30 to-slate-700/30">
-    <div class="space-y-4">
-      <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ 'admin.sideMenu-welcome' | workyTranslations }}</div>
-      <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+  <div class="p-4 border-b border-gray-700 bg-gray-800/30">
+    <div class="space-y-3">
+      <div class="text-xs font-medium text-gray-400 uppercase tracking-wider">{{ 'admin.sideMenu-welcome' | workyTranslations }}</div>
+      <div class="flex items-center gap-3 p-3 bg-gray-800 rounded-lg border border-gray-600 shadow-sm">
         <div class="relative">
-          <worky-avatar [size]="48"></worky-avatar>
-          <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-900 shadow-lg">
-            <div class="w-full h-full bg-emerald-400 rounded-full animate-ping opacity-75"></div>
-          </div>
+          <worky-avatar 
+            [size]="36" 
+            [name]="userName"
+            [img]="userAvatar">
+          </worky-avatar>
+          <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900 shadow-sm"></div>
         </div>
         <div class="flex-1 min-w-0">
-          <div class="text-sm font-semibold text-slate-100 truncate">{{ userName }}</div>
-          <div class="flex items-center gap-2 mt-1">
-            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
-            <div class="text-xs text-slate-400">{{ 'admin.sideMenu.administrator' | workyTranslations }}</div>
+          <div class="text-sm font-medium text-gray-100 truncate">{{ userName }}</div>
+          <div class="flex items-center gap-1.5 mt-0.5">
+            <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+            <div class="text-xs text-gray-400">{{ 'admin.sideMenu.administrator' | workyTranslations }}</div>
           </div>
         </div>
       </div>
@@ -38,45 +40,35 @@
   </div>
 
   <!-- Navigation Menu -->
-  <nav class="flex-1 p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
-    <div class="space-y-8">
-      <div class="flex items-center gap-3 text-xs font-bold text-slate-400 uppercase tracking-wider">
-        <div class="w-8 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"></div>
+  <nav class="flex-1 p-4 overflow-y-auto">
+    <div class="space-y-6">
+      <div class="flex items-center gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+        <div class="w-4 h-px bg-blue-500 rounded-full"></div>
         <span>{{ 'admin.sideMenu.navigation' | workyTranslations }}</span>
-        <div class="flex-1 h-0.5 bg-gradient-to-r from-slate-600 to-transparent rounded-full"></div>
+        <div class="flex-1 h-px bg-gray-600 rounded-full"></div>
       </div>
       
-      <div class="space-y-2">
+      <div class="space-y-1">
         @for (item of menuItems; track $index) {
-          <div class="space-y-1">
+          <div class="space-y-0.5">
             <!-- Parent Menu Item with Children -->
             @if (item.children && item.children.length > 0) {
               <button
-                class="w-full group relative overflow-hidden"
-                (click)="toggleMenu(item.title?.toString() || 'Untitled')"
-              >
-                <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl"></div>
-                <div class="relative flex items-center justify-between p-4 rounded-xl border border-transparent group-hover:border-slate-600 transition-all duration-300"
-                     [class.bg-slate-800]="expandedMenus[item.title?.toString() || 'Untitled']"
-                     [class.border-blue-500]="expandedMenus[item.title?.toString() || 'Untitled']">
-                  <div class="flex items-center gap-4 flex-1 min-w-0">
-                    <div class="relative">
-                      <div class="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-600 rounded-lg flex items-center justify-center text-slate-300 group-hover:text-white transition-all duration-300 shadow-lg"
-                           [class.from-blue-500]="expandedMenus[item.title?.toString() || 'Untitled']"
-                           [class.to-cyan-500]="expandedMenus[item.title?.toString() || 'Untitled']">
-                        <i class="material-icons text-lg">{{ getMenuIcon(item.title?.toString()) }}</i>
-                      </div>
-                      <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                class="w-full group relative"
+                (click)="toggleMenu(item.title?.toString() || 'Untitled')">
+                <div class="flex items-center justify-between p-2.5 rounded-lg border border-transparent group-hover:border-gray-600 group-hover:bg-gray-800 transition-all duration-200">
+                  <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <div class="w-6 h-6 bg-gray-700 rounded flex items-center justify-center text-gray-300 group-hover:text-blue-400 transition-colors duration-200">
+                      <i class="material-icons text-sm">{{ getMenuIcon(item.title?.toString()) }}</i>
                     </div>
                     <div class="flex-1 min-w-0">
-                      <div class="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors duration-300 truncate">{{ item.title || ('admin.sideMenu.untitled' | workyTranslations) }}</div>
-                      <div class="text-xs text-slate-500 mt-0.5">{{ 'admin.sideMenu.menuSection' | workyTranslations }}</div>
+                      <div class="text-sm font-medium text-gray-200 group-hover:text-gray-100 transition-colors duration-200 truncate">{{ item.title || ('admin.sideMenu.untitled' | workyTranslations) }}</div>
                     </div>
                   </div>
-                  <div class="flex flex-col items-center gap-1">
-                    <span class="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded-full border border-slate-600">{{ item.children.length || 0 }}</span>
-                    <div class="w-6 h-6 bg-slate-700 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:bg-slate-600">
-                      <i class="material-icons text-sm text-slate-400 transition-transform duration-300" 
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded-full">{{ item.children.length || 0 }}</span>
+                    <div class="w-5 h-5 bg-gray-700 rounded flex items-center justify-center transition-all duration-200 group-hover:bg-gray-600">
+                      <i class="material-icons text-xs text-gray-400 transition-transform duration-200" 
                          [class.rotate-180]="expandedMenus[item.title?.toString() || 'Untitled']">
                         expand_more
                       </i>
@@ -87,21 +79,19 @@
 
               <!-- Submenu Items -->
               @if (expandedMenus[item.title?.toString() || 'Untitled']) {
-                <div class="ml-6 space-y-0.5 animate-in slide-in-from-top-2 duration-300">
+                <div class="ml-6 space-y-0.5 animate-in slide-in-from-top-2 duration-200">
                   @for (child of item.children; track $index) {
                     <a
                       class="group relative block"
                       [routerLink]="child.path"
                       routerLinkActive="active">
-                      <div class="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-lg"></div>
-                      <div class="relative flex items-center gap-3 p-2 rounded-lg border border-transparent group-hover:border-slate-600 transition-all duration-300">
-                        <div class="w-6 h-6 bg-slate-700 rounded flex items-center justify-center text-slate-400 group-hover:text-slate-200 transition-all duration-300">
+                      <div class="flex items-center gap-2.5 p-2 rounded-lg border border-transparent group-hover:border-gray-600 group-hover:bg-gray-800 transition-all duration-200">
+                        <div class="w-4 h-4 bg-gray-700 rounded flex items-center justify-center text-gray-400 group-hover:text-gray-300 transition-colors duration-200">
                           <i class="material-icons text-xs">{{ getSubmenuIcon(child.title?.toString()) }}</i>
                         </div>
                         <div class="flex-1 min-w-0">
-                          <div class="text-xs font-medium text-slate-300 group-hover:text-slate-100 transition-colors duration-300 truncate">{{ child.title || ('admin.sideMenu.untitled' | workyTranslations) }}</div>
+                          <div class="text-xs font-medium text-gray-300 group-hover:text-gray-100 transition-colors duration-200 truncate">{{ child.title || ('admin.sideMenu.untitled' | workyTranslations) }}</div>
                         </div>
-                        <div class="w-1.5 h-1.5 bg-slate-600 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
                       </div>
                     </a>
                   }
@@ -115,19 +105,14 @@
                 class="group relative block"
                 [routerLink]="item.path"
                 routerLinkActive="active">
-                <div class="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl"></div>
-                <div class="relative flex items-center gap-4 p-4 rounded-xl border border-transparent group-hover:border-slate-600 transition-all duration-300">
-                  <div class="relative">
-                    <div class="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-600 rounded-lg flex items-center justify-center text-slate-300 group-hover:text-white transition-all duration-300 shadow-lg">
-                      <i class="material-icons text-lg">{{ getMenuIcon(item.title?.toString()) }}</i>
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                <div class="flex items-center gap-3 p-2.5 rounded-lg border border-transparent group-hover:border-gray-600 group-hover:bg-gray-800 transition-all duration-200">
+                  <div class="w-6 h-6 bg-gray-700 rounded flex items-center justify-center text-gray-300 group-hover:text-blue-400 transition-colors duration-200">
+                    <i class="material-icons text-sm">{{ getMenuIcon(item.title?.toString()) }}</i>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <div class="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors duration-300 truncate">{{ item.title || ('admin.sideMenu.untitled' | workyTranslations) }}</div>
-                    <div class="text-xs text-slate-500 mt-0.5 font-mono truncate">{{ item.path }}</div>
+                    <div class="text-sm font-medium text-gray-200 group-hover:text-gray-100 transition-colors duration-200 truncate">{{ item.title || ('admin.sideMenu.untitled' | workyTranslations) }}</div>
+                    <div class="text-xs text-gray-500 mt-0.5 font-mono truncate">{{ item.path }}</div>
                   </div>
-                  <div class="w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
                 </div>
               </a>
             }
@@ -138,30 +123,25 @@
   </nav>
 
   <!-- Footer Section -->
-  <div class="p-6 border-t border-slate-700/50 bg-gradient-to-r from-slate-800/30 to-slate-700/30">
-    <div class="space-y-4">
-      <div class="flex items-center gap-3 text-xs font-bold text-slate-400 uppercase tracking-wider">
-        <div class="w-8 h-0.5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full"></div>
+  <div class="p-4 border-t border-gray-700 bg-gray-800/30">
+    <div class="space-y-3">
+      <div class="flex items-center gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+        <div class="w-4 h-px bg-red-500 rounded-full"></div>
         <span>{{ 'admin.sideMenu.account' | workyTranslations }}</span>
-        <div class="flex-1 h-0.5 bg-gradient-to-r from-slate-600 to-transparent rounded-full"></div>
+        <div class="flex-1 h-px bg-gray-600 rounded-full"></div>
       </div>
       
       <button 
-        class="w-full group relative overflow-hidden"
+        class="w-full group relative"
         (click)="logout()">
-        <div class="absolute inset-0 bg-gradient-to-r from-red-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl"></div>
-        <div class="relative flex items-center gap-4 p-4 rounded-xl border border-transparent group-hover:border-red-500 transition-all duration-300">
-          <div class="relative">
-            <div class="w-10 h-10 bg-gradient-to-br from-slate-700 to-slate-600 rounded-lg flex items-center justify-center text-slate-300 group-hover:text-red-400 transition-all duration-300 shadow-lg">
-              <i class="material-icons text-lg">logout</i>
-            </div>
-            <div class="absolute inset-0 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+        <div class="flex items-center gap-3 p-2.5 rounded-lg border border-transparent group-hover:border-red-600 group-hover:bg-red-900/20 transition-all duration-200">
+          <div class="w-6 h-6 bg-gray-700 rounded flex items-center justify-center text-gray-300 group-hover:text-red-400 transition-colors duration-200">
+            <i class="material-icons text-sm">logout</i>
           </div>
           <div class="flex-1 min-w-0">
-            <div class="text-sm font-semibold text-slate-200 group-hover:text-red-400 transition-colors duration-300">{{ 'admin.sideMenu.logout' | workyTranslations }}</div>
-            <div class="text-xs text-slate-500 mt-0.5">{{ 'admin.sideMenu.signOut' | workyTranslations }}</div>
+            <div class="text-sm font-medium text-gray-200 group-hover:text-red-300 transition-colors duration-200">{{ 'admin.sideMenu.logout' | workyTranslations }}</div>
+            <div class="text-xs text-gray-500 mt-0.5">{{ 'admin.sideMenu.signOut' | workyTranslations }}</div>
           </div>
-          <div class="w-2 h-2 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
         </div>
       </button>
     </div>
@@ -170,43 +150,43 @@
 
 <style>
 /* Custom scrollbar styles */
-.scrollbar-thin::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 4px;
 }
 
-.scrollbar-thin::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(71, 85, 105, 0.5);
+::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.5);
   border-radius: 2px;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(71, 85, 105, 0.8);
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 85, 99, 0.7);
 }
 
 /* Active state styles */
-.active .relative {
+.active .flex {
   background: rgba(59, 130, 246, 0.1) !important;
   border-color: rgba(59, 130, 246, 0.3) !important;
 }
 
-.active .w-10 {
-  background: linear-gradient(135deg, #3b82f6, #06b6d4) !important;
-  color: white !important;
+.active .w-6 {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: #60a5fa !important;
 }
 
-.active .text-slate-200 {
-  color: #3b82f6 !important;
+.active .text-gray-200 {
+  color: #93c5fd !important;
 }
 
 /* Animation classes */
 @keyframes slide-in-from-top-2 {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
@@ -215,6 +195,6 @@
 }
 
 .animate-in {
-  animation: slide-in-from-top-2 0.3s ease-out;
+  animation: slide-in-from-top-2 0.2s ease-out;
 }
-</style>
+</style> 

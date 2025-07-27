@@ -16,6 +16,7 @@ export class SideMenuComponent implements OnInit {
   title: string = translations['admin.sideMenu-title'];
   subTitle: string = translations['admin.sideMenu-subTitle'];
   userName: string = 'Admin';
+  userAvatar: string = '';
   expandedMenus: { [key: string]: boolean } = {};
 
   menuItems = routes
@@ -37,7 +38,8 @@ export class SideMenuComponent implements OnInit {
   ngOnInit() {
     try {
       const token = this._authService.getDecodedToken()!;
-      this.userName = token?.name;
+      this.userName = token?.name || 'Admin';
+      this.userAvatar = token?.avatar || '';
     } catch (error) {
       this._logService.log(
         LevelLogEnum.ERROR,
