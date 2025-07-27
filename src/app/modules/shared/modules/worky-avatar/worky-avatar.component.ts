@@ -108,9 +108,10 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Image error event triggered', { 
       url: this.img || 'unknown' 
     });
-    // Clear image data and keep initials
     this.imageData = '';
     this.isGeneratedAvatar = true;
+    this.isLoading = false;
+    this.hasError = true;
     this._cdr.markForCheck();
   }
 
@@ -156,6 +157,14 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     // Only try to load image if we have a valid URL
     if (this.img && this.img.trim() !== '' && this.img !== 'null' && this.img !== 'undefined') {
       this.tryLoadImage(this.img);
+    } else {
+      this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'No valid image URL, using initials', { 
+        img: this.img 
+      });
+      this.isGeneratedAvatar = true;
+      this.isLoading = false;
+      this.hasError = false;
+      this._cdr.markForCheck();
     }
   }
 
@@ -165,8 +174,11 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
 
     const timeout = setTimeout(() => {
       if (this.isLoading) {
-        this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Image load timeout', { url: imageUrl });
+        this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Image load timeout, falling back to initials', { url: imageUrl });
+        this.imageData = '';
+        this.isGeneratedAvatar = true;
         this.isLoading = false;
+        this.hasError = true;
         this._cdr.markForCheck();
       }
     }, 3000);
@@ -188,11 +200,14 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
             },
             error: (error) => {
               clearTimeout(timeout);
-              this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image from mobile cache', { 
+              this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image from mobile cache, falling back to initials', { 
                 url: imageUrl, 
                 error: error.message 
               });
+              this.imageData = '';
+              this.isGeneratedAvatar = true;
               this.isLoading = false;
+              this.hasError = true;
               this._cdr.markForCheck();
             }
           });
@@ -211,8 +226,11 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
 
         img.onerror = () => {
           clearTimeout(timeout);
-          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image', { url: imageUrl });
+          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image, falling back to initials', { url: imageUrl });
+          this.imageData = '';
+          this.isGeneratedAvatar = true;
           this.isLoading = false;
+          this.hasError = true;
           this._cdr.markForCheck();
         };
       }
@@ -240,11 +258,14 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
         },
         error: (error) => {
           clearTimeout(timeout);
-          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load Google image', { 
+          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load Google image, falling back to initials', { 
             url: imageUrl, 
             error: error.message 
           });
+          this.imageData = '';
+          this.isGeneratedAvatar = true;
           this.isLoading = false;
+          this.hasError = true;
           this._cdr.markForCheck();
         }
       });
@@ -295,6 +316,15 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
   public forceInitialsNow(): void {
     this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Forcing initials immediately');
     this.generateInitialsAvatar();
+  }
+
+  public forceFallbackToInitials(): void {
+    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Forcing fallback to initials');
+    this.imageData = '';
+    this.isGeneratedAvatar = true;
+    this.isLoading = false;
+    this.hasError = true;
+    this._cdr.markForCheck();
   }
 
   private hashCode(str: string): number {

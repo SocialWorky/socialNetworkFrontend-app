@@ -16,7 +16,7 @@
 
   <!-- Generated avatar with initials - always show as fallback -->
   <div
-    *ngIf="!isLoading && showInitials && (isGeneratedAvatar || !imageData || imageData === '')"
+    *ngIf="!isLoading && showInitials && (isGeneratedAvatar || !imageData || imageData === '' || hasError)"
     class="avatar-initials"
     [style.background-color]="backgroundColor"
     [style.font-size.px]="fontSize"

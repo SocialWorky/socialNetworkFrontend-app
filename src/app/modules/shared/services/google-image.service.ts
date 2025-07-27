@@ -28,16 +28,14 @@ export class GoogleImageService {
       return throwError(() => new Error('Invalid Google image URL'));
     }
 
-    // Verificar caché
     const cacheKey = `${imageUrl}_${size}`;
     const cached = this.GOOGLE_IMAGE_CACHE.get(cacheKey);
     if (cached) {
       return of(cached);
     }
 
-    // Para desarrollo local, evitar CORS usando proxy o fallback
-    if (this.isDevelopmentEnvironment()) {
-      this.logService.log(LevelLogEnum.INFO, 'GoogleImageService', 'Development environment detected, using fallback', { url: imageUrl });
+    if (this.isDevelopmentEnvironment() || this.shouldUseFallback()) {
+      this.logService.log(LevelLogEnum.INFO, 'GoogleImageService', 'Using fallback due to environment or CORS issues', { url: imageUrl });
       return this.getFallbackImage();
     }
 
@@ -59,10 +57,8 @@ export class GoogleImageService {
 
         const objectUrl = URL.createObjectURL(blob);
         
-        // Guardar en caché
         this.GOOGLE_IMAGE_CACHE.set(cacheKey, objectUrl);
         
-        // Limpiar caché después del tiempo especificado
         setTimeout(() => {
           this.GOOGLE_IMAGE_CACHE.delete(cacheKey);
           URL.revokeObjectURL(objectUrl);
@@ -105,6 +101,16 @@ export class GoogleImageService {
            window.location.port === '4200';
   }
 
+  private shouldUseFallback(): boolean {
+    return !navigator.onLine || 
+           window.location.protocol === 'file:' ||
+           this.hasRecentGoogleImageErrors();
+  }
+
+  private hasRecentGoogleImageErrors(): boolean {
+    return false;
+  }
+
   /**
    * Valida si la URL es una imagen válida de Google
    */
@@ -134,12 +140,10 @@ export class GoogleImageService {
     try {
       const urlObj = new URL(url);
       
-      // Agregar parámetros de optimización
       urlObj.searchParams.set('sz', size.toString());
       
-      // Agregar parámetros para reducir rate limiting
       if (!urlObj.searchParams.has('s')) {
-        urlObj.searchParams.set('s', '96-c'); // Tamaño estándar
+        urlObj.searchParams.set('s', '96-c');
       }
 
       return urlObj.toString();
