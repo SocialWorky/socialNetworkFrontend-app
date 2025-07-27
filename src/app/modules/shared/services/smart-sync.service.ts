@@ -85,7 +85,7 @@ export class SmartSyncService {
       switchMap(localData => {
         // Si hay datos locales, retornarlos inmediatamente
         if (localData && this.hasData(localData)) {
-          this.logService.log(LevelLogEnum.INFO, 'SmartSyncService', 'Datos locales cargados inmediatamente');
+    
           
           // Sincronizar en segundo plano si está habilitado
           if (enableBackgroundSync) {
@@ -95,7 +95,7 @@ export class SmartSyncService {
           return of(localData);
         } else {
           // Si no hay datos locales, cargar del servidor
-          this.logService.log(LevelLogEnum.INFO, 'SmartSyncService', 'Cargando datos del servidor');
+    
           return serverDataLoader().pipe(
             tap(serverData => {
               if (serverData && this.hasData(serverData)) {
@@ -142,10 +142,6 @@ export class SmartSyncService {
           isSyncing: false,
           lastSync: Date.now(),
           pendingChanges: 0
-        });
-
-        this.logService.log(LevelLogEnum.INFO, 'SmartSyncService', 'Sincronización completada', {
-          updatedCount: result.updatedCount
         });
 
         return result;
@@ -223,7 +219,7 @@ export class SmartSyncService {
         const serverData = await serverDataLoader().toPromise();
         if (serverData && this.hasData(serverData)) {
           dataUpdater(serverData);
-          this.logService.log(LevelLogEnum.INFO, 'SmartSyncService', 'Sincronización en segundo plano completada');
+    
         }
       } catch (error) {
         this.logService.log(LevelLogEnum.ERROR, 'SmartSyncService', 'Error en sincronización en segundo plano', { error });

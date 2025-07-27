@@ -39,11 +39,7 @@ export class SkeletonService {
       this.loadingStates.get(componentId)!.next(state);
     }
 
-    this.logService.log(LevelLogEnum.INFO, 'SkeletonService', 'Loading started', {
-      componentId,
-      config,
-      message
-    });
+
   }
 
   stopLoading(componentId: string): void {
@@ -55,9 +51,7 @@ export class SkeletonService {
       this.loadingStates.get(componentId)!.next(state);
     }
 
-    this.logService.log(LevelLogEnum.INFO, 'SkeletonService', 'Loading stopped', {
-      componentId
-    });
+
   }
 
   getLoadingState(componentId: string): Observable<LoadingState> {
@@ -77,10 +71,7 @@ export class SkeletonService {
     };
     this.globalLoadingState.next(state);
 
-    this.logService.log(LevelLogEnum.INFO, 'SkeletonService', 'Global loading started', {
-      config,
-      message
-    });
+
   }
 
   stopGlobalLoading(): void {
@@ -89,7 +80,7 @@ export class SkeletonService {
     };
     this.globalLoadingState.next(state);
 
-    this.logService.log(LevelLogEnum.INFO, 'SkeletonService', 'Global loading stopped');
+
   }
 
   getGlobalLoadingState(): Observable<LoadingState> {

@@ -127,7 +127,7 @@ export class MobileImageCacheService {
     
     // For Safari iOS, completely disable IndexedDB to avoid errors
     if (isIOS) {
-      this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Safari iOS detected, disabling IndexedDB completely');
+
       this.db = null; // Ensure no IndexedDB connection
       this.setupIOSOptimizations();
     } else {
@@ -143,13 +143,6 @@ export class MobileImageCacheService {
     
     // Load cache metrics
     await this.updateMetrics();
-    
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Service initialized', {
-      isMobile: this.isMobileDevice,
-      isIOS,
-      useIndexedDB: !isIOS,
-      config: this.getCurrentConfig()
-    });
   }
 
   private detectMobileDevice(): boolean {
@@ -209,7 +202,7 @@ export class MobileImageCacheService {
 
     request.onsuccess = () => {
       this.db = request.result;
-      this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'IndexedDB opened successfully');
+
       resolve();
     };
 
@@ -223,7 +216,7 @@ export class MobileImageCacheService {
           store.createIndex('timestamp', 'timestamp', { unique: false });
           store.createIndex('lastAccessed', 'lastAccessed', { unique: false });
           store.createIndex('expiresAt', 'expiresAt', { unique: false });
-          this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Object store created successfully');
+
         } catch (error) {
           this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Error creating object store', { error });
           if (isIOS) {
@@ -267,7 +260,7 @@ export class MobileImageCacheService {
   private enableAggressiveCaching(): void {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then(registration => {
-        this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Aggressive caching enabled for mobile');
+    
       });
     }
   }
@@ -305,12 +298,6 @@ export class MobileImageCacheService {
         config.preloadThreshold = 5;
         config.compressionEnabled = false;
     }
-    
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Cache strategy adjusted', {
-      connectionType,
-      preloadThreshold: config.preloadThreshold,
-      compressionEnabled: config.compressionEnabled
-    });
   }
 
   private setupOfflineModeDetection(): void {

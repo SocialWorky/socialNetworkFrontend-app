@@ -22,10 +22,7 @@ export class PreloadService {
     const validUrls = urls.filter(url => url && !this.preloadQueue.includes(url));
     this.preloadQueue.push(...validUrls);
 
-    this.logService.log(LevelLogEnum.INFO, 'PreloadService', 'Added URLs to preload queue', {
-      added: validUrls.length,
-      queueSize: this.preloadQueue.length
-    });
+
 
     if (!this.isPreloading) {
       this.startPreloading();
@@ -51,11 +48,7 @@ export class PreloadService {
     
     const urlsToPreload = this.preloadQueue.splice(0, this.MAX_CONCURRENT_PRELOADS);
     
-    this.logService.log(LevelLogEnum.INFO, 'PreloadService', 'Processing preload batch', {
-      batchSize: urlsToPreload.length,
-      remainingInQueue: this.preloadQueue.length,
-      connectionQuality: this.connectionQualityService.getConnectionInfo().quality
-    });
+
 
     urlsToPreload.forEach(url => {
       this.mediaCacheService.loadMedia(url, {
@@ -63,7 +56,6 @@ export class PreloadService {
         preload: true
       }).subscribe({
         next: () => {
-          this.logService.log(LevelLogEnum.INFO, 'PreloadService', 'Preloaded successfully', { url });
         },
         error: (error) => {
           this.logService.log(LevelLogEnum.WARN, 'PreloadService', 'Preload failed', { 
@@ -159,7 +151,7 @@ export class PreloadService {
     this.preloadQueue = [];
     this.isPreloading = false;
     
-    this.logService.log(LevelLogEnum.INFO, 'PreloadService', 'Preload queue cleared');
+
   }
 
   getPreloadStats(): { queueSize: number; isPreloading: boolean } {

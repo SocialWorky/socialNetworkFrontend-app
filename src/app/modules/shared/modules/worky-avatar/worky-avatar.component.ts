@@ -82,7 +82,6 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     this.token = this._authService.getDecodedToken() || undefined;
     this.generateInitialsAvatar(); // Always generate initials first
     this.generateAvatar();
-    this.debugState();
   }
 
   ngOnChanges(): void {
@@ -96,7 +95,6 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     
     this.generateInitialsAvatar(); // Always generate initials first
     this.generateAvatar();
-    this.debugState();
   }
 
   ngOnDestroy(): void {
@@ -120,7 +118,6 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   public forceInitials(): void {
-    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Forcing initials generation');
     this.imageData = '';
     this.isGeneratedAvatar = true;
     this._cdr.markForCheck();
@@ -128,39 +125,17 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
 
   // Test method to verify initials work
   public testInitials(): void {
-    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Testing initials generation');
     this.generateInitialsAvatar();
     this._cdr.markForCheck();
   }
 
-  private debugState(): void {
-    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Component state', {
-      isLoading: this.isLoading,
-      hasError: this.hasError,
-      isGeneratedAvatar: this.isGeneratedAvatar,
-      imageData: this.imageData,
-      initials: this.initials,
-      showInitials: this.showInitials,
-      img: this.img,
-      name: this.name,
-      username: this.username
-    });
-  }
+
 
   private generateAvatar(): void {
-    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Generating avatar', { 
-      img: this.img, 
-      name: this.name, 
-      username: this.username
-    });
-    
     // Only try to load image if we have a valid URL
     if (this.img && this.img.trim() !== '' && this.img !== 'null' && this.img !== 'undefined') {
       this.tryLoadImage(this.img);
     } else {
-      this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'No valid image URL, using initials', { 
-        img: this.img 
-      });
       this.isGeneratedAvatar = true;
       this.isLoading = false;
       this.hasError = false;
@@ -298,28 +273,17 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
 
     this.fontSize = Math.max(12, Math.min(24, this.size * 0.4));
 
-    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Generated initials avatar', { 
-      fullName,
-      nameParts,
-      initials: this.initials,
-      backgroundColor: this.backgroundColor,
-      fontSize: this.fontSize,
-      isGeneratedAvatar: this.isGeneratedAvatar,
-      hasError: this.hasError,
-      imageData: this.imageData
-    });
+
 
     this._cdr.markForCheck();
   }
 
   // Force initials immediately for testing
   public forceInitialsNow(): void {
-    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Forcing initials immediately');
     this.generateInitialsAvatar();
   }
 
   public forceFallbackToInitials(): void {
-    this._logService.log(LevelLogEnum.INFO, 'WorkyAvatarComponent', 'Forcing fallback to initials');
     this.imageData = '';
     this.isGeneratedAvatar = true;
     this.isLoading = false;

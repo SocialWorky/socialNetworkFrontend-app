@@ -34,7 +34,7 @@ export class GoogleImageService {
     }
 
     // Always use fallback due to CORS issues with Google Images
-    this.logService.log(LevelLogEnum.INFO, 'GoogleImageService', 'Using fallback due to CORS restrictions', { url: imageUrl });
+    
     return this.getFallbackImage();
   }
 
@@ -126,7 +126,7 @@ export class GoogleImageService {
     });
     this.GOOGLE_IMAGE_CACHE.clear();
     
-    this.logService.log(LevelLogEnum.INFO, 'GoogleImageService', 'Image cache cleared');
+
   }
 
   /**

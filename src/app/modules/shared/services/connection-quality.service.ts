@@ -90,14 +90,14 @@ export class ConnectionQualityService {
       this.updateConnectionInfo();
     });
 
-    this.logService.log(LevelLogEnum.INFO, 'ConnectionQualityService', 'Connection monitoring started');
+
   }
 
   stopMonitoring(): void {
     if (this.monitoringInterval) {
       this.monitoringInterval.unsubscribe();
       this.monitoringInterval = null;
-      this.logService.log(LevelLogEnum.INFO, 'ConnectionQualityService', 'Connection monitoring stopped');
+  
     }
   }
 
@@ -140,13 +140,6 @@ export class ConnectionQualityService {
     this.connectionSubject.next(connectionInfo);
 
     if (previousQuality !== connectionInfo.quality) {
-      this.logService.log(LevelLogEnum.INFO, 'ConnectionQualityService', 'Connection quality changed', {
-        from: previousQuality,
-        to: connectionInfo.quality,
-        effectiveType: connectionInfo.effectiveType,
-        downlink: connectionInfo.downlink,
-        rtt: connectionInfo.rtt
-      });
     }
   }
 
