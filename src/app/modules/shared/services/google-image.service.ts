@@ -22,7 +22,6 @@ export class GoogleImageService {
    * Obtiene una imagen de Google con manejo de errores y caché
    */
   getGoogleImage(imageUrl: string, size: number = 96): Observable<string> {
-    // Validar URL de Google
     if (!this.isValidGoogleImageUrl(imageUrl)) {
       this.logService.log(LevelLogEnum.WARN, 'GoogleImageService', 'Invalid Google image URL', { url: imageUrl });
       return throwError(() => new Error('Invalid Google image URL'));
@@ -34,62 +33,17 @@ export class GoogleImageService {
       return of(cached);
     }
 
-    if (this.isDevelopmentEnvironment() || this.shouldUseFallback()) {
-      this.logService.log(LevelLogEnum.INFO, 'GoogleImageService', 'Using fallback due to environment or CORS issues', { url: imageUrl });
-      return this.getFallbackImage();
-    }
-
-    // Optimizar URL para evitar errores 429
-    const optimizedUrl = this.optimizeGoogleImageUrl(imageUrl, size);
-
-    return this.http.get(optimizedUrl, { 
-      responseType: 'blob',
-      headers: {
-        'Cache-Control': 'max-age=86400' // 24 horas
-        // Removido User-Agent header que causa problemas
-      }
-    }).pipe(
-      timeout(this.REQUEST_TIMEOUT),
-      map(blob => {
-        if (!blob || blob.size === 0) {
-          throw new Error('Empty image blob received');
-        }
-
-        const objectUrl = URL.createObjectURL(blob);
-        
-        this.GOOGLE_IMAGE_CACHE.set(cacheKey, objectUrl);
-        
-        setTimeout(() => {
-          this.GOOGLE_IMAGE_CACHE.delete(cacheKey);
-          URL.revokeObjectURL(objectUrl);
-        }, this.CACHE_DURATION);
-
-        this.logService.log(LevelLogEnum.INFO, 'GoogleImageService', 'Google image loaded successfully', { 
-          url: imageUrl, 
-          size, 
-          blobSize: blob.size 
-        });
-
-        return objectUrl;
-      }),
-      catchError(error => {
-        this.logService.log(LevelLogEnum.WARN, 'GoogleImageService', 'Failed to load Google image, using fallback', { 
-          url: imageUrl, 
-          error: error.message,
-          status: error.status 
-        });
-
-        // Retornar imagen por defecto en caso de error
-        return this.getFallbackImage();
-      })
-    );
+    // Always use fallback due to CORS issues with Google Images
+    this.logService.log(LevelLogEnum.INFO, 'GoogleImageService', 'Using fallback due to CORS restrictions', { url: imageUrl });
+    return this.getFallbackImage();
   }
 
   /**
    * Obtiene imagen de fallback
    */
   private getFallbackImage(): Observable<string> {
-    return of('/assets/img/shared/handleImageError.png');
+    // Return empty string to force initials display
+    return of('');
   }
 
   /**

@@ -16,21 +16,19 @@ export class GoogleImageErrorInterceptor implements HttpInterceptor {
   constructor(private logService: LogService) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Solo interceptar peticiones a Google
-    if (!this.isGoogleImageRequest(request.url)) {
-      return next.handle(request);
+    // Block all Google Image requests to prevent CORS issues
+    if (this.isGoogleImageRequest(request.url)) {
+      this.logService.log(
+        LevelLogEnum.INFO,
+        'GoogleImageErrorInterceptor',
+        'Blocking Google Image request to prevent CORS issues',
+        { url: request.url }
+      );
+      // Return a controlled error instead of making the request
+      return throwError(() => new Error('Google image requests blocked to prevent CORS issues'));
     }
 
-    return next.handle(request).pipe(
-      catchError((error: HttpErrorResponse) => {
-        if (this.isGoogleImageError(error)) {
-          this.handleGoogleImageError(error, request);
-          // Retornar un error controlado en lugar de propagar el error original
-          return throwError(() => new Error('Google image temporarily unavailable'));
-        }
-        return throwError(() => error);
-      })
-    );
+    return next.handle(request);
   }
 
   private isGoogleImageRequest(url: string): boolean {
