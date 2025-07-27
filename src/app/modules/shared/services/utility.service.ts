@@ -188,12 +188,7 @@ export class UtilityService {
         }
       }
 
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'UtilityService',
-        'Cleaned up orphaned databases',
-        { cleanedCount: currentUserDatabases.length }
-      );
+      // Cleaned up orphaned databases - no need to log every cleanup
     } catch (error) {
       this.logService.log(
         LevelLogEnum.ERROR,

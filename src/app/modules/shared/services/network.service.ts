@@ -30,18 +30,7 @@ export class NetworkService {
     this.connectionStatus$.next(status);
     
     const user = this.authService.getDecodedToken();
-    this.logService.log(
-      LevelLogEnum.INFO,
-      'NetworkService',
-      'Network status changed',
-      { 
-        isOnline: status,
-        userAgent: navigator.userAgent,
-        timestamp: new Date().toISOString(),
-        userId: user?.id,
-        username: user?.username
-      }
-    );
+    // Network status changed - no need to log every status change
     
     if (status) {
       this.checkConnectionSpeed();
@@ -81,20 +70,7 @@ export class NetworkService {
         this.connectionSpeed$.next(speedCategory);
         
         const user = this.authService.getDecodedToken();
-        this.logService.log(
-          LevelLogEnum.INFO,
-          'NetworkService',
-          'Connection speed measured',
-          { 
-            speedKbps: Math.round(speedKbps),
-            speedCategory,
-            duration,
-            fileSize,
-            userAgent: navigator.userAgent,
-            userId: user?.id,
-            username: user?.username
-          }
-        );
+        // Connection speed measured - no need to log every speed measurement
       } else {
         this.connectionSpeed$.next('unknown');
       }

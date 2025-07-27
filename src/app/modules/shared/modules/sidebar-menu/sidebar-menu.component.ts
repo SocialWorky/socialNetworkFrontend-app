@@ -58,12 +58,7 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
       )
       .subscribe({
         next: (message: any) => {
-          this._logService.log(
-            LevelLogEnum.INFO,
-            'SideBarMenuComponent',
-            'New message notification received',
-            { messageId: message._id, senderId: message.senderId }
-          );
+          // New message notification received - no need to log every notification
           this.updateUnreadCountForNewMessage(message);
         },
         error: (error) => {

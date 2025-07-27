@@ -65,15 +65,7 @@ export class PwaUpdateService {
       timestamp: new Date()
     };
 
-    this._logService.log(
-      LevelLogEnum.INFO,
-      'PwaUpdateService',
-      'New version available',
-      { 
-        currentVersion: updateInfo.currentVersion,
-        newVersion: updateInfo.newVersion 
-      }
-    );
+    // New version available - no need to log every version check
 
     this.updateAvailable$.next(updateInfo);
   }
@@ -132,11 +124,7 @@ export class PwaUpdateService {
   public applyUpdate(): Promise<void> {
     return this.swUpdate.activateUpdate()
       .then(() => {
-        this._logService.log(
-          LevelLogEnum.INFO,
-          'PwaUpdateService',
-          'Update applied successfully, clearing cache and reloading page'
-        );
+        // Update applied successfully, clearing cache and reloading page - no need to log every update
         
         if (typeof window !== 'undefined' && (window as any).clearPWACache) {
           (window as any).clearPWACache().catch((error: any) => {

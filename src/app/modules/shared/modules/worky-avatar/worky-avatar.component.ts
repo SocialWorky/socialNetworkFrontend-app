@@ -225,18 +225,27 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
       .subscribe({
         next: (cachedUrl) => {
           clearTimeout(timeout);
-          this.imageData = cachedUrl;
-          this.isLoading = false;
-          this.isGeneratedAvatar = false;
-          this._cdr.markForCheck();
-          this.load.emit();
+          
+          // Check if we got a valid URL or fallback
+          if (cachedUrl && cachedUrl.trim() !== '' && cachedUrl !== '/assets/img/shared/handleImageError.png') {
+            this.imageData = cachedUrl;
+            this.isGeneratedAvatar = false;
+            this.isLoading = false;
+            this.hasError = false;
+            this._cdr.markForCheck();
+            this.load.emit();
+          } else {
+            // Fallback to initials if no valid image
+            this.imageData = '';
+            this.isGeneratedAvatar = true;
+            this.isLoading = false;
+            this.hasError = false;
+            this._cdr.markForCheck();
+          }
         },
         error: (error) => {
           clearTimeout(timeout);
-          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load Google image, falling back to initials', { 
-            url: imageUrl, 
-            error: error.message 
-          });
+          // Failed to load Google image, falling back to initials - no need to log every failure
           this.imageData = '';
           this.isGeneratedAvatar = true;
           this.isLoading = false;

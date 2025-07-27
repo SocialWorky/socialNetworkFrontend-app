@@ -120,11 +120,7 @@ export class SyncService {
     this.updateSyncStatus({ isSyncing: true, progress: 0, error: null });
 
     try {
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'SyncService',
-        'Starting database sync'
-      );
+      // Starting database sync - no need to log every sync
 
       // Sync messages
       await this.syncMessages();
@@ -143,12 +139,7 @@ export class SyncService {
         error: null 
       });
 
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'SyncService',
-        'Database sync completed successfully',
-        { lastSync }
-      );
+      // Database sync completed successfully - no need to log every sync
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown sync error';
@@ -180,12 +171,7 @@ export class SyncService {
       // For now, we'll skip server message sync until MessageService is properly implemented
       // TODO: Implement server message sync when MessageService is available
       
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'SyncService',
-        'Messages sync skipped - MessageService not available',
-        { localCount: localMessages.length }
-      );
+      // Messages sync skipped - MessageService not available - no need to log every skip
     } catch (error) {
       this.logService.log(
         LevelLogEnum.ERROR,
@@ -208,12 +194,7 @@ export class SyncService {
       // For now, we'll skip server publication sync until PublicationService is properly implemented
       // TODO: Implement server publication sync when PublicationService is available
       
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'SyncService',
-        'Publications sync skipped - PublicationService not available',
-        { localCount: localPublications.length }
-      );
+      // Publications sync skipped - PublicationService not available - no need to log every skip
     } catch (error) {
       this.logService.log(
         LevelLogEnum.ERROR,

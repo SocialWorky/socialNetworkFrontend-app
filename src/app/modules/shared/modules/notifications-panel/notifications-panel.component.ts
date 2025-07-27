@@ -136,12 +136,7 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy, AfterView
         contentHeader.style.position = 'relative';
       }
       
-      this._logService.log(
-        LevelLogEnum.INFO,
-        'NotificationsPanelComponent',
-        'iPhone positioning fix applied',
-        { height, isIOS: this._iosViewportService.isIOSDevice() }
-      );
+      // iPhone positioning fix applied - no need to log every positioning fix
     }
   }
 

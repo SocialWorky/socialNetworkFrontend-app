@@ -553,11 +553,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     
     this._cdr.markForCheck();
     
-    console.log('Media updated:', {
-      mediaLength: this.publication.media.length,
-      containsMedia: this.publication.containsMedia,
-      mediaLoading: this.mediaLoading
-    });
+    // Media updated - no need to log every media update
   }
 
   private handleMediaProcessed(data: any) {
@@ -571,11 +567,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._cdr.markForCheck();
     this.refreshPublications(data.idReference);
     
-    console.log('Media processed:', {
-      publicationId: data.idReference,
-      containsMedia: this.publication.containsMedia,
-      mediaLoading: this.mediaLoading
-    });
+    // Media processed - no need to log every media processing
   }
 
   private setupMediaProcessingTimeout() {

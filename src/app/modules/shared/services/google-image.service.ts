@@ -24,7 +24,7 @@ export class GoogleImageService {
   getGoogleImage(imageUrl: string, size: number = 96): Observable<string> {
     if (!this.isValidGoogleImageUrl(imageUrl)) {
       // Invalid Google image URL - no need to log every invalid URL
-      return throwError(() => new Error('Invalid Google image URL'));
+      return this.getFallbackImage();
     }
 
     const cacheKey = `${imageUrl}_${size}`;
@@ -33,17 +33,53 @@ export class GoogleImageService {
       return of(cached);
     }
 
-    // Always use fallback due to CORS issues with Google Images
-    
-    return this.getFallbackImage();
+    // Try to load the image with proper error handling
+    return this.tryLoadGoogleImage(imageUrl, size).pipe(
+      catchError(error => {
+        // Failed to load Google image, using fallback - no need to log every failure
+        return this.getFallbackImage();
+      })
+    );
   }
 
   /**
    * Obtiene imagen de fallback
    */
   private getFallbackImage(): Observable<string> {
-    // Return empty string to force initials display
-    return of('');
+    // Return default avatar image instead of empty string
+    return of('/assets/img/shared/handleImageError.png');
+  }
+
+  /**
+   * Intenta cargar la imagen de Google con manejo de errores
+   */
+  private tryLoadGoogleImage(imageUrl: string, size: number): Observable<string> {
+    const optimizedUrl = this.optimizeGoogleImageUrl(imageUrl, size);
+    
+    return this.http.get(optimizedUrl, { 
+      responseType: 'blob'
+    }).pipe(
+      timeout(this.REQUEST_TIMEOUT),
+      map((blob: Blob) => {
+        if (!blob || blob.size === 0) {
+          throw new Error('Empty blob received from Google');
+        }
+        
+        if (!blob.type.startsWith('image/')) {
+          throw new Error('Invalid image type received from Google');
+        }
+        
+        const objectUrl = URL.createObjectURL(blob);
+        const cacheKey = `${imageUrl}_${size}`;
+        this.GOOGLE_IMAGE_CACHE.set(cacheKey, objectUrl);
+        
+        return objectUrl;
+      }),
+      catchError(error => {
+        // Google image load failed - no need to log every failure
+        throw error;
+      })
+    );
   }
 
   /**

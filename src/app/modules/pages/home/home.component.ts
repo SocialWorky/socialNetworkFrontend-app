@@ -455,12 +455,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async forceRefreshPublications() {
-    this._logService.log(
-      LevelLogEnum.INFO,
-      'HomeComponent',
-      'Force refresh publications initiated',
-      { page: this.page, pageSize: this.pageSize }
-    );
+    // Force refresh publications initiated - no need to log every refresh
     
     this.loaderPublications = true;
     this.resetPagination();
@@ -513,12 +508,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async manualRefreshPublications() {
-    this._logService.log(
-      LevelLogEnum.INFO,
-      'HomeComponent',
-      'Manual refresh publications initiated',
-      { currentPublicationsCount: this.publications().length }
-    );
+    // Manual refresh publications initiated - no need to log every refresh
     
     this.loaderPublications = true;
     
@@ -531,12 +521,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       );
       
       if (updatedPublications.length > 0) {
-        this._logService.log(
-          LevelLogEnum.INFO,
-          'HomeComponent',
-          'Publications updated successfully',
-          { updatedCount: updatedPublications.length, totalCount: currentPublications.length }
-        );
+        // Publications updated successfully - no need to log every update
         
         const updatedMap = new Map(updatedPublications.map(pub => [pub._id, pub]));
         
@@ -547,12 +532,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.publications.set(refreshedPublications);
         this._cdr.markForCheck();
       } else {
-        this._logService.log(
-          LevelLogEnum.INFO,
-          'HomeComponent',
-          'No publications to update',
-          { totalCount: currentPublications.length }
-        );
+        // No publications to update - no need to log every check
       }
       
       this.loaderPublications = false;

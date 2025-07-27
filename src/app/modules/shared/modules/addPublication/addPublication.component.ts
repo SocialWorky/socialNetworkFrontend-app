@@ -201,12 +201,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this.avatarLoading = false;
     this._cdr.markForCheck();
     
-    this._logService.log(
-      LevelLogEnum.INFO,
-      'AddPublicationComponent',
-      'Avatar loaded successfully',
-      { hasAvatar: !!this.profileImageUrl }
-    );
+    // Avatar loaded successfully - no need to log every avatar load
   }
 
   onAvatarError() {

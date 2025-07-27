@@ -18,12 +18,7 @@ export class GoogleImageErrorInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // Block all Google Image requests to prevent CORS issues
     if (this.isGoogleImageRequest(request.url)) {
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'GoogleImageErrorInterceptor',
-        'Blocking Google Image request to prevent CORS issues',
-        { url: request.url }
-      );
+      // Blocking Google Image request to prevent CORS issues - no need to log every block
       // Return a controlled error instead of making the request
       return throwError(() => new Error('Google image requests blocked to prevent CORS issues'));
     }

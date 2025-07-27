@@ -123,8 +123,10 @@ export class TimeoutInterceptor implements HttpInterceptor {
       this.logService.log(LevelLogEnum.ERROR, 'TimeoutInterceptor', 'Network error - possible connectivity issue', errorInfo);
     } else if (error.status >= 500) {
       this.logService.log(LevelLogEnum.ERROR, 'TimeoutInterceptor', 'Server error detected', errorInfo);
-    } else {
+    } else if (error.status >= 400 && error.status < 500) {
+      // Only log client errors (4xx) as WARN, not all failed requests
       this.logService.log(LevelLogEnum.WARN, 'TimeoutInterceptor', 'HTTP request failed', errorInfo);
     }
+    // Don't log successful retries or expected failures
   }
 } 

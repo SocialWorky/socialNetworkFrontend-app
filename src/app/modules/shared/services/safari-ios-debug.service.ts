@@ -36,7 +36,7 @@ export class SafariIOSDebugService {
       maxTouchPoints: navigator.maxTouchPoints
     };
 
-    console.log('Safari iOS Environment Info:', info);
+    // Safari iOS Environment Info - no need to log every environment check
     return info;
   }
 
@@ -67,7 +67,7 @@ export class SafariIOSDebugService {
       }
     }
 
-    console.log('IndexedDB Support Check:', support);
+    // IndexedDB Support Check - no need to log every support check
     return support;
   }
 
@@ -120,7 +120,7 @@ export class SafariIOSDebugService {
       cache: this.clearCache()
     };
 
-    console.log('Worky Data Cleanup Results:', results);
+    // Worky Data Cleanup Results - no need to log every cleanup
     return results;
   }
 
@@ -206,7 +206,7 @@ export class SafariIOSDebugService {
    * Force reload the application
    */
   forceReload(): void {
-    console.log('Force reloading application...');
+    // Force reloading application - no need to log every reload
     window.location.reload();
   }
 
@@ -226,7 +226,7 @@ export class SafariIOSDebugService {
       info.message = 'Memory information not available';
     }
 
-    console.log('Memory Info:', info);
+    // Memory Info - no need to log every memory check
     return info;
   }
 
@@ -286,10 +286,7 @@ export class SafariIOSDebugService {
 
     const isPrivateBrowsing = !checks.localStorage || !checks.indexedDB;
     
-    console.log('Private Browsing Check:', {
-      ...checks,
-      isPrivateBrowsing
-    });
+    // Private Browsing Check - no need to log every check
 
     return { ...checks, isPrivateBrowsing };
   }
@@ -306,7 +303,7 @@ export class SafariIOSDebugService {
       timestamp: new Date().toISOString()
     };
 
-    console.log('Full Safari iOS Debug Info:', debugInfo);
+    // Full Safari iOS Debug Info - no need to log every debug info
     return debugInfo;
   }
 

@@ -73,17 +73,6 @@ export class DevCacheService {
   }
 
   logCacheOperation(operation: string, key: string, data?: any): void {
-    if (this.cacheDebug) {
-      this._logService.log(
-        LevelLogEnum.DEBUG,
-        'DevCacheService',
-        `Cache ${operation}`,
-        { 
-          key, 
-          dataSize: data ? JSON.stringify(data).length : 0,
-          timestamp: new Date().toISOString()
-        }
-      );
-    }
+    // Cache operation logging disabled to avoid spam - no need to log every cache operation
   }
 } 

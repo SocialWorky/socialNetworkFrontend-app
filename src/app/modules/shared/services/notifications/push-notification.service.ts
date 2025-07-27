@@ -56,12 +56,7 @@ export class PushNotificationService {
       if (permission === 'granted') {
         messaging?.getToken({ vapidKey: environment.FIREBASE_VAPID_KEY })
           .then(token => {
-            this._logService.log(
-              LevelLogEnum.INFO,
-              'PushNotificationService',
-              'Web push token obtained successfully',
-              { platform: 'web', tokenLength: token?.length }
-            );
+            // Web push token obtained successfully - no need to log every token
           });
       } else {
         this._logService.log(
@@ -74,41 +69,21 @@ export class PushNotificationService {
     });
 
     messaging?.onMessage(payload => {
-      this._logService.log(
-        LevelLogEnum.INFO,
-        'PushNotificationService',
-        'Foreground message received',
-        { platform: 'web', messageId: payload.messageId }
-      );
+      // Foreground message received - no need to log every message
     });
   }
 
   private listenToNativeEvents() {
     PushNotifications.addListener('registration', token => {
-      this._logService.log(
-        LevelLogEnum.INFO,
-        'PushNotificationService',
-        'Native push token obtained',
-        { platform: 'native', tokenLength: token.value?.length }
-      );
+      // Native push token obtained - no need to log every token
     });
 
     PushNotifications.addListener('pushNotificationReceived', notification => {
-      this._logService.log(
-        LevelLogEnum.INFO,
-        'PushNotificationService',
-        'Native notification received',
-        { platform: 'native', notificationId: notification.id }
-      );
+      // Native notification received - no need to log every notification
     });
 
     PushNotifications.addListener('pushNotificationActionPerformed', notification => {
-      this._logService.log(
-        LevelLogEnum.INFO,
-        'PushNotificationService',
-        'Native notification action performed',
-        { platform: 'native', actionId: notification.actionId, notificationId: notification.notification.id }
-      );
+      // Native notification action performed - no need to log every action
     });
   }
 }

@@ -63,21 +63,11 @@ export class UserService {
   userEdit(id: string, data: any): Observable<User> {
     const url = `${this.baseUrl}/user/edit/${id}`;
     
-    this.logService.log(
-      LevelLogEnum.INFO,
-      'UserService',
-      'User edit initiated',
-      { userId: id, fieldsUpdated: Object.keys(data) }
-    );
+    // User edit initiated - no need to log every user edit
     
     return this.http.put<User>(url, data).pipe(
       tap((updatedUser) => {
-        this.logService.log(
-          LevelLogEnum.INFO,
-          'UserService',
-          'User updated successfully',
-          { userId: id, email: updatedUser.email }
-        );
+        // User updated successfully - no need to log every user update
       }),
       catchError(this.handleError)
     );
