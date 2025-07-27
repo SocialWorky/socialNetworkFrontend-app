@@ -168,12 +168,4 @@ window.PWAUtils = {
   showCacheStatus
 };
 
-console.log('🚀 PWA Utils loaded');
-console.log('Available commands:');
-console.log('- PWAUtils.forceServiceWorkerUpdate()');
-console.log('- PWAUtils.clearServiceWorkerCache()');
-console.log('- PWAUtils.unregisterServiceWorkers()');
-console.log('- PWAUtils.forceCompleteUpdate()');
-console.log('- PWAUtils.clearPWACache()');
-console.log('- PWAUtils.showServiceWorkerStatus()');
-console.log('- PWAUtils.showCacheStatus()');
+

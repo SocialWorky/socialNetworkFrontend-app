@@ -3,34 +3,34 @@
  * Run this in the browser console to test the fix
  */
 
-console.log('🧪 Testing CORS fix for Google Images...');
+// console.log('🧪 Testing CORS fix for Google Images...');
 
 // Test 1: Check if GoogleImageService is available
-if (typeof window !== 'undefined' && window.angular) {
-  console.log('✅ Angular detected');
-  
-  // Test 2: Try to make a request to Google Images
-  const testUrl = 'https://lh3.googleusercontent.com/a/test=s96-c';
-  
-  console.log('🔍 Testing request to:', testUrl);
-  
-  fetch(testUrl)
-    .then(response => {
-      console.log('❌ Request succeeded - CORS fix not working');
-      console.log('Response:', response);
-    })
-    .catch(error => {
-      console.log('✅ Request blocked - CORS fix working');
-      console.log('Error:', error.message);
-    });
-} else {
-  console.log('⚠️ Angular not detected - run this in the app context');
-}
+// if (typeof window !== 'undefined' && window.angular) {
+//   console.log('✅ Angular detected');
+//   
+//   // Test 2: Try to make a request to Google Images
+//   const testUrl = 'https://lh3.googleusercontent.com/a/test=s96-c';
+//   
+//   console.log('🔍 Testing request to:', testUrl);
+//   
+//   fetch(testUrl)
+//     .then(response => {
+//       console.log('❌ Request succeeded - CORS fix not working');
+//       console.log('Response:', response);
+//     })
+//     .catch(error => {
+//       console.log('✅ Request blocked - CORS fix working');
+//       console.log('Error:', error.message);
+//     });
+// } else {
+//   console.log('⚠️ Angular not detected - run this in the app context');
+// }
 
 // Test 3: Check console for interceptor logs
-console.log('📋 Look for these logs in the console:');
-console.log('- "Blocking Google Image request to prevent CORS issues"');
-console.log('- "Using fallback due to CORS restrictions"');
+// console.log('📋 Look for these logs in the console:');
+// console.log('- "Blocking Google Image request to prevent CORS issues"');
+// console.log('- "Using fallback due to CORS restrictions"');
 
 // Test 4: Manual test function
 window.testGoogleImageCORS = function() {

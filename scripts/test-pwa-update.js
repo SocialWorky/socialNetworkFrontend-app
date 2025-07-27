@@ -171,8 +171,8 @@ window.PWAUpdateTests = {
   checkEnvironment
 };
 
-// Auto-run tests
-runPWATests();
+// Export functions for manual testing only
+// runPWATests(); // Commented out to prevent auto-execution
 
 console.log('💡 Available test functions:');
 console.log('- PWAUpdateTests.runPWATests()');

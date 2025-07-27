@@ -215,9 +215,4 @@ if (typeof module !== 'undefined' && module.exports) {
   };
 }
 
-console.log('🚀 PWA Cache Utils loaded');
-console.log('Available commands:');
-console.log('- PWACacheUtils.clearPWACache()');
-console.log('- PWACacheUtils.showPWAStatus()');
-console.log('- PWACacheUtils.checkServiceWorkerStatus()');
-console.log('- PWACacheUtils.checkCacheStatus()'); 
+ 
