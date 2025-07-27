@@ -32,8 +32,8 @@
     },
     {
       "name": "app-scripts",
-      "installMode": "prefetch",
-      "updateMode": "prefetch",
+      "installMode": "lazy",
+      "updateMode": "lazy",
       "resources": {
         "files": [
           "/**/*.js",
@@ -58,7 +58,7 @@
     {
       "name": "assets-images",
       "installMode": "lazy",
-      "updateMode": "prefetch",
+      "updateMode": "lazy",
       "resources": {
         "files": [
           "/assets/img/**",
@@ -185,7 +185,7 @@
       "cacheConfig": {
         "strategy": "performance",
         "maxSize": 10,
-        "maxAge": "30d"
+        "maxAge": 604800000
       }
     },
     {
@@ -198,6 +198,18 @@
         "strategy": "performance",
         "maxSize": 100,
         "maxAge": "14d"
+      }
+    },
+    {
+      "name": "mobile-critical-only",
+      "urls": [
+        "/assets/img/shared/handleImageError.png",
+        "/assets/img/logo_worky-100.png"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 5,
+        "maxAge": "7d"
       }
     }
   ],

@@ -130,9 +130,11 @@ export class AppComponent implements OnInit, OnDestroy {
     });
 
     if (!environment.PRODUCTION) {
-      // Solo en desarrollo
       this.setupDevMode();
     }
+
+    // Initialize mobile performance optimizations
+    this.initializeMobileOptimizations();
 
     // Setup accessibility fix for Ionic overlays
     this.setupAccessibilityFix();
@@ -274,6 +276,23 @@ export class AppComponent implements OnInit, OnDestroy {
       localStorage.removeItem('token');
       localStorage.removeItem('lastLogin');
       sessionStorage.clear();
+    }
+  }
+
+  private initializeMobileOptimizations(): void {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      this._logService.log(
+        LevelLogEnum.INFO,
+        'AppComponent',
+        'Mobile device detected, applying performance optimizations'
+      );
+      
+      // Reduce initial load time by delaying non-critical services
+      setTimeout(() => {
+        this._cacheOptimizationService.forcePreload();
+      }, 5000);
     }
   }
 }

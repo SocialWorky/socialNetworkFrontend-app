@@ -30,6 +30,13 @@ export class CacheOptimizationService implements OnDestroy {
     preloadThreshold: 2000
   };
 
+  private readonly MOBILE_CONFIG: CacheOptimizationConfig = {
+    enableAutoPreload: false, // Disable auto preload on mobile
+    preloadInterval: 60, // Longer interval
+    maxImagesPerBatch: 3, // Fewer images
+    preloadThreshold: 5000 // Higher threshold
+  };
+
   private config = this.DEFAULT_CONFIG;
   private preloadStats = new BehaviorSubject<PreloadStats>({
     totalPreloaded: 0,
@@ -48,12 +55,29 @@ export class CacheOptimizationService implements OnDestroy {
     private publicationDatabase: PublicationDatabaseService,
     private logService: LogService
   ) {
+    this.detectDeviceAndConfigure();
     this.initializeAutoPreload();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /**
+   * Detect device type and configure accordingly
+   */
+  private detectDeviceAndConfigure(): void {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    
+    if (isMobile) {
+      this.config = { ...this.MOBILE_CONFIG };
+      this.logService.log(LevelLogEnum.INFO, 'CacheOptimizationService', 'Mobile device detected, using mobile configuration', {
+        isIOS,
+        config: this.config
+      });
+    }
   }
 
   /**
@@ -69,9 +93,11 @@ export class CacheOptimizationService implements OnDestroy {
         this.performAutoPreload();
       });
 
+    // Delay initial preload on mobile
+    const initialDelay = this.config === this.MOBILE_CONFIG ? 30000 : 10000;
     setTimeout(() => {
       this.performAutoPreload();
-    }, 10000);
+    }, initialDelay);
   }
 
   /**

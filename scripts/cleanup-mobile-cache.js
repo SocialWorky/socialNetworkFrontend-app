@@ -1,11 +1,8 @@
-#!/usr/bin/env node
-
 /**
- * Mobile Cache Cleanup Script
- * Cleans up old cache entries for mobile optimization
+ * Mobile-specific cache cleanup script
  */
 
-console.log('🧹 Cleaning up mobile cache...');
+console.log('🧹 Cleaning mobile cache...');
 
 // Clear Service Worker cache
 if ('serviceWorker' in navigator) {
@@ -29,4 +26,15 @@ if ('caches' in window) {
   });
 }
 
-console.log('✅ Mobile cache cleaned up');
+// Clear IndexedDB (if available)
+if ('indexedDB' in window) {
+  indexedDB.databases().then(databases => {
+    databases.forEach(db => {
+      if (db.name.includes('Mobile') || db.name.includes('Cache')) {
+        indexedDB.deleteDatabase(db.name);
+      }
+    });
+  });
+}
+
+console.log('✅ Mobile cache cleaned');
