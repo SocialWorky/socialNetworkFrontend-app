@@ -195,6 +195,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       this.checkAndResolveLoadingStates();
     }, 5000);
+    
+
   }
 
   onAvatarLoad() {
@@ -835,4 +837,5 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       this._logService.log(LevelLogEnum.ERROR, 'AddPublicationComponent', 'Error cargando CSS de emoji-mart');
     }
   }
+
 }

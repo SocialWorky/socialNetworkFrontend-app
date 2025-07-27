@@ -15,7 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTooltipModule, MAT_TOOLTIP_DEFAULT_OPTIONS } from '@angular/material/tooltip';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatMenuModule } from '@angular/material/menu';
 
@@ -39,6 +39,18 @@ import { MatMenuModule } from '@angular/material/menu';
     MatTooltipModule,
     MatSlideToggleModule,
     MatMenuModule
+  ],
+  providers: [
+    {
+      provide: MAT_TOOLTIP_DEFAULT_OPTIONS,
+      useValue: {
+        showDelay: 500,
+        hideDelay: 0,
+        touchendHideDelay: 1500,
+        position: 'above',
+        class: 'extra-mat-tooltip'
+      }
+    }
   ]
 })
 export class MaterialModule { }

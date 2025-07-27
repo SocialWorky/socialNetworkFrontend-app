@@ -115,48 +115,56 @@
           <div *ngIf="!markdownButtonsLoading" class="markdown-buttons-container">
             <div class="extra-content-item"
                 matTooltip="{{ 'addPublication.tooltip.bold' | workyTranslations }}"
+                matTooltipPosition="above"
                 matTooltipClass="extra-mat-tooltip"
                 (click)="insertText('**placeholder**')">
               <i class="material-icons">format_bold</i>
             </div>
             <div class="extra-content-item"
                 matTooltip="{{ 'addPublication.tooltip.italic' | workyTranslations }}"
+                matTooltipPosition="above"
                 matTooltipClass="extra-mat-tooltip"
                 (click)="insertText('*placeholder*')">
               <i class="material-icons">format_italic</i>
             </div>
             <div class="extra-content-item"
                 matTooltip="{{ 'addPublication.tooltip.strikethrough' | workyTranslations }}"
+                matTooltipPosition="above"
                 matTooltipClass="extra-mat-tooltip"
                 (click)="insertText('~~placeholder~~')">
               <i class="material-icons">format_strikethrough</i>
             </div>
             <div class="extra-content-item"
                 matTooltip="{{ 'addPublication.tooltip.link' | workyTranslations }}"
+                matTooltipPosition="above"
                 matTooltipClass="extra-mat-tooltip"
                 (click)="insertText('[placeholder](url)')">
               <i class="material-icons">link</i>
             </div>
             <div class="extra-content-item"
                 matTooltip="{{ 'addPublication.tooltip.image' | workyTranslations }}"
+                matTooltipPosition="above"
                 matTooltipClass="extra-mat-tooltip"
                 (click)="insertText('![placeholder](url)')">
               <i class="material-icons">image</i>
             </div>
             <div class="extra-content-item"
                 matTooltip="{{ 'addPublication.tooltip.code' | workyTranslations }}"
+                matTooltipPosition="above"
                 matTooltipClass="extra-mat-tooltip"
                 (click)="insertText('```placeholder```')">
               <i class="material-icons">code</i>
             </div>
             <div class="extra-content-item"
                 matTooltip="{{ 'addPublication.tooltip.quote' | workyTranslations }}"
+                matTooltipPosition="above"
                 matTooltipClass="extra-mat-tooltip"
                 (click)="insertText('> placeholder')">
               <i class="material-icons">label</i>
             </div>
             <div class="extra-content-item"
                 matTooltip="{{ 'addPublication.tooltip.list' | workyTranslations }}"
+                matTooltipPosition="above"
                 matTooltipClass="extra-mat-tooltip"
                 (click)="insertText('- placeholder')">
               <i class="material-icons">list</i>
@@ -174,6 +182,7 @@
           <div *ngIf="!optionsButtonsLoading" class="options-buttons-container">
             <div id="gif-icon" class="extra-content-item gif-icon"
                 matTooltip="{{ 'addPublication.tooltip.gif' | workyTranslations }}"
+                matTooltipPosition="above"
                 matTooltipClass="extra-mat-tooltip" (click)="openGifSearch()">
               <i class="material-icons">gif</i>
             </div>
@@ -181,6 +190,7 @@
             <div *ngIf="type !== typePublishing.IMAGE_VIEW"
                 class="extra-content-item file-upload"
                 matTooltip="{{ 'addPublication.tooltip.upload' | workyTranslations }}"
+                matTooltipPosition="above"
                 matTooltipClass="extra-mat-tooltip"
                 (click)="openUploadModal()">
               <i class="material-icons">add_photo_alternate</i>
@@ -189,6 +199,7 @@
             <div *ngIf="type === typePublishing.POST || type === typePublishing.POST_PROFILE"
                 class="extra-content-item location-on"
                 matTooltip="{{ 'addPublication.tooltip.location' | workyTranslations }}"
+                matTooltipPosition="above"
                 matTooltipClass="extra-mat-tooltip"
                 (click)="openLocationSearch()">
               <i class="material-icons">location_on</i>
@@ -196,6 +207,7 @@
 
             <div class="extra-content-item emoji-icon"
                 matTooltip="{{ 'addPublication.tooltip.emoji' | workyTranslations }}"
+                matTooltipPosition="above"
                 matTooltipClass="extra-mat-tooltip">
               <i class="material-icons" (click)="toggleEmojiMenu()">mood</i>
               <div *ngIf="showEmojiMenu" class="emoji-menu" (click)="preventClose($event)">

@@ -204,19 +204,34 @@
         gap: 10px;
       }
 
-      .extra-content-item {
-        display: flex;
-        border-radius: 50%;
-        padding: 2px;
-        @include breakpoints.below-sm {
-          .material-icons {
-            font-size: 2rem;
+              .extra-content-item {
+          display: flex;
+          border-radius: 50%;
+          padding: 2px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          position: relative;
+          @include breakpoints.below-sm {
+            .material-icons {
+              font-size: 2rem;
+            }
+          }
+          &:hover {
+            background: color.$worky-color-greyLight;
+            transform: scale(1.05);
+          }
+          
+          // Ensure tooltips are visible
+          ::ng-deep .mat-tooltip {
+            font-size: 12px !important;
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            color: #333 !important;
+            border-radius: 8px !important;
+            padding: 8px 12px !important;
+            z-index: 9999 !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
           }
         }
-        &:hover {
-          background: color.$worky-color-greyLight;
-        }
-      }
 
       .markdown-help {
         display: flex;
@@ -243,14 +258,31 @@
           background-color: color.$worky-color-input-background;
           padding: 5px;
           cursor: pointer;
+          transition: all 0.2s ease;
+          position: relative;
           i {
             color: color-mix(in srgb, var(--worky-color-text), transparent 60%);
           }
           i:hover {
             color: color-mix(in srgb, var(--worky-color-text), transparent 10%);
           }
+          &:hover {
+            transform: scale(1.05);
+            background-color: color-mix(in srgb, color.$worky-color-input-background, transparent 20%);
+          }
           @include breakpoints.below-sm {
             padding: 2px;
+          }
+          
+          // Ensure tooltips are visible
+          ::ng-deep .mat-tooltip {
+            font-size: 12px !important;
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            color: #333 !important;
+            border-radius: 8px !important;
+            padding: 8px 12px !important;
+            z-index: 9999 !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
           }
         }
       }
@@ -280,14 +312,31 @@
           background-color: color.$worky-color-input-background;
           padding: 5px;
           cursor: pointer;
+          transition: all 0.2s ease;
+          position: relative;
           i {
             color: color-mix(in srgb, var(--worky-color-text), transparent 60%);
           }
           i:hover {
             color: color-mix(in srgb, var(--worky-color-text), transparent 10%);
           }
+          &:hover {
+            transform: scale(1.05);
+            background-color: color-mix(in srgb, color.$worky-color-input-background, transparent 20%);
+          }
           @include breakpoints.below-sm {
             padding: 2px;
+          }
+          
+          // Ensure tooltips are visible
+          ::ng-deep .mat-tooltip {
+            font-size: 12px !important;
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            color: #333 !important;
+            border-radius: 8px !important;
+            padding: 8px 12px !important;
+            z-index: 9999 !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
           }
         }
       }
