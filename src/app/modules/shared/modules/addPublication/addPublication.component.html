@@ -15,10 +15,10 @@
 
         <div class="user-name-content">
           <div class="content-name-geo">
-            <div *ngIf="nameLoading || avatarLoading" class="name-skeleton">
-              <worky-text-skeleton width="150px"></worky-text-skeleton>
-            </div>
-            <span class="name" *ngIf="!nameLoading && !avatarLoading"> {{ user.name }} {{ user.lastName }} </span>
+                    <div *ngIf="nameLoading || avatarLoading" class="name-skeleton">
+          <worky-text-skeleton width="150px"></worky-text-skeleton>
+        </div>
+        <span class="name" *ngIf="!nameLoading && !avatarLoading && user.name && user.lastName"> {{ user.name }} {{ user.lastName }} </span>
             
             <div *ngIf="locationLoading" class="location-skeleton">
               <worky-text-skeleton width="120px"></worky-text-skeleton>

@@ -190,16 +190,34 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this.simulateProgressiveLoading();
     // Cargar recursos necesarios de forma lazy
     this.loadRequiredResources();
+    
+    // Safety timeout to prevent infinite skeleton loading
+    setTimeout(() => {
+      this.checkAndResolveLoadingStates();
+    }, 5000);
   }
 
   onAvatarLoad() {
     this.avatarLoading = false;
     this._cdr.markForCheck();
+    
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'AddPublicationComponent',
+      'Avatar loaded successfully',
+      { hasAvatar: !!this.profileImageUrl }
+    );
   }
 
   onAvatarError() {
     this.avatarLoading = false;
     this._cdr.markForCheck();
+    
+    this._logService.log(
+      LevelLogEnum.WARN,
+      'AddPublicationComponent',
+      'Avatar failed to load, using fallback'
+    );
   }
 
   onNameLoad() {
@@ -237,6 +255,40 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
   }
 
+  // Check and resolve problematic loading states
+  private checkAndResolveLoadingStates() {
+    // Check for stuck loading states
+    const stuckStates = [];
+    
+    if (this.avatarLoading) stuckStates.push('avatar');
+    if (this.nameLoading) stuckStates.push('name');
+    if (this.privacyLoading) stuckStates.push('privacy');
+    if (this.textareaLoading) stuckStates.push('textarea');
+    if (this.locationLoading) stuckStates.push('location');
+    if (this.markdownButtonsLoading) stuckStates.push('markdownButtons');
+    if (this.optionsButtonsLoading) stuckStates.push('optionsButtons');
+    if (this.publishButtonLoading) stuckStates.push('publishButton');
+    
+    if (stuckStates.length > 0) {
+      this._logService.log(
+        LevelLogEnum.WARN,
+        'AddPublicationComponent',
+        'Detected stuck loading states',
+        { stuckStates }
+      );
+      
+      // Force resolution of stuck states
+      this.onAvatarLoad();
+      this.onNameLoad();
+      this.onPrivacyLoad();
+      this.onTextareaLoad();
+      this.onLocationLoad();
+      this.onMarkdownButtonsLoad();
+      this.onOptionsButtonsLoad();
+      this.onPublishButtonLoad();
+    }
+  }
+
   private simulateProgressiveLoading() {
     // Load all elements immediately without artificial delays
     this.onNameLoad();
@@ -247,8 +299,14 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this.onOptionsButtonsLoad();
     this.onPublishButtonLoad();
     
-    if (this.profileImageUrl) {
-      this.onAvatarLoad();
+    // Avatar is handled in getUser() to avoid conflicts
+    // Only resolve here if we already have user data
+    if (this.user && this.user.name) {
+      if (this.profileImageUrl && this.profileImageUrl.trim() !== '') {
+        this.onAvatarLoad();
+      } else {
+        this.onAvatarLoad();
+      }
     }
   }
 
@@ -324,11 +382,25 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
           this.user = response;
           this._cdr.markForCheck();
           
-          if (this.profileImageUrl) {
+          // Always resolve avatar loading, with or without image
+          if (this.profileImageUrl && this.profileImageUrl.trim() !== '') {
+            this.onAvatarLoad();
+          } else {
+            // If no avatar, resolve immediately
             this.onAvatarLoad();
           }
         },
-        error: console.error,
+        error: (error) => {
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'AddPublicationComponent',
+            'Error getting user data',
+            { error: error.message }
+          );
+          // Resolve loading states on error to prevent UI freeze
+          this.onAvatarLoad();
+          this.onNameLoad();
+        },
       });
   }
 
