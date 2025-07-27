@@ -78,20 +78,15 @@ export class DatabaseManagerService {
       );
 
       // Step 1: Close all existing connections to prevent locking issues.
-      this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Step 1: Closing all existing connections.');
+      // Step 1: Closing all existing connections - no need to log every step
       if (this.messageDatabase) await this.messageDatabase.closeConnection();
       if (this.publicationDatabase) await this.publicationDatabase.closeConnection();
 
       // Step 2: Get all existing Worky-related databases directly from the browser.
-      this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Step 2: Detecting all existing Worky databases.');
+      // Step 2: Detecting all existing Worky databases - no need to log every step
       const existingDatabases = await this.getExistingWorkyDatabases();
       
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'DatabaseManagerService',
-        'Detection complete. Found databases to check against allow-list.',
-        { existingDatabases, count: existingDatabases.length, newUserId: userId }
-      );
+      // Detection complete - no need to log every detection
 
       // Step 3: Decide which databases to delete by comparing against the allow-list.
       const databasesToDelete: string[] = [];
@@ -101,40 +96,20 @@ export class DatabaseManagerService {
         }
       }
 
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'DatabaseManagerService',
-        'Final Deletion Plan',
-        { 
-          toDelete: databasesToDelete,
-          toDeleteCount: databasesToDelete.length,
-          toKeep: databasesToKeep,
-          toKeepCount: databasesToKeep.length,
-          note: 'Only databases not on the allow-list will be deleted.' 
-        }
-      );
+      // Final deletion plan - no need to log every plan
 
       // Step 4: Execute the deletion plan.
       if (databasesToDelete.length > 0) {
-        this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Step 4: Executing deletion plan.');
+        // Step 4: Executing deletion plan - no need to log every step
         for (const dbName of databasesToDelete) {
           // Individual deletion logs are in deleteDatabaseByName
           await this.deleteDatabaseByName(dbName);
         }
       } else {
-        this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Step 4: No databases to delete. Cleanup not needed.');
+        // Step 4: No databases to delete - no need to log every step
       }
 
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'DatabaseManagerService',
-        'Database cleanup completed successfully.',
-        { 
-          newUserId: userId, 
-          deletedCount: databasesToDelete.length,
-          keptCount: databasesToKeep.length 
-        }
-      );
+      // Database cleanup completed successfully - no need to log every cleanup
 
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
@@ -157,27 +132,21 @@ export class DatabaseManagerService {
    * This is the most reliable way to find all relevant databases.
    */
   private async getExistingWorkyDatabases(): Promise<string[]> {
-    this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Detecting existing databases...');
+    // Detecting existing databases - no need to log every detection
     
     const apiAvailable = 'databases' in indexedDB && typeof indexedDB.databases === 'function';
-    this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Checking for indexedDB.databases() API support.', { apiAvailable });
+    // Checking for indexedDB.databases() API support - no need to log every check
 
     if (apiAvailable) {
       try {
         const allDbs = await indexedDB.databases();
         const dbNames = allDbs.map(db => db.name).filter((name): name is string => !!name);
         
-        this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Successfully fetched database list via modern API.', {
-          totalFound: dbNames.length,
-          databaseNames: dbNames
-        });
+        // Successfully fetched database list via modern API - no need to log every fetch
         
         const workyDbs = dbNames.filter(name => name.startsWith('Worky'));
           
-        this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Filtered for Worky-specific databases.', { 
-          workyDbCount: workyDbs.length,
-          workyDbNames: workyDbs
-        });
+        // Filtered for Worky-specific databases - no need to log every filter
         return workyDbs;
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
@@ -201,10 +170,7 @@ export class DatabaseManagerService {
         existingDatabases.push(dbName);
       }
     }
-    this.logService.log(LevelLogEnum.INFO, 'DatabaseManagerService', 'Found databases using legacy name-guessing method.', { 
-      foundCount: existingDatabases.length,
-      foundDbNames: existingDatabases 
-    });
+    // Found databases using legacy name-guessing method - no need to log every discovery
     return existingDatabases;
   }
 

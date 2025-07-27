@@ -253,11 +253,7 @@ export class AppComponent implements OnInit, OnDestroy {
   // Test method for PWA update simulation (development only)
   testPwaUpdate(): void {
     if (!environment.PRODUCTION) {
-      this._logService.log(
-        LevelLogEnum.INFO,
-        'AppComponent',
-        'Testing PWA update simulation'
-      );
+      // Testing PWA update simulation - no need to log every test
       this._pwaUpdateService.forceCheckAndSimulate();
     }
   }
@@ -283,11 +279,7 @@ export class AppComponent implements OnInit, OnDestroy {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     if (isMobile) {
-      this._logService.log(
-        LevelLogEnum.INFO,
-        'AppComponent',
-        'Mobile device detected, applying performance optimizations'
-      );
+      // Mobile device detected, applying performance optimizations - no need to log every detection
       
       // Reduce initial load time by delaying non-critical services
       setTimeout(() => {

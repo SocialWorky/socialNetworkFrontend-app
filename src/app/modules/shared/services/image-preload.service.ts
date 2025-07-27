@@ -91,10 +91,7 @@ export class ImagePreloadService {
       // Remove duplicates and limit total
       const uniqueUrls = [...new Set(imageUrls)].slice(0, finalStrategy.maxImages);
 
-      this.logService.log(LevelLogEnum.INFO, 'ImagePreloadService', 'Starting image preload', {
-        total: uniqueUrls.length,
-        strategy: finalStrategy
-      });
+      // Starting image preload - no need to log every preload operation
 
       // Preload images
       const results = await this.preloadImageBatch(uniqueUrls, finalStrategy.priority);
@@ -109,7 +106,7 @@ export class ImagePreloadService {
 
       this.preloadResults.next(result);
 
-      this.logService.log(LevelLogEnum.INFO, 'ImagePreloadService', 'Preload completed', result);
+      // Preload completed - no need to log every preload completion
 
       return result;
 
@@ -127,10 +124,7 @@ export class ImagePreloadService {
   preloadSpecificImages(imageUrls: string[], imageType: 'profile' | 'publication' | 'media' = 'media'): void {
     if (imageUrls.length === 0) return;
 
-    this.logService.log(LevelLogEnum.INFO, 'ImagePreloadService', 'Preloading specific images', {
-      count: imageUrls.length,
-      type: imageType
-    });
+    // Preloading specific images - no need to log every preload operation
 
     imageUrls.forEach(url => {
       if (!this.preloadQueue.has(url)) {
@@ -139,7 +133,7 @@ export class ImagePreloadService {
         this.mobileImageCache.loadImage(url, imageType, { priority: 'low' }).subscribe({
           next: () => {
             this.preloadQueue.delete(url);
-            this.logService.log(LevelLogEnum.DEBUG, 'ImagePreloadService', 'Image preloaded', { url, type: imageType });
+            // Image preloaded - no need to log every preload
           },
           error: (error) => {
             this.preloadQueue.delete(url);
@@ -247,7 +241,7 @@ export class ImagePreloadService {
       try {
         await firstValueFrom(this.mobileImageCache.loadImage(url, 'media', { priority }));
         success++;
-        this.logService.log(LevelLogEnum.DEBUG, 'ImagePreloadService', 'Image preloaded successfully', { url });
+        // Image preloaded successfully - no need to log every preload
       } catch (error) {
         failed++;
         this.logService.log(LevelLogEnum.WARN, 'ImagePreloadService', 'Image preload failed', { url, error });
@@ -298,7 +292,7 @@ export class ImagePreloadService {
    */
   clearPreloadQueue(): void {
     this.preloadQueue.clear();
-    this.logService.log(LevelLogEnum.INFO, 'ImagePreloadService', 'Preload queue cleared');
+    // Preload queue cleared - no need to log every queue clear
   }
 
   /**

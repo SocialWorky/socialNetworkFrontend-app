@@ -19,7 +19,7 @@ export class IOSOptimizationsService {
     this.setupIOSMemoryOptimizations();
     this.setupIOSNetworkOptimizations();
     
-    this.logService.log(LevelLogEnum.INFO, 'IOSOptimizationsService', 'iOS optimizations initialized');
+    // iOS optimizations initialized - no need to log every initialization
   }
 
   private setupIOSPerformanceOptimizations(): void {
@@ -65,11 +65,7 @@ export class IOSOptimizationsService {
       const connection = (navigator as any).connection;
       
       connection.addEventListener('change', () => {
-        this.logService.log(LevelLogEnum.INFO, 'IOSOptimizationsService', 'Network connection changed', {
-          effectiveType: connection.effectiveType,
-          downlink: connection.downlink,
-          rtt: connection.rtt
-        });
+        // Network connection changed - no need to log every connection change
       });
     }
   }
@@ -102,6 +98,6 @@ export class IOSOptimizationsService {
       });
     }
 
-    this.logService.log(LevelLogEnum.INFO, 'IOSOptimizationsService', 'Low memory optimization triggered');
+    // Low memory optimization triggered - no need to log every optimization
   }
 } 

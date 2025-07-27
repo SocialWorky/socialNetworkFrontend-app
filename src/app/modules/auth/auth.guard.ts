@@ -20,11 +20,7 @@ export class AuthGuard implements CanActivate {
       if (isAuthenticated) {
         return true;
       } else {
-        this.logService.log(
-          LevelLogEnum.INFO,
-          'AuthGuard',
-          'User not authenticated, redirecting to login'
-        );
+        // User not authenticated, redirecting to login - no need to log every redirect
         this.router.navigate(['/auth/login']);
         return false;
       }

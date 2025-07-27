@@ -35,45 +35,14 @@ export class PwaUpdateService {
   }
 
   private initializeUpdateDetection(): void {
-    this._logService.log(
-      LevelLogEnum.INFO,
-      'PwaUpdateService',
-      'Initializing PWA update detection',
-      { 
-        isEnabled: this.swUpdate.isEnabled,
-        environment: environment.PRODUCTION ? 'production' : 'development'
-      }
-    );
-
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates.subscribe(event => {
-        const logData: any = { eventType: event.type };
-        
-        // Only add version info for VERSION_READY events
-        if (event.type === 'VERSION_READY' && 'currentVersion' in event && 'latestVersion' in event) {
-          logData.currentVersion = (event as any).currentVersion?.hash;
-          logData.latestVersion = (event as any).latestVersion?.hash;
-        }
-        
-        this._logService.log(
-          LevelLogEnum.INFO,
-          'PwaUpdateService',
-          'Version update event received',
-          logData
-        );
-        
         if (event.type === 'VERSION_READY') {
           this.handleVersionReady(event);
         }
       });
 
-      // Check for updates immediately on initialization
       setTimeout(() => {
-        this._logService.log(
-          LevelLogEnum.INFO,
-          'PwaUpdateService',
-          'Performing initial update check'
-        );
         this.checkForUpdates().catch((error) => {
           this._logService.log(
             LevelLogEnum.WARN,
@@ -84,14 +53,7 @@ export class PwaUpdateService {
         });
       }, 1000);
 
-      // Start periodic checks in both development and production
       this.startPeriodicChecks();
-    } else {
-      this._logService.log(
-        LevelLogEnum.WARN,
-        'PwaUpdateService',
-        'Service workers are not enabled'
-      );
     }
   }
 
@@ -117,25 +79,8 @@ export class PwaUpdateService {
   }
 
   private startPeriodicChecks(): void {
-    // Check for updates every 5 minutes in development, 30 minutes in production
     const checkIntervalMs = environment.PRODUCTION ? 30 * 60 * 1000 : 5 * 60 * 1000;
-    
-    this._logService.log(
-      LevelLogEnum.INFO,
-      'PwaUpdateService',
-      'Starting periodic update checks',
-      { 
-        intervalMs: checkIntervalMs,
-        intervalMinutes: checkIntervalMs / (60 * 1000)
-      }
-    );
-
     this.checkInterval = interval(checkIntervalMs).subscribe(() => {
-      this._logService.log(
-        LevelLogEnum.INFO,
-        'PwaUpdateService',
-        'Performing periodic update check'
-      );
       this.checkForUpdates();
     });
   }
@@ -153,41 +98,21 @@ export class PwaUpdateService {
       return Promise.resolve(false);
     }
 
-    // Check if service workers are enabled
     if (!this.swUpdate.isEnabled) {
-      this._logService.log(
-        LevelLogEnum.WARN,
-        'PwaUpdateService',
-        'Cannot check for updates - service workers disabled'
-      );
       return Promise.resolve(false);
     }
 
     this.isChecking = true;
     
-    this._logService.log(
-      LevelLogEnum.INFO,
-      'PwaUpdateService',
-      'Checking for updates...'
-    );
-
     return this.swUpdate.checkForUpdate()
       .then(updateAvailable => {
         this.isChecking = false;
-        
-        this._logService.log(
-          LevelLogEnum.INFO,
-          'PwaUpdateService',
-          'Update check completed',
-          { updateAvailable }
-        );
         
         return updateAvailable;
       })
       .catch(error => {
         this.isChecking = false;
         
-        // Solo mostrar error si no es por service workers deshabilitados
         if (!error.message?.includes('Service workers are disabled')) {
           this._logService.log(
             LevelLogEnum.ERROR,
@@ -244,12 +169,6 @@ export class PwaUpdateService {
    */
   public setAutoUpdate(enabled: boolean): void {
     localStorage.setItem('pwa-auto-update', enabled.toString());
-    this._logService.log(
-      LevelLogEnum.INFO,
-      'PwaUpdateService',
-      'Auto-update setting changed',
-      { enabled }
-    );
   }
 
   /**
@@ -282,12 +201,6 @@ export class PwaUpdateService {
    */
   public simulateUpdate(): void {
     if (!environment.PRODUCTION) {
-      this._logService.log(
-        LevelLogEnum.INFO,
-        'PwaUpdateService',
-        'Simulating update for development testing'
-      );
-
       const mockUpdateInfo: UpdateInfo = {
         available: true,
         currentVersion: 'abc12345',
@@ -309,15 +222,8 @@ export class PwaUpdateService {
    * Forces an update check and simulates if necessary
    */
   public forceCheckAndSimulate(): Promise<boolean> {
-    this._logService.log(
-      LevelLogEnum.INFO,
-      'PwaUpdateService',
-      'Force check and simulate update'
-    );
-
     return this.checkForUpdates().then(updateAvailable => {
       if (!updateAvailable && !environment.PRODUCTION) {
-        // Simulate update in development if no real update is available
         setTimeout(() => {
           this.simulateUpdate();
         }, 1000);

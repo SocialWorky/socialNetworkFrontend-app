@@ -71,7 +71,6 @@ export class MediaCacheService {
         // Validate blob before creating URL
         const objectURL = this.createObjectURL(cached.blob);
         if (objectURL) {
-          this.logService.log(LevelLogEnum.INFO, 'MediaCacheService', 'Media loaded from memory cache', { url, quality: finalOptions.quality || 'medium' });
           return of(objectURL);
         } else {
           this.logService.log(LevelLogEnum.WARN, 'MediaCacheService', 'Invalid blob in memory cache', { url });
@@ -89,7 +88,6 @@ export class MediaCacheService {
       if (objectURL) {
         this.mediaCache.set(cacheKey, cachedData);
         this.cacheSize += cachedData.size;
-        this.logService.log(LevelLogEnum.INFO, 'MediaCacheService', 'Media loaded from persistent cache', { url, quality: finalOptions.quality || 'medium' });
         return of(objectURL);
       } else {
         this.logService.log(LevelLogEnum.WARN, 'MediaCacheService', 'Invalid blob in persistent cache', { url });
@@ -120,7 +118,9 @@ export class MediaCacheService {
     
     urls.forEach(url => {
       this.loadMedia(url, finalOptions).subscribe({
-        next: () => this.logService.log(LevelLogEnum.INFO, 'MediaCacheService', 'Media preloaded successfully', { url }),
+        next: () => {
+          // Eliminado log informativo de media preloaded
+        },
         error: (error) => this.logService.log(LevelLogEnum.WARN, 'MediaCacheService', 'Media preload failed', { url, error: error.message })
       });
     });
@@ -158,7 +158,7 @@ export class MediaCacheService {
       });
     }
 
-    this.logService.log(LevelLogEnum.INFO, 'MediaCacheService', 'Media cache cleared', { includePersistent });
+    // Media cache cleared - no need to log every cache clear
   }
 
   getCacheStats(): { size: number; items: number; persistentItems: number } {
@@ -209,12 +209,6 @@ export class MediaCacheService {
         loadingSubject.next(false);
         this.loadingMedia.delete(cacheKey);
 
-        this.logService.log(LevelLogEnum.INFO, 'MediaCacheService', 'Media loaded from network and cached', { 
-          url, 
-          size: blob.size, 
-          quality: options.quality || 'medium'
-        });
-
         const objectURL = this.createObjectURL(blob);
         if (!objectURL) {
           throw new Error('Failed to create object URL for loaded media');
@@ -262,11 +256,6 @@ export class MediaCacheService {
       this.removeFromCache(key);
       this.cacheService.removeItem(key, true);
     });
-
-    this.logService.log(LevelLogEnum.INFO, 'MediaCacheService', 'Cache cleanup completed', { 
-      removedItems: toRemove,
-      remainingSize: this.cacheSize 
-    });
   }
 
   private initializeCache(): void {
@@ -279,11 +268,6 @@ export class MediaCacheService {
       } else {
         this.cacheService.removeItem(key, true);
       }
-    });
-
-    this.logService.log(LevelLogEnum.INFO, 'MediaCacheService', 'Media cache initialized', { 
-      items: this.mediaCache.size,
-      size: this.cacheSize 
     });
   }
 

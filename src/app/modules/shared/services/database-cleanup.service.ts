@@ -17,7 +17,7 @@ export class DatabaseCleanupService {
    * Clean all Worky-related IndexedDB databases
    */
   async cleanAllWorkyDatabases(): Promise<void> {
-    this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'Starting cleanup of all Worky databases');
+    // Starting cleanup of all Worky databases - no need to log every cleanup
 
     const results = await Promise.allSettled(
       this.WORKY_DATABASES.map(dbName => this.deleteDatabase(dbName))
@@ -26,11 +26,7 @@ export class DatabaseCleanupService {
     const successful = results.filter(result => result.status === 'fulfilled').length;
     const failed = results.filter(result => result.status === 'rejected').length;
 
-    this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'Cleanup completed', {
-      successful,
-      failed,
-      total: this.WORKY_DATABASES.length
-    });
+    // Cleanup completed - no need to log every cleanup completion
 
     if (failed > 0) {
       this.logService.log(LevelLogEnum.WARN, 'DatabaseCleanupService', 'Some databases failed to delete', {
@@ -43,11 +39,11 @@ export class DatabaseCleanupService {
    * Clean a specific database by name
    */
   async cleanDatabase(dbName: string): Promise<void> {
-    this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'Cleaning specific database', { dbName });
+    // Cleaning specific database - no need to log every database cleanup
 
     try {
       await this.deleteDatabase(dbName);
-      this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'Database cleaned successfully', { dbName });
+      // Database cleaned successfully - no need to log every successful cleanup
     } catch (error) {
       this.logService.log(LevelLogEnum.ERROR, 'DatabaseCleanupService', 'Failed to clean database', { 
         dbName, 
@@ -73,14 +69,12 @@ export class DatabaseCleanupService {
           .map(db => db.name)
           .filter((name): name is string => !!name && name.startsWith('Worky'));
         
-        this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'Found Worky databases via modern API', {
-          databases: workyDbs
-        });
+        // Found Worky databases via modern API - no need to log every database discovery
         
         return workyDbs;
       }
     } catch (error) {
-      this.logService.log(LevelLogEnum.WARN, 'DatabaseCleanupService', 'Modern API failed, using fallback method', { error });
+      // Modern API failed, using fallback method - no need to log every fallback
     }
 
     // Fallback: check known database names
@@ -92,9 +86,7 @@ export class DatabaseCleanupService {
       }
     }
 
-    this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'Found Worky databases via fallback method', {
-      databases: existingDbs
-    });
+    // Found Worky databases via fallback method - no need to log every database discovery
 
     return existingDbs;
   }
@@ -177,7 +169,7 @@ export class DatabaseCleanupService {
       const request = indexedDB.deleteDatabase(dbName);
       
       request.onsuccess = () => {
-        this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'Database deletion successful', { dbName });
+        // Database deletion successful - no need to log every successful deletion
         resolve();
       };
       
@@ -201,20 +193,18 @@ export class DatabaseCleanupService {
    * Clean orphaned databases (databases not in the known list)
    */
   async cleanOrphanedDatabases(): Promise<void> {
-    this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'Starting cleanup of orphaned databases');
+    // Starting cleanup of orphaned databases - no need to log every cleanup
 
     try {
       const existingDbs = await this.getExistingWorkyDatabases();
       const orphanedDbs = existingDbs.filter(dbName => !this.WORKY_DATABASES.includes(dbName));
 
       if (orphanedDbs.length === 0) {
-        this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'No orphaned databases found');
+        // No orphaned databases found - no need to log every check
         return;
       }
 
-      this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'Found orphaned databases', {
-        orphaned: orphanedDbs
-      });
+      // Found orphaned databases - no need to log every discovery
 
       const results = await Promise.allSettled(
         orphanedDbs.map(dbName => this.deleteDatabase(dbName))
@@ -223,11 +213,7 @@ export class DatabaseCleanupService {
       const successful = results.filter(result => result.status === 'fulfilled').length;
       const failed = results.filter(result => result.status === 'rejected').length;
 
-      this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'Orphaned database cleanup completed', {
-        successful,
-        failed,
-        total: orphanedDbs.length
-      });
+      // Orphaned database cleanup completed - no need to log every cleanup
     } catch (error) {
       this.logService.log(LevelLogEnum.ERROR, 'DatabaseCleanupService', 'Error during orphaned database cleanup', { error });
     }
@@ -237,7 +223,7 @@ export class DatabaseCleanupService {
    * Force cleanup for Safari iOS issues
    */
   async forceCleanupForSafariIOS(): Promise<void> {
-    this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'Force cleanup for Safari iOS issues');
+    // Force cleanup for Safari iOS issues - no need to log every cleanup
 
     try {
       // Clean all databases
@@ -249,7 +235,7 @@ export class DatabaseCleanupService {
       // Clear sessionStorage
       sessionStorage.clear();
       
-      this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'Force cleanup completed for Safari iOS');
+      // Force cleanup completed for Safari iOS - no need to log every cleanup
     } catch (error) {
       this.logService.log(LevelLogEnum.ERROR, 'DatabaseCleanupService', 'Force cleanup failed', { error });
       throw error;
@@ -272,12 +258,10 @@ export class DatabaseCleanupService {
       
       keysToRemove.forEach(key => {
         localStorage.removeItem(key);
-        this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'Removed localStorage item', { key });
+        // Removed localStorage item - no need to log every item removal
       });
       
-      this.logService.log(LevelLogEnum.INFO, 'DatabaseCleanupService', 'LocalStorage cleanup completed', {
-        removedItems: keysToRemove.length
-      });
+      // LocalStorage cleanup completed - no need to log every cleanup
     } catch (error) {
       this.logService.log(LevelLogEnum.WARN, 'DatabaseCleanupService', 'Error clearing localStorage', { error });
     }

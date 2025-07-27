@@ -19,7 +19,7 @@ export class SafariIOSErrorHandlerService {
 
   private async initializeErrorHandler(): Promise<void> {
     if (this.isIOS && this.isSafari) {
-      this.logService.log(LevelLogEnum.INFO, 'SafariIOSErrorHandlerService', 'iOS Safari detected, initializing error handler');
+      // iOS Safari detected, initializing error handler - no need to log every initialization
       
       // Check IndexedDB support
       this.hasIndexedDBSupport = await this.checkIndexedDBSupport();
@@ -30,10 +30,7 @@ export class SafariIOSErrorHandlerService {
       // Setup error listeners
       this.setupErrorListeners();
       
-      this.logService.log(LevelLogEnum.INFO, 'SafariIOSErrorHandlerService', 'Error handler initialized', {
-        hasIndexedDBSupport: this.hasIndexedDBSupport,
-        isPrivateBrowsing: this.isPrivateBrowsing
-      });
+      // Error handler initialized - no need to log every initialization
     }
   }
 
@@ -144,7 +141,7 @@ export class SafariIOSErrorHandlerService {
 
   private handleIndexedDBError(error: any): void {
     // Provide fallback behavior for IndexedDB errors
-    this.logService.log(LevelLogEnum.INFO, 'SafariIOSErrorHandlerService', 'Providing IndexedDB fallback behavior');
+    // Providing IndexedDB fallback behavior - no need to log every fallback
     
     // Clear any corrupted IndexedDB data
     this.clearCorruptedIndexedDB();
@@ -155,7 +152,7 @@ export class SafariIOSErrorHandlerService {
 
   private handleNetworkError(error: any): void {
     // Handle network errors, especially 404s
-    this.logService.log(LevelLogEnum.INFO, 'SafariIOSErrorHandlerService', 'Handling network error', { error: error.message });
+    // Handling network error - no need to log every network error
     
     // For 404 errors on images, we could implement retry logic or fallback images
     if (error.message?.includes('404')) {
@@ -173,7 +170,7 @@ export class SafariIOSErrorHandlerService {
       for (const dbName of databases) {
         try {
           await this.deleteDatabase(dbName);
-          this.logService.log(LevelLogEnum.INFO, 'SafariIOSErrorHandlerService', 'Cleared corrupted database', { dbName });
+          // Cleared corrupted database - no need to log every database clear
         } catch (error) {
           this.logService.log(LevelLogEnum.WARN, 'SafariIOSErrorHandlerService', 'Failed to clear database', { dbName, error });
         }

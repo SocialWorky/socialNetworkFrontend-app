@@ -283,10 +283,7 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
         
         this.cdr.markForCheck();
         
-        this.logService.log(LevelLogEnum.INFO, 'OptimizedImageComponent', 'Image loaded successfully', { 
-          src: this.src, 
-          type: this.options.type 
-        });
+        // Image loaded successfully - no need to log every successful load
       },
       error: (error) => {
         this.logService.log(LevelLogEnum.ERROR, 'OptimizedImageComponent', 'Failed to load image', { 
@@ -326,10 +323,7 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
     
     // Try fallback URL if available
     if (this.options.fallbackUrl && this.imageSrc !== this.options.fallbackUrl) {
-      this.logService.log(LevelLogEnum.INFO, 'OptimizedImageComponent', 'Trying fallback URL', { 
-        original: this.src, 
-        fallback: this.options.fallbackUrl 
-      });
+      // Trying fallback URL - no need to log every fallback attempt
       this.imageSrc = this.options.fallbackUrl;
       this.hasError = false;
       this.cdr.markForCheck();

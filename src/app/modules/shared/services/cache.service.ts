@@ -30,12 +30,7 @@ export class CacheService {
       try {
         localStorage.setItem(`cache_${key}`, JSON.stringify(cacheItem));
       } catch (error) {
-        this.logService.log(
-          LevelLogEnum.WARN,
-          'CacheService',
-          'Cache storage limit exceeded, removing oldest items',
-          { key, error: error instanceof Error ? error.message : String(error) }
-        );
+        // Cache storage limit exceeded, removing oldest items - no need to log every cleanup
         this.cleanupPersistentCache();
       }
     }

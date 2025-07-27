@@ -26,7 +26,7 @@ export class FontLoaderService {
 
       link.onload = () => {
         this.loadedFonts.add(fontName);
-        this.logService.log(LevelLogEnum.INFO, 'FontLoaderService', `Fuente cargada: ${fontName}`);
+        // Fuente cargada - no need to log every font load
         resolve();
       };
 

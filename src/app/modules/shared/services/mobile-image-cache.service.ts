@@ -303,12 +303,12 @@ export class MobileImageCacheService {
   private setupOfflineModeDetection(): void {
     window.addEventListener('online', () => {
       this.MOBILE_CONFIG.offlineMode = false;
-      this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Online mode enabled');
+      // Online mode enabled - no need to log every online/offline change
     });
 
     window.addEventListener('offline', () => {
       this.MOBILE_CONFIG.offlineMode = true;
-      this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Offline mode enabled');
+      // Offline mode enabled - no need to log every online/offline change
     });
   }
 
@@ -322,7 +322,7 @@ export class MobileImageCacheService {
     // iOS-specific cache cleanup
     this.setupIOSCacheCleanup();
     
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'iOS optimizations enabled');
+          // iOS optimizations enabled - no need to log every optimization setup
   }
 
   private setupIOSMemoryManagement(): void {
@@ -339,10 +339,7 @@ export class MobileImageCacheService {
         const toRemove = entries.slice(0, Math.floor(maxMemoryCacheSize / 2));
         toRemove.forEach(([key]) => this.memoryCache.delete(key));
         
-        this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'iOS memory cache cleaned', {
-          removed: toRemove.length,
-          remaining: this.memoryCache.size
-        });
+        // iOS memory cache cleaned - no need to log every cleanup operation
       }
     }, 30000); // Check every 30 seconds
   }
@@ -353,7 +350,7 @@ export class MobileImageCacheService {
     if (this.db) {
       // iOS Safari has a limit on IndexedDB transaction size
       // We'll use smaller chunks for operations
-      this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'iOS IndexedDB optimizations applied');
+      // iOS IndexedDB optimizations applied - no need to log every optimization setup
     }
     
     // Handle iOS Safari IndexedDB quirks
@@ -414,7 +411,7 @@ export class MobileImageCacheService {
         this.updateAccessMetrics(cached);
         this.cacheHits++;
         this.updateMetrics();
-        this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image loaded from memory cache', { url: imageUrl, type: imageType, isIOS });
+        // Image loaded from memory cache - no need to log every cache hit
         return of(URL.createObjectURL(cached.blob));
       } else {
         this.memoryCache.delete(imageUrl);
@@ -423,7 +420,7 @@ export class MobileImageCacheService {
 
     // For Safari iOS, skip persistent cache entirely
     if (isIOS) {
-      this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Safari iOS: loading from network only', { url: imageUrl });
+      // Safari iOS: loading from network only - no need to log every network request
       return this.loadFromNetwork(imageUrl, imageType, { ...options, timeout: timeoutValue }).pipe(
         tap(cachedImage => {
           if (cachedImage) {
@@ -454,7 +451,7 @@ export class MobileImageCacheService {
           this.updateAccessMetrics(cachedImage);
           this.cacheHits++;
           this.updateMetrics();
-          this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image loaded from persistent cache', { url: imageUrl, type: imageType, isIOS });
+          // Image loaded from persistent cache - no need to log every cache hit
           return of(URL.createObjectURL(cachedImage.blob));
         }
 
@@ -578,14 +575,7 @@ export class MobileImageCacheService {
         this.loadTimes.push(loadTime);
         this.updateMetrics();
 
-        this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image loaded from network and cached', { 
-          url: imageUrl, 
-          size: blob.size, 
-          loadTime: Math.round(loadTime),
-          type: imageType,
-          isIOS,
-          usePersistentCache: !isIOS
-        });
+        // Image loaded from network and cached - no need to log every successful load
 
         return cachedImage;
       }),
@@ -643,10 +633,7 @@ export class MobileImageCacheService {
         const request = store.put(storageObject);
 
         request.onsuccess = () => {
-          this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image stored in persistent cache', { 
-            url: cachedImage.url, 
-            size: cachedImage.size 
-          });
+          // Image stored in persistent cache - no need to log every storage operation
           resolve();
         };
 
@@ -728,16 +715,13 @@ export class MobileImageCacheService {
     const config = this.getCurrentConfig();
     const urlsToPreload = imageUrls.slice(0, config.preloadThreshold);
     
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Preloading images', {
-      total: imageUrls.length,
-      preloading: urlsToPreload.length,
-      type: imageType,
-      priority
-    });
+    // Preloading images - no need to log every preload operation
 
     urlsToPreload.forEach(url => {
       this.loadImage(url, imageType, { priority }).subscribe({
-        next: () => this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image preloaded', { url, type: imageType }),
+        next: () => {
+          // Image preloaded - no need to log every preload
+        },
         error: (error) => this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Image preload failed', { url, error })
       });
     });
@@ -766,7 +750,7 @@ export class MobileImageCacheService {
     }
     
     await this.updateMetrics();
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Cache cleared');
+    // Cache cleared - no need to log every cache clear
   }
 
   /**
@@ -823,7 +807,7 @@ export class MobileImageCacheService {
       await this.compressCachedImages();
     }
     
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Mobile optimization completed');
+    // Mobile optimization completed - no need to log every optimization
   }
 
   /**
@@ -877,7 +861,7 @@ export class MobileImageCacheService {
       }
     };
 
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Cache cleanup completed');
+    // Cache cleanup completed - no need to log every cleanup
   }
 
   /**
@@ -885,7 +869,7 @@ export class MobileImageCacheService {
    */
   private async compressCachedImages(): Promise<void> {
     // This would be implemented based on your image compression strategy
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Image compression triggered');
+    // Image compression triggered - no need to log every compression
   }
 
   /**
@@ -943,7 +927,7 @@ export class MobileImageCacheService {
    */
   async forceOptimization(): Promise<void> {
     await this.optimizeForMobile();
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Forced optimization completed');
+    // Forced optimization completed - no need to log every optimization
   }
 
   /**
@@ -983,12 +967,7 @@ export class MobileImageCacheService {
     
     const healthy = issues.length === 0;
     
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'iOS cache health check completed', {
-      healthy,
-      issues,
-      memoryCacheSize: this.memoryCache.size,
-      persistentCacheSize: stats.size
-    });
+    // iOS cache health check completed - no need to log every health check
     
     return { healthy, issues };
   }
@@ -999,7 +978,7 @@ export class MobileImageCacheService {
   async recoverIOSCache(): Promise<void> {
     if (!isIOS) return;
     
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Starting iOS cache recovery');
+    // Starting iOS cache recovery - no need to log every recovery
     
     // Clear memory cache
     this.memoryCache.clear();
@@ -1012,6 +991,6 @@ export class MobileImageCacheService {
       await this.initDatabase();
     }
     
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'iOS cache recovery completed');
+    // iOS cache recovery completed - no need to log every recovery
   }
 }

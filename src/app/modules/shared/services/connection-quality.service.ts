@@ -110,7 +110,7 @@ export class ConnectionQualityService {
         this.updateConnectionInfo();
       });
     } else {
-      this.logService.log(LevelLogEnum.WARN, 'ConnectionQualityService', 'Network Information API not supported, using default values');
+      // Network Information API not supported, using default values - no need to log every initialization
     }
   }
 

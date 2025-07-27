@@ -29,7 +29,7 @@ export class LazyCssService {
 
       link.onload = () => {
         this.loadedStyles.add(id);
-        this.logService.log(LevelLogEnum.INFO, 'LazyCssService', `CSS cargado exitosamente: ${cssPath}`);
+        // CSS cargado exitosamente - no need to log every CSS load
         resolve();
       };
 

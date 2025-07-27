@@ -67,7 +67,7 @@ export class ImageService {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then(registration => {
         this.useServiceWorkerCache = true;
-        this.logService.log(LevelLogEnum.INFO, 'ImageService', 'Service Worker cache enabled');
+        // Service Worker cache enabled - no need to log every initialization
       }).catch(error => {
         this.logService.log(LevelLogEnum.WARN, 'ImageService', 'Service Worker cache not available', { error: error.message });
       });
@@ -82,7 +82,7 @@ export class ImageService {
     
     // Check memory cache first
     if (this.imageCache.has(imageUrl)) {
-      this.logService.log(LevelLogEnum.INFO, 'ImageService', 'Image loaded from memory cache', { url: imageUrl });
+      // Image loaded from memory cache - no need to log every cache hit
       return of(this.imageCache.get(imageUrl)!);
     }
 
@@ -173,10 +173,7 @@ export class ImageService {
           this.loadingImages.get(imageUrl)?.next(false);
           this.loadingImages.delete(imageUrl);
           
-          this.logService.log(LevelLogEnum.INFO, 'ImageService', 'Image loaded from Service Worker cache', { 
-            url: imageUrl,
-            cacheSource: 'service-worker'
-          });
+          // Image loaded from Service Worker cache - no need to log every cache hit
           
           observer.next(cachedUrl);
           observer.complete();
@@ -235,10 +232,7 @@ export class ImageService {
         this.loadingImages.get(imageUrl)?.next(false);
         this.loadingImages.delete(imageUrl);
         
-        this.logService.log(LevelLogEnum.INFO, 'ImageService', 'Image loaded from network', { 
-          url: imageUrl,
-          cacheSource: 'network'
-        });
+        // Image loaded from network - no need to log every successful load
         
         return of(imageUrl);
       }),
@@ -254,10 +248,7 @@ export class ImageService {
         
         // Return fallback if available
         if (options.fallbackUrl) {
-          this.logService.log(LevelLogEnum.INFO, 'ImageService', 'Using fallback image', { 
-            original: imageUrl, 
-            fallback: options.fallbackUrl 
-          });
+          // Using fallback image - no need to log every fallback
           return of(options.fallbackUrl);
         }
         
@@ -273,7 +264,9 @@ export class ImageService {
     const finalOptions = { ...options, priority: 'low' as const };
     
     this.loadImage(imageUrl, finalOptions).subscribe({
-      next: () => this.logService.log(LevelLogEnum.INFO, 'ImageService', 'Image preloaded successfully', { url: imageUrl }),
+              next: () => {
+          // Image preloaded successfully - no need to log every preload
+        },
       error: (error) => this.logService.log(LevelLogEnum.ERROR, 'ImageService', 'Image preload failed', { url: imageUrl, error })
     });
   }
@@ -311,7 +304,7 @@ export class ImageService {
    */
   clearCache(): void {
     this.imageCache.clear();
-    this.logService.log(LevelLogEnum.INFO, 'ImageService', 'Image cache cleared');
+    // Image cache cleared - no need to log every cache clear
   }
 
   /**

@@ -22,7 +22,7 @@ export class IOSViewportService implements OnDestroy {
     this.setupOrientationChangeHandler();
     this.setupNotificationPanelFix();
     
-    this.logService.log(LevelLogEnum.INFO, 'IOSViewportService', 'iOS viewport fixes initialized');
+    // iOS viewport fixes initialized - no need to log every initialization
   }
 
   private setupViewportHeightFix(): void {
@@ -42,7 +42,7 @@ export class IOSViewportService implements OnDestroy {
       )
       .subscribe(() => {
         setVH();
-        this.logService.log(LevelLogEnum.DEBUG, 'IOSViewportService', 'Viewport height updated', { vh: window.innerHeight });
+        // Viewport height updated - no need to log every viewport update
       });
   }
 
@@ -61,10 +61,7 @@ export class IOSViewportService implements OnDestroy {
           // Force recalculation of modal heights
           this.updateModalHeights();
           
-          this.logService.log(LevelLogEnum.INFO, 'IOSViewportService', 'Orientation changed, viewport updated', { 
-            orientation: window.orientation,
-            vh: window.innerHeight 
-          });
+          // Orientation changed, viewport updated - no need to log every orientation change
         }, 100);
       });
   }
@@ -166,7 +163,7 @@ export class IOSViewportService implements OnDestroy {
     document.documentElement.style.setProperty('--vh', `${vh}px`);
     this.updateModalHeights();
     
-    this.logService.log(LevelLogEnum.INFO, 'IOSViewportService', 'Forced viewport update', { vh: window.innerHeight });
+    // Forced viewport update - no need to log every forced update
   }
 
   ngOnDestroy(): void {

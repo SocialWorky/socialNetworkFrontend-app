@@ -139,12 +139,7 @@ export class OptimizedVideoComponent implements OnInit, OnDestroy {
         this.retryCount = 0;
         this.cdr.markForCheck();
 
-        this.logService.log(LevelLogEnum.INFO, 'OptimizedVideoComponent', 'Video loaded successfully', {
-          originalUrl: this.src,
-          optimizedUrl,
-          quality: finalOptions.quality,
-          connectionQuality: this.connectionQualityService.getConnectionInfo().quality
-        });
+        // Video loaded successfully - no need to log every successful load
       },
       error: (error) => {
         this.logService.log(LevelLogEnum.ERROR, 'OptimizedVideoComponent', 'Failed to load video', {

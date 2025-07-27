@@ -35,16 +35,7 @@ export class TimeoutInterceptor implements HttpInterceptor {
             
             // Only retry on specific errors
             if (this.shouldRetry(error)) {
-              this.logService.log(
-                LevelLogEnum.WARN,
-                'TimeoutInterceptor',
-                'Retrying request',
-                {
-                  url: request.url,
-                  attempt: index + 1,
-                  error: error.message
-                }
-              );
+              // Retrying request - no need to log every retry attempt
               return timer(this.RETRY_DELAY * (index + 1));
             }
             

@@ -73,10 +73,7 @@ export class CacheOptimizationService implements OnDestroy {
     
     if (isMobile) {
       this.config = { ...this.MOBILE_CONFIG };
-      this.logService.log(LevelLogEnum.INFO, 'CacheOptimizationService', 'Mobile device detected, using mobile configuration', {
-        isIOS,
-        config: this.config
-      });
+      // Mobile device detected, using mobile configuration - no need to log device detection
     }
   }
 
@@ -108,14 +105,12 @@ export class CacheOptimizationService implements OnDestroy {
 
     const connectionInfo = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
     if (connectionInfo && (connectionInfo.effectiveType === 'slow-2g' || connectionInfo.effectiveType === '2g')) {
-      this.logService.log(LevelLogEnum.INFO, 'CacheOptimizationService', 'Skipping preload due to slow connection', { 
-        effectiveType: connectionInfo.effectiveType 
-      });
+      // Skipping preload due to slow connection - no need to log every skip
       return;
     }
 
     this.isPreloading = true;
-    this.logService.log(LevelLogEnum.INFO, 'CacheOptimizationService', 'Starting auto preload');
+          // Starting auto preload - no need to log every preload cycle
 
     try {
       const publications = await this.publicationDatabase.getAllPublications();
@@ -171,7 +166,7 @@ export class CacheOptimizationService implements OnDestroy {
           next: () => {
             this.preloadQueue.delete(url);
             this.updatePreloadStats(true);
-            this.logService.log(LevelLogEnum.DEBUG, 'CacheOptimizationService', 'Image preloaded', { url });
+            // Image preloaded - no need to log every preload
           },
           error: (error) => {
             this.preloadQueue.delete(url);
@@ -215,7 +210,7 @@ export class CacheOptimizationService implements OnDestroy {
    */
   updateConfig(newConfig: Partial<CacheOptimizationConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    this.logService.log(LevelLogEnum.INFO, 'CacheOptimizationService', 'Configuration updated', { config: this.config });
+    // Configuration updated - no need to log every config update
   }
 
   /**
@@ -230,7 +225,7 @@ export class CacheOptimizationService implements OnDestroy {
    */
   clearPreloadQueue(): void {
     this.preloadQueue.clear();
-    this.logService.log(LevelLogEnum.INFO, 'CacheOptimizationService', 'Preload queue cleared');
+    // Preload queue cleared - no need to log every queue clear
   }
 
   /**

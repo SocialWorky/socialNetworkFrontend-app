@@ -23,7 +23,7 @@ export class GoogleImageService {
    */
   getGoogleImage(imageUrl: string, size: number = 96): Observable<string> {
     if (!this.isValidGoogleImageUrl(imageUrl)) {
-      this.logService.log(LevelLogEnum.WARN, 'GoogleImageService', 'Invalid Google image URL', { url: imageUrl });
+      // Invalid Google image URL - no need to log every invalid URL
       return throwError(() => new Error('Invalid Google image URL'));
     }
 

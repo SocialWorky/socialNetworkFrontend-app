@@ -297,10 +297,7 @@ export class PublicationService {
               // Emitir las publicaciones actualizadas
               this.publications.set(syncResult.updatedPublications);
               
-              this.logService.log(LevelLogEnum.INFO, 'PublicationService', 'Publicaciones sincronizadas', {
-                nuevas: syncResult.newPublications.length,
-                actualizadas: syncResult.updatedCount - syncResult.newPublications.length
-              });
+              // Publicaciones sincronizadas - no need to log every sync
             }
           });
 
