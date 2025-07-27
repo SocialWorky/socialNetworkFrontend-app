@@ -37,15 +37,35 @@ export class PwaUpdateService {
   private initializeUpdateDetection(): void {
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates.subscribe(event => {
+        this._logService.log(
+          LevelLogEnum.INFO,
+          'PwaUpdateService',
+          'Version update event received',
+          { eventType: event.type }
+        );
+        
         if (event.type === 'VERSION_READY') {
           this.handleVersionReady(event);
         }
       });
 
-      // No automatic periodic checks - user must manually check or wait for service worker detection
-      // this.startPeriodicChecks();
+      // Check for updates immediately on initialization
+      setTimeout(() => {
+        this.checkForUpdates().catch(() => {
+          // Silent error on initial check
+        });
+      }, 2000);
+
+      // Start periodic checks in production
+      if (environment.PRODUCTION) {
+        this.startPeriodicChecks();
+      }
     } else {
-      // Log removed to avoid spam - service workers status is checked frequently
+      this._logService.log(
+        LevelLogEnum.WARN,
+        'PwaUpdateService',
+        'Service workers are not enabled'
+      );
     }
   }
 
@@ -95,23 +115,48 @@ export class PwaUpdateService {
 
     // Check if service workers are enabled
     if (!this.swUpdate.isEnabled) {
-      // Log removed to avoid spam - service workers status is checked frequently
+      this._logService.log(
+        LevelLogEnum.WARN,
+        'PwaUpdateService',
+        'Cannot check for updates - service workers disabled'
+      );
       return Promise.resolve(false);
     }
 
     this.isChecking = true;
+    
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'PwaUpdateService',
+      'Checking for updates...'
+    );
 
     return this.swUpdate.checkForUpdate()
       .then(updateAvailable => {
         this.isChecking = false;
+        
+        this._logService.log(
+          LevelLogEnum.INFO,
+          'PwaUpdateService',
+          'Update check completed',
+          { updateAvailable }
+        );
+        
         return updateAvailable;
       })
       .catch(error => {
+        this.isChecking = false;
+        
         // Solo mostrar error si no es por service workers deshabilitados
         if (!error.message?.includes('Service workers are disabled')) {
-          console.error('Error al verificar actualizaciones:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'PwaUpdateService',
+            'Error checking for updates',
+            { error: error.message }
+          );
         }
-        this.isChecking = false;
+        
         return false;
       });
   }

@@ -654,10 +654,18 @@ img, video {
   opacity: 0.9;
   
   @media (max-width: 768px) {
-    bottom: 80px;
-    right: 15px;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    right: calc(15px + env(safe-area-inset-right));
     width: 45px;
     height: 45px;
+  }
+  
+  /* iOS specific adjustments */
+  @supports (-webkit-touch-callout: none) {
+    @media (max-width: 768px) {
+      bottom: calc(100px + env(safe-area-inset-bottom));
+      right: calc(15px + env(safe-area-inset-right));
+    }
   }
   
   &:hover {

@@ -6,8 +6,11 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "build:prod": "ng build --configuration=production",
+    "build": "npm run pwa:setup && ng build",
+    "build:prod": "npm run pwa:setup && ng build --configuration=production",
+    "build:docker": "ng build --configuration=production",
+    "build:docker:setup": "npm run pwa:copy-utils && ng build --configuration=production",
+    "build:docker:safe": "node scripts/docker-build.js",
     "build:prod:analyze": "ng build --configuration=production --stats-json && npx webpack-bundle-analyzer dist/socialNetworkFrontend-app/stats.json",
     "build:prod:minimal": "NODE_ENV=production ng build --configuration=production --optimization=true --aot=true --build-optimizer=true",
     "build:dev": "ng build --configuration=development",
@@ -34,7 +37,12 @@
     "mobile:optimize": "node scripts/optimize-mobile-cache.js",
     "mobile:cleanup": "node scripts/cleanup-mobile-cache.js",
     "mobile:build": "npm run mobile:optimize && npm run build",
-    "mobile:dev": "npm run mobile:optimize && npm start"
+    "mobile:dev": "npm run mobile:optimize && npm start",
+    "pwa:clear-cache": "node scripts/clear-pwa-cache.js",
+    "pwa:status": "node scripts/clear-pwa-cache.js --status",
+    "pwa:force-update": "node scripts/clear-pwa-cache.js --force",
+    "pwa:copy-utils": "node scripts/copy-pwa-utils.js",
+    "pwa:setup": "npm run pwa:copy-utils"
   },
   "private": true,
   "dependencies": {
