@@ -1,9 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, from, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap, timeout } from 'rxjs/operators';
+import { catchError, map, switchMap, tap, timeout, retryWhen, delay } from 'rxjs/operators';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { ImageService, ImageLoadOptions } from './image.service';
 import { HttpClient } from '@angular/common/http';
+import { ConnectionQualityService } from './connection-quality.service';
+import { DeviceDetectionService } from './device-detection.service';
+import { AuthService } from '../../auth/services/auth.service';
+import { EnhancedLoggingService } from './enhanced-logging.service';
 
 // iOS-specific optimizations
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -56,7 +60,6 @@ export interface CachedImage {
   timestamp: number;
   lastAccessed: number;
   accessCount: number;
-  etag?: string;
   expiresAt: number;
 }
 
@@ -117,32 +120,38 @@ export class MobileImageCacheService {
   constructor(
     private imageService: ImageService,
     private logService: LogService,
-    private http: HttpClient
+    private http: HttpClient,
+    private connectionQualityService: ConnectionQualityService,
+    private deviceDetectionService: DeviceDetectionService,
+    private authService: AuthService,
+    private enhancedLoggingService: EnhancedLoggingService
   ) {
     this.initializeService();
   }
 
-  private async initializeService(): Promise<void> {
+  private initializeService(): void {
     this.isMobileDevice = this.detectMobileDevice();
     
-    // For Safari iOS, completely disable IndexedDB to avoid errors
-    if (isIOS) {
-
-      this.db = null; // Ensure no IndexedDB connection
-      this.setupIOSOptimizations();
-    } else {
-      // Initialize IndexedDB only for non-iOS browsers
-      await this.initDatabase();
-    }
-    
-    // Setup mobile optimizations
-    this.setupMobileOptimizations();
-    
-    // Monitor cache performance
-    this.startCacheMonitoring();
-    
-    // Load cache metrics
-    await this.updateMetrics();
+    // Initialize IndexedDB
+    this.initializeDatabase().then(() => {
+      this.enhancedLoggingService.logWithEnhancedMetadata(
+        LevelLogEnum.INFO,
+        'MobileImageCacheService',
+        'Service initialized successfully',
+        {
+          isMobile: this.isMobileDevice,
+          isIOS,
+          config: this.getCurrentConfig()
+        }
+      );
+    }).catch(error => {
+      this.enhancedLoggingService.logWithEnhancedMetadata(
+        LevelLogEnum.ERROR,
+        'MobileImageCacheService',
+        'Failed to initialize service',
+        { error: error?.message || error?.toString() }
+      );
+    });
   }
 
   private detectMobileDevice(): boolean {
@@ -152,35 +161,16 @@ export class MobileImageCacheService {
   private getCurrentConfig(): MobileCacheConfig {
     if (isIOS) {
       return iOS_CONFIG;
+    } else if (this.isMobileDevice) {
+      return this.MOBILE_CONFIG;
+    } else {
+      return this.DESKTOP_CONFIG;
     }
-    return this.isMobileDevice ? this.MOBILE_CONFIG : this.DESKTOP_CONFIG;
   }
 
-  private async initDatabase(): Promise<void> {
+  private async initializeDatabase(): Promise<void> {
     return new Promise((resolve, reject) => {
-      // Check if IndexedDB is available
-      if (!('indexedDB' in window)) {
-        this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'IndexedDB not supported, falling back to memory cache only');
-        resolve();
-        return;
-      }
-
-      // iOS Safari private browsing detection
-      if (isIOS) {
-        this.detectPrivateBrowsing().then(isPrivate => {
-          if (isPrivate) {
-            this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS Safari private browsing detected, using memory cache only');
-            resolve();
-            return;
-          }
-          this.openDatabase(resolve, reject);
-        }).catch(() => {
-          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Could not detect private browsing, proceeding with caution');
-          this.openDatabase(resolve, reject);
-        });
-      } else {
-        this.openDatabase(resolve, reject);
-      }
+      this.openDatabase(resolve, reject);
     });
   }
 
@@ -230,161 +220,98 @@ export class MobileImageCacheService {
     };
   }
 
-  private async detectPrivateBrowsing(): Promise<boolean> {
-    return new Promise((resolve) => {
-      try {
-        // Test IndexedDB availability
-        const testRequest = indexedDB.open('test', 1);
-        testRequest.onerror = () => {
-          resolve(true); // Likely private browsing
-        };
-        testRequest.onsuccess = () => {
-          // Clean up test database
-          indexedDB.deleteDatabase('test');
-          resolve(false); // Not private browsing
-        };
-      } catch (error) {
-        resolve(true); // Error suggests private browsing
-      }
-    });
-  }
-
-  private setupMobileOptimizations(): void {
-    if (this.isMobileDevice) {
-      this.enableAggressiveCaching();
-      this.setupConnectionMonitoring();
-      this.setupOfflineModeDetection();
-    }
-  }
-
-  private enableAggressiveCaching(): void {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(registration => {
+  /**
+   * Get enhanced device and user information for logging
+   */
+  private getEnhancedLogMetadata(imageUrl: string, imageType: string, options: ImageLoadOptions = {}): Record<string, any> {
+    const connectionInfo = this.connectionQualityService.getConnectionInfo();
+    const userInfo = this.authService.getDecodedToken();
+    const deviceInfo = this.getDeviceInfo();
     
-      });
-    }
+    return {
+      url: imageUrl,
+      imageType,
+      isIOS,
+      isMobile: this.isMobileDevice,
+      connectionQuality: connectionInfo.quality,
+      connectionType: connectionInfo.effectiveType,
+      downlink: connectionInfo.downlink,
+      rtt: connectionInfo.rtt,
+      saveData: connectionInfo.saveData,
+      userId: userInfo?.id || 'anonymous',
+      userEmail: userInfo?.email || 'anonymous',
+      userRole: userInfo?.role || 'user',
+      deviceInfo,
+      timeout: options.timeout,
+      priority: options.priority,
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      language: navigator.language,
+      onLine: navigator.onLine,
+      cookieEnabled: navigator.cookieEnabled,
+      hardwareConcurrency: navigator.hardwareConcurrency,
+      deviceMemory: (navigator as any).deviceMemory,
+      maxTouchPoints: navigator.maxTouchPoints
+    };
   }
 
-  private setupConnectionMonitoring(): void {
-    if ('connection' in navigator) {
-      const connection = (navigator as any).connection;
-      
-      connection.addEventListener('change', () => {
-        this.adjustCacheStrategy(connection.effectiveType);
-      });
-      
-      this.adjustCacheStrategy(connection.effectiveType);
-    }
-  }
-
-  private adjustCacheStrategy(connectionType: string): void {
-    const config = this.getCurrentConfig();
+  /**
+   * Get detailed device information
+   */
+  private getDeviceInfo(): Record<string, any> {
+    const isTablet = this.deviceDetectionService.isTablet();
+    const isNative = this.deviceDetectionService.isNative();
+    const isIphone = this.deviceDetectionService.isIphone();
     
-    switch (connectionType) {
-      case 'slow-2g':
-      case '2g':
-        config.preloadThreshold = 1;
-        config.compressionEnabled = true;
-        break;
-      case '3g':
-        config.preloadThreshold = 2;
-        config.compressionEnabled = true;
-        break;
-      case '4g':
-        config.preloadThreshold = 3;
-        config.compressionEnabled = false;
-        break;
+    return {
+      isTablet,
+      isNative,
+      isIphone,
+      width: this.deviceDetectionService.width(),
+      height: this.deviceDetectionService.height(),
+      screenWidth: window.screen.width,
+      screenHeight: window.screen.height,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+      pixelRatio: window.devicePixelRatio,
+      colorDepth: window.screen.colorDepth,
+      orientation: window.screen.orientation?.type || 'unknown'
+    };
+  }
+
+  /**
+   * Get optimized timeout based on connection quality and device type
+   */
+  private getOptimizedTimeout(options: ImageLoadOptions = {}): number {
+    const connectionInfo = this.connectionQualityService.getConnectionInfo();
+    const baseTimeout = options.timeout || 30000;
+    
+    // Adjust timeout based on connection quality
+    switch (connectionInfo.quality) {
+      case 'slow':
+        return Math.max(baseTimeout * 2, 60000); // At least 60 seconds for slow connections
+      case 'medium':
+        return Math.max(baseTimeout * 1.5, 45000); // At least 45 seconds for medium connections
+      case 'fast':
       default:
-        config.preloadThreshold = 5;
-        config.compressionEnabled = false;
+        return baseTimeout;
     }
   }
 
-  private setupOfflineModeDetection(): void {
-    window.addEventListener('online', () => {
-      this.MOBILE_CONFIG.offlineMode = false;
-      // Online mode enabled - no need to log every online/offline change
-    });
-
-    window.addEventListener('offline', () => {
-      this.MOBILE_CONFIG.offlineMode = true;
-      // Offline mode enabled - no need to log every online/offline change
-    });
-  }
-
-  private setupIOSOptimizations(): void {
-    // iOS-specific memory management
-    this.setupIOSMemoryManagement();
+  /**
+   * Get retry configuration based on connection quality
+   */
+  private getRetryConfig(): { maxRetries: number; retryDelay: number } {
+    const connectionInfo = this.connectionQualityService.getConnectionInfo();
     
-    // iOS-specific IndexedDB optimizations
-    this.setupIOSIndexedDBOptimizations();
-    
-    // iOS-specific cache cleanup
-    this.setupIOSCacheCleanup();
-    
-          // iOS optimizations enabled - no need to log every optimization setup
-  }
-
-  private setupIOSMemoryManagement(): void {
-    // iOS is more aggressive with memory management
-    // Reduce memory cache size for iOS
-    const maxMemoryCacheSize = 20; // Limit memory cache to 20 items on iOS
-    
-    // Monitor memory usage and cleanup when needed
-    setInterval(() => {
-      if (this.memoryCache.size > maxMemoryCacheSize) {
-        const entries = Array.from(this.memoryCache.entries());
-        // Remove oldest entries
-        entries.sort((a, b) => a[1].lastAccessed - b[1].lastAccessed);
-        const toRemove = entries.slice(0, Math.floor(maxMemoryCacheSize / 2));
-        toRemove.forEach(([key]) => this.memoryCache.delete(key));
-        
-        // iOS memory cache cleaned - no need to log every cleanup operation
-      }
-    }, 30000); // Check every 30 seconds
-  }
-
-  private setupIOSIndexedDBOptimizations(): void {
-    // iOS Safari has issues with large IndexedDB transactions
-    // Use smaller transaction sizes and handle iOS-specific quirks
-    if (this.db) {
-      // iOS Safari has a limit on IndexedDB transaction size
-      // We'll use smaller chunks for operations
-      // iOS IndexedDB optimizations applied - no need to log every optimization setup
-    }
-    
-    // Handle iOS Safari IndexedDB quirks
-    if (isIOS && 'indexedDB' in window) {
-      // iOS Safari sometimes has issues with IndexedDB in private browsing
-      try {
-        const testRequest = indexedDB.open('test', 1);
-        testRequest.onerror = () => {
-          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'IndexedDB not available in iOS private browsing mode');
-        };
-        testRequest.onsuccess = () => {
-          indexedDB.deleteDatabase('test');
-        };
-      } catch (error) {
-        this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'IndexedDB test failed on iOS', { error });
-      }
-    }
-  }
-
-  private setupIOSCacheCleanup(): void {
-    // More frequent cache cleanup for iOS
-    setInterval(() => {
-      this.cleanupOldCache();
-    }, 5 * 60 * 1000); // Every 5 minutes instead of default
-    
-    // iOS-specific memory pressure handling
-    if (isIOS && 'memory' in performance) {
-      setInterval(() => {
-        const memory = (performance as any).memory;
-        if (memory && memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.8) {
-          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS memory pressure detected, cleaning memory cache');
-          this.memoryCache.clear();
-        }
-      }, 10000); // Check every 10 seconds
+    switch (connectionInfo.quality) {
+      case 'slow':
+        return { maxRetries: 3, retryDelay: 5000 }; // More retries, longer delays for slow connections
+      case 'medium':
+        return { maxRetries: 2, retryDelay: 3000 };
+      case 'fast':
+      default:
+        return { maxRetries: 1, retryDelay: 1000 };
     }
   }
 
@@ -394,9 +321,11 @@ export class MobileImageCacheService {
   loadImage(imageUrl: string, imageType: 'profile' | 'publication' | 'media' = 'media', options: ImageLoadOptions = {}): Observable<string> {
     const startTime = performance.now();
     const config = this.getCurrentConfig();
+    const optimizedTimeout = this.getOptimizedTimeout(options);
+    const retryConfig = this.getRetryConfig();
     
     // iOS-specific timeout adjustment
-    const timeoutValue = isIOS ? (options.timeout || 15000) : (options.timeout || 30000);
+    const timeoutValue = isIOS ? Math.min(optimizedTimeout, 15000) : optimizedTimeout;
     
     // Handle Google Images with special service
     if (this.isGoogleImage(imageUrl)) {
@@ -439,7 +368,15 @@ export class MobileImageCacheService {
         catchError(error => {
           this.cacheMisses++;
           this.updateMetrics();
-          this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Error loading image on iOS', { url: imageUrl, error, isIOS });
+          this.enhancedLoggingService.logImageError(
+            'MobileImageCacheService',
+            'Error loading image on iOS',
+            imageUrl,
+            imageType,
+            error,
+            performance.now() - startTime,
+            options
+          );
           return throwError(() => error);
         })
       );
@@ -460,8 +397,18 @@ export class MobileImageCacheService {
           return of(URL.createObjectURL(cachedImage.blob));
         }
 
-        // Load from network and cache
+        // Load from network and cache with retry logic
         return this.loadFromNetwork(imageUrl, imageType, { ...options, timeout: timeoutValue }).pipe(
+          retryWhen(errors => 
+            errors.pipe(
+              switchMap((error, index) => {
+                if (index >= retryConfig.maxRetries) {
+                  return throwError(() => error);
+                }
+                return of(error).pipe(delay(retryConfig.retryDelay));
+              })
+            )
+          ),
           tap(cachedImage => {
             if (cachedImage) {
               // Store in memory cache
@@ -478,7 +425,15 @@ export class MobileImageCacheService {
       catchError(error => {
         this.cacheMisses++;
         this.updateMetrics();
-        this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Error loading image', { url: imageUrl, error, isIOS });
+        this.enhancedLoggingService.logImageError(
+          'MobileImageCacheService',
+          'Failed to load image from network',
+          imageUrl,
+          imageType,
+          error,
+          performance.now() - startTime,
+          options
+        );
         return throwError(() => error);
       })
     );
@@ -591,12 +546,15 @@ export class MobileImageCacheService {
         if (this.isGoogleImage(imageUrl)) {
           // No need to log every Google Image CORS error - this is expected behavior
         } else {
-          this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Failed to load image from network', { 
-            url: imageUrl, 
-            error: error.message, 
-            loadTime: Math.round(loadTime),
-            isIOS
-          });
+                  this.enhancedLoggingService.logImageError(
+          'MobileImageCacheService',
+          'Failed to load image from network',
+          imageUrl,
+          imageType,
+          error,
+          loadTime,
+          options
+        );
         }
         return throwError(() => error);
       })
@@ -642,7 +600,6 @@ export class MobileImageCacheService {
           timestamp: cachedImage.timestamp,
           lastAccessed: cachedImage.lastAccessed,
           accessCount: cachedImage.accessCount,
-          etag: cachedImage.etag,
           expiresAt: cachedImage.expiresAt,
           blob: cachedImage.blob
         };
@@ -1031,7 +988,7 @@ export class MobileImageCacheService {
     // Check memory usage
     if ('memory' in performance) {
       const memory = (performance as any).memory;
-      if (memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.9) {
+      if (memory && memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.9) {
         issues.push('High memory usage detected');
       }
     }
@@ -1071,7 +1028,7 @@ export class MobileImageCacheService {
     
     // Reinitialize database if needed
     if (!this.db) {
-      await this.initDatabase();
+              await this.initializeDatabase();
     }
     
     // iOS cache recovery completed - no need to log every recovery

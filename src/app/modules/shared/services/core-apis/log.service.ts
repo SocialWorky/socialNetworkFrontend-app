@@ -31,30 +31,40 @@ export class LogService {
   }
 
   log(level: LevelLogEnum, context: string, message: string, metadata?: Record<string, any>) {
-    // Truncar mensaje si es muy largo
-    const truncatedMessage = message.length > this.MAX_LOG_SIZE 
-      ? message.substring(0, this.MAX_LOG_SIZE) + '...' 
-      : message;
+    try {
+      // Truncar mensaje si es muy largo
+      const truncatedMessage = message.length > this.MAX_LOG_SIZE 
+        ? message.substring(0, this.MAX_LOG_SIZE) + '...' 
+        : message;
 
-    // Limpiar metadata si es muy grande
-    const cleanMetadata = this.cleanMetadata(metadata);
+      // Limpiar metadata si es muy grande
+      const cleanMetadata = this.cleanMetadata(metadata);
 
-    const logEntry = {
-      level,
-      context: context.substring(0, 100), // Limitar contexto a 100 caracteres
-      message: `FRONT: ${truncatedMessage}`,
-      metadata: cleanMetadata,
-      timestamp: new Date().toISOString(),
-    };
+      const logEntry = {
+        level,
+        context: context.substring(0, 100), // Limitar contexto a 100 caracteres
+        message: `FRONT: ${truncatedMessage}`,
+        metadata: cleanMetadata,
+        timestamp: new Date().toISOString(),
+      };
 
-    this._logs.push(logEntry);
+      this._logs.push(logEntry);
 
-    // Enviar logs inmediatamente si alcanzamos el límite
-    if (this._logs.length >= this.MAX_BATCH_SIZE) {
-      this.sendLogs();
-    } else if (!this._timer) {
-      // Enviar logs después del timeout
-      this._timer = setTimeout(() => this.sendLogs(), this.BATCH_TIMEOUT);
+      // Enviar logs inmediatamente si alcanzamos el límite
+      if (this._logs.length >= this.MAX_BATCH_SIZE) {
+        this.sendLogs();
+      } else if (!this._timer) {
+        // Enviar logs después del timeout
+        this._timer = setTimeout(() => this.sendLogs(), this.BATCH_TIMEOUT);
+      }
+    } catch (error) {
+      // Si hay error al procesar el log, lo registramos en consola para debugging
+      console.error('Error processing log entry:', {
+        level,
+        context,
+        message: message.substring(0, 200),
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   }
 
@@ -65,18 +75,24 @@ export class LogService {
     const maxValueLength = 500; // Máximo 500 caracteres por valor
 
     for (const [key, value] of Object.entries(metadata)) {
-      if (typeof value === 'string' && value.length > maxValueLength) {
-        clean[key] = value.substring(0, maxValueLength) + '...';
-      } else if (typeof value === 'object' && value !== null) {
-        // Para objetos, convertir a string y truncar
-        const stringValue = JSON.stringify(value);
-        if (stringValue.length > maxValueLength) {
-          clean[key] = JSON.parse(stringValue.substring(0, maxValueLength) + '...');
+      try {
+        if (typeof value === 'string' && value.length > maxValueLength) {
+          clean[key] = value.substring(0, maxValueLength) + '...';
+        } else if (typeof value === 'object' && value !== null) {
+          // Para objetos, convertir a string y truncar de forma segura
+          const stringValue = JSON.stringify(value);
+          if (stringValue.length > maxValueLength) {
+            // En lugar de intentar parsear un JSON truncado, guardamos el string truncado
+            clean[key] = stringValue.substring(0, maxValueLength) + '...';
+          } else {
+            clean[key] = value;
+          }
         } else {
           clean[key] = value;
         }
-      } else {
-        clean[key] = value;
+      } catch (error) {
+        // Si hay error al procesar un valor, lo reemplazamos con un mensaje de error
+        clean[key] = `[Error processing value: ${error instanceof Error ? error.message : 'Unknown error'}]`;
       }
     }
 

@@ -15,6 +15,7 @@ import { ImageSkeletonComponent } from './components/skeleton/image-skeleton.com
 import { TextSkeletonComponent } from './components/skeleton/text-skeleton.component';
 import { AvatarSkeletonComponent } from './components/skeleton/avatar-skeleton.component';
 import { ButtonSkeletonComponent } from './components/skeleton/button-skeleton.component';
+import { NetworkStatusComponent } from './components/network-status/network-status.component';
 
 @NgModule({
   imports: [
@@ -29,7 +30,8 @@ import { ButtonSkeletonComponent } from './components/skeleton/button-skeleton.c
     ImageSkeletonComponent,
     TextSkeletonComponent,
     AvatarSkeletonComponent,
-    ButtonSkeletonComponent
+    ButtonSkeletonComponent,
+    NetworkStatusComponent
   ],
   declarations: [
     AccessibleLoadingComponent
@@ -47,7 +49,8 @@ import { ButtonSkeletonComponent } from './components/skeleton/button-skeleton.c
     ImageSkeletonComponent,
     TextSkeletonComponent,
     AvatarSkeletonComponent,
-    ButtonSkeletonComponent
+    ButtonSkeletonComponent,
+    NetworkStatusComponent
   ],
   providers: [
     PullToRefreshService,
