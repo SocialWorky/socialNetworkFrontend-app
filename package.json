@@ -43,7 +43,9 @@
     "pwa:force-update": "node scripts/clear-pwa-cache.js --force",
     "pwa:copy-utils": "node scripts/copy-pwa-utils.js",
     "pwa:setup": "npm run pwa:copy-utils",
-    "mobile:clean": "node scripts/cleanup-mobile-cache.js"
+    "mobile:clean": "node scripts/cleanup-mobile-cache.js",
+    "ios:clean": "node scripts/clear-ios-cache.js",
+    "cache:clear": "node scripts/clear-ios-cache.js"
   },
   "private": true,
   "dependencies": {
