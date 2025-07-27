@@ -202,7 +202,7 @@ export class PwaUpdateService {
   }
 
   /**
-   * Aplica la actualización disponible
+   * Applies the available update
    */
   public applyUpdate(): Promise<void> {
     return this.swUpdate.activateUpdate()
@@ -210,20 +210,37 @@ export class PwaUpdateService {
         this._logService.log(
           LevelLogEnum.INFO,
           'PwaUpdateService',
-          'Update applied successfully, reloading page'
+          'Update applied successfully, clearing cache and reloading page'
         );
+        
+        if (typeof window !== 'undefined' && (window as any).clearPWACache) {
+          (window as any).clearPWACache().catch((error: any) => {
+            this._logService.log(
+              LevelLogEnum.WARN,
+              'PwaUpdateService',
+              'Cache clearing failed, continuing with reload',
+              { error: error.message }
+            );
+          });
+        }
+        
         setTimeout(() => {
           window.location.reload();
         }, 1000);
       })
       .catch(error => {
-        console.error('Error al aplicar la actualización:', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'PwaUpdateService',
+          'Error applying update',
+          { error: error.message }
+        );
         throw error;
       });
   }
 
   /**
-   * Configura si la aplicación debe actualizarse automáticamente
+   * Sets whether the application should update automatically
    */
   public setAutoUpdate(enabled: boolean): void {
     localStorage.setItem('pwa-auto-update', enabled.toString());
@@ -236,14 +253,14 @@ export class PwaUpdateService {
   }
 
   /**
-   * Obtiene el estado de actualización automática
+   * Gets the automatic update status
    */
   public getAutoUpdateStatus(): boolean {
     return this.shouldAutoUpdate();
   }
 
   /**
-   * Limpia los recursos cuando el servicio se destruye
+   * Cleans up resources when the service is destroyed
    */
   public destroy(): void {
     if (this.checkInterval) {
@@ -253,15 +270,15 @@ export class PwaUpdateService {
   }
 
   /**
-   * Fuerza una verificación inmediata de actualizaciones
+   * Forces an immediate update check
    */
   public forceCheck(): Promise<boolean> {
     return this.checkForUpdates();
   }
 
   /**
-   * Método de prueba para simular una actualización disponible
-   * Solo usar en desarrollo
+   * Test method to simulate an available update
+   * Only use in development
    */
   public simulateUpdate(): void {
     if (!environment.PRODUCTION) {
@@ -289,7 +306,7 @@ export class PwaUpdateService {
   }
 
   /**
-   * Fuerza una verificación de actualizaciones y simula si es necesario
+   * Forces an update check and simulates if necessary
    */
   public forceCheckAndSimulate(): Promise<boolean> {
     this._logService.log(
