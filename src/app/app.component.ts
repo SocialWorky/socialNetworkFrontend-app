@@ -23,6 +23,7 @@ import { environment } from '@env/environment';
 import { DevCacheService } from '@shared/services/dev-cache.service';
 import { CacheService } from '@shared/services/cache.service';
 import { CacheOptimizationService } from '@shared/services/cache-optimization.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
     selector: 'worky-root',
@@ -60,7 +61,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private _widgetConfigService: WidgetConfigService,
     private devCacheService: DevCacheService,
     private cacheService: CacheService,
-    private _cacheOptimizationService: CacheOptimizationService
+    private _cacheOptimizationService: CacheOptimizationService,
+    private _logService: LogService
   ) {
     this._notificationUsersService.setupInactivityListeners();
     if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();
@@ -247,11 +249,16 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   // Test method for PWA update simulation (development only)
-  /*
   testPwaUpdate(): void {
-    this._pwaUpdateService.simulateUpdate();
+    if (!environment.PRODUCTION) {
+      this._logService.log(
+        LevelLogEnum.INFO,
+        'AppComponent',
+        'Testing PWA update simulation'
+      );
+      this._pwaUpdateService.forceCheckAndSimulate();
+    }
   }
-  */
 
   private setupDevMode(): void {
     // Generar datos mock para desarrollo

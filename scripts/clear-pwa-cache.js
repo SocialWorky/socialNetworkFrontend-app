@@ -187,17 +187,19 @@ async function showPWAStatus() {
   console.log('- Notification API:', 'Notification' in window);
 }
 
-// Exportar funciones para uso global
-window.PWACacheUtils = {
-  clearPWACache,
-  clearServiceWorkerCache,
-  unregisterServiceWorkers,
-  clearPWALocalStorage,
-  clearPWASessionStorage,
-  checkServiceWorkerStatus,
-  checkCacheStatus,
-  showPWAStatus
-};
+// Exportar funciones para uso global (solo en navegador)
+if (typeof window !== 'undefined') {
+  window.PWACacheUtils = {
+    clearPWACache,
+    clearServiceWorkerCache,
+    unregisterServiceWorkers,
+    clearPWALocalStorage,
+    clearPWASessionStorage,
+    checkServiceWorkerStatus,
+    checkCacheStatus,
+    showPWAStatus
+  };
+}
 
 // Auto-ejecutar si se llama directamente
 if (typeof module !== 'undefined' && module.exports) {

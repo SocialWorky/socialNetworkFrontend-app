@@ -35,13 +35,31 @@ export class PwaUpdateService {
   }
 
   private initializeUpdateDetection(): void {
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'PwaUpdateService',
+      'Initializing PWA update detection',
+      { 
+        isEnabled: this.swUpdate.isEnabled,
+        environment: environment.PRODUCTION ? 'production' : 'development'
+      }
+    );
+
     if (this.swUpdate.isEnabled) {
       this.swUpdate.versionUpdates.subscribe(event => {
+        const logData: any = { eventType: event.type };
+        
+        // Only add version info for VERSION_READY events
+        if (event.type === 'VERSION_READY' && 'currentVersion' in event && 'latestVersion' in event) {
+          logData.currentVersion = (event as any).currentVersion?.hash;
+          logData.latestVersion = (event as any).latestVersion?.hash;
+        }
+        
         this._logService.log(
           LevelLogEnum.INFO,
           'PwaUpdateService',
           'Version update event received',
-          { eventType: event.type }
+          logData
         );
         
         if (event.type === 'VERSION_READY') {
@@ -51,15 +69,23 @@ export class PwaUpdateService {
 
       // Check for updates immediately on initialization
       setTimeout(() => {
-        this.checkForUpdates().catch(() => {
-          // Silent error on initial check
+        this._logService.log(
+          LevelLogEnum.INFO,
+          'PwaUpdateService',
+          'Performing initial update check'
+        );
+        this.checkForUpdates().catch((error) => {
+          this._logService.log(
+            LevelLogEnum.WARN,
+            'PwaUpdateService',
+            'Initial update check failed',
+            { error: error.message }
+          );
         });
-      }, 2000);
+      }, 1000);
 
-      // Start periodic checks in production
-      if (environment.PRODUCTION) {
-        this.startPeriodicChecks();
-      }
+      // Start periodic checks in both development and production
+      this.startPeriodicChecks();
     } else {
       this._logService.log(
         LevelLogEnum.WARN,
@@ -72,8 +98,8 @@ export class PwaUpdateService {
   private handleVersionReady(event: any): void {
     const updateInfo: UpdateInfo = {
       available: true,
-      currentVersion: event.currentVersion?.hash,
-      newVersion: event.latestVersion?.hash,
+      currentVersion: event.currentVersion?.hash || 'unknown',
+      newVersion: event.latestVersion?.hash || 'unknown',
       timestamp: new Date()
     };
 
@@ -88,14 +114,28 @@ export class PwaUpdateService {
     );
 
     this.updateAvailable$.next(updateInfo);
-
-    // Remove auto-update logic - always require user interaction
-    // The modal will handle the update process when user clicks the button
   }
 
   private startPeriodicChecks(): void {
-    // Check for updates every 30 minutes
-    this.checkInterval = interval(30 * 60 * 1000).subscribe(() => {
+    // Check for updates every 5 minutes in development, 30 minutes in production
+    const checkIntervalMs = environment.PRODUCTION ? 30 * 60 * 1000 : 5 * 60 * 1000;
+    
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'PwaUpdateService',
+      'Starting periodic update checks',
+      { 
+        intervalMs: checkIntervalMs,
+        intervalMinutes: checkIntervalMs / (60 * 1000)
+      }
+    );
+
+    this.checkInterval = interval(checkIntervalMs).subscribe(() => {
+      this._logService.log(
+        LevelLogEnum.INFO,
+        'PwaUpdateService',
+        'Performing periodic update check'
+      );
       this.checkForUpdates();
     });
   }
@@ -225,6 +265,12 @@ export class PwaUpdateService {
    */
   public simulateUpdate(): void {
     if (!environment.PRODUCTION) {
+      this._logService.log(
+        LevelLogEnum.INFO,
+        'PwaUpdateService',
+        'Simulating update for development testing'
+      );
+
       const mockUpdateInfo: UpdateInfo = {
         available: true,
         currentVersion: 'abc12345',
@@ -233,6 +279,33 @@ export class PwaUpdateService {
       };
       
       this.updateAvailable$.next(mockUpdateInfo);
+    } else {
+      this._logService.log(
+        LevelLogEnum.WARN,
+        'PwaUpdateService',
+        'Simulate update called in production - ignored'
+      );
     }
+  }
+
+  /**
+   * Fuerza una verificación de actualizaciones y simula si es necesario
+   */
+  public forceCheckAndSimulate(): Promise<boolean> {
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'PwaUpdateService',
+      'Force check and simulate update'
+    );
+
+    return this.checkForUpdates().then(updateAvailable => {
+      if (!updateAvailable && !environment.PRODUCTION) {
+        // Simulate update in development if no real update is available
+        setTimeout(() => {
+          this.simulateUpdate();
+        }, 1000);
+      }
+      return updateAvailable;
+    });
   }
 }
