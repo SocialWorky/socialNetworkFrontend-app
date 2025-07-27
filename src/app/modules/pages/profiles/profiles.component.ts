@@ -226,6 +226,15 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   private async loadPublications() {
     if (this.loaderPublications || !this.hasMorePublications) return;
 
+    const currentPublications = this.publicationsProfile();
+    if (currentPublications.length === 0) {
+    } else {
+      const totalExpected = this.page * this.pageSize;
+      if (currentPublications.length >= totalExpected) {
+        return;
+      }
+    }
+
     this.loaderPublications = true;
     try {
       const newPublications = await firstValueFrom(
@@ -748,16 +757,31 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onScroll(event: any) {
-    // Usar el ScrollService para manejar el scroll de forma consistente
     this._scrollService.onScroll(event);
     
-    // Cargar más publicaciones cuando se llegue al final
-    const threshold = 100;
-    const position = event.target.scrollTop + event.target.clientHeight;
-    const height = event.target.scrollHeight;
-
-    if (position >= height - threshold && !this.loaderPublications && this.hasMorePublications) {
-      this.loadPublications();
+    if (!this.loaderPublications && this.hasMorePublications) {
+      const currentPublications = this.publicationsProfile();
+      if (currentPublications.length === 0) return;
+      
+      const container = event.target;
+      const scrollTop = container.scrollTop;
+      const clientHeight = container.clientHeight;
+      const scrollHeight = container.scrollHeight;
+      
+      const publicationHeight = 300;
+      const currentPublicationIndex = Math.floor(scrollTop / publicationHeight);
+      const visiblePublications = Math.ceil(clientHeight / publicationHeight);
+      const remainingPublications = currentPublications.length - currentPublicationIndex - visiblePublications;
+      
+      if (remainingPublications <= 5 && remainingPublications > 0) {
+        setTimeout(() => this.loadPublications(), 0);
+      }
+      
+      const threshold = 200;
+      const position = scrollTop + clientHeight;
+      if (position >= scrollHeight - threshold) {
+        setTimeout(() => this.loadPublications(), 0);
+      }
     }
   }
 

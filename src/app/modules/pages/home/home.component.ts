@@ -40,7 +40,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   pageSize = 10;
 
-  loaderPublications: boolean = false; // Iniciar en false para permitir carga
+  loaderPublications: boolean = false;
 
   paramPublication: boolean = false;
 
@@ -58,7 +58,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   connectionStatusMessage = '';
 
-  navbarVisible = true; // Track navbar visibility
+  navbarVisible = true;
 
   private destroy$ = new Subject<void>();
 
@@ -114,8 +114,6 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.resetPagination();
 
-    // Siempre cargar publicaciones usando el método inteligente
-    // que maneja automáticamente datos locales y sincronización
     await this.loadPublications();
     await this.checkForMorePublications();
 
@@ -177,7 +175,6 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.showConnectionOverlay = !isOnline;
     this.connectionStatusMessage = isOnline ? '' : 'Estás offline - Usando cache local';
     
-    // Si no hay publicaciones cargadas, intentar cargar usando el método inteligente
     if (this.publications().length === 0) {
       this.loadPublications();
     }
@@ -203,15 +200,22 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   public async loadPublications() {
-    
     if (this.loaderPublications || !this.hasMorePublications) {
       return;
+    }
+
+    const currentPublications = this.publications();
+    if (currentPublications.length === 0) {
+    } else {
+      const totalExpected = this.page * this.pageSize;
+      if (currentPublications.length >= totalExpected) {
+        return;
+      }
     }
 
     this.loaderPublications = true;
     
     try {
-      // Usar el nuevo método de sincronización inteligente
       const newPublicationsResponse = await firstValueFrom(
         this._publicationService.getAllPublicationsWithSmartSync(this.page, this.pageSize, TypePublishing.ALL)
       );
@@ -250,7 +254,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       await this.checkForMorePublications();
 
     } catch (error) {
-      this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error cargando publicaciones', { error });
+      this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error loading publications', { error });
       this.loaderPublications = false;
     }
   }
@@ -290,7 +294,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
               },
               error: (error) => {
-                console.error('Error al sincronizar nueva publicación:', error);
+                console.error('Error syncing new publication:', error);
               }
             });
         },
@@ -560,16 +564,31 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onScroll(event: any) {
-    // Usar el ScrollService para manejar el scroll de forma consistente
     this._scrollService.onScroll(event);
     
-    // Cargar más publicaciones cuando se llegue al final
-    const threshold = 100;
-    const position = event.target.scrollTop + event.target.clientHeight;
-    const height = event.target.scrollHeight;
-
-    if (position >= height - threshold && !this.loaderPublications && this.hasMorePublications) {
-      this.loadPublications();
+    if (!this.loaderPublications && this.hasMorePublications) {
+      const currentPublications = this.publications();
+      if (currentPublications.length === 0) return;
+      
+      const container = event.target;
+      const scrollTop = container.scrollTop;
+      const clientHeight = container.clientHeight;
+      const scrollHeight = container.scrollHeight;
+      
+      const publicationHeight = 300;
+      const currentPublicationIndex = Math.floor(scrollTop / publicationHeight);
+      const visiblePublications = Math.ceil(clientHeight / publicationHeight);
+      const remainingPublications = currentPublications.length - currentPublicationIndex - visiblePublications;
+      
+      if (remainingPublications <= 5 && remainingPublications > 0) {
+        setTimeout(() => this.loadPublications(), 0);
+      }
+      
+      const threshold = 200;
+      const position = scrollTop + clientHeight;
+      if (position >= scrollHeight - threshold) {
+        setTimeout(() => this.loadPublications(), 0);
+      }
     }
   }
 
@@ -591,7 +610,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.hasMorePublications = currentCount < totalCount;
       },
       error: (error) => {
-        console.error('Error verificando total de publicaciones:', error);
+        console.error('Error checking total publications:', error);
         this.hasMorePublications = true;
       }
     });
@@ -611,7 +630,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this._cdr.markForCheck();
       }
     } catch (error) {
-      console.error('Error verificando total de publicaciones:', error);
+      console.error('Error checking total publications:', error);
     }
   }
 
@@ -764,3 +783,4 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     return indicator;
   }
 }
+
