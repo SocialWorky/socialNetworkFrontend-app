@@ -21,31 +21,31 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '2.0.9',
+  version: '2.0.10',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
-    ✨ NUEVAS FUNCIONALIDADES:
+    🐛 CORRECCIONES Y MEJORAS (v2.0.10):
+    - Fixed: Alertas de actualización con botones funcionales (Actualizar/Cancelar)
+    - Fixed: Lógica de forceUpdate solo aplica con versiones diferentes
+    - Fixed: Traducciones correctas en alerts (botón "Aceptar" vs keys)
+    - Fixed: Feedback completo en verificación manual de actualizaciones
+    - Improved: Intervalos conservadores (2h periódico, 1h al inicio)
+    - Added: Botón "Verificar actualizaciones" en menú de usuario
+    - Added: Versión sutil en menú (sin ícono, alineada a la derecha)
+    - Removed: Botón "Instalar Aplicación" innecesario
+    - Removed: AppUpdateModalComponent duplicado
+    - Removed: Código PWA obsoleto y console.log temporales
+
+    ✨ FUNCIONALIDADES BASE (v2.0.9):
     - Sistema completo de gestión de versiones con backend
     - Panel de administración con diseño profesional (Tailwind CSS)
     - Soporte para actualizaciones opcionales, forzadas y modo mantenimiento
-    - Verificación automática cada 30 minutos con cache inteligente
+    - Verificación automática con cache inteligente
     - Indicadores de estado de conexión con backend
-    
-    🔧 MEJORAS TÉCNICAS:
-    - Logging estructurado con LogService (eliminados console.log)
-    - Manejo robusto de errores 404 del backend
-    - Traducciones completas (i18n) sin keys hardcodeadas
+    - Logging estructurado con LogService
+    - Traducciones completas (i18n)
     - Funcionalidad offline con configuración local
-    
-    🗑️ ELIMINACIONES:
-    - Sistema PWA anterior completamente removido
-    - Componentes y servicios obsoletos eliminados
-    
-    🐛 CORRECCIONES:
-    - Fix de overflow de contenido y fondos cortados
-    - Compilación sin errores de linting
-    - Estructura de traducciones optimizada
   `.trim(),
   minRequiredVersion: undefined,
   forceUpdate: false,
