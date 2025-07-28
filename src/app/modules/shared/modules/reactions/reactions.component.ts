@@ -41,7 +41,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   token: Token | null = this._authService.getDecodedToken();
 
-  unlockReactions = true;
+  unlockReactions = false; // Start with loading state
 
   private destroy$ = new Subject<void>();
 
@@ -77,10 +77,21 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   addReaction(reaction: CustomReactionList) {
     this.hideReactions();
     this.unlockReactions = false;
+    
+    // Safety timeout to prevent skeleton from getting stuck
+    const safetyTimeout = setTimeout(() => {
+      if (!this.unlockReactions) {
+        this.unlockReactions = true;
+        this._cdr.markForCheck();
+      }
+    }, 10000); // 10 seconds timeout
+    
     if (this.reactionUserInPublication) {
+      clearTimeout(safetyTimeout);
       this.editReaction(this.reactionUserInPublication._id, reaction);
       return;
     }
+    
     this._reactionsService
       .createReaction({
         authorId: this.token?.id!,
@@ -91,26 +102,33 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
       }).pipe(takeUntil(this.destroy$))
       .subscribe({
         next: async () => {
+          try {
+            const publicationsUpdated = await firstValueFrom(
+              this._publicationService.getPublicationId(this.publication?._id!).pipe(takeUntil(this.destroy$))
+            );
 
-          const publicationsUpdated = await firstValueFrom(
-            this._publicationService.getPublicationId(this.publication?._id!).pipe(takeUntil(this.destroy$))
-          );
+            if (publicationsUpdated) {
+              this._publicationService.updatePublications(publicationsUpdated);
+              this.publication = publicationsUpdated[0];
+              this._cdr.markForCheck();
+            }
 
-          if (publicationsUpdated) {
-            this._publicationService.updatePublications(publicationsUpdated);
-            this.publication = publicationsUpdated[0];
+            this.reactionsVisible = false;
+            this._notificationService.sendNotification(this.publication);
+            this._emailNotificationService.reactionsNotification(this.publication!, reaction);
+            this.refreshPublications();
+          } catch (error) {
+            // Handle any errors in the async operations
+          } finally {
+            clearTimeout(safetyTimeout);
+            this.unlockReactions = true;
             this._cdr.markForCheck();
           }
-
-          this.reactionsVisible = false;
-          this.unlockReactions = true;
-          this._notificationService.sendNotification(this.publication);
-          this._emailNotificationService.reactionsNotification(this.publication!, reaction);
-          this.refreshPublications();
         },
         error: (err) => {
-          console.error('Failed to add reaction', err);
+          clearTimeout(safetyTimeout);
           this.unlockReactions = true;
+          this._cdr.markForCheck();
         }
       });
   }
@@ -120,6 +138,14 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   async deleteReaction(idReaction: string) {
     this.hideReactions();
     this.unlockReactions = false;
+
+    // Safety timeout to prevent skeleton from getting stuck
+    const safetyTimeout = setTimeout(() => {
+      if (!this.unlockReactions) {
+        this.unlockReactions = true;
+        this._cdr.markForCheck();
+      }
+    }, 10000); // 10 seconds timeout
 
     try {
       await firstValueFrom(
@@ -147,20 +173,31 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
       }
 
       this.reactionsVisible = false;
-      this.unlockReactions = true;
       await this._notificationService.sendNotification(this.publication);
       this.hideReactions();
       this.refreshPublications();
 
     } catch (err) {
-      console.error('Failed to delete reaction', err);
+      // Handle error silently or with appropriate logging
+    } finally {
+      clearTimeout(safetyTimeout);
       this.unlockReactions = true;
+      this._cdr.markForCheck();
     }
   }
 
   editReaction(id: string, reaction: CustomReactionList) {
     this.hideReactions();
     this.unlockReactions = false;
+    
+    // Safety timeout to prevent skeleton from getting stuck
+    const safetyTimeout = setTimeout(() => {
+      if (!this.unlockReactions) {
+        this.unlockReactions = true;
+        this._cdr.markForCheck();
+      }
+    }, 10000); // 10 seconds timeout
+    
     this._reactionsService.editReaction(id, {
       authorId: this.token?.id!,
       _idCustomReaction: reaction._id,
@@ -169,44 +206,56 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
       _idPublication: this.publication?._id!,
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: async () => {
+        try {
+          const publicationsUpdated = await firstValueFrom(
+            this._publicationService.getPublicationId(this.publication?._id!).pipe(takeUntil(this.destroy$))
+          );
 
-        const publicationsUpdated = await firstValueFrom(
-          this._publicationService.getPublicationId(this.publication?._id!).pipe(takeUntil(this.destroy$))
-        );
+          if (publicationsUpdated) {
+            this._publicationService.updatePublications(publicationsUpdated);
+            this.publication = publicationsUpdated[0];
+            this._cdr.markForCheck();
+          }
 
-        if (publicationsUpdated) {
-          this._publicationService.updatePublications(publicationsUpdated);
-          this.publication = publicationsUpdated[0];
+          this._notificationService.sendNotification(this.publication);
+          this.refreshPublications();
+        } catch (error) {
+          // Handle any errors in the async operations
+        } finally {
+          clearTimeout(safetyTimeout);
+          this.unlockReactions = true;
           this._cdr.markForCheck();
         }
-
-        this._notificationService.sendNotification(this.publication);
-        this.refreshPublications();
-        this.unlockReactions = true;
       },
       error: (err) => {
-        console.error('Failed to edit reaction', err);
+        clearTimeout(safetyTimeout);
         this.unlockReactions = true;
+        this._cdr.markForCheck();
       }
     });
   }
 
   loadReactions() {
-      this._customReactionsService.getCustomReactionsAll().pipe(takeUntil(this.destroy$)).subscribe({
-        next: (reactions: CustomReactionList[]) => {
-          this.reactions = reactions
-            .filter(reaction => reaction.isDeleted === false)
-            .map((reaction) => ({
-              ...reaction,
-              zoomed: false
-            }));
-          this._cdr.markForCheck();
-        },
-        error: (err) => {
-          console.error('Failed to load reactions', err);
-        }
-      });
-    }
+    this.unlockReactions = false; // Show skeleton while loading
+    this._cdr.markForCheck();
+    
+    this._customReactionsService.getCustomReactionsAll().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (reactions: CustomReactionList[]) => {
+        this.reactions = reactions
+          .filter(reaction => reaction.isDeleted === false)
+          .map((reaction) => ({
+            ...reaction,
+            zoomed: false
+          }));
+        this.unlockReactions = true; // Hide skeleton after loading
+        this._cdr.markForCheck();
+      },
+      error: (err) => {
+        this.unlockReactions = true; // Hide skeleton on error
+        this._cdr.markForCheck();
+      }
+    });
+  }
 
   showReactions() {
     this.reactionsVisible = true;
