@@ -173,8 +173,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-
-
   toggleNotificationsPanel() {
     this._notificationPanelService.togglePanel();
   }

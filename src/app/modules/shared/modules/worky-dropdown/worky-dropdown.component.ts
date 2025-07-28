@@ -164,16 +164,11 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   async showMobileMenu() {
     const buttons = this.dataLink.map((data) => ({
       text: data.title,
-      icon: this.mapIconToIonic(data.icon || 'help'),
+      ...(data.icon ? { icon: this.mapIconToIonic(data.icon || 'help') } : {}),
       ...(data.img ? { icon: data.img } : {}),
+      cssClass: data.isVersionInfo ? 'version-info' : '',
       handler: () => this.handleMenuItemClick(data),
     }));
-
-    buttons.push({
-      text: 'Cancelar',
-      icon: 'close',
-      handler: () => {},
-    });
 
     const actionSheet = await this._actionSheetController.create({
       header: this.menuTitle || 'Menú',
@@ -209,6 +204,7 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
       'report':'alert-outline',
       'dark_mode': 'moon-outline',
       'light_mode': 'sunny-outline',
+      'system_update': 'refresh-outline',
     };
 
     return iconMapping[iconName] || 'help-outline';
