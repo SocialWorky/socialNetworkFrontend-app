@@ -11,6 +11,7 @@ import { LogComponent } from './shared/log/log.component';
 import { WidgetManagementComponent } from './shared/widget-management/widget-management.component';
 import { WebhooksComponent } from './shared/webhooks/webhooks.component';
 import { UserManagementComponent } from './shared/user-management/user-management.component';
+import { VersionManagementComponent } from './shared/version-management/version-management.component';
 import { translations } from '@translations/translations';
 
 
@@ -37,6 +38,7 @@ export const routes: Routes = [
         ],
       },
       { title: translations['admin.sideMenu.items.userManagement'], path: 'user-management', component: UserManagementComponent },
+      { title: translations['admin.sideMenu.items.versionManagement'], path: 'version-management', component: VersionManagementComponent },
       { title: translations['admin.sideMenu.items.logs'], path: 'logs', component: LogComponent },
     ],
   },

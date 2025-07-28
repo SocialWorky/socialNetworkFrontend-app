@@ -29,6 +29,7 @@ import { UserTableComponent } from './shared/user-management/components/user-tab
 import { UserPaginationComponent } from './shared/user-management/components/user-pagination/user-pagination.component';
 import { UserDetailsModalComponent } from './shared/user-management/components/user-details-modal/user-details-modal.component';
 import { UserEditModalComponent } from './shared/user-management/components/user-edit-modal/user-edit-modal.component';
+import { VersionManagementComponent } from './shared/version-management/version-management.component';
 
 // Shared Components Module
 import { AdminSharedComponentsModule } from './shared/components/admin-shared-components.module';
@@ -57,6 +58,7 @@ import { MaterialModule } from '@shared/modules/material/material.module';
     LogComponent,
     WebhooksComponent,
     UserManagementComponent,
+    VersionManagementComponent,
     // User Management Components
     UserStatsComponent,
     UserFiltersComponent,

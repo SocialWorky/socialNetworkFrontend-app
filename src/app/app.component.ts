@@ -15,7 +15,7 @@ import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { CommentService } from '@shared/services/core-apis/comment.service';
 import { AuthService } from '@auth/services/auth.service';
-import { PwaUpdateService } from '@shared/services/pwa-update.service';
+
 import { EmojiEventsService } from '@shared/services/emoji-events.service';
 import { MediaEventsService } from '@shared/services/media-events.service';
 import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget-config.service';
@@ -24,6 +24,7 @@ import { DevCacheService } from '@shared/services/dev-cache.service';
 import { CacheService } from '@shared/services/cache.service';
 import { CacheOptimizationService } from '@shared/services/cache-optimization.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { AppUpdateManagerService } from '@shared/services/app-update-manager.service';
 
 @Component({
     selector: 'worky-root',
@@ -55,14 +56,15 @@ export class AppComponent implements OnInit, OnDestroy {
     private _publicationService: PublicationService,
     private _commentService: CommentService,
     private _authService: AuthService,
-    private _pwaUpdateService: PwaUpdateService,
+
     private _emojiEventsService: EmojiEventsService,
     private _mediaEventsService: MediaEventsService,
     private _widgetConfigService: WidgetConfigService,
     private devCacheService: DevCacheService,
     private cacheService: CacheService,
     private _cacheOptimizationService: CacheOptimizationService,
-    private _logService: LogService
+    private _logService: LogService,
+    private _appUpdateManagerService: AppUpdateManagerService
   ) {
     this._notificationUsersService.setupInactivityListeners();
     if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();
@@ -90,6 +92,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Only initialize widget data if user is authenticated
     await this.checkAuthenticationAndInitializeWidgets();
+
+    // Initialize app update checks
+    this.initializeAppUpdates();
 
     setTimeout(() => {
       this._socketService.listenEvent('newExternalMessage', (message: any) => {
@@ -125,9 +130,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if(localStorage.getItem('token')) this.currentUserId = this._authService.getDecodedToken()!.id;
 
     // Verify PWA updates securely
-    this._pwaUpdateService.checkForUpdates().catch(() => {
-      // Silent error if updates cannot be verified
-    });
+
 
     if (!environment.PRODUCTION) {
       this.setupDevMode();
@@ -143,7 +146,7 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-    this._pwaUpdateService.destroy();
+
   }
 
   private setupAccessibilityFix(): void {
@@ -250,13 +253,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Test method for PWA update simulation (development only)
-  testPwaUpdate(): void {
-    if (!environment.PRODUCTION) {
-      // Testing PWA update simulation - no need to log every test
-      this._pwaUpdateService.forceCheckAndSimulate();
-    }
-  }
+
 
   private setupDevMode(): void {
     // Generar datos mock para desarrollo
@@ -285,5 +282,11 @@ export class AppComponent implements OnInit, OnDestroy {
         this._cacheOptimizationService.forcePreload();
       }, 5000);
     }
+  }
+
+  private initializeAppUpdates(): void {
+    // App update manager is automatically initialized in its constructor
+    // This method can be used for additional app update initialization if needed
+    this._logService.log(LevelLogEnum.INFO, 'AppComponent', 'App update manager initialized');
   }
 }

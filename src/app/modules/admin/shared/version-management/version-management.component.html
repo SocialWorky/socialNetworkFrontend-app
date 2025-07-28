@@ -1,0 +1,290 @@
+<div class="min-h-full bg-gray-900 text-gray-100 p-6">
+  <!-- Header Section -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-100 mb-2">{{ 'admin.versionManagement.title' | workyTranslations }}</h1>
+        <p class="text-gray-400">{{ 'admin.versionManagement.subtitle' | workyTranslations }}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="w-3 h-3 rounded-full" [ngClass]="backendConnected ? 'bg-green-500' : 'bg-red-500'"></div>
+        <span class="text-sm" [ngClass]="backendConnected ? 'text-green-400' : 'text-red-400'">
+          {{ getConnectionStatusText() }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Current Version Card -->
+  <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 mb-6" *ngIf="currentVersion">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-100">{{ 'admin.versionManagement.currentVersion' | workyTranslations }}</h2>
+      <span class="px-3 py-1 rounded-full text-xs font-medium" [ngClass]="getVersionTypeClass(currentVersion)">
+        {{ getVersionTypeLabel(currentVersion) }}
+      </span>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-gray-700 rounded-lg p-4">
+        <div class="text-sm text-gray-400 mb-1">{{ 'admin.versionManagement.version' | workyTranslations }}</div>
+        <div class="text-xl font-bold text-blue-400">{{ currentVersion.version }}</div>
+      </div>
+      <div class="bg-gray-700 rounded-lg p-4">
+        <div class="text-sm text-gray-400 mb-1">{{ 'admin.versionManagement.buildNumber' | workyTranslations }}</div>
+        <div class="text-lg font-medium text-gray-100">{{ currentVersion.buildNumber }}</div>
+      </div>
+      <div class="bg-gray-700 rounded-lg p-4">
+        <div class="text-sm text-gray-400 mb-1">{{ 'admin.versionManagement.releaseDate' | workyTranslations }}</div>
+        <div class="text-lg font-medium text-gray-100">{{ currentVersion.releaseDate | date:'short' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <!-- Maintenance Mode Section -->
+    <div class="bg-gray-800 border border-gray-700 rounded-lg p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-100">{{ 'admin.versionManagement.maintenanceMode' | workyTranslations }}</h2>
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full" [ngClass]="isMaintenanceMode ? 'bg-yellow-500' : 'bg-gray-500'"></div>
+          <span class="text-sm" [ngClass]="isMaintenanceMode ? 'text-yellow-400' : 'text-gray-400'">
+            {{ isMaintenanceMode ? ('admin.versionManagement.maintenanceActive' | workyTranslations) : ('admin.versionManagement.maintenanceInactive' | workyTranslations) }}
+          </span>
+        </div>
+      </div>
+      
+      <form [formGroup]="maintenanceForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">
+            {{ 'admin.versionManagement.maintenanceMessage' | workyTranslations }}
+          </label>
+          <textarea 
+            formControlName="message" 
+            rows="3"
+            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            [disabled]="isMaintenanceMode || !backendConnected">
+          </textarea>
+        </div>
+        <button 
+          type="button" 
+          class="w-full px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+          [ngClass]="isMaintenanceMode ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-yellow-600 hover:bg-yellow-700 text-white'"
+          (click)="toggleMaintenanceMode()"
+          [disabled]="isLoading || !backendConnected">
+          <span *ngIf="isLoading" class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+          {{ isMaintenanceMode ? ('admin.versionManagement.disableMaintenance' | workyTranslations) : ('admin.versionManagement.enableMaintenance' | workyTranslations) }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Create New Version Section -->
+    <div class="bg-gray-800 border border-gray-700 rounded-lg p-6">
+      <h2 class="text-lg font-semibold text-gray-100 mb-4">{{ 'admin.versionManagement.createNewVersion' | workyTranslations }}</h2>
+      
+      <form [formGroup]="versionForm" (ngSubmit)="createVersion()" class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              {{ 'admin.versionManagement.version' | workyTranslations }} *
+            </label>
+            <input 
+              type="text" 
+              formControlName="version" 
+              placeholder="0.0.1"
+              class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              [class.border-red-500]="versionForm.get('version')?.invalid && versionForm.get('version')?.touched">
+            <div *ngIf="versionForm.get('version')?.invalid && versionForm.get('version')?.touched" 
+                 class="text-red-400 text-xs mt-1">
+              {{ 'admin.versionManagement.errors.invalidVersion' | workyTranslations }}
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              {{ 'admin.versionManagement.buildNumber' | workyTranslations }} *
+            </label>
+            <div class="flex gap-2">
+              <input 
+                type="text" 
+                formControlName="buildNumber"
+                class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <button type="button" 
+                      class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors duration-200"
+                      (click)="generateBuildNumber()">
+                {{ 'admin.versionManagement.generate' | workyTranslations }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              {{ 'admin.versionManagement.releaseDate' | workyTranslations }} *
+            </label>
+            <input 
+              type="date" 
+              formControlName="releaseDate"
+              class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              {{ 'admin.versionManagement.minRequiredVersion' | workyTranslations }} 
+              <span class="text-xs text-gray-500">(opcional)</span>
+            </label>
+            <input 
+              type="text" 
+              formControlName="minRequiredVersion" 
+              placeholder="Ej: 2.0.0 - Solo si requieres versión mínima"
+              class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <div class="text-xs text-gray-400 mt-1">
+              Dejar vacío para PWA que actualiza automáticamente
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">
+            {{ 'admin.versionManagement.changelog' | workyTranslations }} *
+          </label>
+          <textarea 
+            formControlName="changelog" 
+            rows="3"
+            placeholder="Describe los cambios de esta versión..."
+            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            [class.border-red-500]="versionForm.get('changelog')?.invalid && versionForm.get('changelog')?.touched">
+          </textarea>
+          <div *ngIf="versionForm.get('changelog')?.invalid && versionForm.get('changelog')?.touched" 
+               class="text-red-400 text-xs mt-1">
+            {{ 'admin.versionManagement.errors.changelogRequired' | workyTranslations }}
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">
+            {{ 'admin.versionManagement.downloadUrl' | workyTranslations }}
+            <span class="text-xs text-gray-500">(opcional)</span>
+          </label>
+          <input 
+            type="url" 
+            formControlName="downloadUrl" 
+            placeholder="Solo para apps descargables - No necesario para PWA"
+            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <div class="text-xs text-gray-400 mt-1">
+            Dejar vacío para PWA que actualiza cache automáticamente
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <input type="checkbox" 
+                 formControlName="forceUpdate" 
+                 id="forceUpdate"
+                 class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
+          <label for="forceUpdate" class="text-sm text-gray-300">
+            {{ 'admin.versionManagement.forceUpdate' | workyTranslations }}
+          </label>
+        </div>
+        <div class="text-xs text-gray-400">
+          {{ 'admin.versionManagement.forceUpdateHelp' | workyTranslations }}
+        </div>
+
+        <div class="flex gap-3 pt-4">
+          <button 
+            type="submit" 
+            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            [disabled]="versionForm.invalid || isLoading || !backendConnected">
+            <span *ngIf="isLoading" class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+            {{ isLoading ? ('common.loading' | workyTranslations) : ('admin.versionManagement.createVersion' | workyTranslations) }}
+          </button>
+          <button 
+            type="button" 
+            class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
+            (click)="versionForm.reset()">
+            {{ 'common.reset' | workyTranslations }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Versions History Section -->
+  <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 mt-6" *ngIf="backendConnected">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-100">{{ 'admin.versionManagement.versionHistory' | workyTranslations }}</h2>
+      <button class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" 
+              (click)="loadVersions()" 
+              [disabled]="isLoading">
+        <span *ngIf="isLoading" class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+        {{ 'common.refresh' | workyTranslations }}
+      </button>
+    </div>
+
+    <div *ngIf="versions.length > 0; else noVersions" class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-gray-700">
+            <th class="text-left py-3 px-4 font-medium text-gray-300">{{ 'admin.versionManagement.version' | workyTranslations }}</th>
+            <th class="text-left py-3 px-4 font-medium text-gray-300">{{ 'admin.versionManagement.type' | workyTranslations }}</th>
+            <th class="text-left py-3 px-4 font-medium text-gray-300">{{ 'admin.versionManagement.releaseDate' | workyTranslations }}</th>
+            <th class="text-left py-3 px-4 font-medium text-gray-300">{{ 'admin.versionManagement.status' | workyTranslations }}</th>
+            <th class="text-left py-3 px-4 font-medium text-gray-300">{{ 'common.actions' | workyTranslations }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let version of versions" class="border-b border-gray-700 hover:bg-gray-700/50">
+            <td class="py-3 px-4 font-medium text-blue-400">{{ version.version }}</td>
+            <td class="py-3 px-4">
+              <span class="px-2 py-1 rounded-full text-xs font-medium" [ngClass]="getVersionTypeClass(version)">
+                {{ getVersionTypeLabel(version) }}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-gray-300">{{ version.releaseDate | date:'short' }}</td>
+            <td class="py-3 px-4">
+              <span class="px-2 py-1 rounded-full text-xs font-medium" 
+                    [ngClass]="version.isActive ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400'">
+                {{ version.isActive ? ('admin.versionManagement.active' | workyTranslations) : ('admin.versionManagement.inactive' | workyTranslations) }}
+              </span>
+            </td>
+            <td class="py-3 px-4">
+              <button *ngIf="!version.isActive" 
+                      class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors duration-200"
+                      (click)="activateVersion(version.id)"
+                      [disabled]="isLoading">
+                {{ 'admin.versionManagement.activate' | workyTranslations }}
+              </button>
+              <span *ngIf="version.isActive" class="text-green-400 text-sm font-medium">
+                {{ 'admin.versionManagement.current' | workyTranslations }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #noVersions>
+      <div class="text-center py-8">
+        <div class="text-gray-400 mb-2">
+          <svg class="w-12 h-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <p class="text-gray-400">{{ 'admin.versionManagement.noVersions' | workyTranslations }}</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Backend Not Connected Notice -->
+  <div class="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4 mt-6" *ngIf="!backendConnected">
+    <div class="flex items-center">
+      <svg class="w-5 h-5 text-yellow-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+      </svg>
+      <div>
+        <h3 class="text-yellow-400 font-medium">Backend No Disponible</h3>
+        <p class="text-yellow-300 text-sm mt-1">
+          Mostrando configuración local. Para gestionar versiones, asegúrate de que el backend esté funcionando.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

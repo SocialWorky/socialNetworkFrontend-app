@@ -13,9 +13,11 @@ import { NotificationCenterService } from '@shared/services/core-apis/notificati
 import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service'
 import { MessageService } from '../../messages/services/message.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
-import { PwaInstallService } from '@shared/services/pwa-install.service';
+
 import { ScrollService } from '@shared/services/scroll.service';
 import { Token } from '@shared/interfaces/token.interface';
+import { AppUpdateManagerService } from '@shared/services/app-update-manager.service';
+import { APP_VERSION_CONFIG } from '../../../../../app-version.config';
 
 @Component({
     selector: 'worky-navbar',
@@ -69,8 +71,8 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     private _messageService: MessageService,
     private _notificationPanelService: NotificationPanelService,
     private _configService: ConfigService,
-    private _pwaInstallService: PwaInstallService,
-    private _scrollService: ScrollService
+    private _scrollService: ScrollService,
+    private _appUpdateManagerService: AppUpdateManagerService
   ) {
     this.menuProfile();
   }
@@ -100,7 +102,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
     this.subscribeToConfig();
-    this.checkPwaInstall();
     this.getConfig();
     this.checkAdminDataLink();
     this.getUnreadMessagesCount();
@@ -172,19 +173,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private checkPwaInstall() {
-    if (!this._pwaInstallService.isAppInstalled()) {
-      const link = { icon: 'download', function: this.installPWA.bind(this),  title: translations['navbar.installApp']}
-      this.dataLinkProfile.unshift(link);
-    }
-  }
 
-  private installPWA() {
-    this._pwaInstallService.showInstallPrompt(
-       translations['navbar.show_install_app'],
-       translations['navbar.show_install_app_message'],
-     );
-  }
 
   toggleNotificationsPanel() {
     this._notificationPanelService.togglePanel();
@@ -225,9 +214,15 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
   this.dataLinkProfile = [
     { icon: iconMode, function: () => this.toggleDarkMode(this.isDarkMode), title: this.isDarkMode ? 'modo oscuro' : 'modo claro' },
+    { icon: 'system_update', function: () => this.checkForUpdates(), title: translations['navbar.checkUpdates']},
     { icon: 'logout', function: this.logoutUser.bind(this),  title: translations['navbar.logout']},
+    { function: undefined, title: `${translations['navbar.version']} ${APP_VERSION_CONFIG.version}`, isVersionInfo: true },
   ];
 }
+
+  checkForUpdates() {
+    this._appUpdateManagerService.forceCheckForUpdates();
+  }
 
   handleLinkClicked(data: DropdownDataLink<any>) {
     if (data.function) {
@@ -291,7 +286,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isDarkMode = !isDarkMode;
     this.menuProfile();
     this.checkAdminDataLink();
-    this.checkPwaInstall();
     this._cdr.markForCheck();
 
   }

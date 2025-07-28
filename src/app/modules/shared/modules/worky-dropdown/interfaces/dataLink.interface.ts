@@ -6,4 +6,5 @@ export interface DropdownDataLink<T> {
   color?: string;
   linkUrl?: string;
   function?: (...args: T[]) => any;
+  isVersionInfo?: boolean;
 }

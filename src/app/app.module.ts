@@ -18,8 +18,7 @@ import { TimeoutInterceptor } from './timeout.interceptor';
 import { SafariIOSErrorInterceptor } from './safari-ios-error.interceptor';
 import { GoogleImageErrorInterceptor } from './google-image-error.interceptor';
 import { ServiceWorkerModule } from '@angular/service-worker';
-import { PwaUpdateNotificationComponent } from '@shared/components/pwa-update-notification/pwa-update-notification.component';
-import { PwaSettingsComponent } from '@shared/components/pwa-settings/pwa-settings.component';
+
 import { SafariIOSErrorHandlerService } from '@shared/services/safari-ios-error-handler.service';
 import { GlobalErrorHandlerService } from '@shared/services/global-error-handler.service';
 import { SafariIOSDebugService } from '@shared/services/safari-ios-debug.service';
@@ -40,8 +39,6 @@ const config: SocketIoConfig = {
 @NgModule({
   declarations: [
     AppComponent,
-    PwaUpdateNotificationComponent,
-    PwaSettingsComponent,
   ],
   imports: [
     BrowserModule,

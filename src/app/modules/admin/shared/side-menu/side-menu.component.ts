@@ -80,6 +80,7 @@ export class SideMenuComponent implements OnInit {
     if (titleLower.includes('invitation') || titleLower.includes('code')) return 'vpn_key';
     if (titleLower.includes('reaction')) return 'thumb_up';
     if (titleLower.includes('css') || titleLower.includes('custom')) return 'palette';
+    if (titleLower.includes('version') || titleLower.includes('gestión de versiones')) return 'system_update';
     
     return 'dashboard';
   }
