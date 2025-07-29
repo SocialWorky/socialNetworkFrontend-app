@@ -16,11 +16,6 @@
   transition: right 0.3s ease-out;
   z-index: 1000;
 
-  // Safe area insets for iOS
-  padding-top: env(safe-area-inset-top);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
-
   @include breakpoints.below-sm {
     width: 100%;
     right: -100%;
@@ -28,9 +23,7 @@
     height: calc(var(--vh, 1vh) * 100);
     // Ensure proper top positioning on mobile
     top: 0;
-    padding-top: max(env(safe-area-inset-top), 20px);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    padding-top: 20px;
   }
 
   // iOS-specific fixes for viewport height issues
@@ -119,26 +112,26 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
-    // Calculate height properly considering header and safe areas
-    height: calc(100dvh - 80px - env(safe-area-inset-top));
-    height: calc((var(--vh, 1vh) * 100) - 80px - env(safe-area-inset-top));
+    // Calculate height properly considering header
+    height: calc(100dvh - 80px);
+    height: calc((var(--vh, 1vh) * 100) - 80px);
     overflow-y: auto;
 
     @include breakpoints.below-sm {
-      height: calc(100dvh - 80px - max(env(safe-area-inset-top), 20px));
-      height: calc((var(--vh, 1vh) * 100) - 80px - max(env(safe-area-inset-top), 20px));
+      height: calc(100dvh - 80px);
+      height: calc((var(--vh, 1vh) * 100) - 80px);
     }
 
     // iOS-specific fixes for content body height
     @supports (-webkit-touch-callout: none) {
-      height: calc(100vh - 80px - env(safe-area-inset-top));
-      height: calc(-webkit-fill-available - 80px - env(safe-area-inset-top));
-      height: calc((var(--vh, 1vh) * 100) - 80px - env(safe-area-inset-top));
+      height: calc(100vh - 80px);
+      height: calc(-webkit-fill-available - 80px);
+      height: calc((var(--vh, 1vh) * 100) - 80px);
       
       @include breakpoints.below-sm {
-        height: calc(100vh - 80px - max(env(safe-area-inset-top), 20px));
-        height: calc(-webkit-fill-available - 80px - max(env(safe-area-inset-top), 20px));
-        height: calc((var(--vh, 1vh) * 100) - 80px - max(env(safe-area-inset-top), 20px));
+        height: calc(100vh - 80px);
+        height: calc(-webkit-fill-available - 80px);
+        height: calc((var(--vh, 1vh) * 100) - 80px);
       }
     }
   }

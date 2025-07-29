@@ -725,22 +725,6 @@ img, video {
   to { transform: rotate(360deg); }
 }
 
-
-@supports (padding-top: env(safe-area-inset-top)) {
-  .content-worky {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  
-  .fixed-top {
-    top: env(safe-area-inset-top) !important;
-  }
-  
-  .safe-bottom {
-    bottom: env(safe-area-inset-bottom) !important;
-  }
-}
-
 /* iOS-specific viewport fixes */
 @supports (-webkit-touch-callout: none) {
   /* Fix for iOS viewport height issues */
@@ -771,9 +755,9 @@ img, video {
   }
   
   .notifications-panel .content-body {
-    height: calc(100vh - 80px - env(safe-area-inset-top)) !important;
-    height: calc(-webkit-fill-available - 80px - env(safe-area-inset-top)) !important;
-    height: calc((var(--vh, 1vh) * 100) - 80px - env(safe-area-inset-top)) !important;
+    height: calc(100vh - 80px) !important;
+    height: calc(-webkit-fill-available - 80px) !important;
+    height: calc((var(--vh, 1vh) * 100) - 80px) !important;
   }
   
   /* Fix for iOS Safari 100vh issue */

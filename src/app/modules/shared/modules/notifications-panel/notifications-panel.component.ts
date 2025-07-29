@@ -120,12 +120,11 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy, AfterView
       const contentBody = notificationPanel.querySelector('.content-body') as HTMLElement;
       if (contentBody) {
         const headerHeight = 80;
-        const safeAreaTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-top')) || 0;
-        const bodyHeight = height - headerHeight - safeAreaTop;
+        const bodyHeight = height - headerHeight;
         
         contentBody.style.height = `${bodyHeight}px`;
-        contentBody.style.height = `calc(-webkit-fill-available - ${headerHeight}px - ${safeAreaTop}px)`;
-        contentBody.style.height = `calc((var(--vh, 1vh) * 100) - ${headerHeight}px - ${safeAreaTop}px)`;
+        contentBody.style.height = `calc(-webkit-fill-available - ${headerHeight}px)`;
+        contentBody.style.height = `calc((var(--vh, 1vh) * 100) - ${headerHeight}px)`;
       }
       
       // Ensure header is properly positioned

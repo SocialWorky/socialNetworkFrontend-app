@@ -172,9 +172,7 @@
     }
 
     .last-publication {
-      @supports (padding-top: env(safe-area-inset-top)) {
-        margin-bottom: calc(20px + env(safe-area-inset-bottom));
-      }
+      margin-bottom: 20px;
     }
 
   }

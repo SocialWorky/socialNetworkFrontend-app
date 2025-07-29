@@ -15,10 +15,6 @@
     flex-direction: column;
   }
 
-  @supports (padding-top: env(safe-area-inset-top)) {
-    padding-top: env(safe-area-inset-top);
-  }
-
   worky-image-loading {
     width: 65%;
     height: 95vh;
@@ -54,8 +50,5 @@
     background-color: map.get(colors.$worky-navy, 56);
     border-radius: 50%;
     padding: 5px;
-    @supports (padding-top: env(safe-area-inset-top)) {
-      top: calc(env(safe-area-inset-top) + 10px);
-    }
   }
 }
