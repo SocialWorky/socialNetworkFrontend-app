@@ -7,6 +7,7 @@ import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { AlertService } from './alert.service';
 import { Alerts } from '../enums/alerts.enum';
 import { translationsDictionary } from '../../../../translations/translations';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,7 @@ import { translationsDictionary } from '../../../../translations/translations';
 export class AppUpdateManagerService implements OnDestroy {
   private readonly UPDATE_CHECK_INTERVAL = 1000 * 60 * 60 * 2; // 2 hours
   private readonly FORCE_UPDATE_CHECK_INTERVAL = 1000 * 60 * 60; // 1 hour
+  private readonly ENABLE_VERSION_LOGS = (environment as any).VERSION_LOGS_ENABLED === 'true';
   
   private unsubscribe$ = new Subject<void>();
   private updateCheckSubscription: Subscription | null = null;
@@ -80,9 +82,12 @@ export class AppUpdateManagerService implements OnDestroy {
             this.lastUpdateCheck = now;
             this.handleVersionCheckResult(result);
           },
-          error: (error) => {
+                  error: (error) => {
+          // Only log critical errors, not network issues
+          if (error?.status !== 404 && error?.status !== 0 && this.ENABLE_VERSION_LOGS) {
             this.logService.log(LevelLogEnum.ERROR, 'AppUpdateManager', 'Error checking for updates on start', error);
           }
+        }
         });
     }
   }
@@ -102,7 +107,10 @@ export class AppUpdateManagerService implements OnDestroy {
           this.handleVersionCheckResult(result);
         },
         error: (error) => {
-          this.logService.log(LevelLogEnum.ERROR, 'AppUpdateManager', 'Error in periodic update check', error);
+          // Only log critical errors, not network issues
+          if (error?.status !== 404 && error?.status !== 0 && this.ENABLE_VERSION_LOGS) {
+            this.logService.log(LevelLogEnum.ERROR, 'AppUpdateManager', 'Error in periodic update check', error);
+          }
         }
       });
   }
@@ -257,7 +265,10 @@ export class AppUpdateManagerService implements OnDestroy {
           this.handleManualUpdateCheck(result);
         },
         error: (error) => {
-          this.logService.log(LevelLogEnum.ERROR, 'AppUpdateManager', 'Error in manual update check', error);
+          // Only log critical errors, not network issues
+          if (error?.status !== 404 && error?.status !== 0 && this.ENABLE_VERSION_LOGS) {
+            this.logService.log(LevelLogEnum.ERROR, 'AppUpdateManager', 'Error in manual update check', error);
+          }
           this.showUpdateCheckError();
         }
       });
@@ -327,7 +338,10 @@ export class AppUpdateManagerService implements OnDestroy {
           this.handleVersionCheckResult(result);
         },
         error: (error) => {
-          this.logService.log(LevelLogEnum.ERROR, 'AppUpdateManager', 'Error in forced update check', error);
+          // Only log critical errors, not network issues
+          if (error?.status !== 404 && error?.status !== 0 && this.ENABLE_VERSION_LOGS) {
+            this.logService.log(LevelLogEnum.ERROR, 'AppUpdateManager', 'Error in forced update check', error);
+          }
         }
       });
   }

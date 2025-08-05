@@ -45,4 +45,5 @@ export const environment = {
   FIREBASE_VAPID_KEY: import.meta.env.NG_APP_FIREBASE_VAPID_KEY,
   CACHE_DEBUG: import.meta.env.NG_APP_CACHE_DEBUG || 'false',
   CACHE_ENABLED: import.meta.env.NG_APP_CACHE_ENABLED || 'false',
+  VERSION_LOGS_ENABLED: 'false', // Disable version logs in production
 };

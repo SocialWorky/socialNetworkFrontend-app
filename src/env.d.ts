@@ -46,6 +46,7 @@ declare interface Env {
   readonly NG_APP_FIREBASE_VAPID_KEY: string;
   readonly NG_APP_CACHE_DEBUG: string;
   readonly NG_APP_CACHE_ENABLED: string;
+  readonly NG_APP_VERSION_LOGS_ENABLED: string;
 }
 
 // Choose how to access the environment variables.

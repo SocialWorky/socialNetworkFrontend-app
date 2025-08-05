@@ -204,12 +204,15 @@ export class VersionManagementComponent implements OnInit {
     try {
       const response = await this.http.get<any>(`${environment.API_URL}/app/version`).toPromise();
       
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'VersionManagementComponent',
-        'Current version response received',
-        { response: response }
-      );
+      // Only log in development mode
+      if (!environment.PRODUCTION) {
+        this.logService.log(
+          LevelLogEnum.INFO,
+          'VersionManagementComponent',
+          'Current version response received',
+          { response: response }
+        );
+      }
       
       if (response) {
         // Handle different response structures
@@ -217,21 +220,27 @@ export class VersionManagementComponent implements OnInit {
         if (versionData) {
           this.currentVersion = versionData;
           this.isMaintenanceMode = versionData.maintenanceMode || false;
-          this.logService.log(
-            LevelLogEnum.INFO,
-            'VersionManagementComponent',
-            'Current version loaded from backend',
-            { version: versionData.version }
-          );
+          // Only log in development mode
+          if (!environment.PRODUCTION) {
+            this.logService.log(
+              LevelLogEnum.INFO,
+              'VersionManagementComponent',
+              'Current version loaded from backend',
+              { version: versionData.version }
+            );
+          }
         }
       }
     } catch (error: any) {
       if (error?.status === 404) {
-        this.logService.log(
-          LevelLogEnum.INFO,
-          'VersionManagementComponent',
-          'No active version found in backend (404) - using local config'
-        );
+        // Only log in development mode
+        if (!environment.PRODUCTION) {
+          this.logService.log(
+            LevelLogEnum.INFO,
+            'VersionManagementComponent',
+            'No active version found in backend (404) - using local config'
+          );
+        }
         // Keep using local configuration when no backend version exists
       } else {
         this.logService.log(

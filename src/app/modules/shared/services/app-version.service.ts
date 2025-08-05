@@ -33,6 +33,7 @@ export interface VersionCheckResult {
 export class AppVersionService {
   private readonly VERSION_KEY = 'app_version_cache';
   private readonly VERSION_CHECK_INTERVAL = 1000 * 60 * 30; // 30 minutes
+  private readonly ENABLE_VERSION_LOGS = (environment as any).VERSION_LOGS_ENABLED === 'true';
   
   private currentVersion = APP_VERSION_CONFIG.version; // Get from app-version.config.ts
   private versionCheckSubject = new BehaviorSubject<VersionCheckResult | null>(null);
@@ -73,7 +74,9 @@ export class AppVersionService {
           // Backend returns version data directly
           serverVersion = response;
         } else {
-          this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Unexpected backend response format', { response });
+          if (this.ENABLE_VERSION_LOGS) {
+            this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Unexpected backend response format', { response });
+          }
           throw new Error('Invalid backend response format');
         }
         
@@ -83,7 +86,10 @@ export class AppVersionService {
         return of(result);
       }),
       catchError(error => {
-        this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Error checking for app updates', error);
+        // Only log critical errors, not 404s or network issues
+        if (error?.status !== 404 && this.ENABLE_VERSION_LOGS) {
+          this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Error checking for app updates', error);
+        }
         // Return cached result or default
         const cachedResult = this.getCachedVersionCheck();
         return of(cachedResult || this.getDefaultVersionCheck());
