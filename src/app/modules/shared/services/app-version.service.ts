@@ -43,7 +43,6 @@ export class AppVersionService {
     private logService: LogService,
     private utilityService: UtilityService
   ) {
-    this.logService.log(LevelLogEnum.INFO, 'AppVersionService', 'Service initialized', { currentVersion: this.currentVersion });
   }
 
   /**

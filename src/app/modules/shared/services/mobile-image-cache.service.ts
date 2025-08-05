@@ -134,16 +134,7 @@ export class MobileImageCacheService {
     
     // Initialize IndexedDB
     this.initializeDatabase().then(() => {
-      this.enhancedLoggingService.logWithEnhancedMetadata(
-        LevelLogEnum.INFO,
-        'MobileImageCacheService',
-        'Service initialized successfully',
-        {
-          isMobile: this.isMobileDevice,
-          isIOS,
-          config: this.getCurrentConfig()
-        }
-      );
+      // Service initialized successfully - no need to log this
     }).catch(error => {
       this.enhancedLoggingService.logWithEnhancedMetadata(
         LevelLogEnum.ERROR,

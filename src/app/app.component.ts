@@ -287,6 +287,5 @@ export class AppComponent implements OnInit, OnDestroy {
   private initializeAppUpdates(): void {
     // App update manager is automatically initialized in its constructor
     // This method can be used for additional app update initialization if needed
-    this._logService.log(LevelLogEnum.INFO, 'AppComponent', 'App update manager initialized');
   }
 }

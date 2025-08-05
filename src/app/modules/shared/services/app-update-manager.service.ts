@@ -25,7 +25,6 @@ export class AppUpdateManagerService implements OnDestroy {
     private logService: LogService,
     private alertService: AlertService
   ) {
-    this.logService.log(LevelLogEnum.INFO, 'AppUpdateManager', 'Service initialized - starting update checks');
     this.initializeUpdateChecks();
   }
 
@@ -74,8 +73,6 @@ export class AppUpdateManagerService implements OnDestroy {
     
     // Only check if enough time has passed
     if (timeSinceLastCheck > this.FORCE_UPDATE_CHECK_INTERVAL) {
-      this.logService.log(LevelLogEnum.INFO, 'AppUpdateManager', 'Starting version check on app start');
-      
       this.appVersionService.checkForUpdates()
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe({
@@ -84,12 +81,9 @@ export class AppUpdateManagerService implements OnDestroy {
             this.handleVersionCheckResult(result);
           },
           error: (error) => {
-            console.error('❌ Error checking for updates:', error);
             this.logService.log(LevelLogEnum.ERROR, 'AppUpdateManager', 'Error checking for updates on start', error);
           }
         });
-    } else {
-      console.log('⏭️ Skipping version check - too soon since last check');
     }
   }
 
@@ -158,8 +152,6 @@ export class AppUpdateManagerService implements OnDestroy {
    * Handle force update
    */
   private handleForceUpdate(result: VersionCheckResult): void {
-    this.logService.log(LevelLogEnum.INFO, 'AppUpdateManager', 'Force update required');
-    
     // Show alert with single update button (no cancel option for force updates)
     this.showForceUpdateAlert(result);
   }
@@ -195,8 +187,6 @@ export class AppUpdateManagerService implements OnDestroy {
    * Handle optional update
    */
   private handleOptionalUpdate(result: VersionCheckResult): void {
-    this.logService.log(LevelLogEnum.INFO, 'AppUpdateManager', 'Optional update available');
-    
     // Show confirmation dialog with update option
     this.alertService.showConfirmation(
       this.getTranslation('APP.UPDATE.AVAILABLE.TITLE'),
@@ -215,8 +205,6 @@ export class AppUpdateManagerService implements OnDestroy {
    */
   private async performAppUpdate(result: VersionCheckResult): Promise<void> {
     try {
-      this.logService.log(LevelLogEnum.INFO, 'AppUpdateManager', 'Starting app update process');
-
       if (result.serverVersion.downloadUrl) {
         // For downloadable apps
         window.open(result.serverVersion.downloadUrl, '_blank');
@@ -236,8 +224,6 @@ export class AppUpdateManagerService implements OnDestroy {
    */
   private async clearCacheAndReload(): Promise<void> {
     try {
-      this.logService.log(LevelLogEnum.INFO, 'AppUpdateManager', 'Clearing application cache');
-
       // Clear browser cache
       if ('caches' in window) {
         const cacheNames = await caches.keys();
@@ -264,8 +250,6 @@ export class AppUpdateManagerService implements OnDestroy {
    * Force check for updates (called from user interface)
    */
   forceCheckForUpdates(): void {
-    this.logService.log(LevelLogEnum.INFO, 'AppUpdateManager', 'Manual update check requested by user');
-    
     this.appVersionService.checkForUpdates()
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
@@ -367,7 +351,6 @@ export class AppUpdateManagerService implements OnDestroy {
    */
   clearUpdateCache(): void {
     this.appVersionService.clearVersionCache();
-    this.logService.log(LevelLogEnum.INFO, 'AppUpdateManager', 'Update cache cleared');
   }
 
   /**
