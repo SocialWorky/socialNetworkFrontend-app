@@ -66,6 +66,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   loaderPublications: boolean = false; // Iniciar en false para permitir carga
 
   userData: User | undefined;
+  isLoadingUserData: boolean = true;
 
   idUserProfile: string;
 
@@ -238,7 +239,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loaderPublications = true;
     try {
       const newPublications = await firstValueFrom(
-        this._publicationService.getAllPublications(
+        this._publicationService.forceSyncPublications(
           this.page,
           this.pageSize,
           TypePublishing.POST_PROFILE,
@@ -294,12 +295,18 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private async getDataProfile(): Promise<void> {
+    this.isLoadingUserData = true;
+    this._cdr.markForCheck();
+    
     this._userService.getUserById(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: User) => {
         this.userData = response;
+        this.isLoadingUserData = false;
         this._cdr.markForCheck();
       },
       error: (error) => {
+        this.isLoadingUserData = false;
+        this._cdr.markForCheck();
         this._logService.log(
           LevelLogEnum.ERROR,
           'ProfilesComponent',
