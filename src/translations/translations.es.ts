@@ -791,6 +791,7 @@ export const translations = {
   'admin.siteConfig.retry': 'Intentar de nuevo',
   'admin.webhooks.selectEvent': 'Seleccionar evento',
   'admin.webhooks.update': 'Actualizar',
+  'admin.webhooks.create': 'Crear',
 
   
   // ADMIN INVITATIONS CODE
