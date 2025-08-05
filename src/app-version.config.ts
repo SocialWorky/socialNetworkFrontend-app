@@ -21,10 +21,32 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '2.0.10',
+  version: '2.1.0',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    ✨ NUEVAS FUNCIONALIDADES (v2.1.0):
+    - Added: Sistema completo de skeleton components con Tailwind CSS
+      * Componentes granulares: worky-text-skeleton, worky-avatar-skeleton, worky-image-skeleton, worky-button-skeleton
+      * Skeleton wrapper para manejo automático de transiciones
+      * Implementación en PublicationViewComponent, AddPublicationComponent, HomeComponent, ProfilesComponent
+      * Carga progresiva inteligente con estados individuales por elemento
+      * Sin estilos personalizados, bundle optimizado
+    
+    - Added: AccessibleLoadingComponent para reemplazar loadings de Ionic
+      * Accesibilidad completa compatible con lectores de pantalla
+      * Focus management apropiado y navegación por teclado
+      * Soporte para modo oscuro, alto contraste y reducción de movimiento
+      * Responsive design que se adapta a diferentes tamaños de pantalla
+      * Eventos de carga reales para avatares y contenido
+    
+    - Improved: Experiencia de carga en toda la aplicación
+      * Carga granular por elemento individual
+      * Estados de carga condicionales (no aparecen si no hay contenido)
+      * Eventos de carga reales para optimizar UX
+      * Eliminación de retrasos artificiales en producción
+      * Estructura original mantenida con mejoras de rendimiento
+
     🐛 CORRECCIONES Y MEJORAS (v2.0.10):
     - Fixed: Alertas de actualización con botones funcionales (Actualizar/Cancelar)
     - Fixed: Lógica de forceUpdate solo aplica con versiones diferentes
