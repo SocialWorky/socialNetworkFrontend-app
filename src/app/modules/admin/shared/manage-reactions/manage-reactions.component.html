@@ -19,10 +19,14 @@
   </div>
 
   <!-- Initial Loading State -->
-  <worky-loading-spinner 
-    [loading]="isLoading"
-    [config]="loadingConfig">
-  </worky-loading-spinner>
+  <div class="flex flex-col items-center justify-center min-h-[400px] p-8" *ngIf="isLoading">
+    <div class="relative">
+      <div class="w-16 h-16 border-4 border-slate-600 border-t-blue-500 rounded-full animate-spin"></div>
+      <div class="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-blue-400 rounded-full animate-spin" style="animation-delay: 0.2s;"></div>
+    </div>
+    <p class="text-slate-400 text-lg font-medium mt-6">{{ 'admin.manageReactions.loading.reactions' | workyTranslations }}</p>
+    <p class="text-slate-500 text-sm mt-2">{{ 'admin.manageReactions.loading.preparing' | workyTranslations }}</p>
+  </div>
 
   <!-- Error State -->
   <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="error && !isLoading">
@@ -44,10 +48,13 @@
   </div>
 
   <!-- Processing Loading State -->
-  <worky-loading-spinner 
-    [loading]="loadReactionsButtons"
-    [config]="processingConfig">
-  </worky-loading-spinner>
+  <div class="flex flex-col items-center justify-center min-h-[200px] p-8" *ngIf="loadReactionsButtons">
+    <div class="relative">
+      <div class="w-12 h-12 border-4 border-slate-600 border-t-blue-500 rounded-full animate-spin"></div>
+      <div class="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-blue-400 rounded-full animate-spin" style="animation-delay: 0.2s;"></div>
+    </div>
+    <p class="text-slate-400 text-base font-medium mt-4">{{ 'admin.manageReactions.loading.processing' | workyTranslations }}</p>
+  </div>
 
   <!-- Main Content -->
   <div class="flex flex-col gap-8" *ngIf="!isLoading && !error">

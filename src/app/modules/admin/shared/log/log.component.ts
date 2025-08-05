@@ -5,7 +5,6 @@ import { Subject, takeUntil } from 'rxjs';
 import { LogService, LogStats, LogsResponse } from './services/log.service';
 import { LogsList } from './interface/log.interface';
 import { GenericSnackbarService } from '@shared/services/generic-snackbar.service';
-import { LoadingSpinnerConfig } from '@admin/shared/components/loading-spinner/loading-spinner.component';
 import { PaginationConfig } from '@admin/shared/components/pagination/pagination.component';
 
 @Component({
@@ -50,12 +49,7 @@ export class LogComponent implements OnInit, OnDestroy {
 
   autoRefresh: boolean = false;
 
-  // Configuraciones para componentes compartidos
-  loadingConfig: LoadingSpinnerConfig = {
-    size: 'medium',
-    text: 'admin.log.loading',
-    overlay: true
-  };
+
 
   get paginationConfig(): PaginationConfig {
     return {
@@ -105,6 +99,8 @@ export class LogComponent implements OnInit, OnDestroy {
 
   loadLogs() {
     this.isLoading = true;
+    this._cdr.markForCheck();
+    
     this._logService.getLogs(
       this.currentPage, 
       this.limit, 

@@ -16,7 +16,6 @@ import { TypePublishing } from '@shared/modules/addPublication/enum/addPublicati
 import { UtilityService } from '@shared/services/utility.service';
 import { SocketService } from '@shared/services/socket.service';
 import { EmojiEventsService } from '@shared/services/emoji-events.service';
-import { LoadingSpinnerConfig } from '@admin/shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
     selector: 'worky-manage-reactions',
@@ -40,18 +39,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
 
   error: string | null = null;
 
-  // Configuraciones para componentes compartidos
-  loadingConfig: LoadingSpinnerConfig = {
-    size: 'large',
-    text: translations['admin.manageReactions.loading.reactions'],
-    overlay: true
-  };
 
-  processingConfig: LoadingSpinnerConfig = {
-    size: 'medium',
-    text: translations['admin.manageReactions.loading.processing'],
-    overlay: true
-  };
 
   private destroy$ = new Subject<void>();
 

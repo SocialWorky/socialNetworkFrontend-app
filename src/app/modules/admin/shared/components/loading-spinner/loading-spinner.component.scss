@@ -1,8 +1,22 @@
 /* Dynamic positioning classes */
 .with-overlay {
-  @apply absolute inset-0 bg-slate-900/80 backdrop-blur-sm z-50 rounded-lg;
+  @apply absolute inset-0 bg-slate-900/80 backdrop-blur-sm z-50 rounded-lg flex items-center justify-center;
 }
 
 .full-screen {
-  @apply fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[9999];
+  @apply fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[9999] flex items-center justify-center;
+}
+
+/* Spinner animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 } 

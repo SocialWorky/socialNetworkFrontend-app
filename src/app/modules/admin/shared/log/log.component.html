@@ -134,77 +134,87 @@
 
   <!-- Contenido principal -->
   <div class="flex-1 overflow-hidden p-6 flex flex-col min-h-0">
-    <worky-loading-spinner 
-      [loading]="isLoading"
-      [config]="loadingConfig">
-    </worky-loading-spinner>
-
-    <div class="flex flex-col items-center justify-center h-full gap-4 text-center" *ngIf="!isLoading && logs.length === 0">
-      <i class="material-icons text-6xl text-slate-500">info</i>
-      <h3 class="text-2xl font-semibold text-white m-0">{{ 'admin.log.empty.title' | workyTranslations }}</h3>
-      <p class="text-slate-400 text-base m-0">{{ 'admin.log.empty.subtitle' | workyTranslations }}</p>
-    </div>
-
-    <div class="flex flex-col gap-0 flex-1 overflow-y-auto pr-2 min-h-0 mb-4" *ngIf="!isLoading && logs.length > 0">
-      <ng-container *ngFor="let log of logs; trackBy: trackByLogId">
-        <div *ngIf="log"
-          class="bg-slate-800 border border-slate-700 rounded-xl overflow-visible transition-all duration-300 mb-4 shadow-md hover:shadow-lg hover:border-slate-600 group"
-          [class.border-blue-500]="isExpanded(log._id)"
-          [class.shadow-blue-250]="isExpanded(log._id)">
-        <div class="flex items-center gap-4 p-4 cursor-pointer transition-all duration-200 hover:bg-slate-700/30 group-hover:bg-slate-700/20" (click)="toggleMetadata(log._id)">
-          <div class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider min-w-[80px] justify-center shadow-md" 
-               [class]="log.level === 'error' ? 'bg-red-500/15 text-red-300 border border-red-500/40' :
-                        log.level === 'warn' ? 'bg-yellow-500/15 text-yellow-300 border border-yellow-500/40' :
-                        log.level === 'info' ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40' :
-                        'bg-slate-500/15 text-slate-300 border border-slate-500/40'">
-            <i class="material-icons text-base">{{ getLevelIcon(log.level) }}</i>
-            <span>{{ log.level.toUpperCase() }}</span>
-          </div>
-          
-          <div class="flex-1 min-w-0">
-            <div class="font-medium mb-1 leading-relaxed break-words text-white">{{ log.message }}</div>
-            <div class="text-sm text-slate-400 font-mono break-words">{{ log.context }}</div>
-          </div>
-          
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2 text-sm text-slate-500">
-              <i class="material-icons text-base">schedule</i>
-              {{ log.timestamp | date: 'dd/MM/yy HH:mm:ss' }}
-            </div>
-            <div class="flex gap-2">
-              <button class="w-8 h-8 border border-slate-600 rounded-md bg-slate-700/50 text-slate-400 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white" (click)="onCopy(log); $event.stopPropagation()" [title]="'admin.log.actions.copyLog' | workyTranslations">
-                <i class="material-icons text-lg">content_copy</i>
-              </button>
-              <button class="w-8 h-8 border border-slate-600 rounded-md bg-slate-700/50 text-slate-400 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white" (click)="toggleMetadata(log._id); $event.stopPropagation()" [title]="'admin.log.actions.viewMetadata' | workyTranslations">
-                <i class="material-icons text-lg transition-transform duration-200" [class.rotate-180]="isExpanded(log._id)">expand_more</i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="border-t border-slate-700 bg-slate-900/20" *ngIf="isExpanded(log._id)">
-          <div class="p-4">
-            <h4 class="flex items-center gap-2 text-base font-semibold m-0 mb-4 text-white">
-              <i class="material-icons text-blue-500">code</i>
-              {{ 'admin.log.metadata.title' | workyTranslations }}
-            </h4>
-            <div class="relative bg-slate-900/30 rounded-lg p-4 max-h-[500px] overflow-y-auto overflow-x-auto">
-              <ngx-json-viewer [depth]="2" [json]="log.metadata"></ngx-json-viewer>
-              <button class="absolute top-3 right-3 flex items-center gap-2 px-4 py-2 border border-slate-600 rounded-md bg-slate-900/80 text-slate-400 text-sm cursor-pointer transition-all duration-200 hover:bg-slate-700 hover:border-slate-500 hover:text-white" (click)="onCopy(log.metadata)">
-                <i class="material-icons text-base">content_copy</i>
-                {{ 'admin.log.metadata.copyJson' | workyTranslations }}
-              </button>
-            </div>
-          </div>
-        </div>
+    <!-- Loading State -->
+    <div class="flex flex-col items-center justify-center min-h-[400px] p-8" *ngIf="isLoading">
+      <div class="relative">
+        <div class="w-16 h-16 border-4 border-slate-600 border-t-blue-500 rounded-full animate-spin"></div>
+        <div class="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-blue-400 rounded-full animate-spin" style="animation-delay: 0.2s;"></div>
       </div>
-      </ng-container>
+      <p class="text-slate-400 text-lg font-medium mt-6">{{ 'admin.log.loading' | workyTranslations }}</p>
+      <p class="text-slate-500 text-sm mt-2">{{ 'admin.log.preparing' | workyTranslations }}</p>
     </div>
 
-    <!-- Pagination -->
-    <worky-pagination 
-      [config]="paginationConfig"
-      (pageChange)="changePage($event)">
-    </worky-pagination>
+    <!-- Contenido cuando no está cargando -->
+    <div *ngIf="!isLoading">
+      <!-- Estado vacío -->
+      <div class="flex flex-col items-center justify-center h-full gap-4 text-center" *ngIf="logs.length === 0">
+        <i class="material-icons text-6xl text-slate-500">info</i>
+        <h3 class="text-2xl font-semibold text-white m-0">{{ 'admin.log.empty.title' | workyTranslations }}</h3>
+        <p class="text-slate-400 text-base m-0">{{ 'admin.log.empty.subtitle' | workyTranslations }}</p>
+      </div>
+
+      <!-- Lista de logs -->
+      <div class="flex flex-col gap-0 flex-1 overflow-y-auto pr-2 min-h-0 mb-4" *ngIf="logs.length > 0">
+        <ng-container *ngFor="let log of logs; trackBy: trackByLogId">
+          <div *ngIf="log"
+            class="bg-slate-800 border border-slate-700 rounded-xl overflow-visible transition-all duration-300 mb-4 shadow-md hover:shadow-lg hover:border-slate-600 group"
+            [class.border-blue-500]="isExpanded(log._id)"
+            [class.shadow-blue-250]="isExpanded(log._id)">
+            <div class="flex items-center gap-4 p-4 cursor-pointer transition-all duration-200 hover:bg-slate-700/30 group-hover:bg-slate-700/20" (click)="toggleMetadata(log._id)">
+              <div class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider min-w-[80px] justify-center shadow-md" 
+                   [class]="log.level === 'error' ? 'bg-red-500/15 text-red-300 border border-red-500/40' :
+                            log.level === 'warn' ? 'bg-yellow-500/15 text-yellow-300 border border-yellow-500/40' :
+                            log.level === 'info' ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40' :
+                            'bg-slate-500/15 text-slate-300 border border-slate-500/40'">
+                <i class="material-icons text-base">{{ getLevelIcon(log.level) }}</i>
+                <span>{{ log.level.toUpperCase() }}</span>
+              </div>
+              
+              <div class="flex-1 min-w-0">
+                <div class="font-medium mb-1 leading-relaxed break-words text-white">{{ log.message }}</div>
+                <div class="text-sm text-slate-400 font-mono break-words">{{ log.context }}</div>
+              </div>
+              
+              <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 text-sm text-slate-500">
+                  <i class="material-icons text-base">schedule</i>
+                  {{ log.timestamp | date: 'dd/MM/yy HH:mm:ss' }}
+                </div>
+                <div class="flex gap-2">
+                  <button class="w-8 h-8 border border-slate-600 rounded-md bg-slate-700/50 text-slate-400 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white" (click)="onCopy(log); $event.stopPropagation()" [title]="'admin.log.actions.copyLog' | workyTranslations">
+                    <i class="material-icons text-lg">content_copy</i>
+                  </button>
+                  <button class="w-8 h-8 border border-slate-600 rounded-md bg-slate-700/50 text-slate-400 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white" (click)="toggleMetadata(log._id); $event.stopPropagation()" [title]="'admin.log.actions.viewMetadata' | workyTranslations">
+                    <i class="material-icons text-lg transition-transform duration-200" [class.rotate-180]="isExpanded(log._id)">expand_more</i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-slate-700 bg-slate-900/20" *ngIf="isExpanded(log._id)">
+              <div class="p-4">
+                <h4 class="flex items-center gap-2 text-base font-semibold m-0 mb-4 text-white">
+                  <i class="material-icons text-blue-500">code</i>
+                  {{ 'admin.log.metadata.title' | workyTranslations }}
+                </h4>
+                <div class="relative bg-slate-900/30 rounded-lg p-4 max-h-[500px] overflow-y-auto overflow-x-auto">
+                  <ngx-json-viewer [depth]="2" [json]="log.metadata"></ngx-json-viewer>
+                  <button class="absolute top-3 right-3 flex items-center gap-2 px-4 py-2 border border-slate-600 rounded-md bg-slate-900/80 text-slate-400 text-sm cursor-pointer transition-all duration-200 hover:bg-slate-700 hover:border-slate-500 hover:text-white" (click)="onCopy(log.metadata)">
+                    <i class="material-icons text-base">content_copy</i>
+                    {{ 'admin.log.metadata.copyJson' | workyTranslations }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Pagination -->
+      <worky-pagination 
+        [config]="paginationConfig"
+        (pageChange)="changePage($event)">
+      </worky-pagination>
+    </div>
   </div>
 </div>

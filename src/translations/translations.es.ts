@@ -265,6 +265,7 @@ export const translations = {
   'admin.log.levels.info': 'Información',
   'admin.log.levels.debug': 'Debug',
   'admin.log.loading': 'Cargando logs...',
+  'admin.log.preparing': 'Preparando datos...',
   
   // ADMIN SITE CONFIG FIELDS
   'admin.siteConfig.fields.siteTitle': 'Título del Sitio',
@@ -413,6 +414,7 @@ export const translations = {
   'admin.manageReactions.loading.creating': 'Creando reacción...',
   'admin.manageReactions.loading.reactions': 'Cargando reacciones...',
   'admin.manageReactions.loading.processing': 'Procesando reacción...',
+  'admin.manageReactions.loading.preparing': 'Preparando datos...',
   
   // ADMIN MANAGE REACTIONS SUCCESS
   'admin.manageReactions.success.title': 'Éxito',
