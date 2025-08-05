@@ -39,6 +39,28 @@ export class PublicationService {
     this._publicationDatabase.initDatabase();
   }
 
+  /**
+   * Sort publications by fixed status first, then by creation date (newest first)
+   */
+  private sortPublicationsByFixedAndDate(publications: PublicationView[]): PublicationView[] {
+    return publications.sort((a, b) => {
+      // First priority: fixed publications come first
+      if (a.fixed && !b.fixed) return -1;
+      if (!a.fixed && b.fixed) return 1;
+      
+      // Second priority: date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }
+
+  /**
+   * Public method to sort publications by fixed status and date
+   * Used by components to reorder publications when fixed status changes
+   */
+  sortPublicationsByFixedAndDatePublic(publications: PublicationView[]): PublicationView[] {
+    return this.sortPublicationsByFixedAndDate(publications);
+  }
+
   private handleError(error: any) {
     console.error('An error occurred', error);
     return throwError(() => new Error('Something went wrong; please try again later.'));
@@ -100,7 +122,15 @@ export class PublicationService {
       }),
       map((publicationsResponse: Publication) => {
         if (publicationsResponse.publications) {
-          this._publicationDatabase.addPublications(publicationsResponse.publications);
+          // Sort publications by fixed status before saving to database
+          const sortedPublications = this.sortPublicationsByFixedAndDate(publicationsResponse.publications);
+          this._publicationDatabase.addPublications(sortedPublications);
+          
+          // Return sorted publications
+          return {
+            ...publicationsResponse,
+            publications: sortedPublications
+          };
         }
         return publicationsResponse;
       })
@@ -126,7 +156,15 @@ export class PublicationService {
       }),
       map((publicationsResponse: Publication) => {
         if (publicationsResponse.publications) {
-          this._publicationDatabase.addPublications(publicationsResponse.publications);
+          // Sort publications by fixed status before saving to database
+          const sortedPublications = this.sortPublicationsByFixedAndDate(publicationsResponse.publications);
+          this._publicationDatabase.addPublications(sortedPublications);
+          
+          // Return sorted publications
+          return {
+            ...publicationsResponse,
+            publications: sortedPublications
+          };
         }
         return publicationsResponse;
       })
@@ -135,14 +173,24 @@ export class PublicationService {
 
   updatePublicationById(id: string, data: EditPublication): Observable<any> {
     const url = `${this.baseUrl}/publications/edit/${id}`;
-    const response = this.http.put<any>(url, data).pipe(
+    return this.http.put<any>(url, data).pipe(
       catchError(this.handleError),
-      tap((updatedPublication) => {
-        this._publicationDatabase.updatePublication(updatedPublication);
+      switchMap((response) => {
+        // After updating, get the complete updated publication
+        return this.getPublicationId(id).pipe(
+          map((publications) => {
+            if (publications.length > 0) {
+              const updatedPublication = publications[0];
+              // Update local database
+              this._publicationDatabase.updatePublication(updatedPublication);
+              // Send notification with the complete updated publication
+              this._notificationPublicationService.sendNotificationUpdatePublication([updatedPublication]);
+            }
+            return response;
+          })
+        );
       })
     );
-    this._notificationPublicationService.sendNotificationUpdatePublication(response);
-    return response;
   }
 
   updatePublicationsLocal(newPublications: PublicationView[]): void {

@@ -18,6 +18,20 @@ export class PublicationDatabaseService {
   ) {}
 
   /**
+   * Sort publications by fixed status first, then by creation date (newest first)
+   */
+  private sortPublicationsByFixedAndDate(publications: PublicationView[]): PublicationView[] {
+    return publications.sort((a, b) => {
+      // First priority: fixed publications come first
+      if (a.fixed && !b.fixed) return -1;
+      if (!a.fixed && b.fixed) return 1;
+      
+      // Second priority: date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }
+
+  /**
    * Get database name with user ID
    */
   private getDatabaseName(): string {
@@ -147,8 +161,8 @@ export class PublicationDatabaseService {
       
       request.onsuccess = () => {
         const publications = request.result as PublicationView[];
-        publications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        resolve(publications);
+        const sortedPublications = this.sortPublicationsByFixedAndDate(publications);
+        resolve(sortedPublications);
       };
       request.onerror = () => reject(request.error);
     });
@@ -304,7 +318,9 @@ export class PublicationDatabaseService {
       
       request.onsuccess = () => {
         const publications = request.result as PublicationView[];
-        const publicationsWithTimestamp = publications.map(pub => ({
+        const sortedPublications = this.sortPublicationsByFixedAndDate(publications);
+        
+        const publicationsWithTimestamp = sortedPublications.map(pub => ({
           publication: pub,
           lastSync: new Date(pub.updatedAt).getTime()
         }));

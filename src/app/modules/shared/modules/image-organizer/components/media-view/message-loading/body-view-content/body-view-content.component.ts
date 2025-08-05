@@ -119,7 +119,10 @@ export class BodyViewContentComponent  implements OnDestroy, OnInit {
               const updatedPublications = publicationsCurrent.map(pub =>
                 pub._id === updatedPublication._id ? updatedPublication : pub
               );
-              this.publications.set(updatedPublications);
+              
+              // Sort publications by fixed status after updating
+              const sortedPublications = this._publicationService.sortPublicationsByFixedAndDatePublic(updatedPublications);
+              this.publications.set(sortedPublications);
             }
           } else if (this.typeView === TypeView.COMMENT && this.comment) {
             const commentCurrent = this.comment();

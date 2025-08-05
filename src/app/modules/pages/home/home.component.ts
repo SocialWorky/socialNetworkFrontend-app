@@ -357,13 +357,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
                     if (hasChanges) {
                       publicationsCurrent[index] = updatedPublication;
                       
-                      const fixedPublications = publicationsCurrent.filter(pub => pub.fixed);
-                      const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed);
-                      
-                      const updatedPublications = [
-                        ...fixedPublications,
-                        ...nonFixedPublications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                      ];
+                      // Use the service method to sort publications correctly
+                      const updatedPublications = this._publicationService.sortPublicationsByFixedAndDatePublic(publicationsCurrent);
                       
                       this.publications.set(updatedPublications);
                       this._cdr.markForCheck();
