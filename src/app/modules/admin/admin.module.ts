@@ -20,15 +20,7 @@ import { InvitationsCodeComponent } from './shared/invitations-code/invitations-
 import { LogComponent } from './shared/log/log.component';
 import { WebhooksComponent } from './shared/webhooks/webhooks.component';
 import { WidgetManagementComponent } from './shared/widget-management/widget-management.component';
-import { UserManagementComponent } from './shared/user-management/user-management.component';
 
-// User Management Components
-import { UserStatsComponent } from './shared/user-management/components/user-stats/user-stats.component';
-import { UserFiltersComponent } from './shared/user-management/components/user-filters/user-filters.component';
-import { UserTableComponent } from './shared/user-management/components/user-table/user-table.component';
-import { UserPaginationComponent } from './shared/user-management/components/user-pagination/user-pagination.component';
-import { UserDetailsModalComponent } from './shared/user-management/components/user-details-modal/user-details-modal.component';
-import { UserEditModalComponent } from './shared/user-management/components/user-edit-modal/user-edit-modal.component';
 import { VersionManagementComponent } from './shared/version-management/version-management.component';
 
 // Shared Components Module
@@ -57,15 +49,7 @@ import { MaterialModule } from '@shared/modules/material/material.module';
     InvitationsCodeComponent,
     LogComponent,
     WebhooksComponent,
-    UserManagementComponent,
     VersionManagementComponent,
-    // User Management Components
-    UserStatsComponent,
-    UserFiltersComponent,
-    UserTableComponent,
-    UserPaginationComponent,
-    UserDetailsModalComponent,
-    UserEditModalComponent,
   ],
   imports: [
     CommonModule,
