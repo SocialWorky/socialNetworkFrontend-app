@@ -21,10 +21,32 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '2.1.0',
+  version: '2.2.0',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🚀 OPTIMIZACIONES DE PERFORMANCE (v2.2.0):
+    - Optimized: Eliminación de comentarios con actualización local instantánea
+      * Eliminada llamada de red innecesaria para eliminar comentarios
+      * Actualización inmediata del estado local sin network requests
+      * Mejor UX con feedback instantáneo al usuario
+      * Reducción significativa de tráfico de red y carga del servidor
+      * Filtrado optimizado del comentario eliminado del array local
+    
+    - Refactored: Media processing notifications con RxJS declarativo
+      * Eliminada duplicación de código (~200 líneas)
+      * Reemplazado callback hell con operadores RxJS (timer, switchMap, catchError)
+      * Código más mantenible y robusto
+      * Mejor manejo de errores con catchError
+      * Flujo más declarativo y fácil de seguir
+    
+    🐛 CORRECCIONES CRÍTICAS:
+    - Fixed: WebSocket Observable Issue en PublicationService
+      * Corregido envío de Observable en lugar de datos reales por WebSocket
+      * Notificaciones WebSocket funcionan correctamente
+      * Eliminado código redundante y buggy
+      * Mejor rendimiento de notificaciones en tiempo real
+    
     ✨ NUEVAS FUNCIONALIDADES (v2.1.0):
     - Added: Sistema completo de skeleton components con Tailwind CSS
       * Componentes granulares: worky-text-skeleton, worky-avatar-skeleton, worky-image-skeleton, worky-button-skeleton
