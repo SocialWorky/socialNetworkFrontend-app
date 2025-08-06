@@ -28,10 +28,9 @@ export class PublicationDataService {
     type: string = 'all', 
     consultId: string = ''
   ): Observable<Publication> {
-    const url = `${this.baseUrl}/publications`;
-    const params = { page: page.toString(), size: size.toString(), type, consultId };
+    const url = `${this.baseUrl}/publications/all?page=${page}&pageSize=${size}&type=${type}&consultId=${consultId}`;
 
-    return this.http.get<Publication>(url, { params }).pipe(
+    return this.http.get<Publication>(url).pipe(
       map(response => {
         this.logService.log(LevelLogEnum.INFO, 'PublicationDataService', 'Publications fetched from server', {
           page,
@@ -70,7 +69,7 @@ export class PublicationDataService {
     return this.http.post(url, post).pipe(
       map(response => {
         this.logService.log(LevelLogEnum.INFO, 'PublicationDataService', 'Publication created successfully', {
-          publicationId: response._id
+          publicationId: (response as any)._id
         });
         return response;
       }),

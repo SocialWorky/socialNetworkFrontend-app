@@ -7,6 +7,7 @@ import { PublicationView, Comment } from '@shared/interfaces/publicationView.int
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { UtilityService } from '@shared/services/utility.service';
 import { PreloadService } from '@shared/services/preload.service';
+import { ImageLoadingService } from '@shared/services/image-loading.service';
 
 @Component({
     selector: 'worky-image-organizer',
@@ -48,7 +49,8 @@ export class ImageOrganizerComponent implements OnInit {
     private _dialog: MatDialog,
     private _deviceDetectionService: DeviceDetectionService,
     private _utilityService: UtilityService,
-    private _preloadService: PreloadService
+    private _preloadService: PreloadService,
+    private _imageLoadingService: ImageLoadingService
   ) { }
 
   ngOnInit(): void {
@@ -107,20 +109,38 @@ export class ImageOrganizerComponent implements OnInit {
   private preloadMedia(): void {
     if (this.images.length === 0) return;
 
-    const mediaUrls = this.images.map(image => {
-      if (this.isImageUrl(image.urlCompressed)) {
-        return this._utilityService.normalizeImageUrl(image.urlCompressed, this.urlMediaApi);
-      } else if (this.isVideoUrl(image.url)) {
-        return this._utilityService.normalizeImageUrl(image.url, this.urlMediaApi);
-      }
-      return null;
-    }).filter((url): url is string => url !== null && url.length > 0);
+    const imageUrls = this.images
+      .filter(image => this.isImageUrl(image.urlCompressed))
+      .map(image => this._utilityService.normalizeImageUrl(image.urlCompressed, this.urlMediaApi))
+      .filter((url): url is string => url !== null && url.length > 0);
 
-    // Only preload if we have valid URLs and network is stable
-    if (mediaUrls.length > 0) {
-      // Add a small delay to ensure the component is fully loaded
+    const videoUrls = this.images
+      .filter(image => this.isVideoUrl(image.url))
+      .map(image => this._utilityService.normalizeImageUrl(image.url, this.urlMediaApi))
+      .filter((url): url is string => url !== null && url.length > 0);
+
+    // Use ImageLoadingService for optimized image loading
+    if (imageUrls.length > 0) {
+      imageUrls.forEach(imageUrl => {
+        this._imageLoadingService.loadImage(imageUrl, 'media', {
+          timeout: 10000,
+          maxRetries: 2,
+          retryDelay: 1000
+        }).subscribe({
+          next: (result) => {
+            // Image loaded successfully - no logging needed
+          },
+          error: (error) => {
+            // Error handled silently - no logging needed
+          }
+        });
+      });
+    }
+
+    // Use PreloadService for videos (keep existing logic)
+    if (videoUrls.length > 0) {
       setTimeout(() => {
-        this._preloadService.addToPreloadQueue(mediaUrls);
+        this._preloadService.addToPreloadQueue(videoUrls);
       }, 500);
     }
   }

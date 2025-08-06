@@ -135,7 +135,7 @@ export class ImageLoadingService {
     imageType: 'profile' | 'publication' | 'media', 
     options: ImageLoadOptions
   ): Observable<ImageLoadResult> {
-    return this.imageService.loadImage(imageUrl, imageType, options).pipe(
+    return this.imageService.loadImage(imageUrl, options).pipe(
       map(url => {
         // Convert URL to blob for consistency
         return this.http.get(url, { responseType: 'blob' }).pipe(

@@ -1,12 +1,15 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
-import { filter, takeUntil, debounceTime, distinctUntilChanged, throttleTime } from 'rxjs/operators';
+import { filter, takeUntil, debounceTime, distinctUntilChanged, throttleTime, map } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
+import { PublicationDataService } from '@shared/services/core-apis/publication-data.service';
+import { PublicationCacheService } from '@shared/services/core-apis/publication-cache.service';
+import { NetworkOptimizationService } from '@shared/services/network-optimization.service';
 import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
 import { AuthService } from '@auth/services/auth.service';
 import { LocationService } from '@shared/services/apis/location.service';
@@ -106,6 +109,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   constructor(
     private _publicationService: PublicationService,
+    private _publicationDataService: PublicationDataService,
+    private _publicationCacheService: PublicationCacheService,
+    private _networkOptimizationService: NetworkOptimizationService,
     private _cdr: ChangeDetectorRef,
     private _notificationCommentService: NotificationCommentService,
     private _authService: AuthService,
@@ -282,9 +288,33 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loaderPublications = true;
     
     try {
-      const newPublicationsResponse = await firstValueFrom(
-        this._publicationService.getAllPublicationsWithSmartSync(this.page, this.pageSize, TypePublishing.ALL)
-      );
+      // Check cache first using PublicationCacheService
+      const cacheKey = `publications_${this.page}_${this.pageSize}_${TypePublishing.ALL}`;
+      const cachedPublications = this._publicationCacheService.getPublicationListFromCache(cacheKey);
+      
+      let newPublicationsResponse;
+      
+      if (cachedPublications) {
+        // Use cached data
+        newPublicationsResponse = {
+          publications: cachedPublications,
+          total: cachedPublications.length
+        };
+        this._logService.log(LevelLogEnum.INFO, 'HomeComponent', 'Publications loaded from cache', {
+          page: this.page,
+          count: cachedPublications.length
+        });
+      } else {
+        // Load from server using PublicationDataService
+        newPublicationsResponse = await firstValueFrom(
+          this._publicationDataService.getAllPublicationsFromServer(this.page, this.pageSize, TypePublishing.ALL)
+        );
+        
+        // Cache the response
+        if (newPublicationsResponse.publications.length > 0) {
+          this._publicationCacheService.addPublicationListToCache(cacheKey, newPublicationsResponse.publications);
+        }
+      }
 
       const currentPublications = this.publications();
       const newPublicationsList = newPublicationsResponse.publications;
@@ -294,7 +324,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         const existingIds = new Set(currentPublications.map(pub => pub._id));
         const uniqueNewPublications = newPublicationsList.filter(
-          pub => !existingIds.has(pub._id)
+          (pub: PublicationView) => !existingIds.has(pub._id)
         );
 
         if (uniqueNewPublications.length > 0) {
