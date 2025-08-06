@@ -245,7 +245,7 @@ export class WebSocketOptimizationService implements OnDestroy {
    * Optimized event listener with error handling
    */
   fromEvent<T>(event: string): Observable<T> {
-    return this.socket.fromEvent<T>(event).pipe(
+    return this.socket.fromEvent<T, string>(event).pipe(
       tap(() => {
         this.updateMetrics({ messageCount: this.metrics$.value.messageCount + 1 });
       }),
