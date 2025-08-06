@@ -79,6 +79,31 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     return index;
   }
 
+  // Computed properties for template optimization
+  get shouldShowAddPublication(): boolean {
+    return !this.paramPublication;
+  }
+
+  get shouldShowLoader(): boolean {
+    return this.loaderPublications;
+  }
+
+  get shouldShowEmptyState(): boolean {
+    return !this.loaderPublications && this.publications().length === 0;
+  }
+
+  get shouldShowConnectionOverlay(): boolean {
+    return this.showConnectionOverlay;
+  }
+
+  get publicationsCount(): number {
+    return this.publications().length;
+  }
+
+  get isLastPublication(): (index: number) => boolean {
+    return (index: number) => index === this.publicationsCount - 1;
+  }
+
   constructor(
     private _publicationService: PublicationService,
     private _cdr: ChangeDetectorRef,

@@ -31,7 +31,7 @@
         <div *ngIf="nameLoading || avatarLoading" class="name-skeleton">
           <worky-text-skeleton width="120px"></worky-text-skeleton>
         </div>
-        <div class="user-name" *ngIf="!nameLoading && !avatarLoading && (publication.isMyFriend || (dataUser?.id === publication.userReceiving?._id && !publication.isMyFriend) || (dataUser?.id === publication.author._id && !publication.isMyFriend)); else notFriend">
+        <div class="user-name" *ngIf="shouldShowFriendActions; else notFriend">
           <span (click)="viewProfile(publication.author._id)" class="name link-name">
             {{ publication.author.name }} {{ publication.author.lastName }}
           </span>
@@ -51,19 +51,19 @@
 
             <span class="name">
               <ng-container *ngIf="!isProfile">
-                <i *ngIf="!publication.isMyFriend || publication.isFriendshipPending" class="material-icons">fiber_manual_record</i>
+                <i *ngIf="shouldShowPendingIndicator" class="material-icons">fiber_manual_record</i>
 
-                <a *ngIf="!publication.isMyFriend && (!userRequest?._id || !userReceive?._id)" class="follow-my-friend"
+                <a *ngIf="shouldShowFollowButton" class="follow-my-friend"
                   (click)="followMyFriend(publication.author._id)">
                   {{ 'publicationsView.follow' | workyTranslations }}
                 </a>
 
-                <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending && userRequest?._id === dataUser?.id" class="follow-my-friend"
+                <a *ngIf="shouldShowCancelButton" class="follow-my-friend"
                   (click)="cancelFriendship(publication.isFriendshipPending!, publication.author._id)">
                   {{ 'publicationsView.cancelRequest' | workyTranslations }}
                 </a>
 
-                <a *ngIf="userReceive?._id === dataUser?.id" class="follow-my-friend"
+                <a *ngIf="shouldShowAcceptButton" class="follow-my-friend"
                   (click)="acceptFriendship(publication.isFriendshipPending!, publication.author._id)">
                   Aceptar Amistad
                 </a>
@@ -79,22 +79,14 @@
       <div *ngIf="locationLoading" class="location-skeleton">
         <worky-text-skeleton width="150px"></worky-text-skeleton>
       </div>
-      <span class="geoLocationName" *ngIf="nameGeoLocation !== '' && !locationLoading"> <p class="is-in">{{ 'shared.publicationView.location.isIn' | workyTranslations }} </p><a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
+      <span class="geoLocationName" *ngIf="shouldShowLocation"> <p class="is-in">{{ 'shared.publicationView.location.isIn' | workyTranslations }} </p><a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
       <div class="publication-date">
         <!-- Fecha con skeleton individual -->
         <div *ngIf="dateLoading" class="date-skeleton">
           <worky-text-skeleton width="80px"></worky-text-skeleton>
         </div>
         <span *ngIf="!dateLoading">{{ publication.createdAt! | workyDate:'relative' }}</span>
-        <ng-container *ngIf="publication.privacy === typePrivacy.PUBLIC">
-          <i class="material-icons">public</i>
-        </ng-container>
-        <ng-container *ngIf="publication.privacy === typePrivacy.FRIENDS">
-          <i class="material-icons">people</i>
-        </ng-container>
-        <ng-container *ngIf="publication.privacy === typePrivacy.PRIVATE">
-          <i class="material-icons">lock</i>
-        </ng-container>
+        <i class="material-icons">{{ privacyIcon }}</i>
       </div>
     </div>
   </div>

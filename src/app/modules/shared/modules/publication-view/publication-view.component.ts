@@ -742,5 +742,56 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     }
   }
 
+  // Computed properties for template optimization
+  get shouldShowFriendActions(): boolean {
+    return !this.nameLoading && 
+           !this.avatarLoading && 
+           (this.publication.isMyFriend || 
+            this.isUserReceiving || 
+            this.isAuthor);
+  }
+
+  get isUserReceiving(): boolean {
+    return this.dataUser?.id === this.publication.userReceiving?._id && !this.publication.isMyFriend;
+  }
+
+  get isAuthor(): boolean {
+    return this.dataUser?.id === this.publication.author._id && !this.publication.isMyFriend;
+  }
+
+  get shouldShowFollowButton(): boolean {
+    return !this.publication.isMyFriend && (!this.userRequest?._id || !this.userReceive?._id);
+  }
+
+  get shouldShowCancelButton(): boolean {
+    return !this.publication.isMyFriend && 
+           !!this.publication.isFriendshipPending && 
+           this.userRequest?._id === this.dataUser?.id;
+  }
+
+  get shouldShowAcceptButton(): boolean {
+    return this.userReceive?._id === this.dataUser?.id;
+  }
+
+  get shouldShowPendingIndicator(): boolean {
+    return !this.publication.isMyFriend || !!this.publication.isFriendshipPending;
+  }
+
+  get privacyIcon(): string {
+    switch (this.publication.privacy) {
+      case this.typePrivacy.PUBLIC:
+        return 'public';
+      case this.typePrivacy.FRIENDS:
+        return 'people';
+      case this.typePrivacy.PRIVATE:
+        return 'lock';
+      default:
+        return 'public';
+    }
+  }
+
+  get shouldShowLocation(): boolean {
+    return this.nameGeoLocation !== '' && !this.locationLoading;
+  }
 
 }
