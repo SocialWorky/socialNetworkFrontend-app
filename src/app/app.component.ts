@@ -98,25 +98,226 @@ export class AppComponent implements OnInit, OnDestroy {
 
     setTimeout(() => {
       this._socketService.listenEvent('newExternalMessage', (message: any) => {
-        if (!message.idReference) return;
-        
+        if (!message.idReference) {
+          return;
+        }
         switch (message.type) {
           case TypePublishing.POST:
             this.handlePostUpdate(message.idReference);
+            // Check if this is a media processing notification first
+            if (message.title && message.title.includes('Archivo procesado')) {
+              // Extract the publication ID from the notification
+              const publicationId = message.idReference;
+              if (publicationId) {
+                // Add a longer delay to ensure the server has updated the publication
+                setTimeout(() => {
+                  // Fetch the updated publication from server
+                  this._publicationService.getPublicationId(publicationId)
+                    .pipe(takeUntil(this.destroy$))
+                    .subscribe({
+                      next: (publications: PublicationView[]) => {
+                        if (publications && publications.length > 0) {
+                          const updatedPublication = publications[0];
+                          
+                          // Check if the publication actually has media data
+                          if (updatedPublication.media && updatedPublication.media.length > 0) {
+                            // Notify with the actual media data
+                            this._mediaEventsService.notifyMediaProcessed({
+                              idReference: publicationId,
+                              media: updatedPublication.media,
+                              containsMedia: true
+                            });
+                          } else {
+                            // Try to force sync the specific publication immediately
+                            this._publicationService.syncSpecificPublication(publicationId)
+                              .pipe(takeUntil(this.destroy$))
+                              .subscribe({
+                                next: (syncedPublication) => {
+                                  if (syncedPublication && syncedPublication.media && syncedPublication.media.length > 0) {
+                                    this._mediaEventsService.notifyMediaProcessed({
+                                      idReference: publicationId,
+                                      media: syncedPublication.media,
+                                      containsMedia: true
+                                    });
+                                  } else {
+                                    // If force sync also fails, try again after 2 seconds
+                                    setTimeout(() => {
+                                      this._publicationService.getPublicationId(publicationId)
+                                        .pipe(takeUntil(this.destroy$))
+                                        .subscribe({
+                                          next: (retryPublications: PublicationView[]) => {
+                                            if (retryPublications && retryPublications.length > 0) {
+                                              const retryPublication = retryPublications[0];
+                                              
+                                              if (retryPublication.media && retryPublication.media.length > 0) {
+                                                this._mediaEventsService.notifyMediaProcessed({
+                                                  idReference: publicationId,
+                                                  media: retryPublication.media,
+                                                  containsMedia: true
+                                                });
+                                              } else {
+                                                this._mediaEventsService.notifyMediaProcessed({
+                                                  idReference: publicationId,
+                                                  media: [],
+                                                  containsMedia: false
+                                                });
+                                              }
+                                            } else {
+                                              this._mediaEventsService.notifyMediaProcessed({
+                                                idReference: publicationId,
+                                                media: [],
+                                                containsMedia: false
+                                              });
+                                            }
+                                          },
+                                          error: (error) => {
+                                            this._mediaEventsService.notifyMediaProcessed({
+                                              idReference: publicationId,
+                                              media: [],
+                                              containsMedia: false
+                                            });
+                                          }
+                                        });
+                                    }, 2000);
+                                  }
+                                },
+                                error: (error) => {
+                                  this._mediaEventsService.notifyMediaProcessed({
+                                    idReference: publicationId,
+                                    media: [],
+                                    containsMedia: false
+                                  });
+                                }
+                              });
+                          }
+                        } else {
+                          // Even if no publication found, notify to clear processing state
+                          this._mediaEventsService.notifyMediaProcessed({
+                            idReference: publicationId,
+                            media: [],
+                            containsMedia: false
+                          });
+                        }
+                      },
+                      error: (error) => {
+                        // Even if error, notify to clear processing state
+                        this._mediaEventsService.notifyMediaProcessed({
+                          idReference: publicationId,
+                          media: [],
+                          containsMedia: false
+                        });
+                      }
+                    });
+                }, 2000); // Wait 2 seconds for server to update
+              } else {
+                // No publicationId found in message
+              }
+            } else if (message.containsMedia) {
+              this._mediaEventsService.notifyMediaProcessed(message);
+            }
             break;
           case TypePublishing.COMMENT:
             this.handleCommentUpdate(message.idReference);
-            break;
-          case TypePublishing.EMOJI:
-            this._emojiEventsService.notifyEmojiProcessed(message);
-            break;
-          case TypePublishing.POST:
-          case TypePublishing.COMMENT:
             if (message.containsMedia) {
               this._mediaEventsService.notifyMediaProcessed(message);
             }
             break;
+          case TypePublishing.EMOJI:
+            this._emojiEventsService.notifyEmojiProcessed(message);
+            break;
           default:
+            // Check if this is a media processing notification
+            if (message.title && message.title.includes('Archivo procesado')) {
+              // Extract the publication ID from the notification
+              const publicationId = message.idReference;
+              if (publicationId) {
+                // Add a longer delay to ensure the server has updated the publication
+                setTimeout(() => {
+                  // Fetch the updated publication from server
+                  this._publicationService.getPublicationId(publicationId)
+                    .pipe(takeUntil(this.destroy$))
+                    .subscribe({
+                      next: (publications: PublicationView[]) => {
+                        if (publications && publications.length > 0) {
+                          const updatedPublication = publications[0];
+                          
+                          // Check if the publication actually has media data
+                          if (updatedPublication.media && updatedPublication.media.length > 0) {
+                            // Check if there are subscribers before notifying
+                            const hasSubscribers = this._mediaEventsService.hasSubscribers();
+                            
+                            // Notify with the actual media data
+                            this._mediaEventsService.notifyMediaProcessed({
+                              idReference: publicationId,
+                              media: updatedPublication.media,
+                              containsMedia: true
+                            });
+                          } else {
+                            // If no media data, try again after 2 more seconds
+                            setTimeout(() => {
+                              this._publicationService.getPublicationId(publicationId)
+                                .pipe(takeUntil(this.destroy$))
+                                .subscribe({
+                                  next: (retryPublications: PublicationView[]) => {
+                                    if (retryPublications && retryPublications.length > 0) {
+                                      const retryPublication = retryPublications[0];
+                                      
+                                      if (retryPublication.media && retryPublication.media.length > 0) {
+                                        this._mediaEventsService.notifyMediaProcessed({
+                                          idReference: publicationId,
+                                          media: retryPublication.media,
+                                          containsMedia: true
+                                        });
+                                      } else {
+                                        this._mediaEventsService.notifyMediaProcessed({
+                                          idReference: publicationId,
+                                          media: [],
+                                          containsMedia: false
+                                        });
+                                      }
+                                    } else {
+                                      this._mediaEventsService.notifyMediaProcessed({
+                                        idReference: publicationId,
+                                        media: [],
+                                        containsMedia: false
+                                      });
+                                    }
+                                  },
+                                  error: (error) => {
+                                    this._mediaEventsService.notifyMediaProcessed({
+                                      idReference: publicationId,
+                                      media: [],
+                                      containsMedia: false
+                                    });
+                                  }
+                                });
+                            }, 2000);
+                          }
+                        } else {
+                          // Even if no publication found, notify to clear processing state
+                          this._mediaEventsService.notifyMediaProcessed({
+                            idReference: publicationId,
+                            media: [],
+                            containsMedia: false
+                          });
+                        }
+                      },
+                      error: (error) => {
+                        // Even if error, notify to clear processing state
+                        this._mediaEventsService.notifyMediaProcessed({
+                          idReference: publicationId,
+                          media: [],
+                          containsMedia: false
+                        });
+                      }
+                    });
+                }, 2000); // Wait 2 seconds for server to update
+              } else {
+                // No publicationId found in message
+              }
+            } else {
+              // Not a media processing notification
+            }
             break;
         }
       });

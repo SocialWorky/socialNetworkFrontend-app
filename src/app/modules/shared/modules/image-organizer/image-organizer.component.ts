@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ImageOrganizer, MediaType } from './interfaces/image-organizer.interface';
 import { environment } from '@env/environment';
@@ -22,6 +22,9 @@ export class ImageOrganizerComponent implements OnInit {
   @Input() type = 'publication';
 
   @Input() comment?: Comment;
+
+  @Output() load = new EventEmitter<void>();
+  @Output() error = new EventEmitter<Event>();
 
   images: ImageOrganizer[] = [];
 
@@ -94,6 +97,11 @@ export class ImageOrganizerComponent implements OnInit {
 
   onImageError(event: Event): void {
     this._utilityService.handleImageError(event, 'assets/img/shared/handleImageError.png');
+    this.error.emit(event);
+  }
+
+  onImageLoad(): void {
+    this.load.emit();
   }
 
   private preloadMedia(): void {
@@ -106,10 +114,14 @@ export class ImageOrganizerComponent implements OnInit {
         return this._utilityService.normalizeImageUrl(image.url, this.urlMediaApi);
       }
       return null;
-    }).filter(url => url !== null);
+    }).filter((url): url is string => url !== null && url.length > 0);
 
+    // Only preload if we have valid URLs and network is stable
     if (mediaUrls.length > 0) {
-      this._preloadService.addToPreloadQueue(mediaUrls);
+      // Add a small delay to ensure the component is fully loaded
+      setTimeout(() => {
+        this._preloadService.addToPreloadQueue(mediaUrls);
+      }, 500);
     }
   }
 

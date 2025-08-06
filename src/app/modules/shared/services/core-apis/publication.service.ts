@@ -494,4 +494,25 @@ export class PublicationService {
       maxListCache: 20
     };
   }
+
+  /**
+   * Updates a publication in the local database (IndexedDB) with new media data
+   * This ensures consistency between UI and local storage when media processing completes
+   */
+  async updatePublicationInLocalDatabase(publicationId: string, updateData: { media: any[]; containsMedia: boolean }): Promise<void> {
+    try {
+      // Update the publication in IndexedDB
+      await this._publicationDatabase.updatePublicationMedia(publicationId, updateData.media, updateData.containsMedia);
+      
+      // Update the cache with the new data
+      const cachedPublication = this.publicationCache.get(publicationId);
+      if (cachedPublication) {
+        cachedPublication.publication.media = updateData.media;
+        cachedPublication.publication.containsMedia = updateData.containsMedia;
+        cachedPublication.timestamp = Date.now();
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
 }

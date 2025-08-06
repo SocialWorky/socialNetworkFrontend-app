@@ -63,7 +63,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   paramPublication: boolean = false;
 
-  loaderPublications: boolean = false; // Iniciar en false para permitir carga
+  loaderPublications: boolean = false;
 
   userData: User | undefined;
   isLoadingUserData: boolean = true;
@@ -102,7 +102,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   isMobile = this._deviceDetectionService.isMobile();
 
-  navbarVisible = true; // Track navbar visibility
+  navbarVisible = true;
 
   hasMorePublications = true;
 
@@ -326,7 +326,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       .pipe(
         takeUntil(this.destroy$),
         filter((notifications: NotificationNewPublication[]) => !!notifications?.[0]?.publications?._id),
-        // Removed debounceTime for immediate response
         distinctUntilChanged((prev, curr) => {
           if (!prev || !curr || prev.length === 0 || curr.length === 0) return false;
           return prev[0].publications._id === curr[0].publications._id;
@@ -372,7 +371,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
                 this._logService.log(
                   LevelLogEnum.ERROR,
                   'ProfilesComponent',
-                  'Error al obtener la publicación',
+                  'Error getting publication',
                   {
                     user: this._authService.getDecodedToken(),
                     message: error,
@@ -385,7 +384,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
           this._logService.log(
             LevelLogEnum.ERROR,
             'ProfilesComponent',
-            'Error en suscripción de notificaciones de nuevas publicaciones',
+            'Error in new publication notifications subscription',
             {
               user: this._authService.getDecodedToken(),
               message: error,
@@ -399,7 +398,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     this._notificationPublicationService.notificationDeletePublication$
       .pipe(
         takeUntil(this.destroy$),
-        // Removed debounceTime for immediate response
         distinctUntilChanged((prev, curr) => {
           if (!prev || !curr || prev.length === 0 || curr.length === 0) return false;
           return prev[0]._id === curr[0]._id;
@@ -422,7 +420,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
           this._logService.log(
             LevelLogEnum.ERROR,
             'ProfilesComponent',
-            'Error en suscripción de notificaciones de eliminar publicaciones',
+            'Error in delete publication notifications subscription',
             {
               user: this._authService.getDecodedToken(),
               message: error,
@@ -459,7 +457,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
               this._logService.log(
                 LevelLogEnum.ERROR,
                 'ProfilesComponent',
-                'Error al obtener la publicación',
+                'Error getting publication',
                 {
                   user: this._authService.getDecodedToken(),
                   message: error,
@@ -485,7 +483,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
             if (hasChanges) {
               publicationsCurrent[existingIndex] = updatedPublication;
               
-              // Use the service method to sort publications correctly
               const updatedPublications = this._publicationService.sortPublicationsByFixedAndDatePublic(publicationsCurrent);
               
               this.publicationsProfile.set(updatedPublications);
@@ -497,7 +494,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
           this._logService.log(
             LevelLogEnum.ERROR,
             'ProfilesComponent',
-            'Error en suscripción de notificaciones de actualizar publicaciones',
+            'Error in update publication notifications subscription',
             {
               user: this._authService.getDecodedToken(),
               message: error,
@@ -511,7 +508,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     this._notificationCommentService.notificationComment$
      .pipe(
        takeUntil(this.destroy$),
-       // Removed debounceTime for immediate response
        filter((data: any) => !!data?.postId)
      )
      .subscribe({
@@ -546,7 +542,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
               this._logService.log(
                 LevelLogEnum.ERROR,
                 'ProfilesComponent',
-                'Error al obtener la publicación para comentario',
+                'Error getting publication for comment',
                 {
                   user: this._authService.getDecodedToken(),
                   message: error,
@@ -560,7 +556,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
         this._logService.log(
           LevelLogEnum.ERROR,
           'ProfilesComponent',
-          'Error en suscripción de notificaciones de comentarios',
+          'Error in comment notifications subscription',
           {
             user: this._authService.getDecodedToken(),
             message: error,
@@ -580,7 +576,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
         this._logService.log(
           LevelLogEnum.ERROR,
           'ProfilesComponent',
-          'Error al obtener los amigos',
+          'Error getting friends',
           {
             user: this._authService.getDecodedToken(),
             message: error,
@@ -796,19 +792,15 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     this._cdr.markForCheck();
     
     try {
-      // Mostrar indicador de refresh moderno
       this.showModernRefreshIndicator();
       
-      // Recargar datos del perfil
       await this.getDataProfile();
       
-      // Recargar publicaciones
       this.page = 1;
       this.hasMorePublications = true;
       this.publicationsProfile.set([]);
       await this.loadPublications();
       
-      // Hide indicator after completion
       setTimeout(() => {
         this.hideModernRefreshIndicator();
         this.isRefreshing = false;
@@ -816,7 +808,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       }, 1000);
       
     } catch (error) {
-      console.error('Error en pull-to-refresh:', error);
+      console.error('Error in pull-to-refresh:', error);
       this.hideModernRefreshIndicator();
       this.isRefreshing = false;
       this._cdr.markForCheck();
@@ -867,7 +859,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
             <path d="M17.3 6.7l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <span class="modern-refresh-text">Actualizando...</span>
+        <span class="modern-refresh-text">Updating...</span>
       </div>
     `;
     

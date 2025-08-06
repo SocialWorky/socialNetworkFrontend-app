@@ -66,6 +66,21 @@ export class UserService {
   }
 
   /**
+   * Get user by ID for critical components that need fresh data
+   * This method bypasses cache completely for components like AddPublication
+   */
+  getUserByIdFresh(id: string): Observable<User> {
+    const url = `${this.baseUrl}/user/${id}`;
+    return this.http.get<User>(url).pipe(
+      tap(user => {
+        // Update cache with fresh data
+        this.addToCache(id, user);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
    * Search users with optional limit
    */
   searchUsers(limit?: number): Observable<User[]> {
@@ -116,6 +131,21 @@ export class UserService {
     return this.http.put<User>(url, data).pipe(
       tap((updatedUser) => {
         // Update cache with refreshed data
+        this.addToCache(id, updatedUser);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Update user avatar and invalidate cache for immediate refresh
+   */
+  updateUserAvatar(id: string, avatarData: any): Observable<User> {
+    const url = `${this.baseUrl}/user/edit/${id}`;
+    
+    return this.http.put<User>(url, avatarData).pipe(
+      tap((updatedUser) => {
+        // Immediately update cache with new avatar
         this.addToCache(id, updatedUser);
       }),
       catchError(this.handleError)

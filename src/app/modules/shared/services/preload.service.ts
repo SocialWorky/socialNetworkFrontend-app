@@ -48,20 +48,34 @@ export class PreloadService {
     
     const urlsToPreload = this.preloadQueue.splice(0, this.MAX_CONCURRENT_PRELOADS);
     
+    // Filter out URLs that might cause network issues
+    const validUrls = urlsToPreload.filter(url => {
+      // Skip URLs that are already cached or have network issues
+      if (!url || url.includes('undefined') || url.includes('null')) {
+        return false;
+      }
+      return true;
+    });
 
-
-    urlsToPreload.forEach(url => {
+    validUrls.forEach(url => {
       this.mediaCacheService.loadMedia(url, {
         ...connectionOptions,
-        preload: true
+        preload: true,
+        maxRetries: 1, // Reduce retries to prevent cascading errors
+        retryDelay: 1000, // Shorter delay
+        timeout: 5000 // Shorter timeout
       }).subscribe({
         next: () => {
+          // Success - no logging needed for preload
         },
         error: (error) => {
-          this.logService.log(LevelLogEnum.WARN, 'PreloadService', 'Preload failed', { 
-            url, 
-            error: error.message 
-          });
+          // Only log critical errors, not network issues
+          if (error.status !== 0 && error.status !== 404) {
+            this.logService.log(LevelLogEnum.WARN, 'PreloadService', 'Preload failed', { 
+              url, 
+              error: error.message 
+            });
+          }
         }
       });
     });

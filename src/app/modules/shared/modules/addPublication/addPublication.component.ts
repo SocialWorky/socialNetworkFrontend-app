@@ -65,7 +65,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   user: User = {} as User;
 
-  profileImageUrl: string | null = null;
+  profileImageUrl: string | null = '';
 
   nameGeoLocation = '';
 
@@ -369,23 +369,21 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   private getUser() {
     this._userService
-      .getUserById(this.decodedToken.id)
+      .getUserByIdFresh(this.decodedToken.id)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
         next: (response: User) => {
-          // Handle avatar URL - if it's relative, add the file service prefix
+          // Handle avatar URL - use the avatar as it comes from the server
           if (response.avatar && response.avatar.trim() !== '' && response.avatar !== 'null' && response.avatar !== 'undefined') {
-            if (response.avatar.startsWith('http')) {
-              this.profileImageUrl = response.avatar;
-            } else {
-              this.profileImageUrl = environment.APIFILESERVICE + response.avatar;
-            }
+            this.profileImageUrl = response.avatar;
           } else {
             this.profileImageUrl = null;
           }
           
           this.user = response;
           this._cdr.markForCheck();
+          
+
           
 
           
