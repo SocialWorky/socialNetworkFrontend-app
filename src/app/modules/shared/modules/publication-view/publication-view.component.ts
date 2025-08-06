@@ -30,6 +30,9 @@ import { Token } from '@shared/interfaces/token.interface';
 import { LoadingService } from '@shared/services/loading.service';
 import { ImageLoadOptions } from '../../services/image.service';
 import { MediaEventsService } from '@shared/services/media-events.service';
+import { AlertService } from '@shared/services/alert.service';
+import { Alerts, Position } from '@shared/enums/alerts.enum';
+
 
 @Component({
     selector: 'worky-publication-view',
@@ -96,6 +99,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   locationLoading: boolean = true;
   dateLoading: boolean = true;
   actionsLoading: boolean = true;
+  isDeletingPublication: boolean = false;
+  isDeletingComment: boolean = false;
+  translations = translations;
 
   private destroy$ = new Subject<void>();
   private mediaProcessingTimeout?: any;
@@ -124,7 +130,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _notificationService: NotificationService,
     private _scrollService: ScrollService,
     private _loadingService: LoadingService,
-    private _mediaEventsService: MediaEventsService
+    private _mediaEventsService: MediaEventsService,
+    private _alertService: AlertService
   ) {}
 
   async ngAfterViewInit() {
@@ -529,20 +536,37 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async deletePublications(publication: PublicationView) {
-    // Usar el nuevo sistema de loading accesible
-    const loading = await this._loadingService.showLoading(translations['publicationsView.loadingDeletePublication']);
-
-    this._publicationService.deletePublication(publication._id).pipe(
+    // Show confirmation alert using AlertService
+    this._alertService.showConfirmation(
+      translations['publicationsView.deletePublicationTitle'],
+      translations['publicationsView.deletePublicationWarning'],
+      translations['publicationsView.delete'],
+      translations['publicationsView.cancel'],
+      Alerts.WARNING,
+      Position.CENTER
+    ).pipe(
       takeUntil(this.destroy$)
-    ).subscribe({
-      next: () => {
-        this._publicationService.updatePublicationsDeleted([publication]);
-        this._loadingService.hideLoading();
-      },
-      error: (error) => {
-        console.error(error);
-        this._loadingService.hideLoading();
-      },
+    ).subscribe(async (confirmed: boolean) => {
+      if (confirmed) {
+        // Show accessible loading immediately after confirmation
+        this.isDeletingPublication = true;
+        this._cdr.markForCheck(); // Force immediate UI update
+
+        this._publicationService.deletePublication(publication._id).pipe(
+          takeUntil(this.destroy$)
+        ).subscribe({
+          next: () => {
+            this._publicationService.updatePublicationsDeleted([publication]);
+            this.isDeletingPublication = false;
+            this._cdr.markForCheck();
+          },
+          error: (error) => {
+            console.error(error);
+            this.isDeletingPublication = false;
+            this._cdr.markForCheck();
+          },
+        });
+      }
     });
   }
 
@@ -698,16 +722,34 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async deleteComment(_id: string, id_publication: string) {
-    const loading = await this._loadingService.showLoading(translations['publicationsView.loadingDeletePublication']);
+    // Show confirmation alert using AlertService
+    this._alertService.showConfirmation(
+      translations['publicationsView.deleteCommentTitle'],
+      translations['publicationsView.deleteCommentWarning'],
+      translations['publicationsView.delete'],
+      translations['publicationsView.cancel'],
+      Alerts.WARNING,
+      Position.CENTER
+    ).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(async (confirmed: boolean) => {
+      if (confirmed) {
+        // Show accessible loading immediately after confirmation
+        this.isDeletingComment = true;
+        this._cdr.markForCheck(); // Force immediate UI update
 
-    this._commentService.deleteComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => {
-        this.refreshPublications(id_publication);
-        this._loadingService.hideLoading();
-      },
-      error: (error) => {
-        console.error('Error deleting comment:', error);
-        this._loadingService.hideLoading();
+        this._commentService.deleteComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
+          next: () => {
+            this.refreshPublications(id_publication);
+            this.isDeletingComment = false;
+            this._cdr.markForCheck();
+          },
+          error: (error) => {
+            console.error('Error deleting comment:', error);
+            this.isDeletingComment = false;
+            this._cdr.markForCheck();
+          }
+        });
       }
     });
   }

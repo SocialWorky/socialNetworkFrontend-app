@@ -64,7 +64,7 @@ export class AccessibleLoadingComponent implements OnInit, OnDestroy {
       if (overlay) {
         overlay.focus();
       }
-    }, 100);
+    }, 50);
   }
 
   onEscapeKey(): void {

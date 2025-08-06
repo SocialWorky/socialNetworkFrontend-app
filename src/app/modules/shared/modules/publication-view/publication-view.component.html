@@ -244,3 +244,10 @@
     </div>
   </div>
 </div>
+
+<!-- Accessible Loading Component for deletion operations -->
+<worky-accessible-loading
+  [show]="isDeletingPublication || isDeletingComment"
+  [message]="isDeletingPublication ? (translations['publicationsView.loadingDeletePublication'] | workyTranslations) : (translations['publicationsView.loadingDeleteComment'] | workyTranslations)"
+  [fullscreen]="true">
+</worky-accessible-loading>

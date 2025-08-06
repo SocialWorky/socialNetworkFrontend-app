@@ -21,6 +21,8 @@ import { ImageSkeletonComponent } from '../../components/skeleton/image-skeleton
 import { TextSkeletonComponent } from '../../components/skeleton/text-skeleton.component';
 import { AvatarSkeletonComponent } from '../../components/skeleton/avatar-skeleton.component';
 import { ButtonSkeletonComponent } from '../../components/skeleton/button-skeleton.component';
+import { SharedModule } from '../../shared.module';
+
 
 @NgModule({
   declarations: [PublicationViewComponent, ReportResponseComponent],
@@ -45,6 +47,7 @@ import { ButtonSkeletonComponent } from '../../components/skeleton/button-skelet
     TextSkeletonComponent,
     AvatarSkeletonComponent,
     ButtonSkeletonComponent,
+    SharedModule,
   ],
 })
 export class PublicationViewModule {}

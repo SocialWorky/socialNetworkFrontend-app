@@ -1,3 +1,5 @@
+@use 'src/assets/styles/worky-palettes.scss' as colors;
+
 .accessible-loading-overlay {
   position: fixed;
   top: 0;
@@ -46,21 +48,21 @@
     height: 100%;
     border: 3px solid transparent;
     border-radius: 50%;
-    animation: spin 1.5s linear infinite;
+    animation: spin 1s linear infinite;
     
     &:nth-child(1) {
-      border-top-color: #007bff;
+      border-top-color: colors.$worky-color-blue;
       animation-delay: 0s;
     }
     
     &:nth-child(2) {
-      border-right-color: #28a745;
-      animation-delay: 0.5s;
+      border-right-color: colors.$worky-color-green;
+      animation-delay: 0.3s;
     }
     
     &:nth-child(3) {
-      border-bottom-color: #ffc107;
-      animation-delay: 1s;
+      border-bottom-color: colors.$worky-color-yellow;
+      animation-delay: 0.6s;
     }
   }
 }
@@ -68,14 +70,14 @@
 .loading-message {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: colors.$worky-color-text;
   margin-bottom: 8px;
   line-height: 1.4;
 }
 
 .loading-sub-message {
   font-size: 14px;
-  color: #666;
+  color: colors.$worky-color-grey;
   line-height: 1.4;
 }
 
