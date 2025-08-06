@@ -7,6 +7,7 @@ import { environment } from '@env/environment';
 import { CreatePost } from '@shared/modules/addPublication/interfaces/createPost.interface';
 import { EditPublication, Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
 import { LogService, LevelLogEnum } from './log.service';
+import { NetworkOptimizationService } from '@shared/services/network-optimization.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,8 @@ export class PublicationDataService {
 
   constructor(
     private http: HttpClient,
-    private logService: LogService
+    private logService: LogService,
+    private networkOptimizationService: NetworkOptimizationService
   ) {}
 
   /**
@@ -66,7 +68,7 @@ export class PublicationDataService {
   createPost(post: CreatePost): Observable<any> {
     const url = `${this.baseUrl}/publications`;
     
-    return this.http.post(url, post).pipe(
+    return this.networkOptimizationService.post(url, post).pipe(
       map(response => {
         this.logService.log(LevelLogEnum.INFO, 'PublicationDataService', 'Publication created successfully', {
           publicationId: (response as any)._id
@@ -83,7 +85,7 @@ export class PublicationDataService {
   updatePublicationById(id: string, data: EditPublication): Observable<any> {
     const url = `${this.baseUrl}/publications/${id}`;
     
-    return this.http.put(url, data).pipe(
+    return this.networkOptimizationService.put(url, data).pipe(
       map(response => {
         this.logService.log(LevelLogEnum.INFO, 'PublicationDataService', 'Publication updated successfully', { id });
         return response;
@@ -98,7 +100,7 @@ export class PublicationDataService {
   deletePublication(id: string): Observable<any> {
     const url = `${this.baseUrl}/publications/${id}`;
     
-    return this.http.delete(url).pipe(
+    return this.networkOptimizationService.delete(url).pipe(
       map(response => {
         this.logService.log(LevelLogEnum.INFO, 'PublicationDataService', 'Publication deleted successfully', { id });
         return response;
