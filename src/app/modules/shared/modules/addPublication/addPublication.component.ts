@@ -65,7 +65,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   user: User = {} as User;
 
-  profileImageUrl: string | null = null;
+  profileImageUrl: string | null = '';
 
   nameGeoLocation = '';
 
@@ -202,8 +202,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   onAvatarLoad() {
     this.avatarLoading = false;
     this._cdr.markForCheck();
-    
-    // Avatar loaded successfully - no need to log every avatar load
   }
 
   onAvatarError() {
@@ -371,13 +369,23 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   private getUser() {
     this._userService
-      .getUserById(this.decodedToken.id)
+      .getUserByIdFresh(this.decodedToken.id)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
         next: (response: User) => {
-          this.profileImageUrl = response.avatar;
+          // Handle avatar URL - use the avatar as it comes from the server
+          if (response.avatar && response.avatar.trim() !== '' && response.avatar !== 'null' && response.avatar !== 'undefined') {
+            this.profileImageUrl = response.avatar;
+          } else {
+            this.profileImageUrl = null;
+          }
+          
           this.user = response;
           this._cdr.markForCheck();
+          
+
+          
+
           
           // Always resolve avatar loading, with or without image
           if (this.profileImageUrl && this.profileImageUrl.trim() !== '') {
@@ -454,7 +462,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         loadingComment.dismiss();
       },
       error: error => {
-        console.error(error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'AddPublicationComponent',
+          'Error creating comment',
+          { error: error instanceof Error ? error.message : String(error) }
+        );
         this.loaderSavePublication = false;
         loadingComment.dismiss();
       }
@@ -482,7 +495,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         );
       }
     } catch (error) {
-      console.error(error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'AddPublicationComponent',
+        'Error handling comment response',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
     }
   }
 
@@ -510,7 +528,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         loadingPublications.dismiss();
       },
       error: error => {
-        console.error(error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'AddPublicationComponent',
+          'Error creating publication',
+          { error: error.message }
+        );
         this.loaderSavePublication = false;
         loadingPublications.dismiss();
       },
@@ -563,7 +586,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         );
       }
     } catch (error) {
-      console.error(error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'AddPublicationComponent',
+        'Error handling publication response',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
     }
   }
 
@@ -761,7 +789,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       const publicationsNew = await lastValueFrom(this._publicationService.getAllPublications(1, 10, type, idUserProfile));
       this._publicationService.updatePublications(publicationsNew.publications);
     } catch (error) {
-      console.error('Error getting publications', error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'AddPublicationComponent',
+        'Error getting publications',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
     }
   }
 

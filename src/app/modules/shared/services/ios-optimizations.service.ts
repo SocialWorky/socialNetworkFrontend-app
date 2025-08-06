@@ -1,12 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class IOSOptimizationsService {
+export class IOSOptimizationsService implements OnDestroy {
   private isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  
+  private memoryMonitoringInterval: any;
 
   constructor(private logService: LogService) {
     this.initializeIOSOptimizations();
@@ -42,7 +44,7 @@ export class IOSOptimizationsService {
   private setupIOSMemoryOptimizations(): void {
     // Monitor memory usage on iOS
     if ('memory' in performance) {
-      setInterval(() => {
+      this.memoryMonitoringInterval = setInterval(() => {
         const memory = (performance as any).memory;
         if (memory && memory.usedJSHeapSize > memory.jsHeapSizeLimit * 0.8) {
           this.logService.log(LevelLogEnum.WARN, 'IOSOptimizationsService', 'High memory usage detected', {
@@ -99,5 +101,12 @@ export class IOSOptimizationsService {
     }
 
     // Low memory optimization triggered - no need to log every optimization
+  }
+
+  ngOnDestroy(): void {
+    if (this.memoryMonitoringInterval) {
+      clearInterval(this.memoryMonitoringInterval);
+      this.memoryMonitoringInterval = null;
+    }
   }
 } 

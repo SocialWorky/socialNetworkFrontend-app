@@ -1,23 +1,20 @@
 import { NgModule } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { RouterModule, Routes } from '@angular/router';
+import { IonicModule } from '@ionic/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { RouterModule } from '@angular/router';
-
-import { PagesRoutingModule } from './pages-routing.module';
-import { HomeComponent } from './home/home.component';
-import { LoyautComponent } from './templates/loyaut/loyaut.component';
-import { NavbarComponent } from './components/navbar/navbar.component';
-import { ContentLeftSideComponent } from './components/content-left-side/content-left-side.component';
-import { ContentRightSideComponent } from './components/content-right-side/content-right-side.component';
-import { MaterialModule } from '@shared/modules/material/material.module';
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
 import { MarkdownModule } from 'ngx-markdown';
 
+import { ProfilesComponent } from './profiles.component';
+import { ProfileDetailComponent } from './components/profile-detail/profile-detail.component';
+import { EditImgProfileComponent } from './components/edit-img-profile/edit-img-profile.component';
+import { EditInfoProfileDetailComponent } from './components/edit-info-profile/edit-info-profile.component';
+
+import { SharedModule } from '@shared/shared.module';
+import { MaterialModule } from '@shared/modules/material/material.module';
 import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
-import { WorkyMenuComponentComponent } from './components/navbar/worky-menu-component/worky-menu-component.component';
-import { SideBarMenutModule } from '@shared/modules/sidebar-menu/sidebar-menu.module';
 import { WorkyDropdownModule } from '@shared/modules/worky-dropdown/worky-dropdown.module';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
 import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.module';
@@ -30,18 +27,19 @@ import { UserOnlineModule } from '@shared/modules/user-online/user-online.module
 import { NotificationsPanelModule } from '@shared/modules/notifications-panel/notifications-panel.module';
 import { ProcessingMediaModule } from '@shared/modules/processing-media/processing-media.module';
 import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.module';
-import { SharedModule } from '@shared/shared.module';
 import { SyncIndicatorComponent } from '@shared/components/sync-indicator/sync-indicator.component';
 
+const routes: Routes = [
+  { path: '', component: ProfilesComponent },
+  { path: ':profileId', component: ProfilesComponent }
+];
 
 @NgModule({
   declarations: [
-    HomeComponent,
-    LoyautComponent,
-    NavbarComponent,
-    ContentLeftSideComponent,
-    ContentRightSideComponent,
-    WorkyMenuComponentComponent,
+    ProfilesComponent,
+    ProfileDetailComponent,
+    EditImgProfileComponent,
+    EditInfoProfileDetailComponent
   ],
   imports: [
     CommonModule,
@@ -50,7 +48,7 @@ import { SyncIndicatorComponent } from '@shared/components/sync-indicator/sync-i
     ScrollingModule,
     ReactiveFormsModule,
     RouterModule,
-    PagesRoutingModule,
+    RouterModule.forChild(routes),
     WorkyDropdownModule,
     TranslationsModule,
     WorkyAvatarModule,
@@ -59,7 +57,6 @@ import { SyncIndicatorComponent } from '@shared/components/sync-indicator/sync-i
     WorkyWidgetModule,
     MaterialModule,
     PickerModule,
-    SideBarMenutModule,
     ContactsModule,
     WorkyButtonsModule,
     UserOnlineModule,
@@ -69,7 +66,7 @@ import { SyncIndicatorComponent } from '@shared/components/sync-indicator/sync-i
     ProcessingMediaModule,
     FormBuilderModule,
     SharedModule,
-    SyncIndicatorComponent,
+    SyncIndicatorComponent
   ]
 })
-export class PagesModule { }
+export class ProfilesModule { } 

@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { jwtDecode } from 'jwt-decode';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { NetworkOptimizationService } from '@shared/services/network-optimization.service';
 
 import { environment } from '@env/environment';
 import { Token } from '../../shared/interfaces/token.interface';
@@ -26,7 +27,8 @@ export class AuthService {
     private _router: Router,
     private _userService: UserService,
     private logService: LogService,
-    private databaseCleanup: DatabaseCleanupService
+    private databaseCleanup: DatabaseCleanupService,
+    private networkOptimizationService: NetworkOptimizationService
   ) {}
 
   async isAuthenticated(): Promise<boolean> {
@@ -94,10 +96,9 @@ export class AuthService {
     const token = localStorage.getItem('token');
     const url = `${environment.API_URL}/user/renewtoken/${_id}`;
     try {
-      const response: any = await this.http.get(url, { 
-        headers: { Authorization: `Bearer ${token}` }, 
-        responseType: 'text' 
-      }).toPromise();
+      const response: any = await firstValueFrom(this.networkOptimizationService.get(url, { 
+        headers: new HttpHeaders({ Authorization: `Bearer ${token}` })
+      }));
       
       const newToken = response;
       localStorage.setItem('token', newToken);
@@ -161,7 +162,7 @@ export class AuthService {
   async checkExistingUserName(username: string): Promise<boolean> {
     const url = `${environment.API_URL}/user/checkUsername/${username}`;
     try {
-      const data: any = await this.http.get(url).toPromise();
+      const data: any = await firstValueFrom(this.networkOptimizationService.get(url));
       return data;
     } catch (error) {
       return false;
@@ -221,7 +222,7 @@ export class AuthService {
         isVerified: true
       };
       
-      return this.http.put(url, updateData);
+      return this.networkOptimizationService.put(url, updateData);
     } catch (error) {
       return new Observable(observer => {
         observer.error(new Error('Invalid token format'));

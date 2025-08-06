@@ -4,6 +4,8 @@ import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { Socket } from 'ngx-socket-io';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
+import { WebSocketOptimizationService } from '@shared/services/websocket-optimization.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 
 @Injectable({
@@ -22,6 +24,8 @@ export class NotificationPublicationService implements OnDestroy {
 
     constructor(
       private socket: Socket,
+      private webSocketOptimizationService: WebSocketOptimizationService,
+      private logService: LogService
     ) {
       this.subscribeToNotificationNewPublication();
       this.subscribeToNotificationDeletePublication();
@@ -29,10 +33,11 @@ export class NotificationPublicationService implements OnDestroy {
     }
 
     private subscribeToNotificationNewPublication() {
-      this.socket.fromEvent<NotificationNewPublication, 'newPublication'>('newPublication')
+      this.webSocketOptimizationService.fromEvent<NotificationNewPublication>('newPublication')
         .pipe(
           takeUntil(this._unsubscribeAll),
           catchError(error => {
+            this.logService.log(LevelLogEnum.ERROR, 'NotificationPublicationService', 'Error in newPublication event', { error });
             throw error;
           })
         )
@@ -44,10 +49,11 @@ export class NotificationPublicationService implements OnDestroy {
     }
 
     private subscribeToNotificationDeletePublication() {
-      this.socket.fromEvent<{_id: string}, 'deletePublication'>('deletePublication')
+      this.webSocketOptimizationService.fromEvent<{_id: string}>('deletePublication')
         .pipe(
           takeUntil(this._unsubscribeAll),
           catchError(error => {
+            this.logService.log(LevelLogEnum.ERROR, 'NotificationPublicationService', 'Error in deletePublication event', { error });
             throw error;
           })
         )
@@ -59,10 +65,11 @@ export class NotificationPublicationService implements OnDestroy {
     }
 
     private subscribeToNotificationUpdatePublication() {
-      this.socket.fromEvent<PublicationView[], 'updatePublication'>('updatePublication')
+      this.webSocketOptimizationService.fromEvent<PublicationView[]>('updatePublication')
         .pipe(
           takeUntil(this._unsubscribeAll),
           catchError(error => {
+            this.logService.log(LevelLogEnum.ERROR, 'NotificationPublicationService', 'Error in updatePublication event', { error });
             throw error;
           })
         )
@@ -74,15 +81,15 @@ export class NotificationPublicationService implements OnDestroy {
     }
 
     sendNotificationNewPublication(payload: any) {
-      this.socket.emit('newPublication', payload);
+      this.webSocketOptimizationService.emit('newPublication', payload);
     }
 
     sendNotificationDeletePublication(payload: any) {
-      this.socket.emit('deletePublication', payload);
+      this.webSocketOptimizationService.emit('deletePublication', payload);
     }
 
     sendNotificationUpdatePublication(payload: any) {
-      this.socket.emit('updatePublication', payload);
+      this.webSocketOptimizationService.emit('updatePublication', payload);
     }
 
     ngOnDestroy() {

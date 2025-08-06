@@ -1,6 +1,7 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-palettes' as colors;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'sass:color';
 
 .content-publication-view {
 
@@ -176,6 +177,57 @@
     // Estilos para skeleton de media
     .media-skeleton {
       padding: 16px;
+    }
+
+    .media-processing-error {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background-color: colors.$worky-color-greyLight;
+      border-radius: 8px;
+      margin: 1rem 16px;
+      
+      .error-message {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        color: colors.$worky-color-warn;
+        
+        i {
+          font-size: 20px;
+        }
+        
+        span {
+          font-size: variables.$worky-font-size-4;
+          font-weight: 500;
+        }
+      }
+      
+      .retry-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: colors.$worky-color-blue;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: variables.$worky-font-size-3;
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+        
+        &:hover {
+          background-color: color-mix(in srgb, colors.$worky-color-blue, black 10%);
+        }
+        
+        i {
+          font-size: 16px;
+        }
+      }
     }
   }
 

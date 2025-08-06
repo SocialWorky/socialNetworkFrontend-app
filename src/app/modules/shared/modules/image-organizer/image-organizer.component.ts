@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ImageOrganizer, MediaType } from './interfaces/image-organizer.interface';
 import { environment } from '@env/environment';
@@ -7,6 +7,7 @@ import { PublicationView, Comment } from '@shared/interfaces/publicationView.int
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { UtilityService } from '@shared/services/utility.service';
 import { PreloadService } from '@shared/services/preload.service';
+import { ImageLoadingService } from '@shared/services/image-loading.service';
 
 @Component({
     selector: 'worky-image-organizer',
@@ -22,6 +23,9 @@ export class ImageOrganizerComponent implements OnInit {
   @Input() type = 'publication';
 
   @Input() comment?: Comment;
+
+  @Output() load = new EventEmitter<void>();
+  @Output() error = new EventEmitter<Event>();
 
   images: ImageOrganizer[] = [];
 
@@ -45,7 +49,8 @@ export class ImageOrganizerComponent implements OnInit {
     private _dialog: MatDialog,
     private _deviceDetectionService: DeviceDetectionService,
     private _utilityService: UtilityService,
-    private _preloadService: PreloadService
+    private _preloadService: PreloadService,
+    private _imageLoadingService: ImageLoadingService
   ) { }
 
   ngOnInit(): void {
@@ -94,22 +99,49 @@ export class ImageOrganizerComponent implements OnInit {
 
   onImageError(event: Event): void {
     this._utilityService.handleImageError(event, 'assets/img/shared/handleImageError.png');
+    this.error.emit(event);
+  }
+
+  onImageLoad(): void {
+    this.load.emit();
   }
 
   private preloadMedia(): void {
     if (this.images.length === 0) return;
 
-    const mediaUrls = this.images.map(image => {
-      if (this.isImageUrl(image.urlCompressed)) {
-        return this._utilityService.normalizeImageUrl(image.urlCompressed, this.urlMediaApi);
-      } else if (this.isVideoUrl(image.url)) {
-        return this._utilityService.normalizeImageUrl(image.url, this.urlMediaApi);
-      }
-      return null;
-    }).filter(url => url !== null);
+    const imageUrls = this.images
+      .filter(image => this.isImageUrl(image.urlCompressed))
+      .map(image => this._utilityService.normalizeImageUrl(image.urlCompressed, this.urlMediaApi))
+      .filter((url): url is string => url !== null && url.length > 0);
 
-    if (mediaUrls.length > 0) {
-      this._preloadService.addToPreloadQueue(mediaUrls);
+    const videoUrls = this.images
+      .filter(image => this.isVideoUrl(image.url))
+      .map(image => this._utilityService.normalizeImageUrl(image.url, this.urlMediaApi))
+      .filter((url): url is string => url !== null && url.length > 0);
+
+    // Use ImageLoadingService for optimized image loading
+    if (imageUrls.length > 0) {
+      imageUrls.forEach(imageUrl => {
+        this._imageLoadingService.loadImage(imageUrl, 'media', {
+          timeout: 10000,
+          maxRetries: 2,
+          retryDelay: 1000
+        }).subscribe({
+          next: (result) => {
+            // Image loaded successfully - no logging needed
+          },
+          error: (error) => {
+            // Error handled silently - no logging needed
+          }
+        });
+      });
+    }
+
+    // Use PreloadService for videos (keep existing logic)
+    if (videoUrls.length > 0) {
+      setTimeout(() => {
+        this._preloadService.addToPreloadQueue(videoUrls);
+      }, 500);
     }
   }
 

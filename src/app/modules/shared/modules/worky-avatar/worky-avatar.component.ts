@@ -114,6 +114,9 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onImageLoad(): void {
+    this.hasError = false;
+    this.isGeneratedAvatar = false;
+    this._cdr.markForCheck();
     this.load.emit();
   }
 
@@ -133,7 +136,18 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
 
   private generateAvatar(): void {
     // Only try to load image if we have a valid URL
-    if (this.img && this.img.trim() !== '' && this.img !== 'null' && this.img !== 'undefined') {
+    const isValidUrl = this.img && 
+                      typeof this.img === 'string' &&
+                      this.img.trim() !== '' && 
+                      this.img !== 'null' && 
+                      this.img !== 'undefined' && 
+                      this.img !== '' &&
+                      this.img.length > 0;
+    
+
+
+    
+    if (isValidUrl && this.img) {
       this.tryLoadImage(this.img);
     } else {
       this.isGeneratedAvatar = true;
@@ -146,6 +160,8 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
   private tryLoadImage(imageUrl: string): void {
     this.isLoading = true;
     this._cdr.markForCheck();
+
+
 
     const timeout = setTimeout(() => {
       if (this.isLoading) {
@@ -170,6 +186,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
               this.imageData = cachedUrl;
               this.isLoading = false;
               this.isGeneratedAvatar = false;
+              this.hasError = false;
               this._cdr.markForCheck();
               this.load.emit();
             },
@@ -195,6 +212,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
           this.imageData = imageUrl;
           this.isLoading = false;
           this.isGeneratedAvatar = false;
+          this.hasError = false;
           this._cdr.markForCheck();
           this.load.emit();
         };

@@ -402,4 +402,38 @@ export class PublicationDatabaseService {
 
     return updatedPublications;
   }
+
+  /**
+   * Updates the media data for a specific publication in the local database
+   * This is used when media processing completes to update the publication with processed media
+   */
+  async updatePublicationMedia(publicationId: string, mediaData: any[], containsMedia: boolean): Promise<void> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const getRequest = store.get(publicationId);
+      
+      getRequest.onsuccess = () => {
+        const publication = getRequest.result as PublicationView;
+        if (publication) {
+          // Update the publication with new media data
+          publication.media = mediaData;
+          publication.containsMedia = containsMedia;
+          publication.updatedAt = new Date();
+          
+                                  // Save the updated publication
+                        const putRequest = store.put(publication);
+                        putRequest.onsuccess = () => {
+                          resolve();
+                        };
+                        putRequest.onerror = () => reject(putRequest.error);
+                      } else {
+                        resolve(); // Don't fail if publication doesn't exist
+                      }
+      };
+      getRequest.onerror = () => reject(getRequest.error);
+    });
+  }
 } 

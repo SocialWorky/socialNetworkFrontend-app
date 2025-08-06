@@ -72,6 +72,7 @@
           left: 65px;
           position: absolute;
           color: color.$worky-color-light;
+          z-index: 10;
           i {
             cursor: pointer;
             border-radius: 50%;

@@ -1,12 +1,15 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
-import { filter, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { filter, takeUntil, debounceTime, distinctUntilChanged, throttleTime, map } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
+import { PublicationDataService } from '@shared/services/core-apis/publication-data.service';
+import { PublicationCacheService } from '@shared/services/core-apis/publication-cache.service';
+import { NetworkOptimizationService } from '@shared/services/network-optimization.service';
 import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
 import { AuthService } from '@auth/services/auth.service';
 import { LocationService } from '@shared/services/apis/location.service';
@@ -61,6 +64,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   navbarVisible = true;
 
   private destroy$ = new Subject<void>();
+  private scrollThrottle = new Subject<{ scrollTop: number; clientHeight: number; scrollHeight: number }>();
 
   @ViewChild('contentContainer', { static: false }) contentContainer!: ElementRef;
   
@@ -78,8 +82,36 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     return index;
   }
 
+  // Computed properties for template optimization
+  get shouldShowAddPublication(): boolean {
+    return !this.paramPublication;
+  }
+
+  get shouldShowLoader(): boolean {
+    return this.loaderPublications;
+  }
+
+  get shouldShowEmptyState(): boolean {
+    return !this.loaderPublications && this.publications().length === 0;
+  }
+
+  get shouldShowConnectionOverlay(): boolean {
+    return this.showConnectionOverlay;
+  }
+
+  get publicationsCount(): number {
+    return this.publications().length;
+  }
+
+  get isLastPublication(): (index: number) => boolean {
+    return (index: number) => index === this.publicationsCount - 1;
+  }
+
   constructor(
     private _publicationService: PublicationService,
+    private _publicationDataService: PublicationDataService,
+    private _publicationCacheService: PublicationCacheService,
+    private _networkOptimizationService: NetworkOptimizationService,
     private _cdr: ChangeDetectorRef,
     private _notificationCommentService: NotificationCommentService,
     private _authService: AuthService,
@@ -120,7 +152,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscribeToNotificationNewPublication();
     this.subscribeToNotificationDeletePublication();
     this.subscribeToNotificationUpdatePublication();
-    this.scrollSubscription();
+    this.setupOptimizedScroll();
     this.subscribeToNotificationComment();
     
     this.observeConnectionStatus();
@@ -180,7 +212,20 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private scrollSubscription() {
+  private setupOptimizedScroll() {
+    // Setup optimized scroll handling with throttling
+    this.scrollThrottle.pipe(
+      throttleTime(100), // 100ms throttling for better performance
+      distinctUntilChanged((prev, curr) => {
+        // Only trigger if scroll position changed significantly
+        return Math.abs(prev.scrollTop - curr.scrollTop) < 50;
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe((scrollData) => {
+      this.handleScrollOptimized(scrollData);
+    });
+
+    // Keep original scroll service for navbar visibility
     this._scrollService.scrollEnd$.pipe(
       takeUntil(this.destroy$)
     ).subscribe((data) => {
@@ -197,6 +242,33 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this._cdr.markForCheck();
       }
     });
+  }
+
+  private handleScrollOptimized(scrollData: { scrollTop: number; clientHeight: number; scrollHeight: number }) {
+    if (!this.loaderPublications && this.hasMorePublications) {
+      const currentPublications = this.publications();
+      if (currentPublications.length === 0) return;
+      
+      const { scrollTop, clientHeight, scrollHeight } = scrollData;
+      
+      // Optimized calculation for infinite scroll
+      const publicationHeight = 300;
+      const currentPublicationIndex = Math.floor(scrollTop / publicationHeight);
+      const visiblePublications = Math.ceil(clientHeight / publicationHeight);
+      const remainingPublications = currentPublications.length - currentPublicationIndex - visiblePublications;
+      
+      // Load more publications when approaching the end
+      if (remainingPublications <= 5 && remainingPublications > 0) {
+        this.loadPublications();
+      }
+      
+      // Alternative threshold-based loading
+      const threshold = 200;
+      const position = scrollTop + clientHeight;
+      if (position >= scrollHeight - threshold) {
+        this.loadPublications();
+      }
+    }
   }
 
   public async loadPublications() {
@@ -216,9 +288,33 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loaderPublications = true;
     
     try {
-      const newPublicationsResponse = await firstValueFrom(
-        this._publicationService.getAllPublicationsWithSmartSync(this.page, this.pageSize, TypePublishing.ALL)
-      );
+      // Check cache first using PublicationCacheService
+      const cacheKey = `publications_${this.page}_${this.pageSize}_${TypePublishing.ALL}`;
+      const cachedPublications = this._publicationCacheService.getPublicationListFromCache(cacheKey);
+      
+      let newPublicationsResponse;
+      
+      if (cachedPublications) {
+        // Use cached data
+        newPublicationsResponse = {
+          publications: cachedPublications,
+          total: cachedPublications.length
+        };
+        this._logService.log(LevelLogEnum.INFO, 'HomeComponent', 'Publications loaded from cache', {
+          page: this.page,
+          count: cachedPublications.length
+        });
+      } else {
+        // Load from server using PublicationDataService
+        newPublicationsResponse = await firstValueFrom(
+          this._publicationDataService.getAllPublicationsFromServer(this.page, this.pageSize, TypePublishing.ALL)
+        );
+        
+        // Cache the response
+        if (newPublicationsResponse.publications.length > 0) {
+          this._publicationCacheService.addPublicationListToCache(cacheKey, newPublicationsResponse.publications);
+        }
+      }
 
       const currentPublications = this.publications();
       const newPublicationsList = newPublicationsResponse.publications;
@@ -228,7 +324,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         const existingIds = new Set(currentPublications.map(pub => pub._id));
         const uniqueNewPublications = newPublicationsList.filter(
-          pub => !existingIds.has(pub._id)
+          (pub: PublicationView) => !existingIds.has(pub._id)
         );
 
         if (uniqueNewPublications.length > 0) {
@@ -541,30 +637,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   onScroll(event: any) {
     this._scrollService.onScroll(event);
     
-    if (!this.loaderPublications && this.hasMorePublications) {
-      const currentPublications = this.publications();
-      if (currentPublications.length === 0) return;
-      
-      const container = event.target;
-      const scrollTop = container.scrollTop;
-      const clientHeight = container.clientHeight;
-      const scrollHeight = container.scrollHeight;
-      
-      const publicationHeight = 300;
-      const currentPublicationIndex = Math.floor(scrollTop / publicationHeight);
-      const visiblePublications = Math.ceil(clientHeight / publicationHeight);
-      const remainingPublications = currentPublications.length - currentPublicationIndex - visiblePublications;
-      
-      if (remainingPublications <= 5 && remainingPublications > 0) {
-        setTimeout(() => this.loadPublications(), 0);
-      }
-      
-      const threshold = 200;
-      const position = scrollTop + clientHeight;
-      if (position >= scrollHeight - threshold) {
-        setTimeout(() => this.loadPublications(), 0);
-      }
-    }
+    // Send scroll data to throttled stream for optimized processing
+    const container = event.target;
+    this.scrollThrottle.next({
+      scrollTop: container.scrollTop,
+      clientHeight: container.clientHeight,
+      scrollHeight: container.scrollHeight
+    });
   }
 
   public checkIfMorePublicationsAvailable(): void {

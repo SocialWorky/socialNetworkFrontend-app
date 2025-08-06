@@ -6,7 +6,7 @@
 
   <!-- Avatar image - only show if successfully loaded -->
   <img
-    *ngIf="!isLoading && imageData && !isGeneratedAvatar && imageData !== ''"
+    *ngIf="!isLoading && imageData && !isGeneratedAvatar && imageData !== '' && !hasError"
     [src]="imageData"
     [alt]="'Avatar de ' + (name || username)"
     class="avatar-image"
@@ -14,7 +14,7 @@
     (error)="onImageError()"
   />
 
-  <!-- Generated avatar with initials - always show as fallback -->
+  <!-- Generated avatar with initials - show only when no valid image -->
   <div
     *ngIf="!isLoading && showInitials && (isGeneratedAvatar || !imageData || imageData === '' || hasError)"
     class="avatar-initials"

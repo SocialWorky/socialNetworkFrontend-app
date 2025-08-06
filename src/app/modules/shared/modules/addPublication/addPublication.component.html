@@ -6,10 +6,12 @@
         <div *ngIf="avatarLoading" class="avatar-skeleton">
           <worky-avatar-skeleton size="60px"></worky-avatar-skeleton>
         </div>
+
+        
         <worky-avatar *ngIf="!avatarLoading && user.name && user.lastName"
           [size]="60"
-          img="{{ profileImageUrl }}"
-          name="{{ user.name}} {{ user.lastName }}"
+          [img]="profileImageUrl || ''"
+          [name]="user.name + ' ' + user.lastName"
           [showInitials]="true">
         </worky-avatar>
 
@@ -69,8 +71,8 @@
 
         <worky-avatar *ngIf="type === typePublishing.COMMENT && user.name && user.lastName"
           [size]="35"
-          img="{{ profileImageUrl }}"
-          name="{{ user.name}} {{ user.lastName }}">
+          [img]="profileImageUrl || ''"
+          [name]="user.name + ' ' + user.lastName">
         </worky-avatar>
 
         <div *ngIf="textareaLoading" class="textarea-skeleton">

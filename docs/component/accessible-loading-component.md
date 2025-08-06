@@ -158,28 +158,62 @@ export class MiComponenteComponent {
 
 ## Estilos Personalizados
 
-El componente incluye estilos por defecto, pero puedes personalizarlos:
+El componente incluye estilos por defecto que usan las variables de color del proyecto. Para personalizar:
+
+### Importar Variables de Color
 
 ```scss
 // En tu archivo de estilos
+@use 'src/assets/styles/worky-palettes.scss' as colors;
+
 .accessible-loading-overlay {
   // Personalizar el overlay
   background: rgba(0, 0, 0, 0.8);
 }
 
 .accessible-loading-content {
-  // Personalizar el contenido
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  // Personalizar el contenido usando colores del proyecto
+  background: colors.$worky-color-module-container;
+  color: colors.$worky-color-text;
 }
 
 .loading-spinner {
-  // Personalizar el spinner
+  // Personalizar el spinner con colores del proyecto
   .spinner-ring {
     border-width: 4px;
+    
+    &:nth-child(1) {
+      border-top-color: colors.$worky-color-blue;
+    }
+    
+    &:nth-child(2) {
+      border-right-color: colors.$worky-color-green;
+    }
+    
+    &:nth-child(3) {
+      border-bottom-color: colors.$worky-color-yellow;
+    }
   }
 }
+
+.loading-message {
+  color: colors.$worky-color-text;
+}
+
+.loading-sub-message {
+  color: colors.$worky-color-grey;
+}
 ```
+
+### Variables de Color Disponibles
+
+- `colors.$worky-color-blue` - Azul principal
+- `colors.$worky-color-green` - Verde
+- `colors.$worky-color-yellow` - Amarillo
+- `colors.$worky-color-red` - Rojo
+- `colors.$worky-color-text` - Color de texto
+- `colors.$worky-color-grey` - Color gris
+- `colors.$worky-color-module-container` - Fondo de contenedores
 
 ## Accesibilidad
 

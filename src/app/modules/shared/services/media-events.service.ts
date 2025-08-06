@@ -13,7 +13,8 @@ export class MediaEventsService {
   }
 
   hasSubscribers(): boolean {
-    return this.mediaProcessedSubject.observers.length > 0;
+    const hasSubs = this.mediaProcessedSubject.observers.length > 0;
+    return hasSubs;
   }
 
   getSubscriberCount(): number {

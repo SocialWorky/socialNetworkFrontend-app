@@ -1,10 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
-import { ProfilesComponent } from './profiles/profiles.component';
 import { LoyautComponent } from './templates/loyaut/loyaut.component';
-import { MessagesComponent } from './messages/messages.component';
-
 
 const routes: Routes = [
   {
@@ -13,10 +10,22 @@ const routes: Routes = [
     children: [
       { path: '', component: HomeComponent, pathMatch: 'full'},
       { path: 'publication/:_idPublication', component: HomeComponent },
-      { path: 'profile', component: ProfilesComponent },
-      { path: 'profile/:profileId', component: ProfilesComponent },
-      { path: 'messages', component: MessagesComponent },
-      { path: 'messages/:userIdMessages', component: MessagesComponent },
+      { 
+        path: 'profile', 
+        loadChildren: () => import('./profiles/profiles.module').then(m => m.ProfilesModule)
+      },
+      { 
+        path: 'profile/:profileId', 
+        loadChildren: () => import('./profiles/profiles.module').then(m => m.ProfilesModule)
+      },
+      { 
+        path: 'messages', 
+        loadChildren: () => import('./messages/messages.module').then(m => m.MessagesModule)
+      },
+      { 
+        path: 'messages/:userIdMessages', 
+        loadChildren: () => import('./messages/messages.module').then(m => m.MessagesModule)
+      },
 
       { path: '**', redirectTo: '', pathMatch: 'full' }
     ],
