@@ -244,11 +244,21 @@ export class NotificationUsersService implements OnDestroy {
   ngOnDestroy() {
     this._unsubscribeAll.next();
     this._unsubscribeAll.complete();
+    
+    // Clear all timeouts to prevent memory leaks
     clearTimeout(this.inactivityTimeout);
+    clearTimeout(this.batchInterval);
+    
+    // Remove event listeners
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
     ['mousemove', 'keydown', 'scroll', 'click', 'touchstart', 'touchmove'].forEach(event => {
       window.removeEventListener(event, this.throttledHandleUserActivity);
     });
+    
+    // Clear cache
     this._cacheService.removeItem(this.CACHE_KEY);
+    
+    // Clear batched updates
+    this.batchedUpdates = [];
   }
 }

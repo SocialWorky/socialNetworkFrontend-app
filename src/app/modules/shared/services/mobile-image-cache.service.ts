@@ -844,11 +844,20 @@ export class MobileImageCacheService {
   /**
    * Start cache monitoring
    */
+  private cacheMonitoringInterval: any;
+
   private startCacheMonitoring(): void {
     // Monitor cache size every 5 minutes
-    setInterval(() => {
+    this.cacheMonitoringInterval = setInterval(() => {
       this.monitorCacheSize();
     }, 5 * 60 * 1000);
+  }
+
+  private stopCacheMonitoring(): void {
+    if (this.cacheMonitoringInterval) {
+      clearInterval(this.cacheMonitoringInterval);
+      this.cacheMonitoringInterval = null;
+    }
   }
 
   /**
@@ -1023,5 +1032,16 @@ export class MobileImageCacheService {
     }
     
     // iOS cache recovery completed - no need to log every recovery
+  }
+
+  /**
+   * Cleanup service resources
+   */
+  cleanup(): void {
+    this.stopCacheMonitoring();
+    this.memoryCache.clear();
+    this.loadTimes = [];
+    this.cacheHits = 0;
+    this.cacheMisses = 0;
   }
 }
