@@ -225,7 +225,7 @@ export class PublicationService {
 
   deletePublication(id: string): Observable<any> {
     const url = `${this.baseUrl}/publications/delete/${id}`;
-    const response = this.http.delete(url).pipe(
+    return this.http.delete(url).pipe(
       catchError(this.handleError),
       map((data) => {
         this._notificationPublicationService.sendNotificationDeletePublication({ _id: id });
@@ -234,8 +234,6 @@ export class PublicationService {
         return data;
       })
     );
-    this._notificationPublicationService.sendNotificationDeletePublication(response);
-    return response;
   }
 
   getCountPublications(): Observable<number> {

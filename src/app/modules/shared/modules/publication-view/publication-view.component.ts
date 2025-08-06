@@ -650,7 +650,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
         this._commentService.deleteComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
           next: () => {
-            this.refreshPublications(id_publication);
+            // Optimized: Update local state directly instead of making a network request
+            this.updateLocalCommentState(_id);
             this.isDeletingComment = false;
             this._cdr.markForCheck();
           },
@@ -662,6 +663,25 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         });
       }
     });
+  }
+
+  /**
+   * Update local publication state by removing the deleted comment
+   * This avoids unnecessary network requests for better performance
+   */
+  private updateLocalCommentState(deletedCommentId: string): void {
+    if (this.publication && this.publication.comment) {
+      // Filter out the deleted comment
+      this.publication.comment = this.publication.comment.filter(
+        comment => comment._id !== deletedCommentId
+      );
+      
+      // Update the publication in the local service cache
+      this._publicationService.updatePublicationsLocal([this.publication]);
+      
+      // Force change detection to update the UI immediately
+      this._cdr.markForCheck();
+    }
   }
 
   onEmojiError(event: Event) {

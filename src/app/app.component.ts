@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
-import { filter, map, Subject, switchMap, takeUntil } from 'rxjs';
+import { filter, map, Subject, switchMap, takeUntil, timer, of, catchError, retryWhen, delay, tap } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 
 import { getTranslationsLanguage } from '../translations/translations';
@@ -104,114 +104,8 @@ export class AppComponent implements OnInit, OnDestroy {
         switch (message.type) {
           case TypePublishing.POST:
             this.handlePostUpdate(message.idReference);
-            // Check if this is a media processing notification first
-            if (message.title && message.title.includes('Archivo procesado')) {
-              // Extract the publication ID from the notification
-              const publicationId = message.idReference;
-              if (publicationId) {
-                // Add a longer delay to ensure the server has updated the publication
-                setTimeout(() => {
-                  // Fetch the updated publication from server
-                  this._publicationService.getPublicationId(publicationId)
-                    .pipe(takeUntil(this.destroy$))
-                    .subscribe({
-                      next: (publications: PublicationView[]) => {
-                        if (publications && publications.length > 0) {
-                          const updatedPublication = publications[0];
-                          
-                          // Check if the publication actually has media data
-                          if (updatedPublication.media && updatedPublication.media.length > 0) {
-                            // Notify with the actual media data
-                            this._mediaEventsService.notifyMediaProcessed({
-                              idReference: publicationId,
-                              media: updatedPublication.media,
-                              containsMedia: true
-                            });
-                          } else {
-                            // Try to force sync the specific publication immediately
-                            this._publicationService.syncSpecificPublication(publicationId)
-                              .pipe(takeUntil(this.destroy$))
-                              .subscribe({
-                                next: (syncedPublication) => {
-                                  if (syncedPublication && syncedPublication.media && syncedPublication.media.length > 0) {
-                                    this._mediaEventsService.notifyMediaProcessed({
-                                      idReference: publicationId,
-                                      media: syncedPublication.media,
-                                      containsMedia: true
-                                    });
-                                  } else {
-                                    // If force sync also fails, try again after 2 seconds
-                                    setTimeout(() => {
-                                      this._publicationService.getPublicationId(publicationId)
-                                        .pipe(takeUntil(this.destroy$))
-                                        .subscribe({
-                                          next: (retryPublications: PublicationView[]) => {
-                                            if (retryPublications && retryPublications.length > 0) {
-                                              const retryPublication = retryPublications[0];
-                                              
-                                              if (retryPublication.media && retryPublication.media.length > 0) {
-                                                this._mediaEventsService.notifyMediaProcessed({
-                                                  idReference: publicationId,
-                                                  media: retryPublication.media,
-                                                  containsMedia: true
-                                                });
-                                              } else {
-                                                this._mediaEventsService.notifyMediaProcessed({
-                                                  idReference: publicationId,
-                                                  media: [],
-                                                  containsMedia: false
-                                                });
-                                              }
-                                            } else {
-                                              this._mediaEventsService.notifyMediaProcessed({
-                                                idReference: publicationId,
-                                                media: [],
-                                                containsMedia: false
-                                              });
-                                            }
-                                          },
-                                          error: (error) => {
-                                            this._mediaEventsService.notifyMediaProcessed({
-                                              idReference: publicationId,
-                                              media: [],
-                                              containsMedia: false
-                                            });
-                                          }
-                                        });
-                                    }, 2000);
-                                  }
-                                },
-                                error: (error) => {
-                                  this._mediaEventsService.notifyMediaProcessed({
-                                    idReference: publicationId,
-                                    media: [],
-                                    containsMedia: false
-                                  });
-                                }
-                              });
-                          }
-                        } else {
-                          // Even if no publication found, notify to clear processing state
-                          this._mediaEventsService.notifyMediaProcessed({
-                            idReference: publicationId,
-                            media: [],
-                            containsMedia: false
-                          });
-                        }
-                      },
-                      error: (error) => {
-                        // Even if error, notify to clear processing state
-                        this._mediaEventsService.notifyMediaProcessed({
-                          idReference: publicationId,
-                          media: [],
-                          containsMedia: false
-                        });
-                      }
-                    });
-                }, 2000); // Wait 2 seconds for server to update
-              } else {
-                // No publicationId found in message
-              }
+            if (this.isMediaProcessingNotification(message)) {
+              this.handleMediaProcessingNotification(message.idReference);
             } else if (message.containsMedia) {
               this._mediaEventsService.notifyMediaProcessed(message);
             }
@@ -226,97 +120,8 @@ export class AppComponent implements OnInit, OnDestroy {
             this._emojiEventsService.notifyEmojiProcessed(message);
             break;
           default:
-            // Check if this is a media processing notification
-            if (message.title && message.title.includes('Archivo procesado')) {
-              // Extract the publication ID from the notification
-              const publicationId = message.idReference;
-              if (publicationId) {
-                // Add a longer delay to ensure the server has updated the publication
-                setTimeout(() => {
-                  // Fetch the updated publication from server
-                  this._publicationService.getPublicationId(publicationId)
-                    .pipe(takeUntil(this.destroy$))
-                    .subscribe({
-                      next: (publications: PublicationView[]) => {
-                        if (publications && publications.length > 0) {
-                          const updatedPublication = publications[0];
-                          
-                          // Check if the publication actually has media data
-                          if (updatedPublication.media && updatedPublication.media.length > 0) {
-                            // Check if there are subscribers before notifying
-                            const hasSubscribers = this._mediaEventsService.hasSubscribers();
-                            
-                            // Notify with the actual media data
-                            this._mediaEventsService.notifyMediaProcessed({
-                              idReference: publicationId,
-                              media: updatedPublication.media,
-                              containsMedia: true
-                            });
-                          } else {
-                            // If no media data, try again after 2 more seconds
-                            setTimeout(() => {
-                              this._publicationService.getPublicationId(publicationId)
-                                .pipe(takeUntil(this.destroy$))
-                                .subscribe({
-                                  next: (retryPublications: PublicationView[]) => {
-                                    if (retryPublications && retryPublications.length > 0) {
-                                      const retryPublication = retryPublications[0];
-                                      
-                                      if (retryPublication.media && retryPublication.media.length > 0) {
-                                        this._mediaEventsService.notifyMediaProcessed({
-                                          idReference: publicationId,
-                                          media: retryPublication.media,
-                                          containsMedia: true
-                                        });
-                                      } else {
-                                        this._mediaEventsService.notifyMediaProcessed({
-                                          idReference: publicationId,
-                                          media: [],
-                                          containsMedia: false
-                                        });
-                                      }
-                                    } else {
-                                      this._mediaEventsService.notifyMediaProcessed({
-                                        idReference: publicationId,
-                                        media: [],
-                                        containsMedia: false
-                                      });
-                                    }
-                                  },
-                                  error: (error) => {
-                                    this._mediaEventsService.notifyMediaProcessed({
-                                      idReference: publicationId,
-                                      media: [],
-                                      containsMedia: false
-                                    });
-                                  }
-                                });
-                            }, 2000);
-                          }
-                        } else {
-                          // Even if no publication found, notify to clear processing state
-                          this._mediaEventsService.notifyMediaProcessed({
-                            idReference: publicationId,
-                            media: [],
-                            containsMedia: false
-                          });
-                        }
-                      },
-                      error: (error) => {
-                        // Even if error, notify to clear processing state
-                        this._mediaEventsService.notifyMediaProcessed({
-                          idReference: publicationId,
-                          media: [],
-                          containsMedia: false
-                        });
-                      }
-                    });
-                }, 2000); // Wait 2 seconds for server to update
-              } else {
-                // No publicationId found in message
-              }
-            } else {
-              // Not a media processing notification
+            if (this.isMediaProcessingNotification(message)) {
+              this.handleMediaProcessingNotification(message.idReference);
             }
             break;
         }
@@ -488,5 +293,123 @@ export class AppComponent implements OnInit, OnDestroy {
   private initializeAppUpdates(): void {
     // App update manager is automatically initialized in its constructor
     // This method can be used for additional app update initialization if needed
+  }
+
+  /**
+   * Check if the message is a media processing notification
+   */
+  private isMediaProcessingNotification(message: any): boolean {
+    return message.title && message.title.includes('Archivo procesado');
+  }
+
+  /**
+   * Handle media processing notification with RxJS operators for better control flow
+   */
+  private handleMediaProcessingNotification(publicationId: string): void {
+    if (!publicationId) {
+      return;
+    }
+
+    // Create a polling mechanism with RxJS operators
+    timer(2000) // Initial delay of 2 seconds
+      .pipe(
+        switchMap(() => this._publicationService.getPublicationId(publicationId)),
+        switchMap((publications: PublicationView[]) => {
+          if (publications && publications.length > 0) {
+            const publication = publications[0];
+            
+            if (publication.media && publication.media.length > 0) {
+              // Media found, notify and complete
+              this._mediaEventsService.notifyMediaProcessed({
+                idReference: publicationId,
+                media: publication.media,
+                containsMedia: true
+              });
+              return of(null); // Complete the stream
+            } else {
+              // No media found, try force sync
+              return this._publicationService.syncSpecificPublication(publicationId)
+                .pipe(
+                  switchMap((syncedPublication) => {
+                    if (syncedPublication && syncedPublication.media && syncedPublication.media.length > 0) {
+                      this._mediaEventsService.notifyMediaProcessed({
+                        idReference: publicationId,
+                        media: syncedPublication.media,
+                        containsMedia: true
+                      });
+                      return of(null); // Complete the stream
+                    } else {
+                      // Still no media, retry after 2 more seconds
+                      return timer(2000).pipe(
+                        switchMap(() => this._publicationService.getPublicationId(publicationId)),
+                        map((retryPublications: PublicationView[]) => {
+                          if (retryPublications && retryPublications.length > 0) {
+                            const retryPublication = retryPublications[0];
+                            
+                            if (retryPublication.media && retryPublication.media.length > 0) {
+                              this._mediaEventsService.notifyMediaProcessed({
+                                idReference: publicationId,
+                                media: retryPublication.media,
+                                containsMedia: true
+                              });
+                            } else {
+                              this._mediaEventsService.notifyMediaProcessed({
+                                idReference: publicationId,
+                                media: [],
+                                containsMedia: false
+                              });
+                            }
+                          } else {
+                            this._mediaEventsService.notifyMediaProcessed({
+                              idReference: publicationId,
+                              media: [],
+                              containsMedia: false
+                            });
+                          }
+                          return null;
+                        }),
+                        catchError(() => {
+                          this._mediaEventsService.notifyMediaProcessed({
+                            idReference: publicationId,
+                            media: [],
+                            containsMedia: false
+                          });
+                          return of(null);
+                        })
+                      );
+                    }
+                  }),
+                  catchError(() => {
+                    this._mediaEventsService.notifyMediaProcessed({
+                      idReference: publicationId,
+                      media: [],
+                      containsMedia: false
+                    });
+                    return of(null);
+                  })
+                );
+            }
+          } else {
+            // No publication found, notify to clear processing state
+            this._mediaEventsService.notifyMediaProcessed({
+              idReference: publicationId,
+              media: [],
+              containsMedia: false
+            });
+            return of(null);
+          }
+        }),
+        catchError(() => {
+          // Even if error, notify to clear processing state
+          this._mediaEventsService.notifyMediaProcessed({
+            idReference: publicationId,
+            media: [],
+            containsMedia: false
+          });
+          return of(null);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe();
   }
 }
