@@ -104,17 +104,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   translations = translations;
 
   private destroy$ = new Subject<void>();
-  private mediaProcessingTimeout?: any;
-  private processingMediaTimeout?: any;
-  private retryTimeout?: any;
-  private skeletonTimeout?: any;
-  private retryCount: number = 0;
-  private loadedImagesCount: number = 0;
-  private totalImagesCount: number = 0;
-  private mediaProcessed: boolean = false; // Flag to prevent re-processing
-  private readonly MAX_RETRIES: number = 3;
-  private readonly RETRY_DELAY: number = 5000; // 5 segundos
-  private readonly SKELETON_TIMEOUT: number = 3000; // 3 segundos
+  private mediaTimeout?: any;
+  private mediaState: 'loading' | 'loaded' | 'error' = 'loading';
+  private readonly MEDIA_TIMEOUT: number = 3000; // 3 segundos
 
   constructor(
     private _router: Router,
@@ -174,7 +166,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._cdr.markForCheck();
     
     this.simulateProgressiveLoading();
-    this.setupMediaProcessingTimeout();
   }
 
   // Métodos para manejar la carga de elementos individuales
@@ -200,30 +191,17 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   onMediaLoad() {
-    // Immediately hide skeleton when any image loads
     this.mediaLoading = false;
-    
-    // Clear any processing timeouts when media loads successfully
-    if (this.mediaProcessingTimeout) {
-      clearTimeout(this.mediaProcessingTimeout);
-    }
-    if (this.processingMediaTimeout) {
-      clearTimeout(this.processingMediaTimeout);
-    }
-    if (this.retryTimeout) {
-      clearTimeout(this.retryTimeout);
-    }
-    if (this.skeletonTimeout) {
-      clearTimeout(this.skeletonTimeout);
-    }
-    
-    // Force change detection to ensure UI updates immediately
+    this.mediaState = 'loaded';
+    this.clearMediaTimeout();
     this._cdr.markForCheck();
   }
 
   // Force media loading state reset - used when skeleton gets stuck
   forceMediaLoadComplete() {
     this.mediaLoading = false;
+    this.mediaState = 'loaded';
+    this.clearMediaTimeout();
     this._cdr.markForCheck();
   }
 
@@ -231,22 +209,17 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   forceProcessingMediaComplete() {
     this.publication.containsMedia = false;
     this.mediaLoading = false;
-    
-    // Clear all timeouts
-    if (this.mediaProcessingTimeout) {
-      clearTimeout(this.mediaProcessingTimeout);
-    }
-    if (this.processingMediaTimeout) {
-      clearTimeout(this.processingMediaTimeout);
-    }
-    if (this.retryTimeout) {
-      clearTimeout(this.retryTimeout);
-    }
-    if (this.skeletonTimeout) {
-      clearTimeout(this.skeletonTimeout);
-    }
-    
+    this.mediaState = 'loaded';
+    this.clearMediaTimeout();
     this._cdr.markForCheck();
+  }
+
+  // Clear media timeout
+  private clearMediaTimeout() {
+    if (this.mediaTimeout) {
+      clearTimeout(this.mediaTimeout);
+      this.mediaTimeout = undefined;
+    }
   }
 
   // Force immediate update when media processing completes
@@ -254,101 +227,41 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     if (mediaData && mediaData.length > 0) {
       this.publication.media = mediaData;
       this.publication.containsMedia = false;
-      this.mediaLoading = true; // Show skeleton first
-      
-      // Initialize image loading counters
-      this.loadedImagesCount = 0;
-      this.totalImagesCount = mediaData.length;
+      this.mediaLoading = true;
+      this.mediaState = 'loading';
       
       this._cdr.markForCheck();
       
-      // Setup skeleton timeout to prevent it from getting stuck
-      this.setupSkeletonTimeout();
-      
-      // Don't force complete - let the actual image loading events handle it
-      // The skeleton will be hidden when images actually load or when timeout occurs
+      // Setup media timeout to prevent it from getting stuck
+      this.setupMediaTimeout();
     }
   }
 
-  // Retry processing media if it fails
-  private retryMediaProcessing() {
-    if (this.retryCount < this.MAX_RETRIES && !this.mediaProcessed) {
-      this.retryCount++;
-      
-      this.retryTimeout = setTimeout(() => {
-        // Try to refresh the publication to get updated media status
-        this.refreshPublications(this.publication._id);
-      }, this.RETRY_DELAY);
-    } else {
-      // Max retries reached, force complete
-      this.forceProcessingMediaComplete();
-    }
+  // Setup media timeout to prevent getting stuck
+  private setupMediaTimeout() {
+    this.clearMediaTimeout();
+    this.mediaTimeout = setTimeout(() => {
+      this.mediaLoading = false;
+      this.mediaState = 'loaded';
+      this._cdr.markForCheck();
+    }, this.MEDIA_TIMEOUT);
   }
 
   // Check if media processing is stuck
   isMediaProcessingStuck(): boolean {
     return this.publication.containsMedia && 
            this.publication.media.length === 0 && 
-           this.retryCount >= this.MAX_RETRIES;
+           this.mediaState === 'loading';
   }
 
   // Public method to manually retry media processing
   retryMediaProcessingManual() {
-    this.retryCount = 0; // Reset retry count
-    this.retryMediaProcessing();
-  }
-
-  // Force transition from processing to media display
-  private forceMediaTransition() {
-    this.mediaLoading = false;
-    this.publication.containsMedia = false;
-    
-    // Clear all timeouts
-    if (this.mediaProcessingTimeout) {
-      clearTimeout(this.mediaProcessingTimeout);
-    }
-    if (this.processingMediaTimeout) {
-      clearTimeout(this.processingMediaTimeout);
-    }
-    if (this.retryTimeout) {
-      clearTimeout(this.retryTimeout);
-    }
-    
+    this.mediaState = 'loading';
+    this.setupMediaTimeout();
     this._cdr.markForCheck();
   }
 
-  // Setup skeleton timeout to prevent it from getting stuck
-  private setupSkeletonTimeout() {
-    if (this.publication.media.length > 0 && this.mediaLoading) {
-      this.skeletonTimeout = setTimeout(() => {
-        // If skeleton is still showing after timeout, force complete
-        if (this.mediaLoading) {
-          this.mediaLoading = false;
-          this._cdr.markForCheck();
-        }
-      }, this.SKELETON_TIMEOUT);
-    }
-  }
 
-  // Force complete media loading when network issues occur
-  private clearAllTimeouts() {
-    if (this.mediaProcessingTimeout) {
-      clearTimeout(this.mediaProcessingTimeout);
-      this.mediaProcessingTimeout = undefined;
-    }
-    if (this.processingMediaTimeout) {
-      clearTimeout(this.processingMediaTimeout);
-      this.processingMediaTimeout = undefined;
-    }
-    if (this.retryTimeout) {
-      clearTimeout(this.retryTimeout);
-      this.retryTimeout = undefined;
-    }
-    if (this.skeletonTimeout) {
-      clearTimeout(this.skeletonTimeout);
-      this.skeletonTimeout = undefined;
-    }
-  }
 
   private updateLocalPublication(publicationId: string, mediaData: any[]) {
     // Update the current publication object
@@ -372,11 +285,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   private forceMediaLoadCompleteOnError() {
     this.mediaLoading = false;
-    this.publication.containsMedia = false;
-    
-    // Clear all timeouts
-    this.clearAllTimeouts();
-    
+    this.mediaState = 'error';
+    this.clearMediaTimeout();
     this._cdr.markForCheck();
   }
 
@@ -415,16 +325,16 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     if (this.publication.media.length > 0) {
       // If media exists, show skeleton first then load
       this.mediaLoading = true;
-      this.setupSkeletonTimeout();
+      this.mediaState = 'loading';
+      this.setupMediaTimeout();
       
       // Simulate media loading with a small delay
       setTimeout(() => {
         this.onMediaLoad();
       }, 100);
-    } else if (this.publication.containsMedia && this.retryCount === 0 && !this.mediaProcessed) {
-      // Only set up processing timeouts if we haven't already tried and media hasn't been processed
-      this.setupMediaProcessingTimeout();
-      this.setupProcessingMediaTimeout();
+    } else if (this.publication.containsMedia) {
+      // Set up media timeout for processing state
+      this.setupMediaTimeout();
     }
   }
 
@@ -432,8 +342,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this.destroy$.next();
     this.destroy$.complete();
     
-    // Clear all timeouts to prevent memory leaks
-    this.clearAllTimeouts();
+    // Clear media timeout to prevent memory leaks
+    this.clearMediaTimeout();
   }
 
   loadReactionsImg(publication: PublicationView = this.publication){
@@ -760,14 +670,15 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   onMediaLoadError(event: Event) {
-    // Handle media loading errors gracefully
     const img = event.target as HTMLImageElement;
     if (img) {
       img.style.display = 'none';
     }
     
-    // Force media loading to complete even if images fail to load
-    this.forceMediaLoadCompleteOnError();
+    this.mediaLoading = false;
+    this.mediaState = 'error';
+    this.clearMediaTimeout();
+    this._cdr.markForCheck();
   }
 
   private updatePublicationIfNeeded(updatedData: any) {
@@ -786,9 +697,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       if (hasMediaChanges) {
         this.handleMediaUpdate(updatedData);
         
-        // If media was added, setup skeleton timeout
+        // If media was added, setup media timeout
         if (updatedData.media && updatedData.media.length > 0) {
-          this.setupSkeletonTimeout();
+          this.setupMediaTimeout();
         }
       }
       
@@ -807,36 +718,15 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     // Ensure media loading state is properly updated
     if (this.publication.media.length > 0) {
       this.mediaLoading = false;
-      // Clear any processing timeouts since media is now available
-      if (this.mediaProcessingTimeout) {
-        clearTimeout(this.mediaProcessingTimeout);
-      }
-      if (this.processingMediaTimeout) {
-        clearTimeout(this.processingMediaTimeout);
-      }
-      if (this.retryTimeout) {
-        clearTimeout(this.retryTimeout);
-      }
-      if (this.skeletonTimeout) {
-        clearTimeout(this.skeletonTimeout);
-      }
+      this.mediaState = 'loaded';
+      this.clearMediaTimeout();
     }
     
-    // Force change detection to ensure UI updates immediately
     this._cdr.markForCheck();
   }
 
   private handleMediaProcessed(data: any) {
-    // Clear ALL timeouts immediately to prevent conflicts
-    this.clearAllTimeouts();
-    
-    // Reset retry count on successful processing
-    this.retryCount = 0;
-    
-    // Set flag to prevent re-processing
-    this.mediaProcessed = true;
-    
-    // Immediately reset processing state
+    this.clearMediaTimeout();
     this.publication.containsMedia = false;
     
     // Update the publication with the processed media data
@@ -847,31 +737,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       this.updateLocalPublication(data.idReference, data.media);
     } else {
       this.mediaLoading = false;
+      this.mediaState = 'loaded';
       this._cdr.markForCheck();
     }
   }
 
-  private setupMediaProcessingTimeout() {
-    // Safety timeout to prevent skeleton and processing from getting stuck
-    if (this.publication.containsMedia && this.publication.media.length === 0 && !this.mediaProcessed) {
-      this.mediaProcessingTimeout = setTimeout(() => {
-        // If media is still loading or processing after 10 seconds, start retry mechanism
-        if ((this.mediaLoading || this.publication.containsMedia) && !this.mediaProcessed) {
-          this.retryMediaProcessing();
-        }
-      }, 10000); // 10 seconds timeout
-    }
-  }
 
-  private setupProcessingMediaTimeout() {
-    // Specific timeout for processing media state with retry mechanism
-    if (this.publication.containsMedia && !this.mediaProcessed) {
-      this.processingMediaTimeout = setTimeout(() => {
-        // If processing is still active after 15 seconds, start retry mechanism
-        if (this.publication.containsMedia && !this.mediaProcessed) {
-          this.retryMediaProcessing();
-        }
-      }, 15000); // 15 seconds timeout
-    }
-  }
 }

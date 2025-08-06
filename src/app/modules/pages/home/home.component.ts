@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, signal, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
-import { filter, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { filter, takeUntil, debounceTime, distinctUntilChanged, throttleTime } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 
@@ -61,6 +61,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   navbarVisible = true;
 
   private destroy$ = new Subject<void>();
+  private scrollThrottle = new Subject<{ scrollTop: number; clientHeight: number; scrollHeight: number }>();
 
   @ViewChild('contentContainer', { static: false }) contentContainer!: ElementRef;
   
@@ -120,7 +121,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscribeToNotificationNewPublication();
     this.subscribeToNotificationDeletePublication();
     this.subscribeToNotificationUpdatePublication();
-    this.scrollSubscription();
+    this.setupOptimizedScroll();
     this.subscribeToNotificationComment();
     
     this.observeConnectionStatus();
@@ -180,7 +181,20 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private scrollSubscription() {
+  private setupOptimizedScroll() {
+    // Setup optimized scroll handling with throttling
+    this.scrollThrottle.pipe(
+      throttleTime(100), // 100ms throttling for better performance
+      distinctUntilChanged((prev, curr) => {
+        // Only trigger if scroll position changed significantly
+        return Math.abs(prev.scrollTop - curr.scrollTop) < 50;
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe((scrollData) => {
+      this.handleScrollOptimized(scrollData);
+    });
+
+    // Keep original scroll service for navbar visibility
     this._scrollService.scrollEnd$.pipe(
       takeUntil(this.destroy$)
     ).subscribe((data) => {
@@ -197,6 +211,33 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this._cdr.markForCheck();
       }
     });
+  }
+
+  private handleScrollOptimized(scrollData: { scrollTop: number; clientHeight: number; scrollHeight: number }) {
+    if (!this.loaderPublications && this.hasMorePublications) {
+      const currentPublications = this.publications();
+      if (currentPublications.length === 0) return;
+      
+      const { scrollTop, clientHeight, scrollHeight } = scrollData;
+      
+      // Optimized calculation for infinite scroll
+      const publicationHeight = 300;
+      const currentPublicationIndex = Math.floor(scrollTop / publicationHeight);
+      const visiblePublications = Math.ceil(clientHeight / publicationHeight);
+      const remainingPublications = currentPublications.length - currentPublicationIndex - visiblePublications;
+      
+      // Load more publications when approaching the end
+      if (remainingPublications <= 5 && remainingPublications > 0) {
+        this.loadPublications();
+      }
+      
+      // Alternative threshold-based loading
+      const threshold = 200;
+      const position = scrollTop + clientHeight;
+      if (position >= scrollHeight - threshold) {
+        this.loadPublications();
+      }
+    }
   }
 
   public async loadPublications() {
@@ -541,30 +582,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   onScroll(event: any) {
     this._scrollService.onScroll(event);
     
-    if (!this.loaderPublications && this.hasMorePublications) {
-      const currentPublications = this.publications();
-      if (currentPublications.length === 0) return;
-      
-      const container = event.target;
-      const scrollTop = container.scrollTop;
-      const clientHeight = container.clientHeight;
-      const scrollHeight = container.scrollHeight;
-      
-      const publicationHeight = 300;
-      const currentPublicationIndex = Math.floor(scrollTop / publicationHeight);
-      const visiblePublications = Math.ceil(clientHeight / publicationHeight);
-      const remainingPublications = currentPublications.length - currentPublicationIndex - visiblePublications;
-      
-      if (remainingPublications <= 5 && remainingPublications > 0) {
-        setTimeout(() => this.loadPublications(), 0);
-      }
-      
-      const threshold = 200;
-      const position = scrollTop + clientHeight;
-      if (position >= scrollHeight - threshold) {
-        setTimeout(() => this.loadPublications(), 0);
-      }
-    }
+    // Send scroll data to throttled stream for optimized processing
+    const container = event.target;
+    this.scrollThrottle.next({
+      scrollTop: container.scrollTop,
+      clientHeight: container.clientHeight,
+      scrollHeight: container.scrollHeight
+    });
   }
 
   public checkIfMorePublicationsAvailable(): void {
