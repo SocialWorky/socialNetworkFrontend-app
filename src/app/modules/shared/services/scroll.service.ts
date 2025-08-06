@@ -1,48 +1,117 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { DeviceDetectionService } from './device-detection.service';
+
+interface ScrollConfig {
+  scrollThreshold: number;
+  navbarShowThreshold: number;
+  navbarHideThreshold: number;
+  scrollDirectionThreshold: number;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class ScrollService {
   private scrollEndSource = new Subject<string>();
+  private lastScrollTop = 0;
+  private scrollDirection = 'up';
+  private isMobile = false;
+  
+  // Device-specific configurations
+  private mobileConfig: ScrollConfig = {
+    scrollThreshold: 100,
+    navbarShowThreshold: 50,
+    navbarHideThreshold: 100,
+    scrollDirectionThreshold: 5
+  };
+  
+  private desktopConfig: ScrollConfig = {
+    scrollThreshold: 100,
+    navbarShowThreshold: 0,
+    navbarHideThreshold: 0,
+    scrollDirectionThreshold: 5
+  };
 
   scrollEnd$ = this.scrollEndSource.asObservable();
+
+  constructor(private deviceDetectionService: DeviceDetectionService) {
+    this.isMobile = this.deviceDetectionService.isMobile();
+    
+    // Subscribe to device changes to keep isMobile updated
+    this.deviceDetectionService.getResizeEvent().subscribe(() => {
+      this.isMobile = this.deviceDetectionService.isMobile();
+    });
+  }
+
+  private get config(): ScrollConfig {
+    return this.isMobile ? this.mobileConfig : this.desktopConfig;
+  }
 
   notifyScrollEnd() {
     this.scrollEndSource.next('scrollEnd');
   }
 
   onScroll(event: any) {
-    const threshold = 100; 
+    const { scrollThreshold, navbarShowThreshold, navbarHideThreshold, scrollDirectionThreshold } = this.config;
     const scrollTop = event.target.scrollTop;
     const scrollHeight = event.target.scrollHeight;
     const offsetHeight = event.target.offsetHeight;
 
-    if (scrollTop >= 1500) {
-      this.scrollEndSource.next('showScrollToTopButton');
-    } else {
-      this.scrollEndSource.next('hideScrollToTopButton');
+    // Determine scroll direction
+    if (Math.abs(scrollTop - this.lastScrollTop) > scrollDirectionThreshold) {
+      this.scrollDirection = scrollTop > this.lastScrollTop ? 'down' : 'up';
+      this.lastScrollTop = scrollTop;
     }
 
-    if (scrollTop < 50) {
-      this.scrollEndSource.next('hideNavbar');
-    }
 
-    if (scrollTop >= 50) {
-      this.scrollEndSource.next('showNavbar');
-    }
 
-    if (scrollTop + offsetHeight >= scrollHeight - threshold) {
+    // Device-specific navbar behavior
+    this.handleNavbarBehavior(scrollTop, navbarShowThreshold, navbarHideThreshold);
+
+    // Detect end of scroll for loading more content
+    if (scrollTop + offsetHeight >= scrollHeight - scrollThreshold) {
       this.scrollEndSource.next('scrollEnd');
     }
   }
 
-  scrollToTop() {
-    const element = document.getElementById('first-publication');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  private handleNavbarBehavior(scrollTop: number, showThreshold: number, hideThreshold: number) {
+    if (!this.isMobile) {
+      return; // Only apply navbar behavior on mobile
+    }
+
+    if (scrollTop < showThreshold) {
+      // At the top - always show navbar
+      this.scrollEndSource.next('showNavbar');
+    } else if (this.scrollDirection === 'up') {
+      // Scrolling up - show navbar
+      this.scrollEndSource.next('showNavbar');
+    } else if (this.scrollDirection === 'down' && scrollTop > hideThreshold) {
+      // Scrolling down and past threshold - hide navbar
+      this.scrollEndSource.next('hideNavbar');
     }
   }
 
+
+
+  setScrollContainer(selector: string) {
+    const container = document.querySelector(selector);
+    if (container) {
+      container.addEventListener('scroll', (event) => {
+        this.handleScroll(event);
+      });
+    }
+  }
+
+  private handleScroll(event: any) {
+    const { scrollThreshold } = this.config;
+    const position = event.target.scrollTop + event.target.clientHeight;
+    const height = event.target.scrollHeight;
+
+    if (position >= height - scrollThreshold) {
+      this.scrollEndSource.next('scrollEnd');
+    }
+
+
+  }
 }

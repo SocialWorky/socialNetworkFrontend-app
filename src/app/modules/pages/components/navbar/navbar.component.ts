@@ -1,27 +1,29 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input,  AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 
 import { translations } from '@translations/translations'
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { UserService } from '@shared/services/core-apis/users.service';
-import { SocketService } from '@shared/services/socket.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service'
 import { MessageService } from '../../messages/services/message.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
-import { PwaInstallService } from '@shared/services/pwa-install.service';
+
 import { ScrollService } from '@shared/services/scroll.service';
 import { Token } from '@shared/interfaces/token.interface';
+import { AppUpdateManagerService } from '@shared/services/app-update-manager.service';
+import { APP_VERSION_CONFIG } from '../../../../../app-version.config';
 
 @Component({
-  selector: 'worky-navbar',
-  templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.scss'],
+    selector: 'worky-navbar',
+    templateUrl: './navbar.component.html',
+    styleUrls: ['./navbar.component.scss'],
+    standalone: false
 })
 export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   private unsubscribe$ = new Subject<void>();
@@ -50,10 +52,12 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   pwaInstalled = false;
 
-  scrolledTop = false;
+  scrolledTop = true;
+
+  isDarkMode = true;
 
   @Input() isMessages: boolean = false;
-
+  @Output() navbarStateChange = new EventEmitter<boolean>();
 
   constructor(
     private _router: Router,
@@ -61,23 +65,26 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     private _cdr: ChangeDetectorRef,
     private _authService: AuthService,
     private _userService: UserService,
-    private _socketService: SocketService,
     private _notificationUsersService: NotificationUsersService,
     private _notificationService: NotificationService,
     private _notificationCenterService: NotificationCenterService,
     private _messageService: MessageService,
     private _notificationPanelService: NotificationPanelService,
     private _configService: ConfigService,
-    private _pwaInstallService: PwaInstallService,
-    private _scrollService: ScrollService
+    private _scrollService: ScrollService,
+    private _appUpdateManagerService: AppUpdateManagerService
   ) {
     this.menuProfile();
-    if (!this._authService.isAuthenticated()) return;
-    this.token = this._authService.getDecodedToken();
-    this._socketService.connectToWebSocket(this.token!);
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+
+    if (localStorage.getItem('isDarkMode') === 'true') {
+      this.isDarkMode = false;
+      this.menuProfile();
+      this._cdr.markForCheck();
+    }
+
     this.isMobile = this._deviceDetectionService.isMobile();
     this._deviceDetectionService.getResizeEvent().pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
       this.isMobile = this._deviceDetectionService.isMobile();
@@ -95,7 +102,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
     this.subscribeToConfig();
-    this.checkPwaInstall();
     this.getConfig();
     this.checkAdminDataLink();
     this.getUnreadMessagesCount();
@@ -105,12 +111,18 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this._scrollService.scrollEnd$.pipe(takeUntil(this.unsubscribe$)).subscribe((event) => {
-      if (event === 'showNavbar') {
-        this.scrolledTop = true;
-      } else if (event === 'hideNavbar') {
-        this.scrolledTop = false
+      // Only process navbar events on mobile devices
+      if (this.isMobile && (event === 'showNavbar' || event === 'hideNavbar')) {
+        if (event === 'showNavbar') {
+          this.scrolledTop = true;
+          this.navbarStateChange.emit(true);
+          this._cdr.markForCheck();
+        } else if (event === 'hideNavbar') {
+          this.scrolledTop = false;
+          this.navbarStateChange.emit(false);
+          this._cdr.markForCheck();
+        }
       }
-
     });
   }
 
@@ -134,10 +146,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  private removeDataLinkProfile(item: string) {
-    this.dataLinkProfile = this.dataLinkProfile.filter((link) => link.title !== item);
-  }
-
   private applyConfig(configData: any) {
     if (configData) {
       this.title = configData.settings.title;
@@ -156,28 +164,13 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
    this._authService.logout();
   }
 
-  private checkAdminDataLink() {
-    if (!this._authService.isAuthenticated()) return;
+  private async checkAdminDataLink() {
     const dataUser = this._authService.getDecodedToken();
     const link = { icon: 'settings', link: '/admin',  title: 'Administración'}
 
     if (dataUser && dataUser.role === 'admin' && !this.isMobile) {
       this.dataLinkProfile.unshift(link);
     }
-  }
-
-  private checkPwaInstall() {
-    if (!this._pwaInstallService.isAppInstalled()) {
-      const link = { icon: 'download', function: this.installPWA.bind(this),  title: 'Instalar App'}
-      this.dataLinkProfile.unshift(link);
-    }
-  }
-
-  private installPWA() {
-    this._pwaInstallService.showInstallPrompt(
-       '🎉 ¡Bienvenido!',
-       'Instala nuestra app para una mejor experiencia.'
-     );
   }
 
   toggleNotificationsPanel() {
@@ -211,10 +204,23 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   menuProfile() {
+  let iconMode = 'light_mode';
+  if (this.isDarkMode) {
+    iconMode = 'dark_mode';
+  } else {
+    iconMode = 'light_mode';
+  }
   this.dataLinkProfile = [
+    { icon: iconMode, function: () => this.toggleDarkMode(this.isDarkMode), title: this.isDarkMode ? 'modo oscuro' : 'modo claro' },
+    { icon: 'system_update', function: () => this.checkForUpdates(), title: translations['navbar.checkUpdates']},
     { icon: 'logout', function: this.logoutUser.bind(this),  title: translations['navbar.logout']},
+    { function: undefined, title: `${translations['navbar.version']} ${APP_VERSION_CONFIG.version}`, isVersionInfo: true },
   ];
 }
+
+  checkForUpdates() {
+    this._appUpdateManagerService.forceCheckForUpdates();
+  }
 
   handleLinkClicked(data: DropdownDataLink<any>) {
     if (data.function) {
@@ -233,8 +239,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     this.searchTerm = '';
   }
 
-  getNotification() {
-    if (!this._authService.isAuthenticated()) return;
+  async getNotification() {
     const userId = this._authService.getDecodedToken()?.id!;
     this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {
@@ -261,6 +266,26 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
         console.error('Error getting messages', error);
       }
     });
+  }
+
+  toggleDarkMode(isDarkMode: boolean) {
+    const body = document.body;
+    const userId = this._authService.getDecodedToken()?.id!;
+    if (isDarkMode) {
+      body.classList.add('dark-mode');
+      localStorage.setItem('isDarkMode', 'true');
+      this._userService.userEdit(userId, { isDarkMode: true }).pipe(takeUntil(this.unsubscribe$)).subscribe({});
+    } else {
+      localStorage.setItem('isDarkMode', 'false');
+      body.classList.remove('dark-mode');
+      this._userService.userEdit(userId, { isDarkMode: false }).pipe(takeUntil(this.unsubscribe$)).subscribe({});
+    }
+
+    this.isDarkMode = !isDarkMode;
+    this.menuProfile();
+    this.checkAdminDataLink();
+    this._cdr.markForCheck();
+
   }
 
 }

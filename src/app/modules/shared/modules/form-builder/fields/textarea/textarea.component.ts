@@ -4,16 +4,17 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormControl } from '@angular/f
 import { Field } from '../../interfaces/field.interface';
 
 @Component({
-  selector: 'app-textarea',
-  templateUrl: './textarea.component.html',
-  styleUrls: ['./textarea.component.scss'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => TextareaComponent),
-      multi: true
-    }
-  ]
+    selector: 'app-textarea',
+    templateUrl: './textarea.component.html',
+    styleUrls: ['./textarea.component.scss'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => TextareaComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 export class TextareaComponent implements ControlValueAccessor, OnChanges, OnInit {
   @Input() field!: Field;

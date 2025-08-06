@@ -6,6 +6,7 @@ export interface CreatePost {
   idPublication?: string;
   extraData?: ExtraData;
   userReceivingId?: string;
+  containsMedia?: boolean;
 }
 
 export interface ExtraData {

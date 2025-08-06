@@ -1,16 +1,18 @@
 import {
   ChangeDetectorRef,
   Component,
-  ElementRef,
   Input,
   OnInit,
   OnDestroy,
   ViewChild,
-  NgZone
+  ElementRef,
+  AfterViewInit,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonTextarea, LoadingController } from '@ionic/angular';
-import { Subject, Subscription, lastValueFrom, takeUntil } from 'rxjs';
+import { Subject, Subscription, lastValueFrom, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import {
   WorkyButtonType,
@@ -41,16 +43,21 @@ import { NotificationCenterService } from '@shared/services/core-apis/notificati
 import { NotificationType } from '@shared/modules/notifications-panel/enums/notificationsType.enum';
 import { GifSearchComponent } from '../gif-search/gif-search.component';
 import { TooltipsOnboardingService } from '@shared/services/tooltips-onboarding.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { ImageLoadOptions } from '../../services/image.service';
+import { Router } from '@angular/router';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { LazyCssService } from '@shared/services/core-apis/lazy-css.service';
+import { FontLoaderService } from '@shared/services/core-apis/font-loader.service';
 
 @Component({
-  selector: 'worky-add-publication',
-  templateUrl: './addPublication.component.html',
-  styleUrls: ['./addPublication.component.scss'],
+    selector: 'worky-add-publication',
+    templateUrl: './addPublication.component.html',
+    styleUrls: ['./addPublication.component.scss'],
+    standalone: false
 })
 export class AddPublicationComponent implements OnInit, OnDestroy {
   WorkyButtonType = WorkyButtonType;
-
-  WorkyButtonTheme = WorkyButtonTheme;
 
   typePrivacy = TypePrivacy;
 
@@ -58,13 +65,11 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   user: User = {} as User;
 
-  profileImageUrl: string | null = null;
+  profileImageUrl: string | null = '';
 
   nameGeoLocation = '';
 
   dataGeoLocation = '';
-
-  showEmojiMenu = false;
 
   privacy = TypePrivacy.PUBLIC;
 
@@ -89,8 +94,18 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     privacy: [''],
     authorId: [''],
     extraData: [''],
+    containsMedia: [false],
     userReceivingId: [''],
   });
+
+  avatarLoading: boolean = true;
+  nameLoading: boolean = true;
+  privacyLoading: boolean = true;
+  textareaLoading: boolean = true;
+  locationLoading: boolean = true;
+  markdownButtonsLoading: boolean = true;
+  optionsButtonsLoading: boolean = true;
+  publishButtonLoading: boolean = true;
 
   private unsubscribe$ = new Subject<void>();
   private mailSendNotification: MailSendValidateData = {} as MailSendValidateData;
@@ -105,9 +120,32 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   @Input() idUserProfile?: string;
 
   @Input() idMedia?: string;
+  imageOptions: ImageLoadOptions = {
+    maxRetries: 2,
+    retryDelay: 1000,
+    timeout: 10000,
+    fallbackUrl: '/assets/images/placeholder.jpg'
+  };
 
   @ViewChild('postTextRef', { static: false }) postTextRef!: IonTextarea;
-  postText!: string;
+
+  @ViewChild('textarea', { static: false }) textarea!: ElementRef;
+
+  content: string = '';
+
+  showEmojiMenu: boolean = false;
+
+  showUploadModal: boolean = false;
+
+  showLocationSearch: boolean = false;
+
+  isLoading: boolean = false;
+
+  readonly TypePublishing = TypePublishing;
+
+  readonly WorkyButtonTheme = WorkyButtonTheme;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private _fb: FormBuilder,
@@ -124,30 +162,147 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _globalEventService: GlobalEventService,
     private _emailNotificationService: EmailNotificationService,
     private _notificationCenterService: NotificationCenterService,
-    private _ngZone: NgZone,
     private _tooltipsOnboardingService: TooltipsOnboardingService,
-  ) {
-    this.isAuthenticated = this._authService.isAuthenticated();
-    if (this.isAuthenticated) {
-      this.decodedToken = this._authService.getDecodedToken()!;
-    }
-  }
+    private _utilityService: UtilityService,
+    private _router: Router,
+    private _logService: LogService,
+    private _lazyCssService: LazyCssService,
+    private _fontLoaderService: FontLoaderService
+  ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
+    this.decodedToken = this._authService.getDecodedToken()!;
     this.postPrivacy(TypePrivacy.PUBLIC);
     this.getUser();
     this.subscription = this._globalEventService.profileImage$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(newImageUrl => {
         this.profileImageUrl = newImageUrl;
-        if (this.type === TypePublishing.POSTPROFILE) {
-          this.updatePublications(TypePublishing.POSTPROFILE, this.idUserProfile);
+        if (this.type === TypePublishing.POST_PROFILE) {
+          this.updatePublications(TypePublishing.POST_PROFILE, this.idUserProfile);
         }
       });
       setTimeout(() => {
         this.startOnboarding();
       }
       , 1000);
+
+    this.simulateProgressiveLoading();
+    // Cargar recursos necesarios de forma lazy
+    this.loadRequiredResources();
+    
+    // Safety timeout to prevent infinite skeleton loading
+    setTimeout(() => {
+      this.checkAndResolveLoadingStates();
+    }, 5000);
+    
+
+  }
+
+  onAvatarLoad() {
+    this.avatarLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onAvatarError() {
+    this.avatarLoading = false;
+    this._cdr.markForCheck();
+    
+    this._logService.log(
+      LevelLogEnum.WARN,
+      'AddPublicationComponent',
+      'Avatar failed to load, using fallback'
+    );
+  }
+
+  onNameLoad() {
+    this.nameLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onPrivacyLoad() {
+    this.privacyLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onTextareaLoad() {
+    this.textareaLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onLocationLoad() {
+    this.locationLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onMarkdownButtonsLoad() {
+    this.markdownButtonsLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onOptionsButtonsLoad() {
+    this.optionsButtonsLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onPublishButtonLoad() {
+    this.publishButtonLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  // Check and resolve problematic loading states
+  private checkAndResolveLoadingStates() {
+    // Check for stuck loading states
+    const stuckStates = [];
+    
+    if (this.avatarLoading) stuckStates.push('avatar');
+    if (this.nameLoading) stuckStates.push('name');
+    if (this.privacyLoading) stuckStates.push('privacy');
+    if (this.textareaLoading) stuckStates.push('textarea');
+    if (this.locationLoading) stuckStates.push('location');
+    if (this.markdownButtonsLoading) stuckStates.push('markdownButtons');
+    if (this.optionsButtonsLoading) stuckStates.push('optionsButtons');
+    if (this.publishButtonLoading) stuckStates.push('publishButton');
+    
+    if (stuckStates.length > 0) {
+      this._logService.log(
+        LevelLogEnum.WARN,
+        'AddPublicationComponent',
+        'Detected stuck loading states',
+        { stuckStates }
+      );
+      
+      // Force resolution of stuck states
+      this.onAvatarLoad();
+      this.onNameLoad();
+      this.onPrivacyLoad();
+      this.onTextareaLoad();
+      this.onLocationLoad();
+      this.onMarkdownButtonsLoad();
+      this.onOptionsButtonsLoad();
+      this.onPublishButtonLoad();
+    }
+  }
+
+  private simulateProgressiveLoading() {
+    // Load all elements immediately without artificial delays
+    this.onNameLoad();
+    this.onPrivacyLoad();
+    this.onTextareaLoad();
+    this.onLocationLoad();
+    this.onMarkdownButtonsLoad();
+    this.onOptionsButtonsLoad();
+    this.onPublishButtonLoad();
+    
+    // Avatar is handled in getUser() to avoid conflicts
+    // Only resolve here if we already have user data
+    if (this.user && this.user.name) {
+      if (this.profileImageUrl && this.profileImageUrl.trim() !== '') {
+        this.onAvatarLoad();
+      } else {
+        this.onAvatarLoad();
+      }
+    }
   }
 
   ngOnDestroy(): void {
@@ -175,38 +330,38 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       {
         element: '.file-upload',
         popover: {
-          title: 'Subir Imganes',
-          description: 'Puedes subir archivos de imagen para añadir a tu publicación.',
+          title: translations['addPublication.onboarding.uploadImages.title'],
+          description: translations['addPublication.onboarding.uploadImages.description'],
         },
       },
       {
         element: '.location-on',
         popover: {
-          title: 'Ubicación',
-          description: 'Puedes añadir la ubicación de tu publicación.',
+          title: translations['addPublication.onboarding.location.title'],
+          description: translations['addPublication.onboarding.location.description'],
           //side: 'right',
         },
       },
       {
         element: '.emoji-icon',
         popover: {
-          title: 'Emojis',
-          description: 'Puedes añadir emojis a tu publicación.',
+          title: translations['addPublication.onboarding.emojis.title'],
+          description: translations['addPublication.onboarding.emojis.description'],
           //side: 'right',
         },
       },
       {
         element: '.markdown-help',
         popover: {
-          title: 'Markdown',
-          description: 'Puedes ver una guía rápida de Markdown para dar formato a tu publicación.',
+          title: translations['addPublication.onboarding.markdown.title'],
+          description: translations['addPublication.onboarding.markdown.description'],
           //side: 'right',
         },
       }
     ];
 
     this._tooltipsOnboardingService.start(steps);
-  } 
+  }
 
   get userToken(): string {
     return this.decodedToken.id;
@@ -214,20 +369,53 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   private getUser() {
     this._userService
-      .getUserById(this.decodedToken.id)
+      .getUserByIdFresh(this.decodedToken.id)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
         next: (response: User) => {
-          this.profileImageUrl = response.avatar;
+          // Handle avatar URL - use the avatar as it comes from the server
+          if (response.avatar && response.avatar.trim() !== '' && response.avatar !== 'null' && response.avatar !== 'undefined') {
+            this.profileImageUrl = response.avatar;
+          } else {
+            this.profileImageUrl = null;
+          }
+          
           this.user = response;
           this._cdr.markForCheck();
+          
+
+          
+
+          
+          // Always resolve avatar loading, with or without image
+          if (this.profileImageUrl && this.profileImageUrl.trim() !== '') {
+            this.onAvatarLoad();
+          } else {
+            // If no avatar, resolve immediately
+            this.onAvatarLoad();
+          }
         },
-        error: console.error,
+        error: (error) => {
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'AddPublicationComponent',
+            'Error getting user data',
+            { error: error.message }
+          );
+          // Resolve loading states on error to prevent UI freeze
+          this.onAvatarLoad();
+          this.onNameLoad();
+        },
       });
   }
 
   toggleEmojiMenu() {
     this.showEmojiMenu = !this.showEmojiMenu;
+    
+    // Cargar CSS de emoji-mart solo cuando se abre
+    if (this.showEmojiMenu) {
+      this.loadEmojiMartCss();
+    }
   }
 
   preventClose(event: Event) {
@@ -245,9 +433,9 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this.loaderSavePublication = true;
     this.myForm.controls['authorId'].setValue(this.decodedToken.id);
     this.myForm.controls['privacy'].setValue(this.privacy);
-    if (this.type === TypePublishing.POST || this.type === TypePublishing.POSTPROFILE) {
+    if (this.type === TypePublishing.POST || this.type === TypePublishing.POST_PROFILE) {
       this.onSavePublication();
-    } else if (this.type === TypePublishing.COMMENT || this.type === this.typePublishing.IMAGEVIEW) {
+    } else if (this.type === TypePublishing.COMMENT || this.type === this.typePublishing.IMAGE_VIEW) {
       this.onSaveComment(this.idPublication as string);
     }
   }
@@ -261,9 +449,10 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
     const dataComment: CreateComment = {
       content: this.myForm.controls['content'].value,
+      containsMedia: this.selectedFiles.length > 0,
       authorId: this.decodedToken.id,
       idPublication: this.type === this.typePublishing.COMMENT ? idPublication : null,
-      idMedia: this.type === this.typePublishing.IMAGEVIEW ? this.idMedia : null,
+      idMedia: this.type === this.typePublishing.IMAGE_VIEW ? this.idMedia : null,
     };
 
     this._commentService.createComment(dataComment).pipe(takeUntil(this.unsubscribe$)).subscribe({
@@ -273,7 +462,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         loadingComment.dismiss();
       },
       error: error => {
-        console.error(error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'AddPublicationComponent',
+          'Error creating comment',
+          { error: error instanceof Error ? error.message : String(error) }
+        );
         this.loaderSavePublication = false;
         loadingComment.dismiss();
       }
@@ -283,8 +477,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   private async handleCommentResponse(message: any, idPublication: string) {
     try {
       if (this.selectedFiles.length) {
-        const response = await this.uploadFiles('comments', message.comment._id);
-        await this.saveFiles(response, environment.APIFILESERVICE + 'comments/', message.comment._id, TypePublishing.COMMENT);
+        const urlMedia = environment.APIFILESERVICE + 'comments/';
+        const idReference = message.comment._id;
+        await this.uploadFiles('comments', idReference, urlMedia, TypePublishing.COMMENT);
+        this.selectedFiles = [];
+        this.previews = [];
+        this._cdr.markForCheck();
       }
 
       await this.updatePublicationAndNotify(idPublication, message.comment);
@@ -297,7 +495,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         );
       }
     } catch (error) {
-      console.error(error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'AddPublicationComponent',
+        'Error handling comment response',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
     }
   }
 
@@ -310,10 +513,13 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
     this.setExtraData();
 
-    if (this.type === TypePublishing.POSTPROFILE && this.idUserProfile !== this.decodedToken.id) {
+    if (this.type === TypePublishing.POST_PROFILE && this.idUserProfile !== this.decodedToken.id) {
       this.myForm.controls['userReceivingId'].setValue(this.idUserProfile);
       this.myForm.controls['privacy'].setValue(TypePrivacy.FRIENDS);
     }
+
+    const containsMedia = this.selectedFiles.length > 0;
+    this.myForm.controls['containsMedia'].setValue(containsMedia);
 
     await this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
@@ -322,7 +528,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         loadingPublications.dismiss();
       },
       error: error => {
-        console.error(error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'AddPublicationComponent',
+          'Error creating publication',
+          { error: error.message }
+        );
         this.loaderSavePublication = false;
         loadingPublications.dismiss();
       },
@@ -357,8 +568,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   private async handlePublicationResponse(message: any) {
     try {
       if (this.selectedFiles.length) {
-        const response = await this.uploadFiles('publications', message.publications._id);
-        await this.saveFiles(response, environment.APIFILESERVICE + 'publications/', message.publications._id, TypePublishing.POST);
+        const urlMedia = environment.APIFILESERVICE + 'publications/';
+        const idReference = message.publications._id;
+        await this.uploadFiles('publications', idReference, urlMedia, TypePublishing.POST);
+        this.selectedFiles = [];
+        this.previews = [];
+        this._cdr.markForCheck();
       }
 
       await this.updatePublicationAndNotify(message.publications._id);
@@ -371,7 +586,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         );
       }
     } catch (error) {
-      console.error(error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'AddPublicationComponent',
+        'Error handling publication response',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
     }
   }
 
@@ -387,30 +607,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     }
   }
 
-  private uploadFiles(folder: string, id: string): Promise<MediaFileUpload[]> {
-    return lastValueFrom(this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$)));
-  }
-
-  private async saveFiles(response: MediaFileUpload[], saveLocation: string, id: string, type: TypePublishing) {
-    for (const file of response) {
-      try {
-        await lastValueFrom(
-          this._fileUploadService.saveUrlFile(
-            saveLocation + file.filename,
-            saveLocation + file.filenameThumbnail,
-            saveLocation + file.filenameCompressed,
-            id,
-            type
-          ).pipe(takeUntil(this.unsubscribe$))
-        );
-      } catch (error) {
-        console.error(`Error saving file ${file.filename}: ${error}`);
-      }
-    }
-
-    this.selectedFiles = [];
-    this.previews = [];
-    this._cdr.markForCheck();
+  private uploadFiles(folder: string, idReference?: string, urlMedia?: string, type?: TypePublishing): Promise<MediaFileUpload[]> {
+    return lastValueFrom(this._fileUploadService.uploadFile(this.selectedFiles, folder, idReference, urlMedia, type).pipe(takeUntil(this.unsubscribe$)));
   }
 
   private async updatePublicationAndNotify(idPublication: string, comment?: any) {
@@ -433,12 +631,10 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this._notificationCenterService.createNotification({
       userId: publication.author._id,
       type: NotificationType.COMMENT,
-      content: this.type === this.typePublishing.IMAGEVIEW ? translations['notification.commentPublicationImage'] : translations['notification.commentPublication'],
+      content: this.type === this.typePublishing.IMAGE_VIEW ? translations['notification.commentPublicationImage'] : translations['notification.commentPublication'],
       link: `/publication/${publication._id}`,
       additionalData: JSON.stringify(dataNotification),
     }).pipe(takeUntil(this.unsubscribe$)).subscribe();
-
-
   }
 
   private createNotificationData(publication: PublicationView, comment: any) {
@@ -460,7 +656,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       message,
       Alerts.SUCCESS,
       Position.CENTER,
-      true,
       true,
       translations['button.ok'],
     );
@@ -514,7 +709,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   openUploadModal() {
     const dialogRef = this._dialog.open(ImageUploadModalComponent, {
       data: {
-        maxFiles: this.type === TypePublishing.POST || this.type === TypePublishing.POSTPROFILE ? 10 : 1,
+        maxFiles: this.type === TypePublishing.POST || this.type === TypePublishing.POST_PROFILE ? 10 : 1,
       }
     });
 
@@ -525,8 +720,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         this.loaderPreviews = true;
         if (result) {
           this.selectedFiles = result;
-          this.createPreviews();
           this._cdr.markForCheck();
+          this.createPreviews();
         } else {
           this.loaderPreviews = false;
         }
@@ -546,15 +741,16 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
           type: fileType === 'image' ? 'image' : 'video',
           url: e.target.result
         });
+        this._cdr.markForCheck();
       };
       reader.readAsDataURL(file);
     });
     if (count >= this.selectedFiles.length){
       setTimeout(() => {
         this.loaderPreviews = false;
-      }, 1500);
+        this._cdr.markForCheck();
+      }, 500);
     }
-
     this._cdr.markForCheck();
   }
 
@@ -593,14 +789,19 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       const publicationsNew = await lastValueFrom(this._publicationService.getAllPublications(1, 10, type, idUserProfile));
       this._publicationService.updatePublications(publicationsNew.publications);
     } catch (error) {
-      console.error('Error getting publications', error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'AddPublicationComponent',
+        'Error getting publications',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
     }
   }
 
   insertText(markdown: string) {
-    const textareaValue = this.postTextRef.value || '';
-    
-    const textarea = this.postTextRef.getInputElement().then((textarea: HTMLTextAreaElement) => {
+    const textareaValue = this.myForm.get('content')?.value || '';
+
+    this.postTextRef.getInputElement().then((textarea: HTMLTextAreaElement) => {
       const startPos = textarea.selectionStart;
       const endPos = textarea.selectionEnd;
 
@@ -632,6 +833,42 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       textarea.focus();
       textarea.setSelectionRange(cursorPos, cursorPos);
     });
+  }
+
+  onImageError(event: Event): void {
+    this._utilityService.handleImageError(event, 'assets/img/shared/handleImageError.png');
+  }
+
+  /**
+   * Carga recursos necesarios de forma lazy
+   */
+  private async loadRequiredResources() {
+    try {
+      // Cargar Material Icons si no están cargadas
+      if (!this._fontLoaderService.isFontLoaded('material-icons')) {
+        await this._fontLoaderService.loadMaterialIcons();
+      }
+
+      // Cargar Material Symbols si no están cargadas
+      if (!this._fontLoaderService.isFontLoaded('material-symbols-sharp')) {
+        await this._fontLoaderService.loadMaterialSymbolsSharp();
+      }
+    } catch (error) {
+      this._logService.log(LevelLogEnum.ERROR, 'AddPublicationComponent', 'Error cargando recursos lazy');
+    }
+  }
+
+  /**
+   * Carga CSS de emoji-mart solo cuando se abre el menú
+   */
+  private async loadEmojiMartCss() {
+    try {
+      if (!this._lazyCssService.isLoaded('emoji-mart')) {
+        await this._lazyCssService.loadEmojiMartCss();
+      }
+    } catch (error) {
+      this._logService.log(LevelLogEnum.ERROR, 'AddPublicationComponent', 'Error cargando CSS de emoji-mart');
+    }
   }
 
 }

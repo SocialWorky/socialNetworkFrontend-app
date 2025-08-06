@@ -72,3 +72,6 @@ env.ts
 .nx/cache
 
 .env
+
+# Development documentation and internal notes
+.dev/

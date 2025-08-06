@@ -1,6 +1,7 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-palettes' as colors;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'sass:color';
 
 .content-publication-view {
 
@@ -28,7 +29,7 @@
       margin-left: 5px;
 
       &:hover {
-        background-color: colors.$worky-color-greyLight;
+        background-color: color-mix(in srgb, var(--worky-color-text), transparent 90%);
       }
     }
 
@@ -93,6 +94,22 @@
           display: flex;
         }
 
+        .material-icons {
+          color: colors.$worky-color-text;
+        }
+
+        // Estilos para skeletons
+        .name-skeleton {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+
+        .avatar-container {
+          display: flex;
+          align-items: center;
+        }
+
 
       }
       .geoLocationName {
@@ -113,6 +130,13 @@
           font-weight: 500;
         }
       }
+      
+      // Estilos para skeleton de ubicación
+      .location-skeleton {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
       .publication-date {
         display: flex;
         align-items: center;
@@ -121,6 +145,13 @@
         gap: 5px;
         i {
           font-size: variables.$worky-font-size-2;
+        }
+        
+        // Estilos para skeleton de fecha
+        .date-skeleton {
+          display: flex;
+          align-items: center;
+          gap: 5px;
         }
       }
     }
@@ -132,8 +163,70 @@
     overflow: auto;
     .publication-content {
       padding: 16px;
-      .content {
-        overflow: hidden;
+      color: colors.$worky-color-text;
+      overflow: hidden;
+      
+      // Estilos para skeleton de contenido
+      .content-skeleton {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+    
+    // Estilos para skeleton de media
+    .media-skeleton {
+      padding: 16px;
+    }
+
+    .media-processing-error {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background-color: colors.$worky-color-greyLight;
+      border-radius: 8px;
+      margin: 1rem 16px;
+      
+      .error-message {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        color: colors.$worky-color-warn;
+        
+        i {
+          font-size: 20px;
+        }
+        
+        span {
+          font-size: variables.$worky-font-size-4;
+          font-weight: 500;
+        }
+      }
+      
+      .retry-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: colors.$worky-color-blue;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: variables.$worky-font-size-3;
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+        
+        &:hover {
+          background-color: color-mix(in srgb, colors.$worky-color-blue, black 10%);
+        }
+        
+        i {
+          font-size: 16px;
+        }
       }
     }
   }
@@ -161,8 +254,10 @@
             width: 20px;
             height: 20px;
             object-fit: cover;
+            object-position: center;
             position: relative;
             margin-left: 0px;
+            border-radius: 50%;
           }
         }
 
@@ -173,6 +268,8 @@
       position: relative;
       display: flex;
       justify-content: space-around;
+      background-color: color-mix(in srgb, var(--worky-color-light), transparent 60%);
+      padding: 8px 0px;
       margin-top: 1rem;
       border-top: 1px solid colors.$worky-color-grey;
       border-bottom: 1px solid colors.$worky-color-grey;
@@ -183,23 +280,11 @@
         gap: 0.2rem;
         padding: 8px 20px;
         border-radius: variables.$worky-border-radius-medium;
-        color: colors.$worky-color-navy;
+        color: colors.$worky-color-text;
         cursor: pointer;
         &:hover {
-          color: colors.$worky-color-blue;
-          background-color: colors.$worky-color-greyLight;
-        }
-
-        ::ng-deep worky-dropdown {
-          .nav-link {
-            span {
-              color: colors.$worky-color-navy;
-            }
-            &:hover span {
-              color: colors.$worky-color-blue;
-            }
-          }
-
+          color: color-mix(in srgb, var(--worky-color-text), transparent 10%);
+          background-color: color-mix(in srgb, var(--worky-color-text), transparent 90%);
         }
 
       }
@@ -221,6 +306,7 @@
       gap: 0.5rem;
       margin-top: 0.3rem;
       .publication-comment-content {
+         color: colors.$worky-color-text;
          max-width: 100%;
         .publication-comment-data {
           padding: 0.4rem 1rem 0.4rem 1rem;
@@ -237,11 +323,11 @@
             justify-content: space-between;
             margin-bottom: 10px;
             .comment-author {
-              color: colors.$worky-color-blue;
+              color: colors.$worky-color-text;
             }
             .link-profile {
               cursor: pointer;
-              color: colors.$worky-color-blue;
+              color: colors.$worky-color-text;
             }
             .delete-comment {
               margin-left: 15px;

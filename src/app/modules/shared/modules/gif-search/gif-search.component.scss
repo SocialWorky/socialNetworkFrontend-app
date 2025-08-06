@@ -1,60 +1,79 @@
+@use "src/assets/styles/worky-typography.scss" as Fonts;
+@use "src/assets/styles/worky-palettes.scss" as color;
+@use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
+@use "sass:map";
 
-div {
+.content-search-gif {
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  padding: 10px;
-}
-
-.content-options {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
-  gap: 10px;
-}
-
-input[type="text"] {
-  width: 90%;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-input[type="text"]:focus {
-  border-color: #66afe9;
-  outline: none;
-  box-shadow: 0 0 8px rgba(102, 175, 233, 0.6);
-}
-
-.gif-results {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  flex-direction: row;
-}
-
-.gif-results div {
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.gif-results div:hover {
-  transform: scale(1.05);
-}
-
-.gif-results img {
-  width: 150px;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.gif-results img.large {
+  align-items: flex-start;
   width: 100%;
-  height: auto;
+  flex: 1 auto;
+  background-color: color-mix(
+    in srgb,
+    var(--worky-color-light),
+    transparent 30%
+  );
+  color: color.$worky-color-text;
+
+  .search-term {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    padding: 10px;
+
+    input[type="text"] {
+      width: 90%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0px 0px 5px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    input[type="text"]:focus {
+      border-color: color.$worky-color-navy;
+      outline: none;
+    }
+
+    .content-options {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: row;
+      gap: 10px;
+    }
+
+  }
+
+  .gif-results {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .gif-results div {
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .gif-results div:hover {
+    transform: scale(1.05);
+  }
+
+  .gif-results img {
+    width: 150px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .gif-results img.large {
+    width: 100%;
+    height: auto;
+  }
 }

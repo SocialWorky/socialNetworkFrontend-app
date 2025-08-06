@@ -2,7 +2,7 @@
   <input #fileInput type="file" multiple accept="image/*,video/*" (change)="onFileSelected($event)" hidden>
   <div class="drag-drop-container" (click)="fileInput.click()">
     <div class="drag-drop-content">
-      <p>Arrastra tus archivos aquí o haz click para seleccionar</p>
+      <p>{{ 'imageUpload.dragDropText' | workyTranslations }}</p>
       <i class="material-icons">cloud_upload</i>
     </div>
     <div class="drag-drop-background"></div>
@@ -11,7 +11,7 @@
   <div class="previews">
     <div class="loader" *ngIf="loading"></div>
     <div *ngFor="let preview of previews; let i = index" class="preview">
-      <img *ngIf="preview.type.startsWith('image/')" [src]="preview.url" alt="Image Preview">
+      <img *ngIf="preview.type.startsWith('image/')" [src]="preview.url" alt="{{ 'imageUpload.imagePreview' | workyTranslations }}">
       <video *ngIf="preview.type.startsWith('video/')" [src]="preview.url" controls></video>
 
       <i class="material-icons remove-button" (click)="removeFile(i)">close</i>
@@ -19,13 +19,13 @@
   </div>
 
   <div class="buttons">
-    <p>Archivos seleccionados {{ selectedFiles.length }} de {{ maxFiles }}</p>
+    <p>{{ 'imageUpload.selectedFiles' | workyTranslations }} {{ selectedFiles.length }} {{ 'imageUpload.of' | workyTranslations }} {{ maxFiles }}</p>
     <worky-buttons *ngIf="selectedFiles.length"
       [workyButtonType]="WorkyButtonType.Outline"
       [theme]="WorkyButtonTheme.Accent"
       (click)="upload()"
       [width]="'100%'">
-      <span basic-button-text>Subir</span>
+      <span basic-button-text>{{ 'imageUpload.upload' | workyTranslations }}</span>
     </worky-buttons>
   </div>
 </div>

@@ -1,63 +1,106 @@
 <div class="content-edit-detail-profile">
-  <div class="edit-profile-container">
+  <div class="edit-profile-container" *ngIf="dataOk">
     <form [formGroup]="editProfileBasicDetailForm" autocomplete="off">
       <div class="form-detail-basic">
-        <div class="form-input">
-          <mat-form-field class="worky-input worky-accent">
-            <mat-label>Nombre</mat-label>
+
+          <mat-form-field class="worky-input worky-accent worky-50">
+            <mat-label>{{ 'pages.editInfoProfile.name' | workyTranslations }}</mat-label>
             <input type="text" formControlName="name" id="name" matInput required>
           </mat-form-field>
 
-          <mat-form-field class="worky-input worky-accent">
-            <mat-label>Apellido</mat-label>
+          <mat-form-field class="worky-input worky-accent worky-50">
+            <mat-label>{{ 'pages.editInfoProfile.lastName' | workyTranslations }}</mat-label>
             <input type="text" formControlName="lastName" id="lastName" matInput required>
           </mat-form-field>
-        </div>
+
       </div>
     </form>
 
-    <form [formGroup]="editProfailDetailForm" autocomplete="off">
-      <div class="form-detail-basic">
-        <div class="form-input">
-          <mat-form-field class="worky-input worky-accent">
-            <mat-label>Leyenda</mat-label>
+    <form [formGroup]="editProfileDetailForm" autocomplete="off">
+      <div class="form-detail-basic detail-full">
+          <mat-form-field class="worky-input worky-accent worky-100">
+            <mat-label>{{ 'pages.editInfoProfile.legend' | workyTranslations }}</mat-label>
             <input id="legend" type="text" formControlName="legend" matInput>
           </mat-form-field>
 
-          <mat-form-field class="worky-input worky-accent">
-            <mat-label>Fecha de Cumpleaño</mat-label>
-            <input id="dateOfBirth" type="date" formControlName="dateOfBirth" matInput>
-          </mat-form-field>
-
-          <mat-form-field class="worky-input worky-accent">
-            <mat-label>Descripción</mat-label>
+          <mat-form-field class="worky-input worky-accent worky-100">
+            <mat-label>{{ 'pages.editInfoProfile.description' | workyTranslations }}</mat-label>
             <textarea id="description" formControlName="description" matInput></textarea>
           </mat-form-field>
 
-          <mat-form-field class="worky-input worky-accent">
-            <mat-label>Sexo</mat-label>
-            <mat-select id="sex" formControlName="sex">
-              <mat-option value="">Select</mat-option>
-              <mat-option value="masculino">Masculino</mat-option>
-              <mat-option value="femenino">Femenino</mat-option>
-              <mat-option value="otro">Otro</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <div formGroupName="whatsapp" class="whatsapp-content">
-            <mat-slide-toggle class="whatsapp-content" formControlName="isViewable">Habilitar WhatsApp</mat-slide-toggle>
-
-            <div *ngIf="editProfailDetailForm.get('whatsapp.isViewable')?.value">
-              <mat-form-field class="worky-input worky-accent">
-                <mat-label>Numero de WhatsApp</mat-label>
-                <input id="whatsappNumber" type="text" formControlName="number" matInput>
+          <div class="form-detail-basic">
+              <mat-form-field class="worky-input worky-accent worky-50">
+                <mat-label>{{ 'pages.editInfoProfile.dateOfBirth' | workyTranslations }}</mat-label>
+                <input id="dateOfBirth" type="date" formControlName="dateOfBirth" matInput>
               </mat-form-field>
-            </div>
+
+              <mat-form-field class="worky-input worky-accent worky-50">
+                <mat-label>{{ 'pages.editInfoProfile.sex' | workyTranslations }}</mat-label>
+                <mat-select id="sex" formControlName="sex">
+                  <mat-option value="">{{ 'pages.editInfoProfile.sex.select' | workyTranslations }}</mat-option>
+                  <mat-option value="masculino">{{ 'pages.editInfoProfile.sex.male' | workyTranslations }}</mat-option>
+                  <mat-option value="femenino">{{ 'pages.editInfoProfile.sex.female' | workyTranslations }}</mat-option>
+                  <mat-option value="otro">{{ 'pages.editInfoProfile.sex.other' | workyTranslations }}</mat-option>
+                </mat-select>
+              </mat-form-field>
           </div>
 
-        </div>
+
+                      <div formGroupName="whatsapp" class="whatsapp-content worky-100">
+              <div class="whatsapp-toggle-container">
+                <label class="whatsapp-toggle-label">
+                  <span class="whatsapp-toggle-text">{{ 'pages.editInfoProfile.whatsapp.enable' | workyTranslations }}</span>
+                  <div class="whatsapp-toggle-wrapper">
+                    <input 
+                      type="checkbox" 
+                      formControlName="isViewable"
+                      class="whatsapp-toggle-input"
+                      (change)="onWhatsAppToggleChange($event)">
+                    <div class="whatsapp-toggle-track"
+                         [class.whatsapp-toggle-on]="editProfileDetailForm.get('whatsapp.isViewable')?.value"
+                         [class.whatsapp-toggle-off]="!editProfileDetailForm.get('whatsapp.isViewable')?.value">
+                    </div>
+                    <div class="whatsapp-toggle-thumb"
+                         [class.whatsapp-thumb-on]="editProfileDetailForm.get('whatsapp.isViewable')?.value"
+                         [class.whatsapp-thumb-off]="!editProfileDetailForm.get('whatsapp.isViewable')?.value">
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <div *ngIf="editProfileDetailForm.get('whatsapp.isViewable')?.value" class="whatsapp-number-container">
+                <mat-form-field class="worky-input worky-accent worky-100">
+                   <mat-label>{{ 'pages.editInfoProfile.whatsapp.number' | workyTranslations }}</mat-label>
+                   <input id="whatsappNumber" type="text" formControlName="number" matInput>
+                </mat-form-field>
+              </div>
+            </div>
       </div>
     </form>
+
+
+    <form [formGroup]="dynamicFieldsForm" *ngIf="dynamicFieldsForm">
+      <div *ngFor="let field of dynamicFields; let i = index" class="form-detail-basic">
+          <app-input *ngIf="field.type === enumCustomFieldType.TEXT"
+            class="worky-100"
+            [field]="field"
+            [formControlName]="field.id">
+          </app-input>
+
+          <app-textarea *ngIf="field.type === enumCustomFieldType.TEXTAREA"
+            class="worky-100"
+            [field]="field"
+            [formControlName]="field.id">
+          </app-textarea>
+
+          <app-select *ngIf="field.type === enumCustomFieldType.SELECT"
+            class="worky-100"
+            [field]="field"
+            [formControlName]="field.id">
+          </app-select>
+      </div>
+    </form>
+
 
     <worky-buttons
       [workyButtonType]="WorkyButtonType.Flat"
@@ -65,7 +108,10 @@
       [disabled]="!editProfileBasicDetailForm.valid"
       [width]="'100%'"
       (click)="onSave()">
-      <span basic-button-text>Guardar Cambios</span>
+      <span basic-button-text>{{ 'pages.editInfoProfile.saveChanges' | workyTranslations }}</span>
     </worky-buttons>
   </div>
+
+  <div class="loader" *ngIf="!dataOk"></div>
+
 </div>

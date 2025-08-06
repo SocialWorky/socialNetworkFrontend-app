@@ -1,0 +1,64 @@
+<div class="flex justify-between items-center p-6 border-t border-slate-700 bg-slate-900 gap-4" *ngIf="config.totalPages > 1">
+  <div class="text-slate-400 text-sm whitespace-nowrap" *ngIf="config.showInfo">
+    <span>{{ paginationInfo }}</span>
+  </div>
+  
+  <div class="flex items-center gap-2 flex-wrap justify-center">
+    <!-- First Page Button -->
+    <button 
+      class="w-9 h-9 rounded-lg border border-slate-600 bg-slate-700 text-slate-100 cursor-pointer flex items-center justify-center transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none min-w-9 hidden sm:flex" 
+      [disabled]="config.currentPage === 1"
+      (click)="onFirstPage()"
+      title="{{ 'admin.shared.pagination.firstPage' | workyTranslations }}">
+      <i class="material-icons text-lg">first_page</i>
+    </button>
+    
+    <!-- Previous Page Button -->
+    <button 
+      class="w-9 h-9 rounded-lg border border-slate-600 bg-slate-700 text-slate-100 cursor-pointer flex items-center justify-center transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none min-w-9" 
+      [disabled]="config.currentPage === 1"
+      (click)="onPreviousPage()"
+      title="{{ 'admin.shared.pagination.previousPage' | workyTranslations }}">
+      <i class="material-icons text-lg">chevron_left</i>
+    </button>
+    
+    <!-- Page Numbers -->
+    <div class="flex gap-1 items-center" *ngIf="config.showPageNumbers">
+      <button 
+        class="min-w-9 h-9 rounded-lg border border-slate-600 bg-slate-700 text-slate-100 cursor-pointer flex items-center justify-center text-sm font-semibold transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/20"
+        [ngClass]="{
+          'bg-blue-500 text-white border-blue-500 shadow-lg shadow-blue-500/30': page === config.currentPage
+        }"
+        *ngFor="let page of visiblePageNumbers"
+        (click)="onPageChange(page)">
+        {{ page }}
+      </button>
+      
+      <!-- Ellipsis for large page counts -->
+      <span class="text-slate-500 text-sm px-2 select-none" *ngIf="visiblePageNumbers.length > 0 && visiblePageNumbers[0] > 1">
+        ...
+      </span>
+      <span class="text-slate-500 text-sm px-2 select-none" *ngIf="visiblePageNumbers.length > 0 && visiblePageNumbers[visiblePageNumbers.length - 1] < config.totalPages">
+        ...
+      </span>
+    </div>
+    
+    <!-- Next Page Button -->
+    <button 
+      class="w-9 h-9 rounded-lg border border-slate-600 bg-slate-700 text-slate-100 cursor-pointer flex items-center justify-center transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none min-w-9" 
+      [disabled]="config.currentPage === config.totalPages"
+      (click)="onNextPage()"
+      title="{{ 'admin.shared.pagination.nextPage' | workyTranslations }}">
+      <i class="material-icons text-lg">chevron_right</i>
+    </button>
+    
+    <!-- Last Page Button -->
+    <button 
+      class="w-9 h-9 rounded-lg border border-slate-600 bg-slate-700 text-slate-100 cursor-pointer flex items-center justify-center transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none min-w-9 hidden sm:flex" 
+      [disabled]="config.currentPage === config.totalPages"
+      (click)="onLastPage()"
+      title="{{ 'admin.shared.pagination.lastPage' | workyTranslations }}">
+      <i class="material-icons text-lg">last_page</i>
+    </button>
+  </div>
+</div> 

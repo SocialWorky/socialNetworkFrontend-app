@@ -5,22 +5,23 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Pipe({
-  name: 'workyPreviewHtml'
+    name: 'workyPreviewHtml',
+    standalone: false
 })
 export class WorkyPreviewHtmlPipe implements PipeTransform {
 
   constructor(private contentService: ContentService, private sanitizer: DomSanitizer) {}
 
-  transform(value: string | undefined): Observable<{ markdownHtml: SafeHtml, previewsHtml: SafeHtml, youtubeHtml: SafeHtml }> {
+  transform(value: string | undefined): Observable<{ markdownHtml: SafeHtml, previewsHtml: SafeHtml, youTubeHtml: SafeHtml }> {
     if (!value) {
-      return new Observable<{ markdownHtml: SafeHtml, previewsHtml: SafeHtml, youtubeHtml: SafeHtml }>(observer => observer.next({ markdownHtml: '', previewsHtml: '', youtubeHtml: '' }));
+      return new Observable<{ markdownHtml: SafeHtml, previewsHtml: SafeHtml, youTubeHtml: SafeHtml }>(observer => observer.next({ markdownHtml: '', previewsHtml: '', youTubeHtml: '' }));
     }
 
     return this.contentService.processContent(value).pipe(
-      map(({ markdownHtml, previewsHtml, youtubeHtml }) => ({
+      map(({ markdownHtml, previewsHtml, youTubeHtml }) => ({
         markdownHtml: this.sanitizer.bypassSecurityTrustHtml(markdownHtml),
         previewsHtml: this.sanitizer.bypassSecurityTrustHtml(previewsHtml),
-        youtubeHtml: this.sanitizer.bypassSecurityTrustHtml(youtubeHtml)
+        youTubeHtml: this.sanitizer.bypassSecurityTrustHtml(youTubeHtml)
       }))
     );
   }

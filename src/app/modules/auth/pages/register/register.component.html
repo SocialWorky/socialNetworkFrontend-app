@@ -4,44 +4,44 @@
         <h1 class="title-register">{{ 'register.title' | workyTranslations }}</h1>
         <p class="subTitle-register">{{ 'register.subTitle' | workyTranslations }}</p>
     </div>
-    
+
     <div class="img-register">
         <img src="assets/img/login/worky-login.svg" alt="Register" />
     </div>
-    
+
     <div class="content-register">
         <div class="content-register-header">
             <h1 class="title-register">{{ 'register.title' | workyTranslations }}</h1>
             <p class="subTitle-register">{{ 'register.subTitle' | workyTranslations }}</p>
         </div>
-    
+
         <form [formGroup]="registerForm" (ngSubmit)="register()" autocomplete="off">
-            <div class="form-register">  
+            <div class="form-register">
                 <div class="form-input">
                     <mat-form-field class="worky-input worky-accent">
                         <mat-label>{{ 'input.name' | workyTranslations }}</mat-label>
                             <input type="name" formControlName="name" id="name" matInput required>
                         <mat-error worky-validation-error-message></mat-error>
                     </mat-form-field>
-            
+
                     <mat-form-field class="worky-input worky-accent">
-                        <mat-label>{{ 'input.lastname' | workyTranslations }}</mat-label>
+                        <mat-label>{{ 'input.lastName' | workyTranslations }}</mat-label>
                             <input type="lastName" formControlName="lastName" id="lastName" matInput required>
                         <mat-error worky-validation-error-message></mat-error>
                     </mat-form-field>
-            
+
                     <mat-form-field class="worky-input worky-accent">
                         <mat-label>{{ 'input.username' | workyTranslations }}</mat-label>
                             <input type="username" formControlName="username" id="username" matInput #userNameInput required>
                         <mat-error worky-validation-error-message></mat-error>
                     </mat-form-field>
-            
+
                     <mat-form-field class="worky-input worky-accent">
                         <mat-label>{{ 'input.email' | workyTranslations }}</mat-label>
                             <input type="email" formControlName="email" id="email" matInput #emailInput required>
                         <mat-error worky-validation-error-message></mat-error>
                     </mat-form-field>
-            
+
                     <mat-form-field class="worky-input worky-accent">
                         <mat-label>{{ 'input.password' | workyTranslations }}</mat-label>
                             <input type="password" formControlName="password" id="password" matInput required>
@@ -58,7 +58,7 @@
                 <div class="have-account">
                     <span routerLink="auth/login">{{ 'register.haveAccountLogIn' | workyTranslations }}</span>
                 </div>
-        
+
                 <div class="form-register-buttons">
                     <worky-buttons *ngIf="!registerLoading"
                         [workyButtonType]="WorkyButtonType.Flat"
@@ -68,7 +68,7 @@
                         <span basic-button-text>{{ 'button.register' | workyTranslations }}</span>
                     </worky-buttons>
                 </div>
-            </div>   
+            </div>
         </form>
     </div>
-</div> 
+</div>

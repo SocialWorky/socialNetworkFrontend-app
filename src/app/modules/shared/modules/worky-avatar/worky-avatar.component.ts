@@ -1,13 +1,19 @@
-import { ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
+import { ImageLoadOptions } from '../../services/image.service';
+import { MobileImageCacheService } from '../../services/mobile-image-cache.service';
+import { GoogleImageService } from '../../services/google-image.service';
+import { LogService, LevelLogEnum } from '../../services/core-apis/log.service';
 
 @Component({
-  selector: 'worky-avatar',
-  templateUrl: './worky-avatar.component.html',
-  styleUrls: ['./worky-avatar.component.scss'],
+    selector: 'worky-avatar',
+    templateUrl: './worky-avatar.component.html',
+    styleUrls: ['./worky-avatar.component.scss'],
+    standalone: false
 })
-export class WorkyAvatarComponent implements OnInit, OnChanges {
+export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
   token?: Token;
 
   userAvatar = '';
@@ -19,6 +25,21 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
   backgroundColor = '';
 
   fontSize: number | null = null;
+
+  isGeneratedAvatar = false;
+
+  isLoading = true;
+
+  hasError = false;
+
+  imageOptions: ImageLoadOptions = {
+    maxRetries: 2,
+    retryDelay: 500,
+    timeout: 5000,
+    fallbackUrl: '/assets/img/shared/handleImageError.png'
+  };
+
+  private destroy$ = new Subject<void>();
 
   private _size = 30;
 
@@ -33,114 +54,278 @@ export class WorkyAvatarComponent implements OnInit, OnChanges {
 
   @Input() img?: string | null;
 
+  @Input() showInitials: boolean = true;
+
+  @Output() load = new EventEmitter<void>();
+  @Output() error = new EventEmitter<void>();
+
   @Input()
   set size(value: number) {
     if (value >= 10 && value <= 100) {
       this._size = value;
     }
   }
-  
+
   get size(): number {
     return this._size;
   }
 
-  constructor(private _authService: AuthService, private _cdr: ChangeDetectorRef) {}
+  constructor(
+    private _authService: AuthService,
+    private _mobileCacheService: MobileImageCacheService,
+    private _googleImageService: GoogleImageService,
+    private _logService: LogService,
+    private _cdr: ChangeDetectorRef
+  ) {}
 
-  ngOnInit() {
-    if(!this._authService.isAuthenticated()) return;
-    this.token = this._authService.getDecodedToken()!;
-
-    this.username = this.token?.name || '';
-
-    this.userAvatar = this.token?.avatar || '';
-
-    this.loadImageUser();
-
+  ngOnInit(): void {
+    this.token = this._authService.getDecodedToken() || undefined;
+    this.generateInitialsAvatar(); // Always generate initials first
+    this.generateAvatar();
   }
 
   ngOnChanges(): void {
-    this.loadImageUser();
+    this.isLoading = true;
+    this.hasError = false;
+    this.isGeneratedAvatar = false;
+    this.imageData = '';
+    this.initials = '';
+    this.backgroundColor = '';
+    this.fontSize = null;
+    
+    this.generateInitialsAvatar(); // Always generate initials first
+    this.generateAvatar();
   }
 
-  private loadImageUser() {
-    this.img = this.img === 'null' ? null : this.img;
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-    if (!this.name && !this.img) {
-      if (this.username && !this.userAvatar) {
-        this.generateAvatar();
-      } else if (this.userAvatar) {
-        this.imageData = this.userAvatar;
-      }
-    } else if (this.name && !this.img && this.name.length > 2) {
-      this.username = this.name;
-      this.generateAvatar();
-    } 
-    if (this.img) {
-      this.imageData = this.img;
+  onImageError(): void {
+    this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Image error event triggered', { 
+      url: this.img || 'unknown' 
+    });
+    this.imageData = '';
+    this.isGeneratedAvatar = true;
+    this.isLoading = false;
+    this.hasError = true;
+    this._cdr.markForCheck();
+  }
+
+  onImageLoad(): void {
+    this.hasError = false;
+    this.isGeneratedAvatar = false;
+    this._cdr.markForCheck();
+    this.load.emit();
+  }
+
+  public forceInitials(): void {
+    this.imageData = '';
+    this.isGeneratedAvatar = true;
+    this._cdr.markForCheck();
+  }
+
+  // Test method to verify initials work
+  public testInitials(): void {
+    this.generateInitialsAvatar();
+    this._cdr.markForCheck();
+  }
+
+
+
+  private generateAvatar(): void {
+    // Only try to load image if we have a valid URL
+    const isValidUrl = this.img && 
+                      typeof this.img === 'string' &&
+                      this.img.trim() !== '' && 
+                      this.img !== 'null' && 
+                      this.img !== 'undefined' && 
+                      this.img !== '' &&
+                      this.img.length > 0;
+    
+
+
+    
+    if (isValidUrl && this.img) {
+      this.tryLoadImage(this.img);
+    } else {
+      this.isGeneratedAvatar = true;
+      this.isLoading = false;
+      this.hasError = false;
+      this._cdr.markForCheck();
     }
+  }
+
+  private tryLoadImage(imageUrl: string): void {
+    this.isLoading = true;
+    this._cdr.markForCheck();
+
+
+
+    const timeout = setTimeout(() => {
+      if (this.isLoading) {
+        this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Image load timeout, falling back to initials', { url: imageUrl });
+        this.imageData = '';
+        this.isGeneratedAvatar = true;
+        this.isLoading = false;
+        this.hasError = true;
+        this._cdr.markForCheck();
+      }
+    }, 3000);
+
+    if (this.isGoogleImage(imageUrl)) {
+      this.loadGoogleImage(imageUrl, timeout);
+    } else {
+      if (this._mobileCacheService.isMobile()) {
+        this._mobileCacheService.loadImage(imageUrl, 'profile', this.imageOptions)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (cachedUrl) => {
+              clearTimeout(timeout);
+              this.imageData = cachedUrl;
+              this.isLoading = false;
+              this.isGeneratedAvatar = false;
+              this.hasError = false;
+              this._cdr.markForCheck();
+              this.load.emit();
+            },
+            error: (error) => {
+              clearTimeout(timeout);
+              this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image from mobile cache, falling back to initials', { 
+                url: imageUrl, 
+                error: error.message 
+              });
+              this.imageData = '';
+              this.isGeneratedAvatar = true;
+              this.isLoading = false;
+              this.hasError = true;
+              this._cdr.markForCheck();
+            }
+          });
+      } else {
+        const img = new Image();
+        img.src = imageUrl;
+
+        img.onload = () => {
+          clearTimeout(timeout);
+          this.imageData = imageUrl;
+          this.isLoading = false;
+          this.isGeneratedAvatar = false;
+          this.hasError = false;
+          this._cdr.markForCheck();
+          this.load.emit();
+        };
+
+        img.onerror = () => {
+          clearTimeout(timeout);
+          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image, falling back to initials', { url: imageUrl });
+          this.imageData = '';
+          this.isGeneratedAvatar = true;
+          this.isLoading = false;
+          this.hasError = true;
+          this._cdr.markForCheck();
+        };
+      }
+    }
+  }
+
+  private isGoogleImage(url: string): boolean {
+    return url.includes('lh3.googleusercontent.com') || 
+           url.includes('lh4.googleusercontent.com') || 
+           url.includes('lh5.googleusercontent.com') || 
+           url.includes('lh6.googleusercontent.com');
+  }
+
+  private loadGoogleImage(imageUrl: string, timeout: NodeJS.Timeout): void {
+    this._googleImageService.getGoogleImage(imageUrl, this.size)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (cachedUrl) => {
+          clearTimeout(timeout);
+          
+          // Check if we got a valid URL or fallback
+          if (cachedUrl && cachedUrl.trim() !== '' && cachedUrl !== '/assets/img/shared/handleImageError.png') {
+            this.imageData = cachedUrl;
+            this.isGeneratedAvatar = false;
+            this.isLoading = false;
+            this.hasError = false;
+            this._cdr.markForCheck();
+            this.load.emit();
+          } else {
+            // Fallback to initials if no valid image
+            this.imageData = '';
+            this.isGeneratedAvatar = true;
+            this.isLoading = false;
+            this.hasError = false;
+            this._cdr.markForCheck();
+          }
+        },
+        error: (error) => {
+          clearTimeout(timeout);
+          // Failed to load Google image, falling back to initials - no need to log every failure
+          this.imageData = '';
+          this.isGeneratedAvatar = true;
+          this.isLoading = false;
+          this.hasError = true;
+          this._cdr.markForCheck();
+        }
+      });
+  }
+
+  private generateInitialsAvatar(): void {
+    this.isGeneratedAvatar = true;
+    this.isLoading = false;
+    this.hasError = false;
+    this.imageData = '';
+
+    const fullName = this.name || this.username || '';
+    const nameParts = fullName.trim().split(' ').filter(part => part.length > 0);
+    
+    if (nameParts.length >= 2) {
+      this.initials = (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+    } else if (nameParts.length === 1) {
+      this.initials = nameParts[0].charAt(0).toUpperCase();
+    } else {
+      const username = this.username || '';
+      if (username.length > 0) {
+        this.initials = username.charAt(0).toUpperCase();
+      } else {
+        this.initials = '?';
+      }
+    }
+
+    const nameHash = this.hashCode(fullName || this.username || 'user');
+    this.backgroundColor = this.colors[Math.abs(nameHash) % this.colors.length];
+
+    this.fontSize = Math.max(12, Math.min(24, this.size * 0.4));
+
+
 
     this._cdr.markForCheck();
   }
 
-  private generateAvatar() {
-    const canvas = document.createElement('canvas');
+  // Force initials immediately for testing
+  public forceInitialsNow(): void {
+    this.generateInitialsAvatar();
+  }
 
-    const ctx = canvas.getContext('2d');
+  public forceFallbackToInitials(): void {
+    this.imageData = '';
+    this.isGeneratedAvatar = true;
+    this.isLoading = false;
+    this.hasError = true;
+    this._cdr.markForCheck();
+  }
 
-    if (ctx) {
-      const scaledSize = this.size;
-
-      const fontSize = this.size / 2.3;
-
-      this.initials = this.getInitials(this.username);
-      
-      if (this.initials) {
-        this.backgroundColor = this.getColor(this.initials[0]);
-
-        canvas.width = scaledSize;
-
-        canvas.height = scaledSize;
-
-        ctx.beginPath();
-        ctx.fillStyle = this.backgroundColor;
-        ctx.arc(scaledSize / 2, scaledSize / 2, scaledSize / 2, 0, 2 * Math.PI);
-        ctx.fill();
-
-        ctx.font = `${fontSize}px Roboto, sans-serif`;
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(this.initials, scaledSize / 2, scaledSize / 1.85);
-
-        const finalCanvas = document.createElement('canvas');
-        finalCanvas.width = this.size;
-        finalCanvas.height = this.size;
-        const finalCtx = finalCanvas.getContext('2d');
-
-        if (finalCtx) {
-          finalCtx.drawImage(canvas, 0, 0, scaledSize, scaledSize, 0, 0, this.size, this.size);
-          this.imageData = finalCanvas.toDataURL('image/png');
-        } else {
-          console.error('Error al obtener el contexto del canvas final');
-        }
-      } else {
-        console.error('Iniciales no válidas');
-      }
-    } else {
-      console.error('Error al obtener el contexto del canvas');
+  private hashCode(str: string): number {
+    let hash = 0;
+    if (str.length === 0) return hash;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
     }
-  }
-
-  private getInitials(name: string): string {
-    const nameArray = name.split(' ');
-    return nameArray.length === 1
-      ? nameArray[0].charAt(0).toUpperCase()
-      : (nameArray[0].charAt(0) + nameArray[1].charAt(0)).toUpperCase();
-  }
-
-  private getColor(letter: string): string {
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const index = alphabet.indexOf(letter.toUpperCase());
-    return index !== -1 ? this.colors[index % this.colors.length] : this.colors[0];
+    return hash;
   }
 }

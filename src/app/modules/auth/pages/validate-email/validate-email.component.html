@@ -1,0 +1,46 @@
+<div class="validate-email-container">
+  <div class="validate-card">
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="loading">
+      <div class="loading-spinner">
+        <i class="material-icons rotating">hourglass_empty</i>
+      </div>
+      <h2>{{ 'auth.validateEmail.loading.title' | workyTranslations }}</h2>
+      <p>{{ 'auth.validateEmail.loading.subtitle' | workyTranslations }}</p>
+    </div>
+
+    <!-- Success State -->
+    <div class="success-state" *ngIf="validated && !loading">
+      <div class="success-icon">
+        <i class="material-icons">check_circle</i>
+      </div>
+      <h2>{{ 'auth.validateEmail.success.title' | workyTranslations }}</h2>
+      <p>{{ 'auth.validateEmail.success.subtitle' | workyTranslations }}</p>
+      <div class="actions">
+        <button class="btn-primary" (click)="goToLogin()" type="button">
+          <i class="material-icons">login</i>
+          <span>{{ 'auth.validateEmail.success.goToLogin' | workyTranslations }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" *ngIf="error && !loading">
+      <div class="error-icon">
+        <i class="material-icons">error</i>
+      </div>
+      <h2>{{ 'auth.validateEmail.error.title' | workyTranslations }}</h2>
+      <p>{{ 'auth.validateEmail.error.subtitle' | workyTranslations }}</p>
+      <div class="actions">
+        <button class="btn-secondary" (click)="goToRegister()">
+          <i class="material-icons">person_add</i>
+          <span>{{ 'auth.validateEmail.error.registerAgain' | workyTranslations }}</span>
+        </button>
+        <button class="btn-primary" (click)="goToLogin()" type="button">
+          <i class="material-icons">login</i>
+          <span>{{ 'auth.validateEmail.error.goToLogin' | workyTranslations }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

@@ -1,58 +1,73 @@
-@use 'src/assets/styles/worky-variables' as variables;
-@use 'src/assets/styles/worky-palettes' as colors;
-@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;  
+@use "src/assets/styles/worky-variables" as variables;
+@use "src/assets/styles/worky-palettes" as colors;
+@use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
 
 .content-view-comment {
   display: flex;
   flex-direction: column;
-  height: 71vh;
+  max-height: 70dvh;
   overflow: hidden;
   .publication-comment {
-      margin-top: 3px;
-      padding: 10px;
-      overflow: auto;
-      .publication-comment-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.5rem;
-        margin-top: 0.3rem;
-        .publication-comment-content {
-          max-width: 100%;
-          .publication-comment-data {
-            padding: 0.4rem 1rem 0.4rem 1rem;
-            display: flex;
-            flex-direction: column;
-            background-color: colors.$worky-color-greyLight;
-            border-radius: 8px;
-            span {
-              font-size: variables.$worky-font-size-2;
-            }
-            .content-name-header {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 10px;
-              .comment-author {
-                color: colors.$worky-color-blue;
-              }
-              .delete-comment {
-                margin-left: 15px;
-                padding: 5px;
-                background-color: colors.$worky-color-light;
-                border-radius: 50%;
-                cursor: pointer;
-                font-size: 15px;
-                color: colors.$worky-color-red;
-              }
-            }
+    margin-top: 3px;
+    padding: 10px;
+    overflow: auto;
+    max-height: 55dvh;
+    @include breakpoints.below-sm {
+      max-height: 26dvh;
+    }
 
+    .publication-comment-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-top: 0.3rem;
+      .publication-comment-content {
+        color: colors.$worky-color-text;
+        max-width: 100%;
+        .publication-comment-data {
+          padding: 0.4rem 1rem 0.4rem 1rem;
+          display: flex;
+          flex-direction: column;
+          background-color: color-mix(
+            in srgb,
+            var(--worky-color-light),
+            transparent 40%
+          );
+          border-radius: 8px;
+          span {
+            font-size: variables.$worky-font-size-2;
           }
-          .comment-date {
-            margin-left: 5px;
-            font-size: variables.$worky-font-size-0;
-            color: colors.$worky-color-navy;
+          .content-name-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            .comment-author {
+              color: colors.$worky-color-text;
+            }
+            .delete-comment {
+              margin-left: 15px;
+              padding: 5px;
+              background-color: colors.$worky-color-light;
+              border-radius: 50%;
+              cursor: pointer;
+              font-size: 15px;
+              color: colors.$worky-color-red;
+            }
           }
         }
+        .comment-date {
+          margin-left: 5px;
+          font-size: variables.$worky-font-size-0;
+          color: colors.$worky-color-navy;
+        }
       }
+    }
+  }
+
+  .content-add-comment {
+    height: auto;
+    border-radius: 12px;
+    background-color: color-mix(in srgb, var(--worky-color-navy), transparent 95%);
   }
 }

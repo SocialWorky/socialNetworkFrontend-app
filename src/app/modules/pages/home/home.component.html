@@ -1,10 +1,16 @@
-<div class="content-publications" (scroll)="onScroll($event)"
-  [class.desk-content-publications]="!isMobile">
-  <div id="container-add-publications" class="worky-module-container" *ngIf="!paramPublication">
+<div #contentContainer 
+  class="content-publications"
+  (scroll)="onScroll($event)"
+  [class.desk-content-publications]="!isMobile"
+  [class.refreshing]="isRefreshing"
+  [class.navbar-visible]="navbarVisible">
+  
+  <div id="container-add-publications" class="worky-module-container" *ngIf="shouldShowAddPublication">
     <worky-add-publication [type]="typePublishing.POST"></worky-add-publication>
   </div>
+
   <ng-container *ngFor="let publication of publications(); let i = index; trackBy: trackById">
-    <div [ngClass]="{'worky-module-container': true, 'last-publication': i === publications.length - 1}"
+    <div [ngClass]="{'worky-module-container': true, 'last-publication': isLastPublication(i)}"
       [attr.id]="i === 0 ? 'first-publication' : null">
       <worky-publication-view
         [publication]="publication"
@@ -14,23 +20,21 @@
     </div>
   </ng-container>
 
-  <button 
-    *ngIf="showScrollToTopButton"
-    (click)="scrollToTop()"
-    class="floating-button">
-    <i class="material-icons">arrow_upward</i>
-  </button>
+  <div *ngIf="shouldShowLoader" class="loader"></div> 
 
-  <div *ngIf="loaderPublications" class="loader"></div> 
-
-  <ng-container *ngIf="!loaderPublications && publications().length === 0">
+  <ng-container *ngIf="shouldShowEmptyState">
     <span>{{ 'home.notPublications' | workyTranslations }}</span>
   </ng-container>
+
+
 </div>
 
 <!-- Connection Overlay -->
-<div *ngIf="showConnectionOverlay" class="connection-overlay">
+<div *ngIf="shouldShowConnectionOverlay" class="connection-overlay">
   <div class="connection-overlay-message">
     {{ connectionStatusMessage }}
   </div>
 </div>
+
+<!-- Sync Indicator -->
+<worky-sync-indicator></worky-sync-indicator>

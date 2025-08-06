@@ -29,40 +29,56 @@
 
   <base href="/" />
 
-  <meta name="color-scheme" content="" />
-  <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=content, user-scalable=no">
   <meta name="format-detection" content="telephone=no" />
   <meta name="msapplication-tap-highlight" content="no" />
+  
+  <!-- iOS-specific optimizations -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Worky" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  
+  <!-- iOS performance optimizations -->
+  <meta name="apple-touch-fullscreen" content="yes" />
+  <meta name="apple-mobile-web-app-orientations" content="portrait" />
 
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="manifest.json" /> 
 
+  <!-- iOS meta tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="__PWA_NAME__" />
+  
+  <!-- iOS icons -->
+  <link rel="apple-touch-icon" href="assets/icons/icon-__PWA_NAME__-152x152.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="assets/icons/icon-__PWA_NAME__-152x152.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/icon-__PWA_NAME__-192x192.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="assets/icons/icon-__PWA_NAME__-192x192.png" />
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="preload">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
-
-  <link rel="preload" href="https://fonts.gstatic.com/s/materialicons/v140/flUhRq6tzZclQEJ-Vdg-IuiaDsNcIhQ8tQ.woff2" as="font" type="font/woff2" crossorigin>
-
+  <!-- Google Fonts - Optimizadas para rendimiento -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- Material Icons - Críticos para navegación -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
+  
+  <!-- Material Symbols - Críticos para navegación -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
-
-  <link rel="icon" type="image/png" href="assets/img/navbar/worky-your-logo.png" />
-
-  <!-- add to homescreen for ios -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  <link rel="icon" type="image/png" href="assets/icons/icon-__PWA_NAME__-72x72.png" />
 
   <style>
     #loading-screen {
       position: fixed;
       width: 100vw;
       height: 100vh;
-      background-color: #ffffff;
+      background-color: #__PWA_BACKGROUND_COLOR__;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -73,7 +89,9 @@
       max-width: 200px;
       max-height: 200px;
     }
+
   </style>
+  
 </head>
 
 <body>
@@ -84,6 +102,43 @@
 
   <!-- Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    window.loadPWACacheUtils = () => {
+      if (window.PWACacheUtils) {
+        return Promise.resolve(window.PWACacheUtils);
+      }
+      
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+          script.src = '/scripts/clear-pwa-cache.js';
+        } else {
+          script.src = '/assets/js/clear-pwa-cache.js';
+        }
+        
+        script.onload = () => {
+          resolve(window.PWACacheUtils);
+        };
+        script.onerror = () => {
+          reject(new Error('PWA Cache Utils not available'));
+        };
+        document.head.appendChild(script);
+      });
+    };
+    
+    window.clearPWACache = async () => {
+      try {
+        await window.loadPWACacheUtils();
+        if (window.PWACacheUtils && window.PWACacheUtils.clearPWACache) {
+          await window.PWACacheUtils.clearPWACache();
+        }
+      } catch (error) {
+        console.warn('PWA Cache Utils not available for cache clearing');
+      }
+    };
+  </script>
 </body>
 
 </html>

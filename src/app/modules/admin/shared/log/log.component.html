@@ -1,0 +1,220 @@
+<div class="min-h-screen bg-slate-900 p-8 font-sans">
+  <!-- Header with filters and statistics -->
+  <div class="bg-slate-800 rounded-xl p-8 mb-8 shadow-lg border border-slate-700">
+    <div class="flex justify-between items-center gap-8 mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-white mb-2">{{ 'admin.log.title' | workyTranslations }}</h1>
+        <p class="text-slate-400">{{ 'admin.log.subtitle' | workyTranslations }}</p>
+      </div>
+      
+      <div class="flex gap-4">
+        <div class="flex items-center p-3 bg-slate-700 rounded-lg min-w-[120px]">
+          <div class="w-10 h-10 bg-blue-500 rounded-lg mr-3 flex items-center justify-center">
+            <i class="material-icons text-white">list_alt</i>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-2xl font-bold text-white leading-none">{{ totalLogs }}</span>
+            <span class="text-xs text-slate-400 uppercase tracking-wider">{{ 'admin.log.stats.total' | workyTranslations }}</span>
+          </div>
+        </div>
+        
+        <div class="flex items-center p-3 bg-slate-700 rounded-lg min-w-[120px]">
+          <div class="w-10 h-10 bg-red-500 rounded-lg mr-3 flex items-center justify-center">
+            <i class="material-icons text-white">error</i>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-2xl font-bold text-white leading-none">{{ getLogCountByLevel('error') }}</span>
+            <span class="text-xs text-slate-400 uppercase tracking-wider">{{ 'admin.log.stats.errors' | workyTranslations }}</span>
+          </div>
+        </div>
+        
+        <div class="flex items-center p-3 bg-slate-700 rounded-lg min-w-[120px]">
+          <div class="w-10 h-10 bg-yellow-500 rounded-lg mr-3 flex items-center justify-center">
+            <i class="material-icons text-white">warning</i>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-2xl font-bold text-white leading-none">{{ getLogCountByLevel('warn') }}</span>
+            <span class="text-xs text-slate-400 uppercase tracking-wider">{{ 'admin.log.stats.warnings' | workyTranslations }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros y controles -->
+    <div class="space-y-4">
+      <div class="flex gap-6 mb-4 flex-wrap">
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-slate-400 uppercase tracking-wider">{{ 'admin.log.filters.level' | workyTranslations }}</label>
+          <div class="flex gap-2 flex-wrap">
+            <button 
+              *ngFor="let level of logLevels" 
+              [class]="selectedLevel === level.value ? 
+                (level.value === 'error' ? 'bg-red-500 border-red-500 text-white shadow-red-500/20' : 
+                 level.value === 'warn' ? 'bg-yellow-500 border-yellow-500 text-white shadow-yellow-500/20' : 
+                 level.value === 'info' ? 'bg-cyan-500 border-cyan-500 text-white shadow-cyan-500/20' : 
+                 level.value === 'debug' ? 'bg-purple-500 border-purple-500 text-white shadow-purple-500/20' :
+                 'bg-slate-500 border-slate-500 text-white shadow-slate-500/20') : 
+                (level.value === 'error' ? 'bg-slate-700 border-red-500/50 text-red-300 hover:bg-red-500/10 hover:border-red-400' : 
+                 level.value === 'warn' ? 'bg-slate-700 border-yellow-500/50 text-yellow-300 hover:bg-yellow-500/10 hover:border-yellow-400' : 
+                 level.value === 'info' ? 'bg-slate-700 border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/10 hover:border-cyan-400' : 
+                 level.value === 'debug' ? 'bg-slate-700 border-purple-500/50 text-purple-300 hover:bg-purple-500/10 hover:border-purple-400' :
+                 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600 hover:border-slate-500')"
+              class="flex items-center gap-2 px-4 py-2 border rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 shadow-sm"
+              (click)="filterByLevel(level.value)"
+            >
+              <i class="material-icons text-base">{{ level.icon }}</i>
+              {{ level.label | workyTranslations }}
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-slate-400 uppercase tracking-wider">{{ 'admin.log.filters.search' | workyTranslations }}</label>
+          <div class="relative">
+            <i class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">search</i>
+            <input 
+              type="text" 
+              placeholder="{{ 'admin.log.filters.search.placeholder' | workyTranslations }}"
+              [(ngModel)]="searchTerm"
+              (input)="onSearchChange()"
+              class="pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm w-full focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-slate-400 uppercase tracking-wider">{{ 'admin.log.filters.itemsPerPage' | workyTranslations }}</label>
+          <select [(ngModel)]="limit" (change)="onLimitChange()" class="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm cursor-pointer focus:outline-none focus:border-blue-500">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 flex-wrap">
+        <button 
+          [disabled]="isLoading"
+          class="flex items-center gap-2 px-6 py-3 border border-blue-500 rounded-lg bg-slate-700 text-blue-400 font-semibold text-sm cursor-pointer transition-all duration-200 hover:bg-blue-500 hover:text-white disabled:opacity-60 disabled:cursor-not-allowed"
+          (click)="refreshLogs()"
+        >
+          <i class="material-icons">refresh</i>
+          {{ isLoading ? ('admin.log.buttons.refreshing' | workyTranslations) : ('admin.log.buttons.refresh' | workyTranslations) }}
+        </button>
+        
+        <button 
+          class="flex items-center gap-2 px-6 py-3 border border-green-500 rounded-lg bg-slate-700 text-green-400 font-semibold text-sm cursor-pointer transition-all duration-200 hover:bg-green-500 hover:text-white"
+          (click)="exportLogs()"
+        >
+          <i class="material-icons">download</i>
+          {{ 'admin.log.buttons.export' | workyTranslations }}
+        </button>
+        
+        <button 
+          *ngIf="selectedLevel || searchTerm"
+          [disabled]="isLoading"
+          class="flex items-center gap-2 px-6 py-3 border border-yellow-500 rounded-lg bg-slate-700 text-yellow-400 font-semibold text-sm cursor-pointer transition-all duration-200 hover:bg-yellow-500 hover:text-white disabled:opacity-60 disabled:cursor-not-allowed"
+          (click)="clearFilters()"
+        >
+          <i class="material-icons">clear</i>
+          {{ 'admin.log.buttons.clearFilters' | workyTranslations }}
+        </button>
+        
+        <div class="flex items-center gap-3">
+          <label class="flex items-center gap-3 cursor-pointer text-sm text-slate-400">
+            <input type="checkbox" [(ngModel)]="autoRefresh" (change)="toggleAutoRefresh()" class="hidden">
+            <span class="relative w-12 h-6 bg-slate-600 rounded-full transition-colors duration-300 before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:w-5 before:h-5 before:bg-white before:rounded-full before:transition-transform before:duration-300" [class.bg-blue-500]="autoRefresh" [class.before:translate-x-6]="autoRefresh"></span>
+            {{ 'admin.log.autoRefresh' | workyTranslations }}
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="flex-1 overflow-hidden p-6 flex flex-col min-h-0">
+    <!-- Loading State -->
+    <div class="flex flex-col items-center justify-center min-h-[400px] p-8" *ngIf="isLoading">
+      <div class="relative">
+        <div class="w-16 h-16 border-4 border-slate-600 border-t-blue-500 rounded-full animate-spin"></div>
+        <div class="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-blue-400 rounded-full animate-spin" style="animation-delay: 0.2s;"></div>
+      </div>
+      <p class="text-slate-400 text-lg font-medium mt-6">{{ 'admin.log.loading' | workyTranslations }}</p>
+      <p class="text-slate-500 text-sm mt-2">{{ 'admin.log.preparing' | workyTranslations }}</p>
+    </div>
+
+    <!-- Contenido cuando no está cargando -->
+    <div *ngIf="!isLoading">
+      <!-- Estado vacío -->
+      <div class="flex flex-col items-center justify-center h-full gap-4 text-center" *ngIf="logs.length === 0">
+        <i class="material-icons text-6xl text-slate-500">info</i>
+        <h3 class="text-2xl font-semibold text-white m-0">{{ 'admin.log.empty.title' | workyTranslations }}</h3>
+        <p class="text-slate-400 text-base m-0">{{ 'admin.log.empty.subtitle' | workyTranslations }}</p>
+      </div>
+
+      <!-- Lista de logs -->
+      <div class="flex flex-col gap-0 flex-1 overflow-y-auto pr-2 min-h-0 mb-4" *ngIf="logs.length > 0">
+        <ng-container *ngFor="let log of logs; trackBy: trackByLogId">
+          <div *ngIf="log"
+            class="bg-slate-800 border border-slate-700 rounded-xl overflow-visible transition-all duration-300 mb-4 shadow-md hover:shadow-lg hover:border-slate-600 group"
+            [class.border-blue-500]="isExpanded(log._id)"
+            [class.shadow-blue-250]="isExpanded(log._id)">
+            <div class="flex items-center gap-4 p-4 cursor-pointer transition-all duration-200 hover:bg-slate-700/30 group-hover:bg-slate-700/20" (click)="toggleMetadata(log._id)">
+              <div class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider min-w-[80px] justify-center shadow-md" 
+                   [class]="log.level === 'error' ? 'bg-red-500/15 text-red-300 border border-red-500/40' :
+                            log.level === 'warn' ? 'bg-yellow-500/15 text-yellow-300 border border-yellow-500/40' :
+                            log.level === 'info' ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40' :
+                            'bg-slate-500/15 text-slate-300 border border-slate-500/40'">
+                <i class="material-icons text-base">{{ getLevelIcon(log.level) }}</i>
+                <span>{{ log.level.toUpperCase() }}</span>
+              </div>
+              
+              <div class="flex-1 min-w-0">
+                <div class="font-medium mb-1 leading-relaxed break-words text-white">{{ log.message }}</div>
+                <div class="text-sm text-slate-400 font-mono break-words">{{ log.context }}</div>
+              </div>
+              
+              <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 text-sm text-slate-500">
+                  <i class="material-icons text-base">schedule</i>
+                  {{ log.timestamp | date: 'dd/MM/yy HH:mm:ss' }}
+                </div>
+                <div class="flex gap-2">
+                  <button class="w-8 h-8 border border-slate-600 rounded-md bg-slate-700/50 text-slate-400 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white" (click)="onCopy(log); $event.stopPropagation()" [title]="'admin.log.actions.copyLog' | workyTranslations">
+                    <i class="material-icons text-lg">content_copy</i>
+                  </button>
+                  <button class="w-8 h-8 border border-slate-600 rounded-md bg-slate-700/50 text-slate-400 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white" (click)="toggleMetadata(log._id); $event.stopPropagation()" [title]="'admin.log.actions.viewMetadata' | workyTranslations">
+                    <i class="material-icons text-lg transition-transform duration-200" [class.rotate-180]="isExpanded(log._id)">expand_more</i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-slate-700 bg-slate-900/20" *ngIf="isExpanded(log._id)">
+              <div class="p-4">
+                <h4 class="flex items-center gap-2 text-base font-semibold m-0 mb-4 text-white">
+                  <i class="material-icons text-blue-500">code</i>
+                  {{ 'admin.log.metadata.title' | workyTranslations }}
+                </h4>
+                <div class="relative bg-slate-900/30 rounded-lg p-4 max-h-[500px] overflow-y-auto overflow-x-auto">
+                  <ngx-json-viewer [depth]="2" [json]="log.metadata"></ngx-json-viewer>
+                  <button class="absolute top-3 right-3 flex items-center gap-2 px-4 py-2 border border-slate-600 rounded-md bg-slate-900/80 text-slate-400 text-sm cursor-pointer transition-all duration-200 hover:bg-slate-700 hover:border-slate-500 hover:text-white" (click)="onCopy(log.metadata)">
+                    <i class="material-icons text-base">content_copy</i>
+                    {{ 'admin.log.metadata.copyJson' | workyTranslations }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Pagination -->
+      <worky-pagination 
+        [config]="paginationConfig"
+        (pageChange)="changePage($event)">
+      </worky-pagination>
+    </div>
+  </div>
+</div>

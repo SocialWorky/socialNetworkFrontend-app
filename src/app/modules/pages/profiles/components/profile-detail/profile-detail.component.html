@@ -7,47 +7,65 @@
 <div class="worky-module-container">
   <div class="container-detail">
     <div class="header-detail">
-      <span>Detalles</span>
+      <span>{{ 'profile.details' | workyTranslations }}</span>
     </div>
 
     <div class="body-detail">
         <div class="detail">
           <i class="material-icons">badge</i>
-          <span class="label-detail">Nombre: </span>
+          <span class="label-detail">{{ 'profile.details-name' | workyTranslations }}</span>
           <span>{{ userData?.name }}</span>
         </div>
         <div class="detail">
           <i class="material-icons">badge</i>
-          <span class="label-detail">Apellido: </span>
+          <span class="label-detail">{{ 'profile.details-lastName' | workyTranslations }}</span>
           <span>{{ userData?.lastName }}</span>
         </div>
         <div class="detail">
           <i class="material-icons">person</i>
-          <span class="label-detail">Usuario: </span>
+          <span class="label-detail">{{ 'profile.details-username' | workyTranslations }}</span>
           <span>{{ userData?.username }}</span>
         </div>
         <div class="detail">
           <i class="material-icons">alternate_email</i>
-          <span class="label-detail">Correo: </span>
+          <span class="label-detail">{{ 'profile.details-email' | workyTranslations }}</span>
           <span>{{ userData?.email }}</span>
         </div>
         <div class="detail" *ngIf="userData?.profile?.dateOfBirth">
           <i class="material-icons">cake</i>
-          <span class="label-detail">Fecha de Nacimiento: </span>
+          <span class="label-detail">{{ 'profile.details-birthday' | workyTranslations }}</span>
           <span>{{ userData?.profile?.dateOfBirth | date: 'dd/MM/yyyy' }}</span>
         </div>
         <div class="detail" *ngIf="userData?.profile?.sex">
           <i class="material-icons">person</i>
-          <span class="label-detail">Sexo: </span>
+          <span class="label-detail">{{ 'profile.details-sexo' | workyTranslations }}</span>
           <span>{{ userData?.profile?.sex }}</span>
         </div>
 
-        <div class="detail">
+        <div *ngIf="userData?.createdAt" class="detail">
           <i class="material-icons">schedule</i>
-          <span class="label-detail">Se unío en: </span>
-          <span>{{ userData?.createdAt | date: 'MMMM yyyy' }}</span>
+          <span class="label-detail">{{ 'profile.details-createdAt' | workyTranslations }}</span>
+          <span>{{ userData?.createdAt! | workyDate: 'relative' }}</span>
         </div>
 
+    </div>
+
+    <div *ngIf="userData?.profile?.dynamicFields && pushData.length">
+        <div class="body-detail">
+          <div class="detail" *ngFor="let item of dynamicFields">
+            <ng-container *ngIf="item.label && item.value != '' || item.value.length && item.label">
+              <i class="material-icons">dynamic_form</i>
+              <span class="label-detail">{{ item.label }} : </span>
+              <span *ngIf="item.type != 'array'">{{ item.value }}</span>
+
+              <div *ngIf="item.type=== 'array'">
+                <div class="worky-chip" *ngFor="let value of item.value; let i = index">
+                  <span class="worky-label">{{ value }}</span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
     </div>
 
     <div class="footer-detail">
@@ -56,7 +74,7 @@
           [theme]="WorkyButtonTheme.Basic"
           [width]="'100%'"
           (click)="openEditProfileDetailModal()">
-          <span basic-button-text>Editar Perfil</span>
+          <span basic-button-text>{{ 'profile.btn-editProfile' | workyTranslations }}</span>
       </worky-buttons>
     </div>
 

@@ -3,9 +3,10 @@ import { User } from "@shared/interfaces/user.interface";
 import { GlobalEventService } from "@shared/services/globalEventService.service";
 
 @Component({
-  selector: 'worky-user-list-item',
-  templateUrl: './user-list-item.component.html',
-  styleUrls: ['./user-list-item.component.scss'],
+    selector: 'worky-user-list-item',
+    templateUrl: './user-list-item.component.html',
+    styleUrls: ['./user-list-item.component.scss'],
+    standalone: false
 })
 export class UserListItemComponent {
 

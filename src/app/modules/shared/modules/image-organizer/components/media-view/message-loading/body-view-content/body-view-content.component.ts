@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnDestroy, signal, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit, signal, SimpleChanges } from '@angular/core';
 import { LoadingController } from '@ionic/angular';
 import { catchError, filter, of, Subject, switchMap, takeUntil } from 'rxjs';
 
@@ -9,16 +9,15 @@ import { CommentService } from '@shared/services/core-apis/comment.service';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
-import { AxiomService } from '@shared/services/apis/axiom.service';
-import { AxiomType } from '@shared/interfaces/axiom.enum';
 import { Token } from '@shared/interfaces/token.interface';
 
 @Component({
-  selector: 'worky-body-view-content',
-  templateUrl: './body-view-content.component.html',
-  styleUrls: ['./body-view-content.component.scss'],
+    selector: 'worky-body-view-content',
+    templateUrl: './body-view-content.component.html',
+    styleUrls: ['./body-view-content.component.scss'],
+    standalone: false
 })
-export class BodyViewContentComponent  implements OnDestroy {
+export class BodyViewContentComponent  implements OnDestroy, OnInit {
 
   dataUser: Token | null = null;
 
@@ -26,7 +25,7 @@ export class BodyViewContentComponent  implements OnDestroy {
 
   typePublishingEnum = TypePublishing;
 
-  type?: TypePublishing = TypePublishing.IMAGEVIEW;
+  type?: TypePublishing = TypePublishing.IMAGE_VIEW;
 
   dataViewContent: any;
 
@@ -48,12 +47,12 @@ export class BodyViewContentComponent  implements OnDestroy {
     private _commentService: CommentService,
     private _cdr: ChangeDetectorRef,
     private _publicationService: PublicationService,
-    private _axiomService: AxiomService,
     private _notificationPublicationService: NotificationPublicationService,
-  ) { 
-    if(!this._authService.isAuthenticated()) return;
-    this.dataUser = this._authService.getDecodedToken();
+  ) {
     this.subscribeToNotificationUpdatePublication();
+  }
+  ngOnInit(): void {
+    this.dataUser = this._authService.getDecodedToken();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -77,7 +76,7 @@ export class BodyViewContentComponent  implements OnDestroy {
 
     await loadingDeleteComment.present();
 
-    this._commentService.deletComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
+    this._commentService.deleteComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this._publicationService.getPublicationId(id_publication).pipe(takeUntil(this.destroy$)).subscribe({
           next: (data: PublicationView[]) => {
@@ -102,12 +101,7 @@ export class BodyViewContentComponent  implements OnDestroy {
           const notification = data[0];
           return this._publicationService.getPublicationId(notification._id).pipe(
             catchError((error) => {
-              this._axiomService.sendLog({
-                message: 'Error al obtener publicación actualizada',
-                component: 'BodyViewContentComponent',
-                type: AxiomType.ERROR,
-                error: error,
-              });
+              console.error('Error fetching publication:', error);
               return of([]);
             })
           );
@@ -116,6 +110,7 @@ export class BodyViewContentComponent  implements OnDestroy {
       )
       .subscribe({
         next: (publication: PublicationView[]) => {
+
           const updatedPublication = publication[0];
 
           if(this.typeView === TypeView.PUBLICATION && this.publications){
@@ -124,28 +119,48 @@ export class BodyViewContentComponent  implements OnDestroy {
               const updatedPublications = publicationsCurrent.map(pub =>
                 pub._id === updatedPublication._id ? updatedPublication : pub
               );
-              this.publications.set(updatedPublications);
+              
+              // Sort publications by fixed status after updating
+              const sortedPublications = this._publicationService.sortPublicationsByFixedAndDatePublic(updatedPublications);
+              this.publications.set(sortedPublications);
             }
           } else if (this.typeView === TypeView.COMMENT && this.comment) {
             const commentCurrent = this.comment();
             if (commentCurrent) {
-              const updatedComment = commentCurrent.map(com =>
-                com._id === updatedPublication._id ? updatedPublication : com
-              );
-              this.comment.set(updatedComment);
+
+              const mediaComments = updatedPublication.comment;
+              if (mediaComments) {
+
+                const updateComments = mediaComments.find(
+                  (comment) => comment._id === commentCurrent[0]?._id
+                );
+
+                if (updateComments && updateComments.media && updateComments.media.length > 0) {
+                  const mediaItem = updateComments.media[0];
+
+                  const sortedMediaComments = [...mediaItem.comments].sort((a, b) => {
+                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                  });
+
+                  const result = {
+                    ...updateComments,
+                    media: [
+                      {
+                        ...mediaItem,
+                        comments: sortedMediaComments
+                      }
+                    ]
+                  };
+                if(updateComments) this.comment.set([result]);
+
+                }
+              }
             }
-          } 
-
-
-          this._cdr.markForCheck(); // Marcar para detección de cambios
+          }
+          this._cdr.markForCheck();
         },
         error: (error) => {
-          this._axiomService.sendLog({
-            message: 'Error en suscripción de notificaciones de actualizar publicaciones',
-            component: 'HomeComponent',
-            type: AxiomType.ERROR,
-            error: error,
-          });
+          console.error('Error updating publication:', error);
         },
       });
   }
@@ -182,7 +197,7 @@ export class BodyViewContentComponent  implements OnDestroy {
     if (currentPublication?.comment?.length && this.images.length === 1 && this.typeView === this.typeViewEnum.PUBLICATION) {
       return currentPublication.comment;
     }
-    
+
     if (currentPublication?.media?.length && this.images.length > 1 && this.typeView === this.typeViewEnum.PUBLICATION) {
       return this.getCommentImageSelected();
     }

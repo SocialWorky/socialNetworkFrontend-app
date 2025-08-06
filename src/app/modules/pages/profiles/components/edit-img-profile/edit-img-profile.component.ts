@@ -8,12 +8,16 @@ import { FileUploadService } from '@shared/services/core-apis/file-upload.servic
 import { ProfileService } from '../../services/profile.service';
 import { AuthService } from '@auth/services/auth.service';
 import { environment } from '@env/environment';
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { LazyCssService } from '@shared/services/core-apis/lazy-css.service';
+import { FontLoaderService } from '@shared/services/core-apis/font-loader.service';
 
 @Component({
-  selector: 'worky-edit-img-profile',
-  templateUrl: './edit-img-profile.component.html',
-  styleUrls: ['./edit-img-profile.component.scss'],
+    selector: 'worky-edit-img-profile',
+    templateUrl: './edit-img-profile.component.html',
+    styleUrls: ['./edit-img-profile.component.scss'],
+    standalone: false
 })
 export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDestroy, AfterViewInit {
   private unsubscribe$ = new Subject<void>();
@@ -52,7 +56,10 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     private _fileUploadService: FileUploadService,
     private _profileService: ProfileService,
     private _authService: AuthService,
-    private _deviceDetectionService: DeviceDetectionService
+    private _deviceDetectionService: DeviceDetectionService,
+    private _utilityService: UtilityService,
+    private _lazyCssService: LazyCssService,
+    private _fontLoaderService: FontLoaderService
   ) {}
 
   ngAfterViewInit(): void {
@@ -245,5 +252,9 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
       default:
         return 'jpg';
     }
+  }
+
+  onImageError(event: Event): void {
+    this._utilityService.handleImageError(event, this.imgCoverDefault);
   }
 }

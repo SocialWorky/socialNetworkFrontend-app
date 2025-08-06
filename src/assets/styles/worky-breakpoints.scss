@@ -5,7 +5,7 @@ $screen-lg: 1400px;
 $screen-xl: 2100px;
 
 // Mixins
-// Para dispositivos pequeños
+// For small devices
 @mixin from-sm-up {
   @media screen and (min-width: #{$screen-sm-min}) {
     @content;

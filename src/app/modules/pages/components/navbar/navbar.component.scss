@@ -1,12 +1,13 @@
-@use 'src/assets/styles/worky-variables' as variables;
-@use 'src/assets/styles/worky-palettes' as colors;
-@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use "src/assets/styles/worky-variables" as variables;
+@use "src/assets/styles/worky-palettes" as colors;
+@use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
+@use "sass:map";
 
 .content-navbar {
   display: flex;
   justify-content: center;
   width: 100%;
-  background-color: transparent;
+  background: colors.$worky-color-content-navbar;
   z-index: 10;
   @include breakpoints.below-sm {
     flex-direction: column;
@@ -59,15 +60,22 @@
 
       .search-icon {
         position: absolute;
-        color: colors.$worky-color-app-dark;
+        color: colors.$worky-color-text;
         left: 8px;
         top: 50%;
         transform: translateY(-50%);
         z-index: 1;
       }
       .form-control {
+        border: none;
         padding-left: 40px;
+        color: colors.$worky-color-text;
+        background-color: colors.$worky-color-input-background;
         border-radius: variables.$worky-border-radius-medium;
+        &:focus {
+          outline: none;
+          box-shadow: none;
+        }
       }
     }
 
@@ -110,7 +118,6 @@
       background: colors.$worky-color-greyLight;
       cursor: pointer;
     }
-
   }
 
   ::ng-deep worky-menu-component {
@@ -121,7 +128,6 @@
     @include breakpoints.below-sm {
       justify-content: flex-start;
     }
-
   }
 
   .worky-profile {
@@ -131,6 +137,7 @@
     align-items: center;
     align-content: center;
     width: 20%;
+    gap: 5px;
 
     .item-navbar-actions {
       width: 40px;
@@ -138,12 +145,22 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: map-get(colors.$worky-navy, 24);
+      background-color: color-mix(in srgb, var(--worky-color-light), transparent 70%);
       border-radius: 50%;
       margin: 4px;
 
-      &:focus, &:hover {
-        background: map-get(colors.$worky-navy, 56);
+      &:focus,
+      &:hover {
+        background: map.get(colors.$worky-navy, 72);
+      }
+    }
+
+    ::ng-deep worky-dropdown {
+      .nav-link {
+        color: #FFF;
+        &:hover {
+          color: colors.$worky-color-text;
+        }
       }
     }
 
@@ -155,24 +172,167 @@
     }
   }
 
+  // Mobile fused navbar styles
+  .worky-brand-mobile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 15px;
+    border-bottom: 1px solid colors.$worky-color-greyLight;
+
+    .worky-logo-mobile {
+      width: 35px;
+      height: 35px;
+      max-width: fit-content;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .worky-search-mobile {
+      flex: 1;
+      
+      .search-container-mobile {
+        position: relative;
+      }
+
+      .search-icon-mobile {
+        position: absolute;
+        color: colors.$worky-color-text;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1;
+        font-size: 18px;
+      }
+
+      .form-control-mobile {
+        border: none;
+        padding: 8px 8px 8px 35px;
+        color: colors.$worky-color-text;
+        background-color: colors.$worky-color-input-background;
+        border-radius: variables.$worky-border-radius-medium;
+        width: 100%;
+        font-size: 14px;
+        
+        &:focus {
+          outline: none;
+          box-shadow: none;
+        }
+      }
+    }
+  }
+
+  .worky-profile-mobile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 8px 15px;
+    gap: 10px;
+
+    ::ng-deep worky-dropdown {
+      .item-navbar-actions {
+        width: 35px;
+        height: 35px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: color-mix(in srgb, var(--worky-color-light), transparent 70%);
+        border-radius: 50%;
+        margin: 2px;
+
+        &:focus,
+        &:hover {
+          background: map.get(colors.$worky-navy, 72);
+        }
+      }
+
+      .nav-link {
+        color: #FFF;
+        &:hover {
+          color: colors.$worky-color-text;
+        }
+      }
+    }
+  }
+
+  .search-results-mobile {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    background: colors.$worky-color-light;
+    width: 100%;
+    border: 1px solid colors.$worky-color-greyLight;
+    max-height: 200px;
+    border-radius: variables.$worky-border-radius-medium;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    z-index: 9999;
+    top: 100%;
+
+    li {
+      display: flex;
+      align-items: center;
+      font-size: variables.$worky-font-size-3;
+      color: colors.$worky-color-navy;
+      padding: 10px;
+      border-bottom: 1px solid colors.$worky-color-greyLight;
+      gap: 10px;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background: colors.$worky-color-greyLight;
+        cursor: pointer;
+      }
+    }
+  }
+
   ::ng-deep worky-dropdown.item-navbar-actions {
     span.material-icons {
       font-size: variables.$worky-font-size-9;
     }
     div.nav-link {
-      &:focus, &:hover {
+      &:focus,
+      &:hover {
         color: colors.$worky-color-greyLight;
       }
     }
   }
-
 }
 
-.content-navbar.sticky-content {
-  z-index: 9;
-  will-change: transform;
-}
+  .content-navbar.sticky-content {
+    @include breakpoints.below-sm {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      will-change: transform;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateY(0);
+      background: colors.$worky-color-content-navbar;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      pointer-events: auto;
+      height: 120px;
+    }
+  }
 
-.scrolledTop {
-  position: absolute;
-}
+  .content-navbar.sticky-content.scrolledTop {
+    @include breakpoints.below-sm {
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+  }
+
+  .content-navbar.sticky-content:not(.scrolledTop) {
+    @include breakpoints.below-sm {
+      transform: translateY(-100%);
+      pointer-events: none;
+    }
+  }

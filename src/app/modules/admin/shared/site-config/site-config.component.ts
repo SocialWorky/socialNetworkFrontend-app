@@ -5,15 +5,17 @@ import { LoadingController } from '@ionic/angular';
 
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { environment } from '@env/environment';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
 
 @Component({
-  selector: 'worky-site-config',
-  templateUrl: './site-config.component.html',
-  styleUrls: ['./site-config.component.scss'],
+    selector: 'worky-site-config',
+    templateUrl: './site-config.component.html',
+    styleUrls: ['./site-config.component.scss'],
+    standalone: false
 })
 export class SiteConfigComponent implements OnInit, OnDestroy {
 
@@ -25,11 +27,16 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
   imagePreview: string | ArrayBuffer | null = null;
 
+  selectedFileName: string = '';
+
   urlApiFile = `${environment.APIFILESERVICE}config/`;
 
+  isLoading = true;
   loadUpdateConfigButtons = false;
 
   loginMethods = { email: true, google: true };
+
+  error: string | null = null;
 
   private destroy$ = new Subject<void>();
 
@@ -40,6 +47,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
     private _fileUploadService: FileUploadService,
     private _alertService: AlertService,
     private _loadingCtrl: LoadingController,
+    private _logService: LogService,
   ) {
     this.configForm = this._fb.group({
       logoUrl: [''],
@@ -54,13 +62,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
         email: [false],
         google: [false],
       }),
-      services: this._fb.group({
-        logs: this._fb.group({
-          enabled: [false],
-          urlApi: [''],
-          token: [''],
-        }),
-      }),
     });
   }
 
@@ -74,54 +75,62 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
   }
 
   getSiteConfig() {
-    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
-      let loginMethods = { email: false, google: false };
-      
-      if (configData.settings.loginMethods) {
-        try {
-         loginMethods = JSON.parse(configData.settings.loginMethods);
+    this.isLoading = true;
+    this.error = null;
+    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (configData) => {
+        let loginMethods = { email: false, google: false };
 
-        } catch (error) {
-          console.error('Error parsing loginMethods:', error);
+        if (configData.settings.loginMethods) {
+          try {
+           loginMethods = JSON.parse(configData.settings.loginMethods);
+
+          } catch (error) {
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'SiteConfigComponent',
+              'Error parsing loginMethods configuration',
+              { error: String(error), loginMethods: configData.settings.loginMethods }
+            );
+          }
         }
-      }
 
-      this.configForm.patchValue({
-        logoUrl: configData.settings.logoUrl || '',
-        title: configData.settings.title || '',
-        privacyPolicy: configData.settings.privacyPolicy || '',
-        contactEmail: configData.settings.contactEmail || '',
-        faviconUrl: configData.settings.faviconUrl || '',
-        urlSite: configData.settings.urlSite || '',
-        description: configData.settings.description || '',
-        invitationCode: configData.settings.invitationCode || false,
-        loginMethods: {
-          email: JSON.parse(String(loginMethods.email)),
-          google: JSON.parse(String(loginMethods.google)),
-        },
-      });
-
-      this._cdr.markForCheck();
-    });
-
-    this._configService.getConfigServices().pipe(takeUntil(this.destroy$)).subscribe((configServices) => {
-      this.configForm.patchValue({
-        services: {
-          logs: {
-            enabled: configServices.services.logs.enabled || false,
-            urlApi: configServices.services.logs.urlApi || '',
-            token: configServices.services.logs.token || '',
+        this.configForm.patchValue({
+          logoUrl: configData.settings.logoUrl || '',
+          title: configData.settings.title || '',
+          privacyPolicy: configData.settings.privacyPolicy || '',
+          contactEmail: configData.settings.contactEmail || '',
+          faviconUrl: configData.settings.faviconUrl || '',
+          urlSite: configData.settings.urlSite || '',
+          description: configData.settings.description || '',
+          invitationCode: configData.settings.invitationCode || false,
+          loginMethods: {
+            email: JSON.parse(String(loginMethods.email)),
+            google: JSON.parse(String(loginMethods.google)),
           },
-        },
-      });
+        });
 
-      this._cdr.markForCheck();
+        this.isLoading = false;
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'SiteConfigComponent',
+          'Error loading site configuration',
+          { error: String(error) }
+        );
+        this.error = translations['admin.siteConfig.errors.loadError'];
+        this.isLoading = false;
+        this._cdr.markForCheck();
+      }
     });
-
   }
 
   updateConfig() {
     this.loadUpdateConfigButtons = true;
+    this.error = null;
+    
     if (this.configForm.valid) {
       if (this.imageFile) {
         this._fileUploadService.uploadFile([this.imageFile], 'config').pipe(takeUntil(this.destroy$)).subscribe({
@@ -130,28 +139,39 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
             this.imageFile = null;
             this.submitUpdateConfig();
           },
-          error: () => {
+          error: (error) => {
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'SiteConfigComponent',
+              'Error uploading configuration file',
+              { error: String(error) }
+            );
             this.loadUpdateConfigButtons = false;
+            this.error = translations['admin.siteConfig.errors.uploadError'];
             this._alertService.showAlert(
-              'Error',
-              'Error al subir archivo, intente de nuevo.',
+              translations['admin.siteConfig.errors.title'],
+              translations['admin.siteConfig.errors.uploadError'],
               Alerts.ERROR,
               Position.CENTER,
               true,
-              true,
               translations['button.ok']
             );
+            this._cdr.markForCheck();
           }
         });
       } else {
         this.submitUpdateConfig();
       }
+    } else {
+      this.loadUpdateConfigButtons = false;
+      this.error = translations['admin.siteConfig.errors.requiredFields'];
+      this._cdr.markForCheck();
     }
   }
 
   async submitUpdateConfig() {
     const loadingReaction = await this._loadingCtrl.create({
-      message: 'Actualizando Configuración...',
+      message: translations['admin.siteConfig.updating'],
     });
 
     await loadingReaction.present();
@@ -163,11 +183,10 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
     this._configService.updateConfig(config).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
         this._alertService.showAlert(
-          'Éxito',
-          'Configuración actualizada correctamente',
+          translations['admin.siteConfig.success.title'],
+          translations['admin.siteConfig.success.message'],
           Alerts.SUCCESS,
           Position.CENTER,
-          true,
           true,
           translations['button.ok']
         );
@@ -176,10 +195,19 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
         loadingReaction.dismiss();
         this.loadUpdateConfigButtons = false;
+        this._cdr.markForCheck();
       },
-      error: () => {
+      error: (error) => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'SiteConfigComponent',
+          'Error updating site configuration',
+          { error: String(error) }
+        );
+        this.error = translations['admin.siteConfig.errors.updateError'];
         loadingReaction.dismiss();
         this.loadUpdateConfigButtons = false;
+        this._cdr.markForCheck();
       }
     });
   }
@@ -188,6 +216,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
     const file = event.target.files[0];
     if (file) {
       this.imageFile = file;
+      this.selectedFileName = file.name;
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.imagePreview = e.target.result;
@@ -198,6 +227,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       this.configForm.patchValue({ logoUrl: '' });
     } else {
       this.imagePreview = null;
+      this.selectedFileName = '';
     }
   }
 }

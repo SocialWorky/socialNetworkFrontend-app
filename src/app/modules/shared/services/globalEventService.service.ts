@@ -20,8 +20,14 @@ export class GlobalEventService {
 
     const markdownImageRegex = /!\[.*?\]\((.*?)\)/;
     const markdownImageMatch = html.match(markdownImageRegex);
+    const htmlVideoRegex = /<video\b[^>]*>[\s\S]*?<\/video>/gi;
+
     if (markdownImageMatch) {
       result = 'se envió una imagen ';
+    }
+
+    if (htmlVideoRegex.test(result)) {
+      result = 'se envió un video';
     }
 
     return result;

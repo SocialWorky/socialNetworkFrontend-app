@@ -1,0 +1,150 @@
+// Color palette variables
+$primary-color: #3b82f6;
+$primary-dark: #1d4ed8;
+$success-color: #10b981;
+$warning-color: #f59e0b;
+$danger-color: #ef4444;
+$info-color: #06b6d4;
+$secondary-color: #6b7280;
+$dark-bg: #1f2937;
+$darker-bg: #111827;
+$card-bg: #374151;
+$border-color: #4b5563;
+$text-primary: #f9fafb;
+$text-secondary: #d1d5db;
+$text-muted: #9ca3af;
+
+// Animation for rotating icons
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rotating {
+  animation: rotate 1s linear infinite;
+}
+
+.validate-email-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, $darker-bg 0%, $dark-bg 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+.validate-card {
+  background: $card-bg;
+  border-radius: 16px;
+  padding: 3rem;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  border: 1px solid $border-color;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}
+
+.loading-state, .success-state, .error-state {
+  .loading-spinner, .success-icon, .error-icon {
+    margin-bottom: 1.5rem;
+
+    i {
+      font-size: 4rem;
+      color: $text-secondary;
+    }
+  }
+
+  .success-icon i {
+    color: $success-color;
+  }
+
+  .error-icon i {
+    color: $danger-color;
+  }
+
+  h2 {
+    color: $text-primary;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem 0;
+  }
+
+  p {
+    color: $text-secondary;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0 0 2rem 0;
+  }
+
+  .actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+    }
+
+          button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 140px;
+        justify-content: center;
+        position: relative;
+        z-index: 10;
+
+        i {
+          font-size: 1.125rem;
+        }
+
+        &:hover {
+          transform: translateY(-1px);
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
+      }
+
+    .btn-primary {
+      background: $primary-color;
+      color: white;
+
+      &:hover {
+        background: color-mix(in srgb, $primary-color 90%, black);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+      }
+    }
+
+    .btn-secondary {
+      background: $secondary-color;
+      color: white;
+
+      &:hover {
+        background: color-mix(in srgb, $secondary-color 90%, black);
+      }
+    }
+  }
+} 

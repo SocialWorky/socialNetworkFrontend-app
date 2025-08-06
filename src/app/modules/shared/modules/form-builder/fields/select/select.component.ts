@@ -4,22 +4,23 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormControl } from '@angular/f
 import { Field } from '../../interfaces/field.interface';
 
 @Component({
-  selector: 'app-select',
-  templateUrl: './select.component.html',
-  styleUrls: ['./select.component.scss'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SelectComponent),
-      multi: true
-    }
-  ]
+    selector: 'app-select',
+    templateUrl: './select.component.html',
+    styleUrls: ['./select.component.scss'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SelectComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 export class SelectComponent implements ControlValueAccessor, OnChanges, OnInit {
   @Input() field!: Field;
   control = new FormControl('');
 
-  // Implementación de ControlValueAccessor
+  // ControlValueAccessor implementation
   onChange: any = () => { };
   onTouched: any = () => { };
 

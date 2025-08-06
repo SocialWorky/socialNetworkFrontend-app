@@ -1,0 +1,19 @@
+// Version type badges
+.optional {
+  @apply bg-green-900 text-green-300;
+}
+
+.forced {
+  @apply bg-orange-900 text-orange-300;
+}
+
+.maintenance {
+  @apply bg-red-900 text-red-300;
+}
+
+// Fix for content overflow and background
+:host {
+  display: block;
+  min-height: 100vh;
+  width: 100%;
+}

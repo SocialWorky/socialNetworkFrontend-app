@@ -1,18 +1,17 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, signal, computed, effect } from '@angular/core';
 import { Router } from '@angular/router';
 import { Token } from '@shared/interfaces/token.interface';
 import { Subject, interval } from 'rxjs';
 import { takeUntil, catchError, switchMap, startWith, distinctUntilChanged, debounceTime } from 'rxjs/operators';
+
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { AuthService } from '@auth/services/auth.service';
-import { UtilityService } from '@shared/services/utility.service';
-import { computed, effect } from '@angular/core';
-
 @Component({
-  selector: 'worky-user-online',
-  templateUrl: './user-online.component.html',
-  styleUrls: ['./user-online.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'worky-user-online',
+    templateUrl: './user-online.component.html',
+    styleUrls: ['./user-online.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class UserOnlineComponent implements OnInit, OnDestroy {
   private readonly _destroy$ = new Subject<void>();
@@ -40,7 +39,6 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     private _notificationUsersService: NotificationUsersService,
     private _router: Router,
     private _authService: AuthService,
-    private _utilityService: UtilityService
   ) {
     this.checkAndInitializeUser();
 
@@ -53,10 +51,6 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
   }
 
   private checkAndInitializeUser(): void {
-    if (!this._authService.isAuthenticated()) {
-      this._router.navigate(['/login']);
-      return;
-    }
 
     try {
       const decodedToken = this._authService.getDecodedToken();
@@ -72,11 +66,9 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     }
   }
 
-  async ngOnInit() {
+  ngOnInit() {
     this.isLoading.set(true);
-    await this._utilityService.sleep(1000);
     if (!this.currentUser) return;
-
     interval(this.REFRESH_INTERVAL).pipe(
       startWith(0),
       switchMap(() => this._notificationUsersService.userStatuses$),
@@ -116,6 +108,7 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
   }
 
   goToProfile(_id: string) {
+    if (!_id) return
     this._router.navigate(['/profile/', _id]);
   }
 }

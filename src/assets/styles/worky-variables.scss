@@ -36,7 +36,7 @@ $worky-border-radius-medium: 8px;
 $worky-border-radius-large: 16px;
 
 /* Additional Font Styles */
-$worky-font-style-italic: italic; // Estilo de fuente itálica
+$worky-font-style-italic: italic; // Italic font style
 $worky-font-style-underline: underline; // Estilo de fuente subrayada
 
 
@@ -49,7 +49,7 @@ $worky-font-merriweather-sans: 'Merriweather Sans', sans-serif;
 $worky-font-merriweather-serif: 'Merriweather Serif', serif;
 
 $worky-font-family-jost: "Jost";
-$worky-font-family-global: $worky-font-merriweather-sans;
+$worky-font-family-global: $worky-font-roboto;
 
 // Weights
 $worky-font-weight-bold: 700;
@@ -67,8 +67,8 @@ $worky-kerning-6: 0.015rem;
 /* Sizes */
 $worky-font-size-13: 46.2px;
 $worky-font-size-12: 41px;
-$worky-font-size-11: 36.5px; 
-$worky-font-size-10: 32.44px; 
+$worky-font-size-11: 36.5px;
+$worky-font-size-10: 32.44px;
 $worky-font-size-9: 28.8px;
 $worky-font-size-8: 25.6px;
 $worky-font-size-7: 22.8px;

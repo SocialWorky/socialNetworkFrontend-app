@@ -1,26 +1,23 @@
 <div class="gallery-lightbox-container" *ngIf="images && images.length > 0">
-  <div class="gallery" 
-    [ngClass]="{ 
+  <div class="gallery"
+    [ngClass]="{
       'single': images.length === 1,
       'two-images': images.length === 2,
       'three-images': images.length === 3,
       'four-images': images.length === 4,
       'five-images': images.length === 5,
-      'more-five-images': images.length > 5 
+      'more-five-images': images.length > 5
     }">
     <ng-container *ngFor="let image of images.slice(0, 5); let i = index">
-      <div class="gallery-item" (click)="openViewMedia(image)" 
+      <div class="gallery-item" (click)="openViewMedia(image)"
           [attr.data-content]="i === 4 && images.length > 5 ? '+ ' + (images.length - 5) : ''">
         <ng-container *ngIf="isImageUrl(image.urlCompressed)">
-          <img [src]="image.urlCompressed" alt="Image">
+          <worky-image [src]="image.urlCompressed" alt="Image" (load)="onImageLoad()" (error)="onImageError($event)"></worky-image>
         </ng-container>
 
-        <ng-container *ngIf="isVideoUrl(image.url)">
+        <ng-container *ngIf="isVideoUrl(image.urlCompressed)">
           <div class="video-container">
-            <video [src]="image.url" controls>
-              <source [src]="image.url" type="video/mp4">
-              Tu navegador no soporta el elemento <code>video</code>.
-            </video>
+            <worky-image [src]="image.urlThumbnail" alt="Image" (load)="onImageLoad()" (error)="onImageError($event)"></worky-image>
           </div>
         </ng-container>
       </div>

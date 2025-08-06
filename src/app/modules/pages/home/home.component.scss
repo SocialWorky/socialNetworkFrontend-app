@@ -1,11 +1,28 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 @use 'src/assets/styles/worky-palettes.scss' as color;
+@use "sass:map";
 
 .content-publications {
-  height: 94vh;
+  height: 94dvh;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  
+  &.refreshing {
+    pointer-events: none;
+  }
 
   @include breakpoints.below-md {
-    height: 90vh;
+    height: 100dvh;
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  &.navbar-visible {
+    @include breakpoints.below-md {
+      height: calc(100dvh - 120px);
+    }
   }
 }
 
@@ -13,6 +30,7 @@
   overflow-y: scroll;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .content-publications::-webkit-scrollbar {

@@ -1,75 +1,171 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-palettes' as colors;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'sass:map';
 
 .notifications-panel {
   position: fixed;
   top: 0;
   right: -500px;
   width: 500px;
-  height: 100%;
-  background-color: #fff;
+  height: 100dvh;
+  height: calc(var(--vh, 1vh) * 100);
+  color: colors.$worky-color-text;
+  background-color: colors.$worky-color-light;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   transition: right 0.3s ease-out;
   z-index: 1000;
-  padding: 20px;
+
   @include breakpoints.below-sm {
     width: 100%;
     right: -100%;
+    height: 100dvh;
+    height: calc(var(--vh, 1vh) * 100);
+    // Ensure proper top positioning on mobile
+    top: 0;
+    padding-top: 20px;
+  }
+
+  // iOS-specific fixes for viewport height issues
+  @supports (-webkit-touch-callout: none) {
+    // Force proper height calculation for iOS
+    height: 100vh;
+    height: -webkit-fill-available;
+    height: calc(var(--vh, 1vh) * 100);
+    // Ensure panel starts from the very top
+    top: 0;
+    
+    @include breakpoints.below-sm {
+      height: 100vh;
+      height: -webkit-fill-available;
+      height: calc(var(--vh, 1vh) * 100);
+      // Remove any top margin that might cause issues
+      top: 0;
+      margin-top: 0;
+    }
   }
 
   &.active {
-    right: 0; /* Desplaza hacia la derecha */
+    right: 0;
   }
 
   .content-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    .text-section {
-      span {
-        font-size: 1.5rem;
+    padding: 8px;
+    height: 80px;
+    // Remove margin-top to prevent spacing issues
+    margin-top: 0;
+
+    @include breakpoints.below-sm {
+      margin-top: 0;
+      // Ensure header is properly positioned
+      position: relative;
+      top: 0;
+    }
+
+    .panel-title {
+      margin-bottom: 10px;
+
+      h2 {
+        font-size: 24px;
         font-weight: bold;
-      }
-      p {
-        font-size: 1rem;
-        color: #7b7b7b;
+        color: colors.$worky-color-navy;
       }
     }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+
+      .tab-button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 20px;
+        background-color: colors.$worky-color-input-background;
+        color: colors.$worky-color-text;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &.active {
+          background-color: map.get(colors.$worky-navy, 12);
+          color: map.get(colors.$worky-navy, 87);
+        }
+
+        &:hover:not(.active) {
+          background-color: map.get(colors.$worky-navy, 3);
+          color: map.get(colors.$worky-navy, 87);
+        }
+      }
+    }
+
     i {
       cursor: pointer;
+      font-size: 24px;
+      color: colors.$worky-color-navy;
     }
   }
 
   .content-body {
-    height: 92%;
-    overflow: scroll;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    // Calculate height properly considering header
+    height: calc(100dvh - 80px);
+    height: calc((var(--vh, 1vh) * 100) - 80px);
+    overflow-y: auto;
+
+    @include breakpoints.below-sm {
+      height: calc(100dvh - 80px);
+      height: calc((var(--vh, 1vh) * 100) - 80px);
+    }
+
+    // iOS-specific fixes for content body height
+    @supports (-webkit-touch-callout: none) {
+      height: calc(100vh - 80px);
+      height: calc(-webkit-fill-available - 80px);
+      height: calc((var(--vh, 1vh) * 100) - 80px);
+      
+      @include breakpoints.below-sm {
+        height: calc(100vh - 80px);
+        height: calc(-webkit-fill-available - 80px);
+        height: calc((var(--vh, 1vh) * 100) - 80px);
+      }
+    }
   }
 
   .notification-item-content {
-    cursor: pointer;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    padding: 10px;
+    padding: 15px;
     background-color: colors.$worky-color-greyLight;
+    transition: background-color 0.3s ease;
+
     &:hover {
       background-color: colors.$worky-color-grey;
+    }
+
+    &.notification-not-viewed {
+      background-color: map.get(colors.$worky-navy, 93);
+      color: colors.$worky-color-navy;
+      border: 1px solid map.get(colors.$worky-navy, 87);
+
+      &:hover {
+        background-color: map.get(colors.$worky-navy, 72);
+      }
     }
 
     .notification-item-header {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
+
       .notification-item-title {
-        font-size: 20px;
-        color: colors.$worky-color-navy;
+        font-size: 16px;
         font-weight: 500;
-        margin-bottom: 5px;
       }
 
       .notification-item-date {
-        margin-left: auto;
         font-size: 12px;
         color: #7b7b7b;
       }
@@ -77,52 +173,54 @@
 
     .notification-item-body {
       display: flex;
-      flex-direction: row;
       align-items: center;
       gap: 10px;
+      justify-content: space-between;
+
+      .item-body {
+        cursor: pointer;
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
       i {
         color: colors.$worky-color-navy;
       }
+
       .content {
         display: flex;
         flex-direction: column;
+        gap: 5px;
+
         span {
-          display: flex;
-          gap: 9px;
+          font-size: 14px;
         }
+
         img {
           width: 25px;
           height: 25px;
         }
-      
+      }
+    }
+
+    .action-menu {
+      display: flex;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      background-color: map.get(colors.$worky-navy, 56);
+      z-index: 1000;
+      ::ng-deep worky-dropdown {
+        display: flex;
+      }
+      ::ng-deep worky-dropdown .nav-link:hover{
+        color: #fff;
+      }
+
+      &:hover {
+        background-color: map.get(colors.$worky-navy, 24);
       }
     }
   }
-
-  .notification-not-viewed {
-    background-color: map-get(colors.$worky-navy, 24);
-    color: colors.$worky-color-light;
-    &:hover {
-      background-color: map-get(colors.$worky-navy, 9);
-    }
-
-    .notification-item-body {
-      i {
-        color: colors.$worky-color-yellow;
-      }
-    }
-
-    .notification-item-header {
-
-      .notification-item-title {
-        color: colors.$worky-color-light;
-      }
-      .notification-item-date {
-        color: colors.$worky-color-light;
-      }
-    }
-
-  }
-
-
 }

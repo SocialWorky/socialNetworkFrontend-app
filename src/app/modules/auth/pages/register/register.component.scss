@@ -1,22 +1,24 @@
 @use 'src/assets/styles/worky-typography.scss' as Fonts;
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
-
+@use 'sass:map';
 
 :host {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100dvh;
+  padding-top: 20px;
   @include breakpoints.below-sm {
     height: auto;
-    padding: 20px;
   }
   .content {
     width: 100%;
     display: flex;
     @include breakpoints.below-sm {
       flex-direction: column;
+      padding: 20px;
+      padding-top: 0;
     }
     .img-register {
       width: 50%;
@@ -31,40 +33,41 @@
       }
     }
     .content-register {
+      color: color.$worky-color-text;
       width: 50%;
       padding: 3%;
-      
+
       @include breakpoints.below-sm {
         width: 100%;
         padding: 0;
       }
-      
+
       .form-register {
         width: 70%;
         display: block;
         margin: 0 auto;
         @include breakpoints.below-sm {
           width: 95%;
-        }   
+        }
         .form-input {
           margin-top: 50px;
           display: flex;
           flex-direction: column;
           justify-content: center;
         }
-        
+
         .have-account {
           display: flex;
           cursor: pointer;
           justify-content: flex-end;
           margin-bottom: 20px;
-          
+
           span {
             @include Fonts.worky-text;
             color: color.$worky-color-navy;
           }
         }
-        
+
         .form-register-buttons {
           display: flex;
           flex-direction: column;
@@ -78,7 +81,7 @@
         }
       }
     }
-    
+
     .content-register-header {
       margin-bottom: 5%;
       h1 {
@@ -89,13 +92,13 @@
         @include Fonts.worky-text;
         margin-block-end: 20px;
         margin-block-start: 5px;
-        color: map-get(color.$worky-navy, 24);
+        color: map.get(color.$worky-navy, 24);
       }
       @include breakpoints.below-sm {
         display: none;
       }
     }
-    
+
     .content-register-header.movil {
       display: none;
       @include breakpoints.below-sm {

@@ -1,0 +1,597 @@
+import { Injectable } from '@angular/core';
+import { Message } from '../../../pages/messages/interfaces/message.interface';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class MessageDatabaseService {
+  private readonly DB_BASE_NAME = 'WorkyMessagesDB';
+  private readonly DB_VERSION = 2;
+  private readonly STORE_NAME = 'messages';
+  private readonly MAX_MESSAGES = 1000;
+
+  private db: IDBDatabase | null = null;
+  private currentUserId: string | null = null;
+
+  constructor(
+    private logService: LogService
+  ) {}
+
+  /**
+   * Get database name with user ID
+   */
+  private getDatabaseName(): string {
+    // Get user ID from localStorage to avoid circular dependency
+    const token = localStorage.getItem('token');
+    if (token && token !== 'undefined' && token !== 'null') {
+      try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        const userId = decodedToken.id;
+        return userId ? `${this.DB_BASE_NAME}_${userId}` : this.DB_BASE_NAME;
+      } catch (error) {
+        return this.DB_BASE_NAME;
+      }
+    }
+    return this.DB_BASE_NAME;
+  }
+
+  /**
+   * Check if user has changed and close current database
+   */
+  private checkUserChange(): void {
+    // Get user ID from localStorage to avoid circular dependency
+    const token = localStorage.getItem('token');
+    let userId = null;
+    
+    if (token && token !== 'undefined' && token !== 'null') {
+      try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        userId = decodedToken.id;
+      } catch (error) {
+        userId = null;
+      }
+    }
+    
+    if (userId !== this.currentUserId) {
+      this.currentUserId = userId;
+      this.db = null; // Force re-initialization
+    }
+  }
+
+  async initDatabase(): Promise<void> {
+    this.checkUserChange();
+    
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.getDatabaseName(), this.DB_VERSION);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        this.db = request.result;
+        resolve();
+      };
+
+      request.onupgradeneeded = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        
+        if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+          const store = db.createObjectStore(this.STORE_NAME, { keyPath: '_id' });
+          store.createIndex('createdAt', 'createdAt', { unique: false });
+          store.createIndex('chatId', 'chatId', { unique: false });
+          store.createIndex('senderId', 'senderId', { unique: false });
+          store.createIndex('receiverId', 'receiverId', { unique: false });
+          store.createIndex('isRead', 'isRead', { unique: false });
+        }
+      };
+    });
+  }
+
+  async addMessage(message: Message): Promise<void> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(this.STORE_NAME);
+      
+      const request = store.put(message);
+      
+      request.onsuccess = () => {
+        this.ensureMaxMessages();
+        resolve();
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async addMessages(messages: Message[]): Promise<void> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(this.STORE_NAME);
+      
+      let completed = 0;
+      const total = messages.length;
+      
+      messages.forEach(message => {
+        const request = store.put(message);
+        request.onsuccess = () => {
+          completed++;
+          if (completed === total) {
+            this.ensureMaxMessages();
+            resolve();
+          }
+        };
+        request.onerror = () => reject(request.error);
+      });
+    });
+  }
+
+  async getMessage(id: string): Promise<Message | null> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const request = store.get(id);
+      
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getAllMessages(): Promise<Message[]> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const index = store.index('createdAt');
+      const request = index.getAll();
+      
+      request.onsuccess = () => {
+        const messages = request.result as Message[];
+        messages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        resolve(messages);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getMessagesByChatId(chatId: string): Promise<Message[]> {
+    try {
+      if (!this.db) {
+        await this.initDatabase();
+      }
+      
+      return new Promise((resolve, reject) => {
+        try {
+          const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+          const store = transaction.objectStore(this.STORE_NAME);
+          const index = store.index('chatId');
+          const request = index.getAll(chatId);
+          
+          request.onsuccess = () => {
+            const messages = request.result as Message[];
+            messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+            resolve(messages);
+          };
+          request.onerror = () => {
+            console.error('Error en request de base de datos:', request.error);
+            resolve([]);
+          };
+        } catch (error) {
+          console.error('Error en transacción de base de datos:', error);
+          resolve([]);
+        }
+      });
+    } catch (error) {
+      console.error('Error inicializando base de datos:', error);
+      return [];
+    }
+  }
+
+  async getMessagesByChatIdPaginated(chatId: string, page: number, size: number): Promise<{
+    messages: Message[],
+    total: number
+  }> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const index = store.index('chatId');
+      const request = index.getAll(chatId);
+      
+      request.onsuccess = () => {
+        const messages = request.result as Message[];
+        
+        messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        
+        const total = messages.length;
+        
+        if (page === 1) {
+          const lastMessages = messages.slice(-size);
+          
+          resolve({
+            messages: lastMessages,
+            total: total
+          });
+        } else {
+          const startIndex = Math.max(0, total - (page * size));
+          const endIndex = Math.max(0, total - ((page - 1) * size));
+          const paginatedMessages = messages.slice(startIndex, endIndex);
+          
+          resolve({
+            messages: paginatedMessages,
+            total: total
+          });
+        }
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getLastMessageByChatId(chatId: string): Promise<Message | null> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const index = store.index('chatId');
+      const request = index.getAll(chatId);
+      
+      request.onsuccess = () => {
+        const messages = request.result as Message[];
+        if (messages.length > 0) {
+          messages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+          resolve(messages[0]);
+        } else {
+          resolve(null);
+        }
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getUnreadMessagesCount(chatId: string, senderId: string): Promise<number> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const request = store.getAll();
+      
+      request.onsuccess = () => {
+        const messages = request.result as Message[];
+        const unreadCount = messages.filter(msg => 
+          msg.chatId === chatId && 
+          msg.senderId === senderId && 
+          !msg.isRead
+        ).length;
+        resolve(unreadCount);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getUnreadAllMessagesCount(): Promise<number> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const request = store.getAll();
+      
+      request.onsuccess = () => {
+        const messages = request.result as Message[];
+        const unreadMessages = messages.filter(message => !message.isRead);
+        resolve(unreadMessages.length);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async updateMessage(message: Message): Promise<void> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(this.STORE_NAME);
+      
+      const request = store.put(message);
+      
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async markMessagesAsRead(chatId: string, senderId: string): Promise<void> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const request = store.getAll();
+      
+      request.onsuccess = () => {
+        const messages = request.result as Message[];
+        const messagesToUpdate = messages.filter(msg => 
+          msg.chatId === chatId && 
+          msg.senderId === senderId && 
+          !msg.isRead
+        );
+        
+        let completed = 0;
+        const total = messagesToUpdate.length;
+        
+        if (total === 0) {
+          resolve();
+          return;
+        }
+        
+        messagesToUpdate.forEach(message => {
+          message.isRead = true;
+          const updateRequest = store.put(message);
+          updateRequest.onsuccess = () => {
+            completed++;
+            if (completed === total) {
+              resolve();
+            }
+          };
+          updateRequest.onerror = () => reject(updateRequest.error);
+        });
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async deleteMessage(id: string): Promise<void> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(this.STORE_NAME);
+      
+      const request = store.delete(id);
+      
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async clearAllMessages(): Promise<void> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(this.STORE_NAME);
+      
+      const request = store.clear();
+      
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  /**
+   * Delete the entire database for the current user
+   */
+  /**
+   * Close database connection without deleting the database
+   */
+  async closeConnection(): Promise<void> {
+    try {
+      if (this.db) {
+        this.db.close();
+        this.db = null;
+        this.logService.log(
+          LevelLogEnum.INFO,
+          'MessageDatabaseService',
+          'Database connection closed',
+          { dbName: this.getDatabaseName() }
+        );
+      }
+    } catch (error) {
+      this.logService.log(
+        LevelLogEnum.ERROR,
+        'MessageDatabaseService',
+        'Error closing database connection',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
+    }
+  }
+
+  async deleteDatabase(): Promise<void> {
+    try {
+      // Close current connection
+      if (this.db) {
+        this.db.close();
+        this.db = null;
+      }
+
+      // Delete the database
+      const dbName = this.getDatabaseName();
+      const deleteRequest = indexedDB.deleteDatabase(dbName);
+      
+      return new Promise((resolve, reject) => {
+        deleteRequest.onsuccess = () => {
+          this.logService.log(
+            LevelLogEnum.INFO,
+            'MessageDatabaseService',
+            'Database deleted successfully',
+            { dbName }
+          );
+          this.currentUserId = null;
+          resolve();
+        };
+        
+        deleteRequest.onerror = () => {
+          this.logService.log(
+            LevelLogEnum.ERROR,
+            'MessageDatabaseService',
+            'Error deleting database',
+            { dbName, error: deleteRequest.error }
+          );
+          reject(deleteRequest.error);
+        };
+      });
+    } catch (error) {
+      this.logService.log(
+        LevelLogEnum.ERROR,
+        'MessageDatabaseService',
+        'Error in deleteDatabase',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
+      throw error;
+    }
+  }
+
+  async clearMessagesByChatId(chatId: string): Promise<void> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const index = store.index('chatId');
+      const request = index.getAllKeys(chatId);
+      
+      request.onsuccess = () => {
+        const keys = request.result as string[];
+        let completed = 0;
+        const total = keys.length;
+        
+        if (total === 0) {
+          resolve();
+          return;
+        }
+        
+        keys.forEach(key => {
+          const deleteRequest = store.delete(key);
+          deleteRequest.onsuccess = () => {
+            completed++;
+            if (completed === total) {
+              resolve();
+            }
+          };
+          deleteRequest.onerror = () => reject(deleteRequest.error);
+        });
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  private async ensureMaxMessages(): Promise<void> {
+    const messages = await this.getAllMessages();
+    
+    if (messages.length > this.MAX_MESSAGES) {
+      const messagesToDelete = messages.slice(this.MAX_MESSAGES);
+      
+      for (const message of messagesToDelete) {
+        await this.deleteMessage(message._id);
+      }
+    }
+  }
+
+  async getMessageCount(): Promise<number> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const request = store.count();
+      
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async markAllMessagesAsRead(): Promise<void> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const request = store.getAll();
+      
+      request.onsuccess = () => {
+        const messages = request.result as Message[];
+        const unreadMessages = messages.filter(msg => !msg.isRead);
+        
+        let completed = 0;
+        const total = unreadMessages.length;
+        
+        if (total === 0) {
+          resolve();
+          return;
+        }
+        
+        unreadMessages.forEach(message => {
+          message.isRead = true;
+          const updateRequest = store.put(message);
+          updateRequest.onsuccess = () => {
+            completed++;
+            if (completed === total) {
+              resolve();
+            }
+          };
+          updateRequest.onerror = () => reject(updateRequest.error);
+        });
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getMessagesBeforeDate(chatId: string, beforeDate: Date, limit: number = 20): Promise<Message[]> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const index = store.index('chatId');
+      const request = index.getAll(chatId);
+      
+      request.onsuccess = () => {
+        const messages = request.result as Message[];
+        const beforeTimestamp = beforeDate.getTime();
+        
+        const olderMessages = messages.filter(msg => 
+          new Date(msg.timestamp).getTime() < beforeTimestamp
+        );
+        
+        olderMessages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        
+        const limitedMessages = olderMessages.slice(0, limit);
+        
+        limitedMessages.reverse();
+        
+        resolve(limitedMessages);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getLastMessagesByChatId(chatId: string, limit: number = 20): Promise<Message[]> {
+    if (!this.db) await this.initDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const index = store.index('chatId');
+      const request = index.getAll(chatId);
+      
+      request.onsuccess = () => {
+        const messages = request.result as Message[];
+        
+        messages.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        
+        const lastMessages = messages.slice(0, limit);
+        
+        lastMessages.reverse();
+        
+        resolve(lastMessages);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+} 

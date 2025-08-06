@@ -1,13 +1,15 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, Output, EventEmitter } from '@angular/core';
+import { ImageLoadOptions } from '../../services/image.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 
 @Component({
-  selector: 'app-gif-search',
-  templateUrl: './gif-search.component.html',
-  styleUrls: ['./gif-search.component.scss']
+    selector: 'app-gif-search',
+    templateUrl: './gif-search.component.html',
+    styleUrls: ['./gif-search.component.scss'],
+    standalone: false
 })
 export class GifSearchComponent {
   gifs: any[] = [];
@@ -28,7 +30,7 @@ export class GifSearchComponent {
 
   searchGifs(term: string) {
     const apiKey = environment.GIPHYAPIKEY;
-    const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${term}&limit=20`;
+    const url = `https://api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${term}&limit=50`;
     return this.http.get(url);
   }
 

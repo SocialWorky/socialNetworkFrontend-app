@@ -1,6 +1,6 @@
 <div *ngIf="loadMessages" class="loader"></div>
 <div *ngIf="!loadMessages && userId && user[0]" class="content-right-messageChat">
-  
+
   <div *ngIf="isMobile" class="header-content-mobil">
     <div class="header-content-mobil-left">
       <i (click)="goBack()" class="material-icons back-button">arrow_back</i>
@@ -9,9 +9,30 @@
     <div class="header-content-mobil-right"></div>
   </div>
 
-  <div class="content-section-wall" #messageContainer>
+  <!-- <div *ngIf="isMobile" class="refresh-container">
+    <button 
+      (click)="forceSyncMessages()" 
+      [disabled]="loadMessages"
+      class="refresh-button">
+      <i class="material-icons" [class.spinning]="loadMessages">refresh</i>
+      Actualizar
+    </button>
+  </div> -->
+
+  <div class="content-section-wall" #messageContainer (scroll)="onScroll($event)">
+    <!-- Indicador de carga de mensajes antiguos -->
+    <div *ngIf="loadingMoreMessages" class="loading-messages">
+      <div class="loader"></div>
+      <span>{{ 'message.loadingPrevious' | workyTranslations }}</span>
+    </div>
+
+    <!-- Mensaje cuando no hay más mensajes -->
+    <div *ngIf="!loadingMoreMessages && !hasMoreMessages && messages.length > 0" class="no-more-messages">
+      <span>{{ 'message.noMoreMessages' | workyTranslations }}</span>
+    </div>
+
     <div class="messages-container fadeIn fast">
-      <ng-container *ngFor="let message of messages; let i = index">
+      <ng-container *ngFor="let message of messages; let i = index; trackBy: trackByMessageId">
         <!-- Show the date when it changes with respect to the previous message -->
         <ng-container *ngIf="i === 0 || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)">
           <div class="date-divider">
@@ -20,14 +41,15 @@
         </ng-container>
 
         <!-- Apply grouping classes only to the first and last message in the group of the same user and same date -->
-        <div [ngClass]="{
-          'message-sent': message.senderId === currentUser?.id, 
-          'message-received': message.senderId !== currentUser?.id, 
-          'grouped': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
-          'no-avatar': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
-          'first-group': i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp),
-          'last-group': i === messages.length - 1 || messages[i + 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i + 1].timestamp)
-        }">
+        <div 
+          [ngClass]="{
+            'message-sent': message.senderId === currentUser?.id,
+            'message-received': message.senderId !== currentUser?.id,
+            'grouped': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
+            'no-avatar': i > 0 && messages[i - 1].senderId === message.senderId && formatDate(message.timestamp) === formatDate(messages[i - 1].timestamp),
+            'first-group': i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp),
+            'last-group': i === messages.length - 1 || messages[i + 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i + 1].timestamp)
+          }">
 
           <worky-avatar
             [size]="40"
@@ -38,14 +60,32 @@
 
           <div *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId !== currentUser?.id" class="message-triangle"></div>
 
-          <div [ngClass]="{'sent-content': message.senderId === currentUser?.id, 'received-content': message.senderId !== currentUser?.id}">
-            <markdown class="worky-font-roboto">{{ message.content }}</markdown>
-            <div class="content-footer">
-              <small>{{ formatTime(message.timestamp) }}</small>
-              <i *ngIf="message.senderId === currentUser?.id && !message.isRead" class="material-icons">done</i>
-              <i *ngIf="message.senderId === currentUser?.id && message.isRead" class="material-icons">done_all</i>
+          <div *ngIf="message.content !='procesando'" class="content-message">
+            <div [ngClass]="{'sent-content': message.senderId === currentUser?.id, 'received-content': message.senderId !== currentUser?.id}">
+
+              <div *ngIf="message.type === MediaType.IMAGE || message.type === MediaType.VIDEO">
+                <div class="media-wrapper" (click)="openUrl(message.urlFile!)">
+                  <img [src]="getThumbnail(message.content)" class="thumbnail" alt="{{ 'message.thumbnail' | workyTranslations }}" />
+                  <div class="play-button" *ngIf="message.type === MediaType.VIDEO">▶</div>
+                </div>
+              </div>
+
+              <markdown *ngIf="message.type !== MediaType.IMAGE && message.type !== MediaType.VIDEO"
+                class="worky-font-roboto"
+                (click)="openUrl(message.urlFile || '')">
+                {{ message.content }}
+              </markdown>
+
+              <div class="content-footer">
+                <small>{{ formatTime(message.timestamp) }}</small>
+                <i *ngIf="message.senderId === currentUser?.id && !message.isRead" class="material-icons">done</i>
+                <i *ngIf="message.senderId === currentUser?.id && message.isRead" class="material-icons">done_all</i>
+              </div>
             </div>
           </div>
+
+          <worky-processing-media *ngIf="message.content === MediaType.PROCESSING"></worky-processing-media>
+
 
           <div *ngIf="(i === 0 || messages[i - 1].senderId !== message.senderId || formatDate(message.timestamp) !== formatDate(messages[i - 1].timestamp)) && message.senderId === currentUser?.id" class="message-triangle"></div>
 
@@ -58,6 +98,16 @@
         </div>
       </ng-container>
     </div>
+  </div>
+
+  <!-- Flecha flotante para volver al final -->
+  <div 
+    *ngIf="showScrollToBottomButton" 
+    class="scroll-to-bottom-button"
+    (click)="scrollToBottomSmooth()"
+    matTooltip="{{ 'message.scrollToBottom' | workyTranslations }}"
+    matTooltipClass="scroll-tooltip">
+    <i class="material-icons">keyboard_arrow_down</i>
   </div>
 
   <div *ngIf="showEmojiPicker" class="emoji-picker-container">
@@ -101,16 +151,24 @@
 
     <div class="content-footer-bar">
 
-        <div class="extra-content-item gif-icon" matTooltip="Buscar GIF" (click)="openGifSearch()">
+        <div class="extra-content-item gif-icon"
+            matTooltip="{{ 'message.searchGif' | workyTranslations }}"
+            matTooltipClass="extra-mat-tooltip"
+            (click)="openGifSearch()">
           <i class="material-icons">gif</i>
         </div>
 
-        <div class="extra-content-item file-upload" matTooltip="Subir Imagen" (click)="openUploadModal()">
+        <div class="extra-content-item file-upload"
+            matTooltip="{{ 'message.uploadImage' | workyTranslations }}"
+            matTooltipClass="extra-mat-tooltip"
+            (click)="openUploadModal()">
           <i class="material-icons">add_photo_alternate</i>
         </div>
 
       <div class="emoji-wrapper"
-        (click)="toggleEmojiPicker()">
+          matTooltip="{{ 'message.emojis' | workyTranslations }}"
+          matTooltipClass="extra-mat-tooltip"
+          (click)="toggleEmojiPicker()">
         <i class="material-icons">moods</i>
       </div>
 

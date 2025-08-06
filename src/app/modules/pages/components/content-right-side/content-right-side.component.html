@@ -1,15 +1,3 @@
 <div class="side-right-container">
-
-    <ng-container>
-        <worky-weather class="widget"></worky-weather>
-        <worky-news class="widget"></worky-news>
-    </ng-container>
-
-    <!-- <ng-container *ngIf="routerUrl == '/profile'">
-        <worky-suggetion-to-follow></worky-suggetion-to-follow>
-        <app-contacts></app-contacts>
-    </ng-container> -->
-
+  <worky-widget-container [position]="WidgetPosition.RIGHT"></worky-widget-container>
 </div>
-
-

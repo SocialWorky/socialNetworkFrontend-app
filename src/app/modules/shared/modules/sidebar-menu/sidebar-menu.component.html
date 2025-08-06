@@ -1,24 +1,37 @@
-<div class="content-side-left">
-  <a [routerLink]="['/profile']">
-    <worky-avatar [size]="60" class="profile-img"></worky-avatar>
-  </a>
-  <div class="profile-info">
+<div class="content-sidebar">
+  <div class="profile-info"
+    [routerLink]="['/profile']">
+    <worky-avatar 
+      [size]="60" 
+      class="profile-img"
+      [img]="userAvatar"
+      [name]="userFullName">
+    </worky-avatar>
     <span class="profile-name">{{userName}}</span>
   </div>
-  <a [routerLink]="['/']" class="sidebar-icon active">
-    <i class="material-icons">home</i>
-    <span class="sidebar-text">Home</span>
-  </a>  
-  <a [routerLink]="['/messages']" class="sidebar-icon">
-    <i class="material-icons">message</i>
-    <span class="sidebar-text">Message</span>
-    <span *ngIf="messages > 0" class="badge">{{ messages }}</span>
-  </a>  
-  <a class="sidebar-icon" (click)="toggleNotificationsPanel()">
-    <i class="material-icons">notifications</i>
-    <span class="sidebar-text">Notifications</span>
-    <span *ngIf="notifications > 0" class="badge">{{ notifications }}</span>
-  </a>  
+
+  <div class="content-links-sidebar">
+    <a [routerLink]="['/']">
+      <i class="material-icons">home</i>
+      <span>Home</span>
+    </a>
+    <a [routerLink]="['/messages']">
+      <i class="material-icons">message</i>
+      <span>Message</span>
+      <span *ngIf="messages > 0" class="badge">{{ messages }}</span>
+    </a>
+    <a (click)="toggleNotificationsPanel()">
+      <i class="material-icons">notifications</i>
+      <span>Notifications</span>
+      <span *ngIf="notifications > 0" class="badge">{{ notifications }}</span>
+    </a>
+
+    <!-- <a (click)="forceSyncMessageCount()" style="cursor: pointer;">
+      <i class="material-icons">sync</i>
+      <span>Sync Messages</span>
+    </a> -->
+  </div>
+
 </div>
 
 <worky-notifications-panel></worky-notifications-panel>

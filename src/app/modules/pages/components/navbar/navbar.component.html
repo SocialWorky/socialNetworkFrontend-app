@@ -1,5 +1,4 @@
-
-<div class="content-navbar">
+<div class="content-navbar" *ngIf="!isMobile">
   <nav class="worky-navbar">
       <!-- Left elements -->
       <div class="worky-brand">
@@ -8,7 +7,7 @@
           <img class="worky-logo" src="{{ logoUrl }}" alt="{{ title }}" style="margin-top: 2px;" loading="lazy">
         </a>
         <!-- Search -->
-        <form 
+        <form
           class="worky-search"
           (ngSubmit)="search($event)">
           <div class="search-container">
@@ -16,7 +15,7 @@
             <input
               type="search"
               class="form-control"
-              placeholder="Search"
+              placeholder="{{ 'navbar.search' | workyTranslations }}"
               [(ngModel)]="searchTerm"
               (input)="onInputChange($event)"
               autocomplete="off"
@@ -48,13 +47,15 @@
           [badgeValue]="messages > 0 ? messages : null"
           (click)="messagesUrl()"
           [isFilled]=true
+          [isMenu]=false
           [badge]=true>
         </worky-dropdown>
         <!-- Notification -->
         <worky-dropdown class="item-navbar-actions"
           icon="notifications"
-          [badgeValue]="notifications > 0 ? notifications : null" 
+          [badgeValue]="notifications > 0 ? notifications : null"
           (click)="toggleNotificationsPanel()"
+          [isMenu]=false
           [badge]=true>
         </worky-dropdown>
         <!-- Profile -->
@@ -72,23 +73,51 @@
 
 <div class="content-navbar" *ngIf="isMobile"
   [class.sticky-content]="!isMessages"
-  [class.scrolledTop]="scrolledTop">
+  [class.scrolledTop]="scrolledTop && !isMessages">
   <nav class="worky-navbar">
-      <div class="worky-profile">
+      <!-- Mobile Search Bar -->
+      <div class="worky-brand-mobile">
+        <!-- Brand Logo -->
+        <a [routerLink]="['/']" *ngIf="logoUrl !== ''">
+          <img class="worky-logo-mobile" src="{{ logoUrl }}" alt="{{ title }}" loading="lazy">
+        </a>
+        <!-- Search -->
+        <form
+          class="worky-search-mobile"
+          (ngSubmit)="search($event)">
+          <div class="search-container-mobile">
+            <span class="material-icons search-icon-mobile">search</span>
+            <input
+              type="search"
+              class="form-control-mobile"
+              placeholder="{{ 'navbar.search' | workyTranslations }}"
+              [(ngModel)]="searchTerm"
+              (input)="onInputChange($event)"
+              autocomplete="off"
+              name="searchTerm"
+            />
+          </div>
+        </form>
+      </div>
+
+      <!-- Mobile Navigation -->
+      <div class="worky-profile-mobile">
         <worky-menu-component></worky-menu-component>
         <!-- Message -->
-        <worky-dropdown 
+        <worky-dropdown
           icon="chat"
           [badgeValue]="messages > 0 ? messages : null"
           (click)="messagesUrl()"
           [isFilled]=true
+          [isMenu]=false
           [badge]=true>
         </worky-dropdown>
         <!-- Notification -->
-        <worky-dropdown 
+        <worky-dropdown
           icon="notifications"
           [badgeValue]="notifications > 0 ? notifications : null"
           (click)="toggleNotificationsPanel()"
+          [isMenu]=false
           [badge]=true>
         </worky-dropdown>
         <!-- Profile -->
@@ -100,6 +129,18 @@
           (linkClicked)="handleLinkClicked($event)">
         </worky-dropdown>
       </div>
+
+      <!-- Mobile Search Results -->
+      <ul *ngIf="users.length > 0" class="search-results-mobile">
+        <li *ngFor="let user of users" (click)="viewProfile(user._id)">
+          <worky-avatar
+            [img]="user.avatar"
+            [size]="30"
+            [name]="user.name + ' ' + user.lastName"
+          ></worky-avatar>
+          {{ user.name }} {{ user.lastName }} ({{ user.username }})
+        </li>
+      </ul>
   </nav>
 </div>
 

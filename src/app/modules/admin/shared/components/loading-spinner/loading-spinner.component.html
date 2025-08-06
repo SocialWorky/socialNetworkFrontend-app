@@ -1,0 +1,30 @@
+<div [class]="spinnerClasses" *ngIf="loading" class="flex items-center justify-center">
+  <div class="flex flex-col items-center gap-4">
+    <div class="relative inline-block">
+      <div class="absolute border-2 border-transparent rounded-full animate-spin" 
+           [ngClass]="{
+             'w-6 h-6 border-t-blue-500': config.size === 'small',
+             'w-10 h-10 border-t-blue-500': config.size === 'medium',
+             'w-16 h-16 border-t-blue-500': config.size === 'large'
+           }"
+           style="animation-delay: 0s;"></div>
+      <div class="absolute border-2 border-transparent rounded-full animate-spin" 
+           [ngClass]="{
+             'w-6 h-6 border-t-blue-500': config.size === 'small',
+             'w-10 h-10 border-t-blue-500': config.size === 'medium',
+             'w-16 h-16 border-t-blue-500': config.size === 'large'
+           }"
+           style="animation-delay: 0.4s;"></div>
+      <div class="absolute border-2 border-transparent rounded-full animate-spin" 
+           [ngClass]="{
+             'w-6 h-6 border-t-blue-500': config.size === 'small',
+             'w-10 h-10 border-t-blue-500': config.size === 'medium',
+             'w-16 h-16 border-t-blue-500': config.size === 'large'
+           }"
+           style="animation-delay: 0.8s;"></div>
+    </div>
+    <div class="text-sm font-medium text-center text-slate-400" *ngIf="config.text">
+      {{ config.text | workyTranslations }}
+    </div>
+  </div>
+</div> 

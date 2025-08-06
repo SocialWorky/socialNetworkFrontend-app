@@ -1,30 +1,94 @@
 {
   "$schema": "./node_modules/@angular/service-worker/config/schema.json",
   "index": "/index.html",
+  "navigationUrls": [
+    "!/auth/**",
+    "!/profile/**",
+    "!/messages/**"
+  ],
   "assetGroups": [
     {
-      "name": "app",
+      "name": "app-critical",
       "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
         "files": [
-          "/favicon.ico",
           "/index.html",
-          "/manifest.webmanifest",
-          "/*.css",
-          "/*.js",
+          "/manifest.json",
+          "/assets/icon/favicon.ico",
+          "/assets/icons/**"
+        ]
+      }
+    },
+    {
+      "name": "app-styles",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "resources": {
+        "files": [
+          "/**/*.css"
+        ]
+      }
+    },
+    {
+      "name": "app-scripts",
+      "installMode": "lazy",
+      "updateMode": "lazy",
+      "resources": {
+        "files": [
+          "/**/*.js",
           "!/ngsw-worker.js"
         ]
       }
     },
     {
-      "name": "assets",
-      "installMode": "lazy",
+      "name": "critical-images",
+      "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
         "files": [
-          "/assets/**",
-          "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
+          "/assets/img/shared/handleImageError.png",
+          "/assets/img/logo_worky-100.png",
+          "/assets/img/logo_worky-100.jpg",
+          "/assets/img/login/worky-login.svg",
+          "/assets/img/navbar/worky-your-logo.png"
+        ]
+      }
+    },
+    {
+      "name": "assets-images",
+      "installMode": "lazy",
+      "updateMode": "lazy",
+      "resources": {
+        "files": [
+          "/assets/img/**",
+          "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif)"
+        ]
+      }
+    },
+    {
+      "name": "assets-fonts",
+      "installMode": "lazy",
+      "updateMode": "lazy",
+      "resources": {
+        "files": [
+          "/*.(otf|ttf|woff|woff2)"
+        ],
+        "urls": [
+          "https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+        ]
+      }
+    },
+    {
+      "name": "assets-third-party",
+      "installMode": "lazy",
+      "updateMode": "lazy",
+      "resources": {
+        "files": [
+          "/assets/emoji-mart/**",
+          "/assets/cropper/**",
+          "/assets/driver/**",
+          "/assets/highlight-js/**"
         ]
       }
     }
@@ -34,12 +98,13 @@
       "name": "api-freshness",
       "urls": [
         "/api/users/**",
-        "/api/notifications/**"
+        "/api/notifications/**",
+        "/api/messages/**"
       ],
       "cacheConfig": {
         "strategy": "freshness",
-        "maxSize": 100,
-        "maxAge": "3h",
+        "maxSize": 200,
+        "maxAge": "1h",
         "timeout": "10s"
       }
     },
@@ -47,20 +112,106 @@
       "name": "api-performance",
       "urls": [
         "/api/static/**",
-        "/api/config/**"
+        "/api/config/**",
+        "/api/publications/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 500,
+        "maxAge": "2h"
+      }
+    },
+    {
+      "name": "api-long-term",
+      "urls": [
+        "/api/user-profiles/**",
+        "/api/settings/**"
       ],
       "cacheConfig": {
         "strategy": "performance",
         "maxSize": 100,
         "maxAge": "1d"
       }
+    },
+    {
+      "name": "user-images-cache",
+      "urls": [
+        "/api/images/**",
+        "/api/avatars/**",
+        "/api/media/**",
+        "/api/uploads/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 50,
+        "maxAge": 604800000,
+        "timeout": "30s"
+      }
+    },
+    {
+      "name": "publication-images-cache",
+      "urls": [
+        "/api/publications/*/images/**",
+        "/api/publications/*/media/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 50,
+        "maxAge": 604800000,
+        "timeout": "20s"
+      }
+    },
+    {
+      "name": "profile-images-cache",
+      "urls": [
+        "/api/profiles/*/avatar/**",
+        "/api/profiles/*/cover/**",
+        "/api/users/*/avatar/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 50,
+        "maxAge": 604800000,
+        "timeout": "15s"
+      }
+    },
+    {
+      "name": "mobile-critical-images",
+      "urls": [
+        "/assets/img/shared/handleImageError.png",
+        "/assets/img/logo_worky-100.png",
+        "/assets/img/logo_worky-100.jpg"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 10,
+        "maxAge": 604800000
+      }
+    },
+    {
+      "name": "mobile-user-avatars",
+      "urls": [
+        "/api/users/*/avatar/**",
+        "/api/profiles/*/avatar/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 100,
+        "maxAge": "14d"
+      }
+    },
+    {
+      "name": "mobile-critical-only",
+      "urls": [
+        "/assets/img/shared/handleImageError.png",
+        "/assets/img/logo_worky-100.png"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 5,
+        "maxAge": "7d"
+      }
     }
   ],
-  "navigationUrls": [
-    "/**",
-    "!/**/*.*",
-    "!/**/*__*",
-    "!/**/*__*/**",
-    "!/api/**"
-  ]
+  "navigationRequestStrategy": "freshness"
 }

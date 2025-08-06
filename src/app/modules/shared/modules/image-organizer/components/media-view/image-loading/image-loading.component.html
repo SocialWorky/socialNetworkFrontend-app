@@ -1,22 +1,41 @@
 <div class="content-view-media-carousel">
   <div class="carousel-container">
-    <img *ngIf="imageSelected"
-      (click)="openImage(imageSelected)"
-      [src]="imageSelected.urlCompressed" class="main-image" alt="Selected Image" />
+
+    <worky-image *ngIf="isImage() && currentImage?.urlCompressed"
+      (imageClick)="openImage(currentImage!)"
+      [src]="getImageUrl(currentImage)"
+      cssClass="main-image"
+      alt="Selected Image"
+      [attr.data-image-id]="currentImage?._id">
+    </worky-image>
+
+    <div class="main-video-container" (click)="$event.stopPropagation()">
+      <video *ngIf="isVideo()"
+        class="main-video"
+        [src]="getVideoUrl(currentImage)"
+        controls
+        [poster]="getVideoPosterUrl(currentImage)">
+        Tu navegador no soporta el elemento de video.
+      </video>
+    </div>
 
     <ng-container *ngIf="images.length > 1">
-      <button (click)="previousImage()" class="nav-button prev-button"><span class="material-icons">keyboard_arrow_left</span></button>
-      <button (click)="nextImage()" class="nav-button next-button"><span class="material-icons">keyboard_arrow_right</span></button>
+      <button (click)="previousImage()" class="nav-button prev-button">
+        <span class="material-icons">keyboard_arrow_left</span>
+      </button>
+      <button (click)="nextImage()" class="nav-button next-button">
+        <span class="material-icons">keyboard_arrow_right</span>
+      </button>
     </ng-container>
   </div>
 
-  <div class="thumbnail-list">
-    <img
-      *ngFor="let image of images"
-      [src]="image.urlThumbnail"
-      (click)="selectImage(image)"
-      [class.active]="image._id === imageSelected?._id"
-      alt="Thumbnail"
-    />
+  <div *ngIf="!isMobile" class="thumbnail-list">
+    <worky-image
+      *ngFor="let image of images; trackBy: trackByImageId"
+      [src]="getImageUrl(image, 'thumbnail')"
+      (imageClick)="selectImage(image)"
+      [cssClass]="image._id === currentImage?._id ? 'active' : ''"
+      alt="Thumbnail">
+    </worky-image>
   </div>
 </div>

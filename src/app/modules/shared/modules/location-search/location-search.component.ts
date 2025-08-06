@@ -8,9 +8,10 @@ import { GeocodingService } from '@shared/services/apis/geocoding.service';
 import { LocationService } from '@shared/services/apis/location.service';
 
 @Component({
-  selector: 'worky-location-search',
-  templateUrl: './location-search.component.html',
-  styleUrls: ['./location-search.component.scss']
+    selector: 'worky-location-search',
+    templateUrl: './location-search.component.html',
+    styleUrls: ['./location-search.component.scss'],
+    standalone: false
 })
 export class LocationSearchComponent {
   searchTerm: string = '';

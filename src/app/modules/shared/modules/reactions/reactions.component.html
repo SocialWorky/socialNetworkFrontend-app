@@ -1,4 +1,8 @@
-<div *ngIf="!unlockReactions" class="loader"></div>
+<div *ngIf="!unlockReactions" class="reactions-skeleton">
+  <div class="skeleton-reaction-button">
+    <div class="skeleton-icon"></div>
+  </div>
+</div>
 <div class="reaction-container-wrapper"
   (mouseleave)="hideReactions()"
   (mouseenter)="showReactions()"
@@ -18,7 +22,18 @@
         (click)="deleteReaction(reactionUserInPublication._id)"
         (touchstart)="onTouchStart()"
         (touchend)="onTouchEnd()">
-      <img [src]="reactionUserInPublication.customReaction.emoji" [alt]="reactionUserInPublication.customReaction.name">
+      <div class="reaction-icon-container">
+        <img 
+          [src]="reactionUserInPublication.customReaction.emoji" 
+          [alt]="reactionUserInPublication.customReaction.name"
+          class="reaction-emoji-img"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
+          onload="this.style.display='block'; this.nextElementSibling.style.display='none'"
+        />
+        <i class="material-icons reaction-fallback-icon" style="display: none;">
+          mood
+        </i>
+      </div>
       <div>{{ reactionUserInPublication.customReaction.name }}</div>
     </div>
 
@@ -32,8 +47,17 @@
           (mouseleave)="zoomOut(reaction)"
           [matTooltip]="reaction.name"
           matTooltipPosition="above"
+          matTooltipClass="extra-mat-tooltip"
           (click)="addReaction(reaction)">
-        <img class="reaction-image" [src]="reaction.emoji" [alt]="reaction.name">
+        <worky-image 
+          class="reaction-image" 
+          [src]="reaction.emoji" 
+          [alt]="reaction.name"
+          [skeletonWidth]="'40px'"
+          [skeletonHeight]="'40px'"
+          [maxRetries]="0"
+          [loadingTimeout]="3000">
+        </worky-image>
       </div>
     </div>
   </div>

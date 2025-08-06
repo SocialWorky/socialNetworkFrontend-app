@@ -12,15 +12,26 @@
   </div>
 
   <div class="publication-header">
-    <worky-avatar *ngIf="publication.author.name && publication.author.lastName"
+    <!-- Avatar con skeleton individual -->
+    <div *ngIf="avatarLoading" class="avatar-container">
+      <worky-avatar-skeleton size="40px"></worky-avatar-skeleton>
+    </div>
+    <worky-avatar *ngIf="!avatarLoading"
       [size]="40"
       [img]="publication.author.avatar"
-      [name]="publication.author.name + ' ' + publication.author.lastName">
+      [name]="publication.author.name + ' ' + publication.author.lastName"
+      [showInitials]="true"
+      (load)="onAvatarLoad()"
+      (error)="onAvatarError()">
     </worky-avatar>
 
     <div class="publication-header-content">
       <div class="user-name-content">
-        <div class="user-name" *ngIf="publication.isMyFriend || (dataUser?.id === publication.userReceiving?._id && !publication.isMyFriend) || (dataUser?.id === publication.author._id && !publication.isMyFriend); else notFriend">
+        <!-- Nombre con skeleton individual -->
+        <div *ngIf="nameLoading || avatarLoading" class="name-skeleton">
+          <worky-text-skeleton width="120px"></worky-text-skeleton>
+        </div>
+        <div class="user-name" *ngIf="shouldShowFriendActions; else notFriend">
           <span (click)="viewProfile(publication.author._id)" class="name link-name">
             {{ publication.author.name }} {{ publication.author.lastName }}
           </span>
@@ -33,26 +44,26 @@
         </div>
 
         <ng-template #notFriend>
-          <div class="content-actions-follow">
+          <div class="content-actions-follow" *ngIf="!avatarLoading">
             <span (click)="viewProfile(publication.author._id)" class="name link-name">
               {{ publication.author.name }} {{ publication.author.lastName }}
             </span>
 
             <span class="name">
               <ng-container *ngIf="!isProfile">
-                <i *ngIf="!publication.isMyFriend || publication.isFriendshipPending" class="material-icons">fiber_manual_record</i>
+                <i *ngIf="shouldShowPendingIndicator" class="material-icons">fiber_manual_record</i>
 
-                <a *ngIf="!publication.isMyFriend && (!userRequest?._id || !userReceive?._id)" class="follow-my-friend" 
+                <a *ngIf="shouldShowFollowButton" class="follow-my-friend"
                   (click)="followMyFriend(publication.author._id)">
                   {{ 'publicationsView.follow' | workyTranslations }}
                 </a>
 
-                <a *ngIf="!publication.isMyFriend && publication.isFriendshipPending && userRequest?._id === dataUser?.id" class="follow-my-friend" 
+                <a *ngIf="shouldShowCancelButton" class="follow-my-friend"
                   (click)="cancelFriendship(publication.isFriendshipPending!, publication.author._id)">
                   {{ 'publicationsView.cancelRequest' | workyTranslations }}
                 </a>
 
-                <a *ngIf="userReceive?._id === dataUser?.id" class="follow-my-friend" 
+                <a *ngIf="shouldShowAcceptButton" class="follow-my-friend"
                   (click)="acceptFriendship(publication.isFriendshipPending!, publication.author._id)">
                   Aceptar Amistad
                 </a>
@@ -61,37 +72,63 @@
             </span>
 
           </div>
-        </ng-template>    
+        </ng-template>
 
       </div>
-      <span class="geoLocationName" *ngIf="nameGeoLocation !== ''"> <p class="is-in">está en </p><a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
+      <!-- Ubicación con skeleton individual -->
+      <div *ngIf="locationLoading" class="location-skeleton">
+        <worky-text-skeleton width="150px"></worky-text-skeleton>
+      </div>
+      <span class="geoLocationName" *ngIf="shouldShowLocation"> <p class="is-in">{{ 'shared.publicationView.location.isIn' | workyTranslations }} </p><a class="urlLink" [href]="urrMap" target="_blank">{{ nameGeoLocation }}</a></span>
       <div class="publication-date">
-        <span>{{ publication.createdAt! | workyRelativeTime }}</span>
-        <ng-container *ngIf="publication.privacy === typePrivacy.PUBLIC">
-          <i class="material-icons">public</i>
-        </ng-container>
-        <ng-container *ngIf="publication.privacy === typePrivacy.FRIENDS">
-          <i class="material-icons">people</i>
-        </ng-container>
-        <ng-container *ngIf="publication.privacy === typePrivacy.PRIVATE">
-          <i class="material-icons">lock</i>
-        </ng-container>
+        <!-- Fecha con skeleton individual -->
+        <div *ngIf="dateLoading" class="date-skeleton">
+          <worky-text-skeleton width="80px"></worky-text-skeleton>
+        </div>
+        <span *ngIf="!dateLoading">{{ publication.createdAt! | workyDate:'relative' }}</span>
+        <i class="material-icons">{{ privacyIcon }}</i>
       </div>
     </div>
   </div>
 
   <div class="publication-body">
-    <div class="publication-content">
-      <div class="content markdown" *ngIf="(publication.content | workyPreviewHtml | async) as result">
+    <div class="publication-content" *ngIf="publication.content">
+      <!-- Contenido con skeleton individual -->
+      <div *ngIf="contentLoading" class="content-skeleton">
+        <worky-text-skeleton width="100%"></worky-text-skeleton>
+        <worky-text-skeleton width="80%"></worky-text-skeleton>
+        <worky-text-skeleton width="60%"></worky-text-skeleton>
+      </div>
+      <div class="content markdown" *ngIf="!contentLoading && (publication.content | workyPreviewHtml | async) as result">
         <div class="publication-markdown-view" [innerHTML]="result.markdownHtml"></div>
-        <div class="publication-youtube-preview" [innerHTML]="result.youtubeHtml"></div>
+        <div class="publication-youtube-preview" [innerHTML]="result.youTubeHtml"></div>
         <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
       </div>
     </div>
 
-    <worky-image-organizer *ngIf="publication.media.length"
+    <worky-processing-media *ngIf="!publication.media.length && publication.containsMedia && !isMediaProcessingStuck()"></worky-processing-media>
+    
+    <!-- Error message when media processing fails after retries -->
+    <div *ngIf="isMediaProcessingStuck()" class="media-processing-error">
+      <div class="error-message">
+        <i class="material-icons">error_outline</i>
+        <span>{{ 'publicationsView.mediaProcessingError' | workyTranslations }}</span>
+      </div>
+      <button class="retry-button" (click)="retryMediaProcessingManual()">
+        <i class="material-icons">refresh</i>
+        {{ 'publicationsView.retryProcessing' | workyTranslations }}
+      </button>
+    </div>
+
+    <!-- Media con skeleton individual -->
+    <div *ngIf="publication.media.length && mediaLoading" class="media-skeleton">
+      <worky-image-skeleton width="100%" height="300px"></worky-image-skeleton>
+    </div>
+    <worky-image-organizer *ngIf="publication.media.length && !mediaLoading"
       [publication]="publication"
-      type="publication">
+      type="publication"
+      (load)="onMediaLoad()"
+      (error)="onMediaLoadError($event)">
     </worky-image-organizer>
   </div>
 
@@ -99,7 +136,12 @@
     <div class="publication-footer-content">
       <div class="publication-footer-content-item" *ngIf="publication.reaction.length">
         <div class="reactions-img-container" *ngFor="let emoji of listReaction; let i = index;">
-          <img class="reactions-img" [src]="emoji" style="--i: {{ i }};">
+          <img
+            class="reactions-img"
+            [src]="emoji"
+            [alt]="'Reacción ' + (i + 1)"
+            [style.--i]="i"
+            (error)="onEmojiError($event)">
         </div>
         <span>{{ publication.reaction.length }}</span>
 
@@ -111,7 +153,11 @@
     </div>
 
     <div class="publication-footer-actions">
-      <div class="publication-footer-actions-item">
+      <!-- Botones de acción con skeleton individual -->
+      <div class="publication-footer-actions-item" *ngIf="actionsLoading">
+        <worky-button-skeleton width="60px" height="30px"></worky-button-skeleton>
+      </div>
+      <div class="publication-footer-actions-item" *ngIf="!actionsLoading">
         <worky-reactions
           [type]="type"
           [userProfile]="userProfile"
@@ -119,11 +165,19 @@
           [reactionsToPublication]="publication.reaction">
         </worky-reactions>
       </div>
-      <div class="publication-footer-actions-item no-select-text" (click)="commentOn(indexPublication!)">
+      
+      <div class="publication-footer-actions-item" *ngIf="actionsLoading">
+        <worky-button-skeleton width="80px" height="30px"></worky-button-skeleton>
+      </div>
+      <div class="publication-footer-actions-item no-select-text" *ngIf="!actionsLoading" (click)="commentOn(indexPublication!)">
         <i class="material-icons">comment</i>
         <span>{{ 'publicationsView.spanComment' | workyTranslations }}</span>
       </div>
-      <div class="publication-footer-actions-item no-select-text">
+      
+      <div class="publication-footer-actions-item" *ngIf="actionsLoading">
+        <worky-button-skeleton width="60px" height="30px"></worky-button-skeleton>
+      </div>
+            <div class="publication-footer-actions-item no-select-text" *ngIf="!actionsLoading">
         <worky-dropdown
           icon="share"
           [title]="'publicationsView.spanShare' | workyTranslations"
@@ -137,7 +191,7 @@
   </div>
 
   <div class="publication-comment-on" *ngIf="viewCommentSection === indexPublication">
-    <worky-add-publication 
+    <worky-add-publication
       [type]="typePublishing.COMMENT"
       [idPublication]="publication._id"
       [indexPublication]="indexPublication">
@@ -146,7 +200,7 @@
 
   <div class="publication-comment" *ngIf="viewComments === indexPublication">
     <div class="publication-comment-item" *ngFor="let comment of publication.comment">
-      <worky-avatar 
+      <worky-avatar
         [size]="30"
         [img]="comment.author.avatar"
         [name]="comment.author.name + ' ' + comment.author.lastName">
@@ -165,9 +219,11 @@
           </div>
           <div class="comment-content markdown" *ngIf="(comment.content | workyPreviewHtml | async) as result">
             <div [innerHTML]="result.markdownHtml"></div>
-            <div class="publication-youtube-preview" [innerHTML]="result.youtubeHtml"></div>
+            <div class="publication-youtube-preview" [innerHTML]="result.youTubeHtml"></div>
             <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
           </div>
+
+          <worky-processing-media *ngIf="!comment.media.length && comment.containsMedia"></worky-processing-media>
 
           <worky-image-organizer *ngIf="comment.media.length"
             [comment]="comment"
@@ -175,8 +231,15 @@
             type="comment">
           </worky-image-organizer>
         </div>
-        <span class="comment-date">{{ comment.createdAt | workyRelativeTime }}</span>
+        <span class="comment-date">{{ comment.createdAt | workyDate:'relative' }}</span>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Accessible Loading Component for deletion operations -->
+<worky-accessible-loading
+  [show]="isDeletingPublication || isDeletingComment"
+  [message]="isDeletingPublication ? (translations['publicationsView.loadingDeletePublication'] | workyTranslations) : (translations['publicationsView.loadingDeleteComment'] | workyTranslations)"
+  [fullscreen]="true">
+</worky-accessible-loading>

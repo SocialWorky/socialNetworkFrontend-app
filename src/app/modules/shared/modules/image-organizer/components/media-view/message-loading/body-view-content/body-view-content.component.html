@@ -1,7 +1,7 @@
 <div class="content-view-comment">
   <div class="publication-comment" *ngIf="shouldShowComments()">
     <div class="publication-comment-item" *ngFor="let comment of getComments()">
-      <worky-avatar 
+      <worky-avatar
         [size]="30"
         [img]="comment.author.avatar"
         [name]="comment.author.name + ' ' + comment.author.lastName">
@@ -16,7 +16,7 @@
           </div>
           <div class="comment-content markdown" *ngIf="(comment.content | workyPreviewHtml | async) as result">
             <div [innerHTML]="result.markdownHtml"></div>
-            <div class="publication-youtube-preview" [innerHTML]="result.youtubeHtml"></div>
+            <div class="publication-youtube-preview" [innerHTML]="result.youTubeHtml"></div>
             <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
           </div>
 
@@ -26,14 +26,14 @@
             type="comment">
           </worky-image-organizer>
         </div>
-        <span class="comment-date">{{ comment.createdAt | workyRelativeTime }}</span>
+        <span class="comment-date">{{ comment.createdAt | workyDate:'relative' }}</span>
       </div>
     </div>
   </div>
 
   <div class="content-add-comment">
     <worky-add-publication
-      [type]="currentPublication?.comment?.length && images.length === 1 && typeView === typeViewEnum.PUBLICATION ? typePublishingEnum.COMMENT : typePublishingEnum.IMAGEVIEW"
+      [type]="(currentPublication?.comment?.length ?? 0) >= 0 && images.length === 1 && typeView === typeViewEnum.PUBLICATION ? typePublishingEnum.COMMENT : typePublishingEnum.IMAGE_VIEW"
       [idMedia]="imageSelected"
       [idPublication]="currentPublicationId">
     </worky-add-publication>

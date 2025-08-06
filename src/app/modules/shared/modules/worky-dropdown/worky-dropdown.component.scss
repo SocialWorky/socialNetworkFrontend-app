@@ -1,40 +1,87 @@
 @use 'src/assets/styles/worky-variables.scss' as var;
 @use 'src/assets/styles/worky-palettes' as colors;
+@use 'sass:map';
+
+.nav-link {
+  color: colors.$worky-color-icon;
+}
 
 .img-dropdown {
   height: 40px;
 }
 
 .dropdown-menu {
+  position: absolute;
+  margin-top: 10px;
+  left: 0;
+  background-color: color-mix(in srgb, var(--worky-color-light), transparent 20%);
   border-radius: var.$worky-border-radius-medium;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
 
-  &.dropdown-down {
-    top: 450px;
+  &.dropdown-menu-end {
+    left: auto;
   }
 
   &.dropdown-up {
-    bottom: 50px;
+    bottom: 100%;
+    top: auto;
+  }
+
+  &.dropdown-down {
+    top: 100%;
+    bottom: auto;
   }
 }
 
-.content-dropdow {
+.content-drop-dow {
   display: flex;
   align-items: center;
   padding: 8px 15px;
   cursor: pointer;
   transition: 0.3s;
   gap: 10px;
+  color: colors.$worky-color-text;
+  background-color: color-mix(in srgb, var(--worky-color-light), transparent 20%);
 
   &:hover {
-    color: colors.$worky-color-light;
-    background-color: map-get(colors.$worky-blue, 56);
+    background-color: map.get(colors.$worky-navy, 87);
+  }
+
+  // Version info style - non-clickable, subtle appearance
+  &.version-info {
+    cursor: default;
+    font-size: 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 5px;
+    padding-top: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    justify-content: flex-end;
+    text-align: right;
+
+    &:hover {
+      background-color: transparent;
+    }
+
+    span {
+      color: colors.$worky-color-text;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      width: 100%;
+      text-align: right;
+    }
+  }
+
+  .icon-worky-dropdown {
+    border-radius: 50%;
+    background-color: map.get(colors.$worky-navy, 87);
+    padding: 5px;
   }
 
   .icon-img-dropdown {
     width: 20px;
     height: 20px;
+    padding: 5px;
   }
 }
 
@@ -61,3 +108,39 @@
 .mover-icono {
   animation: moverIcono 0.8s infinite alternate;
 }
+
+::ng-deep ion-action-sheet.dropdown-menu-mobile .action-sheet-group {
+  width: 100%;
+  background-color: color-mix(in srgb, var(--worky-color-light), transparent 10%) !important;
+  border-radius: 16px 16px 0px 0px;
+  .action-sheet-title {
+    color: colors.$worky-color-text;
+    font-size: 25px;
+    font-weight: 600;
+  }
+  button {
+    display: flex;
+    align-items: center;
+    span {
+      width: auto;
+      color: colors.$worky-color-text;
+      font-size: 20px;
+    }
+    .action-sheet-icon {
+      color: colors.$worky-color-light;
+      background-color: map.get(colors.$worky-navy, 7);
+      padding: 8px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    &.version-info {
+      justify-content: flex-end;
+      text-align: right;
+    }
+  }
+
+  .sc-ion-action-sheet-ios {
+    background-image: none !important;
+  }
+}
+

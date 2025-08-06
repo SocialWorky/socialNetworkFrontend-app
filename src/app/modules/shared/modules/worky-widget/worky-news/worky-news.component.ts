@@ -1,14 +1,15 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { NewsService } from './service/apiNews';
 import { NewsArticle } from './interface/dataNews.interface';
 import { of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 
 @Component({
-  selector: 'worky-news',
-  templateUrl: './worky-news.component.html',
-  styleUrls: ['./worky-news.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'worky-news',
+    templateUrl: './worky-news.component.html',
+    styleUrls: ['./worky-news.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class WorkyNewsComponent implements OnInit {
   articles: NewsArticle[] = [];
@@ -38,7 +39,7 @@ export class WorkyNewsComponent implements OnInit {
       }),
       catchError(error => {
         console.error('Error fetching news', error);
-        return of([]); // En caso de error, retornar un array vacío
+        return of([]); // In case of error, return empty array
       })
     ).subscribe(articles => {
       this.articles = articles;

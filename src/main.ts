@@ -1,11 +1,12 @@
 import { enableProdMode } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { AppModule } from './app/app.module';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
+
+import { AppModule } from './app/app.module';
 import { Translations } from './translations/translations';
 import { environment } from './environments/environment';
 import { ConfigService } from '@shared/services/core-apis/config.service';
-import { Subject, takeUntil } from 'rxjs';
 
 const destroy$ = new Subject<void>();
 
@@ -32,41 +33,71 @@ async function initializeApp() {
       });
     }
 
+    const body = document.body;
+    if (localStorage.getItem('isDarkMode') === 'true') {
+      body.classList.add('dark-mode');
+    } else {
+      body.classList.remove('dark-mode');
+    }
+
     const appModuleRef = await platformBrowserDynamic().bootstrapModule(AppModule);
     defineCustomElements(window);
 
     const injector = appModuleRef.injector;
     const _configService = injector.get(ConfigService);
 
-    _configService.getConfig().pipe(takeUntil(destroy$)).subscribe((configData) => {
-      localStorage.setItem('theme', configData.settings.themeColors);
-
-      const theme = JSON.parse(configData.settings.themeColors);
-      Object.keys(theme).forEach(variable => {
-        document.documentElement.style.setProperty(variable, theme[variable]);
-      });
-
-      if (configData.settings.title) {
-        document.title = configData.settings.title;
-      }
-
-      if (configData.settings.logoUrl) {
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) {
-          const imgElement = document.createElement('img');
-          imgElement.src = configData.settings.logoUrl;
-          imgElement.alt = 'Cargando...';
-          loadingScreen.innerHTML = '';
-          loadingScreen.appendChild(imgElement);
-        }
-      }
-
-      updateMetaTags(configData);
-
+    const configTimeout = setTimeout(() => {
+      console.warn('ConfigService timeout, using default configuration');
       const loadingScreen = document.getElementById('loading-screen');
       if (loadingScreen) {
         loadingScreen.style.opacity = '0';
         setTimeout(() => loadingScreen.remove(), 500);
+      }
+    }, 3000);
+
+    _configService.getConfig().pipe(takeUntil(destroy$)).subscribe({
+      next: (configData) => {
+        clearTimeout(configTimeout);
+        
+        localStorage.setItem('theme', configData.settings.themeColors);
+
+        const theme = JSON.parse(configData.settings.themeColors);
+        Object.keys(theme).forEach(variable => {
+          document.documentElement.style.setProperty(variable, theme[variable]);
+        });
+
+        if (configData.settings.title) {
+          document.title = configData.settings.title;
+        }
+
+        if (configData.settings.logoUrl) {
+          const loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            const imgElement = document.createElement('img');
+            imgElement.src = configData.settings.logoUrl;
+            imgElement.alt = 'Loading...';
+            loadingScreen.innerHTML = '';
+            loadingScreen.appendChild(imgElement);
+          }
+        }
+
+        updateMetaTags(configData);
+
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.style.opacity = '0';
+          setTimeout(() => loadingScreen.remove(), 500);
+        }
+      },
+      error: (error) => {
+        clearTimeout(configTimeout);
+        console.error('Error loading configuration:', error);
+        
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.style.opacity = '0';
+          setTimeout(() => loadingScreen.remove(), 500);
+        }
       }
     });
   } catch (error) {
@@ -87,7 +118,7 @@ function updateMetaTags(configData: any) {
 
 function updateMetaTag(attrName: string, attrValue: string, content: string) {
   let element: HTMLMetaElement | null = document.querySelector(`meta[${attrName}="${attrValue}"]`);
-  
+
   if (element) {
     element.setAttribute('content', content);
   } else {

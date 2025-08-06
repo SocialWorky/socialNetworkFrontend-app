@@ -1,23 +1,37 @@
 @use 'src/assets/styles/worky-typography.scss' as Fonts;
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'sass:map';
 
 .content-right-messageChat {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 92dvh;
   border-radius: 0.5rem;
   padding: 10px;
-  background-color: #dcdcdc;
-  border: 1px solid var(--worky-color-light);
+  background-color: map.get(color.$worky-navy, 87);
   position: relative;
   overflow: hidden;
+  
+  @include breakpoints.below-sm {
+    height: 86dvh;
+  }
 
   .content-section-wall {
     height: 100%;
     overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #ffffff #f0f0f0;
+    scroll-behavior: smooth;
+    
+    // Scrollbar styling
+    &::-webkit-scrollbar {
+      width: 6px;
+      &-track { background: transparent; }
+      &-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+        &:hover { background: rgba(0, 0, 0, 0.3); }
+      }
+    }
 
     .messages-container {
       display: flex;
@@ -29,7 +43,7 @@
         text-align: center;
         margin: 1rem 0;
         span {
-          background: map-get(color.$worky-navy, 72);
+          background: map.get(color.$worky-navy, 72);
           padding: 0.5rem 1rem;
           color: var(--worky-color-navy);
           font-size: 0.9rem;
@@ -37,37 +51,35 @@
         }
       }
 
+      // Message triangle styles
       .message-triangle {
         position: relative;
-        right: 9px;
         height: 0;
         border-left: 10px solid transparent;
         border-right: 10px solid transparent;
-        border-bottom: 10px solid #fff;
+        border-bottom: 10px solid map.get(color.$worky-navy, 87);
+        
+        &.sent {
+          right: 9px;
+          border-bottom-color: map.get(color.$worky-blue, 9);
+        }
+        
+        &.received {
+          left: 10px;
+          border-bottom-color: map.get(color.$worky-navy, 87);
+        }
       }
 
-      .message-sent .message-triangle {
-        border-bottom-color: var(--worky-color-indigo);
-      }
-
-      .message-received .message-triangle {
-        border-bottom-color: var(--worky-color-greyLight);
-        left: 10px;
-      }
-
+      // Message container styles
       .message-sent,
       .message-received {
         margin-bottom: 0.1rem;
 
-        &.grouped {
-          margin-top: 0rem;
-        }
-
+        &.grouped { margin-top: 0; }
         &.no-avatar {
           padding-left: 60px;
           padding-right: 60px;
         }
-
 
         .sent-content,
         .received-content {
@@ -78,81 +90,95 @@
           max-width: 100%;
           word-break: break-word;
           box-shadow: -15px 1px 12px rgba(0, 0, 0, 0.1);
-          markdown {
+          
+          ::ng-deep markdown {
             display: flex;
             flex-direction: column;
             white-space: pre-wrap;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            
+            img, video {
+              max-width: 200px;
+              @include breakpoints.below-sm { max-width: 100% !important; }
+            }
+          }
+
+          .media-wrapper {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            max-width: 100%;
+            
+            img, video {
+              max-width: 200px;
+              @include breakpoints.below-sm { max-width: 100% !important; }
+            }
+          }
+
+          .thumbnail {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            transition: transform 0.2s;
+            
+            &:hover { transform: scale(1.02); }
+          }
+
+          .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
           }
         }
       }
 
-      .message-sent.first-group.last-group {
-        .sent-content {
-          border-radius: 1rem 0rem 1rem 1rem;
-        }
-      }
-
-      .message-received.first-group.last-group {
-        .received-content {
-          border-radius: 0rem 1rem 1rem 1rem;
-        }
-      }
-
-      .message-sent.first-group {
-        .sent-content {
-          border-radius: 1rem 0rem 0rem 1rem;
-        }
-      }
-
-      .message-received.first-group {
-        .received-content {
-          border-radius: 0rem 1rem 0rem 0rem;
-        }
-      }
-
-      .message-received.grouped {
-        .received-content {
-          border-radius: 0rem 1rem 1rem 0rem;
-        }
-      }
-
-      .message-sent.grouped {
-        .sent-content {
-          border-radius: 1rem 0rem 0rem 1rem;
-        }
-      }
-
-      .message-sent.last-group {
-        .sent-content {
-          border-radius: 1rem 0rem 1rem 1rem;
-          margin-bottom: 15px;
-        }
-      }
-
-      .message-received.last-group {
-        .received-content {
-          border-radius: 0rem 1rem 1rem 1rem;
-          margin-bottom: 15px;
-        }
-      }
-
+      // Border radius variations for grouped messages
       .message-sent {
         display: flex;
         justify-content: flex-end;
+        
         .sent-content {
-          background-color: var(--worky-color-indigo);
-          color: var(--worky-color-light);
+          background-color: map.get(color.$worky-blue, 9);
+          color: #fff;
+        }
+        
+        &.first-group.last-group .sent-content { border-radius: 1rem 0 1rem 1rem; }
+        &.first-group .sent-content { border-radius: 1rem 0 0 1rem; }
+        &.grouped .sent-content { border-radius: 1rem 0 0 1rem; }
+        &.last-group .sent-content { 
+          border-radius: 1rem 0 1rem 1rem;
+          margin-bottom: 15px;
         }
       }
 
       .message-received {
         display: flex;
         justify-content: flex-start;
+        
         .received-content {
-          background-color: var(--worky-color-greyLight);
-          color: var(--worky-color-dark);
+          background-color: map.get(color.$worky-navy, 87);
+          color: color.$worky-color-text;
+        }
+        
+        &.first-group.last-group .received-content { border-radius: 0 1rem 1rem 1rem; }
+        &.first-group .received-content { border-radius: 0 1rem 0 0; }
+        &.grouped .received-content { border-radius: 0 1rem 1rem 0; }
+        &.last-group .received-content { 
+          border-radius: 0 1rem 1rem 1rem;
+          margin-bottom: 15px;
         }
       }
 
@@ -161,9 +187,7 @@
         justify-content: flex-end;
         align-items: center;
         gap: 0.5rem;
-        i {
-          font-size: 18px;
-        }
+        i { font-size: 18px; }
       }
     }
   }
@@ -178,12 +202,12 @@
     display: flex;
     align-items: center;
     flex-direction: column;
-    background-color: var(--worky-color-light);
+    background-color: color-mix(in srgb,var(--worky-color-light),transparent 10%);
     border-radius: 0.5rem;
     padding: 0.3rem;
     box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.1);
     z-index: 1;
-
+    margin-bottom: 40px;
 
     .message-input-container {
       display: flex;
@@ -194,12 +218,12 @@
       .input-wrapper {
         display: flex;
         flex-grow: 1;
-        border: 1px solid var(--worky-color-greyLight);
         margin: 5px;
         border-radius: 8px;
       }
 
       .message-input {
+        color: color.$worky-color-text;
         font-size: 1rem;
         background-color: var(--worky-color-greyLight);
         width: 100%;
@@ -209,12 +233,10 @@
         resize: none;
         overflow-y: hidden;
         padding: 0.5rem 0.5rem;
-        border: 1px solid #ccc;
         border-radius: 8px;
         font-size: 1rem;
         box-sizing: border-box;
       }
-
     }
 
     .content-footer-bar {
@@ -239,7 +261,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 100dvh;
   background: url('../../../../../../assets/img/shared/fondo_message_chat.jpg') center/cover no-repeat;
   opacity: 0.2;
   z-index: 0;
@@ -252,19 +274,21 @@
   align-items: center;
   height: 80px;
   padding: 20px;
-  background: color.$worky-color-navy;
+  background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  color: #FFF;
+  color: color.$worky-color-text;
   flex-shrink: 0;
 
   .header-content-mobil-left {
     display: flex;
     align-items: center;
+    font-size: 1.2rem;
+    font-weight: 600;
 
     .back-button {
       display: flex;
-      background: #ffffffc4;
-      color: color.$worky-color-navy;
+      background-color: map.get(color.$worky-navy, 12);
+      color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
       margin-left: 10px;
       margin-right: 20px;
       border-radius: 50%;
@@ -291,4 +315,101 @@
       justify-content: center;
     }
   }
+}
+
+.refresh-container {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+  
+  .refresh-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: map.get(color.$worky-blue, 9);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .material-icons {
+      font-size: 18px;
+      
+      &.spinning {
+        animation: spin 1s linear infinite;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.loading-messages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: #666;
+  font-size: 14px;
+  
+  .loader {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid map.get(color.$worky-navy, 56);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+  }
+}
+
+.no-more-messages {
+  text-align: center;
+  padding: 20px;
+  color: map.get(color.$worky-navy, 100);
+  font-size: 14px;
+  font-style: italic;
+}
+
+.scroll-to-bottom-button {
+  position: fixed;
+  bottom: 150px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: map.get(color.$worky-navy, 56);
+  color: color.$worky-color-text;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  
+  &:hover {
+    background: map.get(color.$worky-navy, 87);
+    transform: scale(1.1);
+  }
+  
+  i {
+    font-size: 24px;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

@@ -1,62 +1,175 @@
-  <div class="mt-4 mx-4">
-    <div class="w-full overflow-hidden rounded-lg shadow-xs">
-      <div class="w-full overflow-x-auto">
-
-        <div class="content-header-title">
-          <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ 'admin.lastRegisteredUsers-title' | workyTranslations }}</h2>
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-inter">
+  <!-- Header Section -->
+  <div class="bg-slate-700/95 backdrop-blur-lg border border-slate-600 rounded-xl p-6 mb-8 shadow-lg">
+    <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center mb-6">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+          <i class="material-icons">people</i>
         </div>
-
-        <table class="w-full">
-          <thead>
-            <tr class="header-tr">
-              <th class="px-4 py-3">{{ 'admin.lastRegisteredUsers-user' | workyTranslations }}</th>
-              <th class="px-4 py-3">{{ 'admin.lastRegisteredUsers-status' | workyTranslations }}</th>
-              <th class="px-4 py-3">{{ 'admin.lastRegisteredUsers-email' | workyTranslations }}</th>
-              <th class="px-4 py-3">{{ 'admin.lastRegisteredUsers-createdAt' | workyTranslations }}</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
-
-            @for(user of users; track $index) {
-
-              <tr class="body-tr">
-                <td class="px-4 py-3">
-                  <div class="flex items-center text-sm">
-
-                    <div class="relative hidden w-8 h-8 mr-3 rounded-full md:block">
-                        <worky-avatar 
-                          [size]="35"
-                          img="{{ user?.avatar }}"
-                          name="{{ user?.name }} {{ user.lastName }}">
-                        </worky-avatar>
-                      <div class="absolute inset-0 rounded-full shadow-inner" aria-hidden="true"></div>
-                    </div>
-
-                    <div>
-                      <p class="font-semibold">{{ user?.name }} {{ user?.lastName }}</p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">{{ user.username }}</p>
-                    </div>
-
-                  </div>
-                </td>
-
-                <td class="px-4 py-3 text-xs">
-                  <span class="px-2 py-1 font-semibold leading-tight text-green-700  rounded-full dark:text-green-100"
-                    [class.dark:bg-red-700]="user.isVerified === false"
-                    [class.dark:bg-green-700]="user.isVerified === true"> {{ user.isVerified === true ? ('admin.lastRegisteredUsers-validated' | workyTranslations) : ('admin.lastRegisteredUsers-pending' | workyTranslations)  }} </span>
-                </td>
-
-                <td class="px-4 py-3 text-sm">
-                  <span> {{ user.email }} </span>
-                </td>
-
-                <td class="px-4 py-3 text-sm">{{ user.createdAt | date }}</td>
-              </tr>
-  
-            }
-
-          </tbody>
-        </table>
+        <div>
+          <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-1">
+            {{ 'admin.lastRegisteredUsers.title' | workyTranslations }}
+          </h1>
+          <p class="text-slate-300">{{ 'admin.lastRegisteredUsers.subtitle' | workyTranslations }}</p>
+        </div>
+      </div>
+      <div class="flex gap-4 items-center lg:flex-row flex-col lg:w-auto w-full">
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg"
+          (click)="refreshUsers()" 
+          [disabled]="isLoading">
+          <i class="material-icons" [class.animate-spin]="isLoading">refresh</i>
+          <span>{{ 'refresh' | workyTranslations }}</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Stats Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 flex items-center gap-4">
+        <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white text-xl">
+          <i class="material-icons">check_circle</i>
+        </div>
+        <div>
+          <span class="block text-2xl font-bold text-emerald-400">{{ activeUsersCount }}</span>
+          <span class="block text-sm text-slate-400">{{ 'admin.lastRegisteredUsers.stats.active' | workyTranslations }}</span>
+        </div>
+      </div>
+      <div class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-center gap-4">
+        <div class="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center text-white text-xl">
+          <i class="material-icons">schedule</i>
+        </div>
+        <div>
+          <span class="block text-2xl font-bold text-amber-400">{{ pendingUsersCount }}</span>
+          <span class="block text-sm text-slate-400">{{ 'admin.lastRegisteredUsers.stats.pending' | workyTranslations }}</span>
+        </div>
+      </div>
+      <div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-4">
+        <div class="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center text-white text-xl">
+          <i class="material-icons">cancel</i>
+        </div>
+        <div>
+          <span class="block text-2xl font-bold text-red-400">{{ inactiveUsersCount }}</span>
+          <span class="block text-sm text-slate-400">{{ 'admin.lastRegisteredUsers.stats.inactive' | workyTranslations }}</span>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Loading State -->
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="isLoading">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-5xl text-blue-500">
+        <i class="material-icons animate-spin">refresh</i>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold text-slate-100 mb-2">{{ 'admin.lastRegisteredUsers.loading.title' | workyTranslations }}</h3>
+        <p class="text-slate-300">{{ 'loadingUsers' | workyTranslations }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6" *ngIf="!isLoading && users.length > 0">
+    <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5" 
+         *ngFor="let user of users; trackBy: trackByUserId">
+      <div class="p-6">
+        <div class="flex items-start gap-4 mb-6">
+          <div class="relative">
+            <worky-avatar 
+              [size]="50"
+              [img]="user?.avatar"
+              [name]="user?.name + ' ' + user.lastName">
+            </worky-avatar>
+            <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-slate-800" 
+                 [class]="getStatusClass(user) === 'active' ? 'bg-emerald-500' : getStatusClass(user) === 'pending' ? 'bg-amber-500' : 'bg-red-500'"></div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-lg font-semibold text-slate-100 mb-1 truncate">{{ user?.name }} {{ user?.lastName }}</h3>
+            <p class="text-sm text-blue-400 mb-1">&#64;{{ user.username }}</p>
+            <p class="text-sm text-slate-400 truncate">{{ user.email }}</p>
+          </div>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center gap-3 text-sm">
+              <i class="material-icons text-slate-400 text-base">calendar_today</i>
+              <span class="text-slate-400">{{ 'admin.lastRegisteredUsers.user.registrationDate' | workyTranslations }}</span>
+              <span class="text-slate-100">{{ user.createdAt | date:'longDate':'':'es' }}</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm">
+              <i class="material-icons text-slate-400 text-base">access_time</i>
+              <span class="text-slate-400">{{ 'admin.lastRegisteredUsers.user.lastLogin' | workyTranslations }}</span>
+              <span class="text-slate-100">{{ user.updatedAt | date:'medium':'':'es' }}</span>
+            </div>
+            <div class="flex items-center gap-3 text-sm">
+              <i class="material-icons text-slate-400 text-base">security</i>
+              <span class="text-slate-400">{{ 'admin.lastRegisteredUsers.user.role' | workyTranslations }}</span>
+              <span class="px-2 py-1 text-xs rounded-full font-semibold" 
+                    [class]="getRoleClass(user.role) === 'admin' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'">
+                {{ user.role | titlecase }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold" 
+                 [class]="user.isVerified ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'">
+              <i class="material-icons text-base">{{ user.isVerified ? 'verified' : 'warning' }}</i>
+              <span>{{ user.isVerified ? ('admin.lastRegisteredUsers.user.verified' | workyTranslations) : ('admin.lastRegisteredUsers.user.pendingVerification' | workyTranslations) }}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-4 border-t border-slate-600">
+            <span class="text-sm text-slate-400">{{ user.isActive ? ('admin.lastRegisteredUsers.user.active' | workyTranslations) : ('admin.lastRegisteredUsers.user.inactive' | workyTranslations) }}</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                [checked]="user.isActive"
+                (change)="toggleUserStatus(user)"
+                [disabled]="updatingUsers.has(user._id)"
+                class="sr-only peer">
+              <div class="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500" 
+                   [class.animate-pulse]="updatingUsers.has(user._id)"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="!isLoading && users.length === 0">
+    <div class="text-center text-slate-400">
+      <i class="material-icons text-6xl text-slate-500 mb-4">people</i>
+      <h3 class="text-xl font-semibold text-slate-100 mb-2">{{ 'noUsersFound' | workyTranslations }}</h3>
+      <p class="text-slate-300 mb-6">{{ 'noUsersDescription' | workyTranslations }}</p>
+      <button 
+        class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30 mx-auto"
+        (click)="refreshUsers()">
+        <i class="material-icons">refresh</i>
+        <span>{{ 'tryAgain' | workyTranslations }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="error">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-6xl text-red-500/80">
+        <i class="material-icons">warning</i>
+      </div>
+      <div>
+        <h3 class="text-2xl font-semibold text-slate-100 mb-2">{{ 'errorLoadingUsers' | workyTranslations }}</h3>
+        <p class="text-slate-300 mb-6 leading-relaxed">{{ error }}</p>
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
+          (click)="refreshUsers()">
+          <i class="material-icons">refresh</i>
+          <span>{{ 'tryAgain' | workyTranslations }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

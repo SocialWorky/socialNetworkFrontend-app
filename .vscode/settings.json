@@ -4,6 +4,15 @@
     "@ionic/angular/standalone"
   ],
   "cSpell.words": [
+    "worky",
     "Worky"
-  ]
+  ],
+  "cSpell.language": "en,es-ES",
+  "editor.wordWrap": "on",
+  "workbench.editor.pinnedTabsOnSeparateRow": true,
+  "workbench.editor.highlightModifiedTabs": false,
+  "workbench.editor.scrollToSwitchTabs": false,
+  "workbench.editor.showTabs": "multiple",
+  "workbench.editor.tabSizing": "fit",
+  "workbench.editor.wrapTabs": true
 }

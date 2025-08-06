@@ -14,6 +14,7 @@ export class InvitationsCodeService {
   constructor(
     private _http: HttpClient, 
   ) { }
+  
   postGenerateInvitationsCode(email: string): Observable<InvitationsCodeList> {
     return this._http.post<InvitationsCodeList>(`${this.urlApi}/generate`, { email });
   }
@@ -22,4 +23,7 @@ export class InvitationsCodeService {
     return this._http.get<InvitationsCodeList[]>(`${this.urlApi}`);
   }
 
+  deleteInvitation(id: number): Observable<{ success: boolean; message: string }> {
+    return this._http.delete<{ success: boolean; message: string }>(`${this.urlApi}/${id}`);
+  }
 }

@@ -1,0 +1,275 @@
+<div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden">
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-sm border-b border-slate-600/50 p-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-bold bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent">
+          {{ 'admin.userManagement.table.title' | workyTranslations }}
+        </h2>
+        <p class="text-slate-400 text-sm mt-1">{{ 'admin.userManagement.table.subtitle' | workyTranslations }}</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="bg-slate-700/50 rounded-lg px-4 py-2 border border-slate-600/50">
+          <span class="text-slate-300 text-sm font-medium">{{ totalUsers }} {{ 'admin.userManagement.table.users' | workyTranslations }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Content -->
+  <div class="relative min-h-[500px]">
+    <!-- Loading State -->
+    <div class="flex flex-col items-center justify-center min-h-[300px] p-8" *ngIf="loading">
+      <div class="relative">
+        <div class="w-16 h-16 border-4 border-slate-600 border-t-blue-500 rounded-full animate-spin"></div>
+        <div class="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-blue-400 rounded-full animate-spin" style="animation-delay: 0.2s;"></div>
+      </div>
+      <p class="text-slate-400 text-lg font-medium mt-6">{{ 'admin.userManagement.table.loading' | workyTranslations }}</p>
+      <p class="text-slate-500 text-sm mt-2">{{ 'admin.userManagement.table.preparing' | workyTranslations }}</p>
+    </div>
+
+    <!-- Users Table -->
+    <div *ngIf="!loading">
+      <!-- Desktop Table -->
+      <div class="hidden lg:block">
+        <!-- Table Header -->
+        <div class="grid grid-cols-10 gap-4 bg-gradient-to-r from-slate-900/80 to-slate-800/80 backdrop-blur-sm border-b border-slate-600/50 px-6 py-4">
+          <div class="col-span-3">
+            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">{{ 'admin.userManagement.table.headers.user' | workyTranslations }}</span>
+          </div>
+          <div class="col-span-3">
+            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">{{ 'admin.userManagement.table.headers.contact' | workyTranslations }}</span>
+          </div>
+          <div class="col-span-1">
+            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">{{ 'admin.userManagement.table.headers.role' | workyTranslations }}</span>
+          </div>
+          <div class="col-span-1">
+            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">{{ 'admin.userManagement.table.headers.status' | workyTranslations }}</span>
+          </div>
+          <div class="col-span-1">
+            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider">{{ 'admin.userManagement.table.headers.registration' | workyTranslations }}</span>
+          </div>
+          <div class="col-span-1 flex justify-center items-center">
+            <span class="text-slate-300 font-semibold text-sm uppercase tracking-wider text-center">{{ 'admin.userManagement.table.headers.actions' | workyTranslations }}</span>
+          </div>
+        </div>
+        
+        <!-- Table Body -->
+        <div class="divide-y divide-slate-700/50">
+          <div class="grid grid-cols-10 gap-4 px-6 py-4 hover:bg-slate-700/30 transition-all duration-200 group" *ngFor="let user of users; trackBy: trackByUserId">
+            <!-- User Info -->
+            <div class="col-span-3 flex items-center gap-4">
+              <div class="relative">
+                <worky-avatar [size]="48" [img]="user.avatar" [name]="user.name + ' ' + user.lastName"></worky-avatar>
+                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-slate-800 rounded-full" *ngIf="user.isActive"></div>
+                <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-red-500 border-2 border-slate-800 rounded-full" *ngIf="!user.isActive"></div>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="font-semibold text-slate-100 group-hover:text-white transition-colors">
+                  {{ user.name }} {{ user.lastName }}
+                </div>
+                <div class="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
+                  {{ user.username }}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Contact Info -->
+            <div class="col-span-3 flex items-center gap-3">
+              <div class="flex-1">
+                <div class="text-slate-100 text-sm font-medium">{{ user.email }}</div>
+                <div class="flex items-center gap-2 mt-1">
+                  <i class="material-icons text-emerald-500 text-sm" *ngIf="user.isVerified" title="Email verificado">
+                    verified
+                  </i>
+                  <span class="text-xs text-slate-500" *ngIf="user.isVerified">{{ 'admin.userManagement.table.verified' | workyTranslations }}</span>
+                  <span class="text-xs text-amber-500" *ngIf="!user.isVerified">{{ 'admin.userManagement.table.pending' | workyTranslations }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Role -->
+            <div class="col-span-1 flex items-center">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-red-500/15 text-red-400 border border-red-500/20': getRoleColor(user.role) === 'danger',
+                      'bg-amber-500/15 text-amber-400 border border-amber-500/20': getRoleColor(user.role) === 'warning',
+                      'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20': getRoleColor(user.role) === 'success',
+                      'bg-blue-500/15 text-blue-400 border border-blue-500/20': getRoleColor(user.role) === 'info'
+                    }">
+                <i class="material-icons text-xs">{{ getRoleIcon(user.role) }}</i>
+                {{ user.role | titlecase }}
+              </span>
+            </div>
+            
+            <!-- Status -->
+            <div class="col-span-1 flex items-center">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20': getStatusColor(user.isActive ? 'ACTIVE' : 'INACTIVE') === 'success',
+                      'bg-amber-500/15 text-amber-400 border border-amber-500/20': getStatusColor(user.isActive ? 'ACTIVE' : 'INACTIVE') === 'warning',
+                      'bg-red-500/15 text-red-400 border border-red-500/20': getStatusColor(user.isActive ? 'ACTIVE' : 'INACTIVE') === 'danger',
+                      'bg-blue-500/15 text-blue-400 border border-blue-500/20': getStatusColor(user.isActive ? 'ACTIVE' : 'INACTIVE') === 'info'
+                    }">
+                <i class="material-icons text-xs">{{ getStatusIcon(user.isActive ? 'ACTIVE' : 'INACTIVE') }}</i>
+                {{ user.isActive ? ('admin.userManagement.table.status.active' | workyTranslations) : ('admin.userManagement.table.status.inactive' | workyTranslations) }}
+              </span>
+            </div>
+            
+            <!-- Registration Date -->
+            <div class="col-span-1 flex items-center">
+              <div class="text-sm">
+                <div class="text-slate-100 font-medium">{{ user.createdAt | date:'dd/MM/yyyy' }}</div>
+                <div class="text-slate-500 text-xs">{{ user.createdAt | date:'HH:mm' }}</div>
+              </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="col-span-1 flex items-center justify-center">
+              <button 
+                [matMenuTriggerFor]="menuActions" 
+                aria-label="Acciones"
+                class="bg-slate-600 hover:bg-slate-500 text-white hover:text-white rounded-lg w-9 h-9 flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md border border-slate-500/30 mx-auto">
+                <i class="material-icons text-base text-white">more_vert</i>
+              </button>
+              <mat-menu #menuActions="matMenu" panelClass="custom-menu-panel">
+                <button mat-menu-item (click)="viewUserDetails.emit(user)" class="text-slate-100 hover:bg-slate-700">
+                  <mat-icon class="text-blue-400">visibility</mat-icon>
+                  <span>{{ 'admin.userManagement.table.actions.viewDetails' | workyTranslations }}</span>
+                </button>
+                <button mat-menu-item (click)="editUser.emit(user)" class="text-slate-100 hover:bg-slate-700">
+                  <mat-icon class="text-emerald-400">edit</mat-icon>
+                  <span>{{ 'admin.userManagement.table.actions.editUser' | workyTranslations }}</span>
+                </button>
+                <button mat-menu-item (click)="toggleUserStatus.emit(user)" [disabled]="isTogglingStatus(user._id)" class="text-slate-100 hover:bg-slate-700">
+                  <mat-icon class="text-amber-400">{{ user.isActive ? 'pause' : 'play_arrow' }}</mat-icon>
+                  <span>{{ user.isActive ? ('admin.userManagement.table.actions.deactivate' | workyTranslations) : ('admin.userManagement.table.actions.activate' | workyTranslations) }}</span>
+                </button>
+                <button mat-menu-item *ngIf="!user.isVerified" (click)="sendVerificationEmail.emit(user)" [disabled]="isSendingVerification(user._id)" class="text-slate-100 hover:bg-slate-700">
+                  <mat-icon class="text-cyan-400">email</mat-icon>
+                  <span>{{ 'admin.userManagement.table.resendVerification' | workyTranslations }}</span>
+                </button>
+              </mat-menu>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Cards -->
+      <div class="lg:hidden space-y-4 p-4">
+        <div class="bg-gradient-to-br from-slate-700/50 to-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-600/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]" *ngFor="let user of users; trackBy: trackByUserId">
+          <!-- User Header -->
+          <div class="flex items-center gap-4 mb-4">
+            <div class="relative">
+              <worky-avatar [size]="56" [img]="user.avatar" [name]="user.name + ' ' + user.lastName"></worky-avatar>
+              <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-2 border-slate-800 rounded-full" *ngIf="user.isActive"></div>
+              <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-red-500 border-2 border-slate-800 rounded-full" *ngIf="!user.isActive"></div>
+            </div>
+            <div class="flex-1">
+              <div class="font-bold text-slate-100 text-lg">{{ user.name }} {{ user.lastName }}</div>
+              <div class="text-slate-400 text-sm">{{ user.username }}</div>
+            </div>
+            <button 
+              [matMenuTriggerFor]="menuActionsMobile" 
+              aria-label="Acciones"
+              class="bg-slate-600 hover:bg-slate-500 text-white hover:text-white rounded-lg w-9 h-9 flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md border border-slate-500/30 mx-auto">
+              <i class="material-icons text-base text-white">more_vert</i>
+            </button>
+            <mat-menu #menuActionsMobile="matMenu" panelClass="custom-menu-panel">
+              <button mat-menu-item (click)="viewUserDetails.emit(user)" class="text-slate-100 hover:bg-slate-700">
+                <mat-icon class="text-blue-400">visibility</mat-icon>
+                <span>{{ 'admin.userManagement.table.actions.viewDetails' | workyTranslations }}</span>
+              </button>
+              <button mat-menu-item (click)="editUser.emit(user)" class="text-slate-100 hover:bg-slate-700">
+                <mat-icon class="text-emerald-400">edit</mat-icon>
+                <span>{{ 'admin.userManagement.table.actions.editUser' | workyTranslations }}</span>
+              </button>
+              <button mat-menu-item (click)="toggleUserStatus.emit(user)" [disabled]="isTogglingStatus(user._id)" class="text-slate-100 hover:bg-slate-700">
+                <mat-icon class="text-amber-400">{{ user.isActive ? 'pause' : 'play_arrow' }}</mat-icon>
+                <span>{{ user.isActive ? ('admin.userManagement.table.actions.deactivate' | workyTranslations) : ('admin.userManagement.table.actions.activate' | workyTranslations) }}</span>
+              </button>
+              <button mat-menu-item *ngIf="!user.isVerified" (click)="sendVerificationEmail.emit(user)" [disabled]="isSendingVerification(user._id)" class="text-slate-100 hover:bg-slate-700">
+                <mat-icon class="text-cyan-400">email</mat-icon>
+                <span>{{ 'admin.userManagement.table.resendVerification' | workyTranslations }}</span>
+              </button>
+            </mat-menu>
+          </div>
+          
+          <!-- User Details -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-3">
+              <div>
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">{{ 'admin.userManagement.table.mobile.email' | workyTranslations }}</div>
+                <div class="text-slate-100 text-sm font-medium">{{ user.email }}</div>
+                <div class="flex items-center gap-1 mt-1">
+                  <i class="material-icons text-emerald-500 text-xs" *ngIf="user.isVerified">verified</i>
+                  <span class="text-xs" [ngClass]="user.isVerified ? 'text-emerald-400' : 'text-amber-400'">
+                    {{ user.isVerified ? ('admin.userManagement.table.verified' | workyTranslations) : ('admin.userManagement.table.pending' | workyTranslations) }}
+                  </span>
+                </div>
+              </div>
+              
+              <div>
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">{{ 'admin.userManagement.table.mobile.registration' | workyTranslations }}</div>
+                <div class="text-slate-100 text-sm font-medium">{{ user.createdAt | date:'dd/MM/yyyy' }}</div>
+                <div class="text-slate-500 text-xs">{{ user.createdAt | date:'HH:mm' }}</div>
+              </div>
+            </div>
+            
+            <div class="space-y-3">
+              <div>
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">{{ 'admin.userManagement.table.mobile.role' | workyTranslations }}</div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
+                      [ngClass]="{
+                        'bg-red-500/15 text-red-400 border border-red-500/20': getRoleColor(user.role) === 'danger',
+                        'bg-amber-500/15 text-amber-400 border border-amber-500/20': getRoleColor(user.role) === 'warning',
+                        'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20': getRoleColor(user.role) === 'success',
+                        'bg-blue-500/15 text-blue-400 border border-blue-500/20': getRoleColor(user.role) === 'info'
+                      }">
+                  <i class="material-icons text-xs">{{ getRoleIcon(user.role) }}</i>
+                  {{ user.role | titlecase }}
+                </span>
+              </div>
+              
+              <div>
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">{{ 'admin.userManagement.table.mobile.status' | workyTranslations }}</div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
+                      [ngClass]="{
+                        'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20': getStatusColor(user.isActive ? 'ACTIVE' : 'INACTIVE') === 'success',
+                        'bg-amber-500/15 text-amber-400 border border-amber-500/20': getStatusColor(user.isActive ? 'ACTIVE' : 'INACTIVE') === 'warning',
+                        'bg-red-500/15 text-red-400 border border-red-500/20': getStatusColor(user.isActive ? 'ACTIVE' : 'INACTIVE') === 'danger',
+                        'bg-blue-500/15 text-blue-400 border border-blue-500/20': getStatusColor(user.isActive ? 'ACTIVE' : 'INACTIVE') === 'info'
+                      }">
+                  <i class="material-icons text-xs">{{ getStatusIcon(user.isActive ? 'ACTIVE' : 'INACTIVE') }}</i>
+                  {{ user.isActive ? ('admin.userManagement.table.status.active' | workyTranslations) : ('admin.userManagement.table.status.inactive' | workyTranslations) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="text-center py-20 px-8" *ngIf="!loading && users.length === 0">
+      <div class="max-w-md mx-auto">
+        <div class="relative mb-8">
+          <div class="w-24 h-24 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center mx-auto border border-slate-600/50">
+            <i class="material-icons text-4xl text-slate-400">people</i>
+          </div>
+          <div class="absolute inset-0 w-24 h-24 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full mx-auto animate-pulse"></div>
+        </div>
+        <h3 class="text-2xl font-bold text-slate-200 mb-3">{{ 'admin.userManagement.table.empty.title' | workyTranslations }}</h3>
+        <p class="text-slate-400 text-lg leading-relaxed">
+          {{ 'admin.userManagement.table.empty.description' | workyTranslations }}
+        </p>
+        <div class="mt-6">
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-slate-700/50 rounded-lg border border-slate-600/50">
+            <i class="material-icons text-slate-400 text-sm">search</i>
+            <span class="text-slate-400 text-sm">{{ 'admin.userManagement.table.empty.adjustFilters' | workyTranslations }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

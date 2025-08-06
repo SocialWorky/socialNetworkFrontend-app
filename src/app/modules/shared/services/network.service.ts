@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { LogService, LevelLogEnum } from './core-apis/log.service';
+import { AuthService } from '@auth/services/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +13,10 @@ export class NetworkService {
 
   private testImageUrl = 'https://static.vecteezy.com/system/resources/previews/004/948/022/non_2x/flat-illustration-of-internet-speed-test-gauge-suitable-for-design-element-of-internet-performance-test-connection-speed-information-and-network-speedometer-free-vector.jpg';
 
-  constructor() {
+  constructor(
+    private logService: LogService,
+    private authService: AuthService
+  ) {
     this.initNetworkStatusListener();
     this.checkConnectionSpeed();
   }
@@ -23,6 +28,10 @@ export class NetworkService {
 
   private updateOnlineStatus(status: boolean) {
     this.connectionStatus$.next(status);
+    
+    const user = this.authService.getDecodedToken();
+    // Network status changed - no need to log every status change
+    
     if (status) {
       this.checkConnectionSpeed();
     } else {
@@ -51,16 +60,27 @@ export class NetworkService {
         const speedBps = (fileSize * 8) / (duration / 1000);
         const speedKbps = speedBps / 1024;
 
+        let speedCategory: string;
         if (speedKbps < 256) {
-          this.connectionSpeed$.next('slow');
+          speedCategory = 'slow';
         } else {
-          this.connectionSpeed$.next('fast');
+          speedCategory = 'fast';
         }
+        
+        this.connectionSpeed$.next(speedCategory);
+        
+        const user = this.authService.getDecodedToken();
+        // Connection speed measured - no need to log every speed measurement
       } else {
         this.connectionSpeed$.next('unknown');
       }
     } catch (error) {
-      console.error('Error checking connection speed:', error);
+      this.logService.log(
+        LevelLogEnum.ERROR,
+        'NetworkService',
+        'Failed to check connection speed',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
       this.connectionSpeed$.next('offline');
     }
   }

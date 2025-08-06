@@ -1,5 +1,5 @@
 <div class="container-user-online">
-  <h3 class="user-online-title">Usuarios Online</h3>
+  <h3 class="user-online-title">{{ 'userOnline.title' | workyTranslations }}</h3>
 
   @if (isLoading()) {
     <div class="user-online-loading">
@@ -15,8 +15,8 @@
 
   @if (!isLoading() && !error() && usersOnline().length) {
     <div class="user-online-content">
-      @for (user of usersOnline(); track user._id) {
-        <div class="user-online-item" (click)="goToProfile(user._id!)">
+      @for (user of usersOnline(); track user.id) {
+        <div *ngIf="user.id" class="user-online-item" (click)="goToProfile(user.id)">
           <worky-avatar
               [size]="35"
               [name]="user.name"

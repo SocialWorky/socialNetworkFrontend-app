@@ -9,3 +9,9 @@ export enum NotificationType {
   MENTION = 'mention',
   REPOST = 'repost',
 }
+
+export enum NotificationStatus {
+  UNREAD = 'unread',
+  READ = 'read',
+  ALL = 'all',
+}

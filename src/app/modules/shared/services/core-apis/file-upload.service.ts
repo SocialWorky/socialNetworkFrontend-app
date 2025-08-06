@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '@auth/services/auth.service';
 import { environment } from '@env/environment';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
@@ -12,17 +12,32 @@ export class FileUploadService {
   constructor(
     private http: HttpClient,
     private _authService: AuthService
-  ) {
-    if(!this._authService.isAuthenticated()) return;
-  }
+  ) { }
 
-  uploadFile(files: File[], destination: string) {
+  uploadFile(
+    files: File[],
+    destination: string,
+    idReference?: string | null,
+    urlMedia?: string | null,
+    type?: TypePublishing | null
+  ) {
     const url = `${environment.APIFILESERVICE}upload`;
     const id = this._authService.getDecodedToken()?.id;
     const formData = new FormData();
 
     formData.append('userId', `${id}|`);
     formData.append('destination', destination);
+
+    if (idReference) {
+      formData.append('idReference', idReference);
+    }
+    if (urlMedia) {
+      formData.append('urlMedia', urlMedia);
+    }
+
+    if (type) {
+      formData.append('type', type);
+    }
 
     const uniqueFiles = this.getUniqueFiles(files);
     uniqueFiles.forEach(file => {

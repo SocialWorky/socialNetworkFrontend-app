@@ -11,7 +11,9 @@
     "src/polyfills.ts",
     "src/translations/translations.ts",
     "src/translations/translations.es.ts",
-    "src/translations/translations.en.ts"
+    "src/translations/translations.en.ts",
+    "src/translations/dynamic-translations.en.ts",
+    "src/translations/dynamic-translations.es.ts"
   ],
   "include": [
     "src/**/*.d.ts"

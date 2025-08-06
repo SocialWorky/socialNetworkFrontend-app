@@ -20,7 +20,9 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "allowedCommonJsDependencies": [
-              "sweetalert2"
+              "sweetalert2",
+              "cropperjs",
+              "lodash"
             ],
             "assets": [
               {
@@ -42,14 +44,31 @@
                 "glob": "manifest.json",
                 "input": "src",
                 "output": "/"
+              },
+              {
+                "glob": "**/*.css",
+                "input": "node_modules/@ctrl/ngx-emoji-mart",
+                "output": "/assets/emoji-mart/"
+              },
+              {
+                "glob": "**/*.css",
+                "input": "node_modules/cropperjs/dist",
+                "output": "/assets/cropper/"
+              },
+              {
+                "glob": "**/*.css",
+                "input": "node_modules/driver.js/dist",
+                "output": "/assets/driver/"
+              },
+              {
+                "glob": "**/*.css",
+                "input": "node_modules/highlight.js/styles",
+                "output": "/assets/highlight-js/"
               }
             ],
             "styles": [
               "src/styles.css",
-              "src/global.scss",
-              "node_modules/@ctrl/ngx-emoji-mart/picker.css",
-              "node_modules/cropperjs/dist/cropper.css",
-              "node_modules/driver.js/dist/driver.css"
+              "src/global.scss"
             ],
             "scripts": [
               "node_modules/cropperjs/dist/cropper.js",
@@ -64,12 +83,12 @@
                 {
                   "type": "initial",
                   "maximumWarning": "2mb",
-                  "maximumError": "5mb"
+                  "maximumError": "3mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "8kb",
-                  "maximumError": "20kb"
+                  "maximumWarning": "25kb",
+                  "maximumError": "50kb"
                 }
               ],
               "fileReplacements": [
@@ -86,7 +105,13 @@
               "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
-              "namedChunks": true
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.dev.ts"
+                }
+              ]
             },
             "ci": {
               "progress": false

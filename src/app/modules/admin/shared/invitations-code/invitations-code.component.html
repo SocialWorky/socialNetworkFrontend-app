@@ -1,68 +1,294 @@
-<div class="bg-gray-900 text-white py-12">
-    <div class="max-w-lg mx-auto bg-gray-800 p-8 rounded-lg shadow-lg">
-        <h2 class="text-3xl font-semibold mb-6">Crear Nueva Invitación</h2>
-        <form [formGroup]="invitationsForm" (ngSubmit)="createInvitations()">
-            <div class="mb-6">
-                <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Email:</label>
-                <input formControlName="email" id="email" type="text" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-                <div *ngIf="invitationsForm.controls['email'].invalid && invitationsForm.controls['email'].touched" class="text-red-500 text-sm mt-2">El email es requerido.</div>
-            </div>
-            <div class="mt-6">
-                <div *ngIf="loadInvitationsButtons" class="loader"></div>
-                <button *ngIf="!loadInvitationsButtons" type="submit" [disabled]="invitationsForm.invalid" class="w-full bg-indigo-500 text-white py-2 px-4 rounded hover:bg-indigo-600 focus:outline-none focus:bg-indigo-600">Enviar Invitación</button>
-            </div>
-        </form>
-    </div>
-
-
-  <div class="mt-4 mx-4">
-    <div class="w-full overflow-hidden rounded-lg shadow-xs">
-      <div class="w-full overflow-x-auto">
-
-        <div class="content-header-title">
-          <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Invitaciones Enviadas</h2>
-        </div>
-
-        <table class="w-full">
-          <thead>
-            <tr class="header-tr">
-              <th class="px-4 py-3">ID</th>
-              <th class="px-4 py-3">CODIGO</th>
-              <th class="px-4 py-3">EMAIL</th>
-              <th class="px-4 py-3">FECHA ENVIO</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
-
-            @for(invitation of listInvitationsCode; track $index) {
-
-              <tr class="body-tr">
-                <td class="px-4 py-3">
-                  <div class="flex items-center text-sm">
-                      <p class="font-semibold">{{ invitation._id }}</p>
-                  </div>
-                </td>
-
-                <td class="px-4 py-3 text-xs">
-                  <span class="px-2 py-1 font-semibold leading-tight text-green-700  rounded-full dark:text-green-100"> 
-                    {{ invitation.code  }} </span>
-                </td>
-
-                <td class="px-4 py-3 text-sm">
-                  <span> {{ invitation.email }} </span>
-                </td>
-
-                <td class="px-4 py-3 text-sm">{{ invitation.createdAt | date }}</td>
-              </tr>
-
-            }
-
-          </tbody>
-        </table>
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-inter">
+  <!-- Header Section -->
+  <div class="bg-slate-700/95 backdrop-blur-lg border border-slate-600 rounded-xl p-6 mb-8 shadow-lg">
+    <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
+      <div class="flex-1">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+          {{ 'admin.invitationsCode.title' | workyTranslations }}
+        </h1>
+        <p class="text-slate-300 text-lg">{{ 'admin.invitationsCode.subtitle' | workyTranslations }}</p>
+      </div>
+      <div class="flex gap-4 items-center lg:flex-row flex-col lg:w-auto w-full">
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg"
+          (click)="getInvitationsCode()" 
+          [disabled]="loadInvitationsButtons">
+          <i class="material-icons" [class.animate-spin]="loadInvitationsButtons">refresh</i>
+          <span>{{ 'admin.invitationsCode.refresh' | workyTranslations }}</span>
+        </button>
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
+          (click)="showStats()" 
+          [disabled]="loadInvitationsButtons">
+          <i class="material-icons">bar_chart</i>
+          <span>{{ 'admin.invitationsCode.stats' | workyTranslations }}</span>
+        </button>
       </div>
     </div>
   </div>
 
+  <!-- Create Invitation Section -->
+  <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg mb-8">
+    <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+      <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+        <i class="material-icons">add_circle</i>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.invitationsCode.create.title' | workyTranslations }}</h3>
+        <p class="text-sm text-slate-400">{{ 'admin.invitationsCode.create.subtitle' | workyTranslations }}</p>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <form [formGroup]="invitationsForm" (ngSubmit)="createInvitations()" class="space-y-6">
+        <div class="space-y-2">
+          <label for="email" class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+            <i class="material-icons text-blue-500 text-base">email</i>
+            <span>{{ 'admin.invitationsCode.guestEmail' | workyTranslations }}</span>
+          </label>
+          <input 
+            formControlName="email" 
+            id="email" 
+            type="email" 
+            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500"
+            placeholder="{{ 'admin.invitationsCode.emailPlaceholder' | workyTranslations }}"
+            [class.border-red-500]="invitationsForm.controls['email'].invalid && invitationsForm.controls['email'].touched">
+          <div *ngIf="invitationsForm.controls['email'].invalid && invitationsForm.controls['email'].touched" 
+               class="flex items-center gap-1 text-red-400 text-sm mt-1">
+            <i class="material-icons text-sm">error</i>
+            <span>{{ 'admin.invitationsCode.create.emailRequired' | workyTranslations }}</span>
+          </div>
+        </div>
+        
+        <div class="flex justify-end">
+          <button 
+            type="submit" 
+            [disabled]="invitationsForm.invalid || loadInvitationsButtons" 
+            class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30">
+            <i class="material-icons" [class.animate-spin]="loadInvitationsButtons">send</i>
+            <span>{{ 'admin.invitationsCode.create.send' | workyTranslations }}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Invitations List Section -->
+  <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+    <div class="flex items-center justify-between gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+          <i class="material-icons">list</i>
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.invitationsCode.sent.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.invitationsCode.list.subtitle' | workyTranslations }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-600">
+        <span class="text-2xl font-bold text-blue-400">{{ listInvitationsCode.length }}</span>
+        <span class="text-sm text-slate-400">{{ 'admin.invitationsCode.sent.unit' | workyTranslations }}</span>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-slate-600">
+              <th class="text-left py-4 px-4 font-semibold text-slate-300">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-blue-400 text-base">tag</i>
+                  <span>{{ 'admin.invitationsCode.id' | workyTranslations }}</span>
+                </div>
+              </th>
+              <th class="text-left py-4 px-4 font-semibold text-slate-300">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-blue-400 text-base">vpn_key</i>
+                  <span>{{ 'admin.invitationsCode.list.code' | workyTranslations }}</span>
+                </div>
+              </th>
+              <th class="text-left py-4 px-4 font-semibold text-slate-300">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-blue-400 text-base">email</i>
+                  <span>{{ 'admin.invitationsCode.email' | workyTranslations }}</span>
+                </div>
+              </th>
+              <th class="text-left py-4 px-4 font-semibold text-slate-300">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-blue-400 text-base">schedule</i>
+                  <span>{{ 'admin.invitationsCode.list.sendDate' | workyTranslations }}</span>
+                </div>
+              </th>
+              <th class="text-left py-4 px-4 font-semibold text-slate-300">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-blue-400 text-base">settings</i>
+                  <span>{{ 'admin.invitationsCode.actions' | workyTranslations }}</span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let invitation of listInvitationsCode; trackBy: trackByInvitation" 
+                class="border-b border-slate-700/50 hover:bg-slate-800/30 transition-all duration-200">
+              <td class="py-4 px-4">
+                <div class="flex items-center">
+                  <span class="text-sm font-semibold text-slate-400">#{{ invitation._id }}</span>
+                </div>
+              </td>
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-mono text-slate-100 bg-slate-800 px-2 py-1 rounded">{{ invitation.code }}</span>
+                  <button class="p-1 text-slate-400 hover:text-blue-400 transition-all duration-200 hover:bg-blue-500/10 rounded" 
+                          (click)="copyCode(invitation.code)" 
+                          title="{{ 'admin.invitationsCode.tooltips.copyCode' | workyTranslations }}">
+                    <i class="material-icons text-sm">content_copy</i>
+                  </button>
+                </div>
+              </td>
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-slate-400 text-sm">email</i>
+                  <span class="text-sm text-slate-100">{{ invitation.email }}</span>
+                </div>
+              </td>
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-2">
+                  <i class="material-icons text-slate-400 text-sm">schedule</i>
+                  <span class="text-sm text-slate-100">{{ invitation.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+              </td>
+              <td class="py-4 px-4">
+                <div class="flex items-center gap-2">
+                  <button class="p-2 text-slate-400 hover:text-blue-400 transition-all duration-200 hover:bg-blue-500/10 rounded" 
+                          (click)="resendInvitation(invitation)" 
+                          title="{{ 'admin.invitationsCode.tooltips.resendInvitation' | workyTranslations }}">
+                    <i class="material-icons text-sm">refresh</i>
+                  </button>
+                  <button class="p-2 text-slate-400 hover:text-red-400 transition-all duration-200 hover:bg-red-500/10 rounded" 
+                          (click)="deleteInvitation(invitation._id)" 
+                          title="{{ 'admin.invitationsCode.tooltips.deleteInvitation' | workyTranslations }}" 
+                          [disabled]="loadInvitationsButtons">
+                    <i class="material-icons text-sm">delete</i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Empty State -->
+        <div *ngIf="listInvitationsCode.length === 0" class="flex justify-center items-center py-16">
+          <div class="text-center text-slate-400">
+            <i class="material-icons text-5xl text-slate-500 mb-4">inbox</i>
+            <h3 class="text-lg font-semibold text-slate-100 mb-2">{{ 'admin.invitationsCode.empty.title' | workyTranslations }}</h3>
+                            <p class="text-sm">{{ 'admin.invitationsCode.empty.text' | workyTranslations }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Modal -->
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
+       *ngIf="showStatsModal" 
+       (click)="closeStats()">
+    <div class="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl max-w-2xl w-full" 
+         (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-slate-600">
+        <h3 class="text-xl font-semibold text-slate-100">{{ 'admin.invitationsCode.stats.title' | workyTranslations }}</h3>
+        <button 
+          class="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-700 rounded-lg transition-all duration-200"
+          (click)="closeStats()">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 text-center">
+            <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl mx-auto mb-3">
+              <i class="material-icons">send</i>
+            </div>
+            <div>
+              <span class="block text-2xl font-bold text-slate-100">{{ listInvitationsCode.length }}</span>
+              <span class="block text-sm text-slate-400">{{ 'admin.invitationsCode.stats.totalSent' | workyTranslations }}</span>
+            </div>
+          </div>
+          <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 text-center">
+            <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white text-xl mx-auto mb-3">
+              <i class="material-icons">today</i>
+            </div>
+            <div>
+              <span class="block text-2xl font-bold text-slate-100">{{ getTodayInvitations() }}</span>
+              <span class="block text-sm text-slate-400">{{ 'admin.invitationsCode.stats.today' | workyTranslations }}</span>
+            </div>
+          </div>
+          <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 text-center">
+            <div class="w-12 h-12 bg-cyan-500 rounded-xl flex items-center justify-center text-white text-xl mx-auto mb-3">
+              <i class="material-icons">view_week</i>
+            </div>
+            <div>
+              <span class="block text-2xl font-bold text-slate-100">{{ getThisWeekInvitations() }}</span>
+              <span class="block text-sm text-slate-400">{{ 'admin.invitationsCode.stats.thisWeek' | workyTranslations }}</span>
+            </div>
+          </div>
+          <div class="bg-slate-700/50 border border-slate-600 rounded-lg p-4 text-center">
+            <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center text-white text-xl mx-auto mb-3">
+              <i class="material-icons">calendar_month</i>
+            </div>
+            <div>
+              <span class="block text-2xl font-bold text-slate-100">{{ getThisMonthInvitations() }}</span>
+              <span class="block text-sm text-slate-400">{{ 'admin.invitationsCode.stats.thisMonth' | workyTranslations }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="flex justify-center items-center min-h-[40vh] p-8" *ngIf="loadInvitationsButtons">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-5xl text-blue-500">
+        <i class="material-icons animate-spin">refresh</i>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold text-slate-100 mb-2">{{ 'admin.invitationsCode.processing.title' | workyTranslations }}</h3>
+        <p class="text-slate-300">{{ 'admin.invitationsCode.processing.subtitle' | workyTranslations }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success State -->
+  <div class="fixed top-4 right-4 bg-emerald-500 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm" 
+       *ngIf="successMessage">
+    <div class="flex items-center gap-3">
+      <i class="material-icons text-2xl">check_circle</i>
+      <div>
+        <h3 class="font-semibold">{{ 'admin.invitationsCode.success.title' | workyTranslations }}</h3>
+        <p class="text-sm opacity-90">{{ successMessage }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="error">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-6xl text-red-500/80">
+        <i class="material-icons">error</i>
+      </div>
+      <div>
+        <h3 class="text-2xl font-semibold text-slate-100 mb-2">{{ 'admin.invitationsCode.error.title' | workyTranslations }}</h3>
+        <p class="text-slate-300 mb-6 leading-relaxed">{{ error }}</p>
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
+          (click)="getInvitationsCode()">
+          <i class="material-icons">refresh</i>
+          <span>{{ 'admin.invitationsCode.retry' | workyTranslations }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 

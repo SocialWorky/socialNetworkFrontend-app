@@ -1,0 +1,4 @@
+<span [class]="badgeClasses" [style.color]="config.customColor" [style.background-color]="config.customBgColor" class="inline-flex items-center gap-1 px-3 py-1 rounded-full font-medium text-xs uppercase tracking-wider whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+  <i class="material-icons text-sm" *ngIf="config.showIcon">{{ iconClass }}</i>
+  <span class="text-xs font-semibold" *ngIf="config.showText">{{ displayText }}</span>
+</span> 

@@ -7,7 +7,7 @@
         <input
           type="text"
           class="form-control-search"
-          placeholder="Search"
+          placeholder="{{ 'locationSearch.placeholder' | workyTranslations }}"
           [(ngModel)]="searchTerm"
           (input)="onInputChange($event)"
           (keydown)="onKeydown($event)"

@@ -1,0 +1,17 @@
+// ngx-json-viewer custom styles
+::ng-deep .ngx-json-viewer {
+  background: transparent !important;
+  color: #f1f5f9 !important;
+  font-family: monospace !important;
+  font-size: 0.875rem !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+
+  .segment-key {
+    color: #f1f5f9 !important;
+  }
+
+  .segment-value {
+    color: #10b981 !important;
+  }
+}

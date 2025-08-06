@@ -1,85 +1,61 @@
 @use 'src/assets/styles/worky-variables.scss' as var;
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
-// Custom Theming for Angular Material
-// For more information: https://material.angular.io/guide/theming
-@use '@angular/material' as mat;
-// @import '@ctrl/ngx-emoji-mart/picker';
-// Plus imports for other components in your app.
+@use 'sass:map';
 
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
-@include mat.core();
-
-// Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
-// hue. Available color palettes: https://material.io/design/color/
-$app-primary: mat.define-palette(mat.$indigo-palette);
-$app-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
-
-// The warn palette is optional (defaults to red).
-$app-warn: mat.define-palette(mat.$red-palette);
-
-// Create the theme object. A theme consists of configurations for individual
-// theming systems such as "color" or "typography".
-$app-theme: mat.define-light-theme((
-  color: (
-    primary: $app-primary,
-    accent: $app-accent,
-    warn: $app-warn,
-  )
-));
-
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-@include mat.all-component-themes($app-theme);
-
-/*
- * App Global CSS
- * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
- */
-
-/* Core CSS required for Ionic components to work properly */
-// @import "@ionic/angular/css/core.css";
-
-/* Basic CSS for apps built with Ionic */
-// @import "@ionic/angular/css/normalize.css";
-// @import "@ionic/angular/css/structure.css";
-// @import "@ionic/angular/css/typography.css";
-// @import '@ionic/angular/css/display.css';
-
-/* Optional CSS utils that can be commented out */
-// @import "@ionic/angular/css/padding.css";
-// @import "@ionic/angular/css/float-elements.css";
-// @import "@ionic/angular/css/text-alignment.css";
-// @import "@ionic/angular/css/text-transformation.css";
-// @import "@ionic/angular/css/flex-utils.css";
-
-
-html, body { 
+html, body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
   width: 100%;
-  height: 100vh; 
+  height: 100dvh;
 }
-body { 
+body {
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
   margin: 0;
   font-family: var.$worky-font-family-global;
   background-color: color.$worky-color-app-background;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 img, video {
   width: 100%;
 }
+
+.dark-mode {
+  --worky-color-navy: var(--worky-color-navy-dark);
+  --worky-color-yellow: var(--worky-color-yellow-dark);
+  --worky-color-yellow-text: var(--worky-color-yellow-text-dark);
+  --worky-color-green: var(--worky-color-green-dark);
+  --worky-color-radium: var(--worky-color-radium-dark);
+  --worky-color-teal: var(--worky-color-teal-dark);
+  --worky-color-cyan: var(--worky-color-cyan-dark);
+  --worky-color-blue: var(--worky-color-blue-dark);
+  --worky-color-indigo: var(--worky-color-indigo-dark);
+  --worky-color-purple: var(--worky-color-purple-dark);
+  --worky-color-fuchsia: var(--worky-color-fuchsia-dark);
+  --worky-color-magenta: var(--worky-color-magenta-dark);
+  --worky-color-red: var(--worky-color-red-dark);
+  --worky-color-black: var(--worky-color-black-dark);
+
+  --worky-color-light: var(--worky-color-light-dark);
+  --worky-color-greyLight: var(--worky-color-greyLight-dark);
+  --worky-color-grey: var(--worky-color-grey-dark);
+
+  // Colors Icons, texts, chips, etc.
+  --worky-color-icon: var(--worky-color-icon-dark);
+  --worky-color-text: var(--worky-color-text-dark);
+  --worky-color-input-background: var(--worky-color-input-background-dark);
+
+  // Colors Components
+  --worky-color-module-container: var(--worky-color-module-container-dark);
+  --worky-color-content-navbar: var(--worky-color-content-navbar-dark);
+
+}
+
 
 .content-worky {
   display: flex;
@@ -87,8 +63,9 @@ img, video {
   justify-content: flex-start;
   position: relative;
   width: 100%;
-  height: 100vh !important;
+  height: 100dvh !important;
   overflow: hidden;
+  padding: 0px;
 }
 
 .fast {
@@ -123,15 +100,64 @@ img, video {
   font-variation-settings: 'FILL' 1;
 }
 
+.worky-50 {
+  width: 50%;
+  @include breakpoints.below-sm {
+    width: 100%;
+  }
+}
+.worky-100 {
+  width: 100%;
+}
+
+.worky-chip {
+  border-radius: 16px;
+  -webkit-font-smoothing: antialiased;
+  margin-inline: 4px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  padding-inline: 12px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  min-height: 32px;
+  overflow: hidden;
+  vertical-align: middle;
+  background: map.get(color.$worky-navy, 56);
+  worky-label {
+    color: color.$worky-color-text;
+  }
+}
 
  .worky-input {
     .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mat-mdc-floating-label {
       top: calc(var(--mat-form-field-container-height) / 2);
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+      color: color.$worky-color-text;
     }
     .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-floating-label--float-above {
       top: calc(var(--mat-form-field-container-height) / 4);
+      color: color.$worky-color-text;
     }
+
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-text-field__input {
+      color: color.$worky-color-text;
+    }
+
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-text-field__input::placeholder {
+      color: color.$worky-color-text;
+    }
+
+    .mat-mdc-select-trigger .mat-mdc-select-value-text {
+      color: color.$worky-color-text;
+    }
+
+    span {
+      color: color.$worky-color-text;
+    }
+
     .mdc-line-ripple {
       display: none;
     }
@@ -140,24 +166,72 @@ img, video {
       border: 1px solid color.$worky-color-navy;
       border-radius: 8px;
     }
+
+    .mat-mdc-select-arrow-wrapper .mat-mdc-select-arrow {
+      color: color.$worky-color-text;
+    }
+
     .mdc-text-field {
       overflow: visible;
       .mat-mdc-form-field-focus-overlay {
-        background-color: color.$worky-color-light;
+        background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+        border-radius: 8px;
       }
     }
     .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+      .mat-mdc-form-field-infix label {
+         color: color.$worky-color-text;
+      }
     }
     .mat-mdc-text-field-wrapper:hover .mat-mdc-form-field-focus-overlay {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+      .mat-mdc-form-field-infix label {
+         color: color.$worky-color-text;
+      }
     }
     .mat-mdc-form-field.mat-focused:not(:focus) .mat-mdc-form-field-focus-overlay {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+      .mat-mdc-form-field-infix label {
+         color: color.$worky-color-text;
+      }
     }
     .mat-mdc-form-field.mat-focused .mat-mdc-form-field-focus-overlay {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+      .mat-mdc-form-field-infix label {
+         color: color.$worky-color-text;
+      }
     }
+    .mat-mdc-text-field-wrapper:not(:focus) {
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
+      .mat-mdc-form-field-infix label,input {
+        &:hover {
+          color: color.$worky-color-text;
+        }
+      }
+    }
+
+    /* Cambia el color del label cuando el mouse pasa sobre el contenedor y el campo NO está enfocado */
+    .mat-mdc-text-field-wrapper:not(:focus-within):hover .mat-mdc-form-field-infix label {
+      color: var(--worky-color-text); /* Color específico para el hover del label */
+    }
+
+    /* Asegúrate de que el input no afecte el color del label */
+    .mat-mdc-text-field-wrapper:not(:focus-within):hover .mat-mdc-form-field-infix input {
+      color: inherit; /* Mantén el color del texto del input como está */
+    }
+
+    /* Maneja el caso cuando el campo no está lleno */
+    .mat-mdc-text-field-wrapper:not(.mdc-text-field--filled):not(:focus-within):hover .mat-mdc-form-field-infix label {
+      color: var(--worky-color-text); /* Mismo color para campos no llenos */
+    }
+
+    /* Cambiar el color de fondo del input cuando está prellenado */
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-infix input:-webkit-autofill {
+      -webkit-box-shadow: 0 0 0px 1000px var(--worky-color-light) inset !important;
+      -webkit-text-fill-color: var(--worky-color-text) !important; /* Cambiar el color del texto */
+    }
+
     .mat-mdc-text-field--focused {
       border-color: color.$worky-color-blue;
     }
@@ -230,7 +304,21 @@ img, video {
     }
     .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-floating-label--float-above {
       top: calc(var(--mat-form-field-container-height) / 4);
+      color: color.$worky-color-text;
     }
+
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-text-field__input {
+      color: color.$worky-color-text;
+    }
+
+    .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-floating-label {
+      color: var(--worky-color-text);
+    }
+
+    .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mdc-text-field__input::placeholder {
+      color: color.$worky-color-text;
+    }
+
     .mdc-line-ripple {
       display: none;
     }
@@ -242,20 +330,20 @@ img, video {
     .mdc-text-field {
       overflow: visible;
       .mat-mdc-form-field-focus-overlay {
-        background-color: color.$worky-color-light;
+        background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
       }
     }
     .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
     }
     .mat-mdc-text-field-wrapper:hover .mat-mdc-form-field-focus-overlay {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
     }
     .mat-mdc-form-field.mat-focused:not(:focus) .mat-mdc-form-field-focus-overlay {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
     }
     .mat-mdc-form-field.mat-focused .mat-mdc-form-field-focus-overlay {
-      background-color: color.$worky-color-light;
+      background-color: color-mix(in srgb,var(--worky-color-light),transparent 5%);
     }
     .mat-mdc-text-field--focused {
       border-color: color.$worky-color-blue;
@@ -322,6 +410,14 @@ img, video {
     }
   }
 
+  .worky-toggle {
+    .mdc-label {
+      font-size: 14px;
+      font-weight: bold;
+      color: color.$worky-color-text;
+    }
+  }
+
   .nav-link {
     color: color.$worky-color-light;
     display: flex;
@@ -352,7 +448,7 @@ img, video {
     animation: l16 1s infinite linear;
   }
   .loader::before,
-  .loader::after {    
+  .loader::after {
     content: "";
     grid-area: 1/1;
     margin: 2px;
@@ -361,28 +457,28 @@ img, video {
   }
   .loader::before {
     border-color: #f03355 #0000;
-    animation: inherit; 
+    animation: inherit;
     animation-duration: .5s;
     animation-direction: reverse;
   }
   .loader::after {
     margin: 8px;
   }
-  @keyframes l16 { 
+  @keyframes l16 {
     100%{transform: rotate(1turn)}
   }
 
   // worky container module
   .worky-module-container {
     margin: 15px 4px;
+    background-color: color.$worky-color-module-container;
     border: 0px solid #e4e6ebe0;
     border-radius: max(0px, min(8px, calc((100vw - 4px - 100%) * 9999))) / 8px;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
+    box-shadow: 1px 2px 8px 1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
     @include breakpoints.below-sm {
       margin: 15px -1px 0px -1px;
     }
-
   }
 
   .container-widget {
@@ -416,18 +512,20 @@ img, video {
       display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 2;
-      overflow: hidden;  
-      color: map-get(color.$worky-navy, 100);
+      line-clamp: 2;
+      overflow: hidden;
+      color: map.get(color.$worky-navy, 100);
     }
     p {
       padding: 5px;
       font-size: 1rem;
-      color: map-get(color.$worky-navy, 56);
+      color: map.get(color.$worky-navy, 56);
       margin: 0;
       display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 3;
-      overflow: hidden;  
+      line-clamp: 3;
+      overflow: hidden;
     }
   }
 
@@ -439,7 +537,7 @@ img, video {
 }
 
 .no-select-text {
-  user-select: none; 
+  user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
 }
@@ -528,36 +626,15 @@ img, video {
   background-color: color.$worky-color-navy;
 }
 
-
 .mobil-content-app {
   overflow-y: scroll;
   overflow-x: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-.floating-button {
-  position: fixed;
-  bottom: 60px;
-  right: 20px;
-  background-color: color.$worky-color-light;
-  color: color.$worky-color-navy;
-  border: solid 1px color.$worky-color-navy;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s;
-  z-index: 1000;
-  &:hover {
-    background-color: color.$worky-color-navy;
-    color: color.$worky-color-light;
-  }
-}
+
 
 .content-fields {
   display: flex;
@@ -601,4 +678,302 @@ img, video {
 
 .dragging-global {
   cursor: grabbing !important;
+}
+
+.extra-mat-tooltip {
+  padding: 8px 12px !important;
+  margin: 4px !important;
+  border-radius: 8px !important;
+  color: #333 !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  z-index: 9999 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+// Global Material Tooltip styles
+.mat-tooltip {
+  font-size: 12px !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #333 !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  z-index: 9999 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  max-width: 200px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+// Ensure tooltips are visible on mobile
+@media (max-width: 768px) {
+  .mat-tooltip {
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* iOS-specific viewport fixes */
+@supports (-webkit-touch-callout: none) {
+  /* Fix for iOS viewport height issues */
+  html, body {
+    height: 100vh;
+    height: -webkit-fill-available;
+    overflow-x: hidden;
+  }
+  
+  /* Ensure modals take full height on iOS */
+  .notifications-panel {
+    height: 100vh !important;
+    height: -webkit-fill-available !important;
+    height: calc(var(--vh, 1vh) * 100) !important;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    /* Ensure panel starts from the very top */
+    top: 0 !important;
+    margin-top: 0 !important;
+    position: fixed !important;
+  }
+  
+  /* Specific fixes for notification panel content */
+  .notifications-panel .content-header {
+    margin-top: 0 !important;
+    top: 0 !important;
+    position: relative !important;
+  }
+  
+  .notifications-panel .content-body {
+    height: calc(100vh - 80px) !important;
+    height: calc(-webkit-fill-available - 80px) !important;
+    height: calc((var(--vh, 1vh) * 100) - 80px) !important;
+  }
+  
+  /* Fix for iOS Safari 100vh issue */
+  .modal-backdrop,
+  .modal-container,
+  .modal-content {
+    height: 100vh;
+    height: -webkit-fill-available;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+  
+  /* Prevent iOS Safari from adjusting viewport on keyboard */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+  
+  /* Improve scrolling performance on iOS */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Use custom viewport height variable for better iOS support */
+  .full-height {
+    height: 100vh;
+    height: -webkit-fill-available;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+  
+  .full-height-dvh {
+    height: 100dvh;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+}
+
+/* PWA Update Modal Styles */
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Ensure modal is always on top */
+.modal-backdrop {
+  z-index: 99999 !important;
+}
+
+/* Prevent any interaction with background when modal is open */
+body.modal-open .content-worky {
+  pointer-events: none;
+}
+
+body.modal-open .modal-backdrop {
+  pointer-events: auto;
+}
+
+/* Accessibility improvements for Ionic loadings */
+.accessible-loading {
+  --backdrop-opacity: 0.6;
+  --background: rgba(0, 0, 0, 0.8);
+  --border-radius: 12px;
+  --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.accessible-loading .loading-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.accessible-loading .loading-content {
+  color: #333;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Ensure proper focus management for loadings */
+.accessible-loading:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* Prevent aria-hidden conflicts */
+worky-root[aria-hidden="true"] ion-loading {
+  position: relative;
+  z-index: 99999;
+}
+
+/* Alternative approach: use inert attribute instead of aria-hidden */
+worky-root[inert] {
+  pointer-events: none;
+}
+
+worky-root[inert] ion-loading {
+  pointer-events: auto;
+}
+
+/* Dynamic Accessible Loading Styles */
+.accessible-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 20px;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.accessible-loading-content {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.loading-spinner {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 20px;
+
+  .spinner-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin 1.5s linear infinite;
+
+    &:nth-child(1) {
+      border-top-color: #007bff;
+      animation-delay: 0s;
+    }
+
+    &:nth-child(2) {
+      border-right-color: #28a745;
+      animation-delay: 0.5s;
+    }
+
+    &:nth-child(3) {
+      border-bottom-color: #ffc107;
+      animation-delay: 1s;
+    }
+  }
+}
+
+.loading-message {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.loading-sub-message {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Dark theme support for dynamic loading */
+@media (prefers-color-scheme: dark) {
+  .accessible-loading-content {
+    background: rgba(30, 30, 30, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .loading-message {
+    color: #fff;
+  }
+
+  .loading-sub-message {
+    color: #ccc;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .accessible-loading-overlay {
+    background: rgba(0, 0, 0, 0.9);
+  }
+
+  .accessible-loading-content {
+    background: #fff;
+    border: 2px solid #000;
+  }
+
+  .loading-message {
+    color: #000;
+  }
+
+  .loading-sub-message {
+    color: #333;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .spinner-ring {
+    animation: none;
+    border-color: #007bff !important;
+    opacity: 0.7;
+  }
 }

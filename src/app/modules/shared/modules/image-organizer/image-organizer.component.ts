@@ -1,16 +1,20 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ImageOrganizer } from './interfaces/image-organizer.interface';
+import { ImageOrganizer, MediaType } from './interfaces/image-organizer.interface';
 import { environment } from '@env/environment';
 import { MediaViewComponent } from './components/media-view/media-view.component';
 import { PublicationView, Comment } from '@shared/interfaces/publicationView.interface';
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { PreloadService } from '@shared/services/preload.service';
+import { ImageLoadingService } from '@shared/services/image-loading.service';
 
 @Component({
-  selector: 'worky-image-organizer',
-  templateUrl: './image-organizer.component.html',
-  styleUrls: ['./image-organizer.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'worky-image-organizer',
+    templateUrl: './image-organizer.component.html',
+    styleUrls: ['./image-organizer.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ImageOrganizerComponent implements OnInit {
 
@@ -19,6 +23,9 @@ export class ImageOrganizerComponent implements OnInit {
   @Input() type = 'publication';
 
   @Input() comment?: Comment;
+
+  @Output() load = new EventEmitter<void>();
+  @Output() error = new EventEmitter<Event>();
 
   images: ImageOrganizer[] = [];
 
@@ -34,9 +41,16 @@ export class ImageOrganizerComponent implements OnInit {
     return this._deviceDetectionService.isMobile();
   }
 
+  get isIphone(): boolean {
+    return this._deviceDetectionService.isIphone();
+  }
+
   constructor(
     private _dialog: MatDialog,
-    private _deviceDetectionService: DeviceDetectionService
+    private _deviceDetectionService: DeviceDetectionService,
+    private _utilityService: UtilityService,
+    private _preloadService: PreloadService,
+    private _imageLoadingService: ImageLoadingService
   ) { }
 
   ngOnInit(): void {
@@ -53,13 +67,13 @@ export class ImageOrganizerComponent implements OnInit {
     this.galleryItems = this.images.map(image => {
       if (this.isImageUrl(image.urlCompressed)) {
         return {
-          src: this.urlMediaApi + image.urlCompressed,
+          src: this._utilityService.normalizeImageUrl(image.urlCompressed, this.urlMediaApi),
           isImage: true,
           isVideo: false
         };
       } else if (this.isVideoUrl(image.url)) {
         return {
-          src: this.urlMediaApi + image.url,
+          src: this._utilityService.normalizeImageUrl(image.url, this.urlMediaApi),
           isImage: false,
           isVideo: true
         };
@@ -67,6 +81,12 @@ export class ImageOrganizerComponent implements OnInit {
         return null;
       }
     }).filter(item => item !== null);
+
+    this.images.map(image => {
+      image.type = this.isImageUrl(image.url) ? MediaType.IMAGE : MediaType.VIDEO;
+    });
+
+    this.preloadMedia();
   }
 
   isImageUrl(url: string): boolean {
@@ -75,6 +95,54 @@ export class ImageOrganizerComponent implements OnInit {
 
   isVideoUrl(url: string): boolean {
     return /\.(mp4|ogg|webm|avi|mov)$/i.test(url);
+  }
+
+  onImageError(event: Event): void {
+    this._utilityService.handleImageError(event, 'assets/img/shared/handleImageError.png');
+    this.error.emit(event);
+  }
+
+  onImageLoad(): void {
+    this.load.emit();
+  }
+
+  private preloadMedia(): void {
+    if (this.images.length === 0) return;
+
+    const imageUrls = this.images
+      .filter(image => this.isImageUrl(image.urlCompressed))
+      .map(image => this._utilityService.normalizeImageUrl(image.urlCompressed, this.urlMediaApi))
+      .filter((url): url is string => url !== null && url.length > 0);
+
+    const videoUrls = this.images
+      .filter(image => this.isVideoUrl(image.url))
+      .map(image => this._utilityService.normalizeImageUrl(image.url, this.urlMediaApi))
+      .filter((url): url is string => url !== null && url.length > 0);
+
+    // Use ImageLoadingService for optimized image loading
+    if (imageUrls.length > 0) {
+      imageUrls.forEach(imageUrl => {
+        this._imageLoadingService.loadImage(imageUrl, 'media', {
+          timeout: 10000,
+          maxRetries: 2,
+          retryDelay: 1000
+        }).subscribe({
+          next: (result) => {
+            // Image loaded successfully - no logging needed
+          },
+          error: (error) => {
+            // Error handled silently - no logging needed
+          }
+        });
+      });
+    }
+
+    // Use PreloadService for videos (keep existing logic)
+    if (videoUrls.length > 0) {
+      setTimeout(() => {
+        this._preloadService.addToPreloadQueue(videoUrls);
+      }, 500);
+    }
   }
 
   openLightbox(index: number): void {
@@ -87,12 +155,40 @@ export class ImageOrganizerComponent implements OnInit {
     this.currentItem = null;
   }
 
+  private resetIOSViewport(): void {
+    if (!this.isIphone) return;
+
+    const resetStyles = (element: HTMLElement) => {
+      element.style.padding = '0';
+      element.style.margin = '0';
+      element.style.top = '0';
+      element.style.position = '';
+      element.style.height = '';
+      element.style.overflow = '';
+      element.style.transform = '';
+    };
+
+    [document.body, document.documentElement].forEach(resetStyles);
+    
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    
+    // Doble reset para asegurar que se aplique
+    setTimeout(() => {
+      [document.body, document.documentElement].forEach(resetStyles);
+      window.scrollTo(0, 0);
+    }, 50);
+  }
+
   openViewMedia(imagenSelected: ImageOrganizer): void {
-    const dialogRef = this._dialog.open(MediaViewComponent, {
-      width: this.isMobile ? '100vw' : '95vw',
-      height: this.isMobile? '100vh' : '95vh',
-      maxWidth: this.isMobile? '100vw' : '95vw',
+    const dialogConfig: MatDialogConfig = {
+      width: this.isIphone ? '100vw' : (this.isMobile ? '100dvw' : '95dvw'),
+      height: this.isIphone ? '100vh' : (this.isMobile ? '100dvh' : '95dvh'),
+      maxWidth: this.isIphone ? '100vw' : (this.isMobile ? '100dvw' : '95dvw'),
+      maxHeight: this.isIphone ? '100vh' : (this.isMobile ? '100dvh' : '95dvh'),
       panelClass: 'view-media-modal-container',
+      disableClose: this.isIphone,
       data: {
         images: this.images,
         imageSelected: imagenSelected,
@@ -100,11 +196,21 @@ export class ImageOrganizerComponent implements OnInit {
         publication: this.publication,
         type: this.type
       }
-    });
+    };
+
+    if (this.isIphone) {
+      dialogConfig.position = { top: '0px' };
+    }
+
+    const dialogRef = this._dialog.open(MediaViewComponent, dialogConfig);
 
     dialogRef.afterClosed().subscribe(result => {
+      if (this.isIphone) {
+        this.resetIOSViewport();
+      }
+      
       if (result) {
-        console.log('The dialog was closed', result);
+        // Your existing logic here
       }
     });
   }

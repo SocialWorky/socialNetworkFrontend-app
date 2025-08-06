@@ -1,0 +1,47 @@
+<div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10000] p-4" *ngIf="showDialog" (click)="onOverlayClick($event)">
+  <div [class]="dialogClasses" [style.width]="config.width" class="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl max-w-[90vw] max-h-[90vh] overflow-hidden animate-in fade-in-0 zoom-in-95 duration-300">
+    <div class="flex items-center gap-4 p-6 pb-0">
+      <div class="flex items-center justify-center w-12 h-12 rounded-lg"
+           [ngClass]="{
+             'bg-red-500/20': config.type === 'danger',
+             'bg-amber-500/20': config.type === 'warning',
+             'bg-blue-500/20': config.type === 'info',
+             'bg-emerald-500/20': config.type === 'success'
+           }">
+        <i [class]="iconClass" class="text-2xl"
+           [ngClass]="{
+             'text-red-400': config.type === 'danger',
+             'text-amber-400': config.type === 'warning',
+             'text-blue-400': config.type === 'info',
+             'text-emerald-400': config.type === 'success'
+           }">{{ iconName }}</i>
+      </div>
+      <h3 class="text-xl font-semibold text-slate-100 flex-1">{{ config.title }}</h3>
+      <button class="w-8 h-8 rounded-lg border-none bg-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 cursor-pointer flex items-center justify-center transition-all duration-200" (click)="onClose()" title="Cerrar">
+        <i class="material-icons text-xl">close</i>
+      </button>
+    </div>
+    
+    <div class="px-6 py-4">
+      <p class="text-slate-300 leading-relaxed text-sm m-0">{{ config.message }}</p>
+    </div>
+    
+    <div class="flex gap-3 justify-end p-6 pt-0">
+      <button 
+        class="px-6 py-3 rounded-lg border-none font-medium cursor-pointer transition-all duration-200 text-sm min-w-[100px] bg-slate-600 text-slate-100 hover:bg-slate-500" 
+        *ngIf="config.showCancel"
+        (click)="onCancel()">
+        {{ config.cancelText }}
+      </button>
+      <button 
+        class="px-6 py-3 rounded-lg border-none font-medium cursor-pointer transition-all duration-200 text-sm min-w-[100px] text-white hover:transform hover:-translate-y-0.5 hover:shadow-lg"
+        [ngClass]="{
+          'bg-red-500 hover:bg-red-600 hover:shadow-red-500/30': config.type === 'danger',
+          'bg-blue-500 hover:bg-blue-600 hover:shadow-blue-500/30': config.type !== 'danger'
+        }"
+        (click)="onConfirm()">
+        {{ config.confirmText }}
+      </button>
+    </div>
+  </div>
+</div> 

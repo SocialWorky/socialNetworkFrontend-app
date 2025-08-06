@@ -45,6 +45,7 @@ jobs:
           echo "NG_APP_PWA_SHORT_NAME=${{ secrets.NG_APP_PWA_SHORT_NAME }}" >> .env
           echo "NG_APP_PWA_THEME_COLOR=${{ secrets.NG_APP_PWA_THEME_COLOR }}" >> .env
           echo "NG_APP_PWA_BACKGROUND_COLOR=${{ secrets.NG_APP_PWA_BACKGROUND_COLOR }}" >> .env
+          echo "NG_APP_CACHE_ENABLED=true" >> .env
 
       - name: Instalar herramientas de compilación
         run: |

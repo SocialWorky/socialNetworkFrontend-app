@@ -1,17 +1,17 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom, lastValueFrom, of, Subject, takeUntil } from 'rxjs';
-import { catchError, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
+import { catchError, filter, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import * as _ from 'lodash';
-import { Title } from '@angular/platform-browser';
 
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { UserService } from '@shared/services/core-apis/users.service';
-import { ActivatedRoute, Router } from '@angular/router';
 import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
-import { Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
+import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
@@ -24,20 +24,24 @@ import { GlobalEventService } from '@shared/services/globalEventService.service'
 import { ProfileService } from './services/profile.service';
 import { ProfileNotificationService } from '@shared/services/notifications/profile-notification.service';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
-import { AxiomService } from '@shared/services/apis/axiom.service';
-import { AxiomType } from '@shared/interfaces/axiom.enum';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { ImageLoadOptions } from '@shared/services/image.service';
+import { PreloadService } from '@shared/services/preload.service';
 
 @Component({
-  selector: 'worky-profiles',
-  templateUrl: './profiles.component.html',
-  styleUrls: ['./profiles.component.scss'],
+    selector: 'worky-profiles',
+    templateUrl: './profiles.component.html',
+    styleUrls: ['./profiles.component.scss'],
+    standalone: false
 })
-export class ProfilesComponent implements OnInit, OnDestroy {
+export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   typePublishing = TypePublishing;
 
   publicationsProfile = signal<PublicationView[]>([]);
@@ -50,11 +54,19 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   WorkyButtonTheme = WorkyButtonTheme;
 
+  imageOptions: ImageLoadOptions = {
+    maxRetries: 2,
+    retryDelay: 1000,
+    timeout: 10000,
+    fallbackUrl: '/assets/images/placeholder.jpg'
+  };
+
   paramPublication: boolean = false;
 
   loaderPublications: boolean = false;
 
   userData: User | undefined;
+  isLoadingUserData: boolean = true;
 
   idUserProfile: string;
 
@@ -90,11 +102,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
 
   isMobile = this._deviceDetectionService.isMobile();
 
-  showScrollToTopButton = false;
+  navbarVisible = true;
 
   hasMorePublications = true;
 
   private destroy$ = new Subject<void>();
+
+  @ViewChild('contentContainer', { static: false }) contentContainer!: ElementRef;
+  
+  isRefreshing = false;
 
   constructor(
     public _dialog: MatDialog,
@@ -115,8 +131,11 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     private _scrollService: ScrollService,
     private _titleService: Title,
     private _configService: ConfigService,
-    private _axiomService: AxiomService,
-    private _notificationPublicationService: NotificationPublicationService
+    private _notificationPublicationService: NotificationPublicationService,
+    private _logService: LogService,
+    private _pullToRefreshService: PullToRefreshService,
+    private _utilityService: UtilityService,
+    private _preloadService: PreloadService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
@@ -125,7 +144,6 @@ export class ProfilesComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    this._authService.isAuthenticated();
     if (this.idUserProfile === '') {
       this.idUserProfile = this._authService.getDecodedToken()?.id!;
       this._cdr.markForCheck();
@@ -155,7 +173,27 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this._cdr.markForCheck();
     });
 
+    this._pullToRefreshService.refresh$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.handlePullToRefresh();
+    });
+  }
 
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      if (this.contentContainer?.nativeElement && this.isMobile) {
+        this._pullToRefreshService.initPullToRefresh(
+          this.contentContainer.nativeElement
+        );
+        
+        const container = this.contentContainer.nativeElement;
+        container.style.height = '86dvh';
+        container.style.overflowY = 'auto';
+        container.style.webkitOverflowScrolling = 'touch';
+        container.style.overscrollBehavior = 'contain';
+      }
+    }, 500);
   }
 
   private scrollSubscription() {
@@ -163,25 +201,64 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe((data) => {
       if(data === 'scrollEnd') this.loadPublications();
-      if(data === 'showScrollToTopButton') this.showScrollToTopButton = true;
-      if(data === 'hideScrollToTopButton') this.showScrollToTopButton = false;
+
+      if(data === 'showNavbar') {
+        this.navbarVisible = true;
+        this._cdr.markForCheck();
+      }
+      if(data === 'hideNavbar') {
+        this.navbarVisible = false;
+        this._cdr.markForCheck();
+      }
     });
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    
+    if (this.contentContainer?.nativeElement) {
+      this._pullToRefreshService.destroyPullToRefresh(
+        this.contentContainer.nativeElement
+      );
+    }
   }
 
   private async loadPublications() {
-
     if (this.loaderPublications || !this.hasMorePublications) return;
+
+    const currentPublications = this.publicationsProfile();
+    if (currentPublications.length === 0) {
+    } else {
+      const totalExpected = this.page * this.pageSize;
+      if (currentPublications.length >= totalExpected) {
+        return;
+      }
+    }
+
     this.loaderPublications = true;
     try {
+      const newPublications = await firstValueFrom(
+        this._publicationService.forceSyncPublications(
+          this.page,
+          this.pageSize,
+          TypePublishing.POST_PROFILE,
+          this.idUserProfile
+        )
+      );
 
-      const newPublications = await firstValueFrom(this._publicationService.getAllPublications(this.page, this.pageSize, TypePublishing.POSTPROFILE, this.idUserProfile));
+      const currentPublications = this.publicationsProfile();
+      const newPublicationsList = newPublications.publications;
 
-      this.publicationsProfile.update((current: PublicationView[]) => [...current, ...newPublications.publications]);
+      const existingIds = new Set(currentPublications.map(pub => pub._id));
+
+      const uniqueNewPublications = newPublicationsList.filter(
+        pub => !existingIds.has(pub._id)
+      );
+
+      if (uniqueNewPublications.length > 0) {
+        this.publicationsProfile.update(current => [...current, ...uniqueNewPublications]);
+      }
 
       if (this.publicationsProfile().length >= newPublications.total) {
         this.hasMorePublications = false;
@@ -191,31 +268,55 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       this.loaderPublications = false;
       this._cdr.markForCheck();
 
+      this.preloadProfileMedia();
+
     } catch (error) {
-      this._axiomService.sendLog({
-        message: 'Error al cargar las publicaciones',
-        component: 'ProfilesComponent',
-        type: AxiomType.ERROR,
-        error: error
-      });
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'ProfilesComponent',
+        'Error al cargar las publicaciones',
+        {
+          user: this._authService.getDecodedToken(),
+          message: error,
+        },
+      );
       this.loaderPublications = false;
     }
   }
 
+  private preloadProfileMedia(): void {
+    const publications = this.publicationsProfile();
+    if (publications.length === 0) return;
+
+    this._preloadService.preloadForPage('profile', { 
+      publications,
+      profile: this.userData 
+    });
+  }
 
   private async getDataProfile(): Promise<void> {
+    this.isLoadingUserData = true;
+    this._cdr.markForCheck();
+    
     this._userService.getUserById(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: User) => {
         this.userData = response;
+        this.isLoadingUserData = false;
         this._cdr.markForCheck();
       },
       error: (error) => {
-        this._axiomService.sendLog({
-          message: 'Error al cargar el perfil',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+        this.isLoadingUserData = false;
+        this._cdr.markForCheck();
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error al obtener los datos del perfil',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
+        this._router.navigate(['/']);
       },
     });
   }
@@ -224,7 +325,11 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this._notificationPublicationService.notificationNewPublication$
       .pipe(
         takeUntil(this.destroy$),
-        filter((notifications: NotificationNewPublication[]) => !!notifications?.[0]?.publications?._id)
+        filter((notifications: NotificationNewPublication[]) => !!notifications?.[0]?.publications?._id),
+        distinctUntilChanged((prev, curr) => {
+          if (!prev || !curr || prev.length === 0 || curr.length === 0) return false;
+          return prev[0].publications._id === curr[0].publications._id;
+        })
       )
       .subscribe({
         next: async (notifications: NotificationNewPublication[]) => {
@@ -237,13 +342,18 @@ export class ProfilesComponent implements OnInit, OnDestroy {
               filter((publication: PublicationView[]) => {
                 return !!publication &&
                        publication.length > 0 &&
-                       publication[0].author._id === this.idUserProfile ||
-                       publication[0].userReceiving?._id === this.idUserProfile;
+                       (publication[0].author._id === this.idUserProfile ||
+                        publication[0].userReceiving?._id === this.idUserProfile);
               })
             )
             .subscribe({
               next: (publication: PublicationView[]) => {
                 const newPublication = publication[0];
+                
+                const existingPublication = publicationsCurrent.find(pub => pub._id === newPublication._id);
+                if (existingPublication) {
+                  return;
+                }
 
                 const fixedPublications = publicationsCurrent.filter(pub => pub.fixed);
                 const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed);
@@ -258,29 +368,41 @@ export class ProfilesComponent implements OnInit, OnDestroy {
                 this._cdr.markForCheck();
               },
               error: (error) => {
-                this._axiomService.sendLog({
-                  message: 'Error al obtener nueva publicación',
-                  component: 'ProfilesComponent',
-                  type: AxiomType.ERROR,
-                  error: error
-                });
+                this._logService.log(
+                  LevelLogEnum.ERROR,
+                  'ProfilesComponent',
+                  'Error getting publication',
+                  {
+                    user: this._authService.getDecodedToken(),
+                    message: error,
+                  },
+                );
               }
             });
         },
         error: (error) => {
-          this._axiomService.sendLog({
-            message: 'Error en suscripción de notificaciones de nuevas publicaciones',
-            component: 'ProfilesComponent',
-            type: AxiomType.ERROR,
-            error: error
-          });
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'ProfilesComponent',
+            'Error in new publication notifications subscription',
+            {
+              user: this._authService.getDecodedToken(),
+              message: error,
+            },
+          );
         }
       });
   }
 
   private async subscribeToNotificationDeletePublication() {
     this._notificationPublicationService.notificationDeletePublication$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        distinctUntilChanged((prev, curr) => {
+          if (!prev || !curr || prev.length === 0 || curr.length === 0) return false;
+          return prev[0]._id === curr[0]._id;
+        })
+      )
       .subscribe({
         next: async (notifications: {_id: string}[]) => {
           const notification = notifications[0];
@@ -295,12 +417,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          this._axiomService.sendLog({
-            message: 'Error en suscripción de notificaciones de eliminar publicaciones',
-            component: 'ProfilesComponent',
-            type: AxiomType.ERROR,
-            error: error
-          });
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'ProfilesComponent',
+            'Error in delete publication notifications subscription',
+            {
+              user: this._authService.getDecodedToken(),
+              message: error,
+            },
+          );
         }
       });
   }
@@ -310,16 +435,34 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         filter((data: PublicationView[]) => !!data?.[0]?._id),
+        debounceTime(500),
+        distinctUntilChanged((prev, curr) => {
+          if (!prev || !curr || prev.length === 0 || curr.length === 0) return false;
+          return prev[0]._id === curr[0]._id && 
+                 JSON.stringify(prev[0]) === JSON.stringify(curr[0]);
+        }),
         switchMap((data: PublicationView[]) => {
           const notification = data[0];
+          
+          const isRelevantPublication = 
+            notification.author._id === this.idUserProfile ||
+            notification.userReceiving?._id === this.idUserProfile;
+          
+          if (!isRelevantPublication) {
+            return of([]);
+          }
+          
           return this._publicationService.getPublicationId(notification._id).pipe(
             catchError((error) => {
-              this._axiomService.sendLog({
-                message: 'Error al obtener publicación actualizada',
-                component: 'HomeComponent',
-                type: AxiomType.ERROR,
-                error: error,
-              });
+              this._logService.log(
+                LevelLogEnum.ERROR,
+                'ProfilesComponent',
+                'Error getting publication',
+                {
+                  user: this._authService.getDecodedToken(),
+                  message: error,
+                },
+              );
               return of([]);
             })
           );
@@ -328,70 +471,97 @@ export class ProfilesComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (publication: PublicationView[]) => {
-
-          if (publication[0].author._id !== this.userData?._id) return;
-
           const updatedPublication = publication[0];
           const publicationsCurrent = this.publicationsProfile();
-
-          const fixedPublications = publicationsCurrent.filter(pub => pub.fixed && pub._id !== updatedPublication._id);
-          const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed && pub._id !== updatedPublication._id);
-
-          let updatedPublications: PublicationView[];
-
-          if (updatedPublication.fixed) {
-            updatedPublications = [
-              updatedPublication,
-              ...fixedPublications,
-              ...nonFixedPublications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            ];
-          } else {
-            updatedPublications = [
-              ...fixedPublications,
-              ...nonFixedPublications.concat(updatedPublication).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            ];
+          
+          const existingIndex = publicationsCurrent.findIndex(pub => pub._id === updatedPublication._id);
+          
+          if (existingIndex !== -1) {
+            const currentPub = publicationsCurrent[existingIndex];
+            const hasChanges = JSON.stringify(currentPub) !== JSON.stringify(updatedPublication);
+            
+            if (hasChanges) {
+              publicationsCurrent[existingIndex] = updatedPublication;
+              
+              const updatedPublications = this._publicationService.sortPublicationsByFixedAndDatePublic(publicationsCurrent);
+              
+              this.publicationsProfile.set(updatedPublications);
+              this._cdr.markForCheck();
+            }
           }
-
-          this.publicationsProfile.set(updatedPublications);
-          this._cdr.markForCheck();
         },
         error: (error) => {
-          this._axiomService.sendLog({
-            message: 'Error en suscripción de notificaciones de actualizar publicaciones',
-            component: 'HomeComponent',
-            type: AxiomType.ERROR,
-            error: error,
-          });
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'ProfilesComponent',
+            'Error in update publication notifications subscription',
+            {
+              user: this._authService.getDecodedToken(),
+              message: error,
+            },
+          );
         }
       });
   }
 
   private async subscribeToNotificationComment() {
     this._notificationCommentService.notificationComment$
-     .pipe(takeUntil(this.destroy$))
+     .pipe(
+       takeUntil(this.destroy$),
+       filter((data: any) => !!data?.postId)
+     )
      .subscribe({
       next: async (data: any) => {
         if (data.postId) {
           const publicationsCurrent = this.publicationsProfile();
-          this._publicationService.getPublicationId(data.postId).pipe(takeUntil(this.destroy$)).subscribe({
+          
+          const existingPublication = publicationsCurrent.find(pub => pub._id === data.postId);
+          if (!existingPublication) {
+            return;
+          }
+          
+          this._publicationService.getPublicationId(data.postId).pipe(
+            takeUntil(this.destroy$)
+          ).subscribe({
             next: (publication: PublicationView[]) => {
-              const index = publicationsCurrent.findIndex(pub => pub._id === publication[0]._id);
-              if (index !== -1) {
-                publicationsCurrent[index] = publication[0];
-                this.publicationsProfile.set(publicationsCurrent);
-                this._cdr.markForCheck();
+              if (publication.length > 0) {
+                const index = publicationsCurrent.findIndex(pub => pub._id === publication[0]._id);
+                if (index !== -1) {
+                  const currentPub = publicationsCurrent[index];
+                  const hasChanges = JSON.stringify(currentPub) !== JSON.stringify(publication[0]);
+                  
+                  if (hasChanges) {
+                    publicationsCurrent[index] = publication[0];
+                    this.publicationsProfile.set(publicationsCurrent);
+                    this._cdr.markForCheck();
+                  }
+                }
               }
             },
+            error: (error) => {
+              this._logService.log(
+                LevelLogEnum.ERROR,
+                'ProfilesComponent',
+                'Error getting publication for comment',
+                {
+                  user: this._authService.getDecodedToken(),
+                  message: error,
+                },
+              );
+            }
           });
         }
       },
       error: (error) => {
-        this._axiomService.sendLog({
-          message: 'Error en suscripción de notificaciones de comentarios',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error in comment notifications subscription',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
       }
     });
   }
@@ -403,12 +573,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this.getUserFriendPending();
       },
       error: (error) => {
-        this._axiomService.sendLog({
-          message: 'Error al cargar los amigos',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error getting friends',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
       },
     });
   }
@@ -431,13 +604,16 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         }
       },
-      error: (error: any) => {
-        this._axiomService.sendLog({
-          message: 'Error al cargar los amigos pendientes',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+      error: (error) => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error al obtener el estado de la solicitud de amistad',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
       },
     });
   }
@@ -451,12 +627,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        this._axiomService.sendLog({
-          message: 'Error al solicitar amistad',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error al enviar la solicitud de amistad',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
       }
     });
   }
@@ -480,12 +659,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        this._axiomService.sendLog({
-          message: 'Error al aceptar la amistad',
-          component: 'ProfilesComponent',
-          type: AxiomType.ERROR,
-          error: error
-        });
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error al aceptar la solicitud de amistad',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
       }
     });
   }
@@ -537,12 +719,15 @@ export class ProfilesComponent implements OnInit, OnDestroy {
           }, 1200);
         },
         error: (error) => {
-          this._axiomService.sendLog({
-            message: 'Error al subir la imagen de perfil',
-            component: 'ProfilesComponent',
-            type: AxiomType.ERROR,
-            error: error
-          });
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'ProfilesComponent',
+            'Error al actualizar la imagen de perfil',
+            {
+              user: this._authService.getDecodedToken(),
+              message: error,
+            },
+          );
           this.isUploading = false;
           this._cdr.markForCheck();
         }
@@ -563,19 +748,179 @@ export class ProfilesComponent implements OnInit, OnDestroy {
     this._router.navigate(['/messages/', _id]);
   }
 
-  onScroll(event: any) {
-    const threshold = 100;
-    const position = event.target.scrollTop + event.target.clientHeight;
-    const height = event.target.scrollHeight;
-
-    this.showScrollToTopButton = position > 3500;
-
-    if (position >= height - threshold && !this.loaderPublications && this.hasMorePublications) {
-      this.loadPublications();
+  sendMessageToUser() {
+    if (this.userData?._id) {
+      this.sendMessage(this.userData._id);
     }
   }
 
-  scrollToTop() {
-    this._scrollService.scrollToTop();
+  onScroll(event: any) {
+    this._scrollService.onScroll(event);
+    
+    if (!this.loaderPublications && this.hasMorePublications) {
+      const currentPublications = this.publicationsProfile();
+      if (currentPublications.length === 0) return;
+      
+      const container = event.target;
+      const scrollTop = container.scrollTop;
+      const clientHeight = container.clientHeight;
+      const scrollHeight = container.scrollHeight;
+      
+      const publicationHeight = 300;
+      const currentPublicationIndex = Math.floor(scrollTop / publicationHeight);
+      const visiblePublications = Math.ceil(clientHeight / publicationHeight);
+      const remainingPublications = currentPublications.length - currentPublicationIndex - visiblePublications;
+      
+      if (remainingPublications <= 5 && remainingPublications > 0) {
+        setTimeout(() => this.loadPublications(), 0);
+      }
+      
+      const threshold = 200;
+      const position = scrollTop + clientHeight;
+      if (position >= scrollHeight - threshold) {
+        setTimeout(() => this.loadPublications(), 0);
+      }
+    }
+  }
+
+
+
+  private async handlePullToRefresh(): Promise<void> {
+    if (this.isRefreshing) return;
+    
+    this.isRefreshing = true;
+    this._cdr.markForCheck();
+    
+    try {
+      this.showModernRefreshIndicator();
+      
+      await this.getDataProfile();
+      
+      this.page = 1;
+      this.hasMorePublications = true;
+      this.publicationsProfile.set([]);
+      await this.loadPublications();
+      
+      setTimeout(() => {
+        this.hideModernRefreshIndicator();
+        this.isRefreshing = false;
+        this._cdr.markForCheck();
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error in pull-to-refresh:', error);
+      this.hideModernRefreshIndicator();
+      this.isRefreshing = false;
+      this._cdr.markForCheck();
+    }
+  }
+
+  private showModernRefreshIndicator(): void {
+    let indicator = document.querySelector('.modern-refresh-indicator') as HTMLElement;
+    
+    if (!indicator) {
+      indicator = this.createModernRefreshIndicator();
+      document.body.appendChild(indicator);
+    }
+    
+    indicator.style.opacity = '1';
+    indicator.style.transform = 'translateX(-50%) translateY(20px)';
+  }
+
+  private hideModernRefreshIndicator(): void {
+    const indicator = document.querySelector('.modern-refresh-indicator') as HTMLElement;
+    if (indicator) {
+      indicator.style.opacity = '0';
+      indicator.style.transform = 'translateX(-50%) translateY(-20px)';
+      
+      setTimeout(() => {
+        if (indicator.parentNode) {
+          indicator.parentNode.removeChild(indicator);
+        }
+      }, 300);
+    }
+  }
+
+  private createModernRefreshIndicator(): HTMLElement {
+    const indicator = document.createElement('div');
+    indicator.className = 'modern-refresh-indicator';
+    indicator.innerHTML = `
+      <div class="modern-refresh-container">
+        <div class="modern-spinner">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor" opacity="0.2"/>
+            <path d="M12 4v2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 17.5V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4.93 4.93l1.77 1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.3 17.3l1.77 1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12h2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19.5 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4.93 19.07l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.3 6.7l1.77-1.77" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="modern-refresh-text">Updating...</span>
+      </div>
+    `;
+    
+    indicator.style.cssText = `
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 9999;
+      pointer-events: none;
+    `;
+    
+    const container = indicator.querySelector('.modern-refresh-container') as HTMLElement;
+    container.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      background: rgba(59, 130, 246, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 25px;
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    `;
+    
+    const spinner = indicator.querySelector('.modern-spinner') as HTMLElement;
+    spinner.style.cssText = `
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: spin 1s linear infinite;
+      color: white;
+    `;
+    
+    const svg = spinner.querySelector('svg') as unknown as HTMLElement;
+    svg.style.cssText = `
+      width: 100%;
+      height: 100%;
+    `;
+    
+    const text = indicator.querySelector('.modern-refresh-text') as HTMLElement;
+    text.style.cssText = `
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+      letter-spacing: 0.025em;
+    `;
+    
+    return indicator;
+  }
+
+  onImageError(event: Event): void {
+    this._utilityService.handleImageError(event, this.imgCoverDefault);
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 }

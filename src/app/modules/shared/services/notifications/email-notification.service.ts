@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 import { environment } from '@env/environment'
 import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
@@ -32,7 +32,6 @@ export class EmailNotificationService {
     private _userService: UserService,
     private _centerSocketNotificationsService: CenterSocketNotificationsService
   ) {
-    if(!this._authService.isAuthenticated()) return;
     this.baseUrl = environment.API_URL;
     this.dataUser = this._authService.getDecodedToken();
   }

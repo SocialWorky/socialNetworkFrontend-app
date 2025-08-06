@@ -17,8 +17,50 @@ $worky-color-black: #000000;
 $worky-color-light: #FFFFFF;
 $worky-color-greyLight: #f1f2f3;
 $worky-color-grey: #E4E6EB;
+
+/* colors icon, text, etc */
+$worky-color-icon: #ffffff;
+$worky-color-text: #113355;
+$worky-color-input-background: #f1f2f3;
+
+/* Colors Components */
+$worky-color-module-container: #FFFFFF;
+$worky-color-content-navbar: #000955;
+
+/* Modo Oscuro */
+$worky-color-navy-dark: #e1e1e1;
+$worky-color-yellow-dark: #FFB400;
+$worky-color-yellow-text-dark: #FFD700;
+$worky-color-green-dark: #229933;
+$worky-color-radium-dark: #00C853;
+$worky-color-teal-dark: #008E66;
+$worky-color-cyan-dark: #0088BB;
+$worky-color-blue-dark: #666666;
+$worky-color-indigo-dark: #3333CC;
+$worky-color-purple-dark: #8800FF;
+$worky-color-fuchsia-dark: #FF0088;
+$worky-color-magenta-dark: #FF0044;
+$worky-color-red-dark: #FF0000;
+$worky-color-black-dark: #000000;
+
+$worky-color-light-dark: #1C1C1D;
+$worky-color-greyLight-dark: #1E1E1E;
+$worky-color-grey-dark: #2C2C2C;
+
+/* colors icon, text, etc */
+$worky-color-icon-dark: #B8BBBF;
+$worky-color-text-dark: #B8BBBF;
+$worky-color-input-background-dark: #484849;
+
+
+/* Colors Components */
+$worky-color-module-container-dark: #333333;
+$worky-color-content-navbar-dark: #333333;
+
+
 /* Exportar variables SCSS como variables CSS */
 :root {
+  /* Modo Claro (default) */
   --worky-color-navy: #{$worky-color-navy};
   --worky-color-yellow: #{$worky-color-yellow};
   --worky-color-yellow-text: #{$worky-color-yellow-text};
@@ -37,4 +79,43 @@ $worky-color-grey: #E4E6EB;
   --worky-color-light: #{$worky-color-light};
   --worky-color-greyLight: #{$worky-color-greyLight};
   --worky-color-grey: #{$worky-color-grey};
+
+  /* colors icon, text, etc */
+  --worky-color-icon: #{$worky-color-icon};
+  --worky-color-text: #{$worky-color-text};
+  --worky-color-input-background: #{$worky-color-input-background};
+
+  /* Colors Components */
+  --worky-color-module-container: #{$worky-color-module-container};
+  --worky-color-content-navbar: #{$worky-color-content-navbar};
+
+  /* Modo Oscuro */
+  --worky-color-navy-dark: #{$worky-color-navy-dark};
+  --worky-color-yellow-dark: #{$worky-color-yellow-dark};
+  --worky-color-yellow-text-dark: #{$worky-color-yellow-text-dark};
+  --worky-color-green-dark: #{$worky-color-green-dark};
+  --worky-color-radium-dark: #{$worky-color-radium-dark};
+  --worky-color-teal-dark: #{$worky-color-teal-dark};
+  --worky-color-cyan-dark: #{$worky-color-cyan-dark};
+  --worky-color-blue-dark: #{$worky-color-blue-dark};
+  --worky-color-indigo-dark: #{$worky-color-indigo-dark};
+  --worky-color-purple-dark: #{$worky-color-purple-dark};
+  --worky-color-fuchsia-dark: #{$worky-color-fuchsia-dark};
+  --worky-color-magenta-dark: #{$worky-color-magenta-dark};
+  --worky-color-red-dark: #{$worky-color-red-dark};
+  --worky-color-black-dark: #{$worky-color-black-dark};
+
+  --worky-color-light-dark: #{$worky-color-light-dark};
+  --worky-color-greyLight-dark: #{$worky-color-greyLight-dark};
+  --worky-color-grey-dark: #{$worky-color-grey-dark};
+
+  /* colors icon, text, etc */
+  --worky-color-icon-dark: #{$worky-color-icon-dark};
+  --worky-color-text-dark: #{$worky-color-text-dark};
+  --worky-color-input-background-dark: #{$worky-color-input-background-dark};
+  --worky-color-chips-background-dark: #{$worky-color-navy-dark};
+
+  /* Colors Components */
+  --worky-color-module-container-dark: #{$worky-color-module-container-dark};
+  --worky-color-content-navbar-dark: #{$worky-color-content-navbar-dark};
 }

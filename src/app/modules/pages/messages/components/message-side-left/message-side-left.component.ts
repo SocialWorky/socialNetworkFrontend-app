@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, Output, EventEmitter, OnDestroy } from '@angular/core';
-import { forkJoin, Subject, takeUntil } from 'rxjs';
+import { forkJoin, Subject, takeUntil, of } from 'rxjs';
+
 import { AuthService } from '@auth/services/auth.service';
 import { User } from '@shared/interfaces/user.interface';
 import { UserService } from '@shared/services/core-apis/users.service';
@@ -10,9 +11,10 @@ import { NotificationService } from '@shared/services/notifications/notification
 import { MessageStateService } from '../../services/message-state.service';
 
 @Component({
-  selector: 'worky-message-side-left',
-  templateUrl: './message-side-left.component.html',
-  styleUrls: ['./message-side-left.component.scss'],
+    selector: 'worky-message-side-left',
+    templateUrl: './message-side-left.component.html',
+    styleUrls: ['./message-side-left.component.scss'],
+    standalone: false
 })
 export class MessageSideLeftComponent implements OnInit, OnDestroy {
   @Output() userIdSelected = new EventEmitter<string>();
@@ -35,8 +37,7 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
     private _cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    if (!this._authService.isAuthenticated()) return;
+  async ngOnInit(): Promise<void> {
 
     this.users$ = this._messageStateService.usersWithConversations$;
 
@@ -84,21 +85,27 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
         }
 
         const userObservables = userIds.map(userId => this._userService.getUserById(userId));
-        const messageObservables = userIds.map(userId => this._messageService.getLastConversationWithUser(userId));
+        const messageObservables = userIds.map(userId => 
+          this._messageService.getLastConversationWithUser(userId)
+        );
 
         forkJoin([forkJoin(userObservables), forkJoin(messageObservables)]).subscribe({
           next: ([users, messages]: [User[], Message[]]) => {
-            const unreadMessagesObservables = users.map((user, index) =>
-              this._messageService.getUnreadMessagesCount(messages[index].chatId, user._id)
-            );
+            const unreadMessagesObservables = users.map((user, index) => {
+              const chatId = messages[index]?.chatId;
+              if (chatId) {
+                return this._messageService.getUnreadMessagesCount(chatId, user._id);
+              }
+              return of(0);
+            });
 
             forkJoin(unreadMessagesObservables).subscribe({
               next: (unreadCounts: number[]) => {
                 const updatedUsers = users.map((user, index) => ({
                   user,
-                  lastMessage: messages[index].content,
-                  createAt: messages[index].timestamp,
-                  unreadMessagesCount: unreadCounts[index],
+                  lastMessage: messages[index]?.content || '',
+                  createAt: messages[index]?.timestamp || new Date(),
+                  unreadMessagesCount: unreadCounts[index] || 0,
                 }));
 
                 this._messageStateService.updateUsersWithConversations(updatedUsers);

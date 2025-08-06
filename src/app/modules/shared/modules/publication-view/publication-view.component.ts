@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, takeUntil, debounceTime } from 'rxjs/operators';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 import * as _ from 'lodash';
@@ -27,12 +27,19 @@ import { Reactions } from './interfaces/reactions.interface';
 import { Colors } from '@shared/interfaces/colors.enum';
 import { ScrollService } from '@shared/services/scroll.service';
 import { Token } from '@shared/interfaces/token.interface';
+import { LoadingService } from '@shared/services/loading.service';
+import { ImageLoadOptions } from '../../services/image.service';
+import { MediaEventsService } from '@shared/services/media-events.service';
+import { AlertService } from '@shared/services/alert.service';
+import { Alerts, Position } from '@shared/enums/alerts.enum';
+
 
 @Component({
-  selector: 'worky-publication-view',
-  templateUrl: './publication-view.component.html',
-  styleUrls: ['./publication-view.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'worky-publication-view',
+    templateUrl: './publication-view.component.html',
+    styleUrls: ['./publication-view.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() publication!: PublicationView;
@@ -46,6 +53,13 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   typePublishing = TypePublishing;
 
   typePrivacy = TypePrivacy;
+
+  emojiImageOptions: ImageLoadOptions = {
+    maxRetries: 1,
+    retryDelay: 300,
+    timeout: 3000,
+    fallbackUrl: '/assets/images/emoji-placeholder.png'
+  };
 
   dataLinkActions: DropdownDataLink<any>[] = [];
 
@@ -77,7 +91,22 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     return content.trim().startsWith('```');
   }
 
+  // Estados de carga individuales para skeletons
+  avatarLoading: boolean = true;
+  nameLoading: boolean = true;
+  contentLoading: boolean = true;
+  mediaLoading: boolean = true;
+  locationLoading: boolean = true;
+  dateLoading: boolean = true;
+  actionsLoading: boolean = true;
+  isDeletingPublication: boolean = false;
+  isDeletingComment: boolean = false;
+  translations = translations;
+
   private destroy$ = new Subject<void>();
+  private mediaTimeout?: any;
+  private mediaState: 'loading' | 'loaded' | 'error' = 'loading';
+  private readonly MEDIA_TIMEOUT: number = 3000; // 3 segundos
 
   constructor(
     private _router: Router,
@@ -91,7 +120,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     public _dialog: MatDialog,
     private _emailNotificationService: EmailNotificationService,
     private _notificationService: NotificationService,
-    private _scrollService: ScrollService
+    private _scrollService: ScrollService,
+    private _loadingService: LoadingService,
+    private _mediaEventsService: MediaEventsService,
+    private _alertService: AlertService
   ) {}
 
   async ngAfterViewInit() {
@@ -99,7 +131,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   ngOnInit() {
-    if(!this._authService.isAuthenticated()) return;
     this.dataUser = this._authService.getDecodedToken();
     this.getUserFriendPending();
     this.menuShareActions();
@@ -107,27 +138,212 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this.routeUrl = this._router.url;
     this.isProfile = this.routeUrl.includes('profile');
 
-    this._notificationService.notification$
-      .pipe(
-        distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
-        takeUntil(this.destroy$)
-      )
+          this._notificationService.notification$
+        .pipe(
+          distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+          takeUntil(this.destroy$)
+        )
       .subscribe({
         next: (data: any) => {
           if (data?._id === this.publication._id) {
-            this.refreshPublications(data._id);
-            this.loadReactionsImg(data);
-            this._cdr.markForCheck();
+            this.updatePublicationIfNeeded(data);
+          }
+        }
+      });
+
+      this._mediaEventsService.mediaProcessed$
+        .pipe(
+          takeUntil(this.destroy$)
+        )
+      .subscribe({
+        next: (data: any) => {
+          if (data?.idReference === this.publication._id) {
+            this.handleMediaProcessed(data);
           }
         }
       });
     this.loadReactionsImg();
     this._cdr.markForCheck();
+    
+    this.simulateProgressiveLoading();
+  }
+
+  // Métodos para manejar la carga de elementos individuales
+  onAvatarLoad() {
+    this.avatarLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onAvatarError() {
+    this.avatarLoading = false;
+    // Force the avatar component to show initials when image fails
+    this._cdr.markForCheck();
+  }
+
+  onNameLoad() {
+    this.nameLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onContentLoad() {
+    this.contentLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onMediaLoad() {
+    this.mediaLoading = false;
+    this.mediaState = 'loaded';
+    this.clearMediaTimeout();
+    this._cdr.markForCheck();
+  }
+
+  // Force media loading state reset - used when skeleton gets stuck
+  forceMediaLoadComplete() {
+    this.mediaLoading = false;
+    this.mediaState = 'loaded';
+    this.clearMediaTimeout();
+    this._cdr.markForCheck();
+  }
+
+  // Force processing media state reset - used when processing gets stuck
+  forceProcessingMediaComplete() {
+    this.publication.containsMedia = false;
+    this.mediaLoading = false;
+    this.mediaState = 'loaded';
+    this.clearMediaTimeout();
+    this._cdr.markForCheck();
+  }
+
+  // Clear media timeout
+  private clearMediaTimeout() {
+    if (this.mediaTimeout) {
+      clearTimeout(this.mediaTimeout);
+      this.mediaTimeout = undefined;
+    }
+  }
+
+  // Force immediate update when media processing completes
+  private forceImmediateMediaUpdate(mediaData: any[]) {
+    if (mediaData && mediaData.length > 0) {
+      this.publication.media = mediaData;
+      this.publication.containsMedia = false;
+      this.mediaLoading = true;
+      this.mediaState = 'loading';
+      
+      this._cdr.markForCheck();
+      
+      // Setup media timeout to prevent it from getting stuck
+      this.setupMediaTimeout();
+    }
+  }
+
+  // Setup media timeout to prevent getting stuck
+  private setupMediaTimeout() {
+    this.clearMediaTimeout();
+    this.mediaTimeout = setTimeout(() => {
+      this.mediaLoading = false;
+      this.mediaState = 'loaded';
+      this._cdr.markForCheck();
+    }, this.MEDIA_TIMEOUT);
+  }
+
+  // Check if media processing is stuck
+  isMediaProcessingStuck(): boolean {
+    return this.publication.containsMedia && 
+           this.publication.media.length === 0 && 
+           this.mediaState === 'loading';
+  }
+
+  // Public method to manually retry media processing
+  retryMediaProcessingManual() {
+    this.mediaState = 'loading';
+    this.setupMediaTimeout();
+    this._cdr.markForCheck();
+  }
+
+
+
+  private updateLocalPublication(publicationId: string, mediaData: any[]) {
+    // Update the current publication object
+    this.publication.media = mediaData;
+    this.publication.containsMedia = false;
+    
+    // Force change detection to update the UI immediately
+    this._cdr.markForCheck();
+    
+    // Update the local database (IndexedDB) with the new media data
+    // This ensures consistency between the UI and local storage
+    this._publicationService.updatePublicationInLocalDatabase(publicationId, {
+      media: mediaData,
+      containsMedia: false
+    }).then(() => {
+      // Local database updated successfully
+    }).catch((error) => {
+      // Error updating local database
+    });
+  }
+
+  private forceMediaLoadCompleteOnError() {
+    this.mediaLoading = false;
+    this.mediaState = 'error';
+    this.clearMediaTimeout();
+    this._cdr.markForCheck();
+  }
+
+  onLocationLoad() {
+    this.locationLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onDateLoad() {
+    this.dateLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  onActionsLoad() {
+    this.actionsLoading = false;
+    this._cdr.markForCheck();
+  }
+
+  // Load all elements immediately without artificial delays
+  private simulateProgressiveLoading() {
+    // Load all elements immediately
+    this.onNameLoad();
+    this.onDateLoad();
+    this.onLocationLoad();
+    this.onActionsLoad();
+    
+    // Load content if exists
+    if (this.publication.content) {
+      this.onContentLoad();
+    }
+    
+    // Load avatar - always show avatar component (with or without image)
+    this.onAvatarLoad();
+    
+    // Load media if exists - with safety check
+    if (this.publication.media.length > 0) {
+      // If media exists, show skeleton first then load
+      this.mediaLoading = true;
+      this.mediaState = 'loading';
+      this.setupMediaTimeout();
+      
+      // Simulate media loading with a small delay
+      setTimeout(() => {
+        this.onMediaLoad();
+      }, 100);
+    } else if (this.publication.containsMedia) {
+      // Set up media timeout for processing state
+      this.setupMediaTimeout();
+    }
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    
+    // Clear media timeout to prevent memory leaks
+    this.clearMediaTimeout();
   }
 
   loadReactionsImg(publication: PublicationView = this.publication){
@@ -169,14 +385,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     const menuDeletePublications = {
       icon: 'delete',
       function: this.deletePublications.bind(this),
-      title: translations['publicationsView.deletePublication'],
-      color: Colors.RED
+      title: translations['publicationsView.deletePublication']
     };
     const menuFixedPublications = {
       icon: 'push_pin',
       function: this.fixedPublications.bind(this),
-      title: !this.publication.fixed ? translations['publicationsView.fixedPublication'] : translations['publicationsView.unfixedPublication'],
-      color: this.publication.fixed ? Colors.RED : Colors.BLUE
+      title: !this.publication.fixed ? translations['publicationsView.fixedPublication'] : translations['publicationsView.unfixedPublication']
     };
 
     if (userId === this.dataUser?.id || this.dataUser?.role === RoleUser.ADMIN) {
@@ -200,7 +414,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   menuActions() {
     this.dataLinkActions = [
-      { icon: 'report', function: this.createReport.bind(this), title: translations['publicationsView.reportPublication'], color: Colors.RED },
+      { icon: 'report', function: this.createReport.bind(this), title: translations['publicationsView.reportPublication'] },
     ];
   }
 
@@ -208,66 +422,78 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     const url = environment.BASE_URL;
     this.dataShareActions = [
       {
-        img: 'assets/img/logos/facebook.svg',
+        img: 'assets/img/logos/svg-facebook.svg',
         linkUrl: `https://web.facebook.com/sharer.php?u=${url}`,
-        title: 'Facebook'
+        title: translations['social.facebook']
       },
       {
-        img: 'assets/img/logos/twitter_x.svg',
+        img: 'assets/img/logos/twitter-x.svg',
         linkUrl: `https://twitter.com/intent/tweet?url=${url}`,
-        title: 'Twitter'
+        title: translations['social.twitter']
       },
       // TODO: Uncomment when the linkedin share is ready
       // {
       //   img: 'assets/img/logos/linkedin.svg',
       //   linkUrl: `https://www.linkedin.com/shareArticle?url=${url}`,
-      //   title: 'Linkedin'
+      //   title: translations['social.linkedin']
       // },
       {
-        img: 'assets/img/logos/whatsapp.svg',
+        img: 'assets/img/logos/svg-whatsapp.svg',
         linkUrl: `whatsapp://send?text=${url}`,
-        title: 'Whatsapp'
+        title: translations['social.whatsapp']
       },
     ];
   }
 
   async deletePublications(publication: PublicationView) {
-    const loadingDeletePublication = await this._loadingCtrl.create({
-      message: translations['publicationsView.loadingDeletePublication'],
-    });
-
-    await loadingDeletePublication.present();
-
-    this._publicationService.deletePublication(publication._id).pipe(
+    // Show confirmation alert using AlertService
+    this._alertService.showConfirmation(
+      translations['publicationsView.deletePublicationTitle'],
+      translations['publicationsView.deletePublicationWarning'],
+      translations['publicationsView.delete'],
+      translations['publicationsView.cancel'],
+      Alerts.WARNING,
+      Position.CENTER
+    ).pipe(
       takeUntil(this.destroy$)
-    ).subscribe({
-      next: () => {
-        this._publicationService.updatePublicationsDeleted([publication]);
-        loadingDeletePublication.dismiss();
-      },
-      error: (error) => {
-        console.error(error);
-        loadingDeletePublication.dismiss();
-      },
+    ).subscribe(async (confirmed: boolean) => {
+      if (confirmed) {
+        // Show accessible loading immediately after confirmation
+        this.isDeletingPublication = true;
+        this._cdr.markForCheck(); // Force immediate UI update
+
+        this._publicationService.deletePublication(publication._id).pipe(
+          takeUntil(this.destroy$)
+        ).subscribe({
+          next: () => {
+            this._publicationService.updatePublicationsDeleted([publication]);
+            this.isDeletingPublication = false;
+            this._cdr.markForCheck();
+          },
+          error: (error) => {
+            console.error(error);
+            this.isDeletingPublication = false;
+            this._cdr.markForCheck();
+          },
+        });
+      }
     });
   }
 
   async fixedPublications(publication: PublicationView) {
-    const loadingFixedPublication = await this._loadingCtrl.create({
-      message: !publication.fixed ? translations['publicationsView.loadingFixedPublication'] : translations['publicationsView.loadingUnfixedPublication'],
-    });
-
-    await loadingFixedPublication.present();
+    // Usar el nuevo sistema de loading accesible
+    const loading = await this._loadingService.showLoading(
+      !publication.fixed ? translations['publicationsView.loadingFixedPublication'] : translations['publicationsView.loadingUnfixedPublication']
+    );
 
     this._publicationService.updatePublicationById(publication._id, { fixed: !publication.fixed }).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.refreshPublications(publication._id);
-        loadingFixedPublication.dismiss();
-        this._scrollService.scrollToTop();
+        this._loadingService.hideLoading();
       },
       error: (error) => {
         console.error(error);
-        loadingFixedPublication.dismiss();
+        this._loadingService.hideLoading();
       },
     });
   }
@@ -332,16 +558,39 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   refreshPublications(_id?: string) {
     if (_id) {
-      this._publicationService.getPublicationId(_id).pipe(takeUntil(this.destroy$)).subscribe({
+      this._publicationService.getPublicationId(_id).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe({
         next: (publication: PublicationView[]) => {
           if (!publication.length) {
             return;
           }
-          this._publicationService.updatePublications(publication);
-          this.publication = publication[0];
-          this.loadReactionsImg(publication[0]);
-          this.checkDataLink(publication[0]._id);
-          this._cdr.markForCheck();
+          
+          const updatedPublication = publication[0];
+          
+          const hasMediaChanges = 
+            this.publication.media.length !== updatedPublication.media.length ||
+            this.publication.containsMedia !== updatedPublication.containsMedia ||
+            JSON.stringify(this.publication.media) !== JSON.stringify(updatedPublication.media);
+          
+          const hasOtherChanges = 
+            this.publication.reaction.length !== updatedPublication.reaction.length ||
+            this.publication.comment.length !== updatedPublication.comment.length ||
+            this.publication.fixed !== updatedPublication.fixed ||
+            JSON.stringify(this.publication.reaction) !== JSON.stringify(updatedPublication.reaction);
+          
+          if (hasMediaChanges || hasOtherChanges) {
+            this._publicationService.updatePublicationsLocal(publication);
+            this.publication = updatedPublication;
+            this.loadReactionsImg(updatedPublication);
+            this.checkDataLink(updatedPublication._id);
+            
+            if (hasMediaChanges) {
+              this.mediaLoading = false;
+            }
+            
+            this._cdr.markForCheck();
+          }
         },
         error: (error) => {
           console.error('Failed to refresh publications', error);
@@ -358,11 +607,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     const dialogRef = this._dialog.open(ReportResponseComponent, {});
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (result: any) => {
       if (result) {
-        const loadingCreateReport = await this._loadingCtrl.create({
-          message: 'Creando reporte...',
-        });
-
-        await loadingCreateReport.present();
+        const loading = await this._loadingService.showLoading(translations['shared.reportResponse.title']);
 
         const report: ReportCreate = {
           type: ReportType.POST,
@@ -373,13 +618,13 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         };
         this._reportsService.createReport(report).pipe(takeUntil(this.destroy$)).subscribe({
           next: (data) => {
-            loadingCreateReport.dismiss();
+            this._loadingService.hideLoading();
             this._emailNotificationService.sendEmailNotificationReport(publication, result);
             this._cdr.markForCheck();
           },
           error: (error) => {
             console.error('Error creating report:', error);
-            loadingCreateReport.dismiss();
+            this._loadingService.hideLoading();
           }
         });
       }
@@ -387,21 +632,186 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async deleteComment(_id: string, id_publication: string) {
-    const loadingDeleteComment = await this._loadingCtrl.create({
-      message: 'Eliminando comentario...',
-    });
+    // Show confirmation alert using AlertService
+    this._alertService.showConfirmation(
+      translations['publicationsView.deleteCommentTitle'],
+      translations['publicationsView.deleteCommentWarning'],
+      translations['publicationsView.delete'],
+      translations['publicationsView.cancel'],
+      Alerts.WARNING,
+      Position.CENTER
+    ).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(async (confirmed: boolean) => {
+      if (confirmed) {
+        // Show accessible loading immediately after confirmation
+        this.isDeletingComment = true;
+        this._cdr.markForCheck(); // Force immediate UI update
 
-    await loadingDeleteComment.present();
-
-    this._commentService.deletComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => {
-        this.refreshPublications(id_publication);
-        loadingDeleteComment.dismiss();
-      },
-      error: (error) => {
-        console.error('Error deleting comment:', error);
-        loadingDeleteComment.dismiss();
+        this._commentService.deleteComment(_id).pipe(takeUntil(this.destroy$)).subscribe({
+          next: () => {
+            // Optimized: Update local state directly instead of making a network request
+            this.updateLocalCommentState(_id);
+            this.isDeletingComment = false;
+            this._cdr.markForCheck();
+          },
+          error: (error) => {
+            console.error('Error deleting comment:', error);
+            this.isDeletingComment = false;
+            this._cdr.markForCheck();
+          }
+        });
       }
     });
   }
+
+  /**
+   * Update local publication state by removing the deleted comment
+   * This avoids unnecessary network requests for better performance
+   */
+  private updateLocalCommentState(deletedCommentId: string): void {
+    if (this.publication && this.publication.comment) {
+      // Filter out the deleted comment
+      this.publication.comment = this.publication.comment.filter(
+        comment => comment._id !== deletedCommentId
+      );
+      
+      // Update the publication in the local service cache
+      this._publicationService.updatePublicationsLocal([this.publication]);
+      
+      // Force change detection to update the UI immediately
+      this._cdr.markForCheck();
+    }
+  }
+
+  onEmojiError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
+  }
+
+  onMediaLoadError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      img.style.display = 'none';
+    }
+    
+    this.mediaLoading = false;
+    this.mediaState = 'error';
+    this.clearMediaTimeout();
+    this._cdr.markForCheck();
+  }
+
+  private updatePublicationIfNeeded(updatedData: any) {
+    const hasMediaChanges = 
+      this.publication.media.length !== updatedData.media?.length ||
+      this.publication.containsMedia !== updatedData.containsMedia ||
+      JSON.stringify(this.publication.media) !== JSON.stringify(updatedData.media);
+    
+    const hasOtherChanges = 
+      this.publication.reaction.length !== updatedData.reaction?.length ||
+      this.publication.comment.length !== updatedData.comment?.length ||
+      this.publication.fixed !== updatedData.fixed ||
+      JSON.stringify(this.publication.reaction) !== JSON.stringify(updatedData.reaction);
+
+    if (hasMediaChanges || hasOtherChanges) {
+      if (hasMediaChanges) {
+        this.handleMediaUpdate(updatedData);
+        
+        // If media was added, setup media timeout
+        if (updatedData.media && updatedData.media.length > 0) {
+          this.setupMediaTimeout();
+        }
+      }
+      
+      // Add small delay to ensure UI updates properly
+      setTimeout(() => {
+        this.refreshPublications(updatedData._id);
+        this.loadReactionsImg(updatedData);
+      }, 100);
+    }
+  }
+
+  private handleMediaUpdate(updatedData: any) {
+    this.publication.media = updatedData.media || [];
+    this.publication.containsMedia = updatedData.containsMedia || false;
+    
+    // Ensure media loading state is properly updated
+    if (this.publication.media.length > 0) {
+      this.mediaLoading = false;
+      this.mediaState = 'loaded';
+      this.clearMediaTimeout();
+    }
+    
+    this._cdr.markForCheck();
+  }
+
+  private handleMediaProcessed(data: any) {
+    this.clearMediaTimeout();
+    this.publication.containsMedia = false;
+    
+    // Update the publication with the processed media data
+    if (data.media && data.media.length > 0) {
+      this.forceImmediateMediaUpdate(data.media);
+      
+      // Update the local database with the new media data
+      this.updateLocalPublication(data.idReference, data.media);
+    } else {
+      this.mediaLoading = false;
+      this.mediaState = 'loaded';
+      this._cdr.markForCheck();
+    }
+  }
+
+  // Computed properties for template optimization
+  get shouldShowFriendActions(): boolean {
+    return !this.nameLoading && 
+           !this.avatarLoading && 
+           (this.publication.isMyFriend || 
+            this.isUserReceiving || 
+            this.isAuthor);
+  }
+
+  get isUserReceiving(): boolean {
+    return this.dataUser?.id === this.publication.userReceiving?._id && !this.publication.isMyFriend;
+  }
+
+  get isAuthor(): boolean {
+    return this.dataUser?.id === this.publication.author._id && !this.publication.isMyFriend;
+  }
+
+  get shouldShowFollowButton(): boolean {
+    return !this.publication.isMyFriend && (!this.userRequest?._id || !this.userReceive?._id);
+  }
+
+  get shouldShowCancelButton(): boolean {
+    return !this.publication.isMyFriend && 
+           !!this.publication.isFriendshipPending && 
+           this.userRequest?._id === this.dataUser?.id;
+  }
+
+  get shouldShowAcceptButton(): boolean {
+    return this.userReceive?._id === this.dataUser?.id;
+  }
+
+  get shouldShowPendingIndicator(): boolean {
+    return !this.publication.isMyFriend || !!this.publication.isFriendshipPending;
+  }
+
+  get privacyIcon(): string {
+    switch (this.publication.privacy) {
+      case this.typePrivacy.PUBLIC:
+        return 'public';
+      case this.typePrivacy.FRIENDS:
+        return 'people';
+      case this.typePrivacy.PRIVATE:
+        return 'lock';
+      default:
+        return 'public';
+    }
+  }
+
+  get shouldShowLocation(): boolean {
+    return this.nameGeoLocation !== '' && !this.locationLoading;
+  }
+
 }

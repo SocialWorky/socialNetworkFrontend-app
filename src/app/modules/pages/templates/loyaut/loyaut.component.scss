@@ -1,19 +1,27 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'src/assets/styles/worky-palettes.scss' as color;
 
 .content-app {
   width: 100vw;
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   flex-direction: column;
+  background-color: color.$worky-color-light;
   grid-template:
   "header" 6vh
-  "main" 94vh;
+  "main" 94dvh;
+  overscroll-behavior: contain;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  -ms-overflow-style: none;
+    
   @include breakpoints.below-sm {
     grid-template:
-    "header" 14vh
-    "main" 86vh;
+    "header" 120px
+    "main" 1fr;
   }
 
   .navbar-content {
@@ -21,6 +29,25 @@
     flex-direction: column;
     grid-area: header;
     width: 100vw;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    
+    @include breakpoints.below-sm {
+      position: relative;
+      z-index: 1000;
+      background-color: color.$worky-color-light;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 0;
+    }
+  }
+
+  &.navbar-hidden .navbar-content {
+    @include breakpoints.below-sm {
+      transform: translateY(-100%);
+      height: 0;
+      overflow: hidden;
+    }
   }
 }
 
@@ -30,25 +57,46 @@
   grid-area: main;
   box-sizing: border-box;
   max-width: variables.$worky-app-width;
+  overscroll-behavior: contain;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
   @include breakpoints.below-sm {
     width: 100vw;
     margin: inherit;
     padding-top: 0px;
     flex-direction: column;
     align-items: center;
+    margin-top: 120px;
+    position: relative;
+    z-index: 1;
+    transition: margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  &.navbar-hidden {
+    @include breakpoints.below-sm {
+      margin-top: 0px;
+    }
+  }
+}
+
+.content-app.navbar-hidden .content-social-app {
+  @include breakpoints.below-sm {
+    margin-top: 0px;
   }
 }
 
 ::ng-deep worky-content-left-side,
 ::ng-deep worky-content-right-side {
   width: variables.$worky-container-width-sidebar;
-  height: 94vh;
+  height: 94dvh;
   padding: 5px;
   display: block;
   justify-content: space-around;
   overflow-y: scroll;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   @include breakpoints.below-sm {
     display: none;
   }
@@ -57,11 +105,21 @@
 .social-content-center {
   width: variables.$worky-container-width-content;
   grid-area: main;
-  height: 94vh;
+  height: 94dvh;
   min-width: variables.$worky-app-min-width;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   @include breakpoints.below-sm {
-    height: 90vh;
+    height: calc(100dvh - 120px);
     width: 100vw;
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+.navbar-hidden .social-content-center {
+  @include breakpoints.below-sm {
+    height: 100dvh;
   }
 }
 
@@ -74,11 +132,12 @@
   margin: inherit;
   max-width: 100%;
   width: 100%;
-  height: 94vh;
+  height: 94dvh;
   padding: 10px;
   overflow: hidden;
   @include breakpoints.below-sm {
-    height: 87vh;
+    padding: 0px;
+    height: 87dvh;
   }
 }
 
@@ -95,6 +154,9 @@
   justify-content: flex-start;
   width: 100vw;
   flex-grow: 1;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .messages-view,
@@ -103,4 +165,6 @@
   overflow-y: scroll;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }

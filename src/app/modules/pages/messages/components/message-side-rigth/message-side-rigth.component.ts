@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectorRef, Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import * as _ from 'lodash';
@@ -12,24 +12,32 @@ import { User } from '@shared/interfaces/user.interface';
 import { UserService } from '@shared/services/core-apis/users.service';
 import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { GifSearchComponent } from '@shared/modules/gif-search/gif-search.component';
 import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';
 import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
-import { environment } from '@env/environment';
 import { LoadingController } from '@ionic/angular';
 import { Token } from '@shared/interfaces/token.interface';
+import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
+import { SocketService } from '@shared/services/socket.service';
+import { ExternalMessage } from '@shared/interfaces/notification-external-message.interface';
+import { MediaType } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
+import { LazyCssService } from '@shared/services/core-apis/lazy-css.service';
+import { FontLoaderService } from '@shared/services/core-apis/font-loader.service';
 
 @Component({
-  selector: 'worky-message-side-rigth',
-  templateUrl: './message-side-rigth.component.html',
-  styleUrls: ['./message-side-rigth.component.scss'],
+    selector: 'worky-message-side-rigth',
+    templateUrl: './message-side-rigth.component.html',
+    styleUrls: ['./message-side-rigth.component.scss'],
+    standalone: false
 })
-export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterViewChecked, OnInit{
+export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
 
   WorkyButtonType = WorkyButtonType;
 
   WorkyButtonTheme = WorkyButtonTheme;
+
+  MediaType = MediaType;
 
   userIdMessage: string = '';
 
@@ -55,12 +63,30 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     return this._deviceDetectionService.isMobile();
   }
 
+  trackByMessageId(index: number, message: Message): string {
+    return message._id;
+  }
+
   @ViewChild('messageContainer', { static: false }) private messageContainer?: ElementRef;
 
   private unsubscribe$ = new Subject<void>();
 
   @Input()
   userId: string = '';
+
+  loadingMoreMessages = false;
+
+  currentPage = 1;
+
+  private isInitialLoad = true;
+
+  private userScrolling = false;
+  
+  private scrollTimeout: any;
+
+  hasMoreMessages = true;
+  
+  showScrollToBottomButton = false;
 
   constructor(
     private _messageService: MessageService,
@@ -74,13 +100,13 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     private _dialog: MatDialog,
     private _fileUploadService: FileUploadService,
     private _loadingCtrl: LoadingController,
-  ) {
-    if (!this._authService.isAuthenticated()) return;
-    this.currentUser = this._authService.getDecodedToken();
-  }
+    private _socketService: SocketService,
+    private _lazyCssService: LazyCssService,
+    private _fontLoaderService: FontLoaderService,
+  ) { }
 
   async ngOnInit() {
-    if (!this._authService.isAuthenticated()) return;
+    this.currentUser = this._authService.getDecodedToken();
     this.userIdMessage = await this._activatedRoute.snapshot.paramMap.get('userIdMessages') || '';
     if(this.userIdMessage) this.userId = this.userIdMessage;
 
@@ -99,10 +125,20 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
         next: (message: any) => {
-          if (message.senderId === this.userId || message.receiverId === this.userId) {
-            this.messages.push(message);
-            this._cdr.markForCheck();
-            this.scrollToBottom();
+          const isCurrentChat = (message.senderId === this.userId && message.receiverId === this.currentUser?.id) ||
+                               (message.senderId === this.currentUser?.id && message.receiverId === this.userId);
+          
+          if (isCurrentChat) {
+            const existingMessage = this.messages.find(m => m._id === message._id);
+            if (!existingMessage) {
+              this.messages = [...this.messages, message];
+              this._cdr.markForCheck();
+              this.scrollToBottomSmooth();
+              
+              if (message.senderId !== this.currentUser?.id) {
+                this.markMessagesAsRead();
+              }
+            }
           }
         }
       });
@@ -116,8 +152,29 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
           }
         }
       });
-    this.loadMessagesWithUser(this.currentUser!.id, this.userId);
+
+    await this.loadMessagesWithUser(this.currentUser!.id, this.userId);
     this.markMessagesAsRead();
+
+    this._socketService.listenEvent('newExternalMessage', (message: ExternalMessage) => {
+      if (message.type === TypePublishing.MESSAGE) {
+        this.updateContentMessage(message.idReference, message.response?.content, message.response?.typeFile, message.response?.urlFile);
+      }
+    });
+  }
+
+  private updateContentMessage(idMessage: string, contentMessage: string, typeFile: string, urlFile: string) {
+    if (!idMessage) return;
+    this.messages.forEach(message => {
+      if (message._id === idMessage) {
+        message.content = contentMessage;
+        message.type = typeFile;
+        message.urlFile = urlFile;
+        this._cdr.detectChanges();
+        this._notificationService.sendNotification(this.messages);
+      }
+    })
+
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -137,48 +194,100 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     }
   }
 
-  ngAfterViewChecked(): void {
-    this.scrollToBottom();
-  }
-
   ngOnDestroy() {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+    if (this.scrollTimeout) {
+      clearTimeout(this.scrollTimeout);
+    }
   }
 
-  private async loadMessagesWithUser(currentUserId: string, userIdMessage: string) {
-    if (userIdMessage === currentUserId) return;
+  async loadMessagesWithUser(currentUserId: string, userIdMessage: string) {
+    if (userIdMessage === currentUserId) {
+      return;
+    }
     this.loadMessages = true;
-    await this.getUser(userIdMessage);
-    this._messageService.getConversationsWithUser(currentUserId, userIdMessage)
-      .pipe(
+
+    this.isInitialLoad = true;
+
+    this.hasMoreMessages = true;
+
+    this.currentPage = 1;
+    
+    try {
+      await this.getUser(userIdMessage);
+
+      const chatId = this._messageService.generateChatId(currentUserId, userIdMessage);
+      
+      const localData = await this._messageService.getOnlyLocalMessages(chatId).pipe(
         takeUntil(this.unsubscribe$)
-       )
-      .subscribe({
-      next: (messages: Message[]) => {
-        this.messages = messages;
-        this.scrollToBottom();
-        this._cdr.markForCheck();
-        this.loadMessages = false;
-      },
-      error: (error) => {
-        console.error('Error loading messages:', error);
-        this.loadMessages = false;
+      ).toPromise();
+
+      if (localData && localData.length > 0) {
+        const paginatedData = await this._messageService.getConversationsWithUserSmart(currentUserId, userIdMessage, 1, 20)
+          .pipe(takeUntil(this.unsubscribe$))
+          .toPromise();
+        
+        if (paginatedData) {
+          this.messages = paginatedData.messages;
+          
+          this.hasMoreMessages = paginatedData.total > this.messages.length;
+          
+          if (this.isInitialLoad) {
+            setTimeout(() => {
+              this.scrollToBottomSmooth();
+            }, 100);
+            this.isInitialLoad = false;
+          }
+        }
+      } else {
+        await this._messageService.getConversationsWithUserSmart(currentUserId, userIdMessage, 1, 20)
+          .pipe(takeUntil(this.unsubscribe$))
+          .subscribe({
+            next: (data: { messages: Message[], total: number }) => {
+              this.messages = data.messages;
+              
+              // Check if there are more messages available
+              this.hasMoreMessages = data.total > this.messages.length;
+              
+              if (this.isInitialLoad) {
+                setTimeout(() => {
+                  this.scrollToBottomSmooth();
+                }, 100);
+                this.isInitialLoad = false;
+              }
+              
+              this._cdr.markForCheck();
+            },
+            error: (error) => {
+              console.error('Error loading messages:', error);
+              this.loadMessages = false;
+            },
+            complete: () => {
+              this.loadMessages = false;
+            }
+          });
       }
-    });
+      
+      this._cdr.markForCheck();
+    } catch (error) {
+      console.error('Error en loadMessagesWithUser:', error);
+      this.loadMessages = false;
+    }
   }
 
-  private async getUser(userId: string) {
+  private async getUser(userId: string): Promise<void> {
     this.user = [];
-    await this._user.getUserById(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (user: User) => {
+    try {
+      const user = await this._user.getUserById(userId).pipe(takeUntil(this.unsubscribe$)).toPromise();
+      if (user) {
         this.user = [user];
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Error loading user:', error);
       }
-    });
+      this._cdr.markForCheck();
+    } catch (error) {
+      console.error('Error loading user:', error);
+      throw error;
+    }
   }
 
   formatDate(date: Date): string {
@@ -206,7 +315,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     this.showEmojiPicker = false;
   }
 
- async sendMessage(type: string, content?: string) {
+  async sendMessage(type: string, content?: string) {
     if (this.newMessage.trim() === '' && type === this.plainText) return;
 
     const messageContent = type === this.plainText ? this.newMessage : content;
@@ -221,16 +330,23 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
     await this._messageService.createMessage(message).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (msg) => {
+        this.messages = [...this.messages, msg];
+        
         this._notificationMessageChatService.sendNotificationMessageChat(msg);
         this._notificationService.sendNotification();
         this.newMessage = '';
+
+        if(type === MediaType.PROCESSING) {
+          this._fileUploadService.uploadFile(this.selectedFiles, 'messages', msg._id, '', TypePublishing.MESSAGE).pipe(takeUntil(this.unsubscribe$)).subscribe();
+        }
 
         const textarea = document.querySelector('textarea');
         if (textarea) {
           textarea.style.height = '40px';
         }
 
-        this.scrollToBottom();
+        // Siempre hacer scroll al enviar un mensaje nuevo
+        this.scrollToBottomSmooth();
         this.sendMessagesLoader = false;
         this._cdr.markForCheck();
       },
@@ -241,16 +357,38 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     });
   }
 
-  private scrollToBottom(): void {
+  public scrollToBottomSmooth(): void {
     setTimeout(() => {
       if (this.messageContainer) {
         try {
-          this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
+          this.messageContainer.nativeElement.scrollTo({
+            behavior: 'smooth',
+            top: this.messageContainer.nativeElement.scrollHeight
+          });
+          this.showScrollToBottomButton = false;
         } catch (err) {
           console.error('Error scrolling to bottom:', err);
         }
       }
-    }, 2000);
+    }, 50);
+  }
+
+  private scrollToBottom(): void {
+    // Only auto-scroll if user is not manually scrolling
+    if (!this.userScrolling) {
+      setTimeout(() => {
+        if (this.messageContainer) {
+          try {
+            this.messageContainer.nativeElement.scrollTo({
+              behavior: 'auto',
+              top: this.messageContainer.nativeElement.scrollHeight
+            });
+          } catch (err) {
+            console.error('Error scrolling to bottom:', err);
+          }
+        }
+      }, 0);
+    }
   }
 
   async markMessagesAsRead() {
@@ -258,16 +396,32 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
     if (this.userId && this.messages.length > 0) {
       const chatId = this.messages[0].chatId;
-      await this._messageService.markMessagesAsRead(chatId, this.userId).subscribe({
-        next: (updatedMessages: Message[]) => {
-          this._notificationService.sendNotification(updatedMessages);
-          this.updateMessages(updatedMessages);
-          this._cdr.markForCheck();
-        },
-        error: (error) => {
-          console.error('Error marking messages as read:', error);
-        }
-      });
+      
+      await this._messageService.markMessagesAsReadLocal(chatId, this.userId)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe({
+          next: () => {
+            this.messages.forEach(message => {
+              if (message.senderId !== this.currentUser?.id) {
+                message.isRead = true;
+              }
+            });
+            this._cdr.markForCheck();
+          }
+        });
+
+      await this._messageService.markMessagesAsRead(chatId, this.userId)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe({
+          next: (updatedMessages: Message[]) => {
+            this._notificationService.sendNotification(updatedMessages);
+            this.updateMessages(updatedMessages);
+            this._cdr.markForCheck();
+          },
+          error: (error) => {
+            console.error('Error marking messages as read:', error);
+          }
+        });
     }
   }
 
@@ -288,7 +442,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
 
     if (hasChanges) {
       this.messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-      this.scrollToBottom();
+      this.scrollToBottomSmooth();
       this._cdr.markForCheck();
     }
   }
@@ -333,28 +487,156 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, AfterVie
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.selectedFiles = result;
-        this.uploadFiles('messages');
+        this.scrollToBottom();
+        this.uploadFiles();
       }
     });
   }
 
-  private async uploadFiles(folder: string) {
+  private async uploadFiles() {
     const loadingUploadImage = await this._loadingCtrl.create({
-      message: 'Subiendo imagen...',
+      message: 'Subiendo....',
     });
 
     loadingUploadImage.present();
 
-    return this._fileUploadService.uploadFile(this.selectedFiles, folder).pipe(takeUntil(this.unsubscribe$)).subscribe({
-          next: (file) => {
-            const imagenSaved = environment.APIFILESERVICE + 'messages/' + file[0].filenameCompressed;
-            this.sendMessage('imageContent', `![Image](${imagenSaved})`);
-            loadingUploadImage.dismiss();
-          },
-          error: (error) => {
-            console.error('Error uploading files:', error);
+            this.sendMessage(MediaType.PROCESSING, MediaType.PROCESSING);
+    loadingUploadImage.dismiss();
+
+  }
+
+  isVideoUrl(url: string): boolean {
+    return /\.(mp4|ogg|webm|avi|mov)$/i.test(url);
+  }
+
+  getThumbnail(message: any): string {
+    const patron = /\(([^)]+)\)/;
+    const match = message.match(patron);
+    if (match && match[1]) {
+      return match[1];
+    }
+    return '';
+  }
+
+  openUrl(url: string): void {
+    if (url) window.open(url, '_blank');
+  }
+
+  onScroll(event: any): void {
+    const element = event.target;
+    const scrollTop = element.scrollTop;
+    const scrollHeight = element.scrollHeight;
+    const clientHeight = element.clientHeight;
+    
+    // Detect if user is manually scrolling
+    this.userScrolling = true;
+    clearTimeout(this.scrollTimeout);
+    
+    this.scrollTimeout = setTimeout(() => {
+      this.userScrolling = false;
+    }, 150);
+    
+    // Show/hide scroll to bottom button
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    this.showScrollToBottomButton = !isNearBottom;
+    
+    // Load more messages when user is near the beginning
+    if (scrollTop < 200 && !this.loadingMoreMessages && this.hasMoreMessages) {
+      this.currentPage++;
+      this.loadMoreMessages(this.currentPage);
+    }
+  }
+
+  async loadMoreMessages(page: number = 2) {
+    if (!this.userId || !this.currentUser?.id || this.loadingMoreMessages) {
+      return;
+    }
+
+    this.loadingMoreMessages = true;
+    
+    // Save exact scroll position before loading
+    const scrollTopBefore = this.messageContainer?.nativeElement.scrollTop || 0;
+    const scrollHeightBefore = this.messageContainer?.nativeElement.scrollHeight || 0;
+    
+    try {
+      const data = await this._messageService.getConversationsWithUserSmart(
+        this.currentUser.id, 
+        this.userId, 
+        page, 
+        10
+      ).pipe(takeUntil(this.unsubscribe$)).toPromise();
+
+      if (data && data.messages.length > 0) {
+        const existingIds = this.messages.map(m => m._id);
+        const newMessages = data.messages.filter(msg => !existingIds.includes(msg._id));
+        
+        if (newMessages.length > 0) {
+          this.messages = [...newMessages, ...this.messages];
+          this._cdr.markForCheck();
+        } else {
+          if (data.total <= this.messages.length) {
+            this.hasMoreMessages = false;
           }
-        });
+        }
+      } else {
+        this.hasMoreMessages = false;
+      }
+    } catch (error) {
+      console.error('Error loading more messages:', error);
+      this.hasMoreMessages = false;
+    } finally {
+      this.loadingMoreMessages = false;
+    }
+  }
+
+  async forceSyncMessages() {
+    if (!this.userId || !this.currentUser?.id) return;
+    
+    try {
+      const messages = await this._messageService.forceSyncChat(
+        this.currentUser.id, 
+        this.userId
+      ).pipe(takeUntil(this.unsubscribe$)).toPromise();
+
+      if (messages) {
+        this.messages = messages;
+        this._cdr.markForCheck();
+      }
+    } catch (error) {
+      console.error('Error forzando sincronización:', error);
+    }
+  }
+
+  /**
+   * Carga recursos necesarios de forma lazy
+   */
+  private async loadRequiredResources() {
+    try {
+      // Cargar Material Icons si no están cargadas
+      if (!this._fontLoaderService.isFontLoaded('material-icons')) {
+        await this._fontLoaderService.loadMaterialIcons();
+      }
+
+      // Cargar CSS de emoji-mart solo cuando se necesite
+      if (!this._lazyCssService.isLoaded('emoji-mart')) {
+        // Se cargará cuando se abra el emoji picker
+      }
+    } catch (error) {
+      // this._logService.error('Error cargando recursos lazy', 'MessageSideRigthComponent'); // Original code had this line commented out
+    }
+  }
+
+  /**
+   * Carga CSS de emoji-mart solo cuando se abre el picker
+   */
+  private async loadEmojiMartCss() {
+    try {
+      if (!this._lazyCssService.isLoaded('emoji-mart')) {
+        await this._lazyCssService.loadEmojiMartCss();
+      }
+    } catch (error) {
+      // this._logService.error('Error cargando CSS de emoji-mart', 'MessageSideRigthComponent'); // Original code had this line commented out
+    }
   }
 
 }

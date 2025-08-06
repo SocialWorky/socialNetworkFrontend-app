@@ -1,0 +1,51 @@
+<div class="mb-8">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white/5 border border-white/10 rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center text-white text-2xl">
+          <i class="material-icons">people</i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-3xl font-bold text-slate-100 mb-1">{{ stats.total }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.userManagement.stats.total' | workyTranslations }}</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white/5 border border-white/10 rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center text-white text-2xl">
+          <i class="material-icons">check_circle</i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-3xl font-bold text-slate-100 mb-1">{{ stats.active }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.userManagement.stats.active' | workyTranslations }}</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white/5 border border-white/10 rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center text-white text-2xl">
+          <i class="material-icons">pause_circle</i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-3xl font-bold text-slate-100 mb-1">{{ stats.inactive }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.userManagement.stats.inactive' | workyTranslations }}</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white/5 border border-white/10 rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center text-white text-2xl">
+          <i class="material-icons">email</i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-3xl font-bold text-slate-100 mb-1">{{ stats.pendingVerification }}</h3>
+          <p class="text-sm text-slate-400">{{ 'admin.userManagement.stats.pendingVerification' | workyTranslations }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

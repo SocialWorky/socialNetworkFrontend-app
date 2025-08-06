@@ -7,29 +7,33 @@ import { map, Subject, takeUntil } from 'rxjs';
 import { Field } from './interfaces/field.interface';
 import { CustomFieldType, CustomFieldDestination, CustomField} from './interfaces/custom-field.interface';
 import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { AuthService } from '@auth/services/auth.service';
+import { translations } from '@translations/translations';
 
 @Component({
-  selector: 'worky-form-builder',
-  templateUrl: './form-builder.component.html',
-  styleUrls: ['./form-builder.component.scss']
+    selector: 'worky-form-builder',
+    templateUrl: './form-builder.component.html',
+    styleUrls: ['./form-builder.component.scss'],
+    standalone: false
 })
 export class FormBuilderComponent implements OnInit, OnDestroy {
   form: FormGroup = new FormGroup({});
-  
+
   selectedField: Field | null = null;
-  
+
   idError = false;
-  
+
   selectedFieldIndex: number | null = null;
-  
+
   formDestination: CustomFieldDestination = CustomFieldDestination.PROFILE;
 
   enumCustomFieldType = CustomFieldType;
 
   availableFields: Field[] = [
-    { type: CustomFieldType.TEXT, id: this.generateId(), idName: '', label: 'Campo de Texto', destination: CustomFieldDestination.PROFILE },
-    { type: CustomFieldType.TEXTAREA, id: this.generateId(), idName: '', label: 'Área de Texto', destination: CustomFieldDestination.PROFILE },
-    { type: CustomFieldType.SELECT, id: this.generateId(), idName: '', label: 'Select', options: [], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.TEXT, id: this.generateId(), idName: '', label: translations['formBuilder.textField'], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.TEXTAREA, id: this.generateId(), idName: '', label: translations['formBuilder.textArea'], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.SELECT, id: this.generateId(), idName: '', label: translations['formBuilder.selectField'], options: [], destination: CustomFieldDestination.PROFILE },
   ];
 
   formFields: Field[] = [];
@@ -41,7 +45,9 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
   constructor(
     private _cdr: ChangeDetectorRef,
     private _renderer: Renderer2,
-    private _customFieldService: CustomFieldService
+    private _customFieldService: CustomFieldService,
+    private _logService: LogService,
+    private _authService: AuthService
   ) { }
 
   ngOnInit() {
@@ -102,6 +108,12 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
           }
         });
 
+        const formFieldId = this.form.get('id')?.value
+
+        if (this.formFields.find(f => f.id === formFieldId)) {
+          return;
+        }
+
         this.formFields.push({
           id: field.id,
           index: field.index,
@@ -121,9 +133,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
             maxLength: field.options?.maxLength || 50
           }
         });
-
       });
-
       this._cdr.markForCheck();
     });
   }
@@ -211,7 +221,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
-      const copiedItem: Field = { 
+      const copiedItem: Field = {
         ...event.previousContainer.data[event.previousIndex],
         id: this.generateId(),
         isActive: false,
@@ -309,7 +319,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
     }
 
     this.formFields.forEach(field => {
-      field.destination = this.formDestination; 
+      field.destination = this.formDestination;
     });
 
     const formData = this.formFields.map((field, index) => {
@@ -361,15 +371,21 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
        await this._customFieldService.createCustomField(field).pipe(takeUntil(this.destroy$)).subscribe({
         next: () => {
           this.getFields();
+          this._cdr.markForCheck();
         },
         error: (error) => {
-          console.error('Error al guardar formulario:', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'FormBuilderComponent',
+            'Error al guardar formulario',
+            {
+              user: this._authService.getDecodedToken(),
+              message: error,
+            },
+          );
         }
       });
     });
-    setTimeout(() => {
-      this.getFields();
-    }, 400);
   }
 
   updateIndexFields() {
@@ -401,7 +417,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
 
   hasValidField(): boolean {
     return this.formFields.length > 0 && this.formFields.some(field => {
-      return field.label && field.id; 
+      return field.label && field.id;
     });
   }
 }

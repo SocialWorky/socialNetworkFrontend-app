@@ -4,15 +4,15 @@ import { MAT_DIALOG_DATA, MatDialog  } from '@angular/material/dialog';
 import * as _ from 'lodash';
 
 import { ImageOrganizer } from '../../interfaces/image-organizer.interface';
-import { DeviceDetectionService } from '@shared/services/DeviceDetection.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { Comment, PublicationView } from '@shared/interfaces/publicationView.interface';
-import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 
 @Component({
-  selector: 'worky-media-view',
-  templateUrl: './media-view.component.html',
-  styleUrls: ['./media-view.component.scss'],
+    selector: 'worky-media-view',
+    templateUrl: './media-view.component.html',
+    styleUrls: ['./media-view.component.scss'],
+    standalone: false
 })
 export class MediaViewComponent  implements OnInit {
 
@@ -24,13 +24,12 @@ export class MediaViewComponent  implements OnInit {
 
   private destroy$ = new Subject<void>();
 
-  constructor( 
+  constructor(
     private _deviceDetectionService: DeviceDetectionService,
     private _cdr: ChangeDetectorRef,
-    private _publicationService: PublicationService,
     private _notificationService: NotificationService,
     private _dialog: MatDialog,
-    @Inject(MAT_DIALOG_DATA) public data: { 
+    @Inject(MAT_DIALOG_DATA) public data: {
       images: ImageOrganizer[],
       imageSelected: ImageOrganizer,
       comment: Comment,
@@ -44,34 +43,8 @@ export class MediaViewComponent  implements OnInit {
   }
 
   ngOnInit() {
-    //this.subscriptionPublication();
     this.subscriptionNotification();
   }
-
-  // private subscriptionPublication(): void {
-  //   this._publicationService.publications$
-  //     .pipe(
-  //       distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
-  //       takeUntil(this.destroy$)
-  //     )
-  //     .subscribe({
-  //       next: (dat: PublicationView[]) => {
-  //         if (dat.filter((d: PublicationView) => d._id === this.data.publication._id).length > 0) {
-  //           this.data.publication = dat.filter((d: PublicationView) => d._id === this.data.publication._id)[0];
-  //           if (!this.data.comment) {
-  //             this.data.images = this.data.publication.media;
-  //           }
-  //           if (this.data.comment) {
-  //             const foundComment = this.data.publication.comment.find((comment: Comment) => comment._id === this.data.comment._id);
-  //             if (foundComment) {
-  //               this.data.comment = foundComment;
-  //             }
-  //           }
-  //           this._cdr.markForCheck();
-  //         }
-  //       }
-  //     });
-  // }
 
   private subscriptionNotification(): void {
     this._notificationService.notification$
@@ -82,7 +55,6 @@ export class MediaViewComponent  implements OnInit {
       .subscribe({
         next: (data: any) => {
           if (data?._id === this.data.publication._id) {
-            //this.subscriptionPublication();
             this._cdr.markForCheck();
           }
         }
@@ -95,7 +67,11 @@ export class MediaViewComponent  implements OnInit {
 
   onImageChanged(imageId: string) {
     this.imageSelected = imageId;
-    this._cdr.detectChanges();
+    const selectedImage = this.data.images.find(img => img._id === imageId);
+    if (selectedImage) {
+      this.data.imageSelected = selectedImage;
+    }
+    this._cdr.markForCheck();
   }
 
   close(): void {

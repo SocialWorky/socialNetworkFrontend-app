@@ -1,2 +1,125 @@
-<worky-form-builder>
-</worky-form-builder>
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-inter">
+  <!-- Header Section -->
+  <div class="bg-slate-700/95 backdrop-blur-lg border border-slate-600 rounded-xl p-6 mb-8 shadow-lg">
+    <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
+      <div class="flex-1">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+          {{ 'admin.customFields.title' | workyTranslations }}
+        </h1>
+        <p class="text-slate-300 text-lg">{{ 'admin.customFields.subtitle' | workyTranslations }}</p>
+      </div>
+      <div class="flex gap-4 items-center lg:flex-row flex-col lg:w-auto w-full">
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
+          (click)="showHelp()">
+          <i class="material-icons">help</i>
+          <span>{{ 'admin.customFields.help' | workyTranslations }}</span>
+        </button>
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+          (click)="refreshFormBuilder()">
+          <i class="material-icons" [class.animate-spin]="isLoading">refresh</i>
+          <span>{{ 'admin.customFields.reload' | workyTranslations }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
+       *ngIf="showHelpModal" 
+       (click)="closeHelp()">
+    <div class="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden" 
+         (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-slate-600">
+        <h3 class="text-xl font-semibold text-slate-100">{{ 'admin.customFields.helpModal.title' | workyTranslations }}</h3>
+        <button 
+          class="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-700 rounded-lg transition-all duration-200"
+          (click)="closeHelp()">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
+      <div class="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+        <div class="flex items-start gap-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+          <i class="material-icons text-blue-400 text-xl mt-0.5">drag_indicator</i>
+          <div>
+            <h4 class="text-lg font-semibold text-slate-100 mb-2">{{ 'admin.customFields.helpModal.dragDrop.title' | workyTranslations }}</h4>
+            <p class="text-slate-300 leading-relaxed">{{ 'admin.customFields.helpModal.dragDrop.description' | workyTranslations }}</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+          <i class="material-icons text-blue-400 text-xl mt-0.5">settings</i>
+          <div>
+            <h4 class="text-lg font-semibold text-slate-100 mb-2">{{ 'admin.customFields.helpModal.configuration.title' | workyTranslations }}</h4>
+            <p class="text-slate-300 leading-relaxed">{{ 'admin.customFields.helpModal.configuration.description' | workyTranslations }}</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+          <i class="material-icons text-emerald-400 text-xl mt-0.5">save</i>
+          <div>
+            <h4 class="text-lg font-semibold text-slate-100 mb-2">{{ 'admin.customFields.helpModal.save.title' | workyTranslations }}</h4>
+            <p class="text-slate-300 leading-relaxed">{{ 'admin.customFields.helpModal.save.description' | workyTranslations }}</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+          <i class="material-icons text-red-400 text-xl mt-0.5">delete</i>
+          <div>
+            <h4 class="text-lg font-semibold text-slate-100 mb-2">{{ 'admin.customFields.helpModal.delete.title' | workyTranslations }}</h4>
+            <p class="text-slate-300 leading-relaxed">{{ 'admin.customFields.helpModal.delete.description' | workyTranslations }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+    <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+      <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+        <i class="material-icons">build</i>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.customFields.mainTitle' | workyTranslations }}</h3>
+        <p class="text-sm text-slate-400">{{ 'admin.customFields.mainSubtitle' | workyTranslations }}</p>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <div class="form-builder-wrapper">
+        <worky-form-builder></worky-form-builder>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="isLoading">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-5xl text-blue-500">
+        <i class="material-icons animate-spin">refresh</i>
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold text-slate-100 mb-2">{{ 'admin.customFields.loading.title' | workyTranslations }}</h3>
+        <p class="text-slate-300">{{ 'admin.customFields.loading.subtitle' | workyTranslations }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="flex justify-center items-center min-h-[60vh] p-8" *ngIf="error">
+    <div class="flex flex-col items-center gap-6 text-center max-w-md">
+      <div class="text-6xl text-red-500/80">
+        <i class="material-icons">warning</i>
+      </div>
+      <div>
+        <h3 class="text-2xl font-semibold text-slate-100 mb-2">{{ 'admin.customFields.error.title' | workyTranslations }}</h3>
+        <p class="text-slate-300 mb-6 leading-relaxed">{{ error }}</p>
+        <button 
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
+          (click)="refreshFormBuilder()">
+          <i class="material-icons">refresh</i>
+          <span>{{ 'admin.customFields.retry' | workyTranslations }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

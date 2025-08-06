@@ -11,9 +11,10 @@ import { PublicationService } from '@shared/services/core-apis/publication.servi
 import { ImageOrganizer, TypeView } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
 
 @Component({
-  selector: 'worky-header-view-content',
-  templateUrl: './header-view-content.component.html',
-  styleUrls: ['./header-view-content.component.scss'],
+    selector: 'worky-header-view-content',
+    templateUrl: './header-view-content.component.html',
+    styleUrls: ['./header-view-content.component.scss'],
+    standalone: false
 })
 export class HeaderViewContentComponent  implements OnInit, OnDestroy {
 
@@ -21,7 +22,7 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
 
   typeViewEnum = TypeView;
 
-  type?: TypePublishing = TypePublishing.IMAGEVIEW;
+  type?: TypePublishing = TypePublishing.IMAGE_VIEW;
 
   listReaction: string[] = [];
 
@@ -63,7 +64,7 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
           if (this.currentPublication && data?._id === this.currentPublication._id) {
             this.refreshPublications(data._id);
             this.loadReactionsImg(data);
-            this._cdr.detectChanges();
+            this._cdr.markForCheck();
           }
         }
       });
@@ -81,9 +82,9 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
       publication.reaction.forEach((element: Reactions) => {
         if(this.listReaction.includes(element.customReaction.emoji)) return;
         this.listReaction.push(element.customReaction.emoji);
-        this._cdr.markForCheck();
       });
     }
+    this._cdr.markForCheck();
   }
 
   refreshPublications(_id?: string) {

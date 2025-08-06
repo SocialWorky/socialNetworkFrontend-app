@@ -11,6 +11,7 @@ export interface PublicationView {
     content:     string;
     privacy:     string;
     fixed:       boolean;
+    containsMedia: boolean;
     extraData:   ExtraData;
     createdAt:   Date;
     updatedAt:   Date;
@@ -42,13 +43,16 @@ export interface User {
 
 export interface MediaFileUpload {
   filename: string;
-  filenameThumbnail: string;
-  filenameCompressed: string;
+  thumbnail: string;
+  optimized?: string;
+  compressed?: string;
+  originalname?: string;
 }
 
 export interface Comment {
   _id: string;
   content: string;
+  containsMedia: boolean;
   createdAt: Date;
   author: User;
   media: ImageOrganizer[];

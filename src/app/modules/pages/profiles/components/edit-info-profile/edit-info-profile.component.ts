@@ -1,20 +1,25 @@
-import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { ChangeDetectorRef } from '@angular/core';
+import { Component, Inject, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { LoadingController } from '@ionic/angular';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Subject, takeUntil } from 'rxjs';
+import { map, Subject, takeUntil } from 'rxjs';
+import { translations } from '@translations/translations';
 
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { ProfileService } from '../../services/profile.service';
 import { User } from '@shared/interfaces/user.interface';
 import { UserService } from '@shared/services/core-apis/users.service';
-import { LoadingController } from '@ionic/angular';
+import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
+import { Field } from '@shared/modules/form-builder/interfaces/field.interface';
+import { CustomFieldDestination, CustomFieldType } from '@shared/modules/form-builder/interfaces/custom-field.interface';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
-  selector: 'worky-edit-info-profile',
-  templateUrl: './edit-info-profile.component.html',
-  styleUrls: ['./edit-info-profile.component.scss'],
-  encapsulation: ViewEncapsulation.None
+    selector: 'worky-edit-info-profile',
+    templateUrl: './edit-info-profile.component.html',
+    styleUrls: ['./edit-info-profile.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class EditInfoProfileDetailComponent implements OnInit {
   WorkyButtonType = WorkyButtonType;
@@ -23,9 +28,19 @@ export class EditInfoProfileDetailComponent implements OnInit {
 
   userData: User = {} as User;
 
+  dataOk = false;
+
   editProfileBasicDetailForm: FormGroup;
 
-  editProfailDetailForm: FormGroup;
+  editProfileDetailForm: FormGroup;
+
+  dynamicFieldsForm!: FormGroup;
+
+  dynamicFields: Field[] = [];
+
+  enumCustomFieldType = CustomFieldType;
+
+  SeeDynamicFields = false;
 
   private unsubscribe$ = new Subject<void>();
 
@@ -37,13 +52,15 @@ export class EditInfoProfileDetailComponent implements OnInit {
     private _dialogRef: MatDialogRef<EditInfoProfileDetailComponent>,
     private _userService: UserService,
     private _loadingCtrl: LoadingController,
+    private _customFieldService: CustomFieldService,
+    private _logService: LogService,
   ) {
     this.editProfileBasicDetailForm = this._fb.group({
       name: ['', Validators.required],
       lastName: ['', Validators.required],
     });
 
-    this.editProfailDetailForm = this._fb.group({
+    this.editProfileDetailForm = this._fb.group({
       legend: [''],
       dateOfBirth: [''],
       description: [''],
@@ -61,33 +78,113 @@ export class EditInfoProfileDetailComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loadBasicDetail();
+    this.getDynamicFieldsFormControls();
+    this.toggleWhatsApp();
+  }
+
+  getDynamicFieldsFormControls(): void {
+    this._customFieldService.getCustomFields()
+      .pipe(
+        takeUntil(this.unsubscribe$),
+        map((fields: any[]) => fields.filter(field => field.destination === CustomFieldDestination.PROFILE))
+      )
+      .subscribe(filteredFields => {
+        const group: Record<string, FormControl> = {};
+
+        filteredFields.forEach((field: any) => {
+
+          const validators = [];
+          if (field.options?.required) validators.push(Validators.required);
+          if (field.options?.maxLength > 0) validators.push(Validators.maxLength(field.options.maxLength));
+          if (field.options?.minLength > 0) validators.push(Validators.minLength(field.options.minLength));
+
+          group[field.id] = new FormControl('', validators);
+
+          this.dynamicFields.push({
+            id: field.id,
+            index: field.index,
+            idName: field.idName,
+            type: field.type,
+            label: field.label,
+            isActive: field.isActive,
+            options: field.options?.choices || [],
+            required: field.options?.required || false,
+            placeholder: field.options?.placeholder || '',
+            destination: field.destination,
+            additionalOptions: {
+              multiSelect: field.options?.multiSelect || false,
+              visible: field.options?.visible || true,
+              required: field.options?.required || false,
+              minLength: field.options?.minLength || 0,
+              maxLength: field.options?.maxLength || 50
+            }
+          });
+        });
+
+        this.dynamicFieldsForm = this._fb.group(group);
+
+        this.dataOk = true;
+
+        this.loadBasicDetail();
+
+        this._cdr.markForCheck();
+      });
   }
 
   toggleWhatsApp() {
-    const isViewable = this.editProfailDetailForm.get('whatsapp.isViewable')?.value;
-    if (isViewable) {
-      isViewable.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe();
+    const isViewableControl = this.editProfileDetailForm.get('whatsapp.isViewable');
+    if (isViewableControl) {
+      isViewableControl.valueChanges.pipe(takeUntil(this.unsubscribe$)).subscribe((value) => {
+        // Trigger change detection when toggle changes
+        this._cdr.markForCheck();
+      });
+    }
+  }
+
+  onWhatsAppToggleChange(event: any) {
+    const isViewableControl = this.editProfileDetailForm.get('whatsapp.isViewable');
+    if (isViewableControl) {
+      isViewableControl.setValue(event.target.checked);
+      this._cdr.markForCheck();
     }
   }
 
   async onSave() {
-    if (this.editProfileBasicDetailForm.invalid || this.editProfailDetailForm.invalid) {
+    if (this.editProfileBasicDetailForm.invalid || this.editProfileDetailForm.invalid) {
       return;
     }
 
     try {
       const loadingProfile = await this._loadingCtrl.create({
-        message: 'Editando perfil...',
+        message: translations['pages.editInfoProfile.loading'],
       });
       await loadingProfile.present();
       const dataBasicProfile = this.prepareBasicProfileData();
       const dataProfile = this.prepareDetailedProfileData();
+
+      const dynamicFieldsToSave = this.dynamicFieldsForm.value;
+
+      dataProfile.dynamicFields = dynamicFieldsToSave;
+
       await this.updateUserData(dataBasicProfile);
       await this.updateUserProfile(dataProfile);
+
       this._dialogRef.close('saved');
     } catch (error) {
       console.error('Error al guardar los cambios:', error);
+
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'EditInfoProfileDetailComponent',
+        'Error guardando los cambios en el perfil.',
+        {
+          user: this.userData,
+          message: error,
+          dataBasic: this.editProfileBasicDetailForm.value,
+          dataProfile: this.editProfileDetailForm.value,
+          dynamicFields: this.dynamicFieldsForm.value,
+        },
+      );
     } finally {
       await this.dismissLoading();
     }
@@ -101,7 +198,7 @@ export class EditInfoProfileDetailComponent implements OnInit {
   }
 
   private prepareDetailedProfileData(): any {
-    const controls = this.editProfailDetailForm.controls;
+    const controls = this.editProfileDetailForm.controls;
 
     const legend = controls['legend'].value || null;
     const dateOfBirth = controls['dateOfBirth'].value || null;
@@ -138,19 +235,29 @@ export class EditInfoProfileDetailComponent implements OnInit {
   }
 
   loadBasicDetail() {
-    if (!this.userData) {
-      return;
-    }
-    this.editProfileBasicDetailForm.controls['name'].setValue(this.userData.name);
-    this.editProfileBasicDetailForm.controls['lastName'].setValue(this.userData.lastName);
-    this.editProfailDetailForm.controls['legend'].setValue(this.userData?.profile?.legend);
-    this.editProfailDetailForm.controls['dateOfBirth'].setValue(this.userData?.profile?.dateOfBirth);
-    this.editProfailDetailForm.controls['description'].setValue(this.userData?.profile?.description);
-    this.editProfailDetailForm.controls['sex'].setValue(this.userData?.profile?.sex);
+    if (!this.userData) return;
 
-    if (this.userData.profile.whatsapp) {
-      this.editProfailDetailForm.controls['whatsapp'].get('number')?.setValue(this.userData.profile.whatsapp.number);
-      this.editProfailDetailForm.controls['whatsapp'].get('isViewable')?.setValue(this.userData.profile.whatsapp.isViewable);
+    this.editProfileBasicDetailForm.patchValue({
+      name: this.userData.name,
+      lastName: this.userData.lastName
+    });
+
+    this.editProfileDetailForm.patchValue({
+      legend: this.userData?.profile?.legend || '',
+      dateOfBirth: this.userData?.profile?.dateOfBirth || '',
+      description: this.userData?.profile?.description || '',
+      sex: this.userData?.profile?.sex || ''
+    });
+
+    if (this.userData.profile?.whatsapp) {
+      this.editProfileDetailForm.get('whatsapp')?.patchValue({
+        number: this.userData.profile.whatsapp.number,
+        isViewable: this.userData.profile.whatsapp.isViewable
+      });
+    }
+
+    if (this.userData.profile?.dynamicFields && this.dynamicFieldsForm) {
+      this.dynamicFieldsForm.patchValue(this.userData.profile.dynamicFields, { emitEvent: false });
     }
 
     this._cdr.markForCheck();

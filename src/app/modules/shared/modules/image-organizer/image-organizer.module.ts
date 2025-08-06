@@ -12,6 +12,7 @@ import { WorkyAvatarModule } from '../worky-avatar/worky-avatar.module';
 import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
 import { ReactionsModule } from '../reactions/reactions.module';
 import { AddPublicationModule } from '../addPublication/addPublication.module';
+import { WorkyImageModule } from '../worky-image/worky-image.module';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { AddPublicationModule } from '../addPublication/addPublication.module';
     PipesSharedModule,
     ReactionsModule,
     AddPublicationModule,
+    WorkyImageModule,
   ],
   exports: [ImageOrganizerComponent],
 })

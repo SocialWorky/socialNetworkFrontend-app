@@ -1,6 +1,7 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 @use 'src/assets/styles/worky-variables.scss' as variables;
+@use 'sass:map';
 
 .reaction-container-wrapper {
   position: relative;
@@ -14,7 +15,7 @@
   right: -15px;
   bottom: -15px;
   z-index: 1;
-  pointer-events: auto; 
+  pointer-events: auto;
 }
 
 .reaction-container {
@@ -26,6 +27,34 @@
     display: flex;
     align-items: center;
     gap: 5px;
+  }
+}
+
+// Skeleton específico para reacciones (solo durante carga inicial)
+.reactions-skeleton {
+  .skeleton-reaction-button {
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+    min-height: 24px; // Ensure consistent height
+    
+    .skeleton-icon {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(90deg, color.$worky-color-greyLight 25%, transparent 50%, color.$worky-color-greyLight 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.2s infinite;
+      border-radius: 50%;
+    }
+  }
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
 
@@ -87,7 +116,27 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  img {
+  
+  .reaction-icon-container {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    .reaction-emoji-img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+    
+    .reaction-fallback-icon {
+      font-size: 20px;
+      color: color.$worky-color-grey;
+    }
+  }
+  
+  worky-image {
     width: 20px;
     height: 20px;
   }

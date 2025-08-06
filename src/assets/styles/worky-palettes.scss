@@ -1,4 +1,5 @@
-@import './worky-palettes-variables';
+@use './worky-palettes-variables';
+@use 'sass:map';
 
 $worky-color-navy: var(--worky-color-navy);
 $worky-color-yellow: var(--worky-color-yellow);
@@ -24,6 +25,15 @@ $worky-color-primary: $worky-color-navy;
 $worky-color-accent: $worky-color-blue;
 $worky-color-warn: $worky-color-magenta;
 
+// Colors icons, text, etc
+$worky-color-icon: var(--worky-color-icon);
+$worky-color-text: var(--worky-color-text);
+$worky-color-input-background: var(--worky-color-input-background);
+
+// Colors Components
+$worky-color-module-container: var(--worky-color-module-container);
+$worky-color-content-navbar: var(--worky-color-content-navbar);
+
 $worky-navy: (
    3:  color-mix(in srgb, $worky-color-navy, $worky-color-light 3%),
    6:  color-mix(in srgb, $worky-color-navy, $worky-color-light 6%),
@@ -34,6 +44,7 @@ $worky-navy: (
   56:  color-mix(in srgb, $worky-color-navy, $worky-color-light 56%),
   72:  color-mix(in srgb, $worky-color-navy, $worky-color-light 72%),
   87:  color-mix(in srgb, $worky-color-navy, $worky-color-light 87%),
+  93:  color-mix(in srgb, $worky-color-navy, $worky-color-light 93%),
   100:     $worky-color-navy,
   contrast: (
       3: $worky-color-dark,
@@ -45,6 +56,7 @@ $worky-navy: (
      56: $worky-color-light,
      72: $worky-color-light,
      87: $worky-color-light,
+     93: $worky-color-light,
     100: $worky-color-light,
   )
 );
@@ -209,6 +221,7 @@ $worky-blue: (
   56:  color-mix(in srgb, $worky-color-blue, $worky-color-light 56%),
   72:  color-mix(in srgb, $worky-color-blue, $worky-color-light 72%),
   87:  color-mix(in srgb, $worky-color-blue, $worky-color-light 87%),
+  93:  color-mix(in srgb, $worky-color-blue, $worky-color-light 93%),
   100:     $worky-color-blue,
   contrast: (
       3: $worky-color-dark,
@@ -220,6 +233,7 @@ $worky-blue: (
      56: $worky-color-dark,
      72: $worky-color-light,
      87: $worky-color-light,
+     93: $worky-color-light,
     100: $worky-color-light,
   )
 );
@@ -377,12 +391,12 @@ $worky-grey: (
 /* worky App Components Colors */
 
 /* App */
-$worky-color-app-background: #FFFFFF;
-$worky-color-app-text: $worky-color-navy;
-$worky-color-app-dark: $worky-color-navy;
+$worky-color-app-background: $worky-color-light;
+// $worky-color-app-text: $worky-color-navy;
+// $worky-color-app-dark: $worky-color-navy;
 
-$worky-color-app-primary: map-get($worky-blue, 100);
-$worky-color-app-secondary: map-get($worky-blue, 56);
+$worky-color-app-primary: map.get($worky-blue, 100);
+$worky-color-app-secondary: map.get($worky-blue, 56);
 
 /* App Components */
-$worky-background-header-color: map-get($worky-blue, 24);
+$worky-background-header-color: map.get($worky-blue, 24);

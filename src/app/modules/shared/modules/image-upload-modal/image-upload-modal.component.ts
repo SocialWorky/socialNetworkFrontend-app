@@ -1,13 +1,15 @@
-import { Component, OnInit, ViewChild, ElementRef, Input, Inject, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ViewChild, ElementRef, ChangeDetectorRef, Inject } from '@angular/core';
+import { ImageLoadOptions } from '../../services/image.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 
 @Component({
-  selector: 'worky-image-upload-modal',
-  templateUrl: './image-upload-modal.component.html',
-  styleUrls: ['./image-upload-modal.component.scss']
+    selector: 'worky-image-upload-modal',
+    templateUrl: './image-upload-modal.component.html',
+    styleUrls: ['./image-upload-modal.component.scss'],
+    standalone: false
 })
 export class ImageUploadModalComponent implements OnInit {
   WorkyButtonType = WorkyButtonType;
@@ -21,7 +23,7 @@ export class ImageUploadModalComponent implements OnInit {
   selectedFiles: File[] = [];
 
   previews: { url: string, type: string }[] = [];
-  
+
   @Input()
   maxFiles: number = 10;
 
@@ -66,7 +68,7 @@ export class ImageUploadModalComponent implements OnInit {
         reader.readAsDataURL(file);
         validFiles.push(file);
       } else {
-        this.showAlert('Tipo de archivo no permitido: ' + file.name);
+        this.showAlert('imageUpload.fileTypeNotAllowed' + ': ' + file.name);
         this.loading = false;
       }
 
@@ -85,8 +87,7 @@ export class ImageUploadModalComponent implements OnInit {
       Alerts.ERROR,
       Position.CENTER,
       true,
-      true,
-      'Cerrar',
+      'button.close',
     );
   }
 

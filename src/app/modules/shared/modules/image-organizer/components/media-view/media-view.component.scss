@@ -1,11 +1,13 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-palettes' as colors;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'sass:map';
 
 .content-view-media {
   display: flex;
   width: 100%;
-  height: 100%;
+  height: 100dvh;
+  background-color: color-mix(in srgb, var(--worky-color-light), transparent 5%);
   &.desktop {
     flex-direction: row;
   }
@@ -18,17 +20,22 @@
     height: 95vh;
     @include breakpoints.below-sm {
       width: 100%;
-      height: 35vh;
+      height: 25dvh;
     }
   }
 
   worky-message-loading {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
     width: 35%;
-    height: 95vh;
+    max-height: 95dvh;
     padding: 5px;
+    background-color: color-mix(in srgb, var(--worky-color-light), transparent 5%);
+    overflow: auto;
     @include breakpoints.below-sm {
       width: 100%;
-      height: 65vh;
+      max-height: 75dvh;
     }
   }
 
@@ -40,7 +47,7 @@
     cursor: pointer;
     color: colors.$worky-color-light;
     font-size: 20px;
-    background-color: map-get(colors.$worky-navy, 56);
+    background-color: map.get(colors.$worky-navy, 56);
     border-radius: 50%;
     padding: 5px;
   }

@@ -9,7 +9,7 @@ WORKDIR /app
 COPY .env .env
 COPY --from=dev-deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run prepare-meta && npm run generate-manifest && npm run build --prod
+RUN npm run prepare-meta && npm run generate-manifest && npm run build:docker:safe
 
 FROM node:22.1.0-alpine3.18 AS generate-icons
 WORKDIR /app

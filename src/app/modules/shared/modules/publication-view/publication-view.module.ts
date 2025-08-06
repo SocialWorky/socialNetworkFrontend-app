@@ -14,6 +14,15 @@ import { ReactionsModule } from '../reactions/reactions.module';
 import { WorkyButtonsModule } from '../buttons/buttons.module';
 import { MaterialModule } from '@shared/modules/material/material.module';
 import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
+import { ProcessingMediaModule } from '@shared/modules/processing-media/processing-media.module';
+import { OptimizedImageComponent } from '../../components/optimized-image/optimized-image.component';
+import { OptimizedVideoComponent } from '../../components/optimized-video/optimized-video.component';
+import { ImageSkeletonComponent } from '../../components/skeleton/image-skeleton.component';
+import { TextSkeletonComponent } from '../../components/skeleton/text-skeleton.component';
+import { AvatarSkeletonComponent } from '../../components/skeleton/avatar-skeleton.component';
+import { ButtonSkeletonComponent } from '../../components/skeleton/button-skeleton.component';
+import { SharedModule } from '../../shared.module';
+
 
 @NgModule({
   declarations: [PublicationViewComponent, ReportResponseComponent],
@@ -31,6 +40,14 @@ import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
     WorkyButtonsModule,
     MaterialModule,
     PipesSharedModule,
+    ProcessingMediaModule,
+    OptimizedImageComponent,
+    OptimizedVideoComponent,
+    ImageSkeletonComponent,
+    TextSkeletonComponent,
+    AvatarSkeletonComponent,
+    ButtonSkeletonComponent,
+    SharedModule,
   ],
 })
 export class PublicationViewModule {}

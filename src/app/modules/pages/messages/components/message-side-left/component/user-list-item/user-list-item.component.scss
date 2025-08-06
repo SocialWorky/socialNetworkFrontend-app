@@ -1,7 +1,7 @@
 @use 'src/assets/styles/worky-typography.scss' as Fonts;
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
-
+@use 'sass:map';
 
 .button {
   width: 100%;
@@ -13,7 +13,7 @@
   cursor: pointer;
   text-align: left;
   &:hover {
-    background: map-get(color.$worky-navy, 87);
+    background: map.get(color.$worky-navy, 87);
   }
 
   .avatar-container {
@@ -33,7 +33,7 @@
       .user-name {
         font-size: 1rem;
         font-weight: 700;
-        color: var(--worky-color-blue);
+        color: color.$worky-color-text;
       }
 
       .unread-messages {

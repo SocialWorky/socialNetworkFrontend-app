@@ -1,7 +1,7 @@
 <div class="container-widget content-weather worky-module-container">
   <div class="search">
     <i class="material-icons">place</i>
-    <input type="text" [(ngModel)]="city" placeholder="Ingrese la ciudad" />
+    <input type="text" [(ngModel)]="city" placeholder="{{ 'weather.cityPlaceholder' | workyTranslations }}" />
 
     <worky-buttons
       [workyButtonType]="WorkyButtonType.Outline"
@@ -26,10 +26,10 @@
         <div class="temperature-current">
           {{ weatherData.forecast.forecastday[i].hour[currentHour].temp_c }}<span>°C</span>
         </div>
-        <span>Temperatura Actual</span>
+        <span>{{ 'weather.currentTemperature' | workyTranslations }}</span>
         <div class="min-max">
-          <p class="temperature">Min: {{ weatherData.forecast.forecastday[i].day.mintemp_c }}<span>°C</span></p>
-          <p class="temperature">Max: {{ weatherData.forecast.forecastday[i].day.maxtemp_c }}<span>°C</span></p>
+          <p class="temperature">{{ 'weather.min' | workyTranslations }}: {{ weatherData.forecast.forecastday[i].day.mintemp_c }}<span>°C</span></p>
+          <p class="temperature">{{ 'weather.max' | workyTranslations }}: {{ weatherData.forecast.forecastday[i].day.maxtemp_c }}<span>°C</span></p>
         </div>
         <p class="description">{{ weatherData.forecast.forecastday[i].hour[currentHour].condition.text }}</p>
       </div>

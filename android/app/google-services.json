@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "914032321589",
+    "project_id": "socialworky",
+    "storage_bucket": "socialworky.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:914032321589:android:3301a54d909bf868fe7d7c",
+        "android_client_info": {
+          "package_name": "com.worky.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0k743LYWWKf7aYyx6JevDzBHdBWYtnYw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
