@@ -21,10 +21,30 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '2.2.0',
+  version: '2.2.1',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🧹 LIMPIEZA Y OPTIMIZACIÓN (v2.2.1):
+    - Cleaned: Eliminación de componentes y servicios no utilizados
+      * VirtualScrollComponent - Eliminado (no se usaba en el proyecto)
+      * IntersectionObserverService - Eliminado (no se inyectaba en ningún servicio)
+      * AdvancedCacheService - Eliminado (sistema de cache existente funciona)
+      * Funcionalidad duplicada de infinite scroll ya implementada
+      * Reducción estimada de 15-20KB en bundle size
+    
+    - Optimized: Limpieza de documentación innecesaria
+      * Eliminada documentación de componentes no utilizados
+      * Reorganización de documentación según estructura correcta
+      * Separación clara entre procesos (.dev/) e implementación (docs/)
+      * Mejor mantenibilidad y claridad del proyecto
+    
+    - Improved: Organización del código
+      * Código más limpio sin componentes muertos
+      * Documentación alineada con instrucciones del proyecto
+      * Menos confusión para desarrolladores
+      * Estructura más clara y mantenible
+
     🚀 OPTIMIZACIONES DE PERFORMANCE (v2.2.0):
     - Optimized: Eliminación de comentarios con actualización local instantánea
       * Eliminada llamada de red innecesaria para eliminar comentarios
