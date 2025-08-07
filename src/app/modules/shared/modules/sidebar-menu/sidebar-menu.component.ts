@@ -8,6 +8,9 @@ import { MessageService } from 'src/app/modules/pages/messages/services/message.
 import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service';
 import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { GlobalEventService } from '@shared/services/globalEventService.service';
+import { UserService } from '@shared/services/core-apis/users.service';
+import { User } from '@shared/interfaces/user.interface';
 
 @Component({
   selector: 'worky-sidebar-menu',
@@ -38,7 +41,9 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
     private _messageService: MessageService,
     private _notificationPanelService: NotificationPanelService,
     private _notificationMessageChatService: NotificationMessageChatService,
-    private _logService: LogService
+    private _logService: LogService,
+    private _globalEventService: GlobalEventService,
+    private _userService: UserService
   ) { }
 
   ngOnInit() {
@@ -46,6 +51,19 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
     this.userName = this.decodedToken.username;
     this.userAvatar = this.decodedToken.avatar || '';
     this.userFullName = this.decodedToken.name || '';
+    
+    // Subscribe to profile image updates
+    this._globalEventService.profileImage$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(newImageUrl => {
+        if (newImageUrl) {
+          this.userAvatar = newImageUrl;
+          this._cdr.markForCheck();
+        }
+      });
+    
+    // Get fresh user data
+    this.getFreshUserData();
     
     this._authService.isAuthenticated().then(isAuth => {
       this.isAuthenticated = isAuth;
@@ -73,6 +91,22 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
   ngOnDestroy() {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+  }
+
+  private async getFreshUserData(): Promise<void> {
+    try {
+      if (this.decodedToken?.id) {
+        const freshUserData = await this._userService.getUserById(this.decodedToken.id).toPromise();
+        if (freshUserData) {
+          this.userAvatar = freshUserData.avatar || '';
+          this.userFullName = freshUserData.name || '';
+          this.userName = freshUserData.username || '';
+          this._cdr.markForCheck();
+        }
+      }
+    } catch (error) {
+      this._logService.log(LevelLogEnum.ERROR, 'SideBarMenuComponent', 'Error getting fresh user data', { error });
+    }
   }
 
   toggleNotificationsPanel() {

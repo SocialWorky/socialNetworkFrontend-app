@@ -12,6 +12,8 @@ import { DeviceDetectionService } from '@shared/services/device-detection.servic
 import { UtilityService } from '@shared/services/utility.service';
 import { LazyCssService } from '@shared/services/core-apis/lazy-css.service';
 import { FontLoaderService } from '@shared/services/core-apis/font-loader.service';
+import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
     selector: 'worky-edit-img-profile',
@@ -59,7 +61,8 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     private _deviceDetectionService: DeviceDetectionService,
     private _utilityService: UtilityService,
     private _lazyCssService: LazyCssService,
-    private _fontLoaderService: FontLoaderService
+    private _fontLoaderService: FontLoaderService,
+    private _logService: LogService
   ) {}
 
   ngAfterViewInit(): void {
@@ -177,47 +180,83 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     });
 
     if (this.selectedImage && this.cropper) {
-      const responseDesktop = await lastValueFrom(
-        this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation).pipe(takeUntil(this.unsubscribe$))
-      );
-      const croppedCanvasMobile = this.cropper.getCroppedCanvas({
-        width: 620,
-        height: 190,
-      });
+      try {
+        const responseDesktop = await lastValueFrom(
+          this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation, null, null, TypePublishing.PROFILE_IMG).pipe(takeUntil(this.unsubscribe$))
+        );
 
-      this.cropper.destroy();
-
-      const croppedImageUrlMobile = croppedCanvasMobile.toDataURL(this.originalMimeType);
-      const fileMobile = this.dataURLtoFile(croppedImageUrlMobile, `${userId}-mobile`, this.originalMimeType!);
-
-      const responseMobile = await lastValueFrom(
-        this._fileUploadService.uploadFile([fileMobile], uploadLocation).pipe(takeUntil(this.unsubscribe$))
-      );
-
-      const coverMobile = environment.APIFILESERVICE + uploadLocation + '/' + responseMobile[0].filename;
-      const coverDesktop = environment.APIFILESERVICE + uploadLocation + '/' + responseDesktop[0].filename;
-
-      await this._profileService.updateProfile(userId, {
-        coverImage: coverDesktop,
-        coverImageMobile: !this.isMobile ? coverMobile : coverDesktop,
-      }).pipe(takeUntil(this.unsubscribe$)).subscribe({
-        next: (data) => {
-          this.isUploading = false;
-          this._cdr.markForCheck();
-        },
-        error: (error) => {
-          console.error('Error updating profile', error);
-          this.isUploading = false;
-          this._cdr.markForCheck();
+        // Handle the actual response structure: {message: string, files: Array}
+        let desktopFilename: string;
+        if (responseDesktop && typeof responseDesktop === 'object' && responseDesktop.files && Array.isArray(responseDesktop.files) && responseDesktop.files.length > 0) {
+          const file = responseDesktop.files[0];
+          desktopFilename = file.filename || file.name || file.url || file;
+        } else {
+          throw new Error('Invalid response structure from desktop upload - expected {message, files}');
         }
-      });
 
-      this.previews[0].url = environment.APIFILESERVICE + uploadLocation + '/' + responseDesktop[0].filename;
+        if (!desktopFilename) {
+          throw new Error('No filename found in desktop upload response');
+        }
 
-      this.selectedFiles = [];
-      this.isUploading = false;
-      this.selectedImage = undefined;
-      this._cdr.markForCheck();
+        const croppedCanvasMobile = this.cropper.getCroppedCanvas({
+          width: 620,
+          height: 190,
+        });
+
+        this.cropper.destroy();
+
+        const croppedImageUrlMobile = croppedCanvasMobile.toDataURL(this.originalMimeType);
+        const fileMobile = this.dataURLtoFile(croppedImageUrlMobile, `${userId}-mobile`, this.originalMimeType!);
+
+        const responseMobile = await lastValueFrom(
+          this._fileUploadService.uploadFile([fileMobile], uploadLocation, null, null, TypePublishing.PROFILE_IMG).pipe(takeUntil(this.unsubscribe$))
+        );
+
+        // Handle the actual response structure: {message: string, files: Array}
+        let mobileFilename: string;
+        if (responseMobile && typeof responseMobile === 'object' && responseMobile.files && Array.isArray(responseMobile.files) && responseMobile.files.length > 0) {
+          const file = responseMobile.files[0];
+          mobileFilename = file.filename || file.name || file.url || file;
+        } else {
+          throw new Error('Invalid response structure from mobile upload - expected {message, files}');
+        }
+
+        if (!mobileFilename) {
+          throw new Error('No filename found in mobile upload response');
+        }
+
+        const coverMobile = environment.APIFILESERVICE + uploadLocation + '/' + mobileFilename;
+        const coverDesktop = environment.APIFILESERVICE + uploadLocation + '/' + desktopFilename;
+
+        await this._profileService.updateProfile(userId, {
+          coverImage: coverDesktop,
+          coverImageMobile: !this.isMobile ? coverMobile : coverDesktop,
+        }).pipe(takeUntil(this.unsubscribe$)).subscribe({
+          next: (data) => {
+            this.isUploading = false;
+            this._cdr.markForCheck();
+          },
+          error: (error) => {
+            this._logService.log(LevelLogEnum.ERROR, 'EditImgProfileComponent', 'Error updating profile', { error });
+            this.isUploading = false;
+            this._cdr.markForCheck();
+          }
+        });
+
+        this.previews[0].url = environment.APIFILESERVICE + uploadLocation + '/' + desktopFilename;
+
+        this.selectedFiles = [];
+        this.isUploading = false;
+        this.selectedImage = undefined;
+        this._cdr.markForCheck();
+      } catch (error) {
+        this._logService.log(LevelLogEnum.ERROR, 'EditImgProfileComponent', 'Error uploading image', { error });
+        this.isUploading = false;
+        this._cdr.markForCheck();
+        // Reset state on error
+        this.selectedFiles = [];
+        this.selectedImage = undefined;
+      }
     }
   }
 

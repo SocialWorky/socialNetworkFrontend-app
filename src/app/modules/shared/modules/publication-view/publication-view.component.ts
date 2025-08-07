@@ -32,6 +32,7 @@ import { ImageLoadOptions } from '../../services/image.service';
 import { MediaEventsService } from '@shared/services/media-events.service';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
+import { GlobalEventService } from '@shared/services/globalEventService.service';
 
 
 @Component({
@@ -123,7 +124,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _scrollService: ScrollService,
     private _loadingService: LoadingService,
     private _mediaEventsService: MediaEventsService,
-    private _alertService: AlertService
+    private _alertService: AlertService,
+    private _globalEventService: GlobalEventService
   ) {}
 
   async ngAfterViewInit() {
@@ -138,11 +140,21 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this.routeUrl = this._router.url;
     this.isProfile = this.routeUrl.includes('profile');
 
-          this._notificationService.notification$
-        .pipe(
-          distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
-          takeUntil(this.destroy$)
-        )
+    // Subscribe to profile image updates
+    this._globalEventService.profileImage$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(newImageUrl => {
+        if (newImageUrl && this.publication.author._id === this.dataUser?.id) {
+          this.publication.author.avatar = newImageUrl;
+          this._cdr.markForCheck();
+        }
+      });
+
+    this._notificationService.notification$
+      .pipe(
+        distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+        takeUntil(this.destroy$)
+      )
       .subscribe({
         next: (data: any) => {
           if (data?._id === this.publication._id) {
@@ -151,10 +163,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         }
       });
 
-      this._mediaEventsService.mediaProcessed$
-        .pipe(
-          takeUntil(this.destroy$)
-        )
+    this._mediaEventsService.mediaProcessed$
+      .pipe(
+        takeUntil(this.destroy$)
+      )
       .subscribe({
         next: (data: any) => {
           if (data?.idReference === this.publication._id) {

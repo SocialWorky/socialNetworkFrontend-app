@@ -702,38 +702,55 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     const uploadLocation = 'profile-avatar';
     if (this.selectedImage) {
       const response = await lastValueFrom(
-        this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation).pipe(takeUntil(this.destroy$))
+        this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation, null, null, TypePublishing.PROFILE_IMG).pipe(takeUntil(this.destroy$))
       );
 
-      const urlImgUpload = environment.APIFILESERVICE + uploadLocation + '/' + response[0].filename;
+      // Handle the actual response structure: {message: string, files: Array}
+      let filename: string;
+      if (response && typeof response === 'object' && response.files && Array.isArray(response.files) && response.files.length > 0) {
+        const file = response.files[0];
+        filename = file.filename || file.name || file.url || file;
+      } else {
+        this._logService.log(LevelLogEnum.ERROR, 'ProfilesComponent', 'Invalid response structure from avatar upload', { response });
+        return;
+      }
 
-      this._userService.userEdit(userId, { avatar: urlImgUpload }).pipe(takeUntil(this.destroy$)).subscribe({
-        next: () => {
-          this._globalEventService.updateProfileImage(urlImgUpload);
-          if (this.userData) {
-            this.userData.avatar = urlImgUpload;
-          }
-          setTimeout(() => {
+      const urlImgUpload = environment.APIFILESERVICE + uploadLocation + '/' + filename;
+
+              this._userService.userEdit(userId, { avatar: urlImgUpload }).pipe(takeUntil(this.destroy$)).subscribe({
+          next: () => {
+            // Invalidate user cache to force refresh in other components
+            this._userService.invalidateUserCache(userId);
+            
+            // Update global event service
+            this._globalEventService.updateProfileImage(urlImgUpload);
+            
+            // Update local user data
+            if (this.userData) {
+              this.userData.avatar = urlImgUpload;
+            }
+            
+            setTimeout(() => {
+              this.isUploading = false;
+              this._cdr.markForCheck();
+            }, 1200);
+          },
+          error: (error) => {
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'ProfilesComponent',
+              'Error al actualizar la imagen de perfil',
+              {
+                user: this._authService.getDecodedToken(),
+                message: error,
+              },
+            );
             this.isUploading = false;
             this._cdr.markForCheck();
-          }, 1200);
-        },
-        error: (error) => {
-          this._logService.log(
-            LevelLogEnum.ERROR,
-            'ProfilesComponent',
-            'Error al actualizar la imagen de perfil',
-            {
-              user: this._authService.getDecodedToken(),
-              message: error,
-            },
-          );
-          this.isUploading = false;
-          this._cdr.markForCheck();
-        }
-      });
+          }
+        });
 
-      await Promise.all(response);
+      // No need to await Promise.all since response is not an array of promises
 
       this.selectedFiles = [];
       this._cdr.markForCheck();

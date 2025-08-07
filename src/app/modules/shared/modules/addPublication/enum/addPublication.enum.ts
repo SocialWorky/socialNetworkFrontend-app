@@ -7,6 +7,7 @@ export enum TypePublishing {
   MESSAGE = 'message',
   PROCESSING = 'procesando',
   EMOJI = 'emoji',
+  PROFILE_IMG = 'profileImg',
 }
 
 export enum TypePrivacy {

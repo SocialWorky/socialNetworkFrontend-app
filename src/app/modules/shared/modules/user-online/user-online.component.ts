@@ -6,6 +6,9 @@ import { takeUntil, catchError, switchMap, startWith, distinctUntilChanged, debo
 
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { AuthService } from '@auth/services/auth.service';
+import { UserService } from '@shared/services/core-apis/users.service';
+import { GlobalEventService } from '@shared/services/globalEventService.service';
+import { User } from '@shared/interfaces/user.interface';
 @Component({
     selector: 'worky-user-online',
     templateUrl: './user-online.component.html',
@@ -39,6 +42,8 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     private _notificationUsersService: NotificationUsersService,
     private _router: Router,
     private _authService: AuthService,
+    private _userService: UserService,
+    private _globalEventService: GlobalEventService,
   ) {
     this.checkAndInitializeUser();
 
@@ -69,6 +74,24 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.isLoading.set(true);
     if (!this.currentUser) return;
+    
+    // Subscribe to profile image updates
+    this._globalEventService.profileImage$
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(newImageUrl => {
+        if (newImageUrl && this.currentUser) {
+          // Update current user's avatar in the online users list
+          const updatedUsers = this.usersOnline().map(user => {
+            if (user.id === this.currentUser?.id) {
+              return { ...user, avatar: newImageUrl };
+            }
+            return user;
+          });
+          this.usersOnline.set(updatedUsers);
+          this._cdr.markForCheck();
+        }
+      });
+    
     interval(this.REFRESH_INTERVAL).pipe(
       startWith(0),
       switchMap(() => this._notificationUsersService.userStatuses$),
@@ -83,9 +106,8 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
       }),
       takeUntil(this._destroy$)
     ).subscribe((userStatuses: Token[]) => {
-      this.usersOnline.set(userStatuses);
-      this.isLoading.set(false);
-      this.error.set(null);
+      // Enhance user data with fresh user information
+      this.enhanceUserData(userStatuses);
     });
 
     this.getUserOnline();
@@ -99,6 +121,45 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error adding user status:', error);
       this.error.set('Failed to update user status');
+    }
+  }
+
+  private async enhanceUserData(userStatuses: Token[]): Promise<void> {
+    try {
+      // Get fresh user data for current user
+      if (this.currentUser) {
+        const freshUserData = await this._userService.getUserById(this.currentUser.id).toPromise();
+        if (freshUserData) {
+          // Update current user's data in the list
+          const enhancedUserStatuses = userStatuses.map(user => {
+            if (user.id === this.currentUser?.id) {
+              return {
+                ...user,
+                avatar: freshUserData.avatar,
+                name: freshUserData.name
+              };
+            }
+            return user;
+          });
+          
+          this.usersOnline.set(enhancedUserStatuses);
+          this.isLoading.set(false);
+          this.error.set(null);
+          this._cdr.markForCheck();
+          return;
+        }
+      }
+      
+      // Fallback to original data if enhancement fails
+      this.usersOnline.set(userStatuses);
+      this.isLoading.set(false);
+      this.error.set(null);
+    } catch (error) {
+      console.error('Error enhancing user data:', error);
+      // Fallback to original data
+      this.usersOnline.set(userStatuses);
+      this.isLoading.set(false);
+      this.error.set(null);
     }
   }
 

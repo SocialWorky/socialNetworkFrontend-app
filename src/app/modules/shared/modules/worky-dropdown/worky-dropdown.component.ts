@@ -80,6 +80,10 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(newImageUrl => {
         this.profileImageUrl = newImageUrl;
+        // Force refresh user data to get updated avatar
+        if (this.img === 'avatar') {
+          this.getUser();
+        }
         this._cdr.markForCheck();
       });
     this.checkDropdownDirection();
