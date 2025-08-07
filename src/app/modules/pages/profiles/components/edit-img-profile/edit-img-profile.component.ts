@@ -69,6 +69,8 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     if (this.profileImage) {
       this.previews[0].url = this.profileImage;
     }
+    // Load Cropper.js CSS from CDN
+    this._lazyCssService.loadCss('https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css', 'cropper');
   }
 
   ngOnDestroy(): void {
@@ -92,6 +94,21 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
       if (this.cropper) {
         this.cropper.destroy();
       }
+      
+      // Ensure the image is loaded before initializing cropper
+      const img = this.cropperImage.nativeElement;
+      if (img.complete) {
+        this.createCropper();
+      } else {
+        img.onload = () => {
+          this.createCropper();
+        };
+      }
+    }
+  }
+
+  createCropper() {
+    if (this.cropperImage && this.selectedImage) {
       this.cropper = new Cropper(this.cropperImage.nativeElement, {
         aspectRatio: 1200 / 250,
         viewMode: 1,
@@ -99,6 +116,10 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
         zoomable: true,
         responsive: true,
         background: false,
+        dragMode: 'move',
+        cropBoxResizable: true,
+        cropBoxMovable: true,
+        toggleDragModeOnDblclick: false,
       });
     }
   }
@@ -146,8 +167,15 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
         const reader = new FileReader();
         reader.onload = (e: any) => {
           this.selectedImage = e.target.result;
-          if (!this.isMobile) this.cropping = true;
-          this._cdr.markForCheck();
+          if (!this.isMobile) {
+            this.cropping = true;
+            // Small delay to ensure DOM is ready
+            setTimeout(() => {
+              this._cdr.markForCheck();
+            }, 100);
+          } else {
+            this._cdr.markForCheck();
+          }
         };
         reader.readAsDataURL(file);
 
