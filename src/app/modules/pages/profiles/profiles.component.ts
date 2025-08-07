@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal, ViewChild, ElementRef, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -39,7 +39,8 @@ import { PreloadService } from '@shared/services/preload.service';
     selector: 'worky-profiles',
     templateUrl: './profiles.component.html',
     styleUrls: ['./profiles.component.scss'],
-    standalone: false
+    standalone: false,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   typePublishing = TypePublishing;
@@ -111,6 +112,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('contentContainer', { static: false }) contentContainer!: ElementRef;
   
   isRefreshing = false;
+  isUpdatingProfile = false;
 
   constructor(
     public _dialog: MatDialog,
@@ -295,6 +297,19 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private async getDataProfile(): Promise<void> {
+    if (!this.idUserProfile) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'ProfilesComponent',
+        'idUserProfile is undefined or empty',
+        {
+          idUserProfile: this.idUserProfile,
+          user: this._authService.getDecodedToken(),
+        },
+      );
+      return;
+    }
+
     this.isLoadingUserData = true;
     this._cdr.markForCheck();
     
@@ -939,5 +954,57 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   trackByIndex(index: number): number {
     return index;
+  }
+
+  // Getters para manejar validaciones de forma elegante
+  get profileCoverImage(): string {
+    return this.userData?.profile?.coverImage || '';
+  }
+
+  get profileCoverImageMobile(): string {
+    return this.userData?.profile?.coverImageMobile || '';
+  }
+
+  get profileLegend(): string {
+    return this.userData?.profile?.legend || '';
+  }
+
+  get profileWhatsappViewable(): boolean {
+    return this.userData?.profile?.whatsapp?.isViewable === true;
+  }
+
+  onUserDataUpdated(updatedUserData: User): void {
+    // Show skeleton during update
+    this.isUpdatingProfile = true;
+    this._cdr.markForCheck();
+    
+    // Usar setTimeout para dar tiempo a que se muestre el skeleton
+    setTimeout(() => {
+      // Usar Object.assign para una actualización más sutil
+      if (this.userData && updatedUserData) {
+        // Actualizar propiedades básicas de forma inmutable
+        Object.assign(this.userData, {
+          name: updatedUserData.name,
+          lastName: updatedUserData.lastName,
+          username: updatedUserData.username,
+          avatar: updatedUserData.avatar
+        });
+        
+        // Actualizar propiedades del perfil de forma inmutable
+        if (updatedUserData.profile) {
+          if (!this.userData.profile) {
+            this.userData.profile = {};
+          }
+          Object.assign(this.userData.profile, updatedUserData.profile);
+        }
+      } else {
+        // Fallback: reemplazar todo si no hay datos existentes
+        this.userData = updatedUserData;
+      }
+      
+      // Ocultar skeleton de actualización
+      this.isUpdatingProfile = false;
+      this._cdr.markForCheck();
+    }, 300); // Aumentado a 300ms para mejor experiencia visual
   }
 }

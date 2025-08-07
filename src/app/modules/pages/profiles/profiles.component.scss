@@ -3,6 +3,37 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 @use 'sass:map';
 
+// Transiciones suaves para evitar pestañeos
+.profile-container {
+  transition: opacity 0.2s ease-in-out;
+  
+  .content-header-profile,
+  .content-body-profile {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  // Estado de actualización
+  &.updating {
+    opacity: 0.8;
+    pointer-events: none;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      z-index: 1000;
+    }
+  }
+}
+
 .content-header-profile {
   -webkit-overflow-scrolling: touch;
   .image-container {
@@ -211,6 +242,34 @@
   &:not(.mobile-container) {
     height: auto;
     overflow: visible;
+  }
+}
+
+// Estilos para el skeleton durante actualizaciones
+.profile-skeleton {
+  padding: 20px;
+  margin: 20px;
+  
+  worky-skeleton {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  // Animación suave para la transición
+  animation: fadeInOut 0.3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

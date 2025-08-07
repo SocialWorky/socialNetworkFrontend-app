@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil } from 'rxjs';
 import { isArray } from 'lodash';
@@ -34,6 +34,8 @@ export class ProfileDetailComponent  implements OnInit {
   @Input() isCurrentUser: boolean | undefined;
 
   @Input() userData: User | undefined;
+
+  @Output() userDataUpdated = new EventEmitter<User>();
 
   constructor(
     private _dialog: MatDialog,
@@ -100,13 +102,16 @@ export class ProfileDetailComponent  implements OnInit {
       }
     });
 
+    const idUserCurrent = this.userData?._id;
+
     dialogRef.afterClosed().pipe(takeUntil(this.unsubscribe$)).subscribe(async result => {
-      if (result) {
-        await this._userService.getUserById(this.userData?._id!).pipe(takeUntil(this.unsubscribe$)).subscribe({
+      if (result && idUserCurrent) {
+        await this._userService.getUserByIdFresh(idUserCurrent).pipe(takeUntil(this.unsubscribe$)).subscribe({
           next: (response: User) => {
             this.userData = response;
             this.processDynamicFields();
             this._cdr.markForCheck();
+            this.userDataUpdated.emit(response);
           },
           error: (error) => {
             this._logService.log(

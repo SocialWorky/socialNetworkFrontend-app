@@ -79,6 +79,7 @@ export const translations = {
   'profile.details-birthday': 'Date of Birth: ',
   'profile.details-createdAt': 'Joined: ',
   'profile.btn-editProfile': 'Edit Profile',
+  'profile.error.loadUser': 'Could not load user profile.',
   
   // PAGES EDIT INFO PROFILE
   'pages.editInfoProfile.name': 'Name',
@@ -95,6 +96,7 @@ export const translations = {
   'pages.editInfoProfile.whatsapp.number': 'WhatsApp Number',
   'pages.editInfoProfile.saveChanges': 'Save Changes',
   'pages.editInfoProfile.loading': 'Editing profile...',
+  'pages.editInfoProfile.loading.subMessage': 'Saving profile changes...',
   
   // ===== PUBLICATIONS MODULE =====
   // PUBLICATIONS COMPONENT
