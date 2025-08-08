@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { ConnectionQualityService } from './connection-quality.service';
 import { DeviceDetectionService } from './device-detection.service';
-import { AuthService } from '../../auth/services/auth.service';
 
 export interface EnhancedLogMetadata {
   // Device Information
@@ -67,8 +66,7 @@ export class EnhancedLoggingService {
   constructor(
     private logService: LogService,
     private connectionQualityService: ConnectionQualityService,
-    private deviceDetectionService: DeviceDetectionService,
-    private authService: AuthService
+    private deviceDetectionService: DeviceDetectionService
   ) {}
 
   /**
@@ -186,10 +184,26 @@ export class EnhancedLoggingService {
   /**
    * Get comprehensive enhanced metadata
    */
+  /**
+   * Get decoded token from localStorage to avoid circular dependency
+   */
+  private getDecodedTokenFromLocalStorage(): any {
+    const token = localStorage.getItem('token');
+    if (token && token !== 'undefined' && token !== 'null') {
+      try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        return decodedToken;
+      } catch (error) {
+        return null;
+      }
+    }
+    return null;
+  }
+
   private getEnhancedMetadata(): EnhancedLogMetadata {
     try {
       const connectionInfo = this.connectionQualityService.getConnectionInfo();
-      const userInfo = this.authService.getDecodedToken();
+      const userInfo = this.getDecodedTokenFromLocalStorage();
       
       return {
         deviceInfo: this.getDeviceInfo(),

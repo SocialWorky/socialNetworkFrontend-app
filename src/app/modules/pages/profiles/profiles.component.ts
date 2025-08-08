@@ -34,6 +34,7 @@ import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
 import { UtilityService } from '@shared/services/utility.service';
 import { ImageLoadOptions } from '@shared/services/image.service';
 import { PreloadService } from '@shared/services/preload.service';
+import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 
 @Component({
     selector: 'worky-profiles',
@@ -137,7 +138,8 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     private _logService: LogService,
     private _pullToRefreshService: PullToRefreshService,
     private _utilityService: UtilityService,
-    private _preloadService: PreloadService
+    private _preloadService: PreloadService,
+    private _mobileImageCacheService: MobileImageCacheService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
@@ -190,7 +192,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
         );
         
         const container = this.contentContainer.nativeElement;
-        container.style.height = '86dvh';
         container.style.overflowY = 'auto';
         container.style.webkitOverflowScrolling = 'touch';
         container.style.overscrollBehavior = 'contain';
@@ -202,7 +203,12 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     this._scrollService.scrollEnd$.pipe(
       takeUntil(this.destroy$)
     ).subscribe((data) => {
-      if(data === 'scrollEnd') this.loadPublications();
+      if(data === 'scrollEnd') {
+        // Add delay to prevent rapid loading
+        setTimeout(() => {
+          this.loadPublications();
+        }, 500);
+      }
 
       if(data === 'showNavbar') {
         this.navbarVisible = true;
@@ -270,7 +276,8 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       this.loaderPublications = false;
       this._cdr.markForCheck();
 
-      this.preloadProfileMedia();
+      // Optimize preload to prevent excessive image loading
+      this.preloadProfileMediaOptimized();
 
     } catch (error) {
       this._logService.log(
@@ -286,13 +293,32 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private preloadProfileMedia(): void {
-    const publications = this.publicationsProfile();
-    if (publications.length === 0) return;
-
-    this._preloadService.preloadForPage('profile', { 
-      publications,
-      profile: this.userData 
+  // NEW: Optimized preload method to prevent excessive image loading
+  private preloadProfileMediaOptimized() {
+    const currentPublications = this.publicationsProfile();
+    const config = this._mobileImageCacheService.getConfig();
+    
+    // Only preload images for visible publications
+    const visiblePublications = currentPublications.slice(-config.preloadThreshold);
+    
+    visiblePublications.forEach(publication => {
+      if (publication.media && publication.media.length > 0) {
+        // Only preload first image to reduce load
+        const firstMedia = publication.media[0];
+        if (firstMedia && firstMedia.url) {
+          this._mobileImageCacheService.loadImage(firstMedia.url, 'publication', {
+            priority: 'low',
+            timeout: 15000
+          }).subscribe({
+            next: () => {
+              // Image preloaded successfully - no need to log
+            },
+            error: (error) => {
+              // Don't log every preload error to reduce noise
+            }
+          });
+        }
+      }
     });
   }
 
@@ -798,19 +824,25 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       const clientHeight = container.clientHeight;
       const scrollHeight = container.scrollHeight;
       
-      const publicationHeight = 300;
+      const publicationHeight = 400; // Increased from 300
       const currentPublicationIndex = Math.floor(scrollTop / publicationHeight);
       const visiblePublications = Math.ceil(clientHeight / publicationHeight);
       const remainingPublications = currentPublications.length - currentPublicationIndex - visiblePublications;
       
-      if (remainingPublications <= 5 && remainingPublications > 0) {
-        setTimeout(() => this.loadPublications(), 0);
+      if (remainingPublications <= 10 && remainingPublications > 0) { // Increased from 5 to 10
+        // Add delay to prevent rapid loading
+        setTimeout(() => {
+          this.loadPublications();
+        }, 300);
       }
       
-      const threshold = 200;
+      const threshold = 500; // Increased from 200 to 500
       const position = scrollTop + clientHeight;
       if (position >= scrollHeight - threshold) {
-        setTimeout(() => this.loadPublications(), 0);
+        // Add delay to prevent rapid loading
+        setTimeout(() => {
+          this.loadPublications();
+        }, 300);
       }
     }
   }

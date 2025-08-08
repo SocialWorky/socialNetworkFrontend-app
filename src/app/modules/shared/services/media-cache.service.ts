@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { catchError, map, timeout, retryWhen, delay, switchMap } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, of, throwError, BehaviorSubject } from 'rxjs';
-import { map, catchError, timeout, switchMap } from 'rxjs/operators';
 import { CacheService } from './cache.service';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { environment } from '@env/environment';
@@ -24,10 +24,9 @@ export interface CachedMedia {
   quality: string;
 }
 
-// Interface for serializable cached media (for localStorage)
-interface SerializableCachedMedia {
+export interface SerializableCachedMedia {
   url: string;
-  blobData: string; // base64 encoded blob
+  blobData: string;
   type: string;
   size: number;
   timestamp: number;
@@ -39,19 +38,25 @@ interface SerializableCachedMedia {
 })
 export class MediaCacheService {
   private readonly CACHE_PREFIX = 'media_cache_';
-  private readonly MAX_CACHE_SIZE = 100 * 1024 * 1024; // 100MB
+  private readonly MAX_CACHE_SIZE = 50 * 1024 * 1024; // Reduced from 100MB to 50MB
   private readonly DEFAULT_OPTIONS: MediaCacheOptions = {
     quality: 'medium',
-    maxRetries: 3,
-    retryDelay: 2000,
-    timeout: 30000,
-    persistent: true,
+    maxRetries: 2, // Reduced from 3 to 2
+    retryDelay: 3000, // Increased from 2000 to 3000
+    timeout: 20000, // Reduced from 30000 to 20000
+    persistent: false, // Disabled persistent cache by default
     preload: false
   };
 
   private mediaCache = new Map<string, CachedMedia>();
   private loadingMedia = new Map<string, BehaviorSubject<boolean>>();
   private cacheSize = 0;
+  
+  // NEW: Load control to prevent infinite loading
+  private currentLoads = 0;
+  private maxConcurrentLoads = 2; // Maximum 2 concurrent video loads
+  private loadHistory: number[] = []; // Track load times
+  private maxLoadsPerMinute = 5; // Maximum 5 video loads per minute
 
   constructor(
     private http: HttpClient,
@@ -59,11 +64,62 @@ export class MediaCacheService {
     private logService: LogService
   ) {
     this.initializeCache();
+    this.startLoadHistoryCleanup();
+  }
+
+  private initializeCache(): void {
+    // Initialize cache with cleanup
+    this.cleanupCache();
+  }
+
+  /**
+   * NEW: Start cleanup of load history every minute
+   */
+  private startLoadHistoryCleanup(): void {
+    setInterval(() => {
+      const oneMinuteAgo = Date.now() - 60000;
+      this.loadHistory = this.loadHistory.filter(time => time > oneMinuteAgo);
+    }, 60000); // Every minute
+  }
+
+  /**
+   * NEW: Check if we can load more based on rate limiting
+   */
+  private canLoadMore(): boolean {
+    const oneMinuteAgo = Date.now() - 60000;
+    const recentLoads = this.loadHistory.filter(time => time > oneMinuteAgo).length;
+    
+    return recentLoads < this.maxLoadsPerMinute && this.currentLoads < this.maxConcurrentLoads;
+  }
+
+  /**
+   * NEW: Record a load attempt
+   */
+  private recordLoad(): void {
+    this.loadHistory.push(Date.now());
+    this.currentLoads++;
+    
+    // Auto-decrease after delay
+    setTimeout(() => {
+      this.currentLoads = Math.max(0, this.currentLoads - 1);
+    }, 5000); // 5 seconds delay
   }
 
   loadMedia(url: string, options: MediaCacheOptions = {}): Observable<string> {
     const finalOptions = { ...this.DEFAULT_OPTIONS, ...options };
     const cacheKey = this.generateCacheKey(url, finalOptions.quality || 'medium');
+
+    // NEW: Check if we can load more
+    if (!this.canLoadMore()) {
+      this.logService.log(LevelLogEnum.WARN, 'MediaCacheService', 'Video load blocked due to rate limiting', {
+        url,
+        currentLoads: this.currentLoads,
+        recentLoads: this.loadHistory.length,
+        maxConcurrent: this.maxConcurrentLoads,
+        maxPerMinute: this.maxLoadsPerMinute
+      });
+      return throwError(() => new Error('Too many video loads'));
+    }
 
     if (this.mediaCache.has(cacheKey)) {
       const cached = this.mediaCache.get(cacheKey)!;
@@ -114,73 +170,60 @@ export class MediaCacheService {
   }
 
   preloadMedia(urls: string[], options: MediaCacheOptions = {}): void {
-    const finalOptions = { ...options, preload: true };
+    const finalOptions = { ...this.DEFAULT_OPTIONS, ...options };
     
     urls.forEach(url => {
       this.loadMedia(url, finalOptions).subscribe({
         next: () => {
-          // Eliminado log informativo de media preloaded
+          // Media preloaded successfully - no need to log
         },
-        error: (error) => this.logService.log(LevelLogEnum.WARN, 'MediaCacheService', 'Media preload failed', { url, error: error.message })
+        error: (error) => {
+          // Don't log every preload error to reduce noise
+        }
       });
     });
   }
 
-  getOptimizedUrl(originalUrl: string, connectionQuality: 'slow' | 'medium' | 'fast' = 'medium'): string {
-    if (!originalUrl) return '';
-
-    const qualityMap = {
-      slow: 'low',
-      medium: 'medium',
-      fast: 'high'
-    };
-
-    const quality = qualityMap[connectionQuality];
-    
-    if (environment.APIFILESERVICE && originalUrl.includes(environment.APIFILESERVICE)) {
-      const separator = originalUrl.includes('?') ? '&' : '?';
-      return `${originalUrl}${separator}quality=${quality}`;
-    }
-
-    return originalUrl;
-  }
-
-  clearCache(includePersistent: boolean = false): void {
-    // Clear memory cache
-    this.mediaCache.clear();
-    this.loadingMedia.clear();
-    this.cacheSize = 0;
-
-    if (includePersistent) {
-      const keys = Object.keys(localStorage).filter(key => key.startsWith(this.CACHE_PREFIX));
-      keys.forEach(key => {
-        this.cacheService.removeItem(key, true);
-      });
-    }
-
-    // Media cache cleared - no need to log every cache clear
-  }
-
-  getCacheStats(): { size: number; items: number; persistentItems: number } {
-    const persistentKeys = Object.keys(localStorage).filter(key => key.startsWith(this.CACHE_PREFIX));
-    
-    return {
-      size: this.cacheSize,
-      items: this.mediaCache.size,
-      persistentItems: persistentKeys.length
-    };
+  // Get optimized URL based on quality
+  getOptimizedUrl(url: string, quality: 'slow' | 'medium' | 'fast' = 'medium'): string {
+    // For now, return the original URL
+    // This can be enhanced to return different quality URLs
+    return url;
   }
 
   private loadFromNetwork(url: string, cacheKey: string, options: MediaCacheOptions): Observable<string> {
     const loadingSubject = new BehaviorSubject<boolean>(true);
     this.loadingMedia.set(cacheKey, loadingSubject);
 
+    // NEW: Record load attempt
+    this.recordLoad();
+
     return this.http.get(url, { responseType: 'blob' }).pipe(
-      timeout(options.timeout || 30000),
+      timeout(options.timeout || 20000), // Reduced timeout
       map(blob => {
         // Validate downloaded blob
         if (!blob || blob.size === 0) {
           throw new Error('Invalid blob received from network');
+        }
+
+        // NEW: Check if blob is too large (prevent memory issues)
+        const maxBlobSize = 50 * 1024 * 1024; // 50MB max
+        if (blob.size > maxBlobSize) {
+          this.logService.log(LevelLogEnum.WARN, 'MediaCacheService', 'Video too large, skipping cache', {
+            url,
+            size: blob.size,
+            maxSize: maxBlobSize
+          });
+          
+          // Return URL directly without caching
+          const objectURL = this.createObjectURL(blob);
+          if (!objectURL) {
+            throw new Error('Failed to create object URL for large video');
+          }
+          
+          loadingSubject.next(false);
+          this.loadingMedia.delete(cacheKey);
+          return objectURL;
         }
 
         const cachedMedia: CachedMedia = {
@@ -231,12 +274,22 @@ export class MediaCacheService {
   }
 
   private generateCacheKey(url: string, quality: string): string {
-    return `${this.CACHE_PREFIX}${btoa(url)}_${quality}`;
+    return `${this.CACHE_PREFIX}${quality}_${this.hashString(url)}`;
   }
 
-  private isCacheValid(cached: CachedMedia): boolean {
-    const maxAge = 24 * 60 * 60 * 1000;
-    return Date.now() - cached.timestamp < maxAge;
+  private hashString(str: string): string {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash).toString(36);
+  }
+
+  private isCacheValid(cachedMedia: CachedMedia): boolean {
+    const maxAge = 30 * 60 * 1000; // 30 minutes (reduced from longer periods)
+    return Date.now() - cachedMedia.timestamp < maxAge;
   }
 
   private removeFromCache(cacheKey: string): void {
@@ -251,24 +304,12 @@ export class MediaCacheService {
     const entries = Array.from(this.mediaCache.entries());
     const sortedEntries = entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
     
-    const toRemove = Math.ceil(sortedEntries.length * 0.2);
-    sortedEntries.slice(0, toRemove).forEach(([key, cached]) => {
-      this.removeFromCache(key);
-      this.cacheService.removeItem(key, true);
-    });
-  }
-
-  private initializeCache(): void {
-    const keys = Object.keys(localStorage).filter(key => key.startsWith(this.CACHE_PREFIX));
-    keys.forEach(key => {
-      const cached = this.getFromPersistentCache(key);
-      if (cached && this.isCacheValid(cached)) {
-        this.mediaCache.set(key, cached);
-        this.cacheSize += cached.size;
-      } else {
-        this.cacheService.removeItem(key, true);
-      }
-    });
+    // Remove oldest entries until cache size is acceptable
+    while (this.cacheSize > this.MAX_CACHE_SIZE * 0.8 && sortedEntries.length > 0) {
+      const [key, value] = sortedEntries.shift()!;
+      this.mediaCache.delete(key);
+      this.cacheSize -= value.size;
+    }
   }
 
   // Convert blob to base64 string
@@ -358,7 +399,7 @@ export class MediaCacheService {
         quality: cachedMedia.quality
       };
       
-      this.cacheService.setItem(cacheKey, serializableData, 24 * 60 * 60 * 1000, true);
+      this.cacheService.setItem(cacheKey, serializableData, 30 * 60 * 1000, true); // 30 minutes
     } catch (error) {
       this.logService.log(LevelLogEnum.ERROR, 'MediaCacheService', 'Failed to save media to persistent cache', { 
         cacheKey, 
@@ -412,5 +453,33 @@ export class MediaCacheService {
       this.cacheService.removeItem(cacheKey, true);
       return null;
     }
+  }
+
+  // NEW: Get load statistics
+  getLoadStats(): any {
+    const oneMinuteAgo = Date.now() - 60000;
+    const recentLoads = this.loadHistory.filter(time => time > oneMinuteAgo).length;
+    
+    return {
+      currentLoads: this.currentLoads,
+      maxConcurrentLoads: this.maxConcurrentLoads,
+      recentLoads: recentLoads,
+      maxLoadsPerMinute: this.maxLoadsPerMinute,
+      loadHistoryLength: this.loadHistory.length,
+      canLoadMore: this.canLoadMore(),
+      cacheSize: this.cacheSize,
+      maxCacheSize: this.MAX_CACHE_SIZE,
+      mediaCacheSize: this.mediaCache.size
+    };
+  }
+
+  // NEW: Force cleanup
+  forceCleanup(): void {
+    this.currentLoads = 0;
+    this.loadHistory = [];
+    this.mediaCache.clear();
+    this.cacheSize = 0;
+    this.loadingMedia.clear();
+    this.logService.log(LevelLogEnum.INFO, 'MediaCacheService', 'Forced cleanup completed');
   }
 } 

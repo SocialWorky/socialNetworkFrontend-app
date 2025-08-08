@@ -27,6 +27,7 @@ import { Token } from '@shared/interfaces/token.interface';
 import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { ImagePreloadService } from '@shared/services/image-preload.service';
+import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 
 @Component({
     selector: 'worky-home',
@@ -128,7 +129,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private _notificationPublicationService: NotificationPublicationService,
     private _pullToRefreshService: PullToRefreshService,
     private _logService: LogService,
-    private _imagePreloadService: ImagePreloadService
+    private _imagePreloadService: ImagePreloadService,
+    private _mobileImageCacheService: MobileImageCacheService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Home');
@@ -215,10 +217,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private setupOptimizedScroll() {
     // Setup optimized scroll handling with throttling
     this.scrollThrottle.pipe(
-      throttleTime(100), // 100ms throttling for better performance
+      throttleTime(200), // Increased from 100ms to 200ms for better performance
       distinctUntilChanged((prev, curr) => {
         // Only trigger if scroll position changed significantly
-        return Math.abs(prev.scrollTop - curr.scrollTop) < 50;
+        return Math.abs(prev.scrollTop - curr.scrollTop) < 100; // Increased from 50 to 100
       }),
       takeUntil(this.destroy$)
     ).subscribe((scrollData) => {
@@ -230,7 +232,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       takeUntil(this.destroy$)
     ).subscribe((data) => {
       if(data === 'scrollEnd') {
-        this.loadPublications();
+        // Add delay to prevent rapid loading
+        setTimeout(() => {
+          this.loadPublications();
+        }, 500);
       }
 
       if(data === 'showNavbar') {
@@ -251,22 +256,28 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       
       const { scrollTop, clientHeight, scrollHeight } = scrollData;
       
-      // Optimized calculation for infinite scroll
-      const publicationHeight = 300;
+      // Optimized calculation for infinite scroll with larger threshold
+      const publicationHeight = 400; // Increased from 300
       const currentPublicationIndex = Math.floor(scrollTop / publicationHeight);
       const visiblePublications = Math.ceil(clientHeight / publicationHeight);
       const remainingPublications = currentPublications.length - currentPublicationIndex - visiblePublications;
       
-      // Load more publications when approaching the end
-      if (remainingPublications <= 5 && remainingPublications > 0) {
-        this.loadPublications();
+      // Load more publications when approaching the end with larger threshold
+      if (remainingPublications <= 10 && remainingPublications > 0) { // Increased from 5 to 10
+        // Add delay to prevent rapid loading
+        setTimeout(() => {
+          this.loadPublications();
+        }, 300);
       }
       
-      // Alternative threshold-based loading
-      const threshold = 200;
+      // Alternative threshold-based loading with larger threshold
+      const threshold = 500; // Increased from 200 to 500
       const position = scrollTop + clientHeight;
       if (position >= scrollHeight - threshold) {
-        this.loadPublications();
+        // Add delay to prevent rapid loading
+        setTimeout(() => {
+          this.loadPublications();
+        }, 300);
       }
     }
   }
@@ -346,7 +357,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.loaderPublications = false;
       this._cdr.markForCheck();
 
-      this.preloadPublicationsMedia();
+      // Optimize preload to prevent excessive image loading
+      this.preloadPublicationsMediaOptimized();
       await this.checkForMorePublications();
 
     } catch (error) {
@@ -688,23 +700,32 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private preloadPublicationsMedia(): void {
-    const publications = this.publications();
-    if (publications.length === 0) return;
-
-    // Preload images for the most recent publications
-    const recentPublications = publications.slice(0, 5); // Preload first 5 publications
-    recentPublications.forEach(publication => {
-      this._imagePreloadService.preloadPublicationImages(publication);
-    });
-
-    // Also preload profile images
-    this._imagePreloadService.preloadImages({
-      profileImages: true,
-      publicationImages: false,
-      mediaImages: false,
-      priority: 'medium',
-      maxImages: 10
+  // NEW: Optimized preload method to prevent excessive image loading
+  private preloadPublicationsMediaOptimized() {
+    const currentPublications = this.publications();
+    const config = this._mobileImageCacheService.getConfig();
+    
+    // Only preload images for visible publications
+    const visiblePublications = currentPublications.slice(-config.preloadThreshold);
+    
+    visiblePublications.forEach(publication => {
+      if (publication.media && publication.media.length > 0) {
+        // Only preload first image to reduce load
+        const firstMedia = publication.media[0];
+        if (firstMedia && firstMedia.url) {
+          this._mobileImageCacheService.loadImage(firstMedia.url, 'publication', {
+            priority: 'low',
+            timeout: 15000
+          }).subscribe({
+            next: () => {
+              // Image preloaded successfully - no need to log
+            },
+            error: (error) => {
+              // Don't log every preload error to reduce noise
+            }
+          });
+        }
+      }
     });
   }
 

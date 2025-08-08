@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { MessageDatabaseService } from './message-database.service';
 import { PublicationDatabaseService } from './publication-database.service';
+import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 import { UtilityService } from '@shared/services/utility.service';
 
 export interface DatabaseConfig {
@@ -24,6 +25,11 @@ export class DatabaseManagerService {
       name: 'WorkyPublicationsDB',
       version: 1,
       stores: ['publications']
+    },
+    {
+      name: 'MobileImageCacheDB',
+      version: 1,
+      stores: ['images']
     }
   ];
 
@@ -33,6 +39,7 @@ export class DatabaseManagerService {
   constructor(
     private messageDatabase: MessageDatabaseService,
     private publicationDatabase: PublicationDatabaseService,
+    private mobileImageCacheService: MobileImageCacheService,
     private logService: LogService,
     private utilityService: UtilityService
   ) {
@@ -67,7 +74,8 @@ export class DatabaseManagerService {
       // Define the "allow-list" of databases that should be kept for the current user.
       const databasesToKeep = [
         `WorkyMessagesDB_${userId}`,
-        `WorkyPublicationsDB_${userId}`
+        `WorkyPublicationsDB_${userId}`,
+        `MobileImageCacheDB_${userId}`
       ];
 
       this.logService.log(
@@ -81,6 +89,7 @@ export class DatabaseManagerService {
       // Step 1: Closing all existing connections - no need to log every step
       if (this.messageDatabase) await this.messageDatabase.closeConnection();
       if (this.publicationDatabase) await this.publicationDatabase.closeConnection();
+      if (this.mobileImageCacheService) await this.mobileImageCacheService.closeConnection();
 
       // Step 2: Get all existing Worky-related databases directly from the browser.
       // Step 2: Detecting all existing Worky databases - no need to log every step
@@ -144,7 +153,9 @@ export class DatabaseManagerService {
         
         // Successfully fetched database list via modern API - no need to log every fetch
         
-        const workyDbs = dbNames.filter(name => name.startsWith('Worky'));
+        const workyDbs = dbNames.filter(name => 
+          name.startsWith('Worky') || name.startsWith('MobileImageCacheDB')
+        );
           
         // Filtered for Worky-specific databases - no need to log every filter
         return workyDbs;
@@ -160,8 +171,12 @@ export class DatabaseManagerService {
     // Fallback for older browsers or environments where indexedDB.databases() is not available.
     this.logService.log(LevelLogEnum.WARN, 'DatabaseManagerService', 'Using legacy fallback method to find databases by guessing names.');
     const knownUserIds = this.getKnownUserIds();
-    const legacyDbNames = ['WorkyMessagesDB', 'WorkyPublicationsDB'];
-    const userDbNames = knownUserIds.flatMap(id => [`WorkyMessagesDB_${id}`, `WorkyPublicationsDB_${id}`]);
+    const legacyDbNames = ['WorkyMessagesDB', 'WorkyPublicationsDB', 'MobileImageCacheDB'];
+    const userDbNames = knownUserIds.flatMap(id => [
+      `WorkyMessagesDB_${id}`, 
+      `WorkyPublicationsDB_${id}`,
+      `MobileImageCacheDB_${id}`
+    ]);
     const allPossibleDbNames = [...new Set([...legacyDbNames, ...userDbNames])];
     
     const existingDatabases: string[] = [];
@@ -194,7 +209,7 @@ export class DatabaseManagerService {
    * Delete databases for a specific user ID
    */
   private async deleteUserDatabases(userId: string): Promise<void> {
-    const baseNames = ['WorkyMessagesDB', 'WorkyPublicationsDB'];
+    const baseNames = ['WorkyMessagesDB', 'WorkyPublicationsDB', 'MobileImageCacheDB'];
     
     for (const baseName of baseNames) {
       const dbName = `${baseName}_${userId}`;
@@ -515,6 +530,11 @@ export class DatabaseManagerService {
       // Initialize each database service
       await this.messageDatabase.initDatabase();
       await this.publicationDatabase.initDatabase();
+      
+      // Initialize MobileImageCacheService database
+      if (this.mobileImageCacheService) {
+        await this.mobileImageCacheService.initDatabase();
+      }
 
       this.isInitialized = true;
 
