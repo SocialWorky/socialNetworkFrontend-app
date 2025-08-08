@@ -109,11 +109,7 @@ export class ImageLoadingService {
     return this.http.get(imageUrl, { responseType: 'blob' }).pipe(
       map(blob => {
         const size = blob.size;
-        this.logService.log(LevelLogEnum.INFO, 'ImageLoadingService', 'Image loaded from network', {
-          url: imageUrl,
-          type: imageType,
-          size
-        });
+
         return { blob, size };
       }),
       catchError(error => {
@@ -202,6 +198,6 @@ export class ImageLoadingService {
    */
   private trackLoadTime(loadTime: number): void {
     // This would be implemented to track performance metrics
-    this.logService.log(LevelLogEnum.INFO, 'ImageLoadingService', 'Image load time tracked', { loadTime });
+
   }
 } 

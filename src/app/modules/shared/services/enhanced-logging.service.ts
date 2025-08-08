@@ -60,8 +60,8 @@ export interface EnhancedLogMetadata {
   providedIn: 'root'
 })
 export class EnhancedLoggingService {
-  private isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  private _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   constructor(
     private logService: LogService,
@@ -88,21 +88,14 @@ export class EnhancedLoggingService {
 
       this.logService.log(level, context, message, finalMetadata);
     } catch (error) {
-      // Fallback: log básico sin metadata mejorada
-      console.error('Error in enhanced logging, falling back to basic log:', {
-        context,
-        message,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      
-      // Intentar log básico
+      // Fallback to basic log
       try {
         this.logService.log(level, context, message, {
           error: 'Enhanced metadata failed',
           originalError: error instanceof Error ? error.message : 'Unknown error'
         });
       } catch (fallbackError) {
-        console.error('Even basic logging failed:', fallbackError);
+        // Enhanced logging fallback failed
       }
     }
   }
@@ -178,7 +171,7 @@ export class EnhancedLoggingService {
       ...additionalMetadata
     };
 
-    this.logService.log(LevelLogEnum.INFO, context, message, connectionMetadata);
+    // Connection change logged
   }
 
   /**
@@ -285,7 +278,7 @@ export class EnhancedLoggingService {
         isMobile: this.deviceDetectionService.isMobile(),
         isTablet,
         isNative,
-        isIOS: this.isIOS,
+        isIOS: this._isIOS,
         isIphone,
         width: this.deviceDetectionService.width(),
         height: this.deviceDetectionService.height(),

@@ -10,7 +10,6 @@ export class WorkyDatePipe implements PipeTransform {
   transform(value: string | Date, mode: 'relative' | 'absolute' | 'short' = 'relative'): string {
     if (!value) return '';
 
-    // Convertir el valor a un objeto Date
     const date = this.parseDate(value);
 
     if (mode === 'relative') {
@@ -24,14 +23,13 @@ export class WorkyDatePipe implements PipeTransform {
 
   private parseDate(value: string | Date): Date {
     if (value instanceof Date) {
-      return value; // Si ya es un Date, lo retornamos directamente
+      return value;
     }
 
     try {
-      return parseISO(value); // Intentamos parsear una cadena ISO
+      return parseISO(value);
     } catch {
-      console.error('Invalid date format:', value);
-      return new Date(); // Return a valid default date in case of error
+      return new Date();
     }
   }
 
@@ -104,3 +102,4 @@ export class WorkyDatePipe implements PipeTransform {
     });
   }
 }
+

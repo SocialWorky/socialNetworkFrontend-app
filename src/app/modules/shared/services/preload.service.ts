@@ -72,10 +72,7 @@ export class PreloadService {
         error: (error) => {
           // Only log critical errors, not network issues
           if (error.status !== 0 && error.status !== 404) {
-            this.logService.log(LevelLogEnum.WARN, 'PreloadService', 'Preload failed', { 
-              url, 
-              error: error.message 
-            });
+            
           }
         }
       });

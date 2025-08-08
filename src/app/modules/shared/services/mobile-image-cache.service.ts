@@ -565,7 +565,6 @@ export class MobileImageCacheService {
   private async storeInPersistentCache(cachedImage: CachedImage): Promise<void> {
     // Early return for iOS Safari - completely avoid IndexedDB operations
     if (isIOS) {
-      this.logService.log(LevelLogEnum.DEBUG, 'MobileImageCacheService', 'Skipping persistent cache for iOS Safari', { url: cachedImage.url });
       return;
     }
 
@@ -575,17 +574,14 @@ export class MobileImageCacheService {
       try {
         // Validate blob before storing
         if (!cachedImage.blob || cachedImage.blob.size === 0) {
-          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Invalid blob, skipping persistent cache', { url: cachedImage.url });
+  
           resolve();
           return;
         }
 
         // Additional validation for blob type
         if (!cachedImage.blob.type.startsWith('image/')) {
-          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Invalid blob type, skipping persistent cache', { 
-            url: cachedImage.url, 
-            type: cachedImage.blob.type 
-          });
+          
           resolve();
           return;
         }
@@ -623,7 +619,7 @@ export class MobileImageCacheService {
       } catch (error) {
         // iOS Safari sometimes throws errors during IndexedDB operations
         if (isIOS) {
-          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS IndexedDB operation failed, skipping persistent cache', { error, url: cachedImage.url });
+
           resolve(); // Don't fail completely
         } else {
           reject(error);
@@ -828,10 +824,7 @@ export class MobileImageCacheService {
     const config = this.getCurrentConfig();
     
     if (stats.size > config.maxCacheSize) {
-      this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Cache size limit reached', {
-        currentSize: stats.size,
-        maxSize: config.maxCacheSize
-      });
+
       
       // Trigger cleanup
       await this.cleanupOldCache();

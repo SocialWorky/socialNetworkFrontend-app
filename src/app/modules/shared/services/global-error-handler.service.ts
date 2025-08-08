@@ -3,10 +3,10 @@ import { LogService, LevelLogEnum } from './core-apis/log.service';
 
 @Injectable()
 export class GlobalErrorHandlerService implements ErrorHandler {
-  private isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+  private _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  
-  private isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+
+  private _isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
 
   constructor(
     private logService: LogService,
@@ -15,13 +15,13 @@ export class GlobalErrorHandlerService implements ErrorHandler {
 
   handleError(error: Error | any): void {
     // Check if this is a Safari iOS specific error
-    if (this.isSafariIOS() && this.isIndexedDBError(error)) {
+    if (this._isSafariIOS() && this._isIndexedDBError(error)) {
       this.handleSafariIOSIndexedDBError(error);
       return;
     }
 
     // Check if this is a network error on Safari iOS
-    if (this.isSafariIOS() && this.isNetworkError(error)) {
+    if (this._isSafariIOS() && this._isNetworkError(error)) {
       this.handleSafariIOSNetworkError(error);
       return;
     }
@@ -30,20 +30,17 @@ export class GlobalErrorHandlerService implements ErrorHandler {
     this.logService.log(LevelLogEnum.ERROR, 'GlobalErrorHandlerService', 'Unhandled error', {
       error: error.message,
       stack: error.stack,
-      isSafariIOS: this.isSafariIOS()
+      isSafariIOS: this._isSafariIOS()
     });
 
-    // In development, still show the error in console
-    if (typeof console !== 'undefined' && console.error) {
-      console.error('Global error handler caught:', error);
-    }
+    // Global error handled
   }
 
-  private isSafariIOS(): boolean {
-    return this.isIOS && this.isSafari;
+  private _isSafariIOS(): boolean {
+    return this._isIOS && this._isSafari;
   }
 
-  private isIndexedDBError(error: any): boolean {
+  private _isIndexedDBError(error: any): boolean {
     if (!error) return false;
     
     const errorMessage = error.message || error.toString();
@@ -59,7 +56,7 @@ export class GlobalErrorHandlerService implements ErrorHandler {
            (errorMessage.includes('UnknownError') && errorMessage.includes('object store'));
   }
 
-  private isNetworkError(error: any): boolean {
+  private _isNetworkError(error: any): boolean {
     if (!error) return false;
     
     const errorMessage = error.message || error.toString();
@@ -116,7 +113,7 @@ export class GlobalErrorHandlerService implements ErrorHandler {
    * Check if the current environment is Safari iOS
    */
   public isSafariIOSEnvironment(): boolean {
-    return this.isSafariIOS();
+    return this._isSafariIOS();
   }
 
   /**
@@ -130,9 +127,9 @@ export class GlobalErrorHandlerService implements ErrorHandler {
     platform: string;
   } {
     return {
-      isIOS: this.isIOS,
-      isSafari: this.isSafari,
-      isSafariIOS: this.isSafariIOS(),
+      isIOS: this._isIOS,
+      isSafari: this._isSafari,
+      isSafariIOS: this._isSafariIOS(),
       userAgent: navigator.userAgent,
       platform: navigator.platform
     };

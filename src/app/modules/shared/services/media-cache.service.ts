@@ -421,7 +421,7 @@ export class MediaCacheService {
       
       // Validate blob
       if (!blob || blob.size === 0) {
-        this.logService.log(LevelLogEnum.WARN, 'MediaCacheService', 'Invalid blob in cache', { cacheKey });
+
         this.cacheService.removeItem(cacheKey, true);
         return null;
       }

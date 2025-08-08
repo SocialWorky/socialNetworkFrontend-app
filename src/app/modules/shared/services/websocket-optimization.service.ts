@@ -68,9 +68,7 @@ export class WebSocketOptimizationService implements OnDestroy {
     this.setupHeartbeat();
     this.adaptToConnectionQuality();
     
-    this.logService.log(LevelLogEnum.INFO, 'WebSocketOptimizationService', 'Service initialized', {
-      config: this.currentConfig
-    });
+
   }
 
   /**
@@ -80,7 +78,7 @@ export class WebSocketOptimizationService implements OnDestroy {
     // Monitor connection events
     this.socket.on('connect', () => {
       this.updateMetrics({ connectionStatus: 'connected', reconnectAttempts: 0 });
-      this.logService.log(LevelLogEnum.INFO, 'WebSocketOptimizationService', 'WebSocket connected');
+
       this.startHeartbeat();
     });
 
@@ -153,11 +151,7 @@ export class WebSocketOptimizationService implements OnDestroy {
       
       const delay = this.calculateReconnectDelay();
       
-      this.logService.log(LevelLogEnum.INFO, 'WebSocketOptimizationService', 'Attempting reconnection', {
-        attempt: this.reconnectAttempts,
-        delay,
-        reason
-      });
+
       
       this.reconnectTimer = setTimeout(() => {
         this.socket.connect();
@@ -229,10 +223,7 @@ export class WebSocketOptimizationService implements OnDestroy {
         this.socket.emit(event, data);
         this.updateMetrics({ messageCount: this.metrics$.value.messageCount + 1 });
         
-        this.logService.log(LevelLogEnum.INFO, 'WebSocketOptimizationService', 'Message emitted', {
-          event,
-          dataSize: data ? JSON.stringify(data).length : 0
-        });
+        
       } else {
         this.logService.log(LevelLogEnum.WARN, 'WebSocketOptimizationService', 'Cannot emit - not connected', { event });
       }
@@ -261,7 +252,7 @@ export class WebSocketOptimizationService implements OnDestroy {
    * Force reconnection
    */
   forceReconnect(): void {
-    this.logService.log(LevelLogEnum.INFO, 'WebSocketOptimizationService', 'Force reconnection requested');
+
     this.reconnectAttempts = 0;
     this.socket.disconnect();
     this.socket.connect();
@@ -293,7 +284,7 @@ export class WebSocketOptimizationService implements OnDestroy {
    */
   updateConfig(newConfig: Partial<WebSocketConfig>): void {
     this.currentConfig = { ...this.currentConfig, ...newConfig };
-    this.logService.log(LevelLogEnum.INFO, 'WebSocketOptimizationService', 'Configuration updated', this.currentConfig);
+
   }
 
   /**

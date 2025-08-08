@@ -110,12 +110,6 @@ export class ScrollOptimizationService {
     
     // Check if we can load more content
     if (!this.canLoadMore()) {
-      this.logService.log(LevelLogEnum.DEBUG, 'ScrollOptimizationService', 'Load blocked due to rate limiting', {
-        currentLoads: this.currentLoads,
-        recentLoads: this.loadHistory.length,
-        maxConcurrent: config.maxConcurrentLoads,
-        maxPerMinute: config.maxLoadsPerMinute
-      });
       return;
     }
 
@@ -156,12 +150,6 @@ export class ScrollOptimizationService {
     
     // Check if we can load more content
     if (!this.canLoadMore()) {
-      this.logService.log(LevelLogEnum.DEBUG, 'ScrollOptimizationService', 'Infinite scroll blocked due to rate limiting', {
-        currentLoads: this.currentLoads,
-        recentLoads: this.loadHistory.length,
-        maxConcurrent: config.maxConcurrentLoads,
-        maxPerMinute: config.maxLoadsPerMinute
-      });
       return;
     }
 

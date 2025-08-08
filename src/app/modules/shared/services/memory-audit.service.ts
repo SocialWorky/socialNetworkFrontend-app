@@ -196,7 +196,7 @@ export class MemoryAuditService implements OnDestroy {
       window.gc();
     }
 
-    this.logService.log(LevelLogEnum.INFO, 'MemoryAuditService', 'Memory cleanup triggered');
+
   }
 
   /**
