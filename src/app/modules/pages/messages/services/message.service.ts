@@ -5,46 +5,47 @@ import { environment } from '@env/environment';
 import { CreateMessage, Message, UpdateMessage } from '../interfaces/message.interface';
 import { MessageDatabaseService } from '@shared/services/database/message-database.service';
 import { AuthService } from '@auth/services/auth.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MessageService {
-  private baseUrl: string;
+  private _baseUrl: string;
 
   constructor(
     private http: HttpClient,
     private _messageDatabase: MessageDatabaseService,
-    private _authService: AuthService
+    private _authService: AuthService,
+    private _logService: LogService
   ) {
-    this.baseUrl = environment.APIMESSAGESERVICE;
+    this._baseUrl = environment.APIMESSAGESERVICE;
     this._messageDatabase.initDatabase();
   }
 
   /**
-   * Obtener usuarios con los que el usuario logeado tiene conversaciones.
-   * @returns Observable con la lista de IDs de usuarios.
+   * Get users with conversations for logged user
+   * @returns Observable with list of user IDs
    */
   getUsersWithConversations(): Observable<string[]> {
-    if (!this.baseUrl) {
-      console.warn('APIMESSAGESERVICE not configured, using fallback');
+    if (!this._baseUrl) {
       return of([]);
     }
-    const url = `${this.baseUrl}/messages/users`;
+    const url = `${this._baseUrl}/messages/users`;
     return this.http.get<string[]>(url).pipe(
       catchError((error) => {
-        console.error('Error loading users with conversations:', error);
+        this._logService.log(LevelLogEnum.ERROR, 'MessageService', 'Error loading users with conversations', { error: error?.message });
         return of([]);
       })
     );
   }
 
   /**
-   * Verificar si el usuario tiene permisos de administrador en el backend.
-   * @returns Observable con el resultado de la verificación.
+   * Verify if user has admin permissions in backend
+   * @returns Observable with verification result
    */
   verifyAdminPermissions(): Observable<{ hasAdminAccess: boolean; message?: string }> {
-    if (!this.baseUrl) {
+    if (!this._baseUrl) {
       return of({ hasAdminAccess: false, message: 'APIMESSAGESERVICE not configured' });
     }
 
@@ -57,15 +58,18 @@ export class MessageService {
       return of({ hasAdminAccess: false, message: `User role is ${decodedToken.role}, not admin` });
     }
 
-    // Try to access a simple admin endpoint to verify permissions
-    const url = `${this.baseUrl}/messages/statistics`;
+    // Access admin endpoint to verify permissions
+    const url = `${this._baseUrl}/messages/statistics`;
     
     return this.http.get(url, { observe: 'response' }).pipe(
       map((response) => {
         return { hasAdminAccess: true };
       }),
       catchError((error) => {
-        console.error('Admin permissions verification failed:', error);
+        this._logService.log(LevelLogEnum.ERROR, 'MessageService', 'Admin permissions verification failed', { 
+          error: error?.message, 
+          status: error?.status 
+        });
         
         if (error.status === 403) {
           return of({ 
@@ -88,8 +92,8 @@ export class MessageService {
   }
 
   /**
-   * Obtener estadísticas básicas de mensajes (fallback para usuarios no admin).
-   * @returns Observable con estadísticas básicas.
+   * Get basic message statistics (fallback for non-admin users)
+   * @returns Observable with basic statistics
    */
   getBasicMessagesStatistics(): Observable<{
     totalMessages: number;
@@ -99,7 +103,7 @@ export class MessageService {
     messagesToday: number;
     averageMessagesPerConversation: number;
   }> {
-    // Try to get unread count as a basic metric
+    // Get unread count as basic metric
     return this.getUnreadAllMessagesCount().pipe(
       map((unreadCount) => {
         return {
@@ -112,7 +116,7 @@ export class MessageService {
         };
       }),
       catchError((error) => {
-        console.error('Error getting basic messages statistics:', error);
+        this._logService.log(LevelLogEnum.ERROR, 'MessageService', 'Error getting basic messages statistics', { error: error?.message });
         return of({
           totalMessages: 0,
           unreadMessages: 0,
@@ -126,8 +130,8 @@ export class MessageService {
   }
 
   /**
-   * Obtener estadísticas completas de mensajes.
-   * @returns Observable con las estadísticas de mensajes.
+   * Get complete message statistics
+   * @returns Observable with message statistics
    */
   getMessagesStatistics(): Observable<{
     totalMessages: number;
@@ -137,7 +141,7 @@ export class MessageService {
     messagesToday: number;
     averageMessagesPerConversation: number;
   }> {
-    if (!this.baseUrl) {
+    if (!this._baseUrl) {
       console.warn('APIMESSAGESERVICE not configured, using fallback');
       return of({
         totalMessages: 0,
@@ -149,14 +153,13 @@ export class MessageService {
       });
     }
 
-    // Check if user has admin role (token is handled by interceptor)
+    // Check user admin role
     const decodedToken = this._authService.getDecodedToken();
     if (!decodedToken || decodedToken.role !== 'admin') {
-      console.warn('User does not have admin role. Current role:', decodedToken?.role);
       return this.getBasicMessagesStatistics();
     }
 
-    const url = `${this.baseUrl}/messages/statistics`;
+    const url = `${this._baseUrl}/messages/statistics`;
     
     return this.http.get<{
       totalMessages: number;
@@ -167,41 +170,8 @@ export class MessageService {
       averageMessagesPerConversation: number;
     }>(url).pipe(
       catchError((error) => {
-        console.error('Error loading messages statistics:', error);
-        console.error('Error status:', error.status);
-        console.error('Error message:', error.message);
-        console.error('Error details:', error.error);
-        
         if (error.status === 403) {
-          console.error('Access forbidden. Check if user has admin role or proper permissions.');
-          console.error('Current user role:', this._authService.getDecodedToken()?.role);
-          console.error('Current user ID:', this._authService.getDecodedToken()?.id);
-          console.error('Token from localStorage:', localStorage.getItem('token')?.substring(0, 50) + '...');
-          
-          // Try to get more information about the token
-          try {
-            const token = localStorage.getItem('token');
-            if (token) {
-              const decoded = this._authService.getDecodedToken();
-              console.error('Decoded token info:', {
-                id: decoded?.id,
-                email: decoded?.email,
-                role: decoded?.role,
-                username: decoded?.username
-              });
-            }
-          } catch (tokenError) {
-            console.error('Error decoding token:', tokenError);
-          }
-          
-          // Use basic statistics as fallback for 403 errors
           return this.getBasicMessagesStatistics();
-        } else if (error.status === 401) {
-          console.error('Unauthorized. Token may be invalid or expired.');
-        } else if (error.status === 404) {
-          console.error('Endpoint not found. Check if the endpoint exists in the backend.');
-        } else if (error.status === 0) {
-          console.error('Network error. Check if the service is accessible.');
         }
         
         return of({
@@ -219,10 +189,10 @@ export class MessageService {
 
 
   /**
-   * Obtener las conversaciones del usuario logeado con otro usuario específico.
-   * @param currentUserId ID del usuario logeado.
-   * @param otherUserId ID del otro usuario.
-   * @returns Observable con la lista de mensajes.
+   * Get conversations between logged user and specific user
+   * @param currentUserId Logged user ID
+   * @param otherUserId Other user ID
+   * @returns Observable with message list
    */
   getConversationsWithUser(currentUserId: string, otherUserId: string): Observable<Message[]> {
     const chatId = this.generateChatId(currentUserId, otherUserId);
@@ -237,14 +207,14 @@ export class MessageService {
         }
       }),
       catchError((error) => {
-        console.error('Error cargando desde cache, intentando servidor:', error);
+        this._logService.log(LevelLogEnum.ERROR, 'MessageService', 'Error loading from cache, trying server', { error: error?.message });
         return this.getConversationsFromServer(currentUserId, otherUserId);
       })
     );
   }
 
   /**
-   * Obtener las conversaciones con paginación inteligente
+   * Get conversations with smart pagination
    */
   getConversationsWithUserSmart(currentUserId: string, otherUserId: string, page: number = 1, size: number = 20): Observable<{
     messages: Message[],
@@ -265,7 +235,7 @@ export class MessageService {
         }
       }),
       catchError((error) => {
-        console.error('Error cargando mensajes paginados desde cache:', error);
+        this._logService.log(LevelLogEnum.ERROR, 'MessageService', 'Error loading paginated messages from cache', { error: error?.message });
         return this.getConversationsFromServerPaginated(currentUserId, otherUserId, page, size);
       })
     );
@@ -277,7 +247,7 @@ export class MessageService {
    * @returns Observable con el último mensaje.
    */
   getLastConversationWithUser(otherUserId: string): Observable<Message> {
-    const url = `${this.baseUrl}/messages/conversations/${otherUserId}/last`;
+    const url = `${this._baseUrl}/messages/conversations/${otherUserId}/last`;
     return this.http.get<Message>(url).pipe(
       tap((message) => {
         this._messageDatabase.addMessage(message);
@@ -291,7 +261,7 @@ export class MessageService {
    * @returns Observable con el número de conversaciones.
    */
   countConversationsWithUser(otherUserId: string): Observable<number> {
-    const url = `${this.baseUrl}/messages/conversations/${otherUserId}/count`;
+    const url = `${this._baseUrl}/messages/conversations/${otherUserId}/count`;
     return this.http.get<number>(url);
   }
 
@@ -302,7 +272,7 @@ export class MessageService {
    * @returns Observable con la lista de mensajes.
    */
   getConversationsByDate(startDate: string, endDate: string): Observable<Message[]> {
-    const url = `${this.baseUrl}/messages/conversations/date?startDate=${startDate}&endDate=${endDate}`;
+    const url = `${this._baseUrl}/messages/conversations/date?startDate=${startDate}&endDate=${endDate}`;
     return this.http.get<Message[]>(url).pipe(
       tap((messages) => {
         this._messageDatabase.addMessages(messages);
@@ -316,7 +286,7 @@ export class MessageService {
    * @returns Observable con el mensaje creado.
    */
   createMessage(createMessage: CreateMessage): Observable<Message> {
-    const url = `${this.baseUrl}/messages`;
+    const url = `${this._baseUrl}/messages`;
     return this.http.post<Message>(url, createMessage).pipe(
       tap((message) => {
         this._messageDatabase.addMessage(message);
@@ -330,7 +300,7 @@ export class MessageService {
    * @returns Observable con el mensaje actualizado.
    */
   updateMessageStatus(messageId: string): Observable<Message> {
-    const url = `${this.baseUrl}/messages/${messageId}/read`;
+    const url = `${this._baseUrl}/messages/${messageId}/read`;
     return this.http.put<Message>(url, {}).pipe(
       tap((message) => {
         this._messageDatabase.updateMessage(message);
@@ -345,7 +315,7 @@ export class MessageService {
    * @returns Observable con el mensaje actualizado.
    */
   updateMessage(messageId: string, updateMessage: UpdateMessage): Observable<Message> {
-    const url = `${this.baseUrl}/messages/${messageId}`;
+    const url = `${this._baseUrl}/messages/${messageId}`;
     return this.http.put<Message>(url, updateMessage).pipe(
       tap((message) => {
         this._messageDatabase.updateMessage(message);
@@ -359,7 +329,7 @@ export class MessageService {
    * @returns Observable<void>.
    */
   deleteMessage(messageId: string): Observable<void> {
-    const url = `${this.baseUrl}/messages/${messageId}`;
+    const url = `${this._baseUrl}/messages/${messageId}`;
     return this.http.delete<void>(url).pipe(
       tap(() => {                                                                                   
         this._messageDatabase.deleteMessage(messageId);
@@ -368,7 +338,7 @@ export class MessageService {
   }
 
   markMessagesAsRead(chatId: string, senderId: string): Observable<Message[]> {
-    const url = `${this.baseUrl}/messages/mark-as-read`;
+    const url = `${this._baseUrl}/messages/mark-as-read`;
     return this.http.post<Message[]>(url, { chatId, senderId }).pipe(
       tap((messages) => {
         messages.forEach(message => this._messageDatabase.updateMessage(message));
@@ -386,16 +356,16 @@ export class MessageService {
         if (localCount !== null && localCount !== undefined) {
           return of(localCount);
         } else {
-          const url = `${this.baseUrl}/messages/unread-count/${chatId}/${senderId}`;
+          const url = `${this._baseUrl}/messages/unread-count/${chatId}/${senderId}`;
           return this.http.get<number>(url);
         }
       }),
       catchError((error) => {
-        console.error('Error obteniendo conteo local, intentando servidor:', error);
-        const url = `${this.baseUrl}/messages/unread-count/${chatId}/${senderId}`;
+        this._logService.log(LevelLogEnum.ERROR, 'MessageService', 'Error getting local count, trying server', { error: error?.message });
+        const url = `${this._baseUrl}/messages/unread-count/${chatId}/${senderId}`;
         return this.http.get<number>(url).pipe(
           catchError((serverError) => {
-            console.error('Error también en servidor:', serverError);
+            this._logService.log(LevelLogEnum.ERROR, 'MessageService', 'Error also on server', { error: serverError?.message });
             return of(0);
           })
         );
@@ -417,14 +387,14 @@ export class MessageService {
         }
       }),
       catchError((error) => {
-        console.error('Error obteniendo conteo total local, intentando servidor:', error);
+        this._logService.log(LevelLogEnum.ERROR, 'MessageService', 'Error getting total local count, trying server', { error: error?.message });
         return this.syncReadStatusFromServer();
       })
     );
   }
 
   private getConversationsFromServer(currentUserId: string, otherUserId: string): Observable<Message[]> {
-    const url = `${this.baseUrl}/messages/conversations/${otherUserId}`;
+    const url = `${this._baseUrl}/messages/conversations/${otherUserId}`;
     return this.http.get<Message[]>(url).pipe(
       tap((messages) => {
         this._messageDatabase.addMessages(messages);
@@ -436,7 +406,7 @@ export class MessageService {
     messages: Message[],
     total: number
   }> {
-    const url = `${this.baseUrl}/messages/conversations/${otherUserId}?page=${page}&size=${size}`;
+    const url = `${this._baseUrl}/messages/conversations/${otherUserId}?page=${page}&size=${size}`;
     return this.http.get<Message[]>(url).pipe(
       tap((messages) => {
         this._messageDatabase.addMessages(messages);
@@ -478,15 +448,14 @@ export class MessageService {
 
   syncSpecificMessage(messageId: string): Observable<Message | null> {
     if (!messageId || messageId === 'undefined' || messageId === 'null') {
-      console.warn('ID de mensaje inválido:', messageId);
       return of(null);
     }
     
-    const url = `${this.baseUrl}/messages/${messageId}`;
+    const url = `${this._baseUrl}/messages/${messageId}`;
     
     return this.http.get<Message>(url).pipe(
       catchError((error) => {
-        console.error('Error sincronizando mensaje específico:', error);
+        this._logService.log(LevelLogEnum.ERROR, 'MessageService', 'Error syncing specific message', { error: error?.message });
         return of(null);
       }),
       tap((message) => {
@@ -530,18 +499,17 @@ export class MessageService {
   }
 
   syncReadStatusFromServer(): Observable<number> {
-    if (!this.baseUrl) {
-      console.warn('APIMESSAGESERVICE not configured, using fallback');
+    if (!this._baseUrl) {
       return of(0);
     }
-    const url = `${this.baseUrl}/messages/unread-all-count`;
+    const url = `${this._baseUrl}/messages/unread-all-count`;
     
     return this.http.get<number>(url).pipe(
       tap((serverCount) => {
         this.updateLocalReadStatus(serverCount);
       }),
       catchError((error) => {
-        console.error('Error sincronizando estado de lectura:', error);
+        this._logService.log(LevelLogEnum.ERROR, 'MessageService', 'Error syncing read status', { error: error?.message });
         return of(0);
       })
     );

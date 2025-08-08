@@ -22,6 +22,15 @@ function clearIndexedDB() {
     'WorkyImageCacheDB'
   ];
 
+  // Also include databases with user IDs pattern
+  const databasesWithUserIds = [
+    'MobileImageCacheDB_',
+    'WorkyMessagesDB_', 
+    'WorkyPublicationsDB_',
+    'WorkyCacheDB_',
+    'WorkyImageCacheDB_'
+  ];
+
   databases.forEach(dbName => {
     try {
       // En un entorno de Node.js, no podemos acceder directamente a IndexedDB

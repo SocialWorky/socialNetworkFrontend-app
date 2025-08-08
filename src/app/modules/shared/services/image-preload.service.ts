@@ -55,7 +55,7 @@ export class ImagePreloadService {
     const startTime = Date.now();
 
     if (this.isPreloading) {
-      this.logService.log(LevelLogEnum.WARN, 'ImagePreloadService', 'Preload already in progress');
+
       return this.preloadResults.value;
     }
 
@@ -137,7 +137,7 @@ export class ImagePreloadService {
           },
           error: (error) => {
             this.preloadQueue.delete(url);
-            this.logService.log(LevelLogEnum.WARN, 'ImagePreloadService', 'Image preload failed', { url, error });
+
           }
         });
       }
@@ -244,7 +244,7 @@ export class ImagePreloadService {
         // Image preloaded successfully - no need to log every preload
       } catch (error) {
         failed++;
-        this.logService.log(LevelLogEnum.WARN, 'ImagePreloadService', 'Image preload failed', { url, error });
+
       }
     });
 

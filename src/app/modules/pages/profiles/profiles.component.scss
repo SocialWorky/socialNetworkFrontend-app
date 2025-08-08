@@ -205,6 +205,10 @@
 
     .last-publication {
       margin-bottom: 20px;
+      
+      @include breakpoints.below-sm {
+        margin-bottom: 40px; // Extra margin for mobile to prevent cutoff
+      }
     }
 
   }

@@ -9,10 +9,11 @@ import { LazyCssService } from './core-apis/lazy-css.service';
   providedIn: 'root'
 })
 export class TooltipsOnboardingService {
-  private driverObj: any;
-  private driverCssLoaded = false;
+  private _driverObj: any;
 
-  private destroy$ = new Subject<void>();
+  private _driverCssLoaded = false;
+
+  private _destroy$ = new Subject<void>();
 
   constructor(
     private _userService: UserService,
@@ -26,7 +27,7 @@ export class TooltipsOnboardingService {
     // Cargar CSS de driver.js de forma lazy
     await this.loadDriverCss();
     
-    this.driverObj = driver({
+    this._driverObj = driver({
       animate: true,
       allowClose: true,
       showProgress: true,
@@ -41,12 +42,12 @@ export class TooltipsOnboardingService {
    * Carga CSS de driver.js solo cuando se necesite
    */
   private async loadDriverCss() {
-    if (!this.driverCssLoaded) {
+    if (!this._driverCssLoaded) {
       try {
         await this._lazyCssService.loadDriverCss();
-        this.driverCssLoaded = true;
+        this._driverCssLoaded = true;
       } catch (error) {
-        console.warn('Error cargando CSS de driver.js:', error);
+        // CSS loading error handled
       }
     }
   }
@@ -62,7 +63,7 @@ export class TooltipsOnboardingService {
 
     setTimeout(() => {
 
-      this.driverObj = driver({
+      this._driverObj = driver({
         animate: true,
         allowClose: false,
         showProgress: true,
@@ -72,8 +73,8 @@ export class TooltipsOnboardingService {
         steps: steps,
         onDestroyed: () => this.onDone(),
       });
-      this.driverObj.highlight(steps);
-      this.driverObj.drive(0);
+      this._driverObj.highlight(steps);
+      this._driverObj.drive(0);
 
     }, 1000);
 
@@ -82,7 +83,8 @@ export class TooltipsOnboardingService {
   private onDone() {
     localStorage.setItem('isTooltipActive', 'false');
     const userId = this._authService.getDecodedToken()?.id!;
-    this._userService.userEdit(userId, { isTooltipActive: false }).pipe(takeUntil(this.destroy$)).subscribe({});
+    this._userService.userEdit(userId, { isTooltipActive: false }).pipe(takeUntil(this._destroy$)).subscribe({});
 
   }
 }
+

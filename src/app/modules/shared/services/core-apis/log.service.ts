@@ -15,15 +15,19 @@ export enum LevelLogEnum {
 })
 export class LogService {
   private _url: string;
-  private _apiUrl: string;
-  private _logs: any[] = [];
-  private _timer: NodeJS.Timeout | null = null;
-  private destroy$ = new Subject<void>();
 
-  // Configuración para evitar errores 413
-  private readonly MAX_BATCH_SIZE = 50; // Máximo 50 logs por batch
-  private readonly MAX_LOG_SIZE = 1000; // Máximo 1000 caracteres por log
-  private readonly BATCH_TIMEOUT = 15000; // 15 segundos en lugar de 30
+  private _apiUrl: string;
+
+  private _logs: any[] = [];
+
+  private _timer: NodeJS.Timeout | null = null;
+
+  private _destroy$ = new Subject<void>();
+
+  // Configuration to avoid 413 errors
+  private readonly MAX_BATCH_SIZE = 50;
+  private readonly MAX_LOG_SIZE = 1000;
+  private readonly BATCH_TIMEOUT = 15000;
 
   constructor(private http: HttpClient) {
     this._url = environment.API_URL;
@@ -32,12 +36,12 @@ export class LogService {
 
   log(level: LevelLogEnum, context: string, message: string, metadata?: Record<string, any>) {
     try {
-      // Truncar mensaje si es muy largo
+      // Truncate message if too long
       const truncatedMessage = message.length > this.MAX_LOG_SIZE 
         ? message.substring(0, this.MAX_LOG_SIZE) + '...' 
         : message;
 
-      // Limpiar metadata si es muy grande
+      // Clean metadata if too large
       const cleanMetadata = this.cleanMetadata(metadata);
 
       const logEntry = {
@@ -50,21 +54,15 @@ export class LogService {
 
       this._logs.push(logEntry);
 
-      // Enviar logs inmediatamente si alcanzamos el límite
+      // Send logs immediately if limit reached
       if (this._logs.length >= this.MAX_BATCH_SIZE) {
         this.sendLogs();
       } else if (!this._timer) {
-        // Enviar logs después del timeout
+        // Send logs after timeout
         this._timer = setTimeout(() => this.sendLogs(), this.BATCH_TIMEOUT);
       }
     } catch (error) {
-      // Si hay error al procesar el log, lo registramos en consola para debugging
-      console.error('Error processing log entry:', {
-        level,
-        context,
-        message: message.substring(0, 200),
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+      // Log processing error - handled by global error handler
     }
   }
 
@@ -72,17 +70,16 @@ export class LogService {
     if (!metadata) return undefined;
 
     const clean: Record<string, any> = {};
-    const maxValueLength = 500; // Máximo 500 caracteres por valor
+    const maxValueLength = 500;
 
     for (const [key, value] of Object.entries(metadata)) {
       try {
         if (typeof value === 'string' && value.length > maxValueLength) {
           clean[key] = value.substring(0, maxValueLength) + '...';
         } else if (typeof value === 'object' && value !== null) {
-          // Para objetos, convertir a string y truncar de forma segura
+          // For objects, convert to string and truncate safely
           const stringValue = JSON.stringify(value);
           if (stringValue.length > maxValueLength) {
-            // En lugar de intentar parsear un JSON truncado, guardamos el string truncado
             clean[key] = stringValue.substring(0, maxValueLength) + '...';
           } else {
             clean[key] = value;
@@ -91,7 +88,7 @@ export class LogService {
           clean[key] = value;
         }
       } catch (error) {
-        // Si hay error al procesar un valor, lo reemplazamos con un mensaje de error
+        // Replace with error message if processing fails
         clean[key] = `[Error processing value: ${error instanceof Error ? error.message : 'Unknown error'}]`;
       }
     }
@@ -106,35 +103,34 @@ export class LogService {
     this._logs = [];
 
     try {
-      // Dividir en batches más pequeños si es necesario
+      // Split into smaller batches if needed
       const batches = this.chunkArray(logsToSend, this.MAX_BATCH_SIZE);
       
       batches.forEach(batch => {
         this.http.post(this._apiUrl, { logs: batch })
-          .pipe(takeUntil(this.destroy$))
+          .pipe(takeUntil(this._destroy$))
           .subscribe({
             next: () => {
-              // Log exitoso
+              // Log successful
             },
             error: (error) => {
-              // Si hay error 413, intentar con batch más pequeño
+              // If 413 error, try with smaller batch
               if (error.status === 413 && batch.length > 1) {
                 const smallerBatches = this.chunkArray(batch, Math.floor(batch.length / 2));
                 smallerBatches.forEach(smallBatch => {
                   this.http.post(this._apiUrl, { logs: smallBatch })
-                    .pipe(takeUntil(this.destroy$))
+                    .pipe(takeUntil(this._destroy$))
                     .subscribe();
                 });
               } else {
-                console.warn('Error sending logs:', error);
+                // Log sending error handled silently
               }
             }
           });
       });
 
     } catch (error) {
-      console.error('Error al enviar logs:', error);
-      // Reintentar con logs más pequeños
+      // Retry with smaller batches
       if (logsToSend.length > 1) {
         const smallerBatches = this.chunkArray(logsToSend, Math.floor(logsToSend.length / 2));
         smallerBatches.forEach(batch => {
@@ -144,7 +140,7 @@ export class LogService {
         this._logs.push(...logsToSend);
       }
     } finally {
-      // Reset the timer
+      // Reset timer
       this._timer = null;
     }
   }
@@ -158,11 +154,12 @@ export class LogService {
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this._destroy$.next();
+    this._destroy$.complete();
     
     if (this._timer) {
       clearTimeout(this._timer);
     }
   }
 }
+

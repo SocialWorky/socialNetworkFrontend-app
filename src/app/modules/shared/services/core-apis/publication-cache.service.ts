@@ -27,7 +27,7 @@ export class PublicationCacheService {
   getPublicationFromCache(id: string): PublicationView | null {
     const cached = this.publicationCache.get(id);
     if (cached && this.isCacheValid(cached.timestamp, this.PUBLICATION_CACHE_DURATION)) {
-      this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Publication retrieved from cache', { id });
+
       return cached.publication;
     }
     return null;
@@ -39,10 +39,7 @@ export class PublicationCacheService {
   getPublicationListFromCache(cacheKey: string): PublicationView[] | null {
     const cached = this.publicationListCache.get(cacheKey);
     if (cached && this.isCacheValid(cached.timestamp, this.LIST_CACHE_DURATION)) {
-      this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Publication list retrieved from cache', { 
-        cacheKey, 
-        count: cached.publications.length 
-      });
+
       return cached.publications;
     }
     return null;
@@ -63,7 +60,7 @@ export class PublicationCacheService {
       timestamp: Date.now()
     });
 
-    this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Publication added to cache', { id });
+
   }
 
   /**
@@ -81,10 +78,7 @@ export class PublicationCacheService {
       timestamp: Date.now()
     });
 
-    this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Publication list added to cache', { 
-      cacheKey, 
-      count: publications.length 
-    });
+
   }
 
   /**
@@ -97,7 +91,7 @@ export class PublicationCacheService {
         publication,
         timestamp: Date.now()
       });
-      this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Publication updated in cache', { id });
+
     }
   }
 
@@ -106,7 +100,7 @@ export class PublicationCacheService {
    */
   removePublicationFromCache(id: string): void {
     this.publicationCache.delete(id);
-    this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Publication removed from cache', { id });
+
   }
 
   /**
@@ -115,7 +109,7 @@ export class PublicationCacheService {
   clearAllCache(): void {
     this.publicationCache.clear();
     this.publicationListCache.clear();
-    this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'All cache cleared');
+
   }
 
   /**
@@ -149,7 +143,7 @@ export class PublicationCacheService {
     }
 
     if (cleanedCount > 0) {
-      this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Expired cache entries cleaned', { cleanedCount });
+  
     }
   }
 

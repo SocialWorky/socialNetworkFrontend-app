@@ -11,7 +11,6 @@ import { ConfigService } from '@shared/services/core-apis/config.service';
 const destroy$ = new Subject<void>();
 
 if (!navigator.geolocation) {
-  console.error('Geolocation is not available');
   throw new Error('Geolocation not supported in this browser');
 }
 
@@ -47,7 +46,6 @@ async function initializeApp() {
     const _configService = injector.get(ConfigService);
 
     const configTimeout = setTimeout(() => {
-      console.warn('ConfigService timeout, using default configuration');
       const loadingScreen = document.getElementById('loading-screen');
       if (loadingScreen) {
         loadingScreen.style.opacity = '0';
@@ -91,7 +89,6 @@ async function initializeApp() {
       },
       error: (error) => {
         clearTimeout(configTimeout);
-        console.error('Error loading configuration:', error);
         
         const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen) {
@@ -101,7 +98,7 @@ async function initializeApp() {
       }
     });
   } catch (error) {
-    console.error('Error initializing the application:', error);
+    // Application initialization error
   }
 }
 
@@ -142,3 +139,4 @@ function updateFavicon(iconUrl: string) {
 }
 
 initializeApp();
+

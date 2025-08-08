@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { ConnectionQualityService } from './connection-quality.service';
 import { DeviceDetectionService } from './device-detection.service';
-import { AuthService } from '../../auth/services/auth.service';
 
 export interface EnhancedLogMetadata {
   // Device Information
@@ -61,14 +60,13 @@ export interface EnhancedLogMetadata {
   providedIn: 'root'
 })
 export class EnhancedLoggingService {
-  private isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  private _isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   constructor(
     private logService: LogService,
     private connectionQualityService: ConnectionQualityService,
-    private deviceDetectionService: DeviceDetectionService,
-    private authService: AuthService
+    private deviceDetectionService: DeviceDetectionService
   ) {}
 
   /**
@@ -90,21 +88,14 @@ export class EnhancedLoggingService {
 
       this.logService.log(level, context, message, finalMetadata);
     } catch (error) {
-      // Fallback: log básico sin metadata mejorada
-      console.error('Error in enhanced logging, falling back to basic log:', {
-        context,
-        message,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      
-      // Intentar log básico
+      // Fallback to basic log
       try {
         this.logService.log(level, context, message, {
           error: 'Enhanced metadata failed',
           originalError: error instanceof Error ? error.message : 'Unknown error'
         });
       } catch (fallbackError) {
-        console.error('Even basic logging failed:', fallbackError);
+        // Enhanced logging fallback failed
       }
     }
   }
@@ -180,16 +171,32 @@ export class EnhancedLoggingService {
       ...additionalMetadata
     };
 
-    this.logService.log(LevelLogEnum.INFO, context, message, connectionMetadata);
+    // Connection change logged
   }
 
   /**
    * Get comprehensive enhanced metadata
    */
+  /**
+   * Get decoded token from localStorage to avoid circular dependency
+   */
+  private getDecodedTokenFromLocalStorage(): any {
+    const token = localStorage.getItem('token');
+    if (token && token !== 'undefined' && token !== 'null') {
+      try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        return decodedToken;
+      } catch (error) {
+        return null;
+      }
+    }
+    return null;
+  }
+
   private getEnhancedMetadata(): EnhancedLogMetadata {
     try {
       const connectionInfo = this.connectionQualityService.getConnectionInfo();
-      const userInfo = this.authService.getDecodedToken();
+      const userInfo = this.getDecodedTokenFromLocalStorage();
       
       return {
         deviceInfo: this.getDeviceInfo(),
@@ -271,7 +278,7 @@ export class EnhancedLoggingService {
         isMobile: this.deviceDetectionService.isMobile(),
         isTablet,
         isNative,
-        isIOS: this.isIOS,
+        isIOS: this._isIOS,
         isIphone,
         width: this.deviceDetectionService.width(),
         height: this.deviceDetectionService.height(),

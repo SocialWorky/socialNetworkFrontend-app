@@ -63,7 +63,8 @@ export class PreloadService {
         preload: true,
         maxRetries: 1, // Reduce retries to prevent cascading errors
         retryDelay: 1000, // Shorter delay
-        timeout: 5000 // Shorter timeout
+        timeout: 5000, // Shorter timeout
+        persistent: false // Disable persistent cache for preload
       }).subscribe({
         next: () => {
           // Success - no logging needed for preload
@@ -71,10 +72,7 @@ export class PreloadService {
         error: (error) => {
           // Only log critical errors, not network issues
           if (error.status !== 0 && error.status !== 404) {
-            this.logService.log(LevelLogEnum.WARN, 'PreloadService', 'Preload failed', { 
-              url, 
-              error: error.message 
-            });
+            
           }
         }
       });

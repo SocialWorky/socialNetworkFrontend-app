@@ -6,30 +6,31 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root',
 })
 export class SocketService {
-  private connectionStatus$ = new BehaviorSubject<boolean>(false);
-  private currentToken: string | null = null;
+  private _connectionStatus$ = new BehaviorSubject<boolean>(false);
+
+  private _currentToken: string | null = null;
 
   constructor(private socket: Socket) {
     this.setupConnectionListeners();
-    this.currentToken = localStorage.getItem('token');
+    this._currentToken = localStorage.getItem('token');
   }
 
   private setupConnectionListeners() {
     // Listen to connection events
     this.socket.on('connect', () => {
-      this.connectionStatus$.next(true);
+      this._connectionStatus$.next(true);
     });
 
     this.socket.on('disconnect', (reason: string) => {
-      this.connectionStatus$.next(false);
+      this._connectionStatus$.next(false);
     });
 
     this.socket.on('connect_error', (error: any) => {
-      this.connectionStatus$.next(false);
+      this._connectionStatus$.next(false);
     });
 
     this.socket.on('reconnect', (attemptNumber: number) => {
-      this.connectionStatus$.next(true);
+      this._connectionStatus$.next(true);
     });
 
     this.socket.on('reconnect_attempt', (attemptNumber: number) => {
@@ -43,7 +44,7 @@ export class SocketService {
   }
 
   get connectionStatus() {
-    return this.connectionStatus$.asObservable();
+    return this._connectionStatus$.asObservable();
   }
 
   isConnected(): boolean {
@@ -56,8 +57,8 @@ export class SocketService {
     }
 
     // If there is a token, set it up before connecting
-    if (this.currentToken) {
-      this.configureSocketWithToken(this.currentToken);
+    if (this._currentToken) {
+      this.configureSocketWithToken(this._currentToken);
     }
 
     this.socket.connect();
@@ -81,7 +82,7 @@ export class SocketService {
       return;
     }
 
-    this.currentToken = newToken;
+    this._currentToken = newToken;
 
     if (this.socket.ioSocket.connected) {
       this.socket.disconnect();
@@ -108,7 +109,8 @@ export class SocketService {
 
   socketError() {
     this.socket.on('connect_error', (error: any) => {
-      console.error('Error de conexión:', error);
+      // Connection error handled
     });
   }
 }
+

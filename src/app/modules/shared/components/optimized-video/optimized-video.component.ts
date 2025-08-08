@@ -94,23 +94,51 @@ export class OptimizedVideoComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    if (!this.src) {
-      this.setError();
-      return;
-    }
-
-    this.setupConnectionMonitoring();
     this.loadVideo();
   }
 
-  private setupConnectionMonitoring(): void {
-    this.connectionQualityService.getConnectionQuality().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(quality => {
-      this.isSlowConnection = quality === 'slow';
-      this.isLowQuality = quality === 'slow';
-      this.cdr.markForCheck();
-    });
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onLoadStart(): void {
+    this.isLoading = true;
+    this.cdr.markForCheck();
+  }
+
+  onCanPlay(): void {
+    this.isLoading = false;
+    this.hasError = false;
+    this.cdr.markForCheck();
+  }
+
+  onVideoError(): void {
+    this.logService.log(LevelLogEnum.ERROR, 'OptimizedVideoComponent', 'Video error', { url: this.src });
+    this.setError();
+  }
+
+  private setError(): void {
+    this.isLoading = false;
+    this.hasError = true;
+    this.videoUrl = this.fallbackSrc;
+    this.cdr.markForCheck();
+  }
+
+  retryLoad(): void {
+    if (this.retryCount < this.MAX_RETRIES) {
+      this.retryCount++;
+      this.canRetry = false;
+      this.loadVideo();
+    }
+  }
+
+  playVideo(): void {
+    if (this.videoElement && this.videoElement.nativeElement) {
+      this.videoElement.nativeElement.play().catch(error => {
+        this.logService.log(LevelLogEnum.ERROR, 'OptimizedVideoComponent', 'Failed to play video', { error });
+      });
+    }
   }
 
   private loadVideo(): void {
@@ -179,47 +207,5 @@ export class OptimizedVideoComponent implements OnInit, OnDestroy {
         this.posterUrl = this.poster!;
       }
     });
-  }
-
-  retryLoad(): void {
-    if (this.canRetry && this.retryCount < this.MAX_RETRIES) {
-      this.loadVideo();
-    }
-  }
-
-  playVideo(): void {
-    if (this.videoElement && this.videoElement.nativeElement) {
-      this.videoElement.nativeElement.play();
-    }
-  }
-
-  private setError(): void {
-    this.videoUrl = this.fallbackSrc;
-    this.isLoading = false;
-    this.hasError = true;
-    this.canRetry = false;
-    this.cdr.markForCheck();
-  }
-
-  onLoadStart(): void {
-    this.isLoading = true;
-    this.cdr.markForCheck();
-  }
-
-  onCanPlay(): void {
-    this.isLoading = false;
-    this.hasError = false;
-    this.cdr.markForCheck();
-  }
-
-  onVideoError(): void {
-    if (this.videoUrl !== this.fallbackSrc) {
-      this.setError();
-    }
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 } 

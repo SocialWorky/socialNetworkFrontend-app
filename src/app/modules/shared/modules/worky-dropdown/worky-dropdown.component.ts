@@ -59,7 +59,7 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
 
   isMobile: boolean = this._deviceDetectionService.isMobile();
 
-  private unsubscribe$ = new Subject<void>();
+  private _unsubscribe$ = new Subject<void>();
 
   constructor(
     private _authService: AuthService,
@@ -77,7 +77,7 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (this.img === 'avatar') this.getUser();
     this._globalEventService.profileImage$
-      .pipe(takeUntil(this.unsubscribe$))
+      .pipe(takeUntil(this._unsubscribe$))
       .subscribe(newImageUrl => {
         this.profileImageUrl = newImageUrl;
         // Force refresh user data to get updated avatar
@@ -90,8 +90,8 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
+    this._unsubscribe$.next();
+    this._unsubscribe$.complete();
   }
 
   handleMenuItemClick(data: DropdownDataLink<any>) {
@@ -101,7 +101,7 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   async getUser() {
     try {
       this.loaderAvatar = true;
-      const response = await firstValueFrom(this._userService.getUserById(this.decodedToken.id).pipe(takeUntil(this.unsubscribe$)));
+      const response = await firstValueFrom(this._userService.getUserById(this.decodedToken.id).pipe(takeUntil(this._unsubscribe$)));
       if (response) {
         this.user = response;
         this.profileImageUrl = response.avatar;
@@ -109,11 +109,9 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       } else {
         this.loaderAvatar = false;
-        console.error('User not found');
       }
     } catch (error) {
       this.loaderAvatar = false;
-      console.error(error);
     }
   }
 
@@ -215,3 +213,4 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   }
 
 }
+

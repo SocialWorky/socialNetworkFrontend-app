@@ -534,16 +534,19 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
     
     this.scrollTimeout = setTimeout(() => {
       this.userScrolling = false;
-    }, 150);
+    }, 200); // Increased from 150 to 200ms
     
     // Show/hide scroll to bottom button
     const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
     this.showScrollToBottomButton = !isNearBottom;
     
-    // Load more messages when user is near the beginning
-    if (scrollTop < 200 && !this.loadingMoreMessages && this.hasMoreMessages) {
-      this.currentPage++;
-      this.loadMoreMessages(this.currentPage);
+    // Load more messages when user is near the beginning with larger threshold
+    if (scrollTop < 500 && !this.loadingMoreMessages && this.hasMoreMessages) { // Increased from 200 to 500
+      // Add delay to prevent rapid loading
+      setTimeout(() => {
+        this.currentPage++;
+        this.loadMoreMessages(this.currentPage);
+      }, 300);
     }
   }
 

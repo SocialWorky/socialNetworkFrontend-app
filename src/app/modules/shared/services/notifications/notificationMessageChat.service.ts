@@ -37,8 +37,6 @@ export class NotificationMessageChatService implements OnDestroy {
       if (message && message._id) {
         this.socket.emit('generalNotification');
         this.socket.emit('newMessageChat', message);
-      } else {
-        console.warn('Intentando enviar mensaje sin ID:', message);
       }
     }
 

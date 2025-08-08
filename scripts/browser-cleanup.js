@@ -12,13 +12,42 @@ const databases = [
   'WorkyImageCacheDB'
 ];
 
+// Also clean databases with user IDs (pattern: DB_NAME_USERID)
+async function clearAllDatabasesWithUserIds() {
+  // Get all databases
+  const allDatabases = await indexedDB.databases();
+  
+  for (const db of allDatabases) {
+    const dbName = db.name;
+    // Check if it's a Worky database (with or without user ID)
+    if (dbName && (
+      dbName.startsWith('MobileImageCacheDB') ||
+      dbName.startsWith('WorkyMessagesDB') ||
+      dbName.startsWith('WorkyPublicationsDB') ||
+      dbName.startsWith('WorkyCacheDB') ||
+      dbName.startsWith('WorkyImageCacheDB')
+    )) {
+      try {
+        await indexedDB.deleteDatabase(dbName);
+        console.log('✅ Limpiado:', dbName);
+      } catch (error) {
+        console.log('⚠️ Error al limpiar', dbName, ':', error.message);
+      }
+    }
+  }
+}
+
 async function clearAllDatabases() {
+  // First, clear databases with user IDs (new pattern)
+  await clearAllDatabasesWithUserIds();
+  
+  // Then, clear legacy databases without user IDs (fallback)
   for (const dbName of databases) {
     try {
       await indexedDB.deleteDatabase(dbName);
-      console.log('✅ Limpiado:', dbName);
+      console.log('✅ Limpiado (legacy):', dbName);
     } catch (error) {
-      console.log('⚠️ Error al limpiar', dbName, ':', error.message);
+      console.log('⚠️ Error al limpiar (legacy)', dbName, ':', error.message);
     }
   }
   

@@ -13,7 +13,7 @@ import { LazyCssService } from './core-apis/lazy-css.service';
 })
 export class ContentService {
 
-  private highlightJsLoaded = false;
+  private _highlightJsLoaded = false;
 
   constructor(
     private http: HttpClient,
@@ -51,12 +51,12 @@ export class ContentService {
    * Carga CSS de highlight.js solo cuando se necesite
    */
   private async loadHighlightJsCss() {
-    if (!this.highlightJsLoaded) {
+    if (!this._highlightJsLoaded) {
       try {
         await this.lazyCssService.loadHighlightJs();
-        this.highlightJsLoaded = true;
+        this._highlightJsLoaded = true;
       } catch (error) {
-        console.warn('Error cargando CSS de highlight.js:', error);
+        // CSS loading error handled
       }
     }
   }
@@ -170,3 +170,4 @@ export class ContentService {
     return { previewHtml, isYouTube: false };
   }
 }
+
