@@ -23,20 +23,18 @@ export class WorkyNewsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Get current date in Chile timezone (UTC-3)
+    // Get current date in Chile timezone
     const currentDate = new Date();
     
-    // Adjust for Chile timezone (UTC-3 or UTC-4)
-    const chileOffset = -3; // UTC-3 for Chile standard time
-    const utcTime = currentDate.getTime() + (currentDate.getTimezoneOffset() * 60000);
-    const chileTime = new Date(utcTime + (chileOffset * 3600000));
+    // Get Chile timezone (automatically handles DST)
+    const chileTime = new Date(currentDate.toLocaleString("en-US", {timeZone: "America/Santiago"}));
     
     const year = chileTime.getFullYear();
     const month = (chileTime.getMonth() + 1).toString().padStart(2, '0');
     const day = chileTime.getDate().toString().padStart(2, '0');
-    const date = `${year}-${month}-${day}`;
+    const currentDateString = `${year}-${month}-${day}`;
 
-    this._newsService.getNews(date).pipe(
+    this._newsService.getNews(currentDateString).pipe(
       switchMap(articles => {
         if (articles.length > 0) {
           return of(articles);
@@ -54,6 +52,14 @@ export class WorkyNewsComponent implements OnInit {
       }),
       switchMap(articles => {
         if (articles.length > 0) {
+          // Try to get fresh news using getFetchNews in background
+          this._newsService.getFetchNews().subscribe(freshArticles => {
+            if (freshArticles.length > 0) {
+              this.articles = freshArticles;
+              this._cdr.markForCheck();
+            }
+          });
+          
           return of(articles);
         }
         
@@ -71,3 +77,4 @@ export class WorkyNewsComponent implements OnInit {
     });
   }
 }
+
