@@ -311,10 +311,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
           publications: cachedPublications,
           total: cachedPublications.length
         };
-        this._logService.log(LevelLogEnum.INFO, 'HomeComponent', 'Publications loaded from cache', {
-          page: this.page,
-          count: cachedPublications.length
-        });
+
       } else {
         // Load from server using PublicationDataService
         newPublicationsResponse = await firstValueFrom(

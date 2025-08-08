@@ -111,13 +111,7 @@ export class MediaCacheService {
 
     // NEW: Check if we can load more
     if (!this.canLoadMore()) {
-      this.logService.log(LevelLogEnum.WARN, 'MediaCacheService', 'Video load blocked due to rate limiting', {
-        url,
-        currentLoads: this.currentLoads,
-        recentLoads: this.loadHistory.length,
-        maxConcurrent: this.maxConcurrentLoads,
-        maxPerMinute: this.maxLoadsPerMinute
-      });
+
       return throwError(() => new Error('Too many video loads'));
     }
 
@@ -129,7 +123,7 @@ export class MediaCacheService {
         if (objectURL) {
           return of(objectURL);
         } else {
-          this.logService.log(LevelLogEnum.WARN, 'MediaCacheService', 'Invalid blob in memory cache', { url });
+  
           this.removeFromCache(cacheKey);
         }
       } else {
@@ -146,7 +140,7 @@ export class MediaCacheService {
         this.cacheSize += cachedData.size;
         return of(objectURL);
       } else {
-        this.logService.log(LevelLogEnum.WARN, 'MediaCacheService', 'Invalid blob in persistent cache', { url });
+
         this.cacheService.removeItem(cacheKey, true);
       }
     }
@@ -209,11 +203,7 @@ export class MediaCacheService {
         // NEW: Check if blob is too large (prevent memory issues)
         const maxBlobSize = 50 * 1024 * 1024; // 50MB max
         if (blob.size > maxBlobSize) {
-          this.logService.log(LevelLogEnum.WARN, 'MediaCacheService', 'Video too large, skipping cache', {
-            url,
-            size: blob.size,
-            maxSize: maxBlobSize
-          });
+          
           
           // Return URL directly without caching
           const objectURL = this.createObjectURL(blob);
@@ -480,6 +470,6 @@ export class MediaCacheService {
     this.mediaCache.clear();
     this.cacheSize = 0;
     this.loadingMedia.clear();
-    this.logService.log(LevelLogEnum.INFO, 'MediaCacheService', 'Forced cleanup completed');
+
   }
 } 

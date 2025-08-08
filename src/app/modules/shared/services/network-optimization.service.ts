@@ -80,10 +80,7 @@ export class NetworkOptimizationService implements OnDestroy {
     const connectionInfo = this.connectionQualityService.getConnectionInfo();
     this.adaptToConnectionQuality(connectionInfo.effectiveType);
     
-    this.logService.log(LevelLogEnum.INFO, 'NetworkOptimizationService', 'Service initialized', {
-      config: this.currentConfig,
-      connectionQuality: connectionInfo.effectiveType
-    });
+
   }
 
   /**
@@ -142,11 +139,7 @@ export class NetworkOptimizationService implements OnDestroy {
     currentQueue.push(batchedRequest);
     this.requestQueue.next(currentQueue);
 
-    this.logService.log(LevelLogEnum.INFO, 'NetworkOptimizationService', 'Request added to batch', {
-      id: batchedRequest.id,
-      url: batchedRequest.url,
-      priority: batchedRequest.priority
-    });
+
 
     // Return observable that will emit when request is processed
     return this.waitForRequestCompletion(batchedRequest.id);
@@ -256,10 +249,7 @@ export class NetworkOptimizationService implements OnDestroy {
       const responseTime = performance.now();
       this.updateMetrics(responseTime, requests.length, true);
       
-      this.logService.log(LevelLogEnum.INFO, 'NetworkOptimizationService', 'Batch executed successfully', {
-        batchSize: requests.length,
-        responseTime
-      });
+
     }).catch(error => {
       this.updateMetrics(0, requests.length, false);
       this.logService.log(LevelLogEnum.ERROR, 'NetworkOptimizationService', 'Batch execution failed', { error });
@@ -374,7 +364,7 @@ export class NetworkOptimizationService implements OnDestroy {
    */
   updateConfig(newConfig: Partial<NetworkConfig>): void {
     this.currentConfig = { ...this.currentConfig, ...newConfig };
-    this.logService.log(LevelLogEnum.INFO, 'NetworkOptimizationService', 'Configuration updated', this.currentConfig);
+
   }
 
   /**

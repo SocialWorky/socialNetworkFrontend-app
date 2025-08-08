@@ -283,6 +283,6 @@ export class ScrollOptimizationService {
   forceCleanup(): void {
     this.currentLoads = 0;
     this.loadHistory = [];
-    this.logService.log(LevelLogEnum.INFO, 'ScrollOptimizationService', 'Forced cleanup completed');
+
   }
 }

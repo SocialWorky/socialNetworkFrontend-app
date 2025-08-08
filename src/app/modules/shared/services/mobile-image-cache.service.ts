@@ -259,7 +259,7 @@ export class MobileImageCacheService {
       
       // For iOS Safari, don't fail completely, just use memory cache
       if (isIOS) {
-        this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS IndexedDB failed, falling back to memory cache');
+
         resolve();
       } else {
         reject(error);
@@ -318,10 +318,7 @@ export class MobileImageCacheService {
         this.createdObjectUrls.delete(url);
       });
       
-      this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Cleaned up object URLs', {
-        removed: urlsToRemove.length,
-        remaining: this.createdObjectUrls.size
-      });
+      
     }
   }
 
@@ -470,7 +467,7 @@ export class MobileImageCacheService {
         request.onerror = () => {
           // iOS Safari specific error handling
           if (isIOS) {
-            this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS IndexedDB read failed, falling back to network', { url: imageUrl });
+  
             resolve(null); // Don't fail completely, fall back to network
           } else {
             reject(request.error);
@@ -479,7 +476,7 @@ export class MobileImageCacheService {
       } catch (error) {
         // iOS Safari sometimes throws errors during IndexedDB operations
         if (isIOS) {
-          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS IndexedDB operation failed, falling back to network', { error, url: imageUrl });
+
           resolve(null); // Don't fail completely, fall back to network
         } else {
           reject(error);
@@ -492,7 +489,7 @@ export class MobileImageCacheService {
     // Validate URL for iOS Safari
     if (isIOS) {
       if (!imageUrl || !imageUrl.startsWith('http')) {
-        this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Invalid image URL for iOS', { url: imageUrl });
+
         throw new Error('Invalid image URL');
       }
     }
@@ -515,10 +512,7 @@ export class MobileImageCacheService {
 
     // For iOS Safari, validate blob type
     if (isIOS && !blob.type.startsWith('image/')) {
-      this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Invalid blob type for iOS', { 
-        url: imageUrl, 
-        type: blob.type 
-      });
+      
       throw new Error('Invalid image type for iOS Safari');
     }
 
@@ -729,7 +723,7 @@ export class MobileImageCacheService {
     this.loadTimes = [];
     this.updateMetrics();
     
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Cache cleared successfully');
+
   }
 
   async getCacheStats(): Promise<any> {
@@ -804,7 +798,7 @@ export class MobileImageCacheService {
     this.loadQueue = [];
     this.currentLoads = 0;
     
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Mobile optimization completed');
+
   }
 
   private cacheMonitoringInterval: any;
@@ -918,7 +912,7 @@ export class MobileImageCacheService {
     this.cleanupObjectUrls();
     this.loadQueue = [];
     this.currentLoads = 0;
-    this.logService.log(LevelLogEnum.INFO, 'MobileImageCacheService', 'Forced optimization completed');
+
   }
 
   /**
