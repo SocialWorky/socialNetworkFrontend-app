@@ -84,7 +84,6 @@ export class WebSocketOptimizationService implements OnDestroy {
 
     this.socket.on('disconnect', (reason: string) => {
       this.updateMetrics({ connectionStatus: 'disconnected' });
-      this.logService.log(LevelLogEnum.WARN, 'WebSocketOptimizationService', 'WebSocket disconnected', { reason });
       this.handleDisconnection(reason);
     });
 
@@ -128,7 +127,6 @@ export class WebSocketOptimizationService implements OnDestroy {
           const now = Date.now();
           
           if (now - lastHeartbeat > this.currentConfig.heartbeatTimeout) {
-            this.logService.log(LevelLogEnum.WARN, 'WebSocketOptimizationService', 'Heartbeat timeout');
             this.handleDisconnection('heartbeat_timeout');
           }
         }, this.currentConfig.heartbeatTimeout);
@@ -157,7 +155,6 @@ export class WebSocketOptimizationService implements OnDestroy {
         this.socket.connect();
       }, delay);
     } else {
-      this.logService.log(LevelLogEnum.ERROR, 'WebSocketOptimizationService', 'Max reconnection attempts reached');
       this.updateMetrics({ connectionStatus: 'disconnected' });
     }
   }
@@ -225,7 +222,7 @@ export class WebSocketOptimizationService implements OnDestroy {
         
         
       } else {
-        this.logService.log(LevelLogEnum.WARN, 'WebSocketOptimizationService', 'Cannot emit - not connected', { event });
+        // Cannot emit - not connected
       }
     } catch (error) {
       this.logService.log(LevelLogEnum.ERROR, 'WebSocketOptimizationService', 'Emit failed', { event, error });

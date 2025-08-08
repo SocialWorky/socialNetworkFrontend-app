@@ -82,44 +82,16 @@ export class VersionManagementComponent implements OnInit {
       this.isLoading = true;
       const response = await this.http.get<any>(`${environment.API_URL}/app/version`).toPromise();
       
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'VersionManagementComponent',
-        'Backend response received',
-        { response: response }
-      );
-      
       // Backend is reachable if we get any response
       this.backendConnected = true;
       this.loadVersions();
       this.loadCurrentVersion();
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'VersionManagementComponent',
-        'Backend connection established'
-      );
       
     } catch (error: any) {
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'VersionManagementComponent',
-        'Backend response with error status',
-        { 
-          error: error,
-          status: error?.status,
-          url: `${environment.API_URL}/app/version`
-        }
-      );
-      
       // Check if it's a 404 (no active version) - backend is still working
       if (error?.status === 404) {
         this.backendConnected = true;
         this.loadVersions();
-        this.logService.log(
-          LevelLogEnum.INFO,
-          'VersionManagementComponent',
-          'Backend connected - no active version found (404)'
-        );
         this.alertService.showAlert(
           'Información', 
           'Backend conectado. No hay versión activa registrada. Puedes crear la primera versión usando el formulario.', 
@@ -156,31 +128,13 @@ export class VersionManagementComponent implements OnInit {
       this.isLoading = true;
       const response = await this.http.get<any>(`${environment.API_URL}/app/versions`).toPromise();
       
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'VersionManagementComponent',
-        'Versions response received',
-        { response: response }
-      );
-      
       if (response) {
         // Handle different response structures
         this.versions = response.data || response || [];
-        this.logService.log(
-          LevelLogEnum.INFO,
-          'VersionManagementComponent',
-          'Versions loaded successfully',
-          { count: this.versions.length }
-        );
       }
     } catch (error: any) {
       if (error?.status === 404) {
         this.versions = [];
-        this.logService.log(
-          LevelLogEnum.INFO,
-          'VersionManagementComponent',
-          'No versions found in backend (404) - starting with empty list'
-        );
       } else {
         this.logService.log(
           LevelLogEnum.ERROR,
