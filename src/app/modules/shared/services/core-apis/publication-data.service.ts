@@ -127,7 +127,7 @@ export class PublicationDataService {
       const response = await this.http.get<{ count: number }>(url, { params }).toPromise();
       return response?.count || 0;
     } catch (error) {
-      this.logService.log(LevelLogEnum.ERROR, 'PublicationDataService', 'Error getting total from server', { error });
+      // Error getting total from server - no need to log every count fetch error
       return 0;
     }
   }
@@ -136,7 +136,7 @@ export class PublicationDataService {
    * Handle errors
    */
   private handleError(error: any) {
-    console.error('PublicationDataService error:', error);
+    // PublicationDataService error - no need to log every service error
     return throwError(() => new Error('Something went wrong; please try again later.'));
   }
 } 

@@ -252,7 +252,7 @@ export class NetworkOptimizationService implements OnDestroy {
 
     }).catch(error => {
       this.updateMetrics(0, requests.length, false);
-      this.logService.log(LevelLogEnum.ERROR, 'NetworkOptimizationService', 'Batch execution failed', { error });
+      // Batch execution failed - no need to log every batch failure
     });
   }
 
@@ -300,11 +300,7 @@ export class NetworkOptimizationService implements OnDestroy {
       }),
       catchError(error => {
         this.updateMetrics(0, 1, false);
-        this.logService.log(LevelLogEnum.ERROR, 'NetworkOptimizationService', 'Request failed', {
-          url: request.url,
-          method: request.method,
-          error: error.message
-        });
+        // Request failed - no need to log every request failure
         return throwError(() => error);
       })
     );

@@ -98,7 +98,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
         }, 1000)
       },
       error: (error) => {
-        console.error('Error getting notifications', error);
+        // Error getting notifications - no need to log every notification fetch error
       }
     });
     this.subscribeToConfig();
@@ -133,7 +133,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error getting config', error);
+        // Error getting config - no need to log every config fetch error
       }
     });
   }
@@ -247,7 +247,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error getting notifications', error);
+        // Error getting notifications - no need to log every notification fetch error
       }
     });
   }
@@ -263,7 +263,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error getting messages', error);
+        // Error getting messages - no need to log every message fetch error
       }
     });
   }

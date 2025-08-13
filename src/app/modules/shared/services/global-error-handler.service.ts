@@ -27,13 +27,7 @@ export class GlobalErrorHandlerService implements ErrorHandler {
     }
 
     // For other errors, log them normally
-    this.logService.log(LevelLogEnum.ERROR, 'GlobalErrorHandlerService', 'Unhandled error', {
-      error: error.message,
-      stack: error.stack,
-      isSafariIOS: this._isSafariIOS()
-    });
-
-    // Global error handled
+    // Unhandled error - no need to log every unhandled error
   }
 
   private _isSafariIOS(): boolean {
@@ -69,10 +63,7 @@ export class GlobalErrorHandlerService implements ErrorHandler {
 
   private handleSafariIOSIndexedDBError(error: any): void {
     this.ngZone.run(() => {
-      this.logService.log(LevelLogEnum.WARN, 'GlobalErrorHandlerService', 'Safari iOS IndexedDB error handled', {
-        error: error.message,
-        isSafariIOS: true
-      });
+      // Safari iOS IndexedDB error handled - no need to log every IndexedDB error
 
       // Don't log this error to console to avoid spam
       // The error is expected behavior in Safari iOS
@@ -90,10 +81,7 @@ export class GlobalErrorHandlerService implements ErrorHandler {
 
   private handleSafariIOSNetworkError(error: any): void {
     this.ngZone.run(() => {
-      this.logService.log(LevelLogEnum.WARN, 'GlobalErrorHandlerService', 'Safari iOS network error handled', {
-        error: error.message,
-        isSafariIOS: true
-      });
+      // Safari iOS network error handled - no need to log every network error
 
       // For network errors, we might want to show a user-friendly message
       // or implement retry logic

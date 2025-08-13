@@ -57,7 +57,7 @@ export class ImageLoadingService {
 
     // iOS-specific URL validation
     if (isIOS && !imageUrl.startsWith('http')) {
-      this.logService.log(LevelLogEnum.WARN, 'ImageLoadingService', 'Invalid image URL for iOS', { url: imageUrl });
+      // Invalid image URL for iOS - no need to log every URL validation
       return throwError(() => new Error('Invalid image URL'));
     }
 
@@ -88,11 +88,7 @@ export class ImageLoadingService {
         };
       }),
       catchError(error => {
-        this.logService.log(LevelLogEnum.ERROR, 'ImageLoadingService', 'Image loading failed', {
-          url: imageUrl,
-          type: imageType,
-          error: error.message
-        });
+        // Network loading failed - no need to log every network failure
         return throwError(() => error);
       })
     );

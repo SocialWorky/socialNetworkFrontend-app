@@ -106,7 +106,7 @@ export class SmartSyncService {
         }
       }),
       catchError(error => {
-        this.logService.log(LevelLogEnum.ERROR, 'SmartSyncService', 'Error en carga inteligente', { error });
+        // Error en carga inteligente - no need to log every sync error
         throw error;
       })
     );
@@ -152,7 +152,7 @@ export class SmartSyncService {
           error: error.message
         });
 
-        this.logService.log(LevelLogEnum.ERROR, 'SmartSyncService', 'Error en sincronización', { error });
+        // Error en sincronización - no need to log every sync error
         throw error;
       })
     );
@@ -201,6 +201,8 @@ export class SmartSyncService {
           isSyncing: false,
           error: error.message
         });
+
+        // Error en sincronización en segundo plano - no need to log every background sync error
         throw error;
       })
     );

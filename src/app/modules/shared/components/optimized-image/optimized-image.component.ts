@@ -253,14 +253,14 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
     // Set loading timeout
     this.imageLoadTimeout = setTimeout(() => {
       if (this.isLoading) {
-        this.logService.log(LevelLogEnum.WARN, 'OptimizedImageComponent', 'Image load timeout', { src: this.src });
+        // Image load timeout - no need to log every timeout
         this.handleError();
       }
     }, 30000); // 30 seconds timeout
 
     // Validate URL for Safari iOS
     if (this.isSafariIOS() && !this.src.startsWith('http')) {
-      this.logService.log(LevelLogEnum.WARN, 'OptimizedImageComponent', 'Invalid image URL for Safari iOS', { src: this.src });
+      // Invalid image URL for Safari iOS - no need to log every URL validation
       this.handleError();
       return;
     }
@@ -286,10 +286,7 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
         // Image loaded successfully - no need to log every successful load
       },
       error: (error) => {
-        this.logService.log(LevelLogEnum.ERROR, 'OptimizedImageComponent', 'Failed to load image', { 
-          src: this.src, 
-          error: error.message 
-        });
+        // Failed to load image - no need to log every image load failure
         this.handleError();
       }
     });
@@ -309,7 +306,7 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
   }
 
   onImageError(): void {
-    this.logService.log(LevelLogEnum.WARN, 'OptimizedImageComponent', 'Image failed to load', { src: this.src });
+    // Image failed to load - no need to log every image error
     this.handleError();
   }
 

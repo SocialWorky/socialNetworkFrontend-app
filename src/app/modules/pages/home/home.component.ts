@@ -200,7 +200,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.updateConnectionStatus(isOnline);
       },
       error: (error) => {
-        console.error('Error verificando estado online', error);
+        // Error verificando estado online - no need to log every connection check error
       },
     });
   }
@@ -399,12 +399,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
               },
               error: (error) => {
-                console.error('Error syncing new publication:', error);
+                // Error syncing new publication - no need to log every sync error
               }
             });
         },
         error: (error) => {
-          console.error('Error en la suscripción de notificaciones de nuevas publicaciones:', error);
+          // Error en la suscripción de notificaciones de nuevas publicaciones - no need to log every subscription error
         }
       });
   }
@@ -426,7 +426,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         },
         error: (error) => {
-          console.error('Error en la suscripción de notificaciones de eliminar publicaciones:', error);
+          // Error en la suscripción de notificaciones de eliminar publicaciones - no need to log every subscription error
         }
       });
   }
@@ -472,12 +472,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
               },
               error: (error) => {
-                console.error('Error al sincronizar publicación actualizada:', error);
+                // Error al sincronizar publicación actualizada - no need to log every sync error
               }
             });
         },
         error: (error) => {
-          console.error('Error en la suscripción de notificaciones de actualizar publicaciones:', error);
+          // Error en la suscripción de notificaciones de actualizar publicaciones - no need to log every subscription error
         }
       });
   }
@@ -502,7 +502,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       },
       error: (error) => {
-        console.error('Error en la suscripción de notificaciones de comentarios:', error);
+        // Error en la suscripción de notificaciones de comentarios - no need to log every subscription error
       }
     });
   }
@@ -527,7 +527,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
           result = false;
         }
       } catch (error) {
-        console.error('Error al obtener la publicación:', error);
+        this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error al obtener la publicación', { error });
         result = false;
       }
     }
@@ -579,7 +579,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       this._cdr.markForCheck();
       
     } catch (error) {
-      console.error('Error al forzar actualización:', error);
+      this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error al forzar actualización', { error });
       this.loaderPublications = false;
     }
   }
@@ -602,7 +602,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       this._cdr.markForCheck();
       
     } catch (error) {
-      console.error('Error al cargar desde cache local:', error);
+      this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error al cargar desde cache local', { error });
       this.loaderPublications = false;
     }
   }
@@ -638,7 +638,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.loaderPublications = false;
       
     } catch (error) {
-      console.error('Error en sincronización manual:', error);
+      this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error en sincronización manual', { error });
       this.loaderPublications = false;
     }
   }
@@ -673,7 +673,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.hasMorePublications = currentCount < totalCount;
       },
       error: (error) => {
-        console.error('Error checking total publications:', error);
+        this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error checking total publications', { error });
         this.hasMorePublications = true;
       }
     });
@@ -693,7 +693,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this._cdr.markForCheck();
       }
     } catch (error) {
-      console.error('Error checking total publications:', error);
+      this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error checking total publications', { error });
     }
   }
 
@@ -747,7 +747,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       }, 1000);
       
     } catch (error) {
-      console.error('Error en pull-to-refresh:', error);
+      this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error en pull-to-refresh', { error });
       this.hideModernRefreshIndicator();
       this.isRefreshing = false;
       this._cdr.markForCheck();

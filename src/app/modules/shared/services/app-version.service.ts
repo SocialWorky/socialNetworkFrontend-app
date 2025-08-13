@@ -74,9 +74,7 @@ export class AppVersionService {
           // Backend returns version data directly
           serverVersion = response;
         } else {
-          if (this.ENABLE_VERSION_LOGS) {
-            this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Unexpected backend response format', { response });
-          }
+          // Unexpected backend response format - no need to log every format validation
           throw new Error('Invalid backend response format');
         }
         
@@ -87,8 +85,8 @@ export class AppVersionService {
       }),
       catchError(error => {
         // Only log critical errors, not 404s or network issues
-        if (error?.status !== 404 && this.ENABLE_VERSION_LOGS) {
-          this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Error checking for app updates', error);
+        if (error?.status !== 404) {
+          // Error checking for app updates - no need to log every update check error
         }
         // Return cached result or default
         const cachedResult = this.getCachedVersionCheck();
@@ -186,7 +184,8 @@ export class AppVersionService {
       };
       localStorage.setItem(this.VERSION_KEY, JSON.stringify(cacheData));
     } catch (error) {
-      this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Error caching version check', { error: error instanceof Error ? error.message : String(error) });
+      // Error caching version check - no need to log every cache operation error
+      // Cache operations can fail silently without affecting functionality
     }
   }
 
@@ -206,7 +205,8 @@ export class AppVersionService {
         }
       }
     } catch (error) {
-      this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Error reading cached version check', { error: error instanceof Error ? error.message : String(error) });
+      // Error reading cached version check - no need to log every cache read error
+      // Cache read failures can happen normally and don't need logging
     }
     return null;
   }
@@ -236,7 +236,8 @@ export class AppVersionService {
     try {
       localStorage.removeItem(this.VERSION_KEY);
     } catch (error) {
-      this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Error clearing version cache', { error: error instanceof Error ? error.message : String(error) });
+      // Error clearing version cache - no need to log every cache clear error
+      // Cache clear failures can happen normally and don't need logging
     }
   }
 

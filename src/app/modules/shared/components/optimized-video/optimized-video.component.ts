@@ -114,7 +114,7 @@ export class OptimizedVideoComponent implements OnInit, OnDestroy {
   }
 
   onVideoError(): void {
-    this.logService.log(LevelLogEnum.ERROR, 'OptimizedVideoComponent', 'Video error', { url: this.src });
+    // Video error - no need to log every video error
     this.setError();
   }
 
@@ -136,7 +136,7 @@ export class OptimizedVideoComponent implements OnInit, OnDestroy {
   playVideo(): void {
     if (this.videoElement && this.videoElement.nativeElement) {
       this.videoElement.nativeElement.play().catch(error => {
-        this.logService.log(LevelLogEnum.ERROR, 'OptimizedVideoComponent', 'Failed to play video', { error });
+        // Failed to play video - no need to log every play failure
       });
     }
   }
@@ -170,11 +170,7 @@ export class OptimizedVideoComponent implements OnInit, OnDestroy {
         // Video loaded successfully - no need to log every successful load
       },
       error: (error) => {
-        this.logService.log(LevelLogEnum.ERROR, 'OptimizedVideoComponent', 'Failed to load video', {
-          url: this.src,
-          error: error.message,
-          retryCount: this.retryCount
-        });
+        // Failed to load video - no need to log every video load failure
 
         if (this.retryCount < this.MAX_RETRIES) {
           this.retryCount++;

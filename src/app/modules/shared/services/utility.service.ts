@@ -190,12 +190,7 @@ export class UtilityService {
 
       // Cleaned up orphaned databases - no need to log every cleanup
     } catch (error) {
-      this.logService.log(
-        LevelLogEnum.ERROR,
-        'UtilityService',
-        'Error cleaning up orphaned databases',
-        { error: error instanceof Error ? error.message : String(error) }
-      );
+      // Error cleaning up orphaned databases - no need to log every cleanup error
     }
   }
 
@@ -243,12 +238,7 @@ export class UtilityService {
             localStorage.removeItem(key);
           }
         } catch (error) {
-          this.logService.log(
-            LevelLogEnum.ERROR,
-            'UtilityService',
-            'Failed to parse cache item during cleanup',
-            { key, error: error instanceof Error ? error.message : String(error) }
-          );
+          // Failed to parse cache item during cleanup - no need to log every parse failure
           localStorage.removeItem(key);
         }
       }
