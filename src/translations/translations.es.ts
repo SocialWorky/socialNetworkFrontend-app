@@ -515,6 +515,12 @@ export const translations = {
   'admin.lastRegisteredUsers-createdAt': 'Fecha de registro',
   'admin.lastRegisteredUsers-validated': 'Validado',
   'admin.lastRegisteredUsers-pending': 'Pendiente',
+  'admin.lastRegisteredUsers.alerts.success': 'Éxito',
+  'admin.lastRegisteredUsers.alerts.userActivated': 'Usuario activado exitosamente',
+  'admin.lastRegisteredUsers.alerts.userDeactivated': 'Usuario desactivado exitosamente',
+  'admin.lastRegisteredUsers.alerts.error': 'Error',
+  'admin.lastRegisteredUsers.alerts.errorUpdatingStatus': 'Error al actualizar el estado del usuario. Por favor, inténtalo de nuevo.',
+  'admin.lastRegisteredUsers.alerts.errorLoadingUsers': 'Error al cargar usuarios. Por favor, inténtalo de nuevo.',
   
   // ADMIN LOG
   'admin.log.title': 'Sistema de Logs',
@@ -1061,4 +1067,5 @@ export const translations = {
   'common.loading': 'Cargando',
   'common.actions': 'Acciones',
   'common.close': 'Cerrar',
+  'common.ok': 'Aceptar',
 };

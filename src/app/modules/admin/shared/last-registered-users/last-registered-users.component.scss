@@ -1,1 +1,83 @@
+/* Estilos específicos para el toggle de usuarios */
+.toggle-container {
+  /* Asegurar que solo se vea el toggle personalizado */
+  input[type="checkbox"] {
+    /* Ocultar completamente el checkbox nativo */
+    position: absolute !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    overflow: hidden !important;
+  }
 
+  /* Asegurar que no haya íconos de check visibles */
+  input[type="checkbox"]::before,
+  input[type="checkbox"]::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  /* Estilos para el toggle personalizado */
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    background-color: #475569;
+    border-radius: 12px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+  }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Estado activo del toggle */
+  input[type="checkbox"]:checked + .toggle-switch {
+    background-color: #3b82f6;
+  }
+
+  input[type="checkbox"]:checked + .toggle-switch::after {
+    transform: translateX(20px);
+  }
+
+  /* Estado deshabilitado */
+  input[type="checkbox"]:disabled + .toggle-switch {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Focus styles */
+  input[type="checkbox"]:focus + .toggle-switch {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+}
+
+/* Asegurar que no haya estilos globales interfiriendo */
+input[type="checkbox"] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+/* Eliminar cualquier ícono de check del sistema */
+input[type="checkbox"]::-ms-check {
+  display: none !important;
+}
