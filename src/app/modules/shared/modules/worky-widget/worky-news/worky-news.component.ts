@@ -71,19 +71,23 @@ export class WorkyNewsComponent implements OnInit {
       }),
       switchMap(articles => {
         if (articles.length > 0) {
-          this._newsService.getFetchNews().subscribe(() => {
-            setTimeout(() => {
-              this._newsService.getNews(currentDateString).subscribe(updatedArticles => {
-                if (updatedArticles.length > 0) {
-                  this.articles = updatedArticles;
-                  this._cdr.markForCheck();
-                } else {
-                  this.articles = articles;
-                  this._cdr.markForCheck();
-                }
-              });
-            }, 3000);
-          });
+          const areFromPreviousDay = this.shouldFetchFreshNews(articles);
+          
+          if (areFromPreviousDay) {
+            this._newsService.getFetchNews().subscribe(() => {
+              setTimeout(() => {
+                this._newsService.getNews(currentDateString).subscribe(updatedArticles => {
+                  if (updatedArticles.length > 0) {
+                    this.articles = updatedArticles;
+                    this._cdr.markForCheck();
+                  } else {
+                    this.articles = articles;
+                    this._cdr.markForCheck();
+                  }
+                });
+              }, 3000);
+            });
+          }
           
           return of(articles);
         }
