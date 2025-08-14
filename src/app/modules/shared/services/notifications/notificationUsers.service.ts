@@ -7,6 +7,7 @@ import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { CacheService } from '../cache.service';
 import { SocketService } from '../socket.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +26,7 @@ export class NotificationUsersService implements OnDestroy {
 
   private _unsubscribeAll = new Subject<void>();
 
-  private inactivityDuration = 5 * 60 * 1000;
+  private inactivityDuration = 5 * 60 * 1000; // 5 minutes
 
   private inactivityTimeout: any;
 
@@ -42,7 +43,8 @@ export class NotificationUsersService implements OnDestroy {
     private socket: Socket,
     private _authService: AuthService,
     private _cacheService: CacheService,
-    private _socketService: SocketService
+    private _socketService: SocketService,
+    private _logService: LogService
   ) {
     this._decodeToken = this._authService.getDecodedToken()!;
 
@@ -57,21 +59,33 @@ export class NotificationUsersService implements OnDestroy {
     const cachedStatuses = this._cacheService.getItem<Token[]>(this.CACHE_KEY);
     if (cachedStatuses && Array.isArray(cachedStatuses)) {
       this._userStatuses.next(cachedStatuses);
-      this.userStatusMap = new Map(cachedStatuses.map(user => [user._id!, user]));
+      this.userStatusMap = new Map(cachedStatuses.map(user => [user.id!, user]));
     }
 
     this.socket.emit('loginUser', localStorage.getItem('token'));
 
     this.socket.emit('getUserStatuses');
 
-    this.socket.fromEvent<Token[], 'initialUserStatuses'>('initialUserStatuses').subscribe((initialStatuses: Token[]) => {
-      this._userStatuses.next(initialStatuses);
-      this._cacheService.setItem(this.CACHE_KEY, initialStatuses);
-      this.userStatusMap = new Map(initialStatuses.map(user => [user._id!, user]));
-    });
-
     this.socket.fromEvent<Token, 'userStatus'>('userStatus').subscribe((data: Token) => {
       this.updateUserStatus(data);
+    });
+
+    // Agregar listener para userUpdated (que emite el backend cuando cambia status)
+    this.socket.fromEvent<Token, 'userUpdated'>('userUpdated').subscribe((data: Token) => {
+      this.updateUserStatus(data);
+    });
+
+    this.socket.fromEvent<Token[], 'initialUserStatuses'>('initialUserStatuses').subscribe((data: Token[]) => {
+      // Procesar usuarios iniciales
+      data.forEach(user => {
+        if (user.id) {
+          this.userStatusMap.set(user.id, user);
+        }
+      });
+      
+      const updatedStatuses = Array.from(this.userStatusMap.values());
+      this._userStatuses.next(updatedStatuses);
+      this._cacheService.setItem<Token[]>(this.CACHE_KEY, updatedStatuses, this.CACHE_DURATION);
     });
 
     if (this._decodeToken) {
@@ -80,19 +94,21 @@ export class NotificationUsersService implements OnDestroy {
   }
 
   private updateUserStatus(data: Token) {
-    if (data.status === 'offLine' && data._id !== undefined) {
-      if (this.userStatusMap.has(data._id)) {
-        this.userStatusMap.delete(data._id);
+    
+    if (data.status === 'offLine' && data.id !== undefined) {
+      if (this.userStatusMap.has(data.id)) {
+        this.userStatusMap.delete(data.id);
         this.sendBatchedUpdates();
       }
     } else {
-      if (data._id !== undefined) {
-        this.userStatusMap.set(data._id, data);
+      if (data.id !== undefined) {
+        this.userStatusMap.set(data.id, data);
         this.addToBatch(data);
       }
     }
 
     const updatedStatuses = Array.from(this.userStatusMap.values());
+    
     this._userStatuses.next(updatedStatuses);
     this._cacheService.setItem<Token[]>(this.CACHE_KEY, updatedStatuses, this.CACHE_DURATION);
   }
@@ -120,31 +136,9 @@ export class NotificationUsersService implements OnDestroy {
     document.addEventListener('visibilitychange', () => this.handleVisibilityChange());
 
     const activityEvents = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart', 'touchmove'];
-    activityEvents.forEach(event => window.addEventListener(event, this.throttledHandleUserActivity.bind(this), { passive: true }));
+    activityEvents.forEach(event => window.addEventListener(event, this.handleUserActivity.bind(this), { passive: true }));
 
     this.resetInactivityTimer();
-  }
-
-  private throttledHandleUserActivity: () => void = this.throttle(this.handleUserActivity.bind(this), 3000);
-
-  private throttle(fn: () => void, limit: number) {
-    let lastFn: any;
-    let lastRan: number;
-
-    return function (this: any, ...args: any) {
-      if (!lastRan) {
-        fn.apply(this, args);
-        lastRan = Date.now();
-      } else {
-        clearTimeout(lastFn);
-        lastFn = setTimeout(() => {
-          if ((Date.now() - lastRan) >= limit) {
-            fn.apply(this, args);
-            lastRan = Date.now();
-          }
-        }, limit - (Date.now() - lastRan));
-      }
-    };
   }
 
   private handleVisibilityChange() {
@@ -156,15 +150,15 @@ export class NotificationUsersService implements OnDestroy {
   }
 
   private handleUserActivity() {
-    if (!this.isInactive) {
-      this.setUserActive();
-      this.resetInactivityTimer();
-    }
+    this.setUserActive();
+    this.resetInactivityTimer();
   }
 
   private resetInactivityTimer() {
     clearTimeout(this.inactivityTimeout);
-    this.inactivityTimeout = setTimeout(() => this.setUserInactive(), this.inactivityDuration);
+    this.inactivityTimeout = setTimeout(() => {
+      this.setUserInactive();
+    }, this.inactivityDuration);
   }
 
   private setUserInactive() {
@@ -179,6 +173,8 @@ export class NotificationUsersService implements OnDestroy {
       this.isInactive = false;
       this.emitUserActive();
       this.resetInactivityTimer();
+    } else {
+      this.resetInactivityTimer();
     }
   }
 
@@ -190,7 +186,7 @@ export class NotificationUsersService implements OnDestroy {
 
   public addCurrentUserStatus(userStatus: Token) {
     const currentStatuses = this._userStatuses.getValue();
-    const userIndex = currentStatuses.findIndex(status => status?._id === userStatus?._id);
+    const userIndex = currentStatuses.findIndex(status => status?.id === userStatus?.id);
 
     if (userIndex === -1) {
       if (currentStatuses.includes(userStatus)) {
@@ -201,19 +197,63 @@ export class NotificationUsersService implements OnDestroy {
   }
 
   private emitUserInactive() {
+    if (!this._decodeToken?.id) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'NotificationUsersService',
+        'No se puede emitir userInactive: ID de usuario no disponible',
+        { userId: this._decodeToken?.id }
+      );
+      return;
+    }
+    
     setTimeout(() => {
-      if(!localStorage.getItem('token')) return;
-      this._socketService.updateToken(localStorage.getItem('token')!);
-      this._socketService.emitEvent('userInactive', localStorage.getItem('token'));
+      const token = localStorage.getItem('token');
+      if (!token) {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'NotificationUsersService',
+          'No hay token disponible para emitir userInactive',
+          { userId: this._decodeToken.id }
+        );
+        return;
+      }
+      
+      this._socketService.updateToken(token);
+      this._socketService.emitEvent('userInactive', token);
+      
+      // Emitir también directamente en el socket para asegurar que llegue
+      this.socket.emit('userInactive', token);
     }, 3000);
   }
 
   private emitUserActive() {
-    setTimeout(() => {
-      if(!localStorage.getItem('token')) return;
-      this._socketService.updateToken(localStorage.getItem('token')!);
-      this._socketService.emitEvent('userActive', localStorage.getItem('token'));
-    }, 3000);
+    if (!this._decodeToken?.id) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'NotificationUsersService',
+        'No se puede emitir userActive: ID de usuario no disponible',
+        { userId: this._decodeToken?.id }
+      );
+      return;
+    }
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'NotificationUsersService',
+        'No hay token disponible para emitir userActive',
+        { userId: this._decodeToken.id }
+      );
+      return;
+    }
+    
+    this._socketService.updateToken(token);
+    this._socketService.emitEvent('userActive', token);
+    
+    // Emitir también directamente en el socket para asegurar que llegue
+    this.socket.emit('userActive', token);
   }
 
   public getUserStatuses() {
@@ -221,24 +261,81 @@ export class NotificationUsersService implements OnDestroy {
   }
 
   public refreshUserStatuses() {
-    setTimeout(() => {
-      if(!localStorage.getItem('token')) return;
-      this._socketService.updateToken(localStorage.getItem('token')!);
-      this._socketService.emitEvent('refreshUserStatuses', localStorage.getItem('token'));
-    }, 3000);
+    if (!this._decodeToken?.id) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'NotificationUsersService',
+        'No se puede refrescar status: ID de usuario no disponible',
+        { userId: this._decodeToken?.id }
+      );
+      return;
+    }
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'NotificationUsersService',
+        'No hay token disponible para refrescar status',
+        { userId: this._decodeToken.id }
+      );
+      return;
+    }
+    
+    this._socketService.updateToken(token);
+    this._socketService.emitEvent('refreshUserStatuses', token);
   }
 
   public logoutUser() {
-    if(!localStorage.getItem('token')) return;
-    this._socketService.emitEvent('logoutUser', localStorage.getItem('token'));
+    if (!this._decodeToken?.id) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'NotificationUsersService',
+        'No se puede hacer logout: ID de usuario no disponible',
+        { userId: this._decodeToken?.id }
+      );
+      return;
+    }
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'NotificationUsersService',
+        'No hay token disponible para hacer logout',
+        { userId: this._decodeToken.id }
+      );
+      return;
+    }
+    
+    this._socketService.updateToken(token);
+    this._socketService.emitEvent('logoutUser', token);
   }
 
   public loginUser() {
-    setTimeout(() => {
-      if(!localStorage.getItem('token')) return;
-      this._socketService.updateToken(localStorage.getItem('token')!);
-      this._socketService.emitEvent('loginUser', localStorage.getItem('token'));
-    }, 3000);
+    if (!this._decodeToken?.id) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'NotificationUsersService',
+        'No se puede hacer login: ID de usuario no disponible',
+        { userId: this._decodeToken?.id }
+      );
+      return;
+    }
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'NotificationUsersService',
+        'No hay token disponible para hacer login',
+        { userId: this._decodeToken.id }
+      );
+      return;
+    }
+    
+    this._socketService.updateToken(token);
+    this._socketService.emitEvent('loginUser', token);
   }
 
   ngOnDestroy() {
@@ -252,7 +349,7 @@ export class NotificationUsersService implements OnDestroy {
     // Remove event listeners
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
     ['mousemove', 'keydown', 'scroll', 'click', 'touchstart', 'touchmove'].forEach(event => {
-      window.removeEventListener(event, this.throttledHandleUserActivity);
+      window.removeEventListener(event, this.handleUserActivity);
     });
     
     // Clear cache
