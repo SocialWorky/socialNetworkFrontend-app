@@ -1095,10 +1095,16 @@ export const translations = {
   'admin.versionManagement.noVersions': 'No versions registered',
   'admin.versionManagement.errors.invalidVersion': 'Invalid version format (e.g: 1.0.0)',
   'admin.versionManagement.errors.changelogRequired': 'Changelog is required',
+  'admin.versionManagement.changes': 'Changes',
+  'admin.versionManagement.viewChanges': 'View Changes',
+  'admin.versionManagement.versionChanges': 'Version Changes',
+  'admin.versionManagement.versionDetails': 'Version Details',
+  'admin.versionManagement.requirements': 'Requirements',
   
   // Common translations
   'common.reset': 'Reset',
   'common.refresh': 'Refresh',
   'common.loading': 'Loading',
   'common.actions': 'Actions',
+  'common.close': 'Close',
 };

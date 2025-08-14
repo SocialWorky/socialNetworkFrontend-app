@@ -1049,10 +1049,16 @@ export const translations = {
   'admin.versionManagement.noVersions': 'No hay versiones registradas',
   'admin.versionManagement.errors.invalidVersion': 'Formato de versión inválido (ej: 1.0.0)',
   'admin.versionManagement.errors.changelogRequired': 'El registro de cambios es obligatorio',
+  'admin.versionManagement.changes': 'Cambios',
+  'admin.versionManagement.viewChanges': 'Ver Cambios',
+  'admin.versionManagement.versionChanges': 'Cambios de la Versión',
+  'admin.versionManagement.versionDetails': 'Detalles de la Versión',
+  'admin.versionManagement.requirements': 'Requisitos',
   
   // Common translations
   'common.reset': 'Restablecer',
   'common.refresh': 'Actualizar',
   'common.loading': 'Cargando',
   'common.actions': 'Acciones',
+  'common.close': 'Cerrar',
 };
