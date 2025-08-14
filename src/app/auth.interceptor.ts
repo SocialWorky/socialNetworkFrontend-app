@@ -41,12 +41,7 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       catchError((error) => {
         if (error.status === 401) {
-          this.logService.log(
-            LevelLogEnum.WARN,
-            'AuthInterceptor',
-            'Unauthorized request, clearing session',
-            { url: request.url, status: error.status }
-          );
+          // Unauthorized request, clearing session - no need to log every 401 error
           
           const currentUrl = this.router.url;
           if (!currentUrl.includes('/auth/login')) {

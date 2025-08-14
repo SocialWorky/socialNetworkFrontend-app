@@ -44,12 +44,7 @@ export class AuthService {
       const currentTime = Math.floor(Date.now() / 1000);
 
       if (!decodedToken || !decodedToken.exp || decodedToken.exp <= currentTime) {
-        this.logService.log(
-          LevelLogEnum.WARN,
-          'AuthService',
-          'Token expired or invalid',
-          { tokenExp: decodedToken?.exp, currentTime }
-        );
+        // Token expired or invalid - no need to log every token validation
         this.clearSession();
         return false;
       }
@@ -60,12 +55,7 @@ export class AuthService {
         if (user) {
           return true;
         } else {
-          this.logService.log(
-            LevelLogEnum.WARN,
-            'AuthService',
-            'User not found in database',
-            { userId: decodedToken.id }
-          );
+          // User not found in database - no need to log every user validation
           this.clearSession();
           return false;
         }
@@ -81,12 +71,7 @@ export class AuthService {
         return false;
       }
     } catch (error) {
-      this.logService.log(
-        LevelLogEnum.ERROR,
-        'AuthService',
-        'Token decode failed',
-        { error: error instanceof Error ? error.message : String(error) }
-      );
+      // Failed to decode token - no need to log every decode failure
       this.clearSession();
       return false;
     }
@@ -104,12 +89,7 @@ export class AuthService {
       localStorage.setItem('token', newToken);
       return newToken;
     } catch (error) {
-      this.logService.log(
-        LevelLogEnum.ERROR,
-        'AuthService',
-        'Failed to renew token',
-        { userId: _id, error: error instanceof Error ? error.message : String(error) }
-      );
+      // Failed to renew token - no need to log every token renewal failure
       throw error;
     }
   }

@@ -52,12 +52,7 @@ export class CacheService {
             return null;
           }
         } catch (error) {
-          this.logService.log(
-            LevelLogEnum.ERROR,
-            'CacheService',
-            'Failed to parse cached item',
-            { key, error: error instanceof Error ? error.message : String(error) }
-          );
+          // Failed to parse cached item - no need to log every parse failure during cleanup
           localStorage.removeItem(`cache_${key}`);
           return null;
         }

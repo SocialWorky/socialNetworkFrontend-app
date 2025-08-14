@@ -112,13 +112,19 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
                 this.loadUsers = false;
                 this._cdr.markForCheck();
               },
-              error: (error: any) => console.error('Error fetching unread messages counts', error),
+              error: (error: any) => {
+                // Error fetching unread messages count - no need to log every count fetch error
+              },
             });
           },
-          error: (error: any) => console.error('Error fetching users or messages', error),
+          error: (error: any) => {
+            // Error fetching user - no need to log every user fetch error
+          },
         });
       },
-      error: (error: any) => console.error('Error fetching users with conversations', error),
+      error: (error: any) => {
+        // Error fetching last message - no need to log every message fetch error
+      },
     });
   }
 
@@ -134,13 +140,19 @@ export class MessageSideLeftComponent implements OnInit, OnDestroy {
               next: (unreadMessagesCount: number) => {
                 this._messageStateService.addUserOrUpdate(user, lastMessage.content, lastMessage.timestamp, unreadMessagesCount);
               },
-              error: (error: any) => console.error('Error fetching unread messages count', error),
+              error: (error: any) => {
+                // Error fetching unread messages count - no need to log every count fetch error
+              },
             });
           },
-          error: (error: any) => console.error('Error fetching user', error),
+          error: (error: any) => {
+            // Error fetching user - no need to log every user fetch error
+          },
         });
       },
-      error: (error: any) => console.error('Error fetching last message', error),
+      error: (error: any) => {
+        // Error fetching last message - no need to log every message fetch error
+      },
     });
   }
 

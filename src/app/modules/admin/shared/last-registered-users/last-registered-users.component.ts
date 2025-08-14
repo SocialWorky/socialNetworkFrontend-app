@@ -75,7 +75,7 @@ export class LastRegisteredUsersComponent implements OnInit, OnDestroy {
             'Error fetching users',
             { error: String(error) }
           );
-          this.error = 'Error loading users. Please try again.';
+          this.error = this.translate('admin.lastRegisteredUsers.alerts.errorLoadingUsers');
           this._cdr.markForCheck();
         }
       });
@@ -106,14 +106,14 @@ export class LastRegisteredUsersComponent implements OnInit, OnDestroy {
             this.users[userIndex] = { ...this.users[userIndex], ...updatedUser };
           }
 
-          const action = newStatus ? 'activated' : 'deactivated';
+          const messageKey = newStatus ? 'admin.lastRegisteredUsers.alerts.userActivated' : 'admin.lastRegisteredUsers.alerts.userDeactivated';
           this._alertService.showAlert(
-            'Success',
-            `User ${action} successfully`,
+            this.translate('admin.lastRegisteredUsers.alerts.success'),
+            this.translate(messageKey),
             Alerts.SUCCESS,
             Position.CENTER,
             true,
-            'OK'
+            this.translate('common.ok')
           );
           this._cdr.markForCheck();
         },
@@ -125,12 +125,12 @@ export class LastRegisteredUsersComponent implements OnInit, OnDestroy {
             { error: String(error), userId: user._id, newStatus }
           );
           this._alertService.showAlert(
-            'Error',
-            'Error updating user status. Please try again.',
+            this.translate('admin.lastRegisteredUsers.alerts.error'),
+            this.translate('admin.lastRegisteredUsers.alerts.errorUpdatingStatus'),
             Alerts.ERROR,
             Position.CENTER,
             true,
-            'OK'
+            this.translate('common.ok')
           );
           this._cdr.markForCheck();
         }
@@ -169,5 +169,24 @@ export class LastRegisteredUsersComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+  }
+
+  /**
+   * Método auxiliar para traducciones
+   */
+  private translate(key: string): string {
+    // Por ahora retornamos las claves directamente
+    // En un entorno real, esto debería usar un servicio de traducciones
+    const translations: { [key: string]: string } = {
+      'admin.lastRegisteredUsers.alerts.success': 'Éxito',
+      'admin.lastRegisteredUsers.alerts.userActivated': 'Usuario activado exitosamente',
+      'admin.lastRegisteredUsers.alerts.userDeactivated': 'Usuario desactivado exitosamente',
+      'admin.lastRegisteredUsers.alerts.error': 'Error',
+      'admin.lastRegisteredUsers.alerts.errorUpdatingStatus': 'Error al actualizar el estado del usuario. Por favor, inténtalo de nuevo.',
+      'admin.lastRegisteredUsers.alerts.errorLoadingUsers': 'Error al cargar usuarios. Por favor, inténtalo de nuevo.',
+      'common.ok': 'Aceptar'
+    };
+    
+    return translations[key] || key;
   }
 }

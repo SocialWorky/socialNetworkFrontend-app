@@ -260,7 +260,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
               this._cdr.markForCheck();
             },
             error: (error) => {
-              console.error('Error loading messages:', error);
+              // Error loading messages - no need to log every message load error
               this.loadMessages = false;
             },
             complete: () => {
@@ -271,7 +271,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
       
       this._cdr.markForCheck();
     } catch (error) {
-      console.error('Error en loadMessagesWithUser:', error);
+      // Error en loadMessagesWithUser - no need to log every method error
       this.loadMessages = false;
     }
   }
@@ -285,7 +285,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
       }
       this._cdr.markForCheck();
     } catch (error) {
-      console.error('Error loading user:', error);
+      // Error loading user - no need to log every user load error
       throw error;
     }
   }
@@ -351,7 +351,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error sending message:', error);
+        // Error sending message - no need to log every message send error
         this.sendMessagesLoader = false
       }
     });
@@ -367,7 +367,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
           });
           this.showScrollToBottomButton = false;
         } catch (err) {
-          console.error('Error scrolling to bottom:', err);
+          // Error scrolling to bottom - no need to log every scroll error
         }
       }
     }, 50);
@@ -384,7 +384,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
               top: this.messageContainer.nativeElement.scrollHeight
             });
           } catch (err) {
-            console.error('Error scrolling to bottom:', err);
+            // Error scrolling to bottom - no need to log every scroll error
           }
         }
       }, 0);
@@ -419,7 +419,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
             this._cdr.markForCheck();
           },
           error: (error) => {
-            console.error('Error marking messages as read:', error);
+            // Error marking messages as read: error
           }
         });
     }
@@ -585,7 +585,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
         this.hasMoreMessages = false;
       }
     } catch (error) {
-      console.error('Error loading more messages:', error);
+      // Error loading more messages: error
       this.hasMoreMessages = false;
     } finally {
       this.loadingMoreMessages = false;
@@ -606,7 +606,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
         this._cdr.markForCheck();
       }
     } catch (error) {
-      console.error('Error forzando sincronización:', error);
+      // Error forzando sincronización: error
     }
   }
 

@@ -206,17 +206,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
           // Initialize user databases after successful login
           await this._databaseManager.initializeForUser(tokenResponse.id);
 
-          this._logService.log(
-            LevelLogEnum.INFO,
-            'LoginComponent',
-            'User login successful',
-            { 
-              userId: tokenResponse.id, 
-              email: tokenResponse.email, 
-              role: tokenResponse.role,
-              isDarkMode: response.user.isDarkMode 
-            }
-          );
+          // User login successful - no need to log every successful login
 
           this._cdr.markForCheck();
 

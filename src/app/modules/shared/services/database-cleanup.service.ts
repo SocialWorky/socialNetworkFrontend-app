@@ -29,9 +29,7 @@ export class DatabaseCleanupService {
     // Cleanup completed - no need to log every cleanup completion
 
     if (failed > 0) {
-      this.logService.log(LevelLogEnum.WARN, 'DatabaseCleanupService', 'Some databases failed to delete', {
-        failedCount: failed
-      });
+      // Some databases failed to delete - no need to log every cleanup failure
     }
   }
 
@@ -148,7 +146,7 @@ export class DatabaseCleanupService {
             };
           });
         } catch (error) {
-          this.logService.log(LevelLogEnum.WARN, 'DatabaseCleanupService', 'Error calculating database size', { dbName, error });
+          // Error calculating database size - no need to log every size calculation error
         }
         
         db.close();
@@ -263,7 +261,7 @@ export class DatabaseCleanupService {
       
       // LocalStorage cleanup completed - no need to log every cleanup
     } catch (error) {
-      this.logService.log(LevelLogEnum.WARN, 'DatabaseCleanupService', 'Error clearing localStorage', { error });
+      // Error clearing localStorage - no need to log every localStorage clear error
     }
   }
 } 

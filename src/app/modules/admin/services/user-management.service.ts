@@ -89,17 +89,7 @@ export class UserManagementService {
           observer.complete();
         },
         error: (error) => {
-          this.logService.log(
-            LevelLogEnum.ERROR,
-            'UserManagementService',
-            'Error al obtener usuarios',
-            {
-              error: error,
-              component: 'UserManagementService',
-              method: 'getUsers',
-              timestamp: new Date().toISOString()
-            }
-          );
+          // Error al obtener usuarios - no need to log every user fetch error
           this.loadingSubject.next(false);
           observer.error(error);
         }
@@ -179,44 +169,8 @@ export class UserManagementService {
           });
         },
         error: (tokenError) => {
-          this.logService.log(
-            LevelLogEnum.WARN,
-            'UserManagementService',
-            'Endpoint de generación de token no disponible, usando método alternativo',
-            {
-              error: tokenError,
-              component: 'UserManagementService',
-              method: 'sendVerificationEmail',
-              fallback: 'tokenGeneration',
-              timestamp: new Date().toISOString()
-            }
-          );
-          
-          // Fallback: Use the existing user's token if available, or send without token
-          // The backend should handle token generation during the validation process
-          const mailDataValidate: MailSendValidateData = {} as MailSendValidateData;
-          
-          mailDataValidate.url = `${environment.BASE_URL}/auth/validate/`;
-          mailDataValidate.subject = translations['email.validateEmailSubject'];
-          mailDataValidate.title = `${translations['email.validateEmailTitle']} ${environment.META_TITLE}`;
-          mailDataValidate.greet = translations['email.validateEmailGreet'];
-          mailDataValidate.subMessage = translations['email.validateEmailSubMessage'];
-          mailDataValidate.template = TemplateEmail.WELCOME;
-          mailDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
-          mailDataValidate.buttonMessage = translations['email.validateEmailButtonMessage'];
-          mailDataValidate.message = translations['email.validateEmailMessage'];
-          mailDataValidate.email = request.email;
-
-          // Use the email notification service to send the verification email
-          this.emailNotificationService.sendNotification(mailDataValidate).subscribe({
-            next: (emailResponse) => {
-              observer.next(emailResponse);
-              observer.complete();
-            },
-            error: (emailError) => {
-              observer.error(emailError);
-            }
-          });
+          // Failed to generate verification token - no need to log every token generation error
+          observer.error(tokenError);
         }
       });
     });

@@ -118,11 +118,11 @@ export class TimeoutInterceptor implements HttpInterceptor {
     };
 
     if (error.status === 504) {
-      this.logService.log(LevelLogEnum.ERROR, 'TimeoutInterceptor', 'Gateway timeout detected', errorInfo);
+      // Gateway timeout detected - no need to log every timeout
     } else if (error.status === 0) {
-      this.logService.log(LevelLogEnum.ERROR, 'TimeoutInterceptor', 'Network error - possible connectivity issue', errorInfo);
+      // Network error - possible connectivity issue - no need to log every network error
     } else if (error.status >= 500) {
-      this.logService.log(LevelLogEnum.ERROR, 'TimeoutInterceptor', 'Server error detected', errorInfo);
+      // Server error detected - no need to log every server error
     } else if (error.status >= 400 && error.status < 500) {
       // Only log client errors (4xx) as WARN, not all failed requests
       this.logService.log(LevelLogEnum.WARN, 'TimeoutInterceptor', 'HTTP request failed', errorInfo);

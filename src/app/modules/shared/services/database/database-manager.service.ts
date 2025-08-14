@@ -442,22 +442,12 @@ export class DatabaseManagerService {
    */
   private async deleteDatabaseByName(dbName: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'DatabaseManagerService',
-        'Attempting to delete database.',
-        { dbName }
-      );
+      // Attempting to delete database - no need to log every deletion attempt
 
       const deleteRequest = indexedDB.deleteDatabase(dbName);
       
       deleteRequest.onsuccess = (event) => {
-        this.logService.log(
-          LevelLogEnum.INFO,
-          'DatabaseManagerService',
-          'Database deletion request successful.',
-          { dbName, event }
-        );
+        // Database deletion request successful - no need to log every successful deletion
         resolve();
       };
       
@@ -520,12 +510,7 @@ export class DatabaseManagerService {
    */
   private async initializeUserDatabases(userId: string): Promise<void> {
     try {
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'DatabaseManagerService',
-        'Initializing databases for user',
-        { userId }
-      );
+      // Initializing databases for user - no need to log every initialization
 
       // Initialize each database service
       await this.messageDatabase.initDatabase();
@@ -538,12 +523,7 @@ export class DatabaseManagerService {
 
       this.isInitialized = true;
 
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'DatabaseManagerService',
-        'Databases initialized successfully',
-        { userId }
-      );
+      // Databases initialized successfully - no need to log every successful initialization
     } catch (error) {
       this.logService.log(
         LevelLogEnum.ERROR,

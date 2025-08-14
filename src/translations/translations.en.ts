@@ -545,6 +545,12 @@ export const translations = {
   'admin.lastRegisteredUsers-createdAt': 'Registration date',
   'admin.lastRegisteredUsers-validated': 'Validated',
   'admin.lastRegisteredUsers-pending': 'Pending',
+  'admin.lastRegisteredUsers.alerts.success': 'Success',
+  'admin.lastRegisteredUsers.alerts.userActivated': 'User activated successfully',
+  'admin.lastRegisteredUsers.alerts.userDeactivated': 'User deactivated successfully',
+  'admin.lastRegisteredUsers.alerts.error': 'Error',
+  'admin.lastRegisteredUsers.alerts.errorUpdatingStatus': 'Error updating user status. Please try again.',
+  'admin.lastRegisteredUsers.alerts.errorLoadingUsers': 'Error loading users. Please try again.',
   
   // ADMIN LOG
   'admin.log.title': 'Log System',
@@ -1095,10 +1101,17 @@ export const translations = {
   'admin.versionManagement.noVersions': 'No versions registered',
   'admin.versionManagement.errors.invalidVersion': 'Invalid version format (e.g: 1.0.0)',
   'admin.versionManagement.errors.changelogRequired': 'Changelog is required',
+  'admin.versionManagement.changes': 'Changes',
+  'admin.versionManagement.viewChanges': 'View Changes',
+  'admin.versionManagement.versionChanges': 'Version Changes',
+  'admin.versionManagement.versionDetails': 'Version Details',
+  'admin.versionManagement.requirements': 'Requirements',
   
   // Common translations
   'common.reset': 'Reset',
   'common.refresh': 'Refresh',
   'common.loading': 'Loading',
   'common.actions': 'Actions',
+  'common.close': 'Close',
+  'common.ok': 'OK',
 };

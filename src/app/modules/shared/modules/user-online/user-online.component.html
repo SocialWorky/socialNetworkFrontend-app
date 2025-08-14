@@ -3,20 +3,18 @@
 
   @if (isLoading()) {
     <div class="user-online-loading">
-      <div class="loader"></div>
+      <div class="loading-spinner"></div>
+      <span>Cargando usuarios...</span>
     </div>
   }
 
-  @if (error()) {
-    <div class="user-online-error">
-      {{ error() }}
-    </div>
-  }
-
-  @if (!isLoading() && !error() && usersOnline().length) {
+  @if (!isLoading() && filteredUsers().length > 0) {
     <div class="user-online-content">
-      @for (user of usersOnline(); track user.id) {
-        <div *ngIf="user.id" class="user-online-item" (click)="goToProfile(user.id)">
+      @for (user of filteredUsers(); track user.id) {
+        <div class="user-online-item" 
+             (click)="goToProfile(user.id)"
+             [title]="user.name + ' - ' + (user.status === 'online' ? 'Online' : 'Inactivo')">
+          
           <worky-avatar
               [size]="35"
               [name]="user.name"
@@ -24,18 +22,20 @@
               class="user-online-avatar">
           </worky-avatar>
 
-          <span class="user-online-point"
-             [class.bg-green-color]="user.status === 'online'"
-             [class.bg-red-color]="user.status === 'inactive'">
-          </span>
+          <div class="user-online-status-indicator"
+               [class.status-online]="user.status === 'online'"
+               [class.status-inactive]="user.status === 'inactive'"
+               [title]="user.status === 'online' ? 'Online' : 'Inactivo'">
+          </div>
         </div>
       }
+    </div>
+  }
 
-      @empty {
-        <div class="user-online-empty">
-          No hay usuarios conectados
-        </div>
-      }
+  @if (!isLoading() && filteredUsers().length === 0) {
+    <div class="user-online-empty">
+      <i class="material-icons">people_outline</i>
+      <span>No hay usuarios conectados</span>
     </div>
   }
 </div>

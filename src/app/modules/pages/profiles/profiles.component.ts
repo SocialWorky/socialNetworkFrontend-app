@@ -872,7 +872,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       }, 1000);
       
     } catch (error) {
-      console.error('Error in pull-to-refresh:', error);
+      // Error in pull-to-refresh - no need to log every refresh error
       this.hideModernRefreshIndicator();
       this.isRefreshing = false;
       this._cdr.markForCheck();
