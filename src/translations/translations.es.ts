@@ -1061,6 +1061,32 @@ export const translations = {
   'admin.versionManagement.versionDetails': 'Detalles de la Versión',
   'admin.versionManagement.requirements': 'Requisitos',
   
+  // ===== FORM BUILDER MODULE =====
+  // FORM BUILDER COMPONENT
+  'formBuilder.fieldRequired': 'Este campo es obligatorio.',
+  'formBuilder.minLength': 'La longitud mínima es de {{count}} caracteres.',
+  'formBuilder.maxLength': 'La longitud máxima es de {{count}} caracteres.',
+  'formBuilder.textField': 'Campo de Texto',
+  'formBuilder.textArea': 'Área de Texto',
+  'formBuilder.selectField': 'Selección',
+  'formBuilder.destination': 'Destino',
+  'formBuilder.configuration.title': 'Configuración del Campo',
+  'formBuilder.configuration.idName': 'Nombre del ID',
+  'formBuilder.configuration.label': 'Etiqueta',
+  'formBuilder.configuration.placeholder': 'Marcador de posición',
+  'formBuilder.configuration.visible': 'Visible',
+  'formBuilder.configuration.required': 'Obligatorio',
+  'formBuilder.configuration.minLength': 'Caracteres mínimos',
+  'formBuilder.configuration.maxLength': 'Caracteres máximos',
+  'formBuilder.configuration.multiSelect': 'Selección múltiple',
+  'formBuilder.configuration.options': 'Opciones (separadas por comas)',
+  'formBuilder.configuration.save': 'Guardar',
+  'formBuilder.configuration.saveForm': 'Guardar Formulario',
+  'formBuilder.configuration.yes': 'Sí',
+  'formBuilder.configuration.no': 'No',
+  'formBuilder.destination.profile': 'Perfil',
+  'formBuilder.destination.register': 'Registro',
+  
   // Common translations
   'common.reset': 'Restablecer',
   'common.refresh': 'Actualizar',

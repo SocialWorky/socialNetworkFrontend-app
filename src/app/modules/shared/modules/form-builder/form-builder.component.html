@@ -5,7 +5,7 @@
       <mat-label>{{ 'formBuilder.destination' | workyTranslations }}</mat-label>
       <mat-select [(value)]="formDestination" (selectionChange)="updateFormDestination($event)">
         <mat-option *ngFor="let destination of customFieldDestinations" [value]="destination" (click)="getFields()">
-          {{ destination }}
+          {{ destinationLabels[destination] }}
         </mat-option>
       </mat-select>
     </mat-form-field>

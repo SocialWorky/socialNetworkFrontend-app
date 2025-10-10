@@ -40,6 +40,11 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
 
   customFieldDestinations = Object.values(CustomFieldDestination);
 
+  destinationLabels = {
+    [CustomFieldDestination.PROFILE]: translations['formBuilder.destination.profile'],
+    [CustomFieldDestination.REGISTRATION]: translations['formBuilder.destination.register']
+  };
+
   private destroy$ = new Subject<void>();
 
   constructor(

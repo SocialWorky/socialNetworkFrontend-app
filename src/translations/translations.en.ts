@@ -367,6 +367,9 @@ export const translations = {
   'formBuilder.configuration.saveForm': 'Save Form',
   'formBuilder.configuration.yes': 'Yes',
   'formBuilder.configuration.no': 'No',
+  'formBuilder.destination': 'Destination',
+  'formBuilder.destination.profile': 'Profile',
+  'formBuilder.destination.register': 'Registration',
   
   // ===== ADMIN MODULE =====
   // ADMIN SIDE MENU
@@ -479,9 +482,6 @@ export const translations = {
   'weather.currentTemperature': 'Current Temperature',
   'weather.min': 'Min',
   'weather.max': 'Max',
-  
-  // FORM BUILDER
-  'formBuilder.destination': 'Destination',
   
   // ADMIN CUSTOM CSS
   'admin.customCss.editor.title': 'CSS Code Editor',
