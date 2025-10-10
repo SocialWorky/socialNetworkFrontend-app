@@ -20,6 +20,7 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
   private readonly _destroy$ = new Subject<void>();
 
   private readonly REFRESH_INTERVAL = 30000;
+  private readonly LOADING_TIMEOUT = 10000; // 10 seconds timeout for loading
 
   usersOnline = signal<Token[]>([]);
 
@@ -40,6 +41,7 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
   });
 
   private _updateTrigger$ = new BehaviorSubject<void>(undefined);
+  private _loadingTimeout: any = null;
 
   constructor(
     private _cdr: ChangeDetectorRef,
@@ -72,10 +74,32 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     }
   }
 
+  private setLoadingWithTimeout(): void {
+    this.isLoading.set(true);
+    
+    // Clear existing timeout
+    if (this._loadingTimeout) {
+      clearTimeout(this._loadingTimeout);
+    }
+    
+    // Set timeout to ensure loading doesn't stay forever
+    this._loadingTimeout = setTimeout(() => {
+      this.isLoading.set(false);
+      this._cdr.markForCheck();
+    }, this.LOADING_TIMEOUT);
+  }
+
+  private clearLoadingTimeout(): void {
+    if (this._loadingTimeout) {
+      clearTimeout(this._loadingTimeout);
+      this._loadingTimeout = null;
+    }
+  }
+
   ngOnInit() {
     if (!this.currentUser) return;
 
-    this.isLoading.set(true);
+    this.setLoadingWithTimeout();
     
     // Activar detección de inactividad
     this._notificationUsersService.setupInactivityListeners();
@@ -104,6 +128,10 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
             'Error fetching user statuses',
             { error: error instanceof Error ? error.message : String(error) }
           );
+          // Ensure loading is cleared on error
+          this.clearLoadingTimeout();
+          this.isLoading.set(false);
+          this._cdr.markForCheck();
           return [];
         })
       )
@@ -159,17 +187,27 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
         }
         
         this.usersOnline.set(updatedUserStatuses);
+        this.clearLoadingTimeout();
         this.isLoading.set(false);
         this._cdr.markForCheck();
+      } else {
+        // Even if no changes, clear loading after first data received
+        if (this.isLoading()) {
+          this.clearLoadingTimeout();
+          this.isLoading.set(false);
+          this._cdr.markForCheck();
+        }
       }
     } catch (error) {
-      console.error('❌ Error en updateUsersList:', error);
       this._logService.log(
         LevelLogEnum.ERROR,
         'UserOnlineComponent',
         'Error updating users list',
         { error: error instanceof Error ? error.message : String(error) }
       );
+      this.clearLoadingTimeout();
+      this.isLoading.set(false);
+      this._cdr.markForCheck();
     }
   }
 
@@ -204,19 +242,25 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
       
       this._notificationUsersService.addCurrentUserStatus(this.currentUser);
       
+      // Clear loading after initializing user status
+      this.clearLoadingTimeout();
+      this.isLoading.set(false);
       this._cdr.markForCheck();
     } catch (error) {
-      console.error('❌ Error en initializeCurrentUserStatus:', error);
       this._logService.log(
         LevelLogEnum.ERROR,
         'UserOnlineComponent',
         'Error adding user status',
         { error: error instanceof Error ? error.message : String(error) }
       );
+      this.clearLoadingTimeout();
+      this.isLoading.set(false);
+      this._cdr.markForCheck();
     }
   }
 
   ngOnDestroy(): void {
+    this.clearLoadingTimeout();
     this._destroy$.next();
     this._destroy$.complete();
   }

@@ -29,6 +29,7 @@ registerLocaleData(localeEs);
 const config: SocketIoConfig = {
   url: environment.WSURL,
   options: {
+    query: { token: localStorage.getItem('authToken') || localStorage.getItem('token') },
     transports: ['websocket'],
     reconnection: true,
     reconnectionAttempts: 5,

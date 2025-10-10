@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject, interval, Subscription } from 'rxjs';
+import { Subject, interval, Subscription, of } from 'rxjs';
 import { takeUntil, switchMap, filter } from 'rxjs/operators';
 import { AppVersionService, VersionCheckResult } from './app-version.service';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
@@ -20,6 +20,7 @@ export class AppUpdateManagerService implements OnDestroy {
   private unsubscribe$ = new Subject<void>();
   private updateCheckSubscription: Subscription | null = null;
   private lastUpdateCheck = 0;
+  private versionEndpointAvailable = true;
 
   constructor(
     private appVersionService: AppVersionService,
@@ -70,6 +71,11 @@ export class AppUpdateManagerService implements OnDestroy {
    * Check for updates when app starts
    */
   private checkForUpdatesOnStart(): void {
+    // Skip if version endpoint is not available
+    if (!this.versionEndpointAvailable) {
+      return;
+    }
+
     const now = Date.now();
     const timeSinceLastCheck = now - this.lastUpdateCheck;
     
@@ -82,12 +88,18 @@ export class AppUpdateManagerService implements OnDestroy {
             this.lastUpdateCheck = now;
             this.handleVersionCheckResult(result);
           },
-                  error: (error) => {
-          // Only log critical errors, not network issues
-          if (error?.status !== 404 && error?.status !== 0 && this.ENABLE_VERSION_LOGS) {
-            this.logService.log(LevelLogEnum.ERROR, 'AppUpdateManager', 'Error checking for updates on start', error);
+          error: (error) => {
+            // Mark endpoint as unavailable if 404
+            if (error?.status === 404) {
+              this.versionEndpointAvailable = false;
+              return;
+            }
+            
+            // Only log critical errors, not network issues
+            if (error?.status !== 0 && this.ENABLE_VERSION_LOGS) {
+              this.logService.log(LevelLogEnum.ERROR, 'AppUpdateManager', 'Error checking for updates on start', error);
+            }
           }
-        }
         });
     }
   }
@@ -99,16 +111,30 @@ export class AppUpdateManagerService implements OnDestroy {
     this.updateCheckSubscription = interval(this.UPDATE_CHECK_INTERVAL)
       .pipe(
         takeUntil(this.unsubscribe$),
-        switchMap(() => this.appVersionService.checkForUpdates())
+        switchMap(() => {
+          // Skip if version endpoint is not available
+          if (!this.versionEndpointAvailable) {
+            return of(null);
+          }
+          return this.appVersionService.checkForUpdates();
+        })
       )
       .subscribe({
         next: (result) => {
-          this.lastUpdateCheck = Date.now();
-          this.handleVersionCheckResult(result);
+          if (result) {
+            this.lastUpdateCheck = Date.now();
+            this.handleVersionCheckResult(result);
+          }
         },
         error: (error) => {
+          // Mark endpoint as unavailable if 404
+          if (error?.status === 404) {
+            this.versionEndpointAvailable = false;
+            return;
+          }
+          
           // Only log critical errors, not network issues
-          if (error?.status !== 404 && error?.status !== 0 && this.ENABLE_VERSION_LOGS) {
+          if (error?.status !== 0 && this.ENABLE_VERSION_LOGS) {
             this.logService.log(LevelLogEnum.ERROR, 'AppUpdateManager', 'Error in periodic update check', error);
           }
         }

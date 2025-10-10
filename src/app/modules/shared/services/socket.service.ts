@@ -58,7 +58,7 @@ export class SocketService {
 
     // If there is a token, set it up before connecting
     if (this._currentToken) {
-      this.configureSocketWithToken(this._currentToken);
+      this.socket.ioSocket.io.opts.query = { token: this._currentToken };
     }
 
     this.socket.connect();
@@ -72,11 +72,6 @@ export class SocketService {
     }
   }
 
-  private configureSocketWithToken(token: string) {
-    this.socket.ioSocket.io.opts.extraHeaders = { Authorization: `Bearer ${token}` };
-    this.socket.ioSocket.io.opts.query = { token: token };
-  }
-
   updateToken(newToken: string) {
     if(!newToken || newToken === '' || newToken === undefined) {
       return;
@@ -84,11 +79,13 @@ export class SocketService {
 
     this._currentToken = newToken;
 
+    // Disconnect and reconnect with new token
     if (this.socket.ioSocket.connected) {
       this.socket.disconnect();
     }
 
-    this.configureSocketWithToken(newToken);
+    // Update socket options with new token
+    this.socket.ioSocket.io.opts.query = { token: newToken };
     this.socket.connect();
   }
 
