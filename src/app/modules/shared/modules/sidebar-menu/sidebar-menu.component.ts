@@ -99,7 +99,7 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
         const freshUserData = await this._userService.getUserById(this.decodedToken.id).toPromise();
         if (freshUserData) {
           this.userAvatar = freshUserData.avatar || '';
-          this.userFullName = freshUserData.name || '';
+          this.userFullName = freshUserData.name + ' ' + freshUserData.lastName || '';
           this.userName = freshUserData.username || '';
           this._cdr.markForCheck();
         }
