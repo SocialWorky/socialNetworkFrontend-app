@@ -44,14 +44,14 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
   adminAuthenticated: boolean = false;
   canManageVersions: boolean = false;
 
-  // NUEVO: Control de inicialización completa
+  // NEW: Complete initialization control
   isInitializationComplete: boolean = false;
 
-  // Propiedades del modal de cambios de versión
+  // Version changes modal properties
   showVersionChangesModal: boolean = false;
   selectedVersion: any = null;
 
-  // Control de destrucción del componente
+  // Component destruction control
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -80,7 +80,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadCurrentVersionFromConfig();
     
-    // Inicialización del componente
+    // Component initialization
     this.initializeWithDetailedLogging();
   }
 
@@ -113,11 +113,11 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
       // PASO 1: Verificar conectividad del backend de manera CORRECTA
       await this.checkBackendConnectivityCorrectly();
       
-      // PASO 2: Si el backend está conectado, verificar autenticación
+      // STEP 2: If backend is connected, verify authentication
       if (this.backendConnected) {
         await this.checkAdminAuthenticationCorrectly();
         
-        // PASO 3: Cargar datos si todo está bien
+        // STEP 3: Load data if everything is OK
         if (this.canManageVersions) {
           await this.loadVersions();
           await this.loadCurrentVersion();
@@ -143,20 +143,20 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
         })
       );
       
-      // Si llegamos aquí, el backend responde correctamente
+      // If we reach here, backend responds correctly
       this.backendConnected = true;
       
     } catch (error: any) {
-      // LÓGICA CORRECTA: Cualquier respuesta del servidor significa que está conectado
+      // CORRECT LOGIC: Any server response means it's connected
       if (error?.status) {
-        // El servidor respondió con un status code (incluso 404, 401, 403, 500, etc.)
+        // Server responded with status code (even 404, 401, 403, 500, etc.)
         this.backendConnected = true;
       } else {
-        // Solo marcar como desconectado si NO hay respuesta del servidor
-        // (error de red, timeout, CORS, etc.)
+        // Only mark as disconnected if NO server response
+        // (network error, timeout, CORS, etc.)
         this.backendConnected = false;
         
-        // Mostrar mensaje apropiado
+        // Show appropriate message
         this.alertService.showAlert(
           'Error de Conexión', 
           'No se pudo conectar con el servidor. Verifica tu conexión a internet.', 

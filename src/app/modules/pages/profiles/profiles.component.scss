@@ -3,7 +3,7 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 @use 'sass:map';
 
-// Transiciones suaves para evitar pestañeos
+// Smooth transitions to avoid flickering
 .profile-container {
   transition: opacity 0.2s ease-in-out;
   
@@ -12,7 +12,7 @@
     transition: all 0.2s ease-in-out;
   }
   
-  // Estado de actualización
+  // Update state
   &.updating {
     opacity: 0.8;
     pointer-events: none;
@@ -262,7 +262,7 @@
     overflow: hidden;
   }
   
-  // Animación suave para la transición
+  // Smooth animation for transition
   animation: fadeInOut 0.3s ease-in-out;
 }
 

@@ -606,7 +606,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
         this._cdr.markForCheck();
       }
     } catch (error) {
-      // Error forzando sincronización: error
+      // Error forcing synchronization
     }
   }
 
@@ -615,17 +615,17 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
    */
   private async loadRequiredResources() {
     try {
-      // Cargar Material Icons si no están cargadas
+      // Load Material Icons if not loaded
       if (!this._fontLoaderService.isFontLoaded('material-icons')) {
         await this._fontLoaderService.loadMaterialIcons();
       }
 
-      // Cargar CSS de emoji-mart solo cuando se necesite
+      // Load emoji-mart CSS only when needed
       if (!this._lazyCssService.isLoaded('emoji-mart')) {
-        // Se cargará cuando se abra el emoji picker
+        // Will load when emoji picker opens
       }
     } catch (error) {
-      // this._logService.error('Error cargando recursos lazy', 'MessageSideRigthComponent'); // Original code had this line commented out
+      // this._logService.error('Error loading lazy resources', 'MessageSideRigthComponent'); // Original code had this line commented out
     }
   }
 
@@ -638,7 +638,7 @@ export class MessageSideRigthComponent implements OnChanges, OnDestroy, OnInit{
         await this._lazyCssService.loadEmojiMartCss();
       }
     } catch (error) {
-      // this._logService.error('Error cargando CSS de emoji-mart', 'MessageSideRigthComponent'); // Original code had this line commented out
+      // this._logService.error('Error loading emoji-mart CSS', 'MessageSideRigthComponent'); // Original code had this line commented out
     }
   }
 

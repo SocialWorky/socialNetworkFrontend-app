@@ -92,7 +92,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     return content.trim().startsWith('```');
   }
 
-  // Estados de carga individuales para skeletons
+  // Individual loading states for skeletons
   avatarLoading: boolean = true;
   nameLoading: boolean = true;
   contentLoading: boolean = true;
@@ -107,7 +107,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   private destroy$ = new Subject<void>();
   private mediaTimeout?: any;
   private mediaState: 'loading' | 'loaded' | 'error' = 'loading';
-  private readonly MEDIA_TIMEOUT: number = 3000; // 3 segundos
+  private readonly MEDIA_TIMEOUT: number = 3000; // 3 seconds
   private pollingInterval: any;
   private pollingTimeout: any;
 
@@ -210,7 +210,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     }
   }
 
-  // Métodos para manejar la carga de elementos individuales
+  // Methods to handle individual element loading
   onAvatarLoad() {
     this.avatarLoading = false;
     this._cdr.markForCheck();
@@ -218,7 +218,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   onAvatarError() {
     this.avatarLoading = false;
-    // Force the avatar component to show initials when image fails
+    // Force avatar component to show initials when image fails
     this._cdr.markForCheck();
   }
 
@@ -239,7 +239,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._cdr.markForCheck();
   }
 
-  // Force media loading state reset - used when skeleton gets stuck
+  // Force media loading state reset when skeleton gets stuck
   forceMediaLoadComplete() {
     this.mediaLoading = false;
     this.mediaState = 'loaded';
@@ -247,7 +247,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._cdr.markForCheck();
   }
 
-  // Force processing media state reset - used when processing gets stuck
+  // Force processing media state reset when processing gets stuck
   forceProcessingMediaComplete() {
     this.publication.containsMedia = false;
     this.mediaLoading = false;
@@ -277,7 +277,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       
       this._cdr.markForCheck();
       
-      // Setup media timeout to prevent it from getting stuck
+      // Setup media timeout to prevent getting stuck
       this.setupMediaTimeout();
     }
   }
@@ -309,15 +309,15 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
 
   private updateLocalPublication(publicationId: string, mediaData: any[]) {
-    // Update the current publication object
+    // Update current publication object
     this.publication.media = mediaData;
     this.publication.containsMedia = false;
     
-    // Force change detection to update the UI immediately
+    // Force change detection to update UI immediately
     this._cdr.markForCheck();
     
-    // Update the local database (IndexedDB) with the new media data
-    // This ensures consistency between the UI and local storage
+    // Update local database (IndexedDB) with new media data
+    // This ensures consistency between UI and local storage
     this._publicationService.updatePublicationInLocalDatabase(publicationId, {
       media: mediaData,
       containsMedia: false
@@ -373,7 +373,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       this.mediaState = 'loading';
       this.setupMediaTimeout();
       
-      // Simulate media loading with a small delay
+      // Simulate media loading with small delay
       setTimeout(() => {
         this.onMediaLoad();
       }, 100);

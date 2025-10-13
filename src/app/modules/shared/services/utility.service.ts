@@ -117,7 +117,7 @@ export class UtilityService {
     const storageConfig = {
       frequent: { type: 'memory' as const, duration: 5 * 60 * 1000 }, // 5 min
       occasional: { type: 'localStorage' as const },
-      rare: { type: 'cookie' as const, duration: 24 * 60 * 60 * 1000 } // 24 horas
+      rare: { type: 'cookie' as const, duration: 24 * 60 * 60 * 1000 } // 24 hours
     };
 
     const config = storageConfig[type];

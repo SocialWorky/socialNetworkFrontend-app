@@ -120,7 +120,7 @@
 
     <worky-processing-media *ngIf="!publication.media.length && publication.containsMedia && !isMediaProcessingStuck()"></worky-processing-media>
 
-    <worky-image-organizer
+    <worky-image-organizer *ngIf="publication.media.length"
       [publication]="publication"
       [isLoading]="mediaLoading"
       type="publication"
