@@ -106,8 +106,6 @@
       </div>
     </div>
 
-    <worky-processing-media *ngIf="!publication.media.length && publication.containsMedia && !isMediaProcessingStuck()"></worky-processing-media>
-    
     <!-- Error message when media processing fails after retries -->
     <div *ngIf="isMediaProcessingStuck()" class="media-processing-error">
       <div class="error-message">
@@ -120,12 +118,11 @@
       </button>
     </div>
 
-    <!-- Media con skeleton individual -->
-    <div *ngIf="publication.media.length && mediaLoading" class="media-skeleton">
-      <worky-image-skeleton width="100%" height="300px"></worky-image-skeleton>
-    </div>
-    <worky-image-organizer *ngIf="publication.media.length && !mediaLoading"
+    <worky-processing-media *ngIf="!publication.media.length && publication.containsMedia && !isMediaProcessingStuck()"></worky-processing-media>
+
+    <worky-image-organizer
       [publication]="publication"
+      [isLoading]="mediaLoading"
       type="publication"
       (load)="onMediaLoad()"
       (error)="onMediaLoadError($event)">

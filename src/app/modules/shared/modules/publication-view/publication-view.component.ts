@@ -108,6 +108,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   private mediaTimeout?: any;
   private mediaState: 'loading' | 'loaded' | 'error' = 'loading';
   private readonly MEDIA_TIMEOUT: number = 3000; // 3 segundos
+  private pollingInterval: any;
+  private pollingTimeout: any;
 
   constructor(
     private _router: Router,
@@ -178,6 +180,34 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._cdr.markForCheck();
     
     this.simulateProgressiveLoading();
+
+    if (this.publication.containsMedia && !this.publication.media.length) {
+      this.startPolling();
+    }
+  }
+
+  private startPolling() {
+    this.stopPolling();
+
+    this.pollingInterval = setInterval(() => {
+      this.refreshPublications(this.publication._id);
+    }, 5000);
+
+    this.pollingTimeout = setTimeout(() => {
+      this.stopPolling();
+    }, 60000);
+  }
+
+  private stopPolling() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+
+    if (this.pollingTimeout) {
+      clearTimeout(this.pollingTimeout);
+      this.pollingTimeout = null;
+    }
   }
 
   // Métodos para manejar la carga de elementos individuales
@@ -237,8 +267,11 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   // Force immediate update when media processing completes
   private forceImmediateMediaUpdate(mediaData: any[]) {
     if (mediaData && mediaData.length > 0) {
-      this.publication.media = mediaData;
-      this.publication.containsMedia = false;
+      this.publication = {
+        ...this.publication,
+        media: mediaData,
+        containsMedia: false,
+      };
       this.mediaLoading = true;
       this.mediaState = 'loading';
       
@@ -353,6 +386,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.stopPolling();
     
     // Clear media timeout to prevent memory leaks
     this.clearMediaTimeout();
@@ -579,7 +613,15 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           }
           
           const updatedPublication = publication[0];
+
+          if (this.publication.containsMedia && updatedPublication.media.length > 0) {
+            this.stopPolling();
+          }
           
+          if (this.publication.media.length > updatedPublication.media.length) {
+            return;
+          }
+
           const hasMediaChanges = 
             this.publication.media.length !== updatedPublication.media.length ||
             this.publication.containsMedia !== updatedPublication.containsMedia ||
@@ -593,7 +635,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           
           if (hasMediaChanges || hasOtherChanges) {
             this._publicationService.updatePublicationsLocal(publication);
-            this.publication = updatedPublication;
+            this.publication = { ...updatedPublication };
             this.loadReactionsImg(updatedPublication);
             this.checkDataLink(updatedPublication._id);
             
@@ -714,6 +756,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   private updatePublicationIfNeeded(updatedData: any) {
+    if (this.publication.containsMedia && !updatedData.media?.length) {
+      return;
+    }
+
     const hasMediaChanges = 
       this.publication.media.length !== updatedData.media?.length ||
       this.publication.containsMedia !== updatedData.containsMedia ||
@@ -735,17 +781,21 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         }
       }
       
-      // Add small delay to ensure UI updates properly
-      setTimeout(() => {
-        this.refreshPublications(updatedData._id);
-        this.loadReactionsImg(updatedData);
-      }, 100);
+      if (hasOtherChanges) {
+        setTimeout(() => {
+          this.refreshPublications(updatedData._id);
+          this.loadReactionsImg(updatedData);
+        }, 100);
+      }
     }
   }
 
   private handleMediaUpdate(updatedData: any) {
-    this.publication.media = updatedData.media || [];
-    this.publication.containsMedia = updatedData.containsMedia || false;
+    this.publication = {
+      ...this.publication,
+      media: updatedData.media || [],
+      containsMedia: updatedData.containsMedia || false,
+    };
     
     // Ensure media loading state is properly updated
     if (this.publication.media.length > 0) {
@@ -760,6 +810,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   private handleMediaProcessed(data: any) {
     this.clearMediaTimeout();
     this.publication.containsMedia = false;
+    this.stopPolling();
     
     // Update the publication with the processed media data
     if (data.media && data.media.length > 0) {

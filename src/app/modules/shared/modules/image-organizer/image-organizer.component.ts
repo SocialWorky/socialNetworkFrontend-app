@@ -24,6 +24,8 @@ export class ImageOrganizerComponent implements OnInit {
 
   @Input() comment?: Comment;
 
+  @Input() isLoading: boolean = false;
+
   @Output() load = new EventEmitter<void>();
   @Output() error = new EventEmitter<Event>();
 
@@ -59,9 +61,9 @@ export class ImageOrganizerComponent implements OnInit {
 
   ngOnChanges(changes: SimpleChanges) {
     if(this.type === 'publication') {
-      this.images = this.publication ? this.publication.media : [];
+      this.images = this.publication ? [...this.publication.media] : [];
     } else if(this.type === 'comment') {
-      this.images = this.comment ? this.comment.media : [];
+      this.images = this.comment ? [...this.comment.media] : [];
     }
 
     this.galleryItems = this.images.map(image => {

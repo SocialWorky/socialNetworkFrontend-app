@@ -1,4 +1,18 @@
-<div class="gallery-lightbox-container" *ngIf="images && images.length > 0">
+<div *ngIf="isLoading" class="gallery"
+  [ngClass]="{
+    'single': (publication?.media?.length ?? 0) === 1,
+    'two-images': (publication?.media?.length ?? 0) === 2,
+    'three-images': (publication?.media?.length ?? 0) === 3,
+    'four-images': (publication?.media?.length ?? 0) === 4,
+    'five-images': (publication?.media?.length ?? 0) === 5,
+    'more-five-images': (publication?.media?.length ?? 0) > 5
+  }">
+  <div *ngFor="let _ of [].constructor((publication?.media?.length ?? 0) > 5 ? 5 : (publication?.media?.length ?? 0)); let i = index" class="gallery-item skeleton-item">
+    <worky-image-skeleton width="100%" height="100%"></worky-image-skeleton>
+  </div>
+</div>
+
+<div class="gallery-lightbox-container" *ngIf="!isLoading && images && images.length > 0">
   <div class="gallery"
     [ngClass]="{
       'single': images.length === 1,
@@ -10,7 +24,7 @@
     }">
     <ng-container *ngFor="let image of images.slice(0, 5); let i = index">
       <div class="gallery-item" (click)="openViewMedia(image)"
-          [attr.data-content]="i === 4 && images.length > 5 ? '+ ' + (images.length - 5) : ''">
+          [attr.data-content]="(i === 4 && images.length > 5) ? '+ ' + (images.length - 5) : null">
         <ng-container *ngIf="isImageUrl(image.urlCompressed)">
           <worky-image [src]="image.urlCompressed" alt="Image" (load)="onImageLoad()" (error)="onImageError($event)"></worky-image>
         </ng-container>

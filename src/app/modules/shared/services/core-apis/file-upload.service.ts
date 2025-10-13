@@ -3,6 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '@auth/services/auth.service';
 import { environment } from '@env/environment';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
+import { catchError, retry, timeout } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +14,8 @@ export class FileUploadService {
 
   constructor(
     private http: HttpClient,
-    private _authService: AuthService
+    private _authService: AuthService,
+    private _logService: LogService
   ) { }
 
   uploadFile(
@@ -44,7 +48,19 @@ export class FileUploadService {
       formData.append('files', file);
     });
 
-    return this.http.post<any>(url, formData);
+    return this.http.post<any>(url, formData).pipe(
+      timeout(60000),
+      retry(2),
+      catchError(error => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'FileUploadService',
+          'File upload failed after retries',
+          { error }
+        );
+        return throwError(() => new Error('File upload failed after retries.'));
+      })
+    );
   }
 
   private getUniqueFiles(files: File[]): File[] {
