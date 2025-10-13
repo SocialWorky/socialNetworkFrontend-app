@@ -21,10 +21,47 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '2.3.0',
+  version: '2.4.0',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🚀 NUEVAS FUNCIONALIDADES Y MEJORAS DE UX (v2.4.0):
+    - Added: Sistema de polling inteligente para procesamiento de medios
+      * Polling automático cada 5 segundos con timeout de 60 segundos
+      * Verificación continua del estado de procesamiento de imágenes y videos
+      * Cleanup automático de intervalos en destrucción del componente
+      * Mejor experiencia de usuario durante la carga de contenido multimedia
+    
+    - Enhanced: Estados de carga mejorados con skeleton loading
+      * Skeleton loading durante procesamiento de medios en ImageOrganizerComponent
+      * Estados visuales claros para el usuario durante operaciones asíncronas
+      * Transiciones suaves entre estados de carga y contenido final
+      * Feedback visual consistente en toda la aplicación
+    
+    - Improved: Sistema de traducciones y localización
+      * Traducciones completas en español e inglés para formularios
+      * Mejoras en el dropdown de destinos del form builder
+      * Consistencia en el sistema de i18n en toda la aplicación
+      * Soporte mejorado para múltiples idiomas
+    
+    - Enhanced: Manejo de errores y retry logic
+      * Lógica de reintento mejorada en FileUploadService
+      * Manejo robusto de errores en servicios de carga
+      * Estados de error más informativos para el usuario
+      * Recuperación automática de fallos temporales de red
+    
+    - Optimized: Gestión de estado inmutable
+      * Actualizaciones de publicaciones con gestión inmutable de estado
+      * Prevención de re-renderizados innecesarios
+      * Mejor rendimiento en componentes complejos
+      * Estado consistente en toda la aplicación
+    
+    - Improved: Experiencia de usuario en perfil
+      * Mostrar nombre completo en lugar de username en sidebar
+      * Información de perfil más clara y profesional
+      * Mejor identificación visual de usuarios
+      * Consistencia en la presentación de datos de usuario
+    
     🔧 MEJORAS DEL SISTEMA DE SOCKET (v2.3.0):
     - Fixed: Corrección de recursión infinita en NotificationUsersService
       * Socket funciona correctamente sin necesidad de refresh
@@ -87,7 +124,7 @@ export const APP_VERSION_CONFIG: AppVersionConfig = {
       * Código más mantenible y robusto
       * Mejor manejo de errores con catchError
     
-    ✨ NUEVAS FUNCIONALIDADES (v2.1.0):
+    ✨ FUNCIONALIDADES BASE (v2.1.0):
     - Added: Sistema completo de skeleton components con Tailwind CSS
       * Componentes granulares para carga progresiva inteligente
       * Implementación en componentes principales de la aplicación
