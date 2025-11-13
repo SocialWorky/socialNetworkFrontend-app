@@ -11,7 +11,6 @@ import { NotificationUsersService } from '@shared/services/notifications/notific
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service'
-import { MessageService } from '../../messages/services/message.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 
 import { ScrollService } from '@shared/services/scroll.service';
@@ -31,8 +30,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   googleLoginSession = localStorage.getItem('googleLogin');
 
   notifications: number = 0;
-
-  messages: number = 0;
 
   searchTerm: string = '';
 
@@ -68,7 +65,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     private _notificationUsersService: NotificationUsersService,
     private _notificationService: NotificationService,
     private _notificationCenterService: NotificationCenterService,
-    private _messageService: MessageService,
     private _notificationPanelService: NotificationPanelService,
     private _configService: ConfigService,
     private _scrollService: ScrollService,
@@ -94,7 +90,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
       next: () => {
         setTimeout(() => {
           this.getNotification();
-          this.getUnreadMessagesCount();
         }, 1000)
       },
       error: (error) => {
@@ -104,7 +99,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscribeToConfig();
     this.getConfig();
     this.checkAdminDataLink();
-    this.getUnreadMessagesCount();
     this._cdr.markForCheck();
   }
 
@@ -248,22 +242,6 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
       },
       error: (error) => {
         // Error getting notifications - no need to log every notification fetch error
-      }
-    });
-  }
-
-  messagesUrl() {
-    this._router.navigate(['/messages']);
-  }
-
-  getUnreadMessagesCount() {
-    this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (data: any) => {
-        this.messages = data;
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        // Error getting messages - no need to log every message fetch error
       }
     });
   }

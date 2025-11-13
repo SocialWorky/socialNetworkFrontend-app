@@ -41,15 +41,6 @@
       <!-- Right elements -->
 
       <div class="worky-profile" *ngIf="!isMobile">
-        <!-- Message -->
-        <worky-dropdown class="item-navbar-actions"
-          icon="chat"
-          [badgeValue]="messages > 0 ? messages : null"
-          (click)="messagesUrl()"
-          [isFilled]=true
-          [isMenu]=false
-          [badge]=true>
-        </worky-dropdown>
         <!-- Notification -->
         <worky-dropdown class="item-navbar-actions"
           icon="notifications"
@@ -103,15 +94,6 @@
       <!-- Mobile Navigation -->
       <div class="worky-profile-mobile">
         <worky-menu-component></worky-menu-component>
-        <!-- Message -->
-        <worky-dropdown
-          icon="chat"
-          [badgeValue]="messages > 0 ? messages : null"
-          (click)="messagesUrl()"
-          [isFilled]=true
-          [isMenu]=false
-          [badge]=true>
-        </worky-dropdown>
         <!-- Notification -->
         <worky-dropdown
           icon="notifications"

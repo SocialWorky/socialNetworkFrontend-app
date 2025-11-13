@@ -18,14 +18,6 @@ const routes: Routes = [
         path: 'profile/:profileId', 
         loadChildren: () => import('./profiles/profiles.module').then(m => m.ProfilesModule)
       },
-      { 
-        path: 'messages', 
-        loadChildren: () => import('./messages/messages.module').then(m => m.MessagesModule)
-      },
-      { 
-        path: 'messages/:userIdMessages', 
-        loadChildren: () => import('./messages/messages.module').then(m => m.MessagesModule)
-      },
 
       { path: '**', redirectTo: '', pathMatch: 'full' }
     ],

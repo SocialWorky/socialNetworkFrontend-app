@@ -93,15 +93,6 @@
             <h2>{{ userData.name || '' }} {{ userData.lastName || '' }}</h2>
 
             <div class="send-message-button">
-              <worky-buttons *ngIf="idUserProfile !== dataUser?.id" 
-                [workyButtonType]="WorkyButtonType.Outline"
-                [theme]="WorkyButtonTheme.Basic" 
-                [width]="'100%'" 
-                (click)="sendMessageToUser()">
-                <span prefix-icon><i class="material-icons">chat</i></span>
-                <span basic-button-text>{{ 'profiles.sendMessage' | workyTranslations }}</span>
-              </worky-buttons>
-
               <img *ngIf="profileWhatsappViewable" 
                 src="/assets/img/logos/svg-whatsapp.svg" 
                 alt="WhatsApp"

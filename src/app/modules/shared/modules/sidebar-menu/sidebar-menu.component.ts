@@ -1,16 +1,13 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
-import { MessageService } from 'src/app/modules/pages/messages/services/message.service';
 import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service';
-import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { UserService } from '@shared/services/core-apis/users.service';
-import { User } from '@shared/interfaces/user.interface';
 
 @Component({
   selector: 'worky-sidebar-menu',
@@ -31,16 +28,12 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
 
   notifications: number = 0;
 
-  messages: number = 0;
-
   constructor(
     private _authService: AuthService,
     private _cdr: ChangeDetectorRef,
     private _notificationCenterService: NotificationCenterService,
     private _notificationService: NotificationService,
-    private _messageService: MessageService,
     private _notificationPanelService: NotificationPanelService,
-    private _notificationMessageChatService: NotificationMessageChatService,
     private _logService: LogService,
     private _globalEventService: GlobalEventService,
     private _userService: UserService
@@ -69,23 +62,7 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
       this.isAuthenticated = isAuth;
     });
 
-    this._notificationMessageChatService.notificationMessageChat$
-      .pipe(
-        takeUntil(this.unsubscribe$),
-        filter((message: any) => message && message._id && message._id !== 'undefined')
-      )
-      .subscribe({
-        next: (message: any) => {
-          // New message notification received - no need to log every notification
-          this.updateUnreadCountForNewMessage(message);
-        },
-        error: (error) => {
-          console.error('Error en notificación de mensaje:', error);
-        }
-      });
-
     this.getNotification();
-    this.getUnreadMessagesCount();
   }
 
   ngOnDestroy() {
@@ -121,75 +98,13 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error getting notifications', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'SideBarMenuComponent',
+          'Error getting notifications',
+          { error: String(error) }
+        );
       }
     });
-  }
-
-  getUnreadMessagesCount() {
-    this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (count: number) => {
-        this.messages = count;
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Error getting unread messages count', error);
-        this.messages = 0;
-        this._cdr.markForCheck();
-      }
-    });
-  }
-
-  forceSyncMessageCount() {
-    this._messageService.syncReadStatusFromServer().pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (count: number) => {
-        this.messages = count;
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Error forzando sincronización:', error);
-      }
-    });
-  }
-
-  forceRefreshCounts() {
-    this.getNotification();
-    this.getUnreadMessagesCount();
-  }
-
-  private updateUnreadCountForNewMessage(message: any) {
-    const currentUserId = this._authService.getDecodedToken()?.id;
-    
-    if (!message || !message._id) {
-      return;
-    }
-    
-    if (message.senderId !== currentUserId) {
-      this.messages++;
-      this._cdr.markForCheck();
-      this._messageService.syncSpecificMessage(message._id)
-        .pipe(takeUntil(this.unsubscribe$))
-        .subscribe({
-          next: (syncedMessage) => {
-            if (syncedMessage) {
-              this.getUnreadMessagesCount();
-            }
-          },
-          error: (error) => {
-            console.error('Error sincronizando mensaje específico:', error);
-          }
-        });
-    } else {
-      this._logService.log(
-        LevelLogEnum.DEBUG,
-        'SideBarMenuComponent',
-        'Message from current user, not updating count',
-        { messageId: message._id, senderId: message.senderId }
-      );
-    }
-  }
-
-  updateUnreadCountWhenMessagesRead() {
-    this.getUnreadMessagesCount();
   }
 }

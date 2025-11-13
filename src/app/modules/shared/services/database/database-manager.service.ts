@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
-import { MessageDatabaseService } from './message-database.service';
 import { PublicationDatabaseService } from './publication-database.service';
 import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 import { UtilityService } from '@shared/services/utility.service';
@@ -17,11 +16,6 @@ export interface DatabaseConfig {
 export class DatabaseManagerService {
   private readonly DATABASES: DatabaseConfig[] = [
     {
-      name: 'WorkyMessagesDB',
-      version: 2,
-      stores: ['messages']
-    },
-    {
       name: 'WorkyPublicationsDB',
       version: 1,
       stores: ['publications']
@@ -37,7 +31,6 @@ export class DatabaseManagerService {
   private isInitialized = false;
 
   constructor(
-    private messageDatabase: MessageDatabaseService,
     private publicationDatabase: PublicationDatabaseService,
     private mobileImageCacheService: MobileImageCacheService,
     private logService: LogService,
@@ -73,7 +66,6 @@ export class DatabaseManagerService {
 
       // Define the "allow-list" of databases that should be kept for the current user.
       const databasesToKeep = [
-        `WorkyMessagesDB_${userId}`,
         `WorkyPublicationsDB_${userId}`,
         `MobileImageCacheDB_${userId}`
       ];
@@ -87,7 +79,6 @@ export class DatabaseManagerService {
 
       // Step 1: Close all existing connections to prevent locking issues.
       // Step 1: Closing all existing connections - no need to log every step
-      if (this.messageDatabase) await this.messageDatabase.closeConnection();
       if (this.publicationDatabase) await this.publicationDatabase.closeConnection();
       if (this.mobileImageCacheService) await this.mobileImageCacheService.closeConnection();
 
@@ -171,9 +162,8 @@ export class DatabaseManagerService {
     // Fallback for older browsers or environments where indexedDB.databases() is not available.
     this.logService.log(LevelLogEnum.WARN, 'DatabaseManagerService', 'Using legacy fallback method to find databases by guessing names.');
     const knownUserIds = this.getKnownUserIds();
-    const legacyDbNames = ['WorkyMessagesDB', 'WorkyPublicationsDB', 'MobileImageCacheDB'];
+    const legacyDbNames = ['WorkyPublicationsDB', 'MobileImageCacheDB'];
     const userDbNames = knownUserIds.flatMap(id => [
-      `WorkyMessagesDB_${id}`, 
       `WorkyPublicationsDB_${id}`,
       `MobileImageCacheDB_${id}`
     ]);
@@ -209,7 +199,7 @@ export class DatabaseManagerService {
    * Delete databases for a specific user ID
    */
   private async deleteUserDatabases(userId: string): Promise<void> {
-    const baseNames = ['WorkyMessagesDB', 'WorkyPublicationsDB', 'MobileImageCacheDB'];
+    const baseNames = ['WorkyPublicationsDB', 'MobileImageCacheDB'];
     
     for (const baseName of baseNames) {
       const dbName = `${baseName}_${userId}`;
@@ -350,8 +340,7 @@ export class DatabaseManagerService {
     ];
     
     for (const testUUID of testUUIDs) {
-      if (await this.databaseExists(`WorkyMessagesDB_${testUUID}`) || 
-          await this.databaseExists(`WorkyPublicationsDB_${testUUID}`)) {
+      if (await this.databaseExists(`WorkyPublicationsDB_${testUUID}`)) {
         discoveredUUIDs.push(testUUID);
       }
     }
@@ -513,7 +502,6 @@ export class DatabaseManagerService {
       // Initializing databases for user - no need to log every initialization
 
       // Initialize each database service
-      await this.messageDatabase.initDatabase();
       await this.publicationDatabase.initDatabase();
       
       // Initialize MobileImageCacheService database
@@ -547,7 +535,6 @@ export class DatabaseManagerService {
       );
 
       // Clear each database
-      await this.messageDatabase.clearAllMessages();
       await this.publicationDatabase.clearAllPublications();
 
       this.logService.log(
@@ -641,7 +628,6 @@ export class DatabaseManagerService {
       );
 
       // Delete each database completely
-      await this.messageDatabase.deleteDatabase();
       await this.publicationDatabase.deleteDatabase();
 
       this.logService.log(
@@ -672,16 +658,13 @@ export class DatabaseManagerService {
    * Get database statistics for current user
    */
   async getDatabaseStats(): Promise<{
-    messages: number;
     publications: number;
     userId: string | null;
   }> {
     try {
-      const messageCount = await this.messageDatabase.getMessageCount();
       const publicationCount = await this.publicationDatabase.getPublicationCount();
 
       return {
-        messages: messageCount,
         publications: publicationCount,
         userId: this.currentUserId
       };
@@ -693,7 +676,6 @@ export class DatabaseManagerService {
         { error: error instanceof Error ? error.message : String(error) }
       );
       return {
-        messages: 0,
         publications: 0,
         userId: this.currentUserId
       };

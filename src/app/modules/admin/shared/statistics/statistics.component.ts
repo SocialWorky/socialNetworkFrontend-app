@@ -6,7 +6,6 @@ import { PublicationService } from '@shared/services/core-apis/publication.servi
 import { ReportsService } from '@shared/services/core-apis/reports.service';
 import { CommentService } from '@shared/services/core-apis/comment.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
-import { MessageService } from '../../../pages/messages/services/message.service';
 import { ReportStatus } from '@shared/enums/report.enum';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import * as _ from 'lodash';
@@ -27,7 +26,6 @@ export class StatisticsComponent implements OnInit {
   isLoadingComments = true;
   isLoadingReactions = true;
   isLoadingReports = true;
-  isLoadingMessages = true;
   error: string | null = null;
   lastUpdated = new Date();
 
@@ -49,10 +47,6 @@ export class StatisticsComponent implements OnInit {
   private _reportsStatusPending: any[] = [];
   private _resolvedReports: number = 0;
   private _todayReports: number = 0;
-
-  private _totalMessages: number = 0;
-  private _unreadMessages: number = 0;
-  private _activeConversations: number = 0;
 
   get allUsersLength() {
     return this._allUsers.length;
@@ -114,18 +108,6 @@ export class StatisticsComponent implements OnInit {
     return this._todayReports;
   }
 
-  get totalMessages() {
-    return this._totalMessages;
-  }
-
-  get unreadMessages() {
-    return this._unreadMessages;
-  }
-
-  get activeConversations() {
-    return this._activeConversations;
-  }
-
   get engagementRate() {
     const totalInteractions = this.totalComments + this.totalReactions;
     const activeUsers = this.activeUsersCount;
@@ -152,7 +134,6 @@ export class StatisticsComponent implements OnInit {
     private _cdr: ChangeDetectorRef,
     private _reportsService: ReportsService,
     private _commentService: CommentService,
-    private _messageService: MessageService,
     private _logService: LogService
   ) { }
 
@@ -189,8 +170,7 @@ export class StatisticsComponent implements OnInit {
       await Promise.all([
         this.getCountPublications(),
         this.getAllPublications(),
-        this.getReportsStatusPending(),
-        this.getMessagesStatistics()
+        this.getReportsStatusPending()
       ]);
     } finally {
       this.isLoading = false;
@@ -344,118 +324,6 @@ export class StatisticsComponent implements OnInit {
         this._cdr.markForCheck();
       }
     });
-  }
-
-  private async getMessagesStatistics() {
-    this.isLoadingMessages = true;
-    try {
-      await this._messageService.verifyAdminPermissions().pipe(takeUntil(this.unsubscribe$)).subscribe({
-        next: (permissionResult) => {
-          
-          if (!permissionResult.hasAdminAccess) {
-            this._logService.log(
-              LevelLogEnum.WARN,
-              'StatisticsComponent',
-              'Admin access denied for messages statistics',
-              { message: permissionResult.message }
-            );
-            // Use basic statistics as fallback
-            this._messageService.getBasicMessagesStatistics().pipe(takeUntil(this.unsubscribe$)).subscribe({
-              next: (stats: any) => {
-                this._totalMessages = stats.totalMessages || 0;
-                this._unreadMessages = stats.unreadMessages || 0;
-                this._activeConversations = stats.activeConversations || 0;
-                this.isLoadingMessages = false;
-                this._cdr.markForCheck();
-              },
-              error: (error: any) => {
-                this._logService.log(
-                  LevelLogEnum.ERROR,
-                  'StatisticsComponent',
-                  'Error loading basic messages statistics',
-                  { error: String(error) }
-                );
-                this._unreadMessages = 0;
-                this.isLoadingMessages = false;
-                this._cdr.markForCheck();
-              }
-            });
-            return;
-          }
-        },
-        error: (error: any) => {
-          this._logService.log(
-            LevelLogEnum.ERROR,
-            'StatisticsComponent',
-            'Error verifying admin permissions',
-            { error: String(error) }
-          );
-        }
-      });
-
-      // Get complete messages statistics from the new endpoint
-      await this._messageService.getMessagesStatistics().pipe(takeUntil(this.unsubscribe$)).subscribe({
-        next: (stats: any) => {
-          this._totalMessages = stats.totalMessages || 0;
-          this._unreadMessages = stats.unreadMessages || 0;
-          this._activeConversations = stats.activeConversations || 0;
-          this.isLoadingMessages = false;
-          this._cdr.markForCheck();
-        },
-        error: (error: any) => {
-          this._logService.log(
-            LevelLogEnum.ERROR,
-            'StatisticsComponent',
-            'Error loading messages statistics',
-            { error: String(error) }
-          );
-          this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
-            next: (unreadCount: number) => {
-              this._unreadMessages = unreadCount;
-              this.isLoadingMessages = false;
-              this._cdr.markForCheck();
-            },
-            error: (unreadError: any) => {
-              this._logService.log(
-                LevelLogEnum.ERROR,
-                'StatisticsComponent',
-                'Error loading unread messages count',
-                { error: String(unreadError) }
-              );
-              this._unreadMessages = 0;
-              this.isLoadingMessages = false;
-              this._cdr.markForCheck();
-            }
-          });
-        }
-      });
-
-    } catch (error) {
-      this._logService.log(
-        LevelLogEnum.ERROR,
-        'StatisticsComponent',
-        'Error loading messages statistics (catch block)',
-        { error: String(error) }
-      );
-      this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
-        next: (unreadCount: number) => {
-          this._unreadMessages = unreadCount;
-          this.isLoadingMessages = false;
-          this._cdr.markForCheck();
-        },
-        error: (unreadError: any) => {
-          this._logService.log(
-            LevelLogEnum.ERROR,
-            'StatisticsComponent',
-            'Error loading unread messages count (catch block)',
-            { error: String(unreadError) }
-          );
-          this._unreadMessages = 0;
-          this.isLoadingMessages = false;
-          this._cdr.markForCheck();
-        }
-      });
-    }
   }
 
   ngOnDestroy(): void {
