@@ -1,0 +1,137 @@
+@use 'src/assets/styles/worky-palettes.scss' as color;
+
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  position: relative;
+}
+
+::ng-deep .messages-view {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  height: 100% !important;
+}
+
+.messages-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  background: color.$worky-color-greyLight;
+  overflow: hidden !important;
+  position: relative;
+  touch-action: pan-y;
+  overscroll-behavior: none;
+}
+
+.conversations-sidebar {
+  width: 380px;
+  min-width: 320px;
+  border-right: 1px solid color.$worky-color-grey;
+  display: flex;
+  flex-direction: column;
+  background: color.$worky-color-module-container;
+  box-shadow: 2px 0 8px rgba(color.$worky-color-black, 0.05);
+
+  &.hidden {
+    display: none;
+  }
+}
+
+.conversations-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid color.$worky-color-grey;
+  background: color.$worky-color-module-container;
+  box-shadow: 0 2px 4px rgba(color.$worky-color-black, 0.02);
+
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: color.$worky-color-text;
+    letter-spacing: -0.5px;
+  }
+}
+
+.conversations-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.loader-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  min-height: 200px;
+}
+
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: color.$worky-color-text;
+}
+
+.load-more-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: color.$worky-color-primary;
+  font-weight: 500;
+
+  &:hover {
+    background: color.$worky-color-greyLight;
+  }
+}
+
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: color.$worky-color-greyLight;
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+
+  &.hidden {
+    display: none;
+  }
+
+  worky-chat-window {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    min-height: 0;
+  }
+}
+
+.empty-chat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: color.$worky-color-text;
+  font-size: 16px;
+  padding: 40px;
+
+  p {
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 768px) {
+  .conversations-sidebar {
+    width: 100%;
+  }
+}
+

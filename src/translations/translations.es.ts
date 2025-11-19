@@ -202,6 +202,29 @@ export const translations = {
   'messageChat.send': 'Enviar',
   'messageChat.noMessages': 'No hay mensajes',
   
+  // MESSAGES COMPONENT
+  'messages.online': 'En línea',
+  'messages.inactive': 'Inactivo',
+  'messages.offline': 'Desconectado',
+  'messages.uploading': 'Subiendo...',
+  'messages.edit': 'Editar',
+  'messages.delete': 'Eliminar',
+  'messages.reply': 'Responder',
+  'messages.replyingTo': 'Respondiendo a',
+  'messages.edited': 'Editado',
+  'messages.deleted': 'Este mensaje fue eliminado',
+  'messages.deleteConfirm': '¿Estás seguro de que deseas eliminar este mensaje?',
+  'messages.editPlaceholder': 'Edita tu mensaje...',
+  'messages.messageOptions': 'Opciones del mensaje',
+  'messages.image': 'Imagen',
+  'messages.video': 'Video',
+  'messages.title': 'Mensajes',
+  'messages.retry': 'Reintentar',
+  'messages.noConversations': 'No hay conversaciones',
+  'messages.loadMore': 'Cargar más',
+  'messages.selectConversation': 'Selecciona una conversación',
+  'messages.noMessages': 'Sin mensajes',
+  
   // MESSAGE COMPONENT
   'message.loadingPrevious': 'Cargando mensajes anteriores...',
   'message.noMoreMessages': 'No hay más mensajes que mostrar',
@@ -210,6 +233,11 @@ export const translations = {
   'message.searchGif': 'Buscar GIF',
   'message.uploadImage': 'Subir imagen',
   'message.emojis': 'Emojis',
+  'message.typeImage': 'Imagen',
+  'message.typeVideo': 'Video',
+  'message.typeAudio': 'Audio',
+  'message.typeFile': 'Archivo',
+  'message.typing': 'está escribiendo...',
   
   // GIF SEARCH
   'gifSearch.placeholder': 'Buscar GIFs',

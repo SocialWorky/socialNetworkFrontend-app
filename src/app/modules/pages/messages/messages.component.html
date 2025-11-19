@@ -1,0 +1,54 @@
+<div class="messages-container" [class.mobile]="isMobile">
+  <div class="conversations-sidebar" [class.hidden]="selectedUserId && isMobile">
+    <div class="conversations-header">
+      <h2>{{ 'messages.title' | workyTranslations }}</h2>
+    </div>
+
+    <div *ngIf="isLoadingConversations" class="loader-container">
+      <div class="loader"></div>
+    </div>
+
+    <div *ngIf="error && !isLoadingConversations" class="error-container">
+      <p>{{ error }}</p>
+      <button (click)="loadConversations()">{{ 'messages.retry' | workyTranslations }}</button>
+    </div>
+
+    <div *ngIf="!isLoadingConversations && !error" class="conversations-list">
+      <worky-conversation-item
+        *ngFor="let conversation of conversations; trackBy: trackByConversationId"
+        [conversation]="conversation"
+        [isSelected]="selectedUserId === conversation.userId"
+        [currentUserId]="currentUserId"
+        (click)="selectConversation(conversation)">
+      </worky-conversation-item>
+
+      <div *ngIf="conversations.length === 0" class="empty-state">
+        <p>{{ 'messages.noConversations' | workyTranslations }}</p>
+      </div>
+
+      <button
+        *ngIf="page < totalPages"
+        (click)="loadMoreConversations()"
+        class="load-more-btn">
+        {{ 'messages.loadMore' | workyTranslations }}
+      </button>
+    </div>
+  </div>
+
+  <div class="chat-container" [class.hidden]="!selectedUserId && isMobile">
+    <div *ngIf="!selectedUserId" class="empty-chat">
+      <p>{{ 'messages.selectConversation' | workyTranslations }}</p>
+    </div>
+
+    <worky-chat-window
+      *ngIf="selectedUserId"
+      [otherUserId]="selectedUserId"
+      [messages]="messages"
+      [isLoading]="isLoadingMessages && isInitialLoad"
+      [totalPages]="messagesTotalPages"
+      (messageSent)="onMessageSent($event)"
+      (backClicked)="onBackClicked()">
+    </worky-chat-window>
+  </div>
+</div>
+

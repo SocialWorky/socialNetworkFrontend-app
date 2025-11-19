@@ -202,6 +202,29 @@ export const translations = {
   'messageChat.send': 'Send',
   'messageChat.noMessages': 'No messages',
   
+  // MESSAGES COMPONENT
+  'messages.online': 'Online',
+  'messages.inactive': 'Inactive',
+  'messages.offline': 'Offline',
+  'messages.uploading': 'Uploading...',
+  'messages.edit': 'Edit',
+  'messages.delete': 'Delete',
+  'messages.reply': 'Reply',
+  'messages.replyingTo': 'Replying to',
+  'messages.edited': 'Edited',
+  'messages.deleted': 'This message was deleted',
+  'messages.deleteConfirm': 'Are you sure you want to delete this message?',
+  'messages.editPlaceholder': 'Edit your message...',
+  'messages.messageOptions': 'Message options',
+  'messages.image': 'Image',
+  'messages.video': 'Video',
+  'messages.title': 'Messages',
+  'messages.retry': 'Retry',
+  'messages.noConversations': 'No conversations',
+  'messages.loadMore': 'Load more',
+  'messages.selectConversation': 'Select a conversation',
+  'messages.noMessages': 'No messages',
+  
   // MESSAGE COMPONENT
   'message.loadingPrevious': 'Loading previous messages...',
   'message.noMoreMessages': 'No more messages to show',
@@ -210,6 +233,11 @@ export const translations = {
   'message.searchGif': 'Search GIF',
   'message.uploadImage': 'Upload image',
   'message.emojis': 'Emojis',
+  'message.typeImage': 'Image',
+  'message.typeVideo': 'Video',
+  'message.typeAudio': 'Audio',
+  'message.typeFile': 'File',
+  'message.typing': 'is typing...',
   
   // GIF SEARCH
   'gifSearch.placeholder': 'Search GIFs',

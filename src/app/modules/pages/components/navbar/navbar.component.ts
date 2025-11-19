@@ -17,6 +17,9 @@ import { ScrollService } from '@shared/services/scroll.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { AppUpdateManagerService } from '@shared/services/app-update-manager.service';
 import { APP_VERSION_CONFIG } from '../../../../../app-version.config';
+import { MessageService } from '../../messages/services/message.service';
+import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
+import { Conversation, PaginatedResponse } from '../../messages/interfaces/conversation.interface';
 
 @Component({
     selector: 'worky-navbar',
@@ -30,6 +33,8 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   googleLoginSession = localStorage.getItem('googleLogin');
 
   notifications: number = 0;
+
+  unreadMessages: number = 0;
 
   searchTerm: string = '';
 
@@ -68,7 +73,9 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     private _notificationPanelService: NotificationPanelService,
     private _configService: ConfigService,
     private _scrollService: ScrollService,
-    private _appUpdateManagerService: AppUpdateManagerService
+    private _appUpdateManagerService: AppUpdateManagerService,
+    private _messageService: MessageService,
+    private _notificationMessageChatService: NotificationMessageChatService
   ) {
     this.menuProfile();
   }
@@ -96,9 +103,17 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
         // Error getting notifications - no need to log every notification fetch error
       }
     });
+    
+    this._notificationMessageChatService.notificationMessageChat$
+    .pipe(takeUntil(this.unsubscribe$))
+    .subscribe(() => {
+      this.getUnreadMessagesCount();
+    });
+
     this.subscribeToConfig();
     this.getConfig();
     this.checkAdminDataLink();
+    this.getUnreadMessagesCount();
     this._cdr.markForCheck();
   }
 
@@ -242,6 +257,15 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
       },
       error: (error) => {
         // Error getting notifications - no need to log every notification fetch error
+      }
+    });
+  }
+
+  getUnreadMessagesCount() {
+    this._messageService.getConversations(1, 100).pipe(takeUntil(this.unsubscribe$)).subscribe((response: PaginatedResponse<Conversation>) => {
+      if (response && response.conversations) {
+        this.unreadMessages = response.conversations.reduce((acc: number, conv: Conversation) => acc + (conv.unreadCount || 0), 0);
+        this._cdr.markForCheck();
       }
     });
   }

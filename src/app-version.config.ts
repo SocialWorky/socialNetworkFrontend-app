@@ -21,10 +21,24 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '2.4.0',
+  version: '2.5.0',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🚀 MEJORAS EN EL SISTEMA DE MENSAJERÍA Y NOTIFICACIONES (v2.5.0):
+    - Added: Nuevo módulo de mensajería con interfaz renovada
+      * Interfaz de usuario moderna y profesional
+      * Componentes optimizados para una mejor experiencia de usuario
+      * Notificaciones en tiempo real integradas en la barra de navegación
+    - Enhanced: Notificaciones de mensajes no leídos
+      * Contador de mensajes no leídos en la barra de navegación
+      * Actualización en tiempo real del estado de los mensajes
+      * Mejoras visuales para identificar rápidamente nuevos mensajes
+    - Improved: Rendimiento y estabilidad del chat
+      * Carga optimizada de conversaciones y mensajes
+      * Reducción del tiempo de respuesta en el envío de mensajes
+      * Sistema robusto para manejar grandes volúmenes de datos
+    
     🚀 NUEVAS FUNCIONALIDADES Y MEJORAS DE UX (v2.4.0):
     - Added: Sistema de polling inteligente para procesamiento de medios
       * Polling automático cada 5 segundos con timeout de 60 segundos

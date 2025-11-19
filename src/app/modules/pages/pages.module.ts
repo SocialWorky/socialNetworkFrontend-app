@@ -32,6 +32,7 @@ import { ProcessingMediaModule } from '@shared/modules/processing-media/processi
 import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.module';
 import { SharedModule } from '@shared/shared.module';
 import { SyncIndicatorComponent } from '@shared/components/sync-indicator/sync-indicator.component';
+import { MessagesModule } from './messages/messages.module';
 
 
 @NgModule({
@@ -70,6 +71,7 @@ import { SyncIndicatorComponent } from '@shared/components/sync-indicator/sync-i
     FormBuilderModule,
     SharedModule,
     SyncIndicatorComponent,
+    MessagesModule,
   ]
 })
 export class PagesModule { }

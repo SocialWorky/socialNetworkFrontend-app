@@ -1,0 +1,122 @@
+@use "src/assets/styles/worky-palettes" as colors;
+
+.conversation-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid colors.$worky-color-grey;
+  transition: all 0.2s ease;
+  background: colors.$worky-color-module-container;
+
+  &:hover {
+    background: colors.$worky-color-greyLight;
+  }
+
+  &.selected {
+    background: colors.$worky-color-greyLight;
+    border-left: 3px solid colors.$worky-color-primary;
+  }
+}
+
+.avatar-wrapper {
+  flex-shrink: 0;
+}
+
+.avatar-skeleton {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, colors.$worky-color-greyLight 25%, colors.$worky-color-grey 50%, colors.$worky-color-greyLight 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.conversation-content {
+  flex: 1;
+  margin-left: 14px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.conversation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: colors.$worky-color-text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.user-name-skeleton {
+  width: 150px;
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, colors.$worky-color-greyLight 25%, colors.$worky-color-grey 50%, colors.$worky-color-greyLight 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.time {
+  font-size: 12px;
+  color: colors.$worky-color-text;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.conversation-preview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.last-message {
+  font-size: 13px;
+  color: colors.$worky-color-text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.message-skeleton {
+  width: 200px;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, colors.$worky-color-greyLight 25%, colors.$worky-color-grey 50%, colors.$worky-color-greyLight 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.badge {
+  background: colors.$worky-color-primary;
+  color: colors.$worky-color-light;
+  border-radius: 12px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
