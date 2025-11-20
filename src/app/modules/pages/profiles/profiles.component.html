@@ -93,6 +93,12 @@
             <h2>{{ userData.name || '' }} {{ userData.lastName || '' }}</h2>
 
             <div class="send-message-button">
+              <i *ngIf="!isCurrentUser" 
+                class="material-icons message-icon" 
+                (click)="openMessage()">
+                message
+              </i>
+              
               <img *ngIf="profileWhatsappViewable" 
                 src="/assets/img/logos/svg-whatsapp.svg" 
                 alt="WhatsApp"

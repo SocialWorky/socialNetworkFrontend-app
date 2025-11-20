@@ -97,7 +97,7 @@
     "highlight.js": "^11.10.0",
     "inflight": "1.0.6",
     "ionicons": "^7.4.0",
-    "jwt-decode": "4.0.0",
+    "jwt-decode": "^4.0.0",
     "lru-cache": "10.2.2",
     "marked": "^15.0.7",
     "ngx-drag-drop": "^19.0.0",

@@ -802,6 +802,9 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     window.open('https://wa.me/' + this.userData?.profile?.whatsapp?.number, '_blank');
   }
 
+  openMessage() {
+    this._router.navigate(['/messages', this.idUserProfile]);
+  }
 
   onScroll(event: any) {
     this._scrollService.onScroll(event);

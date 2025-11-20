@@ -142,6 +142,16 @@
              height: 35px;
              cursor: pointer;
             }
+
+           .message-icon {
+              font-size: 35px;
+              cursor: pointer;
+              color: color.$worky-color-accent;
+              transition: color 0.3s ease;
+              &:hover {
+                color: map.get(color.$worky-blue, 72);
+              }
+            }
           }
            @include breakpoints.below-sm {
             flex-direction: column;

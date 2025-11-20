@@ -2,6 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
 import { Subject, takeUntil } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
 
 export enum LevelLogEnum {
   ERROR = 'error',
@@ -96,8 +97,40 @@ export class LogService {
     return clean;
   }
 
+  private isUserAuthenticated(): boolean {
+    const token = localStorage.getItem('token');
+
+    if (!token || token === 'undefined' || token === 'null') {
+      return false;
+    }
+
+    try {
+      const decodedToken: any = jwtDecode(token);
+      const currentTime = Math.floor(Date.now() / 1000);
+
+      if (!decodedToken || !decodedToken.exp || decodedToken.exp <= currentTime) {
+        return false;
+      }
+    } catch (error) {
+      return false;
+    }
+
+    return true;
+  }
+
   private sendLogs() {
-    if (this._logs.length === 0) return;
+    if (this._logs.length === 0) {
+      return;
+    }
+
+    if (!this.isUserAuthenticated()) {
+      this._logs = [];
+      if (this._timer) {
+        clearTimeout(this._timer);
+        this._timer = null;
+      }
+      return;
+    }
 
     const logsToSend = [...this._logs];
     this._logs = [];
@@ -141,6 +174,9 @@ export class LogService {
       }
     } finally {
       // Reset timer
+      if (this._timer) {
+        clearTimeout(this._timer);
+      }
       this._timer = null;
     }
   }
