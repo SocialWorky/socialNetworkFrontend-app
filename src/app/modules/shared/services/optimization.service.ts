@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, firstValueFrom } from 'rxjs';
 import { debounceTime, throttleTime, distinctUntilChanged, filter, shareReplay } from 'rxjs/operators';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { tap } from 'rxjs/operators';
@@ -139,7 +139,9 @@ export class OptimizationService {
       this.cleanExpiredCache();
       if (this.responseCache.size >= 100) {
         const oldestKey = this.responseCache.keys().next().value;
-        this.responseCache.delete(oldestKey);
+        if (oldestKey) {
+          this.responseCache.delete(oldestKey);
+        }
       }
     }
 
@@ -262,10 +264,18 @@ export class OptimizationService {
       return new Promise((resolve, reject) => {
         this.callQueue.push({
           id: callId,
-          fn: () => {
-            this.executeWithConcurrencyControl(callId, fn)
-              .then(resolve)
-              .catch(reject);
+          fn: async () => {
+            const result = this.executeWithConcurrencyControl(callId, fn);
+            try {
+              if (result instanceof Promise) {
+                resolve(await result);
+              } else {
+                // Convert Observable to Promise using firstValueFrom
+                resolve(await firstValueFrom(result));
+              }
+            } catch (error) {
+              reject(error);
+            }
           }
         });
       });

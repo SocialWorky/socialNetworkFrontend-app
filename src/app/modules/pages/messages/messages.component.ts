@@ -550,7 +550,21 @@ this.isMobile = this._deviceDetectionService.isMobile();
 
     this._messageService.getConversations(this.page, this.pageSize).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: PaginatedResponse<Conversation>) => {
-        this.conversations = response.conversations || [];
+        // Filter out conversations with invalid userId (deleted users)
+        const validConversations = (response.conversations || []).filter(conv => {
+          if (!conv.userId) {
+            this._logService.log(
+              LevelLogEnum.WARN,
+              'MessagesComponent',
+              'Filtered out conversation with undefined userId',
+              { conversation: conv }
+            );
+            return false;
+          }
+          return true;
+        });
+        
+        this.conversations = validConversations;
         this.totalPages = response.totalPages;
         this.isLoadingConversations = false;
         this.joinAllChatRooms();
@@ -635,6 +649,17 @@ this.isMobile = this._deviceDetectionService.isMobile();
   }
 
   selectConversation(conversation: Conversation) {
+    // Validate that conversation has a valid userId
+    if (!conversation.userId) {
+      this._logService.log(
+        LevelLogEnum.WARN,
+        'MessagesComponent',
+        'Cannot select conversation without userId',
+        { conversation }
+      );
+      return;
+    }
+
     if (this.selectedUserId === conversation.userId) {
       return;
     }
@@ -753,11 +778,24 @@ this.isMobile = this._deviceDetectionService.isMobile();
       this.page++;
       this._messageService.getConversations(this.page, this.pageSize).pipe(takeUntil(this.unsubscribe$)).subscribe({
         next: (response: PaginatedResponse<Conversation>) => {
-          const newConversations = response.conversations || [];
-          this.conversations = [...this.conversations, ...newConversations];
+          // Filter out conversations with invalid userId (deleted users)
+          const validNewConversations = (response.conversations || []).filter(conv => {
+            if (!conv.userId) {
+              this._logService.log(
+                LevelLogEnum.WARN,
+                'MessagesComponent',
+                'Filtered out conversation with undefined userId in pagination',
+                { conversation: conv }
+              );
+              return false;
+            }
+            return true;
+          });
+          
+          this.conversations = [...this.conversations, ...validNewConversations];
           this.totalPages = response.totalPages;
           
-          newConversations.forEach(conversation => {
+          validNewConversations.forEach(conversation => {
             if (conversation.userId) {
               this.joinChatRoom(conversation.userId);
             }
