@@ -3,7 +3,6 @@ import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpResponse } fr
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { OptimizationService } from './modules/shared/services/optimization.service';
-import { LogService, LevelLogEnum } from './modules/shared/services/core-apis/log.service';
 
 /**
  * Cache configuration for specific endpoints
@@ -69,8 +68,7 @@ export class CacheInterceptor implements HttpInterceptor {
   ];
 
   constructor(
-    private optimizationService: OptimizationService,
-    private logService: LogService
+    private optimizationService: OptimizationService
   ) {}
 
   intercept(
@@ -104,21 +102,8 @@ export class CacheInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       tap(event => {
         if (event instanceof HttpResponse) {
-          // Get cache duration for this endpoint
-          const duration = this.getCacheDuration(request);
-          
           // Cache the response
           this.optimizationService.setCache(cacheKey, event);
-          
-          // Log cache operation in development
-          if (this.isDebugMode()) {
-            this.logService.log(
-              LevelLogEnum.DEBUG,
-              'CacheInterceptor',
-              'Response cached',
-              { url: request.url, cacheKey, duration }
-            );
-          }
         }
       })
     );
@@ -206,15 +191,6 @@ export class CacheInterceptor implements HttpInterceptor {
         // Clear friends cache
         this.clearCacheByPattern('http_cache_.*friend');
       }
-
-      if (this.isDebugMode()) {
-        this.logService.log(
-          LevelLogEnum.DEBUG,
-          'CacheInterceptor',
-          'Cache invalidated for mutation',
-          { method, url }
-        );
-      }
     }
   }
 
@@ -229,13 +205,5 @@ export class CacheInterceptor implements HttpInterceptor {
     // This is safe but not optimal - consider enhancing OptimizationService
     // to support pattern-based cache clearing
     this.optimizationService.clearCache();
-  }
-
-  /**
-   * Check if debug mode is enabled
-   */
-  private isDebugMode(): boolean {
-    // Check if we're in development mode
-    return !!(window as any)['ngDevMode'];
   }
 }

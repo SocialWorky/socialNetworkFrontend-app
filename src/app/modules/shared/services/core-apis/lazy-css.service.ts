@@ -34,8 +34,14 @@ export class LazyCssService {
       };
 
       link.onerror = () => {
-        this.logService.log(LevelLogEnum.ERROR, 'LazyCssService', `Error cargando CSS: ${cssPath}`);
-        reject(new Error(`Error cargando CSS: ${cssPath}`));
+        const error = new Error(`Error cargando CSS: ${cssPath}`);
+        this.logService.log(
+          LevelLogEnum.ERROR,
+          'LazyCssService',
+          'Error loading CSS',
+          { error: error.message, cssPath }
+        );
+        reject(error);
       };
 
       document.head.appendChild(link);
@@ -79,9 +85,30 @@ export class LazyCssService {
 
   /**
    * Carga Emoji Mart CSS
+   * Verifica primero si ya está cargado globalmente
    */
   loadEmojiMartCss(): Promise<void> {
+    // Check if CSS is already loaded globally (from angular.json styles)
+    if (this.isCssAlreadyLoaded('picker.css') || this.isCssAlreadyLoaded('emoji-mart')) {
+      this.loadedStyles.add('emoji-mart');
+      return Promise.resolve();
+    }
+    
     return this.loadCss('assets/emoji-mart/picker.css', 'emoji-mart');
+  }
+
+  /**
+   * Check if CSS is already loaded in the DOM
+   */
+  private isCssAlreadyLoaded(cssFileName: string): boolean {
+    const links = document.querySelectorAll('link[rel="stylesheet"]');
+    for (let i = 0; i < links.length; i++) {
+      const href = links[i].getAttribute('href') || '';
+      if (href.includes(cssFileName)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

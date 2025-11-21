@@ -3,6 +3,7 @@ import { Message, MessageType } from '../../interfaces/message.interface';
 import { Token } from '@shared/interfaces/token.interface';
 import { LazyCssService } from '@shared/services/core-apis/lazy-css.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { translations } from '@translations/translations';
 
 @Component({
   selector: 'worky-chat-input',
@@ -147,19 +148,19 @@ export class ChatInputComponent {
     if (!replyMessage) return '';
     
     if (replyMessage.isDeleted) {
-      return 'Mensaje eliminado';
+      return translations['messages.deleted'] || 'Mensaje eliminado';
     }
 
     if (replyMessage.type === MessageType.IMAGE) {
-      return '📷 Imagen';
+      return `📷 ${translations['messages.image'] || 'Imagen'}`;
     }
 
     if (replyMessage.type === MessageType.VIDEO) {
-      return '🎥 Video';
+      return `🎥 ${translations['messages.video'] || 'Video'}`;
     }
 
     if (replyMessage.type === MessageType.FILE) {
-      return '📁 Archivo';
+      return `📁 ${translations['message.typeFile'] || 'Archivo'}`;
     }
 
     return replyMessage.content || '';

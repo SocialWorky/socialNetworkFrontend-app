@@ -12,6 +12,7 @@ import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
 import { SocketService } from '@shared/services/socket.service';
+import { translations } from '@translations/translations';
 
 @Component({
   selector: 'worky-messages',
@@ -573,9 +574,9 @@ this.isMobile = this._deviceDetectionService.isMobile();
       error: (error: any) => {
         this.isLoadingConversations = false;
         if (error.status === 404) {
-          this.error = 'El servicio de mensajes no está disponible';
+          this.error = translations['messages.serviceUnavailable'] || 'El servicio de mensajes no está disponible';
         } else {
-          this.error = 'Error al cargar conversaciones';
+          this.error = translations['messages.loadError'] || 'Error al cargar conversaciones';
         }
         this._logService.log(
           LevelLogEnum.ERROR,

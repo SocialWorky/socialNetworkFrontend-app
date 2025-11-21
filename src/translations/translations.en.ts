@@ -224,6 +224,8 @@ export const translations = {
   'messages.loadMore': 'Load more',
   'messages.selectConversation': 'Select a conversation',
   'messages.noMessages': 'No messages',
+  'messages.serviceUnavailable': 'Message service is not available',
+  'messages.loadError': 'Error loading conversations',
   
   // MESSAGE COMPONENT
   'message.loadingPrevious': 'Loading previous messages...',

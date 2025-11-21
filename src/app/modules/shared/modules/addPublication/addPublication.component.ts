@@ -867,7 +867,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         await this._lazyCssService.loadEmojiMartCss();
       }
     } catch (error) {
-      this._logService.log(LevelLogEnum.ERROR, 'AddPublicationComponent', 'Error cargando CSS de emoji-mart');
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'AddPublicationComponent',
+        'Error loading emoji-mart CSS',
+        { error: String(error) }
+      );
     }
   }
 

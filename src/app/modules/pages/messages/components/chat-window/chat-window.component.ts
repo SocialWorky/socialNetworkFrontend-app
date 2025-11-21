@@ -25,6 +25,7 @@ import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
+import { translations } from '@translations/translations';
 
 @Component({
   selector: 'worky-chat-window',
@@ -1496,11 +1497,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
   }
 
   confirmDeleteMessage(message: Message) {
-
-    const translations = (window as any).messages || {};
-    const deleteConfirmText = translations.deleteConfirm || '¿Estás seguro de que deseas eliminar este mensaje?';
-    const deleteButtonText = translations.delete || 'Eliminar';
-    const cancelButtonText = translations.cancel || 'Cancelar';
+    const deleteConfirmText = translations['messages.deleteConfirm'] || '¿Estás seguro de que deseas eliminar este mensaje?';
+    const deleteButtonText = translations['messages.delete'] || 'Eliminar';
+    const cancelButtonText = 'Cancelar';
 
     this._alertService.showConfirmation(
       '',
@@ -1567,12 +1566,12 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
   private setupMessageOptions(): void {
     this.messageOptions = [
       {
-        title: 'Editar',
+        title: translations['messages.edit'] || 'Editar',
         icon: 'edit',
         function: (message: Message) => this.startEditMessage(message),
       },
       {
-        title: 'Eliminar',
+        title: translations['messages.delete'] || 'Eliminar',
         icon: 'delete',
         function: (message: Message) => this.confirmDeleteMessage(message),
       },
@@ -1588,11 +1587,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
   }
 
   private preloadEmojiMartCss() {
-    this._lazyCssService.loadCss('https://cdn.jsdelivr.net/npm/@emoji-mart/css@latest/dist/emoji-mart.css', 'emoji-mart')
-      .then(() => {
-        // CSS loaded successfully
-      })
-      .catch((error: unknown) => {
+    if (!this._lazyCssService.isLoaded('emoji-mart')) {
+      this._lazyCssService.loadEmojiMartCss().catch((error: unknown) => {
         this._logService.log(
           LevelLogEnum.ERROR,
           'ChatWindowComponent',
@@ -1600,5 +1596,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
           { error: String(error) }
         );
       });
+    }
   }
 }

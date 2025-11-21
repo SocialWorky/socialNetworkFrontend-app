@@ -3,6 +3,7 @@ import { Message, MessageType } from '../../interfaces/message.interface';
 import { MediaType } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
 import { Token } from '@shared/interfaces/token.interface';
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
+import { translations } from '@translations/translations';
 
 @Component({
   selector: 'worky-chat-message',
@@ -36,12 +37,12 @@ export class ChatMessageComponent {
 
   messageOptions: DropdownDataLink<any>[] = [
     {
-      title: 'messages.edit',
+      title: translations['messages.edit'] || 'Editar',
       linkUrl: 'edit',
       icon: 'edit'
     },
     {
-      title: 'messages.delete',
+      title: translations['messages.delete'] || 'Eliminar',
       linkUrl: 'delete',
       icon: 'delete',
       color: 'red'
@@ -105,19 +106,19 @@ export class ChatMessageComponent {
     if (!replyMessage) return '';
     
     if (replyMessage.isDeleted) {
-      return 'Mensaje eliminado';
+      return translations['messages.deleted'] || 'Mensaje eliminado';
     }
 
     if (replyMessage.type === MessageType.IMAGE) {
-      return '📷 Imagen';
+      return `📷 ${translations['messages.image'] || 'Imagen'}`;
     }
 
     if (replyMessage.type === MessageType.VIDEO) {
-      return '🎥 Video';
+      return `🎥 ${translations['messages.video'] || 'Video'}`;
     }
 
     if (replyMessage.type === MessageType.FILE) {
-      return '📁 Archivo';
+      return `📁 ${translations['message.typeFile'] || 'Archivo'}`;
     }
 
     return replyMessage.content || '';

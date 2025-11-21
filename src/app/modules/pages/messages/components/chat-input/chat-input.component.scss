@@ -270,9 +270,15 @@
         justify-content: center;
         width: 36px;
         height: 36px;
+        min-width: 36px;
+        min-height: 36px;
         border-radius: 50%;
         transition: background 0.2s ease;
         cursor: pointer;
+        position: relative;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
 
         &:hover {
             background: colors.$worky-color-greyLight;
@@ -280,13 +286,20 @@
 
         i {
             font-size: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            width: 24px;
+            height: 24px;
+            margin: 0;
+            padding: 0;
         }
     }
 
     .emoji-wrapper {
-        position: relative;
-
         i {
+            justify-content: flex-start;
             font-size: 24px;
         }
     }
