@@ -23,8 +23,7 @@ import { DeviceDetectionService } from '@shared/services/device-detection.servic
 import { LazyCssService } from '@shared/services/core-apis/lazy-css.service';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
-import { Subscription } from 'rxjs';
-import { first } from 'rxjs/operators';
+
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 
 @Component({
@@ -44,9 +43,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
   @Output() messageSent = new EventEmitter<Message>();
   @Output() backClicked = new EventEmitter<void>();
 
-  @ViewChild('messagesContainer', { static: false }) messagesContainer!: ElementRef;
-  @ViewChild('messageInput', { static: false }) messageInput!: ElementRef;
-  @ViewChild('emojiWrapper', { static: false }) emojiWrapper!: ElementRef;
+
+
 
   currentUserId: string | null = null;
   messageContent = '';
@@ -58,9 +56,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
 
   otherUserStatus: 'online' | 'inactive' | 'offLine' | null = null;
 
-  showEmojiPicker = false;
 
-  emojiPickerReady = false;
 
   selectedFiles: File[] = [];
 
@@ -78,17 +74,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
 
   currentPage = 1;
 
-  showScrollToBottomButton = false;
 
-  private userScrolling = false;
-
-  private scrollTimeout: any;
-
-  private isAtBottom = true;
-
-  private initialLoad = true;
-
-  private scrollPositioned = false;
 
   isTyping = false;
 
@@ -286,14 +272,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
             }
 
             // Debug only when replyTo is present
-            if (socketMessage.replyTo) {
-              console.log('🔵 Socket Message with REPLY:', {
-                _id: socketMessage._id || socketMessage.messageId,
-                content: socketMessage.content,
-                replyTo: socketMessage.replyTo,
-                hasReplyMessage: !!socketMessage.replyMessage
-              });
-            }
+            /* if (socketMessage.replyTo) {
+             // Debug log removed
+            } */
 
             const senderId = socketMessage.senderId || socketMessage.userId;
             
@@ -318,14 +299,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
             
             if (socketMessage.replyMessage) {
               replyMessage = this.mapReplyMessageFromSocket(socketMessage.replyMessage);
-              console.log('🟢 replyMessage mapped successfully');
             } else if (socketMessage.replyTo) {
               const originalMessage = this.messages.find(m => m._id === socketMessage.replyTo);
               if (originalMessage) {
                 replyMessage = originalMessage;
-                console.log('🟡 Found original message locally');
-              } else {
-                console.log('🔴 WARNING: replyTo exists but original message not found locally:', socketMessage.replyTo);
               }
             }
 
@@ -351,27 +328,18 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
             if (message.replyTo && !message.replyMessage) {
               if (socketMessage.replyMessage) {
                 message.replyMessage = this.mapReplyMessageFromSocket(socketMessage.replyMessage);
-                console.log('🟠 Fixed: Added replyMessage from socket');
               } else if (socketMessage.replyTo) {
                 const originalMessage = this.messages.find(m => m._id === socketMessage.replyTo);
                 if (originalMessage) {
                   message.replyMessage = originalMessage;
-                  console.log('🟠 Fixed: Added replyMessage from local messages');
-                } else {
-                  console.log('🔴 ERROR: Cannot find original message for replyTo:', socketMessage.replyTo);
                 }
               }
             }
 
             // Debug only when replyTo is present
-            if (message.replyTo) {
-              console.log('📦 Final message with REPLY:', {
-                _id: message._id,
-                content: message.content,
-                replyTo: message.replyTo,
-                hasReplyMessage: !!message.replyMessage
-              });
-            }
+            /* if (message.replyTo) {
+              // Debug log removed
+            } */
 
             const existingMessage = this.messages.find(m => m._id === message._id);
             const existingTempMessage = this.messages.find(m => m._id?.startsWith('temp_') && 
@@ -465,28 +433,18 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
               }
 
               // Verify replyMessage before adding
-              if (message.replyTo && !message.replyMessage) {
-                console.error('❌ ERROR: Message has replyTo but no replyMessage before adding to array!', {
-                  _id: message._id,
-                  replyTo: message.replyTo,
-                  replyMessage: message.replyMessage
-                });
-              }
+              /* if (message.replyTo && !message.replyMessage) {
+                 // Error log removed
+              } */
 
               const updatedMessages = [...this.messages, message];
               this.messages = updatedMessages;
               
               // Verify replyMessage after adding
               const lastMessage = this.messages[this.messages.length - 1];
-              if (lastMessage.replyTo && !lastMessage.replyMessage) {
-                console.error('❌ CRITICAL: replyMessage lost after adding to array!', {
-                  _id: lastMessage._id,
-                  replyTo: lastMessage.replyTo,
-                  replyMessage: lastMessage.replyMessage
-                });
-              } else if (lastMessage.replyTo && lastMessage.replyMessage) {
-                console.log('✅ Message with reply successfully added to array');
-              }
+              /* if (lastMessage.replyTo && !lastMessage.replyMessage) {
+                 // Critical log removed
+              } */
               
               this.messageSent.emit(message);
               
@@ -496,9 +454,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
                 this._cdr.detectChanges();
               }, 0);
               
-              if (this.isAtBottom || isFromCurrentUser) {
-                setTimeout(() => this.scrollToBottom(), 100);
-              }
+
               
               if (isFromOtherUser) {
                 this.markMessagesAsRead();
@@ -567,8 +523,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
           const wasTyping = this.otherUserTyping;
           this.otherUserTyping = data.isTyping || false;
           
-          if (this.otherUserTyping && !wasTyping) {
-            setTimeout(() => this.scrollToBottom(), 100);
+          if (this.otherUserTyping) {
+            if (wasTyping) {
+            }
           }
           
           this._cdr.markForCheck();
@@ -670,11 +627,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       if (this.currentUserId && this.otherUserId) {
         this.joinChatRoom();
       }
-      this.showScrollToBottomButton = false;
       this.loadingMoreMessages = false;
-      this.isAtBottom = true;
-      this.initialLoad = true;
-      this.scrollPositioned = false;
 
       const userStatuses = this._notificationUsersService.getUserStatuses();
       const otherUser = userStatuses.find(user => user.id === this.otherUserId);
@@ -697,21 +650,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       const isFirstLoad = changes['messages'].previousValue && changes['messages'].previousValue.length === 0;
       
       if (isFirstLoad) {
-        this.initialLoad = true;
-        this.scrollPositioned = false;
         this.hasMoreMessages = this.totalPages > 1 || this.messages.length >= 25;
-        
         setTimeout(() => {
-          this.initialLoad = false;
           this.markMessagesAsRead();
         }, 800);
-      } else if (!this.initialLoad && this.isAtBottom && !isFirstLoad) {
-        requestAnimationFrame(() => {
-          if (this.messagesContainer && !this.initialLoad) {
-            const element = this.messagesContainer.nativeElement;
-            element.scrollTop = element.scrollHeight;
-          }
-        });
       }
     }
 
@@ -723,43 +665,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
   }
 
   ngAfterViewInit() {
-    // Initial scroll positioning will be handled in ngAfterViewChecked
   }
 
   ngAfterViewChecked() {
-    if (this.initialLoad && this.messages.length > 0 && this.messagesContainer && !this.scrollPositioned) {
-      const element = this.messagesContainer.nativeElement;
-      const scrollHeight = element.scrollHeight;
-      const clientHeight = element.clientHeight;
-      
-      if (scrollHeight > clientHeight) {
-        element.style.scrollBehavior = 'auto';
-        element.scrollTop = scrollHeight;
-        
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (this.messagesContainer && !this.scrollPositioned) {
-              const finalElement = this.messagesContainer.nativeElement;
-              finalElement.scrollTop = finalElement.scrollHeight;
-              finalElement.style.scrollBehavior = '';
-              this.isAtBottom = true;
-              this.scrollPositioned = true;
-              
-              setTimeout(() => {
-                this.initialLoad = false;
-                this.markMessagesAsRead();
-              }, 500);
-            }
-          });
-        });
-      } else if (scrollHeight > 0) {
-        this.scrollPositioned = true;
-        setTimeout(() => {
-          this.initialLoad = false;
-          this.markMessagesAsRead();
-        }, 500);
-      }
-    }
   }
 
   @HostListener('window:focus', ['$event'])
@@ -784,10 +692,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
     
-    if (this.scrollTimeout) {
-      clearTimeout(this.scrollTimeout);
-    }
-
     if (this.typingTimeout) {
       clearTimeout(this.typingTimeout);
     }
@@ -859,7 +763,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       textarea.style.height = '40px';
     }
 
-    setTimeout(() => this.scrollToBottom(), 100);
+
     this._cdr.markForCheck();
 
     this._messageService.createMessage(messageData).pipe(takeUntil(this.unsubscribe$)).subscribe({
@@ -869,7 +773,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
         const messageWithChatId = { ...newMessage, chatId };
         
         if (messageWithChatId.replyTo) {
-          console.log('📥 Message with REPLY created from backend');
+          // Debug log removed
         }
         
         const userName = this.decodedToken.name || this.decodedToken.username || '';
@@ -889,7 +793,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
             .subscribe();
         }
 
-        setTimeout(() => this.scrollToBottom(), 100);
+
         this._cdr.markForCheck();
       },
       error: (error) => {
@@ -911,70 +815,49 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
     });
   }
 
-  onKeyPress(event: KeyboardEvent) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      this.sendMessage();
+  handleTyping(content?: string) {
+    if (content !== undefined) {
+      this.messageContent = content;
     }
-  }
-
-  scrollToBottom() {
-    if (this.messagesContainer) {
-      const element = this.messagesContainer.nativeElement;
-      setTimeout(() => {
-        element.scrollTo({
-          behavior: 'smooth',
-          top: element.scrollHeight
-        });
-        this.showScrollToBottomButton = false;
-        this.isAtBottom = true;
-      }, 100);
-    }
-  }
-
-  scrollToBottomSmooth(): void {
-    setTimeout(() => {
-      if (this.messagesContainer) {
-        try {
-          this.messagesContainer.nativeElement.scrollTo({
-            behavior: 'smooth',
-            top: this.messagesContainer.nativeElement.scrollHeight
-          });
-          this.showScrollToBottomButton = false;
-          this.isAtBottom = true;
-        } catch (err) {
-          // Error scrolling to bottom
-        }
-      }
-    }, 50);
-  }
-
-  onScroll(event: any): void {
-    if (this.initialLoad) {
+    
+    if (!this.otherUserId || !this.currentUserId) {
       return;
     }
 
-    const element = event.target;
-    const scrollTop = element.scrollTop;
-    const scrollHeight = element.scrollHeight;
-    const clientHeight = element.clientHeight;
+    const chatId = this._messageService.generateChatId(this.currentUserId, this.otherUserId);
 
-    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-    this.isAtBottom = distanceFromBottom < 50;
-    
-    this.userScrolling = true;
-    clearTimeout(this.scrollTimeout);
-
-    this.scrollTimeout = setTimeout(() => {
-      this.userScrolling = false;
-    }, 200);
-
-    this.showScrollToBottomButton = !this.isAtBottom;
-
-    if (scrollTop < 500 && !this.loadingMoreMessages && this.hasMoreMessages) {
-      this.loadMoreMessages(this.currentPage + 1);
+    if (!this.isTyping) {
+      this.isTyping = true;
+      this._socketService.emitEvent('typingStart', {
+        userId: this.currentUserId,
+        userName: this.decodedToken.name,
+        chatId: chatId
+      });
     }
+
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+
+    if (this.messageContent.trim() === '') {
+      this.isTyping = false;
+      this._socketService.emitEvent('typingStop', {
+        userId: this.currentUserId,
+        chatId: chatId
+      });
+      return;
+    }
+
+    this.typingTimeout = setTimeout(() => {
+      this.isTyping = false;
+      this._socketService.emitEvent('typingStop', {
+        userId: this.currentUserId,
+        chatId: chatId
+      });
+    }, 3000);
   }
+
+
 
   async loadMoreMessages(page: number) {
     if (!this.otherUserId || !this.currentUserId || this.loadingMoreMessages || !this.hasMoreMessages) {
@@ -987,47 +870,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
 
     this.loadingMoreMessages = true;
     this.currentPage = page;
-
-    if (!this.messagesContainer) {
-      this.loadingMoreMessages = false;
-      return;
-    }
-
-    const element = this.messagesContainer.nativeElement;
-    const scrollTopBefore = element.scrollTop;
-    const scrollHeightBefore = element.scrollHeight;
-    
-    const visibleMessages = Array.from(element.querySelectorAll('[data-message-id]')) as HTMLElement[];
-    let anchorMessageId: string | null = null;
-    let anchorVisualOffset = 0;
-    
-    if (visibleMessages.length > 0) {
-      const firstVisibleMessage = visibleMessages.find(msg => {
-        const rect = msg.getBoundingClientRect();
-        const containerRect = element.getBoundingClientRect();
-        return rect.top >= containerRect.top && rect.top <= containerRect.top + 200;
-      }) || visibleMessages[Math.floor(visibleMessages.length / 3)];
-      
-      if (firstVisibleMessage) {
-        anchorMessageId = firstVisibleMessage.getAttribute('data-message-id');
-        const messageRect = firstVisibleMessage.getBoundingClientRect();
-        const containerRect = element.getBoundingClientRect();
-        anchorVisualOffset = messageRect.top - containerRect.top;
-      }
-    }
-    
-    if (!anchorMessageId && this.messages.length > 0) {
-      const firstMessageElement = visibleMessages[0];
-      if (firstMessageElement) {
-        anchorMessageId = firstMessageElement.getAttribute('data-message-id');
-        const messageRect = firstMessageElement.getBoundingClientRect();
-        const containerRect = element.getBoundingClientRect();
-        anchorVisualOffset = messageRect.top - containerRect.top;
-      } else {
-        anchorMessageId = this.messages[0]._id;
-        anchorVisualOffset = 0;
-      }
-    }
 
     try {
       const response = await this._messageService.getMessagesWithUser(this.otherUserId, page, 25, 'DESC')
@@ -1043,42 +885,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
           this.messages = [...sortedNewMessages, ...this.messages];
           this.hasMoreMessages = page < this.totalPages;
           this._cdr.markForCheck();
-
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                if (this.messagesContainer) {
-                  const element = this.messagesContainer.nativeElement;
-                  const originalScrollBehavior = element.style.scrollBehavior;
-                  element.style.scrollBehavior = 'auto';
-                  
-                  if (anchorMessageId) {
-                    const anchorElement = element.querySelector(`[data-message-id="${anchorMessageId}"]`) as HTMLElement;
-                    if (anchorElement) {
-                      const containerRect = element.getBoundingClientRect();
-                      const messageRect = anchorElement.getBoundingClientRect();
-                      const currentVisualOffset = messageRect.top - containerRect.top;
-                      const offsetDiff = currentVisualOffset - anchorVisualOffset;
-                      element.scrollTop = element.scrollTop - offsetDiff;
-                    } else {
-                      const scrollHeightAfter = element.scrollHeight;
-                      const scrollDiff = scrollHeightAfter - scrollHeightBefore;
-                      element.scrollTop = scrollTopBefore + scrollDiff;
-                    }
-                  } else {
-                    const scrollHeightAfter = element.scrollHeight;
-                    const scrollDiff = scrollHeightAfter - scrollHeightBefore;
-                    element.scrollTop = scrollTopBefore + scrollDiff;
-                  }
-                  
-                  requestAnimationFrame(() => {
-                    element.style.scrollBehavior = originalScrollBehavior;
-                    this.isAtBottom = false;
-                  });
-                }
-              });
-            });
-          });
         } else {
           this.hasMoreMessages = page < this.totalPages;
         }
@@ -1106,14 +912,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
   hasReply(message: Message): boolean {
     const hasReply = !!(message.replyTo && message.replyMessage);
     // Debug: log only when replyTo exists but replyMessage is missing
-    if (message.replyTo && !message.replyMessage) {
-      console.error('❌ hasReply() returning false - message has replyTo but no replyMessage:', {
-        _id: message._id,
-        content: message.content,
-        replyTo: message.replyTo,
-        replyMessage: message.replyMessage
-      });
-    }
+    /* if (message.replyTo && !message.replyMessage) {
+       // Error log removed
+    } */
     return hasReply;
   }
 
@@ -1191,52 +992,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
     return this.otherUserInfo?.avatar || null;
   }
 
-  formatDate(date: string | Date): string {
-    return new Intl.DateTimeFormat('es-CL', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }).format(new Date(date));
-  }
 
-  formatTime(date: string | Date): string {
-    return new Intl.DateTimeFormat('es-CL', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    }).format(new Date(date));
-  }
-
-  isGroupedMessage(index: number): boolean {
-    if (index === 0) return false;
-    const current = this.messages[index];
-    const previous = this.messages[index - 1];
-    return previous.senderId === current.senderId && 
-           this.formatDate(current.timestamp) === this.formatDate(previous.timestamp);
-  }
-
-  isFirstInGroup(index: number): boolean {
-    if (index === 0) return true;
-    const current = this.messages[index];
-    const previous = this.messages[index - 1];
-    return previous.senderId !== current.senderId || 
-           this.formatDate(current.timestamp) !== this.formatDate(previous.timestamp);
-  }
-
-  isLastInGroup(index: number): boolean {
-    if (index === this.messages.length - 1) return true;
-    const current = this.messages[index];
-    const next = this.messages[index + 1];
-    return next.senderId !== current.senderId || 
-           this.formatDate(current.timestamp) !== this.formatDate(next.timestamp);
-  }
-
-  shouldShowDateDivider(index: number): boolean {
-    if (index === 0) return true;
-    const current = this.messages[index];
-    const previous = this.messages[index - 1];
-    return this.formatDate(current.timestamp) !== this.formatDate(previous.timestamp);
-  }
 
   trackByMessageId(index: number, message: Message): string {
     // Include replyTo and replyMessage in trackBy to force re-render when reply is added
@@ -1282,84 +1038,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
     this._cdr.detectChanges();
   }
 
-  toggleEmojiPicker(event?: Event) {
-    if (event) {
-      event.stopPropagation();
-    }
-    
-    if (this.showEmojiPicker) {
-      this.showEmojiPicker = false;
-      this.emojiPickerReady = false;
-    } else {
-      this.showEmojiPicker = true;
-      this.emojiPickerReady = false;
-      this.loadEmojiMartCss().then(() => {
-        setTimeout(() => {
-          this.positionEmojiPicker();
-          this.emojiPickerReady = true;
-          this._cdr.markForCheck();
-        }, 50);
-      });
-    }
-    this._cdr.markForCheck();
-  }
 
-  private positionEmojiPicker() {
-    if (this.emojiWrapper && this.emojiWrapper.nativeElement) {
-      const buttonRect = this.emojiWrapper.nativeElement.getBoundingClientRect();
-      const picker = document.querySelector('.emoji-picker-container') as HTMLElement;
-      if (picker) {
-        picker.style.position = 'fixed';
-        picker.style.bottom = `${window.innerHeight - buttonRect.top + 10}px`;
-        picker.style.right = `${window.innerWidth - buttonRect.right}px`;
-      }
-    }
-  }
-
-  private async preloadEmojiMartCss() {
-    try {
-      if (!this._lazyCssService.isLoaded('emoji-mart')) {
-        await this._lazyCssService.loadEmojiMartCss();
-      }
-    } catch (error) {
-      this._logService.log(
-        LevelLogEnum.ERROR,
-        'ChatWindowComponent',
-        'Error preloading emoji-mart CSS',
-        { error: String(error) }
-      );
-    }
-  }
-
-  private async loadEmojiMartCss(): Promise<void> {
-    try {
-      if (!this._lazyCssService.isLoaded('emoji-mart')) {
-        await this._lazyCssService.loadEmojiMartCss();
-      }
-    } catch (error) {
-      this._logService.log(
-        LevelLogEnum.ERROR,
-        'ChatWindowComponent',
-        'Error loading emoji-mart CSS',
-        { error: String(error) }
-      );
-    }
-  }
-
-  addEmoji(event: any) {
-    if (event && event.emoji && event.emoji.native) {
-      this.messageContent += event.emoji.native;
-      this.showEmojiPicker = false;
-      this._cdr.markForCheck();
-      
-      setTimeout(() => {
-        const picker = document.querySelector('.emoji-picker-container') as HTMLElement;
-        if (picker) {
-          picker.style.display = 'none';
-        }
-      }, 100);
-    }
-  }
 
   openGifSearch() {
     const dialogConfig = new MatDialogConfig();
@@ -1433,51 +1112,9 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
     if (url) window.open(url, '_blank');
   }
 
-  autoResize(event: Event): void {
-    const textarea = event.target as HTMLTextAreaElement;
-    textarea.style.height = '40px';
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 96)}px`;
-    
-    this.handleTyping();
-  }
 
-  handleTyping() {
-    if (!this.otherUserId || !this.currentUserId) {
-      return;
-    }
 
-    const chatId = this._messageService.generateChatId(this.currentUserId, this.otherUserId);
 
-    if (!this.isTyping) {
-      this.isTyping = true;
-      this._socketService.emitEvent('typingStart', {
-        userId: this.currentUserId,
-        userName: this.decodedToken.name,
-        chatId: chatId
-      });
-    }
-
-    if (this.typingTimeout) {
-      clearTimeout(this.typingTimeout);
-    }
-
-    if (this.messageContent.trim() === '') {
-      this.isTyping = false;
-      this._socketService.emitEvent('typingStop', {
-        userId: this.currentUserId,
-        chatId: chatId
-      });
-      return;
-    }
-
-    this.typingTimeout = setTimeout(() => {
-      this.isTyping = false;
-      this._socketService.emitEvent('typingStop', {
-        userId: this.currentUserId,
-        chatId: chatId
-      });
-    }, 3000);
-  }
 
   markMessagesAsRead() {
     if (!this.otherUserId || !this.currentUserId || this.messages.length === 0) {
@@ -1642,9 +1279,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
 
     if (hasChanges) {
       this.messages = updatedMessages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-      if (!this.initialLoad && this.isAtBottom) {
-        setTimeout(() => this.scrollToBottom(), 100);
-      }
       this._cdr.markForCheck();
     }
   }
@@ -1674,8 +1308,6 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
     this.messages = updatedMessages;
     this._cdr.markForCheck();
     this._notificationService.sendNotification(this.messages);
-    
-    setTimeout(() => this.scrollToBottom(), 100);
   }
 
   private joinChatRoom() {
@@ -1733,7 +1365,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
     
     setTimeout(() => {
       const messageIndex = this.messages.findIndex(m => m._id === message._id);
-      const isLastMessage = messageIndex === this.messages.length - 1;
+      const isLastMessage = this.messages.length > 0 && messageIndex === this.messages.length - 1;
 
       const editInput = document.querySelector(`[data-edit-input="${message._id}"]`) as HTMLTextAreaElement;
       if (editInput) {
@@ -1742,10 +1374,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       }
 
       if (isLastMessage) {
-        setTimeout(() => {
-          this.scrollToBottom();
-          this.isAtBottom = true;
-        }, 150);
+        // Scroll handled by chat-list component
       } else {
         const messageElement = document.querySelector(`[data-message-id="${message._id}"]`);
         if (messageElement) {
@@ -1950,15 +1579,26 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
     ];
   }
 
-  handleMessageAction(event: DropdownDataLink<Message>, message: Message): void {
-    if (event.function) {
-      event.function(message);
+  handleMessageAction(action: string, message: Message): void {
+    if (action === 'edit') {
+      this.startEditMessage(message);
+    } else if (action === 'delete') {
+      this.deleteMessage(message);
     }
   }
 
-  private isClickInsideEmojiPicker(target: any): boolean {
-    const emojiWrapper = this.emojiWrapper?.nativeElement;
-    return emojiWrapper && emojiWrapper.contains(target);
+  private preloadEmojiMartCss() {
+    this._lazyCssService.loadCss('https://cdn.jsdelivr.net/npm/@emoji-mart/css@latest/dist/emoji-mart.css', 'emoji-mart')
+      .then(() => {
+        // CSS loaded successfully
+      })
+      .catch((error: unknown) => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ChatWindowComponent',
+          'Error loading emoji-mart CSS',
+          { error: String(error) }
+        );
+      });
   }
 }
-

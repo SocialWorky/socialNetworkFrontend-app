@@ -57,9 +57,6 @@ export class NotificationMessageChatService implements OnDestroy {
       )
       .subscribe((data: any) => {
         if (data) {
-          if (data.replyTo) {
-            console.log('📨 newMessageChat with REPLY received');
-          }
           this._notificationMessageChat.next(data);
         }
       });
@@ -216,9 +213,9 @@ export class NotificationMessageChatService implements OnDestroy {
       return;
     }
 
-    if (chatMessagePayload.replyTo) {
-      console.log('📤 Sending message with REPLY to socket');
-    }
+    /* if (chatMessagePayload.replyTo) {
+      // Debug log removed
+    } */
     this.socket.emit('newMessageChat', chatMessagePayload);
   }
 

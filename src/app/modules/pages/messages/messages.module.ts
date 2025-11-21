@@ -9,6 +9,9 @@ import { MessagesComponent } from './messages.component';
 import { ConversationItemComponent } from './components/conversation-item/conversation-item.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { MessageBubbleComponent } from './components/message-bubble/message-bubble.component';
+import { ChatMessageComponent } from './components/chat-message/chat-message.component';
+import { ChatInputComponent } from './components/chat-input/chat-input.component';
+import { ChatListComponent } from './components/chat-list/chat-list.component';
 import { MessageTimePipe } from './pipes/message-time.pipe';
 
 import { SharedModule } from '@shared/shared.module';
@@ -34,6 +37,9 @@ const routes: Routes = [
     ConversationItemComponent,
     ChatWindowComponent,
     MessageBubbleComponent,
+    ChatMessageComponent,
+    ChatInputComponent,
+    ChatListComponent,
     MessageTimePipe
   ],
   imports: [

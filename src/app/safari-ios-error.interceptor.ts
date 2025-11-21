@@ -44,19 +44,19 @@ export class SafariIOSErrorInterceptor implements HttpInterceptor {
     );
   }
 
-  private isIndexedDBError(error: any): boolean {
+  private isIndexedDBError(error: unknown): boolean {
     if (!error) return false;
     
-    const errorMessage = error.message || error.toString();
+    const errorMessage = (error instanceof Error) ? error.message : String(error);
     return errorMessage.includes('IndexedDB') || 
            errorMessage.includes('Blob') || 
            errorMessage.includes('File') ||
            errorMessage.includes('object store') ||
-           error.name === 'UnknownError' ||
+           (error instanceof Error && error.name === 'UnknownError') ||
            (errorMessage.includes('UnknownError') && errorMessage.includes('Blob'));
   }
 
-  private isImageRequest(request: HttpRequest<any>): boolean {
+  private isImageRequest(request: HttpRequest<unknown>): boolean {
     const url = request.url.toLowerCase();
     return url.includes('.jpg') || 
            url.includes('.jpeg') || 

@@ -1,0 +1,46 @@
+<div class="messages-container" #messagesContainer (scroll)="onScroll($event)">
+    <div *ngIf="isLoading && messages.length === 0" class="loader-container">
+        <div class="loader"></div>
+    </div>
+
+    <div *ngIf="loadingMoreMessages" class="loading-messages">
+        <div class="loader"></div>
+        <span>{{ 'message.loadingPrevious' | workyTranslations }}</span>
+    </div>
+
+    <div *ngIf="!loadingMoreMessages && !hasMoreMessages && messages.length > 0" class="no-more-messages">
+        <span>{{ 'message.noMoreMessages' | workyTranslations }}</span>
+    </div>
+
+    <div class="messages-list">
+        <ng-container *ngFor="let message of messages; let i = index; trackBy: trackByMessageId">
+            <worky-chat-message [message]="message" [currentUserId]="currentUserId"
+                [previousMessage]="i > 0 ? messages[i - 1] : null"
+                [nextMessage]="i < messages.length - 1 ? messages[i + 1] : null" [otherUserName]="otherUserName"
+                [otherUserAvatar]="otherUserAvatar" [decodedToken]="decodedToken" [editingMessageId]="editingMessageId"
+                [editingMessageContent]="editingMessageContent" (reply)="startReplyToMessage($event)"
+                (edit)="startEditMessage($event)" (delete)="deleteMessage($event)"
+                (saveEdit)="saveEditedMessage($event.id, undefined)" (cancelEditEvent)="cancelEdit()"
+                (openUrlEvent)="openUrl($event)" (messageAction)="handleMessageAction($event.action, $event.message)"
+                (editingContentChange)="onEditingContentChange($event)">
+            </worky-chat-message>
+        </ng-container>
+
+        <div *ngIf="otherUserTyping" class="typing-message">
+            <worky-avatar [size]="32" [name]="otherUserName" [img]="otherUserAvatar">
+            </worky-avatar>
+            <div class="typing-bubble">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="showScrollToBottomButton" class="scroll-to-bottom-button" (click)="scrollToBottomSmooth()"
+    [matTooltip]="'message.scrollToBottom' | workyTranslations" matTooltipClass="scroll-tooltip">
+    <i class="material-icons">keyboard_arrow_down</i>
+</div>
