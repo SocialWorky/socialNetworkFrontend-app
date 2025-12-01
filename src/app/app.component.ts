@@ -299,7 +299,8 @@ export class AppComponent implements OnInit, OnDestroy {
    * Check if the message is a media processing notification
    */
   private isMediaProcessingNotification(message: any): boolean {
-    return message.title && message.title.includes('Archivo procesado');
+    //return message.title && message.title.includes('Archivo procesado');
+    return message.title && message.title.includes('archivo procesado') || message.title.includes('file processed');
   }
 
   /**

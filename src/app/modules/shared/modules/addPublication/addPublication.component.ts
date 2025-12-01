@@ -171,13 +171,39 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   ) { }
 
   async ngOnInit() {
-    this.decodedToken = this._authService.getDecodedToken()!;
+    // Wait for authentication before getting token
+    await this._authService.isAuthenticated();
+    
+    const token = this._authService.getDecodedToken();
+    if (!token) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'AddPublicationComponent',
+        'No valid token found, cannot initialize component',
+        {}
+      );
+      return;
+    }
+    
+    this.decodedToken = token;
+    
+    // Set initial avatar from token if available
+    if (this.decodedToken.avatar && this.decodedToken.avatar.trim() !== '' && this.decodedToken.avatar !== 'null' && this.decodedToken.avatar !== 'undefined') {
+      this.profileImageUrl = this.decodedToken.avatar;
+    }
+    
     this.postPrivacy(TypePrivacy.PUBLIC);
     this.getUser();
+    
+    // Subscribe to profile image updates, but only update if newImageUrl is not null
     this.subscription = this._globalEventService.profileImage$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(newImageUrl => {
-        this.profileImageUrl = newImageUrl;
+        // Only update if we have a valid new image URL
+        if (newImageUrl && newImageUrl.trim() !== '' && newImageUrl !== 'null' && newImageUrl !== 'undefined') {
+          this.profileImageUrl = newImageUrl;
+          this._cdr.markForCheck();
+        }
         if (this.type === TypePublishing.POST_PROFILE) {
           this.updatePublications(TypePublishing.POST_PROFILE, this.idUserProfile);
         }
@@ -368,6 +394,18 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   private getUser() {
+    if (!this.decodedToken || !this.decodedToken.id) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'AddPublicationComponent',
+        'Cannot get user: invalid or missing token',
+        {}
+      );
+      this.onAvatarLoad();
+      this.onNameLoad();
+      return;
+    }
+
     this._userService
       .getUserByIdFresh(this.decodedToken.id)
       .pipe(takeUntil(this.unsubscribe$))
@@ -377,7 +415,14 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
           if (response.avatar && response.avatar.trim() !== '' && response.avatar !== 'null' && response.avatar !== 'undefined') {
             this.profileImageUrl = response.avatar;
           } else {
-            this.profileImageUrl = null;
+            // If server doesn't have avatar, keep the one from token if available
+            if (!this.profileImageUrl && this.decodedToken.avatar && this.decodedToken.avatar.trim() !== '' && this.decodedToken.avatar !== 'null' && this.decodedToken.avatar !== 'undefined') {
+              // Keep the avatar from token
+              this.profileImageUrl = this.decodedToken.avatar;
+            } else if (!this.profileImageUrl) {
+              // Only set to null if we don't have any avatar
+              this.profileImageUrl = null;
+            }
           }
           
           this.user = response;
