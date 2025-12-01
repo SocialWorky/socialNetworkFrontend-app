@@ -156,11 +156,16 @@ export class PublicationService {
   /**
    * Get publication by ID with optimized cache
    */
-  getPublicationId(id: string): Observable<PublicationView[]> {
-    // Check cache first
-    const cached = this.publicationCache.get(id);
-    if (cached && this.isCacheValid(cached.timestamp, this.PUBLICATION_CACHE_DURATION)) {
-      return of([cached.publication]);
+  getPublicationId(id: string, forceRefresh: boolean = false): Observable<PublicationView[]> {
+    // If forcing refresh, clear the specific cache entry first
+    if (forceRefresh) {
+      this.publicationCache.delete(id);
+    } else {
+      // Check cache first
+      const cached = this.publicationCache.get(id);
+      if (cached && this.isCacheValid(cached.timestamp, this.PUBLICATION_CACHE_DURATION)) {
+        return of([cached.publication]);
+      }
     }
 
     const url = `${this.baseUrl}/publications/${id}`;

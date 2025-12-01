@@ -11,7 +11,7 @@ import {
   EventEmitter,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IonTextarea, LoadingController } from '@ionic/angular';
+import { IonTextarea } from '@ionic/angular';
 import { Subject, Subscription, lastValueFrom, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import {
@@ -153,7 +153,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _publicationService: PublicationService,
     private _commentService: CommentService,
     private _alertService: AlertService,
-    private _loadingCtrl: LoadingController,
     private _notificationCommentService: NotificationCommentService,
     private _dialog: MatDialog,
     private _cdr: ChangeDetectorRef,
@@ -475,26 +474,34 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   onSave() {
-    this.loaderSavePublication = true;
     this.myForm.controls['authorId'].setValue(this.decodedToken.id);
     this.myForm.controls['privacy'].setValue(this.privacy);
+    
+    // Store content and files before clearing
+    const contentBackup = this.myForm.controls['content'].value;
+    const filesBackup = [...this.selectedFiles];
+    const previewsBackup = [...this.previews];
+    
+    // Clear UI immediately for better UX
+    this.myForm.controls['content'].setValue('');
+    this.selectedFiles = [];
+    this.previews = [];
+    this._cdr.markForCheck();
+    
+    // Restore content and files for processing in background
+    this.myForm.controls['content'].setValue(contentBackup);
+    
     if (this.type === TypePublishing.POST || this.type === TypePublishing.POST_PROFILE) {
-      this.onSavePublication();
+      this.onSavePublication(filesBackup, previewsBackup);
     } else if (this.type === TypePublishing.COMMENT || this.type === this.typePublishing.IMAGE_VIEW) {
-      this.onSaveComment(this.idPublication as string);
+      this.onSaveComment(this.idPublication as string, filesBackup, previewsBackup);
     }
   }
 
-  private async onSaveComment(idPublication: string) {
-    const loadingComment = await this._loadingCtrl.create({
-      message: translations['addPublication.loadingCommentMessage'],
-    });
-
-    await loadingComment.present();
-
+  private async onSaveComment(idPublication: string, filesBackup: File[] = [], previewsBackup: any[] = []) {
     const dataComment: CreateComment = {
       content: this.myForm.controls['content'].value,
-      containsMedia: this.selectedFiles.length > 0,
+      containsMedia: filesBackup.length > 0,
       authorId: this.decodedToken.id,
       idPublication: this.type === this.typePublishing.COMMENT ? idPublication : null,
       idMedia: this.type === this.typePublishing.IMAGE_VIEW ? this.idMedia : null,
@@ -502,9 +509,9 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
     this._commentService.createComment(dataComment).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message) => {
-        await this.handleCommentResponse(message, idPublication);
-        this.loaderSavePublication = false;
-        loadingComment.dismiss();
+        await this.handleCommentResponse(message, idPublication, filesBackup);
+        // Clear content after successful creation
+        this.myForm.controls['content'].setValue('');
       },
       error: error => {
         this._logService.log(
@@ -513,32 +520,25 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
           'Error creating comment',
           { error: error instanceof Error ? error.message : String(error) }
         );
-        this.loaderSavePublication = false;
-        loadingComment.dismiss();
+        // Restore content and files on error
+        this.myForm.controls['content'].setValue(dataComment.content);
+        this.selectedFiles = filesBackup;
+        this.previews = previewsBackup;
+        this._cdr.markForCheck();
       }
     });
   }
 
-  private async handleCommentResponse(message: any, idPublication: string) {
+  private async handleCommentResponse(message: any, idPublication: string, filesBackup: File[] = []) {
     try {
-      if (this.selectedFiles.length) {
+      if (filesBackup.length) {
         const urlMedia = environment.APIFILESERVICE + 'comments/';
         const idReference = message.comment._id;
-        await this.uploadFiles('comments', idReference, urlMedia, TypePublishing.COMMENT);
-        this.selectedFiles = [];
-        this.previews = [];
-        this._cdr.markForCheck();
+        // Upload files in background using the backup
+        await this.uploadFilesInBackground('comments', idReference, urlMedia, TypePublishing.COMMENT, filesBackup);
       }
 
       await this.updatePublicationAndNotify(idPublication, message.comment);
-
-      if (message.message === 'Comment created successfully') {
-        this.myForm.controls['content'].setValue('');
-        this.showSuccessAlert(
-          translations['addPublication.alertCreateCommentTitle'],
-          translations['addPublication.alertCreateCommentMessage']
-        );
-      }
     } catch (error) {
       this._logService.log(
         LevelLogEnum.ERROR,
@@ -549,13 +549,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async onSavePublication() {
-    const loadingPublications = await this._loadingCtrl.create({
-      message: translations['addPublication.loadingPublicationMessage'],
-    });
-
-    loadingPublications.present();
-
+  private async onSavePublication(filesBackup: File[] = [], previewsBackup: any[] = []) {
     this.setExtraData();
 
     if (this.type === TypePublishing.POST_PROFILE && this.idUserProfile !== this.decodedToken.id) {
@@ -563,14 +557,14 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       this.myForm.controls['privacy'].setValue(TypePrivacy.FRIENDS);
     }
 
-    const containsMedia = this.selectedFiles.length > 0;
+    const containsMedia = filesBackup.length > 0;
     this.myForm.controls['containsMedia'].setValue(containsMedia);
 
     await this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
-        await this.handlePublicationResponse(message);
-        this.loaderSavePublication = false;
-        loadingPublications.dismiss();
+        await this.handlePublicationResponse(message, filesBackup);
+        // Clear content after successful creation
+        this.myForm.controls['content'].setValue('');
       },
       error: error => {
         this._logService.log(
@@ -579,8 +573,11 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
           'Error creating publication',
           { error: error.message }
         );
-        this.loaderSavePublication = false;
-        loadingPublications.dismiss();
+        // Restore content and files on error
+        this.myForm.controls['content'].setValue(this.myForm.value.content);
+        this.selectedFiles = filesBackup;
+        this.previews = previewsBackup;
+        this._cdr.markForCheck();
       },
     });
   }
@@ -610,26 +607,18 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this.showGifSearch = false;
   }
 
-  private async handlePublicationResponse(message: any) {
+  private async handlePublicationResponse(message: any, filesBackup: File[] = []) {
     try {
-      if (this.selectedFiles.length) {
+      const hasMedia = filesBackup.length > 0;
+      
+      if (hasMedia) {
         const urlMedia = environment.APIFILESERVICE + 'publications/';
         const idReference = message.publications._id;
-        await this.uploadFiles('publications', idReference, urlMedia, TypePublishing.POST);
-        this.selectedFiles = [];
-        this.previews = [];
-        this._cdr.markForCheck();
+        // Upload files in background using the backup
+        await this.uploadFilesInBackground('publications', idReference, urlMedia, TypePublishing.POST, filesBackup);
       }
 
       await this.updatePublicationAndNotify(message.publications._id);
-
-      if (message.message === 'Publication created successfully') {
-        this.myForm.controls['content'].setValue('');
-        this.showSuccessAlert(
-          translations['addPublication.alertCreatePublicationTitle'],
-          translations['addPublication.alertCreatePublicationMessage']
-        );
-      }
     } catch (error) {
       this._logService.log(
         LevelLogEnum.ERROR,
@@ -654,6 +643,11 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   private uploadFiles(folder: string, idReference?: string, urlMedia?: string, type?: TypePublishing): Promise<MediaFileUpload[]> {
     return lastValueFrom(this._fileUploadService.uploadFile(this.selectedFiles, folder, idReference, urlMedia, type).pipe(takeUntil(this.unsubscribe$)));
+  }
+
+  private uploadFilesInBackground(folder: string, idReference?: string, urlMedia?: string, type?: TypePublishing, files?: File[]): Promise<MediaFileUpload[]> {
+    const filesToUpload = files || this.selectedFiles;
+    return lastValueFrom(this._fileUploadService.uploadFile(filesToUpload, folder, idReference, urlMedia, type).pipe(takeUntil(this.unsubscribe$)));
   }
 
   private async updatePublicationAndNotify(idPublication: string, comment?: any) {
@@ -693,17 +687,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       avatarReceiver: publication.author.avatar,
       nameReceiver: `${publication.author.name} ${publication.author.lastName}`,
     };
-  }
-
-  private showSuccessAlert(title: string, message: string) {
-    this._alertService.showAlert(
-      title,
-      message,
-      Alerts.SUCCESS,
-      Position.CENTER,
-      true,
-      translations['button.ok'],
-    );
   }
 
   onTextareaInput() {

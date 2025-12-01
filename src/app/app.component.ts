@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
-import { filter, map, Subject, switchMap, takeUntil, timer, of, catchError, retryWhen, delay, tap } from 'rxjs';
+import { filter, map, Subject, switchMap, takeUntil, timer, of, catchError, retryWhen, delay, tap, take, groupBy, mergeMap, debounceTime } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 
 import { getTranslationsLanguage } from '../translations/translations';
@@ -25,6 +25,8 @@ import { CacheService } from '@shared/services/cache.service';
 import { CacheOptimizationService } from '@shared/services/cache-optimization.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { AppUpdateManagerService } from '@shared/services/app-update-manager.service';
+import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
+import { ImageOrganizer, MediaType } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
 
 @Component({
     selector: 'worky-root',
@@ -43,6 +45,8 @@ export class AppComponent implements OnInit, OnDestroy {
   environment = environment;
 
   private destroy$ = new Subject<void>();
+  private mediaReadyNotification$ = new Subject<any>();
+  private mediaCollector = new Map<string, any[]>();
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -64,13 +68,15 @@ export class AppComponent implements OnInit, OnDestroy {
     private cacheService: CacheService,
     private _cacheOptimizationService: CacheOptimizationService,
     private _logService: LogService,
-    private _appUpdateManagerService: AppUpdateManagerService
+    private _appUpdateManagerService: AppUpdateManagerService,
+    private _notificationPublicationService: NotificationPublicationService
   ) {
     this._notificationUsersService.setupInactivityListeners();
     if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();
   }
 
   async ngOnInit(): Promise<void> {
+    this.setupMediaReadyDebouncer();
     // Clear invalid tokens first
     this.cleanInvalidTokens();
     
@@ -103,11 +109,24 @@ export class AppComponent implements OnInit, OnDestroy {
         }
         switch (message.type) {
           case TypePublishing.POST:
-            this.handlePostUpdate(message.idReference);
             if (this.isMediaProcessingNotification(message)) {
-              this.handleMediaProcessingNotification(message.idReference);
-            } else if (message.containsMedia) {
-              this._mediaEventsService.notifyMediaProcessed(message);
+              // Collect media data from the socket message
+              const pubId = message.idReference;
+              if (!this.mediaCollector.has(pubId)) {
+                this.mediaCollector.set(pubId, []);
+              }
+              // The 'data' field contains the info for one processed file
+              if (message.data) {
+                this.mediaCollector.get(pubId)!.push(message);
+              }
+
+              // Push the full message to the debouncer to act as a trigger
+              this.mediaReadyNotification$.next(message);
+            } else {
+              this.handlePostUpdate(message.idReference);
+              if (message.containsMedia) {
+                this._mediaEventsService.notifyMediaProcessed(message);
+              }
             }
             break;
           case TypePublishing.COMMENT:
@@ -121,7 +140,15 @@ export class AppComponent implements OnInit, OnDestroy {
             break;
           default:
             if (this.isMediaProcessingNotification(message)) {
-              this.handleMediaProcessingNotification(message.idReference);
+              // Same logic for other types if needed in the future
+              const pubId = message.idReference;
+              if (!this.mediaCollector.has(pubId)) {
+                this.mediaCollector.set(pubId, []);
+              }
+              if (message.data) {
+                this.mediaCollector.get(pubId)!.push(message);
+              }
+              this.mediaReadyNotification$.next(message);
             }
             break;
         }
@@ -188,6 +215,16 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
+  private setupMediaReadyDebouncer(): void {
+    this.mediaReadyNotification$.pipe(
+      groupBy(message => message.idReference),
+      mergeMap(group$ => group$.pipe(debounceTime(2500))), // Wait for 2.5s of silence for a given pub ID
+      takeUntil(this.destroy$)
+    ).subscribe(lastMessage => {
+      this.buildPublicationWithCollectedMedia(lastMessage.idReference);
+    });
+  }
+
   private handlePostUpdate(publicationId: string): void {
     this._publicationService.getPublicationId(publicationId)
       .pipe(takeUntil(this.destroy$))
@@ -209,6 +246,49 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe(({ publication }) => {
         this._socketService.emitEvent('updatePublication', publication);
       });
+  }
+
+  /**
+   * Builds the final publication object by fetching the base and injecting all collected media.
+   */
+  private buildPublicationWithCollectedMedia(publicationId: string): void {
+    const collectedMessages = this.mediaCollector.get(publicationId);
+
+    if (!collectedMessages || collectedMessages.length === 0) {
+      return;
+    }
+
+    // Fetch the base publication to get latest comments, reactions, etc., bypassing cache.
+    this._publicationService.getPublicationId(publicationId, true).pipe(
+      take(1),
+      catchError(err => {
+        this._logService.log(LevelLogEnum.ERROR, 'AppComponent', `Failed to fetch base publication ${publicationId}`, { error: err });
+        return of(null); // Return null to handle the error gracefully
+      })
+    ).subscribe(publications => {
+      if (publications && publications.length > 0) {
+        const basePublication = publications[0];
+
+        // Manually construct the full media array from all collected messages
+        const constructedMedia: ImageOrganizer[] = collectedMessages.map(msg => ({
+          _id: '', // Not critical for the view
+          url: `${msg.urlMedia}${msg.data.filename}`,
+          urlThumbnail: `${msg.urlMedia}${msg.data.thumbnail}`,
+          urlCompressed: `${msg.urlMedia}${msg.data.compressed}`,
+          comments: [],
+          type: MediaType.IMAGE // This can be enhanced to detect video/image from file extension
+        }));
+
+        // Merge and update view
+        basePublication.media = constructedMedia;
+        basePublication.containsMedia = false; // The media is now present
+        
+        this.updatePublicationView(basePublication);
+      }
+
+      // Clean up collector for this publication ID
+      this.mediaCollector.delete(publicationId);
+    });
   }
 
   applyCustomConfig() {
@@ -299,118 +379,23 @@ export class AppComponent implements OnInit, OnDestroy {
    * Check if the message is a media processing notification
    */
   private isMediaProcessingNotification(message: any): boolean {
-    //return message.title && message.title.includes('Archivo procesado');
-    return message.title && message.title.includes('archivo procesado') || message.title.includes('file processed');
+    const title = message.title?.toLowerCase() || '';
+    const isProcessing = title.includes('archivo procesado') || title.includes('file processed') || title.includes('files processed');
+    return isProcessing;
   }
 
   /**
-   * Handle media processing notification with RxJS operators for better control flow
+   * Update publication view with new data from backend
    */
-  private handleMediaProcessingNotification(publicationId: string): void {
-    if (!publicationId) {
-      return;
-    }
+  private updatePublicationView(publication: PublicationView): void {
+    // Notify MediaEventsService for PublicationViewComponent to update individual publication
+    this._mediaEventsService.notifyMediaProcessed({
+      idReference: publication._id,
+      media: publication.media,
+      containsMedia: true
+    });
 
-    // Create a polling mechanism with RxJS operators
-    timer(2000) // Initial delay of 2 seconds
-      .pipe(
-        switchMap(() => this._publicationService.getPublicationId(publicationId)),
-        switchMap((publications: PublicationView[]) => {
-          if (publications && publications.length > 0) {
-            const publication = publications[0];
-            
-            if (publication.media && publication.media.length > 0) {
-              // Media found, notify and complete
-              this._mediaEventsService.notifyMediaProcessed({
-                idReference: publicationId,
-                media: publication.media,
-                containsMedia: true
-              });
-              return of(null); // Complete the stream
-            } else {
-              // No media found, try force sync
-              return this._publicationService.syncSpecificPublication(publicationId)
-                .pipe(
-                  switchMap((syncedPublication) => {
-                    if (syncedPublication && syncedPublication.media && syncedPublication.media.length > 0) {
-                      this._mediaEventsService.notifyMediaProcessed({
-                        idReference: publicationId,
-                        media: syncedPublication.media,
-                        containsMedia: true
-                      });
-                      return of(null); // Complete the stream
-                    } else {
-                      // Still no media, retry after 2 more seconds
-                      return timer(2000).pipe(
-                        switchMap(() => this._publicationService.getPublicationId(publicationId)),
-                        map((retryPublications: PublicationView[]) => {
-                          if (retryPublications && retryPublications.length > 0) {
-                            const retryPublication = retryPublications[0];
-                            
-                            if (retryPublication.media && retryPublication.media.length > 0) {
-                              this._mediaEventsService.notifyMediaProcessed({
-                                idReference: publicationId,
-                                media: retryPublication.media,
-                                containsMedia: true
-                              });
-                            } else {
-                              this._mediaEventsService.notifyMediaProcessed({
-                                idReference: publicationId,
-                                media: [],
-                                containsMedia: false
-                              });
-                            }
-                          } else {
-                            this._mediaEventsService.notifyMediaProcessed({
-                              idReference: publicationId,
-                              media: [],
-                              containsMedia: false
-                            });
-                          }
-                          return null;
-                        }),
-                        catchError(() => {
-                          this._mediaEventsService.notifyMediaProcessed({
-                            idReference: publicationId,
-                            media: [],
-                            containsMedia: false
-                          });
-                          return of(null);
-                        })
-                      );
-                    }
-                  }),
-                  catchError(() => {
-                    this._mediaEventsService.notifyMediaProcessed({
-                      idReference: publicationId,
-                      media: [],
-                      containsMedia: false
-                    });
-                    return of(null);
-                  })
-                );
-            }
-          } else {
-            // No publication found, notify to clear processing state
-            this._mediaEventsService.notifyMediaProcessed({
-              idReference: publicationId,
-              media: [],
-              containsMedia: false
-            });
-            return of(null);
-          }
-        }),
-        catchError(() => {
-          // Even if error, notify to clear processing state
-          this._mediaEventsService.notifyMediaProcessed({
-            idReference: publicationId,
-            media: [],
-            containsMedia: false
-          });
-          return of(null);
-        }),
-        takeUntil(this.destroy$)
-      )
-      .subscribe();
+    // Notify NotificationPublicationService to update publication in lists (HomeComponent, etc)
+    this._notificationPublicationService.sendNotificationUpdatePublication([publication]);
   }
 }

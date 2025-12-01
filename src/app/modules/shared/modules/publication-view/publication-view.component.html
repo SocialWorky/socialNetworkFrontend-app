@@ -106,19 +106,7 @@
       </div>
     </div>
 
-    <!-- Error message when media processing fails after retries -->
-    <div *ngIf="isMediaProcessingStuck()" class="media-processing-error">
-      <div class="error-message">
-        <i class="material-icons">error_outline</i>
-        <span>{{ 'publicationsView.mediaProcessingError' | workyTranslations }}</span>
-      </div>
-      <button class="retry-button" (click)="retryMediaProcessingManual()">
-        <i class="material-icons">refresh</i>
-        {{ 'publicationsView.retryProcessing' | workyTranslations }}
-      </button>
-    </div>
-
-    <worky-processing-media *ngIf="!publication.media.length && publication.containsMedia && !isMediaProcessingStuck()"></worky-processing-media>
+    <worky-processing-media *ngIf="!publication.media.length && publication.containsMedia"></worky-processing-media>
 
     <worky-image-organizer *ngIf="publication.media.length"
       [publication]="publication"

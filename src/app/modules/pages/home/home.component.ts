@@ -435,49 +435,28 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this._notificationPublicationService.notificationUpdatePublication$
       .pipe(
         takeUntil(this.destroy$),
-        filter((data: PublicationView[]) => !!data?.[0]?._id),
-        // Removed debounceTime for immediate response
-        distinctUntilChanged((prev, curr) => {
-          if (!prev || !curr || prev.length === 0 || curr.length === 0) return false;
-          return prev[0]._id === curr[0]._id && 
-                 JSON.stringify(prev[0]) === JSON.stringify(curr[0]);
-        })
+        filter((data: PublicationView[]) => !!data?.[0]?._id)
       )
       .subscribe({
         next: (data: PublicationView[]) => {
-          const notification = data[0];
+          const updatedPublication = data[0];
+          const publicationsCurrent = this.publications();
+          const index = publicationsCurrent.findIndex(pub => pub._id === updatedPublication._id);
           
-          this._publicationService.syncSpecificPublication(notification._id)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-              next: (updatedPublication) => {
-                if (updatedPublication) {
-                  const publicationsCurrent = this.publications();
-                  const index = publicationsCurrent.findIndex(pub => pub._id === updatedPublication._id);
-                  
-                  if (index !== -1) {
-                    const currentPub = publicationsCurrent[index];
-                    const hasChanges = JSON.stringify(currentPub) !== JSON.stringify(updatedPublication);
-                    
-                    if (hasChanges) {
-                      publicationsCurrent[index] = updatedPublication;
-                      
-                      // Use the service method to sort publications correctly
-                      const updatedPublications = this._publicationService.sortPublicationsByFixedAndDatePublic(publicationsCurrent);
-                      
-                      this.publications.set(updatedPublications);
-                      this._cdr.markForCheck();
-                    }
-                  }
-                }
-              },
-              error: (error) => {
-                // Error al sincronizar publicación actualizada - no need to log every sync error
-              }
-            });
+          if (index !== -1) {
+            // Replace the publication in the array
+            const updatedPublications = [...publicationsCurrent];
+            updatedPublications[index] = updatedPublication;
+            
+            // Sort publications correctly
+            const sortedPublications = this._publicationService.sortPublicationsByFixedAndDatePublic(updatedPublications);
+            
+            this.publications.set(sortedPublications);
+            this._cdr.markForCheck();
+          }
         },
         error: (error) => {
-          // Error en la suscripción de notificaciones de actualizar publicaciones - no need to log every subscription error
+          this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error in updatePublication subscription', { error });
         }
       });
   }

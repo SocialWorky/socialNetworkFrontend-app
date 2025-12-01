@@ -377,19 +377,18 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
           const notification = notifications[0];
           const publicationsCurrent = this.publicationsProfile();
 
-          this._publicationService.getPublicationId(notification.publications._id)
+          this._publicationService.syncSpecificPublication(notification.publications._id)
             .pipe(
               takeUntil(this.destroy$),
-              filter((publication: PublicationView[]) => {
+              filter((publication: PublicationView | null) => {
                 return !!publication &&
-                       publication.length > 0 &&
-                       (publication[0].author._id === this.idUserProfile ||
-                        publication[0].userReceiving?._id === this.idUserProfile);
+                       (publication.author._id === this.idUserProfile ||
+                        publication.userReceiving?._id === this.idUserProfile);
               })
             )
             .subscribe({
-              next: (publication: PublicationView[]) => {
-                const newPublication = publication[0];
+              next: (newPublication: PublicationView | null) => {
+                if (!newPublication) return;
                 
                 const existingPublication = publicationsCurrent.find(pub => pub._id === newPublication._id);
                 if (existingPublication) {
