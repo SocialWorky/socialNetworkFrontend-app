@@ -5,6 +5,10 @@
   [class.refreshing]="isRefreshing"
   [class.navbar-visible]="navbarVisible">
   
+  <div class="top-widget-wrapper">
+    <worky-widget-container [position]="WidgetPosition.TOP"></worky-widget-container>
+  </div>
+  
   <div id="container-add-publications" class="worky-module-container" *ngIf="shouldShowAddPublication">
     <worky-add-publication [type]="typePublishing.POST"></worky-add-publication>
   </div>

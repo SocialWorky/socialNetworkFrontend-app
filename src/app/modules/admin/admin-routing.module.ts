@@ -9,6 +9,7 @@ import { AdminCustomFieldsComponent } from './shared/admin-custom-fields/admin-c
 import { InvitationsCodeComponent } from './shared/invitations-code/invitations-code.component';
 import { LogComponent } from './shared/log/log.component';
 import { WidgetManagementComponent } from './shared/widget-management/widget-management.component';
+import { ThematicImageManagementComponent } from './shared/thematic-image-management/thematic-image-management.component';
 import { WebhooksComponent } from './shared/webhooks/webhooks.component';
 import { VersionManagementComponent } from './shared/version-management/version-management.component';
 import { translations } from '@translations/translations';
@@ -30,6 +31,7 @@ export const routes: Routes = [
           { title: translations['admin.sideMenu.items.reactions'], path: 'manage-reactions', component: ManageReactionsComponent },
           { title: translations['admin.sideMenu.items.customFields'], path: 'custom-fields', component: AdminCustomFieldsComponent },
           { title: translations['admin.sideMenu.items.widgetManagement'], path: 'widget-management', component: WidgetManagementComponent },
+          { title: 'Imágenes Temáticas', path: 'thematic-images', component: ThematicImageManagementComponent },
           { title: translations['admin.sideMenu.items.css'], path: 'custom-css', component: CustomCssComponent },
           { title: translations['admin.sideMenu.items.invitations'], path: 'invitations-code', component: InvitationsCodeComponent },
           { title: translations['admin.sideMenu.items.webhooks'], path: 'webhooks', component: WebhooksComponent },

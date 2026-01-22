@@ -6,12 +6,18 @@ import { WidgetContainerComponent } from './widget-container.component';
 import { WeatherComponent } from './worky-weather/worky-weather.component';
 import { WorkyButtonsModule } from '../buttons/buttons.module';
 import { WorkyNewsComponent } from './worky-news/worky-news.component';
+import { ThematicImageWidgetComponent } from './thematic-image-widget/thematic-image-widget.component';
 import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
 import { TranslationsModule } from '../translations/translations.module';
 
 
 @NgModule({
-  declarations: [WeatherComponent, WorkyNewsComponent, WidgetContainerComponent],
+  declarations: [
+    WeatherComponent, 
+    WorkyNewsComponent, 
+    WidgetContainerComponent,
+    ThematicImageWidgetComponent
+  ],
   imports: [
     CommonModule,
     FormsModule,
@@ -19,6 +25,11 @@ import { TranslationsModule } from '../translations/translations.module';
     PipesSharedModule,
     TranslationsModule
   ],
-  exports: [WeatherComponent, WorkyNewsComponent, WidgetContainerComponent]
+  exports: [
+    WeatherComponent, 
+    WorkyNewsComponent, 
+    WidgetContainerComponent,
+    ThematicImageWidgetComponent
+  ]
 })
 export class WorkyWidgetModule { }

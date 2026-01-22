@@ -186,7 +186,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
         return;
       }
       
-      // PASO 2: Token válido y es admin
+      // STEP 2: Valid token and is admin
       this.adminAuthenticated = true;
       
       // PASO 3: Verificar permisos con el endpoint
@@ -214,13 +214,13 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
         this.http.get<any>(`${environment.API_URL}/app/versions`)
       );
       
-      // Si llegamos aquí, el usuario tiene permisos
+      // If we reach here, user has permissions
       this.canManageVersions = true;
       
     } catch (error: any) {
       // Manejar diferentes tipos de error
       if (error?.status === 401) {
-        // Token expirado o inválido
+        // Token expired or invalid
         this.adminAuthenticated = false;
         this.canManageVersions = false;
         
@@ -241,8 +241,8 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
         );
         
       } else if (error?.status === 404) {
-        // Endpoint no encontrado, pero el usuario está autenticado
-        // Asumir que puede gestionar versiones (endpoint puede no existir aún)
+        // Endpoint not found, but user is authenticated
+        // Assume can manage versions (endpoint may not exist yet)
         this.canManageVersions = true;
         
       } else {
@@ -270,7 +270,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
       if (error?.status === 404) {
         this.versions = [];
       } else if (error?.status === 401) {
-        // Token expirado o inválido
+        // Token expired or invalid
         this.adminAuthenticated = false;
         this.canManageVersions = false;
         this.alertService.showAlert(
@@ -305,7 +305,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
 
   async loadCurrentVersion() {
     if (!this.canManageVersions) {
-      // Mantener la versión local si no hay permisos
+      // Keep local version if no permissions
       return;
     }
     
@@ -326,7 +326,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
         // Only log in development mode
         // Keep using local configuration when no backend version exists
       } else if (error?.status === 401) {
-        // Token expirado o inválido
+        // Token expired or invalid
         this.adminAuthenticated = false;
         this.canManageVersions = false;
         this.alertService.showAlert(
@@ -407,11 +407,11 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
           });
           this.loadVersions();
           this.loadCurrentVersion();
-          // Log de éxito eliminado - no es necesario para operaciones rutinarias
+          // Success log removed - not necessary for routine operations
         }
       } catch (error: any) {
         if (error?.status === 401) {
-          // Token expirado o inválido
+          // Token expired or invalid
           this.adminAuthenticated = false;
           this.canManageVersions = false;
           this.alertService.showAlert(
@@ -459,7 +459,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
       }
     } catch (error: any) {
       if (error?.status === 401) {
-        // Token expirado o inválido
+        // Token expired or invalid
         this.adminAuthenticated = false;
         this.canManageVersions = false;
         this.alertService.showAlert(
@@ -519,7 +519,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
           this.isMaintenanceMode = false;
           this.updateMaintenanceFieldState();
           this.alertService.showAlert('Éxito', 'Modo mantenimiento desactivado', Alerts.INFO);
-          // Log de éxito eliminado - no es necesario para operaciones rutinarias
+          // Success log removed - not necessary for routine operations
         }
       } else {
         const message = this.maintenanceForm.get('message')?.value;
@@ -529,14 +529,14 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
           this.isMaintenanceMode = true;
           this.updateMaintenanceFieldState();
           this.alertService.showAlert('Éxito', 'Modo mantenimiento activado', Alerts.INFO);
-          // Log de éxito eliminado - no es necesario para operaciones rutinarias
+          // Success log removed - not necessary for routine operations
         }
       }
       
       this.loadCurrentVersion();
     } catch (error: any) {
       if (error?.status === 401) {
-        // Token expirado o inválido
+        // Token expired or invalid
         this.adminAuthenticated = false;
         this.canManageVersions = false;
         this.alertService.showAlert(
@@ -606,7 +606,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
       this.isLoading = true;
       this.isInitializationComplete = false; // Ocultar interfaz durante refresh
       
-      // Verificar si la autenticación está lista
+      // Check if authentication is ready
       const token = this.authService.getDecodedToken();
       const authReady = token && token.role === 'admin';
       
@@ -646,10 +646,10 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
     await this.checkBackendConnectivityCorrectly();
     
     if (this.backendConnected) {
-      // Verificar autenticación
+      // Verify authentication
       await this.checkAdminAuthenticationCorrectly();
       
-      // Cargar datos si todo está bien
+      // Load data if everything is ok
       if (this.canManageVersions) {
         await this.loadVersions();
         await this.loadCurrentVersion();
@@ -672,7 +672,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
       
     } catch (error: any) {
       if (error?.status === 401) {
-        // Token expirado o inválido
+        // Token expired or invalid
         this.adminAuthenticated = false;
         this.canManageVersions = false;
         
@@ -691,8 +691,8 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
           Alerts.WARNING
         );
       } else if (error?.status === 404) {
-        // Endpoint no encontrado, pero el usuario está autenticado
-        // Asumir que puede gestionar versiones (endpoint puede no existir aún)
+        // Endpoint not found, but user is authenticated
+        // Assume can manage versions (endpoint may not exist yet)
         this.canManageVersions = true;
         
       } else {
@@ -719,7 +719,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
   }
 
   getConnectionStatusClass(): string {
-    // Si la inicialización no está completa, mostrar loading
+    // If initialization is not complete, show loading
     if (!this.isInitializationComplete) {
       return 'loading';
     }
@@ -730,7 +730,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
   }
 
   getConnectionStatusText(): string {
-    // Si la inicialización no está completa, mostrar mensaje de loading
+    // If initialization is not complete, show loading message
     if (!this.isInitializationComplete) {
       return 'Inicializando...';
     }
@@ -763,22 +763,22 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
       // PASO 2: Verificar conectividad del backend
       await this.diagnoseBackendConnectivity();
       
-      // PASO 3: Verificar autenticación de admin
+      // STEP 3: Verify admin authentication
       await this.diagnoseAdminAuthentication();
       
       // PASO 4: Verificar permisos
       await this.diagnoseAdminPermissions();
       
-      // PASO 5: Cargar datos si todo está bien
+      // STEP 5: Load data if everything is ok
       if (this.canManageVersions) {
         await this.loadVersions();
         await this.loadCurrentVersion();
       }
       
-      // Marcar inicialización como completa
+      // Mark initialization as complete
       this.isInitializationComplete = true;
       
-      // Forzar actualización de la interfaz
+      // Force UI update
       this.cdr.detectChanges();
       
       // Log final
@@ -786,9 +786,9 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
       
     } catch (error) {
       console.error('Error durante inicialización:', error);
-      // Aún así, marcar como completa para mostrar error
+      // Still mark as complete to show error
       this.isInitializationComplete = true;
-      // Forzar actualización de la interfaz
+      // Force UI update
       this.cdr.detectChanges();
     } finally {
       this.isLoading = false;
@@ -840,10 +840,10 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
         return;
         
       } catch (headError: any) {
-        // HEAD falló, continuar con GET
+        // HEAD failed, continue with GET
       }
       
-      // Si HEAD falló, intentar GET
+      // If HEAD failed, try GET
       try {
         const getResponse = await firstValueFrom(
           this.http.get(`${environment.API_URL}/app/version`, { 
@@ -855,7 +855,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
         return;
         
       } catch (getError: any) {
-        // Lógica de conectividad: cualquier status code significa conectado
+        // Connectivity logic: any status code means connected
         if (getError?.status) {
           this.backendConnected = true;
         } else {
@@ -929,7 +929,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
    * Log del estado final
    */
   private logFinalDiagnosis(): void {
-    // Solo registrar en caso de error o para auditoría crítica
-    // Los logs de información rutinarios no son necesarios
+    // Only log in case of error or for critical audit
+    // Routine info logs are not necessary
   }
 }

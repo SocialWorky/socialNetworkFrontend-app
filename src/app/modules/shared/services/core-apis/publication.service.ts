@@ -252,7 +252,7 @@ export class PublicationService {
     return from(this._publicationDatabase.getAllPublications());
   }
 
-  // Métodos legacy mantenidos para compatibilidad
+  // Legacy methods maintained for compatibility
   getAllPublicationsWithCache(page: number, size: number, type: string = 'all', consultId: string = ''): Observable<Publication> {
     return this.getAllPublications(page, size, type, consultId, true);
   }

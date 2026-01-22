@@ -36,7 +36,7 @@ export class GoogleImageErrorInterceptor implements HttpInterceptor {
   }
 
   private isGoogleImageError(error: HttpErrorResponse): boolean {
-    // Errores específicos de Google Images
+    // Specific Google Images errors
     return (
       error.status === 429 || // Too Many Requests
       error.status === 403 || // Forbidden (CORS)

@@ -340,7 +340,7 @@ describe('Pruebas de actualización de campos', () => {
     it('no debe guardar si no hay campos válidos', () => {
       component.formFields = [{
         id: '1',
-        label: '', // Label vacío
+        label: '', // Empty label
         type: CustomFieldType.TEXT,
         idName: 'test',
         destination: CustomFieldDestination.PROFILE

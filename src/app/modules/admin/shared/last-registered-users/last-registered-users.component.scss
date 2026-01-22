@@ -1,4 +1,4 @@
-/* Estilos específicos para el toggle de usuarios */
+/* Specific styles for user toggle */
 .toggle-container {
   /* Asegurar que solo se vea el toggle personalizado */
   input[type="checkbox"] {
@@ -16,7 +16,7 @@
     overflow: hidden !important;
   }
 
-  /* Asegurar que no haya íconos de check visibles */
+  /* Ensure no check icons are visible */
   input[type="checkbox"]::before,
   input[type="checkbox"]::after {
     display: none !important;
@@ -77,7 +77,7 @@ input[type="checkbox"] {
   -moz-appearance: none !important;
 }
 
-/* Eliminar cualquier ícono de check del sistema */
+/* Remove any check icons from the system */
 input[type="checkbox"]::-ms-check {
   display: none !important;
 }

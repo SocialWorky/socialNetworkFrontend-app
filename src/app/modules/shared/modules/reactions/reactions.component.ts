@@ -14,6 +14,7 @@ import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { UtilityService } from '@shared/services/utility.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
     selector: 'worky-reactions',
@@ -59,7 +60,8 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
     private _publicationService: PublicationService,
     private _emailNotificationService: EmailNotificationService,
     private _notificationService: NotificationService,
-    private _utilityService: UtilityService
+    private _utilityService: UtilityService,
+    private _logService: LogService
   ) {}
 
   ngOnInit() {
@@ -293,7 +295,12 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       },
       error: (error) => {
-        console.error('Failed to refresh publications', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ReactionsComponent',
+          'Failed to refresh publications',
+          { error }
+        );
       }
     });
   }

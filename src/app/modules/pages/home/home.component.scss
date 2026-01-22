@@ -26,6 +26,28 @@
   }
 }
 
+.top-widget-wrapper {
+  width: 100%;
+  margin: 15px 4px;
+  box-sizing: border-box;
+  
+  // Match worky-module-container spacing
+  ::ng-deep .widget-container.top {
+    max-width: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+  
+  ::ng-deep .widget-wrapper {
+    margin-bottom: 0;
+  }
+  
+  @include breakpoints.below-sm {
+    margin: 15px -1px 0px -1px;
+  }
+}
+
 .desk-content-publications {
   overflow-y: scroll;
   scrollbar-width: none;

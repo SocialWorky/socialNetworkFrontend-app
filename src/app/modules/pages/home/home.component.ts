@@ -28,6 +28,7 @@ import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { ImagePreloadService } from '@shared/services/image-preload.service';
 import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
+import { WidgetPosition } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
 
 @Component({
     selector: 'worky-home',
@@ -37,6 +38,7 @@ import { MobileImageCacheService } from '@shared/services/mobile-image-cache.ser
 })
 export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   typePublishing = TypePublishing;
+  WidgetPosition = WidgetPosition;
 
   publications = signal<PublicationView[]>([]);
 
@@ -404,7 +406,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
             });
         },
         error: (error) => {
-          // Error en la suscripción de notificaciones de nuevas publicaciones - no need to log every subscription error
+          // Error in new publications notification subscription - no need to log every subscription error
         }
       });
   }
@@ -426,7 +428,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         },
         error: (error) => {
-          // Error en la suscripción de notificaciones de eliminar publicaciones - no need to log every subscription error
+          // Error in delete publications notification subscription - no need to log every subscription error
         }
       });
   }
@@ -481,7 +483,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       },
       error: (error) => {
-        // Error en la suscripción de notificaciones de comentarios - no need to log every subscription error
+        // Error in comments notification subscription - no need to log every subscription error
       }
     });
   }

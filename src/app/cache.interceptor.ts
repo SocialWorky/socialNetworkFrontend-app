@@ -190,6 +190,9 @@ export class CacheInterceptor implements HttpInterceptor {
       } else if (url.includes('/friend')) {
         // Clear friends cache
         this.clearCacheByPattern('http_cache_.*friend');
+      } else if (url.includes('/thematic-images')) {
+        // Clear thematic images cache
+        this.clearCacheByPattern('http_cache_.*thematic-images');
       }
     }
   }

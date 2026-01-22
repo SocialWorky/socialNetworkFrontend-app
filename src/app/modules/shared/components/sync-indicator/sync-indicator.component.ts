@@ -198,12 +198,12 @@ export class SyncIndicatorComponent implements OnInit, OnDestroy {
   }
 
   private updateIndicatorVisibility(): void {
-    // Mostrar indicador si hay actividad de sincronización o errores
+    // Show indicator if there is synchronization activity or errors
     this.showIndicator = this.syncStatus.isSyncing || 
                         this.syncStatus.error !== null || 
                         this.syncStatus.pendingChanges > 0;
 
-    // Ocultar indicador después de 3 segundos si no hay errores y no está sincronizando
+    // Hide indicator after 3 seconds if no errors and not synchronizing
     if (!this.syncStatus.isSyncing && !this.syncStatus.error && this.syncStatus.pendingChanges === 0) {
       setTimeout(() => {
         if (!this.syncStatus.isSyncing && !this.syncStatus.error && this.syncStatus.pendingChanges === 0) {

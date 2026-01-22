@@ -1005,9 +1005,9 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     
     // Usar setTimeout para dar tiempo a que se muestre el skeleton
     setTimeout(() => {
-      // Usar Object.assign para una actualización más sutil
+      // Use Object.assign for a more subtle update
       if (this.userData && updatedUserData) {
-        // Actualizar propiedades básicas de forma inmutable
+        // Update basic properties immutably
         Object.assign(this.userData, {
           name: updatedUserData.name,
           lastName: updatedUserData.lastName,
@@ -1027,7 +1027,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
         this.userData = updatedUserData;
       }
       
-      // Ocultar skeleton de actualización
+      // Hide update skeleton
       this.isUpdatingProfile = false;
       this._cdr.markForCheck();
     }, 300); // Aumentado a 300ms para mejor experiencia visual

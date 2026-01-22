@@ -45,6 +45,16 @@ export class WidgetConfigService {
       status: WidgetStatus.ENABLED,
       allowedPositions: [WidgetPosition.LEFT, WidgetPosition.RIGHT],
       icon: 'article'
+    },
+    {
+      selector: 'worky-thematic-image',
+      name: 'Imágenes Temáticas',
+      description: 'Muestra imágenes temáticas con slider automático',
+      position: WidgetPosition.TOP,
+      order: 0,
+      status: WidgetStatus.DISABLED,
+      allowedPositions: [WidgetPosition.TOP],
+      icon: 'collections'
     }
   ];
 

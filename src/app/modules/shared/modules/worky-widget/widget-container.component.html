@@ -1,0 +1,12 @@
+<div class="widget-container" [class]="position">
+  <ng-container *ngFor="let widget of enabledWidgets; trackBy: trackByWidget">
+    <div class="widget-wrapper" [attr.data-widget-selector]="widget.selector">
+      <ng-container [ngSwitch]="widget.selector">
+        <worky-weather *ngSwitchCase="'worky-weather'"></worky-weather>
+        <worky-news *ngSwitchCase="'worky-news'"></worky-news>
+        <worky-thematic-image *ngSwitchCase="'worky-thematic-image'"></worky-thematic-image>
+        <!-- Add more widgets here as they are created -->
+      </ng-container>
+    </div>
+  </ng-container>
+</div>

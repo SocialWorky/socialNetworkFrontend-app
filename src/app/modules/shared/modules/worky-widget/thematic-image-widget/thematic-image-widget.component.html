@@ -1,0 +1,66 @@
+<div *ngIf="!loading; else loadingTemplate" 
+     class="thematic-image-widget worky-module-container"
+     (mouseenter)="onMouseEnter()"
+     (mouseleave)="onMouseLeave()">
+  
+  <div *ngIf="images.length > 0; else noImagesTemplate" class="image-container" [class.single-image]="images.length === 1">
+    <div class="slider-wrapper">
+      <div class="image-slide" 
+           *ngFor="let image of images; let i = index"
+           [class.active]="i === currentIndex"
+           [class.previous]="images.length > 1 && i === (currentIndex - 1 + images.length) % images.length"
+           [class.next]="images.length > 1 && i === (currentIndex + 1) % images.length">
+        <a *ngIf="image.redirectUrl; else noLink" 
+           [href]="image.redirectUrl" 
+           target="_blank" 
+           rel="noopener noreferrer"
+           (click)="onImageClick(image); $event.preventDefault()"
+           class="image-link">
+          <img [src]="image.imageUrl" 
+               [alt]="image.altText || image.name"
+               class="thematic-image"
+               loading="lazy">
+        </a>
+        <ng-template #noLink>
+          <img [src]="image.imageUrl" 
+               [alt]="image.altText || image.name"
+               class="thematic-image"
+               loading="lazy">
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Controles de navegación (solo si hay más de una imagen) -->
+    <div *ngIf="images.length > 1" class="slider-controls">
+      <button class="nav-button prev" 
+              (click)="previousImage()" 
+              [attr.aria-label]="'admin.thematicImages.widget.previousImage' | workyTranslations"
+              type="button">
+        <i class="material-icons">chevron_left</i>
+      </button>
+      <button class="nav-button next" 
+              (click)="nextImage()" 
+              [attr.aria-label]="'admin.thematicImages.widget.nextImage' | workyTranslations"
+              type="button">
+        <i class="material-icons">chevron_right</i>
+      </button>
+    </div>
+
+    <!-- Indicador de pausa -->
+    <div *ngIf="isPaused && images.length > 1" class="pause-indicator">
+      <i class="material-icons">pause</i>
+    </div>
+  </div>
+
+  <ng-template #noImagesTemplate>
+    <div class="no-images-message">
+      <p>{{ 'admin.thematicImages.widget.noImages' | workyTranslations }}</p>
+    </div>
+  </ng-template>
+</div>
+
+<ng-template #loadingTemplate>
+  <div class="loader-container">
+    <div class="loader"></div>
+  </div>
+</ng-template>

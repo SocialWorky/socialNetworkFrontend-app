@@ -872,12 +872,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
    */
   private async loadRequiredResources() {
     try {
-      // Cargar Material Icons si no están cargadas
+      // Load Material Icons if not already loaded
       if (!this._fontLoaderService.isFontLoaded('material-icons')) {
         await this._fontLoaderService.loadMaterialIcons();
       }
 
-      // Cargar Material Symbols si no están cargadas
+      // Load Material Symbols if not already loaded
       if (!this._fontLoaderService.isFontLoaded('material-symbols-sharp')) {
         await this._fontLoaderService.loadMaterialSymbolsSharp();
       }

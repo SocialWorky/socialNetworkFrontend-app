@@ -101,7 +101,7 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
 
     this.setLoadingWithTimeout();
     
-    // Activar detección de inactividad
+    // Activate inactivity detection
     this._notificationUsersService.setupInactivityListeners();
     
     this._globalEventService.profileImage$
@@ -270,9 +270,9 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     this._router.navigate(['/profile/', userId]);
   }
 
-  // Método para testing - forzar inactividad del usuario actual
+  // Method for testing - force inactivity of current user
   forceUserInactive(): void {
-    // Simular cambio de pestaña para activar inactividad
+    // Simulate tab change to activate inactivity
     Object.defineProperty(document, 'hidden', {
       writable: true,
       value: true
@@ -280,7 +280,7 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     document.dispatchEvent(new Event('visibilitychange'));
   }
 
-  // Método para testing - forzar actividad del usuario actual
+  // Method for testing - force activity of current user
   forceUserActive(): void {
     this._notificationUsersService.userActive();
   }

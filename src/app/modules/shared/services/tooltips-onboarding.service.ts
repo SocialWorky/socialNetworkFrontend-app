@@ -58,7 +58,7 @@ export class TooltipsOnboardingService {
 
     if (!isTooltipActive || isTooltipActive === 'false') return;
 
-    // Asegurar que el CSS esté cargado antes de iniciar
+    // Ensure CSS is loaded before starting
     await this.loadDriverCss();
 
     setTimeout(() => {

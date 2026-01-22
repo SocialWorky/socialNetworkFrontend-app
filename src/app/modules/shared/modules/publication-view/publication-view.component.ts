@@ -34,6 +34,7 @@ import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 
 @Component({
@@ -146,6 +147,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _reportsService: ReportsService,
     public _dialog: MatDialog,
     private _emailNotificationService: EmailNotificationService,
+    private _logService: LogService,
     private _notificationService: NotificationService,
     private _scrollService: ScrollService,
     private _loadingService: LoadingService,
@@ -477,7 +479,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         this.urrMap = extraData.locations?.urlMap || '';
       }
     } catch (e) {
-      console.error('Error in file JSON: ', e);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'PublicationViewComponent',
+        'Error parsing file JSON',
+        { error: e }
+      );
       this.nameGeoLocation = '';
       this.urrMap = '';
     }
@@ -583,7 +590,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
             this._cdr.markForCheck();
           },
           error: (error) => {
-            console.error(error);
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'PublicationViewComponent',
+              'Error deleting publication',
+              { error, publicationId: publication._id }
+            );
             this.isDeletingPublication = false;
             this._cdr.markForCheck();
           },
@@ -604,7 +616,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         this._loadingService.hideLoading();
       },
       error: (error) => {
-        console.error(error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'PublicationViewComponent',
+          'Error updating publication fixed status',
+          { error, publicationId: publication._id }
+        );
         this._loadingService.hideLoading();
       },
     });
@@ -628,7 +645,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         this.viewProfile(_idUser);
       },
       error: (error) => {
-        console.error('Error the send request', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'PublicationViewComponent',
+          'Error sending friend request',
+          { error, userId: _idUser }
+        );
       }
     });
   }
@@ -649,7 +671,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         this._cdr.markForCheck();
       },
       error: (error: any) => {
-        console.error(error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'PublicationViewComponent',
+          'Error checking friendship status',
+          { error, userId: this.publication?.author?._id }
+        );
       },
     });
   }
@@ -713,7 +740,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           }
         },
         error: (error) => {
-          console.error('Failed to refresh publications', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'PublicationViewComponent',
+            'Failed to refresh publications',
+            { error, publicationId: _id }
+          );
         }
       });
     }
@@ -743,7 +775,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
             this._cdr.markForCheck();
           },
           error: (error) => {
-            console.error('Error creating report:', error);
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'PublicationViewComponent',
+              'Error creating report',
+              { error, publicationId: publication._id }
+            );
             this._loadingService.hideLoading();
           }
         });
@@ -776,7 +813,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
             this._cdr.markForCheck();
           },
           error: (error) => {
-            console.error('Error deleting comment:', error);
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'PublicationViewComponent',
+              'Error deleting comment',
+              { error, commentId: _id, publicationId: id_publication }
+            );
             this.isDeletingComment = false;
             this._cdr.markForCheck();
           }

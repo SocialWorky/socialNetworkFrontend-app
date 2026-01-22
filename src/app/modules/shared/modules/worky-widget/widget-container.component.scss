@@ -1,0 +1,41 @@
+@use "src/assets/styles/worky-variables" as variables;
+@use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
+
+.widget-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  
+  &.top {
+    max-width: variables.$worky-app-width;
+    margin: 0 auto;
+    padding: 0 10px;
+    box-sizing: border-box;
+    
+    @include breakpoints.below-sm {
+      padding: 0;
+      max-width: 100%;
+      width: 100%;
+    }
+  }
+  
+  &.left,
+  &.right {
+    width: 100%;
+  }
+}
+
+.widget-wrapper {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.no-widgets {
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}

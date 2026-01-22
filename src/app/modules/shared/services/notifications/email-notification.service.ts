@@ -148,7 +148,7 @@ export class EmailNotificationService {
     });
   }
 
-  //TODO: Implementa notificaciones por email y sistema -> reaccion a una publicación.
+  //TODO: Implement email and system notifications -> reaction to a publication.
   async reactionsNotification(publication: PublicationView, reaction: CustomReactionList) {
 
     if (this.dataUser?.id === publication.author._id) return;
@@ -170,7 +170,7 @@ export class EmailNotificationService {
 
   }
 
-  //TODO: Implementa notificacion por email para recuperar contraseña.
+  //TODO: Implement email notification for password recovery.
   async sendEmailToRecoverPassword(email: string) {
     this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/reset-password/`;
     this.mailSendDataValidate.subject = translations['email.resetPasswordSubject'];
@@ -185,7 +185,7 @@ export class EmailNotificationService {
     return this.mailSendDataValidate;
   }
 
-  //TODO: Implementa notificacion por email para resetear contraseña.
+  //TODO: Implement email notification for password reset.
   async sendEmailToResetPassword(email: string, token: string, password: string) {
     this.mailSendDataValidate.url = `${environment.BASE_URL}/auth/login`;
     this.mailSendDataValidate.subject = translations['email.confirmResetPasswordSubject'];
