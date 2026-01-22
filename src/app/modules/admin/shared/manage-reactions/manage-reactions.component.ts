@@ -39,6 +39,9 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
 
   error: string | null = null;
 
+  editingReactionId: string | null = null;
+  isEditing: boolean = false;
+
 
 
   private destroy$ = new Subject<void>();
@@ -118,31 +121,40 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  listReactions() {
-    this.isLoading = true;
-    this.error = null;
-    this._customReactionsService.getCustomReactionsAll().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (reactions: CustomReactionList[]) => {
-        this.reactionsList = reactions
-          .filter((reaction) => reaction.isDeleted === false)
-          .map((reaction) => ({
-            ...reaction,
-            zoomed: false,
-          }));
-        this.isLoading = false;
-        this._cdr.markForCheck();
-      },
-      error: (err) => {
-        this._logService.log(
-          LevelLogEnum.ERROR,
-          'ManageReactionsComponent',
-          'Failed to load reactions',
-          { error: String(err) }
-        );
-        this.error = 'Error al cargar las reacciones. Por favor, intenta de nuevo.';
-        this.isLoading = false;
-        this._cdr.markForCheck();
-      },
+  listReactions(forceRefresh: boolean = false): Promise<void> {
+    return new Promise((resolve) => {
+      this.isLoading = true;
+      this.error = null;
+      
+      this._customReactionsService.getCustomReactionsAll(forceRefresh)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (reactions: CustomReactionList[]) => {
+            const filteredReactions = reactions
+              .filter((reaction) => reaction.isDeleted === false)
+              .map((reaction) => ({
+                ...reaction,
+                zoomed: false,
+              }));
+            
+            this.reactionsList = [...filteredReactions];
+            this.isLoading = false;
+            this._cdr.detectChanges();
+            resolve();
+          },
+          error: (err) => {
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'ManageReactionsComponent',
+              'Failed to load reactions',
+              { error: String(err) }
+            );
+            this.error = 'Error loading reactions. Please try again.';
+            this.isLoading = false;
+            this._cdr.detectChanges();
+            resolve();
+          },
+        });
     });
   }
 
@@ -152,7 +164,6 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
       this.imageFile = file;
       this.selectedFileName = file.name;
       
-      // Create preview URL
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.imagePreview = e.target.result;
@@ -188,10 +199,8 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
   }
 
   onImageError(event: any) {
-    // Hide the broken image
     event.target.style.display = 'none';
     
-    // Create a placeholder icon
     const placeholder = document.createElement('div');
     placeholder.className = 'image-placeholder';
     placeholder.innerHTML = '<i class="material-icons">image</i>';
@@ -239,13 +248,54 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
           },
         });
       } else {
-        this.submitReaction();
+        if (this.reactionForm.get('emoji')?.value || this.imagePreview) {
+          this.submitReaction();
+        } else {
+          this.loadReactionsButtons = false;
+          this.error = translations['admin.manageReactions.errors.requiredFields'];
+          this._cdr.markForCheck();
+        }
       }
     } else {
       this.loadReactionsButtons = false;
       this.error = translations['admin.manageReactions.errors.requiredFields'];
       this._cdr.markForCheck();
     }
+  }
+
+  editReaction(reaction: CustomReactionList) {
+    this.editingReactionId = reaction._id;
+    this.isEditing = true;
+    this.reactionForm.patchValue({
+      name: reaction.name,
+      emoji: reaction.emoji,
+    });
+    
+    if (reaction.emoji && reaction.emoji.startsWith('http')) {
+      this.imagePreview = reaction.emoji;
+      this.selectedFileName = reaction.name + ' (current image)';
+      this.reactionForm.get('emoji')?.clearValidators();
+      this.reactionForm.get('emoji')?.updateValueAndValidity();
+    }
+    
+    const formElement = document.querySelector('.bg-white\\/5');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    
+    this._cdr.markForCheck();
+  }
+
+  cancelEdit() {
+    this.editingReactionId = null;
+    this.isEditing = false;
+    this.reactionForm.reset();
+    this.clearSelectedFile();
+    const fileInput = document.getElementById('image') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    this._cdr.markForCheck();
   }
 
   handleImageProcessed(message: any) {
@@ -256,51 +306,94 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
   }
 
   async submitReaction() {
+    const loadingMessage = this.isEditing 
+      ? (translations['admin.manageReactions.loading.updating'] || 'Updating reaction...')
+      : translations['admin.manageReactions.loading.creating'];
+    
     const loadingReaction = await this._loadingCtrl.create({
-      message: translations['admin.manageReactions.loading.creating'],
+      message: loadingMessage,
     });
 
     await loadingReaction.present();
 
     const reaction = this.reactionForm.value;
-    this._customReactionsService
-      .createCustomReaction(reaction)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this._alertService.showAlert(
-            translations['admin.manageReactions.success.title'],
-            translations['admin.manageReactions.success.created'],
-            Alerts.SUCCESS,
-            Position.CENTER,
-            true,
-            translations['button.ok'],
-          );
-
-          this.reactionForm.reset();
-          this.clearSelectedFile();
-          const fileInput = document.getElementById('image') as HTMLInputElement;
-          if (fileInput) {
-            fileInput.value = '';
+    
+    if (this.isEditing && this.editingReactionId) {
+      this._customReactionsService
+        .updateCustomReaction(this.editingReactionId, reaction)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: async (response) => {
+            loadingReaction.dismiss();
+            this.cancelEdit();
+            this.loadReactionsButtons = false;
+            
+            await this._utilityService.sleep(300);
+            await this.listReactions(true);
+            
+            const successMessage = translations['admin.manageReactions.success.updated'] || 'Reaction updated successfully';
+            this._alertService.showAlert(
+              translations['admin.manageReactions.success.title'],
+              successMessage,
+              Alerts.SUCCESS,
+              Position.CENTER,
+              true,
+              translations['button.ok'],
+            );
+          },
+          error: (err) => {
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'ManageReactionsComponent',
+              'Failed to update reaction',
+              { error: String(err), reactionData: this.reactionForm.value, reactionId: this.editingReactionId }
+            );
+            this.error = translations['admin.manageReactions.errors.updateError'] || 'Error updating reaction. Please try again.';
+            loadingReaction.dismiss();
+            this.loadReactionsButtons = false;
+            this._cdr.markForCheck();
           }
-          loadingReaction.dismiss();
-          this.listReactions();
-          this.loadReactionsButtons = false;
-          this._cdr.markForCheck();
-        },
-        error: (err) => {
-          this._logService.log(
-            LevelLogEnum.ERROR,
-            'ManageReactionsComponent',
-            'Failed to create reaction',
-            { error: String(err), reactionData: this.reactionForm.value }
-          );
-          this.error = translations['admin.manageReactions.errors.createError'];
-          loadingReaction.dismiss();
-          this.loadReactionsButtons = false;
-          this._cdr.markForCheck();
-        }
-      });
+        });
+    } else {
+      this._customReactionsService
+        .createCustomReaction(reaction)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            this._alertService.showAlert(
+              translations['admin.manageReactions.success.title'],
+              translations['admin.manageReactions.success.created'],
+              Alerts.SUCCESS,
+              Position.CENTER,
+              true,
+              translations['button.ok'],
+            );
+
+            this.reactionForm.reset();
+            this.clearSelectedFile();
+            const fileInput = document.getElementById('image') as HTMLInputElement;
+            if (fileInput) {
+              fileInput.value = '';
+            }
+            loadingReaction.dismiss();
+            this.listReactions();
+            this.loadReactionsButtons = false;
+            this._cdr.markForCheck();
+          },
+          error: (err) => {
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'ManageReactionsComponent',
+              'Failed to create reaction',
+              { error: String(err), reactionData: this.reactionForm.value }
+            );
+            this.error = translations['admin.manageReactions.errors.createError'];
+            loadingReaction.dismiss();
+            this.loadReactionsButtons = false;
+            this._cdr.markForCheck();
+          }
+        });
+    }
   }
 
   deleteReaction(id: string) {
@@ -327,9 +420,38 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
             'Failed to delete reaction',
             { error: String(err), reactionId: id }
           );
-          this.error = 'Error al eliminar la reacción. Por favor, intenta de nuevo.';
+          this.error = 'Error deleting reaction. Please try again.';
           this._cdr.markForCheck();
         }
       });
+  }
+
+  getEditTitle(): string {
+    if (this.isEditing) {
+      return translations['admin.manageReactions.edit.title'] || 'Edit Reaction';
+    }
+    return translations['admin.manageReactions.create.title'];
+  }
+
+  getEditSubtitle(): string {
+    if (this.isEditing) {
+      return translations['admin.manageReactions.edit.subtitle'] || 'Modify reaction data';
+    }
+    return translations['admin.manageReactions.create.subtitle'];
+  }
+
+  getCancelText(): string {
+    return translations['button.cancel'] || 'Cancel';
+  }
+
+  getSubmitButtonText(): string {
+    if (this.isEditing) {
+      return translations['admin.manageReactions.edit.button'] || 'Save Changes';
+    }
+    return translations['admin.manageReactions.create.button'];
+  }
+
+  getEditButtonText(): string {
+    return translations['admin.manageReactions.list.edit'] || 'Edit';
   }
 }

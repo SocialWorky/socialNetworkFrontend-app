@@ -107,9 +107,11 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
               this._publicationService.getPublicationId(this.publication?._id!).pipe(takeUntil(this.destroy$))
             );
 
-            if (publicationsUpdated) {
+            if (publicationsUpdated && publicationsUpdated.length > 0) {
+              const updatedPublication = publicationsUpdated[0];
               this._publicationService.updatePublications(publicationsUpdated);
-              this.publication = publicationsUpdated[0];
+              this.publication = updatedPublication;
+              this.reactionsToPublication = [...(updatedPublication.reaction || [])];
               this._cdr.markForCheck();
             }
 

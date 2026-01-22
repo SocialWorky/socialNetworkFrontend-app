@@ -172,7 +172,7 @@ export class AppUpdateManagerService implements OnDestroy {
     // Show maintenance alert
     this.alertService.showAlert(
       this.getTranslation('APP.UPDATE.MAINTENANCE.TITLE'),
-      result.serverVersion.maintenanceMessage || this.getTranslation('APP.UPDATE.MAINTENANCE.MESSAGE'),
+      result.serverVersion?.maintenanceMessage || this.getTranslation('APP.UPDATE.MAINTENANCE.MESSAGE'),
       Alerts.WARNING
     );
     
@@ -239,7 +239,7 @@ export class AppUpdateManagerService implements OnDestroy {
    */
   private async performAppUpdate(result: VersionCheckResult): Promise<void> {
     try {
-      if (result.serverVersion.downloadUrl) {
+      if (result.serverVersion?.downloadUrl) {
         // For downloadable apps
         window.open(result.serverVersion.downloadUrl, '_blank');
       } else {

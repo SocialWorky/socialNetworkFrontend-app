@@ -1,7 +1,7 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { distinctUntilChanged, takeUntil, debounceTime } from 'rxjs/operators';
+import { distinctUntilChanged, takeUntil, debounceTime, filter } from 'rxjs/operators';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 import * as _ from 'lodash';
@@ -33,6 +33,7 @@ import { MediaEventsService } from '@shared/services/media-events.service';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
+import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 
 
 @Component({
@@ -42,8 +43,31 @@ import { GlobalEventService } from '@shared/services/globalEventService.service'
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
-export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit {
-  @Input() publication!: PublicationView;
+export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit, OnChanges {
+  private _publication!: PublicationView;
+  
+  @Input() 
+  set publication(value: PublicationView) {
+    const previousValue = this._publication;
+    this._publication = value;
+    
+    if (previousValue && previousValue._id === value._id) {
+      const reactionsChanged = 
+        !previousValue.reaction || 
+        !value.reaction || 
+        previousValue.reaction.length !== value.reaction.length ||
+        JSON.stringify(previousValue.reaction.map(r => r._id)) !== JSON.stringify(value.reaction.map(r => r._id));
+      
+      if (reactionsChanged) {
+        this.loadReactionsImg(value);
+        this._cdr.markForCheck();
+      }
+    }
+  }
+  
+  get publication(): PublicationView {
+    return this._publication;
+  }
 
   @Input() indexPublication?: number;
 
@@ -127,11 +151,34 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _loadingService: LoadingService,
     private _mediaEventsService: MediaEventsService,
     private _alertService: AlertService,
-    private _globalEventService: GlobalEventService
+    private _globalEventService: GlobalEventService,
+    private _notificationPublicationService: NotificationPublicationService
   ) {}
 
   async ngAfterViewInit() {
     this.getUserFriendPending();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['publication'] && changes['publication'].currentValue) {
+      const currentPublication = changes['publication'].currentValue;
+      const previousPublication = changes['publication'].previousValue;
+      
+      if (!previousPublication || currentPublication._id !== previousPublication._id) {
+        this.loadReactionsImg(currentPublication);
+      } else if (previousPublication && currentPublication._id === previousPublication._id) {
+        const reactionsChanged = 
+          !previousPublication.reaction || 
+          !currentPublication.reaction || 
+          previousPublication.reaction.length !== currentPublication.reaction.length ||
+          JSON.stringify(previousPublication.reaction.map((r: any) => r._id)) !== 
+          JSON.stringify(currentPublication.reaction.map((r: any) => r._id));
+        
+        if (reactionsChanged) {
+          this.loadReactionsImg(currentPublication);
+        }
+      }
+    }
   }
 
   ngOnInit() {
@@ -161,6 +208,22 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         next: (data: any) => {
           if (data?._id === this.publication._id) {
             this.updatePublicationIfNeeded(data);
+          }
+        }
+      });
+
+    this._notificationPublicationService.notificationUpdatePublication$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((data: PublicationView[]) => !!data?.[0]?._id && data[0]._id === this.publication._id)
+      )
+      .subscribe({
+        next: (data: PublicationView[]) => {
+          const updatedPublication = data[0];
+          if (updatedPublication) {
+            this.publication = { ...updatedPublication };
+            this.loadReactionsImg(updatedPublication);
+            this._cdr.markForCheck();
           }
         }
       });
@@ -394,12 +457,15 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   loadReactionsImg(publication: PublicationView = this.publication){
     this.listReaction = [];
-    if (publication) {
+    if (publication && publication.reaction) {
       publication.reaction.forEach((element: Reactions) => {
-        if(this.listReaction.includes(element.customReaction.emoji)) return;
-        this.listReaction.push(element.customReaction.emoji);
-        this._cdr.markForCheck();
+        if (element.customReaction && element.customReaction.emoji) {
+          if(!this.listReaction.includes(element.customReaction.emoji)) {
+            this.listReaction.push(element.customReaction.emoji);
+          }
+        }
       });
+      this._cdr.markForCheck();
     }
   }
 
@@ -765,27 +831,36 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       this.publication.containsMedia !== updatedData.containsMedia ||
       JSON.stringify(this.publication.media) !== JSON.stringify(updatedData.media);
     
-    const hasOtherChanges = 
+    const currentReactionIds = this.publication.reaction?.map((r: any) => r._id).sort() || [];
+    const updatedReactionIds = updatedData.reaction?.map((r: any) => r._id).sort() || [];
+    const reactionsChanged = 
       this.publication.reaction.length !== updatedData.reaction?.length ||
+      JSON.stringify(currentReactionIds) !== JSON.stringify(updatedReactionIds);
+    
+    const hasOtherChanges = 
+      reactionsChanged ||
       this.publication.comment.length !== updatedData.comment?.length ||
-      this.publication.fixed !== updatedData.fixed ||
-      JSON.stringify(this.publication.reaction) !== JSON.stringify(updatedData.reaction);
+      this.publication.fixed !== updatedData.fixed;
 
     if (hasMediaChanges || hasOtherChanges) {
       if (hasMediaChanges) {
         this.handleMediaUpdate(updatedData);
         
-        // If media was added, setup media timeout
         if (updatedData.media && updatedData.media.length > 0) {
           this.setupMediaTimeout();
         }
       }
       
       if (hasOtherChanges) {
-        setTimeout(() => {
-          this.refreshPublications(updatedData._id);
-          this.loadReactionsImg(updatedData);
-        }, 100);
+        this.publication = { ...updatedData };
+        this.loadReactionsImg(updatedData);
+        this._cdr.markForCheck();
+        
+        if (reactionsChanged) {
+          setTimeout(() => {
+            this.refreshPublications(updatedData._id);
+          }, 50);
+        }
       }
     }
   }
