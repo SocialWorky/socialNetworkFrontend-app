@@ -671,7 +671,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
   ngAfterViewChecked() {
   }
 
-  @HostListener('window:focus', ['$event'])
+  @HostListener('window:focus')
   onWindowFocus() {
     if (this.otherUserId && this.messages.length > 0) {
       setTimeout(() => {
@@ -680,7 +680,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
     }
   }
 
-  @HostListener('window:visibilitychange', ['$event'])
+  @HostListener('window:visibilitychange')
   onVisibilityChange() {
     if (!document.hidden && this.otherUserId && this.messages.length > 0) {
       setTimeout(() => {
@@ -1331,8 +1331,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       this._connectionSubscription = this._socketService.connectionStatus
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe({
-          next: (connected: boolean) => {
-            if (connected && this.currentUserId && this.otherUserId) {
+          next: (state) => {
+            if (state.connected && this.currentUserId && this.otherUserId) {
               const chatId = this._messageService.generateChatId(this.currentUserId, this.otherUserId);
               
               this._socketService.emitEvent('joinChat', {

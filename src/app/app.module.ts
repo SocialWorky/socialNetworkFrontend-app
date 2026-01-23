@@ -15,6 +15,7 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { AuthInterceptor } from './auth.interceptor';
 import { CacheInterceptor } from './cache.interceptor';
+import { DeduplicationInterceptor } from './deduplication.interceptor';
 import { TimeoutInterceptor } from './timeout.interceptor';
 import { SafariIOSErrorInterceptor } from './safari-ios-error.interceptor';
 import { GoogleImageErrorInterceptor } from './google-image-error.interceptor';
@@ -34,8 +35,10 @@ const config: SocketIoConfig = {
     query: { token: localStorage.getItem('authToken') || localStorage.getItem('token') },
     transports: ['websocket'],
     reconnection: true,
-    reconnectionAttempts: 5,
+    reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
+    reconnectionDelayMax: 30000,
+    randomizationFactor: 0.5,
   },
 };
 
@@ -64,6 +67,11 @@ const config: SocketIoConfig = {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: DeduplicationInterceptor,
       multi: true,
     },
     {

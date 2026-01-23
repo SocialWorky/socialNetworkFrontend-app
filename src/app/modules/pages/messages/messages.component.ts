@@ -98,8 +98,8 @@ this.isMobile = this._deviceDetectionService.isMobile();
     this._socketService.connectionStatus
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
-        next: (connected: boolean) => {
-          if (connected && this.currentUserId) {
+        next: (state) => {
+          if (state.connected && this.currentUserId) {
             setTimeout(() => {
               this.joinAllChatRooms();
             }, 500);

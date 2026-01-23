@@ -14,7 +14,7 @@ import { FileUploadService } from '@shared/services/core-apis/file-upload.servic
 import { environment } from '@env/environment';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { UtilityService } from '@shared/services/utility.service';
-import { SocketService } from '@shared/services/socket.service';
+import { SocketService, ConnectionState } from '@shared/services/socket.service';
 import { EmojiEventsService } from '@shared/services/emoji-events.service';
 
 @Component({
@@ -90,12 +90,14 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
       }
 
       this._socketService.connectionStatus.pipe(
-        filter(connected => connected),
+        filter(state => state.connected),
         take(1),
         timeout(10000),
-        catchError(() => of(false))
-      ).subscribe((connected) => {
-        resolve(connected);
+        catchError(() => {
+          return of({ connected: false, reconnecting: false, reconnectAttempt: 0, lastConnected: null, lastDisconnected: null, error: null });
+        })
+      ).subscribe((state) => {
+        resolve(state?.connected ?? false);
       });
 
       setTimeout(() => {
