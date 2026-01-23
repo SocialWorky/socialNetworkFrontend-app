@@ -161,7 +161,8 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     this.isLoading = true;
     this._cdr.markForCheck();
 
-
+    // Check if URL has cache-busting parameter (indicates fresh upload)
+    const hasCacheBuster = imageUrl.includes('?t=');
 
     const timeout = setTimeout(() => {
       if (this.isLoading) {
@@ -178,31 +179,15 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
       this.loadGoogleImage(imageUrl, timeout);
     } else {
       if (this._mobileCacheService.isMobile()) {
-        this._mobileCacheService.loadImage(imageUrl, 'profile', this.imageOptions)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (cachedUrl) => {
-              clearTimeout(timeout);
-              this.imageData = cachedUrl;
-              this.isLoading = false;
-              this.isGeneratedAvatar = false;
-              this.hasError = false;
-              this._cdr.markForCheck();
-              this.load.emit();
-            },
-            error: (error) => {
-              clearTimeout(timeout);
-              this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image from mobile cache, falling back to initials', { 
-                url: imageUrl, 
-                error: error.message 
-              });
-              this.imageData = '';
-              this.isGeneratedAvatar = true;
-              this.isLoading = false;
-              this.hasError = true;
-              this._cdr.markForCheck();
-            }
+        // If URL has cache buster, clear old cached version first
+        if (hasCacheBuster) {
+          const baseUrl = imageUrl.split('?')[0];
+          this._mobileCacheService.clearImageFromCache(baseUrl).then(() => {
+            this.loadImageWithMobileCache(imageUrl, timeout);
           });
+        } else {
+          this.loadImageWithMobileCache(imageUrl, timeout);
+        }
       } else {
         const img = new Image();
         img.src = imageUrl;
@@ -230,10 +215,38 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  private loadImageWithMobileCache(imageUrl: string, timeout: NodeJS.Timeout): void {
+    this._mobileCacheService.loadImage(imageUrl, 'profile', this.imageOptions)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (cachedUrl) => {
+          clearTimeout(timeout);
+          this.imageData = cachedUrl;
+          this.isLoading = false;
+          this.isGeneratedAvatar = false;
+          this.hasError = false;
+          this._cdr.markForCheck();
+          this.load.emit();
+        },
+        error: (error) => {
+          clearTimeout(timeout);
+          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image from mobile cache, falling back to initials', {
+            url: imageUrl,
+            error: error.message
+          });
+          this.imageData = '';
+          this.isGeneratedAvatar = true;
+          this.isLoading = false;
+          this.hasError = true;
+          this._cdr.markForCheck();
+        }
+      });
+  }
+
   private isGoogleImage(url: string): boolean {
-    return url.includes('lh3.googleusercontent.com') || 
-           url.includes('lh4.googleusercontent.com') || 
-           url.includes('lh5.googleusercontent.com') || 
+    return url.includes('lh3.googleusercontent.com') ||
+           url.includes('lh4.googleusercontent.com') ||
+           url.includes('lh5.googleusercontent.com') ||
            url.includes('lh6.googleusercontent.com');
   }
 

@@ -11,6 +11,7 @@ import { User } from '@shared/interfaces/user.interface';
 import { Token } from '@shared/interfaces/token.interface';
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
+import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 
 @Component({
     selector: 'worky-dropdown',
@@ -69,7 +70,8 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
     private _elementRef: ElementRef,
     private _renderer: Renderer2,
     private _deviceDetectionService: DeviceDetectionService,
-    private _actionSheetController: ActionSheetController
+    private _actionSheetController: ActionSheetController,
+    private _mobileImageCacheService: MobileImageCacheService
   ) {
     this.decodedToken = this._authService.getDecodedToken()!;
   }
@@ -78,7 +80,12 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
     if (this.img === 'avatar') this.getUser();
     this._globalEventService.profileImage$
       .pipe(takeUntil(this._unsubscribe$))
-      .subscribe(newImageUrl => {
+      .subscribe(async newImageUrl => {
+        // Clear profile images from cache to ensure fresh load
+        if (this._mobileImageCacheService.isMobile()) {
+          await this._mobileImageCacheService.clearProfileImagesFromCache();
+        }
+
         this.profileImageUrl = newImageUrl;
         // Force refresh user data to get updated avatar
         if (this.img === 'avatar') {

@@ -758,18 +758,26 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       const urlImgUpload = environment.APIFILESERVICE + uploadLocation + '/' + filename;
 
               this._userService.userEdit(userId, { avatar: urlImgUpload }).pipe(takeUntil(this.destroy$)).subscribe({
-          next: () => {
+          next: async () => {
+            // Clear old avatar from image cache to force fresh load
+            if (this.userData?.avatar) {
+              await this._mobileImageCacheService.clearImageFromCache(this.userData.avatar);
+            }
+            // Clear all profile images from cache to ensure fresh load everywhere
+            await this._mobileImageCacheService.clearProfileImagesFromCache();
+
             // Invalidate user cache to force refresh in other components
             this._userService.invalidateUserCache(userId);
-            
-            // Update global event service
-            this._globalEventService.updateProfileImage(urlImgUpload);
-            
+
+            // Update global event service with cache-busting URL
+            const cacheBustUrl = urlImgUpload + '?t=' + Date.now();
+            this._globalEventService.updateProfileImage(cacheBustUrl);
+
             // Update local user data
             if (this.userData) {
-              this.userData.avatar = urlImgUpload;
+              this.userData.avatar = cacheBustUrl;
             }
-            
+
             setTimeout(() => {
               this.isUploading = false;
               this._cdr.markForCheck();

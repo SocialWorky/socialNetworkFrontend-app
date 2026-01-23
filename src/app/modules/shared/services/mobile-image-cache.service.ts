@@ -695,31 +695,91 @@ export class MobileImageCacheService {
     // Clear memory cache
     this.memoryCache.clear();
     this.cacheSize = 0;
-    
+
     // Clear persistent cache
     if (this.db) {
       const transaction = this.db.transaction([this.STORE_NAME], 'readwrite');
       const store = transaction.objectStore(this.STORE_NAME);
       await store.clear();
     }
-    
+
     // Clear object URLs
     this.createdObjectUrls.forEach(url => {
       URL.revokeObjectURL(url);
     });
     this.createdObjectUrls.clear();
-    
+
     // Clear load queue
     this.loadQueue = [];
     this.currentLoads = 0;
-    
+
     // Reset metrics
     this.cacheHits = 0;
     this.cacheMisses = 0;
     this.loadTimes = [];
     this.updateMetrics();
-    
+  }
 
+  /**
+   * Clear a specific image from cache (memory and persistent)
+   * Useful when an image is updated and needs to be refreshed
+   */
+  async clearImageFromCache(imageUrl: string): Promise<void> {
+    // Clear from memory cache
+    if (this.memoryCache.has(imageUrl)) {
+      const cached = this.memoryCache.get(imageUrl);
+      if (cached) {
+        this.cacheSize -= cached.size;
+      }
+      this.memoryCache.delete(imageUrl);
+    }
+
+    // Clear from persistent cache
+    if (this.db && !isIOS) {
+      try {
+        const transaction = this.db.transaction([this.STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(this.STORE_NAME);
+        store.delete(imageUrl);
+      } catch (error) {
+        // Ignore errors when clearing specific image
+      }
+    }
+  }
+
+  /**
+   * Clear all profile images from cache
+   * Useful when user changes their avatar
+   */
+  async clearProfileImagesFromCache(): Promise<void> {
+    // Clear profile images from memory cache
+    const keysToDelete: string[] = [];
+    this.memoryCache.forEach((value, key) => {
+      if (value.type === 'profile' || key.includes('profile-avatar') || key.includes('profile/')) {
+        keysToDelete.push(key);
+        this.cacheSize -= value.size;
+      }
+    });
+    keysToDelete.forEach(key => this.memoryCache.delete(key));
+
+    // Clear profile images from persistent cache
+    if (this.db && !isIOS) {
+      try {
+        const transaction = this.db.transaction([this.STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(this.STORE_NAME);
+        const index = store.index('type');
+        const request = index.openCursor(IDBKeyRange.only('profile'));
+
+        request.onsuccess = (event) => {
+          const cursor = (event.target as IDBRequest).result;
+          if (cursor) {
+            store.delete(cursor.primaryKey);
+            cursor.continue();
+          }
+        };
+      } catch (error) {
+        // Ignore errors when clearing profile images
+      }
+    }
   }
 
   async getCacheStats(): Promise<any> {

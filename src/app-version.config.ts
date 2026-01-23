@@ -21,10 +21,29 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '2.6.0',
+  version: '2.6.1',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🐛 CORRECCIONES DE BUGS (v2.6.1):
+    - Fixed: Sistema de gestión de versiones en panel de administración
+      * Corregido el manejo de respuestas del backend (no tenía wrapper {success: true})
+      * La vista ahora se actualiza correctamente al crear/activar versiones
+      * Corregido toggleMaintenanceMode para manejar diferentes estructuras de respuesta
+      * Añadido detectChanges() para forzar actualización de Angular
+
+    - Fixed: Fotos de perfil no visibles/actualizables en móvil
+      * Añadidos métodos clearImageFromCache() y clearProfileImagesFromCache() en MobileImageCacheService
+      * El cache de imágenes ahora se invalida correctamente al cambiar avatar
+      * Implementado cache-busting URL (?t=timestamp) para forzar recarga
+      * worky-avatar detecta URLs con cache-buster y limpia cache antes de cargar
+      * worky-dropdown limpia cache de imágenes de perfil al recibir actualización
+
+    - Improved: Consistencia entre móvil y escritorio
+      * Cache-busting funciona en ambas plataformas
+      * Invalidación de UserService cache funciona igual en ambos
+      * MobileImageCacheService solo afecta a dispositivos móviles
+
     🔧 MEJORAS DE INFRAESTRUCTURA Y ESTABILIDAD (v2.6.0):
     - Fixed: Corrección de health checks en servicios de Kubernetes
       * Health checks ahora funcionan correctamente en todos los servicios
