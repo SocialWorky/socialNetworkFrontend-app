@@ -396,8 +396,10 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
         }
 
         const response = await firstValueFrom(this.http.post<any>(`${environment.API_URL}/app/version`, versionData));
-        
-        if (response.success) {
+
+        // Backend returns AppVersion directly, not { success: true, data: ... }
+        // Check if we got a valid response (has version property)
+        if (response && (response.version || response.id)) {
           this.alertService.showAlert('Éxito', 'Versión creada correctamente', Alerts.INFO);
           this.versionForm.reset();
           this.versionForm.patchValue({
@@ -405,9 +407,13 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
             releaseDate: new Date().toISOString().split('T')[0],
             forceUpdate: false
           });
-          this.loadVersions();
-          this.loadCurrentVersion();
-          // Success log removed - not necessary for routine operations
+          // Wait for data to reload before completing
+          await this.loadVersions();
+          await this.loadCurrentVersion();
+          // Force change detection to update the view
+          this.cdr.detectChanges();
+        } else {
+          this.alertService.showAlert('Error', 'Respuesta inesperada del servidor', Alerts.WARNING);
         }
       } catch (error: any) {
         if (error?.status === 401) {
@@ -451,11 +457,15 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
     try {
       this.isLoading = true;
       const response = await firstValueFrom(this.http.put<any>(`${environment.API_URL}/app/version/${versionId}/activate`, {}));
-      
-      if (response.success) {
+
+      // Backend returns AppVersion directly, not { success: true, ... }
+      if (response && (response.version || response.id || response.isActive !== undefined)) {
         this.alertService.showAlert('Éxito', 'Versión activada correctamente', Alerts.INFO);
-        this.loadVersions();
-        this.loadCurrentVersion();
+        await this.loadVersions();
+        await this.loadCurrentVersion();
+        this.cdr.detectChanges();
+      } else {
+        this.alertService.showAlert('Error', 'Respuesta inesperada del servidor', Alerts.WARNING);
       }
     } catch (error: any) {
       if (error?.status === 401) {
@@ -511,29 +521,36 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
 
     try {
       this.isLoading = true;
-      
+
       if (this.isMaintenanceMode) {
+        // DELETE /app/maintenance returns { message: string }
         const response = await firstValueFrom(this.http.delete<any>(`${environment.API_URL}/app/maintenance`));
-        
-        if (response.success) {
+
+        // Backend returns { message: '...' } on success
+        if (response && (response.message || response.version || response.id)) {
           this.isMaintenanceMode = false;
           this.updateMaintenanceFieldState();
           this.alertService.showAlert('Éxito', 'Modo mantenimiento desactivado', Alerts.INFO);
-          // Success log removed - not necessary for routine operations
+        } else {
+          this.alertService.showAlert('Error', 'Respuesta inesperada del servidor', Alerts.WARNING);
         }
       } else {
         const message = this.maintenanceForm.get('message')?.value;
+        // POST /app/maintenance returns AppVersion
         const response = await firstValueFrom(this.http.post<any>(`${environment.API_URL}/app/maintenance`, { message }));
-        
-        if (response.success) {
+
+        // Backend returns AppVersion on success
+        if (response && (response.version || response.id || response.maintenanceMode !== undefined)) {
           this.isMaintenanceMode = true;
           this.updateMaintenanceFieldState();
           this.alertService.showAlert('Éxito', 'Modo mantenimiento activado', Alerts.INFO);
-          // Success log removed - not necessary for routine operations
+        } else {
+          this.alertService.showAlert('Error', 'Respuesta inesperada del servidor', Alerts.WARNING);
         }
       }
-      
-      this.loadCurrentVersion();
+
+      await this.loadCurrentVersion();
+      this.cdr.detectChanges();
     } catch (error: any) {
       if (error?.status === 401) {
         // Token expired or invalid
