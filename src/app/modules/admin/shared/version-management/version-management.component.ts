@@ -255,35 +255,40 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
   async loadVersions() {
     if (!this.canManageVersions) {
       this.versions = [];
+      this.cdr.detectChanges();
       return;
     }
-    
+
     try {
       this.isLoading = true;
+      this.cdr.detectChanges();
+
       const response = await firstValueFrom(this.http.get<any>(`${environment.API_URL}/app/versions`));
-      
+
       if (response) {
-        // Handle different response structures
-        this.versions = response.data || response || [];
+        // Handle different response structures - create new array reference
+        const versionsData = response.data || response || [];
+        // Ensure we have a new array reference for change detection
+        this.versions = Array.isArray(versionsData) ? [...versionsData] : [];
+      } else {
+        this.versions = [];
       }
     } catch (error: any) {
       if (error?.status === 404) {
         this.versions = [];
       } else if (error?.status === 401) {
-        // Token expired or invalid
         this.adminAuthenticated = false;
         this.canManageVersions = false;
         this.alertService.showAlert(
-          'Sesión Expirada', 
-          'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', 
+          'Sesión Expirada',
+          'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
           Alerts.WARNING
         );
       } else if (error?.status === 403) {
-        // Sin permisos
         this.canManageVersions = false;
         this.alertService.showAlert(
-          'Permisos Insuficientes', 
-          'No tienes permisos para ver el historial de versiones.', 
+          'Permisos Insuficientes',
+          'No tienes permisos para ver el historial de versiones.',
           Alerts.WARNING
         );
       } else {
@@ -291,7 +296,7 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
           LevelLogEnum.ERROR,
           'VersionManagementComponent',
           'Error loading versions',
-          { 
+          {
             error: error instanceof Error ? error.message : String(error),
             status: error?.status
           }
@@ -300,6 +305,8 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
       }
     } finally {
       this.isLoading = false;
+      // Always trigger change detection after loading
+      this.cdr.detectChanges();
     }
   }
 
@@ -308,38 +315,35 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
       // Keep local version if no permissions
       return;
     }
-    
+
     try {
       const response = await firstValueFrom(this.http.get<any>(`${environment.API_URL}/app/version`));
-      
+
       if (response) {
         // Handle different response structures
         const versionData = response.data || response;
         if (versionData) {
-          this.currentVersion = versionData;
+          this.currentVersion = { ...versionData }; // New object reference
           this.isMaintenanceMode = versionData.maintenanceMode || false;
           this.updateMaintenanceFieldState();
         }
       }
     } catch (error: any) {
       if (error?.status === 404) {
-        // Only log in development mode
         // Keep using local configuration when no backend version exists
       } else if (error?.status === 401) {
-        // Token expired or invalid
         this.adminAuthenticated = false;
         this.canManageVersions = false;
         this.alertService.showAlert(
-          'Sesión Expirada', 
-          'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', 
+          'Sesión Expirada',
+          'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
           Alerts.WARNING
         );
       } else if (error?.status === 403) {
-        // Sin permisos
         this.canManageVersions = false;
         this.alertService.showAlert(
-          'Permisos Insuficientes', 
-          'No tienes permisos para ver la versión actual.', 
+          'Permisos Insuficientes',
+          'No tienes permisos para ver la versión actual.',
           Alerts.WARNING
         );
       } else {
@@ -347,12 +351,14 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
           LevelLogEnum.ERROR,
           'VersionManagementComponent',
           'Error loading current version',
-          { 
+          {
             error: error instanceof Error ? error.message : String(error),
             status: error?.status
           }
         );
       }
+    } finally {
+      this.cdr.detectChanges();
     }
   }
 

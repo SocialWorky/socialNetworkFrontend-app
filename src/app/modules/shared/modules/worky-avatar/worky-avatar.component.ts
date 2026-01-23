@@ -136,20 +136,23 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
 
   private generateAvatar(): void {
     // Only try to load image if we have a valid URL
-    const isValidUrl = this.img && 
-                      typeof this.img === 'string' &&
-                      this.img.trim() !== '' && 
-                      this.img !== 'null' && 
-                      this.img !== 'undefined' && 
-                      this.img !== '' &&
-                      this.img.length > 0;
-    
+    const imgValue = this.img;
+    const isValidUrl = imgValue &&
+                      typeof imgValue === 'string' &&
+                      imgValue.trim() !== '' &&
+                      imgValue !== 'null' &&
+                      imgValue !== 'undefined' &&
+                      imgValue !== 'NaN' &&
+                      imgValue.length > 5 && // Minimum length for a valid URL
+                      (imgValue.startsWith('http://') ||
+                       imgValue.startsWith('https://') ||
+                       imgValue.startsWith('blob:') ||
+                       imgValue.startsWith('data:'));
 
-
-    
-    if (isValidUrl && this.img) {
-      this.tryLoadImage(this.img);
+    if (isValidUrl && imgValue) {
+      this.tryLoadImage(imgValue);
     } else {
+      // Invalid or missing URL - show initials
       this.isGeneratedAvatar = true;
       this.isLoading = false;
       this.hasError = false;
@@ -182,9 +185,14 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
         // If URL has cache buster, clear old cached version first
         if (hasCacheBuster) {
           const baseUrl = imageUrl.split('?')[0];
-          this._mobileCacheService.clearImageFromCache(baseUrl).then(() => {
-            this.loadImageWithMobileCache(imageUrl, timeout);
-          });
+          this._mobileCacheService.clearImageFromCache(baseUrl)
+            .then(() => {
+              this.loadImageWithMobileCache(imageUrl, timeout);
+            })
+            .catch(() => {
+              // If clearing cache fails, try loading anyway
+              this.loadImageWithMobileCache(imageUrl, timeout);
+            });
         } else {
           this.loadImageWithMobileCache(imageUrl, timeout);
         }
@@ -229,18 +237,40 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
           this.load.emit();
         },
         error: (error) => {
-          clearTimeout(timeout);
-          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image from mobile cache, falling back to initials', {
+          // Mobile cache failed, try direct loading as fallback
+          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Mobile cache failed, trying direct load', {
             url: imageUrl,
-            error: error.message
+            error: error?.message || 'Unknown error'
           });
-          this.imageData = '';
-          this.isGeneratedAvatar = true;
-          this.isLoading = false;
-          this.hasError = true;
-          this._cdr.markForCheck();
+          this.loadImageDirectly(imageUrl, timeout);
         }
       });
+  }
+
+  private loadImageDirectly(imageUrl: string, timeout: NodeJS.Timeout): void {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = imageUrl;
+
+    img.onload = () => {
+      clearTimeout(timeout);
+      this.imageData = imageUrl;
+      this.isLoading = false;
+      this.isGeneratedAvatar = false;
+      this.hasError = false;
+      this._cdr.markForCheck();
+      this.load.emit();
+    };
+
+    img.onerror = () => {
+      clearTimeout(timeout);
+      this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Direct image load also failed, falling back to initials', { url: imageUrl });
+      this.imageData = '';
+      this.isGeneratedAvatar = true;
+      this.isLoading = false;
+      this.hasError = true;
+      this._cdr.markForCheck();
+    };
   }
 
   private isGoogleImage(url: string): boolean {

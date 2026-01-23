@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, from, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, of, from, throwError, firstValueFrom } from 'rxjs';
 import { catchError, map, switchMap, tap, timeout, retryWhen, delay } from 'rxjs/operators';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { ImageService, ImageLoadOptions } from './image.service';
@@ -494,14 +494,16 @@ export class MobileImageCacheService {
       }
     }
 
-    const response = await this.http.get(imageUrl, { 
-      responseType: 'blob',
-      headers: {
-        'Cache-Control': 'max-age=1800' // 30 minutes cache (reduced from 1 hour)
-      }
-    }).pipe(
-      timeout(options.timeout || 15000)
-    ).toPromise();
+    const response = await firstValueFrom(
+      this.http.get(imageUrl, {
+        responseType: 'blob',
+        headers: {
+          'Cache-Control': 'max-age=1800' // 30 minutes cache
+        }
+      }).pipe(
+        timeout(options.timeout || 15000)
+      )
+    );
 
     const blob = response as Blob;
     
