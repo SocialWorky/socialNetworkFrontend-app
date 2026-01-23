@@ -21,10 +21,35 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '2.5.0',
+  version: '2.6.0',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🔧 MEJORAS DE INFRAESTRUCTURA Y ESTABILIDAD (v2.6.0):
+    - Fixed: Corrección de health checks en servicios de Kubernetes
+      * Health checks ahora funcionan correctamente en todos los servicios
+      * Corrección de errores 404 en probes de liveness y readiness
+      * Mejora en el orden de registro de rutas para evitar conflictos
+    - Fixed: Corrección de puertos en despliegues de Kubernetes
+      * Sincronización de puertos entre secrets, deployments y services
+      * Scripts de generación automática para mantener consistencia
+      * Corrección de problemas de conectividad en producción
+    - Added: Sistema mejorado de manejo de errores de servicios externos
+      * Nuevo interceptor para manejar errores CORS y 502 silenciosamente
+      * Mejoras en el manejo de errores 404 para endpoints de versión
+      * Reducción de ruido en consola del navegador
+    - Fixed: Corrección de doble slash en URLs de servicios
+      * Normalización de URLs base antes de concatenar rutas
+      * Corrección en URLs de Bull Board y otros servicios
+    - Enhanced: Configuración de variables de entorno
+      * Documentación completa de variables requeridas por servicio
+      * Guías de configuración para desarrollo local y producción
+      * Validación mejorada de configuración de servicios
+    - Improved: Estabilidad y confiabilidad del sistema
+      * Mejor manejo de errores de red y servicios no disponibles
+      * Interceptores que previenen errores en consola
+      * Sistema más robusto ante fallos de servicios externos
+    
     🚀 MEJORAS EN EL SISTEMA DE MENSAJERÍA Y NOTIFICACIONES (v2.5.0):
     - Added: Nuevo módulo de mensajería con interfaz renovada
       * Interfaz de usuario moderna y profesional
