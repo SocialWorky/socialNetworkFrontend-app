@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { StreetMapData } from '../../interfaces/streetMap.interface';
 import { CreateLocationRequest } from '../../interfaces/apiGeoLocations.interface';
@@ -37,17 +38,35 @@ export class GeoLocationsService {
         formatted: post.results[0].formatted ? post.results[0].formatted : '',
       };
 
-    return this.http.post(url, requestBody);
+    return this.http.post(url, requestBody).pipe(
+      catchError(error => {
+        // Return null if service is unavailable
+        // Error is already handled by ExternalServiceErrorInterceptor
+        return of(null);
+      })
+    );
   }
 
   findLocationByLatAndLng(lat: number, lng: number): Observable<any> {
     const url = `${this.baseUrl}/locations/${lat}/${lng}`;
-    return this.http.get<any>(url);
+    return this.http.get<any>(url).pipe(
+      catchError(error => {
+        // Return null if service is unavailable
+        // Error is already handled by ExternalServiceErrorInterceptor
+        return of(null);
+      })
+    );
   }
 
   findLocationByCity(city: string): Observable<any> {
     const url = `${this.baseUrl}/locations/${city}`;
-    return this.http.get<any>(url);
+    return this.http.get<any>(url).pipe(
+      catchError(error => {
+        // Return null if service is unavailable
+        // Error is already handled by ExternalServiceErrorInterceptor
+        return of(null);
+      })
+    );
   }
 
 }

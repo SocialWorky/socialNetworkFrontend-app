@@ -20,6 +20,7 @@ import { TimeoutInterceptor } from './timeout.interceptor';
 import { SafariIOSErrorInterceptor } from './safari-ios-error.interceptor';
 import { GoogleImageErrorInterceptor } from './google-image-error.interceptor';
 import { Silent404Interceptor } from './silent-404.interceptor';
+import { ExternalServiceErrorInterceptor } from './external-service-error.interceptor';
 import { ServiceWorkerModule } from '@angular/service-worker';
 
 import { SafariIOSErrorHandlerService } from '@shared/services/safari-ios-error-handler.service';
@@ -97,6 +98,11 @@ const config: SocketIoConfig = {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: Silent404Interceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ExternalServiceErrorInterceptor,
       multi: true,
     },
     provideHttpClient(withInterceptorsFromDi()),

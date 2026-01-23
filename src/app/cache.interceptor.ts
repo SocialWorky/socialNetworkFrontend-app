@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpResponse } from '@angular/common/http';
+import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { UnifiedCacheService } from './modules/shared/services/unified-cache.service';
@@ -40,10 +40,34 @@ export class CacheInterceptor implements HttpInterceptor {
     const cacheKey = this.cacheService.generateHttpCacheKey(request.urlWithParams);
 
     // Check cache
-    const cachedResponse = this.cacheService.get<HttpResponse<any>>(cacheKey);
+    const cachedResponse = this.cacheService.get<HttpResponse<any> | any>(cacheKey);
 
     if (cachedResponse) {
-      return of(cachedResponse.clone());
+      // Ensure we have a valid HttpResponse object
+      if (cachedResponse instanceof HttpResponse) {
+        return of(cachedResponse.clone());
+      } else if (cachedResponse && typeof (cachedResponse as any).clone === 'function') {
+        return of((cachedResponse as any).clone());
+      } else if (cachedResponse && typeof cachedResponse === 'object' && 'body' in cachedResponse) {
+        // Reconstruct HttpResponse from cached data (when deserialized from storage)
+        try {
+          const cachedData = cachedResponse as any;
+          const reconstructed = new HttpResponse({
+            body: cachedData.body,
+            status: cachedData.status || 200,
+            statusText: cachedData.statusText || 'OK',
+            headers: cachedData.headers ? new HttpHeaders(cachedData.headers) : new HttpHeaders(),
+            url: cachedData.url || request.urlWithParams
+          });
+          return of(reconstructed);
+        } catch (error) {
+          // If reconstruction fails, remove from cache and make new request
+          this.cacheService.delete(cacheKey);
+        }
+      } else {
+        // If cached response is not valid, remove from cache and make new request
+        this.cacheService.delete(cacheKey);
+      }
     }
 
     // Make request and cache response
