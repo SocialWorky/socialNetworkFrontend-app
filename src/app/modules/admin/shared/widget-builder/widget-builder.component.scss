@@ -1,0 +1,24 @@
+// Widget Builder specific styles
+// Main styles are in HTML using Tailwind CSS
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+// Ensure widget type items don't overflow
+.widget-type-item {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+// Prevent icon clipping
+.material-icons {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

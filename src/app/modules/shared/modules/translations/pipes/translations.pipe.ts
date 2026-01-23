@@ -3,7 +3,7 @@ import { translations, getDynamicTranslation } from '@translations/translations'
 
 @Pipe({
   name: 'workyTranslations',
-  standalone: false,
+  standalone: true,
 })
 export class TranslationsPipe implements PipeTransform {
   transform(value: string, type?: string, ...args: any[]): string {

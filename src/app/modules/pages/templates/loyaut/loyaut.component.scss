@@ -89,14 +89,34 @@
 ::ng-deep worky-content-right-side {
   width: variables.$worky-container-width-sidebar;
   height: 94dvh;
-  padding: 5px;
-  display: block;
-  justify-content: space-around;
-  overflow-y: scroll;
-  scrollbar-width: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+  
   @include breakpoints.below-sm {
     display: none;
   }
@@ -106,6 +126,7 @@
   width: variables.$worky-container-width-content;
   grid-area: main;
   height: 94dvh;
+  margin: 5px;
   min-width: variables.$worky-app-min-width;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;

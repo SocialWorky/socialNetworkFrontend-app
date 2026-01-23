@@ -61,4 +61,13 @@ export class WidgetContainerComponent implements OnInit, OnDestroy {
   trackByWidget(index: number, widget: WidgetConfig): string {
     return widget.selector;
   }
+
+  shouldShowTitle(widget: WidgetConfig): boolean {
+    // Check if showTitle is explicitly set in config, default to true
+    if (widget.config && widget.config.hasOwnProperty('showTitle')) {
+      return widget.config['showTitle'] !== false;
+    }
+    // Default to showing title if not specified
+    return true;
+  }
 }

@@ -28,14 +28,13 @@
 
 .top-widget-wrapper {
   width: 100%;
-  margin: 15px 4px;
   box-sizing: border-box;
   
   // Match worky-module-container spacing
   ::ng-deep .widget-container.top {
     max-width: 100%;
     width: 100%;
-    padding: 0;
+    padding: 6px;
     margin: 0;
   }
   

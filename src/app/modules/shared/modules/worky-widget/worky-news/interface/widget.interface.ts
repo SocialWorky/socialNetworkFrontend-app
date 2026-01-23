@@ -18,6 +18,8 @@ export interface WidgetConfig {
   status: WidgetStatus;
   allowedPositions: WidgetPosition[];
   icon?: string;
+  type?: string; // 'hardcoded' | 'thematic-image' | 'html' | 'image' | 'text' | 'list' | 'link' | 'iframe' | 'custom'
+  config?: Record<string, any>; // Widget-specific configuration
 }
 
 export interface WidgetLayout {

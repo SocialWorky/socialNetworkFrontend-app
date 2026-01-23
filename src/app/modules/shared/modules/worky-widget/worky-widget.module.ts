@@ -7,6 +7,7 @@ import { WeatherComponent } from './worky-weather/worky-weather.component';
 import { WorkyButtonsModule } from '../buttons/buttons.module';
 import { WorkyNewsComponent } from './worky-news/worky-news.component';
 import { ThematicImageWidgetComponent } from './thematic-image-widget/thematic-image-widget.component';
+import { DynamicWidgetComponent } from './dynamic-widget/dynamic-widget.component';
 import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
 import { TranslationsModule } from '../translations/translations.module';
 
@@ -23,13 +24,15 @@ import { TranslationsModule } from '../translations/translations.module';
     FormsModule,
     WorkyButtonsModule,
     PipesSharedModule,
-    TranslationsModule
+    TranslationsModule,
+    DynamicWidgetComponent
   ],
   exports: [
     WeatherComponent, 
     WorkyNewsComponent, 
     WidgetContainerComponent,
-    ThematicImageWidgetComponent
+    ThematicImageWidgetComponent,
+    DynamicWidgetComponent
   ]
 })
 export class WorkyWidgetModule { }
