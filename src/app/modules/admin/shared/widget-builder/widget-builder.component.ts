@@ -524,28 +524,15 @@ export class WidgetBuilderComponent implements OnInit, OnDestroy {
       next: (response) => {
         if (response && typeof response === 'object' && response.files && Array.isArray(response.files) && response.files.length > 0) {
           const uploadedFile = response.files[0];
-          
-          let imageUrl: string | null = null;
-          
-          if (uploadedFile.filename) {
+
+          // Use the relative path returned by the file service
+          let imageUrl: string | null = uploadedFile.url || null;
+
+          if (!imageUrl && uploadedFile.filename) {
             const destination = 'widgets';
-            const filename = uploadedFile.filename;
-            imageUrl = `${environment.APIFILESERVICE}${destination}/${filename}`;
-          } else if (uploadedFile.url) {
-            try {
-              const urlParts = uploadedFile.url.split('/uploads/');
-              if (urlParts.length === 2) {
-                const filename = urlParts[1];
-                const destination = 'widgets';
-                imageUrl = `${urlParts[0]}/${destination}/${filename}`;
-              } else {
-                imageUrl = uploadedFile.url;
-              }
-            } catch (error) {
-              imageUrl = uploadedFile.url;
-            }
+            imageUrl = `${destination}/${uploadedFile.filename}`;
           }
-          
+
           if (imageUrl) {
             imageUrl = imageUrl.trim();
             this.widgetConfigForm.patchValue({ [fieldKey]: imageUrl });

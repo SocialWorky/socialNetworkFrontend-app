@@ -214,16 +214,17 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
         );
 
         // Handle the actual response structure: {message: string, files: Array}
-        let desktopFilename: string;
+        let coverDesktop: string;
         if (responseDesktop && typeof responseDesktop === 'object' && responseDesktop.files && Array.isArray(responseDesktop.files) && responseDesktop.files.length > 0) {
           const file = responseDesktop.files[0];
-          desktopFilename = file.filename || file.name || file.url || file;
+          // Use the relative path returned by the file service
+          coverDesktop = file.url || `${uploadLocation}/${file.filename}`;
         } else {
           throw new Error('Invalid response structure from desktop upload - expected {message, files}');
         }
 
-        if (!desktopFilename) {
-          throw new Error('No filename found in desktop upload response');
+        if (!coverDesktop) {
+          throw new Error('No URL found in desktop upload response');
         }
 
         const croppedCanvasMobile = this.cropper.getCroppedCanvas({
@@ -241,20 +242,18 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
         );
 
         // Handle the actual response structure: {message: string, files: Array}
-        let mobileFilename: string;
+        let coverMobile: string;
         if (responseMobile && typeof responseMobile === 'object' && responseMobile.files && Array.isArray(responseMobile.files) && responseMobile.files.length > 0) {
           const file = responseMobile.files[0];
-          mobileFilename = file.filename || file.name || file.url || file;
+          // Use the relative path returned by the file service
+          coverMobile = file.url || `${uploadLocation}/${file.filename}`;
         } else {
           throw new Error('Invalid response structure from mobile upload - expected {message, files}');
         }
 
-        if (!mobileFilename) {
-          throw new Error('No filename found in mobile upload response');
+        if (!coverMobile) {
+          throw new Error('No URL found in mobile upload response');
         }
-
-        const coverMobile = environment.APIFILESERVICE + uploadLocation + '/' + mobileFilename;
-        const coverDesktop = environment.APIFILESERVICE + uploadLocation + '/' + desktopFilename;
 
         await this._profileService.updateProfile(userId, {
           coverImage: coverDesktop,
@@ -271,7 +270,8 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
           }
         });
 
-        this.previews[0].url = environment.APIFILESERVICE + uploadLocation + '/' + desktopFilename;
+        // For preview, construct full URL using MINIO_BUCKET_URL
+        this.previews[0].url = environment.MINIO_BUCKET_URL + '/' + coverDesktop;
 
         this.selectedFiles = [];
         this.isUploading = false;

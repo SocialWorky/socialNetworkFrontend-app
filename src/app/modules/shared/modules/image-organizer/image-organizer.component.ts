@@ -33,7 +33,7 @@ export class ImageOrganizerComponent implements OnInit {
 
   galleryItems: any[] = [];
 
-  urlMediaApi = environment.APIFILESERVICE;
+  urlMediaApi = environment.MINIO_BUCKET_URL;
 
   lightboxOpen = false;
 

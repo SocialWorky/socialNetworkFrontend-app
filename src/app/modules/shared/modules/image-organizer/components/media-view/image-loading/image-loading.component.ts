@@ -26,7 +26,7 @@ export class ImageLoadingComponent implements OnInit, OnChanges, OnDestroy {
   currentIndex: number = 0;
   currentImage: ImageOrganizer | undefined;
 
-  urlFilesService = environment.APIFILESERVICE;
+  urlFilesService = environment.MINIO_BUCKET_URL;
 
   private destroy$ = new Subject<void>();
 

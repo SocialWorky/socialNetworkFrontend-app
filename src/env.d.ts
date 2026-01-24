@@ -13,6 +13,7 @@ declare interface Env {
   readonly NG_APP_APIWEATHERURL: string;
   readonly NG_APP_APIWEATHERTOKEN: string;
   readonly NG_APP_APIFILESERVICE: string;
+  readonly NG_APP_MINIO_BUCKET_URL: string;
   readonly NG_APP_APIMESSAGESERVICE: string;
   readonly NG_APP_APINOTIFICATIONCENTER: string;
   readonly NG_APP_GIPHYAPIKEY: string;

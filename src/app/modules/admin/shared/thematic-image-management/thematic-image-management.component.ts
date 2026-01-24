@@ -163,29 +163,12 @@ export class ThematicImageManagementComponent implements OnInit, OnDestroy {
           // Server expects: APIFILESERVICE + destination + '/' + filename
           let imageUrl: string | null = null;
           
-          if (uploadedFile.filename) {
-            // File server uses pattern: /:type/:filename
-            // where type is destination (thematic-images) and filename is the file name
+          // Use the relative path returned by the file service
+          imageUrl = uploadedFile.url || null;
+
+          if (!imageUrl && uploadedFile.filename) {
             const destination = 'thematic-images';
-            // Filename comes complete from backend, use it directly
-            const filename = uploadedFile.filename;
-            imageUrl = `${environment.APIFILESERVICE}${destination}/${filename}`;
-          } else if (uploadedFile.url) {
-            // If only URL comes, try to extract filename and build correct URL
-            // URL comes as: http://localhost:3005/uploads/filename
-            // Need to convert to: http://localhost:3005/thematic-images/filename
-            try {
-              const urlParts = uploadedFile.url.split('/uploads/');
-              if (urlParts.length === 2) {
-                const filename = urlParts[1];
-                const destination = 'thematic-images';
-                imageUrl = `${urlParts[0]}/${destination}/${filename}`;
-              } else {
-                imageUrl = uploadedFile.url;
-              }
-            } catch (error) {
-              imageUrl = uploadedFile.url;
-            }
+            imageUrl = `${destination}/${uploadedFile.filename}`;
           }
           
           if (imageUrl) {

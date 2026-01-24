@@ -746,16 +746,15 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       );
 
       // Handle the actual response structure: {message: string, files: Array}
-      let filename: string;
+      let urlImgUpload: string;
       if (response && typeof response === 'object' && response.files && Array.isArray(response.files) && response.files.length > 0) {
         const file = response.files[0];
-        filename = file.filename || file.name || file.url || file;
+        // Use the relative path returned by the file service (e.g., 'profile-avatar/filename.jpg')
+        urlImgUpload = file.url || `${uploadLocation}/${file.filename}`;
       } else {
         this._logService.log(LevelLogEnum.ERROR, 'ProfilesComponent', 'Invalid response structure from avatar upload', { response });
         return;
       }
-
-      const urlImgUpload = environment.APIFILESERVICE + uploadLocation + '/' + filename;
 
               this._userService.userEdit(userId, { avatar: urlImgUpload }).pipe(takeUntil(this.destroy$)).subscribe({
           next: async () => {

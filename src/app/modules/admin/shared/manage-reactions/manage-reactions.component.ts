@@ -73,11 +73,11 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     
     if (connected) {
       this.subscribeToEmojiEvents();
-      this.urlApiFile = `${environment.APIFILESERVICE}emojis/`;
+      this.urlApiFile = `${environment.MINIO_BUCKET_URL}/`;
       this.listReactions();
     } else {
       this.subscribeToEmojiEvents();
-      this.urlApiFile = `${environment.APIFILESERVICE}emojis/`;
+      this.urlApiFile = `${environment.MINIO_BUCKET_URL}/`;
       this.listReactions();
     }
   }

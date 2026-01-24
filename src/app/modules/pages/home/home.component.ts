@@ -52,7 +52,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   hasMorePublications: boolean = true;
 
-  urlMediaApi = environment.APIFILESERVICE;
+  urlMediaApi = environment.MINIO_BUCKET_URL;
 
   dataUser: Token | null = null;
 
