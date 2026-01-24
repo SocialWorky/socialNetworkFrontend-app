@@ -7,6 +7,7 @@ import hljs from 'highlight.js';
 
 import { environment } from '@env/environment';
 import { LazyCssService } from './core-apis/lazy-css.service';
+import { UtilityService } from './utility.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,8 @@ export class ContentService {
 
   constructor(
     private http: HttpClient,
-    private lazyCssService: LazyCssService
+    private lazyCssService: LazyCssService,
+    private utilityService: UtilityService
   ) {
     this.initializeMarked();
   }
@@ -34,6 +36,17 @@ export class ContentService {
     };
     renderer.codespan = ({ text }: { text: string }) => {
       return `<code class="inline-code">${text}</code>`;
+    };
+    // Normalize image URLs in markdown to ensure MinIO URLs are properly formatted
+    renderer.image = (token: any) => {
+      const href = token.href || '';
+      const title = token.title || null;
+      const text = token.text || null;
+      // Normalize the image URL to handle MinIO relative paths
+      const normalizedHref = this.utilityService.normalizeImageUrl(href, environment.MINIO_BUCKET_URL || '');
+      const titleAttr = title ? ` title="${title}"` : '';
+      const altAttr = text ? ` alt="${text}"` : '';
+      return `<img src="${normalizedHref}"${altAttr}${titleAttr} />`;
     };
     marked.setOptions({
       renderer: renderer,
