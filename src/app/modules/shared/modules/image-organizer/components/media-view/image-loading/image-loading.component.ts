@@ -91,7 +91,18 @@ export class ImageLoadingComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   openImage(image: ImageOrganizer): void {
-    window.open(image.url, '_blank')?.focus();
+    // Normalize the image URL before opening it
+    // Use the full URL (image.url) if available, otherwise fallback to compressed URL
+    const imageUrl = image.url || image.urlCompressed || '';
+    if (!imageUrl) {
+      return;
+    }
+    
+    // Normalize the URL to ensure it's a full URL pointing to MinIO
+    const normalizedUrl = this._utilityService.normalizeImageUrl(imageUrl, this.urlFilesService);
+    
+    // Open the normalized URL in a new window
+    window.open(normalizedUrl, '_blank')?.focus();
   }
 
   isImage(): boolean {

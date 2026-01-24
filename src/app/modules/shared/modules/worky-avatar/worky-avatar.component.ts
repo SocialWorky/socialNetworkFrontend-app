@@ -6,6 +6,8 @@ import { ImageLoadOptions } from '../../services/image.service';
 import { MobileImageCacheService } from '../../services/mobile-image-cache.service';
 import { GoogleImageService } from '../../services/google-image.service';
 import { LogService, LevelLogEnum } from '../../services/core-apis/log.service';
+import { UtilityService } from '../../services/utility.service';
+import { environment } from '@env/environment';
 
 @Component({
     selector: 'worky-avatar',
@@ -75,7 +77,8 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     private _mobileCacheService: MobileImageCacheService,
     private _googleImageService: GoogleImageService,
     private _logService: LogService,
-    private _cdr: ChangeDetectorRef
+    private _cdr: ChangeDetectorRef,
+    private _utilityService: UtilityService
   ) {}
 
   ngOnInit(): void {
@@ -137,22 +140,38 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
   private generateAvatar(): void {
     // Only try to load image if we have a valid URL
     const imgValue = this.img;
-    const isValidUrl = imgValue &&
-                      typeof imgValue === 'string' &&
-                      imgValue.trim() !== '' &&
-                      imgValue !== 'null' &&
-                      imgValue !== 'undefined' &&
-                      imgValue !== 'NaN' &&
-                      imgValue.length > 5 && // Minimum length for a valid URL
-                      (imgValue.startsWith('http://') ||
-                       imgValue.startsWith('https://') ||
-                       imgValue.startsWith('blob:') ||
-                       imgValue.startsWith('data:'));
-
-    if (isValidUrl && imgValue) {
-      this.tryLoadImage(imgValue);
-    } else {
+    
+    if (!imgValue || 
+        typeof imgValue !== 'string' ||
+        imgValue.trim() === '' ||
+        imgValue === 'null' ||
+        imgValue === 'undefined' ||
+        imgValue === 'NaN' ||
+        imgValue.length < 3) {
       // Invalid or missing URL - show initials
+      this.isGeneratedAvatar = true;
+      this.isLoading = false;
+      this.hasError = false;
+      this._cdr.markForCheck();
+      return;
+    }
+
+    // Normalize URL for MinIO (handles both absolute and relative URLs)
+    const normalizedUrl = this._utilityService.normalizeImageUrl(
+      imgValue,
+      environment.MINIO_BUCKET_URL || ''
+    );
+
+    // Check if normalized URL is valid (absolute URL, blob, or data URI)
+    const isValidUrl = normalizedUrl.startsWith('http://') ||
+                       normalizedUrl.startsWith('https://') ||
+                       normalizedUrl.startsWith('blob:') ||
+                       normalizedUrl.startsWith('data:');
+
+    if (isValidUrl) {
+      this.tryLoadImage(normalizedUrl);
+    } else {
+      // Invalid URL after normalization - show initials
       this.isGeneratedAvatar = true;
       this.isLoading = false;
       this.hasError = false;

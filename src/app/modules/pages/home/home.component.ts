@@ -29,6 +29,7 @@ import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service
 import { ImagePreloadService } from '@shared/services/image-preload.service';
 import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 import { WidgetPosition } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
+import { UtilityService } from '@shared/services/utility.service';
 
 @Component({
     selector: 'worky-home',
@@ -132,7 +133,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private _pullToRefreshService: PullToRefreshService,
     private _logService: LogService,
     private _imagePreloadService: ImagePreloadService,
-    private _mobileImageCacheService: MobileImageCacheService
+    private _mobileImageCacheService: MobileImageCacheService,
+    private _utilityService: UtilityService
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Home');
@@ -691,7 +693,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         // Only preload first image to reduce load
         const firstMedia = publication.media[0];
         if (firstMedia && firstMedia.url) {
-          this._mobileImageCacheService.loadImage(firstMedia.url, 'publication', {
+          // Normalize URL for MinIO
+          const normalizedUrl = this._utilityService.normalizeImageUrl(
+            firstMedia.url,
+            this.urlMediaApi || ''
+          );
+          this._mobileImageCacheService.loadImage(normalizedUrl, 'publication', {
             priority: 'low',
             timeout: 15000
           }).subscribe({

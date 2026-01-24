@@ -67,7 +67,11 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
 
   ngAfterViewInit(): void {
     if (this.profileImage) {
-      this.previews[0].url = this.profileImage;
+      // Normalize the profile image URL to ensure it uses MinIO bucket URL
+      this.previews[0].url = this._utilityService.normalizeImageUrl(
+        this.profileImage,
+        environment.MINIO_BUCKET_URL || ''
+      );
     }
     // Load Cropper.js CSS from CDN
     this._lazyCssService.loadCss('https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css', 'cropper');
@@ -80,7 +84,15 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
 
   ngOnInit(): void {
     this._authService.getDecodedToken();
-    this.previews[0].url = this.profileImage || this.imgCoverDefault;
+    // Normalize the profile image URL to ensure it uses MinIO bucket URL
+    if (this.profileImage) {
+      this.previews[0].url = this._utilityService.normalizeImageUrl(
+        this.profileImage,
+        environment.MINIO_BUCKET_URL || ''
+      );
+    } else {
+      this.previews[0].url = this.imgCoverDefault;
+    }
   }
 
   ngAfterViewChecked() {
@@ -217,8 +229,10 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
         let coverDesktop: string;
         if (responseDesktop && typeof responseDesktop === 'object' && responseDesktop.files && Array.isArray(responseDesktop.files) && responseDesktop.files.length > 0) {
           const file = responseDesktop.files[0];
-          // Use the relative path returned by the file service
-          coverDesktop = file.url || `${uploadLocation}/${file.filename}`;
+          // Get the URL from the response
+          const rawUrl = file.url || `${uploadLocation}/${file.filename}`;
+          // Extract relative path: remove any absolute URL prefix (old file-service URLs)
+          coverDesktop = this.extractRelativePath(rawUrl) || `${uploadLocation}/${file.filename}`;
         } else {
           throw new Error('Invalid response structure from desktop upload - expected {message, files}');
         }
@@ -245,8 +259,10 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
         let coverMobile: string;
         if (responseMobile && typeof responseMobile === 'object' && responseMobile.files && Array.isArray(responseMobile.files) && responseMobile.files.length > 0) {
           const file = responseMobile.files[0];
-          // Use the relative path returned by the file service
-          coverMobile = file.url || `${uploadLocation}/${file.filename}`;
+          // Get the URL from the response
+          const rawUrl = file.url || `${uploadLocation}/${file.filename}`;
+          // Extract relative path: remove any absolute URL prefix (old file-service URLs)
+          coverMobile = this.extractRelativePath(rawUrl) || `${uploadLocation}/${file.filename}`;
         } else {
           throw new Error('Invalid response structure from mobile upload - expected {message, files}');
         }
@@ -270,8 +286,8 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
           }
         });
 
-        // For preview, construct full URL using MINIO_BUCKET_URL
-        this.previews[0].url = environment.MINIO_BUCKET_URL + '/' + coverDesktop;
+        // For preview, normalize the URL using MINIO_BUCKET_URL
+        this.previews[0].url = this._utilityService.normalizeImageUrl(coverDesktop, environment.MINIO_BUCKET_URL || '');
 
         this.selectedFiles = [];
         this.isUploading = false;
@@ -323,5 +339,36 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
 
   onImageError(event: Event): void {
     this._utilityService.handleImageError(event, this.imgCoverDefault);
+  }
+
+  /**
+   * Extract relative path from URL (removes absolute URL prefixes from old file-service)
+   * @param url The URL to extract relative path from
+   * @returns Relative path (e.g., "profile/filename.jpg")
+   */
+  private extractRelativePath(url: string): string {
+    if (!url) return '';
+    
+    // If it's already a relative path (doesn't start with http/https), return as is
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      // Remove leading slash if present
+      return url.startsWith('/') ? url.slice(1) : url;
+    }
+    
+    // Extract path from absolute URL
+    try {
+      const urlObj = new URL(url);
+      // Get the pathname and remove leading slash
+      const path = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+      return path;
+    } catch (e) {
+      // If URL parsing fails, try regex extraction
+      const match = url.match(/https?:\/\/[^\/]+(\/.+)/);
+      if (match && match[1]) {
+        return match[1].startsWith('/') ? match[1].slice(1) : match[1];
+      }
+      // Fallback: return as is if we can't parse it
+      return url;
+    }
   }
 }

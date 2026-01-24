@@ -651,7 +651,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   private async updatePublicationAndNotify(idPublication: string, comment?: any) {
-    const publication = await lastValueFrom(this._publicationService.getPublicationId(idPublication).pipe(takeUntil(this.unsubscribe$)));
+    // Force refresh to bypass cache and get fresh data including new comment
+    const publication = await lastValueFrom(this._publicationService.getPublicationId(idPublication, true).pipe(takeUntil(this.unsubscribe$)));
     this._publicationService.updatePublications(publication);
     if (comment) {
       this.sendEmailNotificationReaction(publication[0], comment);

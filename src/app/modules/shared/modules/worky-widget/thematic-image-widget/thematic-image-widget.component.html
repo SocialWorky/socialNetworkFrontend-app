@@ -16,13 +16,13 @@
            rel="noopener noreferrer"
            (click)="onImageClick(image); $event.preventDefault()"
            class="image-link">
-          <img [src]="image.imageUrl" 
+          <img [src]="getNormalizedImageUrl(image.imageUrl)" 
                [alt]="image.altText || image.name"
                class="thematic-image"
                loading="lazy">
         </a>
         <ng-template #noLink>
-          <img [src]="image.imageUrl" 
+          <img [src]="getNormalizedImageUrl(image.imageUrl)" 
                [alt]="image.altText || image.name"
                class="thematic-image"
                loading="lazy">

@@ -46,8 +46,14 @@
             </div>
           </div>
 
-          <div *ngIf="message.type === MessageType.IMAGE || message.type === MessageType.VIDEO" class="media-wrapper" (click)="openUrl(message.urlFile || getThumbnail(message.content))">
-            <img [src]="getThumbnail(message.content) || message.urlFile || ''" class="thumbnail" [alt]="'message.thumbnail' | workyTranslations" />
+          <div *ngIf="message.type === MessageType.IMAGE || message.type === MessageType.VIDEO" class="media-wrapper" (click)="openUrl(getNormalizedUrl(message.urlFile) || getThumbnail(message.content))">
+            <img 
+              [src]="getImageSrc(message)" 
+              class="thumbnail" 
+              [alt]="'message.thumbnail' | workyTranslations"
+              loading="lazy"
+              decoding="async"
+              (error)="onImageError($event)" />
             <div class="play-button" *ngIf="message.type === MessageType.VIDEO">▶</div>
           </div>
 
@@ -123,8 +129,14 @@
               </div>
             </div>
 
-            <div *ngIf="message.type === MessageType.IMAGE || message.type === MessageType.VIDEO" class="media-wrapper" (click)="openUrl(message.urlFile || getThumbnail(message.content))">
-              <img [src]="getThumbnail(message.content) || message.urlFile || ''" class="thumbnail" [alt]="'message.thumbnail' | workyTranslations" />
+            <div *ngIf="message.type === MessageType.IMAGE || message.type === MessageType.VIDEO" class="media-wrapper" (click)="openUrl(getNormalizedUrl(message.urlFile) || getThumbnail(message.content))">
+              <img 
+                [src]="getImageSrc(message)" 
+                class="thumbnail" 
+                [alt]="'message.thumbnail' | workyTranslations"
+                loading="lazy"
+                decoding="async"
+                (error)="onImageError($event)" />
               <div class="play-button" *ngIf="message.type === MessageType.VIDEO">▶</div>
             </div>
 

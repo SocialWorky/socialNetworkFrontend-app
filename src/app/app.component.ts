@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
-import { filter, map, Subject, switchMap, takeUntil, timer, of, catchError, retryWhen, delay, tap, take, groupBy, mergeMap, debounceTime } from 'rxjs';
+import { filter, map, Subject, switchMap, takeUntil, timer, of, catchError, retryWhen, delay, tap, take, groupBy, mergeMap, debounceTime, retry } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 
 import { getTranslationsLanguage } from '../translations/translations';
@@ -27,6 +27,7 @@ import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service
 import { AppUpdateManagerService } from '@shared/services/app-update-manager.service';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { ImageOrganizer, MediaType } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
+import { UtilityService } from '@shared/services/utility.service';
 
 @Component({
     selector: 'worky-root',
@@ -69,7 +70,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private _cacheOptimizationService: CacheOptimizationService,
     private _logService: LogService,
     private _appUpdateManagerService: AppUpdateManagerService,
-    private _notificationPublicationService: NotificationPublicationService
+    private _notificationPublicationService: NotificationPublicationService,
+    private _utilityService: UtilityService
   ) {
     this._notificationUsersService.setupInactivityListeners();
     if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();
@@ -130,9 +132,24 @@ export class AppComponent implements OnInit, OnDestroy {
             }
             break;
           case TypePublishing.COMMENT:
-            this.handleCommentUpdate(message.idReference);
-            if (message.containsMedia) {
-              this._mediaEventsService.notifyMediaProcessed(message);
+            if (this.isMediaProcessingNotification(message)) {
+              // Collect media data from the socket message for comments
+              // For comments, idReference is the comment ID, but we need to track by comment ID
+              const commentId = message.idReference;
+              if (!this.mediaCollector.has(commentId)) {
+                this.mediaCollector.set(commentId, []);
+              }
+              // The 'data' field contains the info for one processed file
+              if (message.data) {
+                this.mediaCollector.get(commentId)!.push(message);
+              }
+              // Push the full message to the debouncer to act as a trigger
+              this.mediaReadyNotification$.next(message);
+            } else {
+              this.handleCommentUpdate(message.idReference);
+              if (message.containsMedia) {
+                this._mediaEventsService.notifyMediaProcessed(message);
+              }
             }
             break;
           case TypePublishing.EMOJI:
@@ -218,10 +235,15 @@ export class AppComponent implements OnInit, OnDestroy {
   private setupMediaReadyDebouncer(): void {
     this.mediaReadyNotification$.pipe(
       groupBy(message => message.idReference),
-      mergeMap(group$ => group$.pipe(debounceTime(2500))), // Wait for 2.5s of silence for a given pub ID
+      mergeMap(group$ => group$.pipe(debounceTime(2500))), // Wait for 2.5s of silence for a given ID
       takeUntil(this.destroy$)
     ).subscribe(lastMessage => {
-      this.buildPublicationWithCollectedMedia(lastMessage.idReference);
+      // Check if it's a comment or publication based on the type
+      if (lastMessage.type === TypePublishing.COMMENT) {
+        this.buildCommentWithCollectedMedia(lastMessage.idReference);
+      } else {
+        this.buildPublicationWithCollectedMedia(lastMessage.idReference);
+      }
     });
   }
 
@@ -234,18 +256,41 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private handleCommentUpdate(commentId: string): void {
-    this._commentService.getCommentsById(commentId)
-      .pipe(
-        takeUntil(this.destroy$),
-        filter(Boolean),
-        switchMap((comment: any) =>
-          this._publicationService.getPublicationId(comment.publicationId)
-            .pipe(map((publication: PublicationView[]) => ({ comment, publication })))
-        )
-      )
-      .subscribe(({ publication }) => {
-        this._socketService.emitEvent('updatePublication', publication);
-      });
+    // Delay to ensure database has completed media linking
+    // Increased delay to ensure media is fully processed and linked
+    timer(1000).pipe(
+      takeUntil(this.destroy$),
+      switchMap(() => this._commentService.getCommentsById(commentId)),
+      filter(Boolean),
+      switchMap((comment: any) => {
+        if (!comment.publicationId) {
+          // Comment might be on a media item, not directly on a publication
+          return of(null);
+        }
+        // Force refresh by bypassing cache (second parameter = true)
+        return this._publicationService.getPublicationId(comment.publicationId, true);
+      }),
+      filter((publication): publication is PublicationView[] => !!publication && publication.length > 0),
+      // Retry if media is still processing (up to 2 retries with 1 second delay)
+      retry({
+        count: 2,
+        delay: 1000
+      })
+    ).subscribe({
+      next: (publication) => {
+        // Use updatePublications which handles both socket notification and local database
+        // This will trigger the update in publication-view component
+        this._publicationService.updatePublications(publication);
+      },
+      error: (error) => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'AppComponent',
+          'Error updating comment after media processing',
+          { commentId, error: error instanceof Error ? error.message : String(error) }
+        );
+      }
+    });
   }
 
   /**
@@ -270,14 +315,40 @@ export class AppComponent implements OnInit, OnDestroy {
         const basePublication = publications[0];
 
         // Manually construct the full media array from all collected messages
-        const constructedMedia: ImageOrganizer[] = collectedMessages.map(msg => ({
-          _id: '', // Not critical for the view
-          url: `${msg.urlMedia}${msg.data.filename}`,
-          urlThumbnail: `${msg.urlMedia}${msg.data.thumbnail}`,
-          urlCompressed: `${msg.urlMedia}${msg.data.compressed}`,
-          comments: [],
-          type: MediaType.IMAGE // This can be enhanced to detect video/image from file extension
-        }));
+        const constructedMedia: ImageOrganizer[] = collectedMessages.map(msg => {
+          // Normalize URLs for MinIO
+          // The msg.data object contains the result from uploadService.processFile
+          // which includes url, urlThumbnail, urlCompressed as relative MinIO paths
+          const baseUrl = environment.MINIO_BUCKET_URL || '';
+          
+          // Use the MinIO URLs directly from the data object
+          // These are already relative paths like "publications/filename.jpg" or "publications/compressed|filename.jpg"
+          const getFullPath = (relativePath: string) => {
+            if (!relativePath) return '';
+            // If already a full URL, return as is
+            if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+              return relativePath;
+            }
+            // Normalize the relative path with the base URL
+            return this._utilityService.normalizeImageUrl(relativePath, baseUrl);
+          };
+          
+          // Prefer urlCompressed/urlThumbnail from data, fallback to constructing from filename/thumbnail if needed
+          const url = msg.data.url ? getFullPath(msg.data.url) : '';
+          const urlThumbnail = msg.data.urlThumbnail ? getFullPath(msg.data.urlThumbnail) : 
+            (msg.data.thumbnail ? getFullPath(`${msg.urlMedia || 'publications/'}${msg.data.thumbnail}`) : '');
+          const urlCompressed = msg.data.urlCompressed ? getFullPath(msg.data.urlCompressed) :
+            (msg.data.compressed ? getFullPath(`${msg.urlMedia || 'publications/'}${msg.data.compressed}`) : url);
+          
+          return {
+            _id: '', // Not critical for the view
+            url: url,
+            urlThumbnail: urlThumbnail,
+            urlCompressed: urlCompressed || url, // Fallback to url if urlCompressed is not available
+            comments: [],
+            type: MediaType.IMAGE // This can be enhanced to detect video/image from file extension
+          };
+        });
 
         // Merge and update view
         basePublication.media = constructedMedia;
@@ -288,6 +359,103 @@ export class AppComponent implements OnInit, OnDestroy {
 
       // Clean up collector for this publication ID
       this.mediaCollector.delete(publicationId);
+    });
+  }
+
+  /**
+   * Builds the final comment object by fetching the comment and publication, then injecting all collected media.
+   */
+  private buildCommentWithCollectedMedia(commentId: string): void {
+    const collectedMessages = this.mediaCollector.get(commentId);
+
+    if (!collectedMessages || collectedMessages.length === 0) {
+      return;
+    }
+
+    // First, get the comment to find its publicationId
+    this._commentService.getCommentsById(commentId).pipe(
+      take(1),
+      filter(Boolean),
+      switchMap((comment: any) => {
+        if (!comment.publicationId) {
+          // Comment might be on a media item, not directly on a publication
+          this._logService.log(LevelLogEnum.WARN, 'AppComponent', `Comment ${commentId} has no publicationId`, {});
+          return of(null);
+        }
+        // Get the publication with the comment
+        return this._publicationService.getPublicationId(comment.publicationId, true).pipe(
+          map((publications: PublicationView[]) => {
+            if (!publications || publications.length === 0) {
+              return null;
+            }
+            return { publication: publications[0], comment };
+          })
+        );
+      }),
+      catchError(err => {
+        this._logService.log(LevelLogEnum.ERROR, 'AppComponent', `Failed to fetch comment and publication for ${commentId}`, { error: err });
+        return of(null);
+      })
+    ).subscribe(result => {
+      if (!result) {
+        // Clean up collector even if we couldn't process
+        this.mediaCollector.delete(commentId);
+        return;
+      }
+
+      const { publication, comment } = result;
+
+      // Manually construct the full media array from all collected messages
+      const constructedMedia: ImageOrganizer[] = collectedMessages.map(msg => {
+        // Normalize URLs for MinIO
+        // The msg.data object contains the result from uploadService.processFile
+        // which includes url, urlThumbnail, urlCompressed as relative MinIO paths
+        const baseUrl = environment.MINIO_BUCKET_URL || '';
+        
+        // Use the MinIO URLs directly from the data object
+        // These are already relative paths like "comments/filename.jpg" or "comments/compressed|filename.jpg"
+        const getFullPath = (relativePath: string) => {
+          if (!relativePath) return '';
+          // If already a full URL, return as is
+          if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+            return relativePath;
+          }
+          // Normalize the relative path with the base URL
+          return this._utilityService.normalizeImageUrl(relativePath, baseUrl);
+        };
+        
+        // Prefer urlCompressed/urlThumbnail from data, fallback to constructing from filename/thumbnail if needed
+        const url = msg.data.url ? getFullPath(msg.data.url) : '';
+        const urlThumbnail = msg.data.urlThumbnail ? getFullPath(msg.data.urlThumbnail) : 
+          (msg.data.thumbnail ? getFullPath(`${msg.urlMedia || 'comments/'}${msg.data.thumbnail}`) : '');
+        const urlCompressed = msg.data.urlCompressed ? getFullPath(msg.data.urlCompressed) :
+          (msg.data.compressed ? getFullPath(`${msg.urlMedia || 'comments/'}${msg.data.compressed}`) : url);
+        
+        return {
+          _id: '', // Not critical for the view
+          url: url,
+          urlThumbnail: urlThumbnail,
+          urlCompressed: urlCompressed || url, // Fallback to url if urlCompressed is not available
+          comments: [],
+          type: MediaType.IMAGE // This can be enhanced to detect video/image from file extension
+        };
+      });
+
+      // Find the comment in the publication and update it with the media
+      const commentIndex = publication.comment?.findIndex((c: any) => c._id === commentId);
+      if (commentIndex !== undefined && commentIndex >= 0) {
+        // Update the comment with the constructed media
+        publication.comment[commentIndex].media = constructedMedia;
+        publication.comment[commentIndex].containsMedia = false; // The media is now present
+        
+        // Update the publication with the updated comment
+        this._publicationService.updatePublications([publication]);
+      } else {
+        this._logService.log(LevelLogEnum.WARN, 'AppComponent', `Comment ${commentId} not found in publication ${publication._id}`, {});
+      }
+
+      // Clean up collector for this comment ID
+      this.mediaCollector.delete(commentId);
     });
   }
 

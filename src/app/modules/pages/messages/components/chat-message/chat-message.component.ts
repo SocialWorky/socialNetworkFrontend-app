@@ -4,6 +4,8 @@ import { MediaType } from '@shared/modules/image-organizer/interfaces/image-orga
 import { Token } from '@shared/interfaces/token.interface';
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { translations } from '@translations/translations';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 
 @Component({
   selector: 'worky-chat-message',
@@ -34,6 +36,8 @@ export class ChatMessageComponent {
 
   MediaType = MediaType;
   MessageType = MessageType;
+
+  constructor(private utilityService: UtilityService) {}
 
   messageOptions: DropdownDataLink<any>[] = [
     {
@@ -97,9 +101,38 @@ export class ChatMessageComponent {
     const patron = /\(([^)]+)\)/;
     const match = message.match(patron);
     if (match && match[1]) {
-      return match[1];
+      return this.utilityService.normalizeImageUrl(match[1], environment.MINIO_BUCKET_URL || '');
     }
     return '';
+  }
+
+  getNormalizedUrl(url: string | undefined): string {
+    if (!url) return '';
+    return this.utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
+  }
+
+  getImageSrc(message: Message): string {
+    // Try to get thumbnail from content first (markdown format)
+    const thumbnail = this.getThumbnail(message.content);
+    if (thumbnail) {
+      return thumbnail;
+    }
+    
+    // Fallback to normalized urlFile
+    if (message.urlFile) {
+      return this.getNormalizedUrl(message.urlFile);
+    }
+    
+    // Return empty string if no image source available
+    return '';
+  }
+
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img && img.src) {
+      // If image fails to load, try to set a fallback
+      img.src = 'assets/img/shared/handleImageError.png';
+    }
   }
 
   getReplyMessagePreview(replyMessage: Message): string {

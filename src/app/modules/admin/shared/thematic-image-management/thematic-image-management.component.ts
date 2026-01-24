@@ -15,6 +15,7 @@ import { ImageUploadModalModule } from '@shared/modules/image-upload-modal/image
 import { environment } from '@env/environment';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { translations } from '@translations/translations';
+import { UtilityService } from '@shared/services/utility.service';
 
 @Component({
   selector: 'worky-thematic-image-management',
@@ -52,7 +53,8 @@ export class ThematicImageManagementComponent implements OnInit, OnDestroy {
     private alertService: AlertService,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef,
-    private logService: LogService
+    private logService: LogService,
+    private utilityService: UtilityService
   ) {
     this.imageForm = this.fb.group({
       name: ['', Validators.required],
@@ -73,6 +75,14 @@ export class ThematicImageManagementComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /**
+   * Get normalized image URL for display
+   */
+  getNormalizedImageUrl(imageUrl: string): string {
+    if (!imageUrl) return '';
+    return this.utilityService.normalizeImageUrl(imageUrl, environment.MINIO_BUCKET_URL || '');
   }
 
   loadImages(): void {

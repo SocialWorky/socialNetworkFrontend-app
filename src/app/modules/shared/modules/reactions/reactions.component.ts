@@ -15,6 +15,7 @@ import { NotificationService } from '@shared/services/notifications/notification
 import { Token } from '@shared/interfaces/token.interface';
 import { UtilityService } from '@shared/services/utility.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { environment } from '@env/environment';
 
 @Component({
     selector: 'worky-reactions',
@@ -74,6 +75,14 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  /**
+   * Get normalized emoji URL for display
+   */
+  getNormalizedEmojiUrl(emojiUrl: string): string {
+    if (!emojiUrl) return '';
+    return this._utilityService.normalizeImageUrl(emojiUrl, environment.MINIO_BUCKET_URL || '');
   }
 
   addReaction(reaction: CustomReactionList) {

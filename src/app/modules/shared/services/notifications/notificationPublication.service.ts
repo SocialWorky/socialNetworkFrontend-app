@@ -88,7 +88,10 @@ export class NotificationPublicationService implements OnDestroy {
       this.webSocketOptimizationService.emit('deletePublication', payload);
     }
 
-    sendNotificationUpdatePublication(payload: any) {
+    sendNotificationUpdatePublication(payload: PublicationView[]) {
+      // Update local BehaviorSubject immediately for instant UI update
+      this._notificationUpdatePublication.next(payload);
+      // Also emit to socket for other clients
       this.webSocketOptimizationService.emit('updatePublication', payload);
     }
 

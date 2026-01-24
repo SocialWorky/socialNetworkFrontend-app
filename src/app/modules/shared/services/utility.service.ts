@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
+import { environment } from '@env/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -254,23 +255,83 @@ export class UtilityService {
   normalizeImageUrl(url: string, baseUrl: string): string {
     if (!url) return '';
     
-    // If URL already starts with http/https, return as is
+    // If URL already starts with blob/data, return as is
+    if (url.startsWith('blob:') || url.startsWith('data:')) {
+      return url;
+    }
+    
+    // Detect and convert old file-service URLs to relative paths
+    // This handles URLs that were saved before the MinIO migration
     if (url.startsWith('http://') || url.startsWith('https://')) {
+      // Check if it's an old file-service URL
+      const oldFileServicePatterns = [
+        /https?:\/\/file-service[^\/]*\.worky\.cl\//,
+        /https?:\/\/file-service[^\/]*\.myb-side\.cl\//,
+        /https?:\/\/localhost:3005\//,
+        /https?:\/\/localhost\/(?!.*:)/  // localhost without port
+      ];
+      
+      for (const pattern of oldFileServicePatterns) {
+        if (pattern.test(url)) {
+          // Extract the relative path (everything after the domain)
+          const match = url.match(/https?:\/\/[^\/]+(\/.+)/);
+          if (match && match[1]) {
+            // Remove leading slash to get relative path
+            url = match[1].startsWith('/') ? match[1].slice(1) : match[1];
+            break; // Exit loop once we've converted the URL
+          }
+        }
+      }
+      
+      // If it's still an absolute URL but not an old file-service URL, return as is
+      // (might be an external URL like Google Images, etc.)
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
+    }
+    
+    // If baseUrl is not provided or is undefined, try to get it from environment
+    let finalBaseUrl = baseUrl;
+    if (!finalBaseUrl || finalBaseUrl.trim() === '') {
+      // Try to get MINIO_BUCKET_URL from environment
+      finalBaseUrl = environment.MINIO_BUCKET_URL || '';
+    }
+    
+    // If still no baseUrl and URL looks like a relative path, this is a problem
+    if (!finalBaseUrl || finalBaseUrl.trim() === '') {
+      // If URL looks like a relative path (starts with publications/, users/, etc.)
+      // and we don't have a baseUrl, return the URL as is (will likely fail)
+      // The component should ensure MINIO_BUCKET_URL is passed
       return url;
     }
     
     // If URL already contains the base URL, return as is
-    if (url.includes(baseUrl)) {
+    if (url.includes(finalBaseUrl)) {
       return url;
     }
     
     // Clean base URL (remove trailing slash)
-    const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    const cleanBaseUrl = finalBaseUrl.endsWith('/') ? finalBaseUrl.slice(0, -1) : finalBaseUrl;
     
-    // Add leading slash to URL if not present
-    const cleanUrl = url.startsWith('/') ? url : '/' + url;
+    // Clean the URL - remove leading slash if present, we'll add it
+    let cleanUrl = url.startsWith('/') ? url.slice(1) : url;
     
-    return cleanBaseUrl + cleanUrl;
+    // Encode pipe separator (|) as %7C for valid HTTP URLs
+    // This must be done on the final URL path, not before constructing the URL
+    // MinIO stores files with | in the name, but HTTP requires proper encoding
+    if (cleanUrl.includes('|')) {
+      // Split by / to preserve path structure, then encode each segment
+      const urlParts = cleanUrl.split('/');
+      cleanUrl = urlParts.map(part => {
+        // Encode the pipe character in each part
+        return part.replace(/\|/g, '%7C');
+      }).join('/');
+    }
+    
+    // Construct final URL
+    const finalUrl = `${cleanBaseUrl}/${cleanUrl}`;
+    
+    return finalUrl;
   }
 
 }

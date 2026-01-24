@@ -990,11 +990,17 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Getters para manejar validaciones de forma elegante
   get profileCoverImage(): string {
-    return this.userData?.profile?.coverImage || '';
+    const coverImage = this.userData?.profile?.coverImage || '';
+    if (!coverImage) return '';
+    // Normalize the URL to ensure it uses MinIO bucket URL
+    return this._utilityService.normalizeImageUrl(coverImage, environment.MINIO_BUCKET_URL || '');
   }
 
   get profileCoverImageMobile(): string {
-    return this.userData?.profile?.coverImageMobile || '';
+    const coverImageMobile = this.userData?.profile?.coverImageMobile || '';
+    if (!coverImageMobile) return '';
+    // Normalize the URL to ensure it uses MinIO bucket URL
+    return this._utilityService.normalizeImageUrl(coverImageMobile, environment.MINIO_BUCKET_URL || '');
   }
 
   get profileLegend(): string {

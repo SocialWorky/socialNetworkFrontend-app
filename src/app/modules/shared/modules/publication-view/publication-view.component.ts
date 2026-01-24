@@ -35,6 +35,7 @@ import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { UtilityService } from '@shared/services/utility.service';
 
 
 @Component({
@@ -151,6 +152,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _notificationService: NotificationService,
     private _scrollService: ScrollService,
     private _loadingService: LoadingService,
+    private _utilityService: UtilityService,
     private _mediaEventsService: MediaEventsService,
     private _alertService: AlertService,
     private _globalEventService: GlobalEventService,
@@ -165,19 +167,30 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     if (changes['publication'] && changes['publication'].currentValue) {
       const currentPublication = changes['publication'].currentValue;
       const previousPublication = changes['publication'].previousValue;
-      
+
       if (!previousPublication || currentPublication._id !== previousPublication._id) {
         this.loadReactionsImg(currentPublication);
       } else if (previousPublication && currentPublication._id === previousPublication._id) {
-        const reactionsChanged = 
-          !previousPublication.reaction || 
-          !currentPublication.reaction || 
+        const reactionsChanged =
+          !previousPublication.reaction ||
+          !currentPublication.reaction ||
           previousPublication.reaction.length !== currentPublication.reaction.length ||
-          JSON.stringify(previousPublication.reaction.map((r: any) => r._id)) !== 
+          JSON.stringify(previousPublication.reaction.map((r: any) => r._id)) !==
           JSON.stringify(currentPublication.reaction.map((r: any) => r._id));
-        
+
         if (reactionsChanged) {
           this.loadReactionsImg(currentPublication);
+        }
+
+        // Check if new comments with pending media were added
+        const prevCommentCount = previousPublication.comment?.length || 0;
+        const currCommentCount = currentPublication.comment?.length || 0;
+
+        if (currCommentCount > prevCommentCount) {
+          // New comments added, check if any have pending media
+          if (this.hasAnyPendingMedia()) {
+            this.startPolling();
+          }
         }
       }
     }
@@ -226,6 +239,13 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
             this.publication = { ...updatedPublication };
             this.loadReactionsImg(updatedPublication);
             this._cdr.markForCheck();
+
+            // Check if we still have pending media and need to continue/start polling
+            if (this.hasAnyPendingMedia()) {
+              this.startPolling();
+            } else {
+              this.stopPolling();
+            }
           }
         }
       });
@@ -243,24 +263,46 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       });
     this.loadReactionsImg();
     this._cdr.markForCheck();
-    
+
     this.simulateProgressiveLoading();
 
-    if (this.publication.containsMedia && !this.publication.media.length) {
+    // Start polling if publication or any comment has pending media
+    if (this.hasAnyPendingMedia()) {
       this.startPolling();
     }
+  }
+
+  /**
+   * Check if publication or any of its comments have pending media
+   */
+  private hasAnyPendingMedia(): boolean {
+    // Check publication media
+    if (this.publication.containsMedia && !this.publication.media?.length) {
+      return true;
+    }
+
+    // Check comments media
+    if (this.publication.comment?.length) {
+      return this.publication.comment.some(
+        comment => comment.containsMedia && (!comment.media || comment.media.length === 0)
+      );
+    }
+
+    return false;
   }
 
   private startPolling() {
     this.stopPolling();
 
+    // Poll every 3 seconds for faster updates
     this.pollingInterval = setInterval(() => {
       this.refreshPublications(this.publication._id);
-    }, 5000);
+    }, 3000);
 
+    // Extended timeout of 2 minutes for heavy images/videos
     this.pollingTimeout = setTimeout(() => {
       this.stopPolling();
-    }, 60000);
+    }, 120000);
   }
 
   private stopPolling() {
@@ -462,8 +504,13 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     if (publication && publication.reaction) {
       publication.reaction.forEach((element: Reactions) => {
         if (element.customReaction && element.customReaction.emoji) {
-          if(!this.listReaction.includes(element.customReaction.emoji)) {
-            this.listReaction.push(element.customReaction.emoji);
+          // Normalize emoji URL for MinIO
+          const normalizedEmoji = this._utilityService.normalizeImageUrl(
+            element.customReaction.emoji,
+            environment.MINIO_BUCKET_URL || ''
+          );
+          if(!this.listReaction.includes(normalizedEmoji)) {
+            this.listReaction.push(normalizedEmoji);
           }
         }
       });
@@ -697,7 +744,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   refreshPublications(_id?: string) {
     if (_id) {
-      this._publicationService.getPublicationId(_id).pipe(
+      // Force refresh to bypass cache when polling for media updates
+      this._publicationService.getPublicationId(_id, true).pipe(
         takeUntil(this.destroy$)
       ).subscribe({
         next: (publication: PublicationView[]) => {
@@ -707,7 +755,13 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           
           const updatedPublication = publication[0];
 
-          if (this.publication.containsMedia && updatedPublication.media.length > 0) {
+          // Stop polling if no more pending media (publication or comments)
+          const hasPendingPublicationMedia = updatedPublication.containsMedia && !updatedPublication.media?.length;
+          const hasPendingCommentMedia = updatedPublication.comment?.some(
+            (c: any) => c.containsMedia && (!c.media || c.media.length === 0)
+          );
+
+          if (!hasPendingPublicationMedia && !hasPendingCommentMedia) {
             this.stopPolling();
           }
           
@@ -715,18 +769,31 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
             return;
           }
 
-          const hasMediaChanges = 
+          const hasMediaChanges =
             this.publication.media.length !== updatedPublication.media.length ||
             this.publication.containsMedia !== updatedPublication.containsMedia ||
             JSON.stringify(this.publication.media) !== JSON.stringify(updatedPublication.media);
-          
-          const hasOtherChanges = 
+
+          // Check if any comment's media has changed (compare by comment ID, not index)
+          const hasCommentMediaChanges = updatedPublication.comment?.some((updatedComment: any) => {
+            const currentComment = this.publication.comment?.find((c: any) => c._id === updatedComment._id);
+            if (!currentComment) return true; // New comment
+            const currentMediaLength = currentComment.media?.length || 0;
+            const updatedMediaLength = updatedComment.media?.length || 0;
+            return currentMediaLength !== updatedMediaLength;
+          }) || false;
+
+          const hasOtherChanges =
             this.publication.reaction.length !== updatedPublication.reaction.length ||
             this.publication.comment.length !== updatedPublication.comment.length ||
             this.publication.fixed !== updatedPublication.fixed ||
             JSON.stringify(this.publication.reaction) !== JSON.stringify(updatedPublication.reaction);
-          
-          if (hasMediaChanges || hasOtherChanges) {
+
+          // Force update if there are pending media that are now ready
+          const pendingMediaNowReady = !hasPendingPublicationMedia && !hasPendingCommentMedia &&
+            (this.publication.containsMedia || this.publication.comment?.some((c: any) => c.containsMedia));
+
+          if (hasMediaChanges || hasCommentMediaChanges || hasOtherChanges || pendingMediaNowReady) {
             this._publicationService.updatePublicationsLocal(publication);
             this.publication = { ...updatedPublication };
             this.loadReactionsImg(updatedPublication);

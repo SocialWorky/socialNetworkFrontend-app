@@ -9,6 +9,8 @@ import { Reactions } from '@shared/modules/publication-view/interfaces/reactions
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { ImageOrganizer, TypeView } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 
 @Component({
     selector: 'worky-header-view-content',
@@ -49,6 +51,7 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
     private _cdr: ChangeDetectorRef,
     private _notificationService: NotificationService,
     private _publicationService: PublicationService,
+    private _utilityService: UtilityService,
   ) { }
 
   ngOnInit() {
@@ -80,8 +83,15 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
     this.listReaction = [];
     if (publication) {
       publication.reaction.forEach((element: Reactions) => {
-        if(this.listReaction.includes(element.customReaction.emoji)) return;
-        this.listReaction.push(element.customReaction.emoji);
+        if (element.customReaction && element.customReaction.emoji) {
+          // Normalize emoji URL for MinIO
+          const normalizedEmoji = this._utilityService.normalizeImageUrl(
+            element.customReaction.emoji,
+            environment.MINIO_BUCKET_URL || ''
+          );
+          if(this.listReaction.includes(normalizedEmoji)) return;
+          this.listReaction.push(normalizedEmoji);
+        }
       });
     }
     this._cdr.markForCheck();
@@ -97,7 +107,7 @@ export class HeaderViewContentComponent  implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         },
         error: (error) => {
-          console.error('Failed to refresh publications', error);
+          // Error handled silently
         }
       });
     }

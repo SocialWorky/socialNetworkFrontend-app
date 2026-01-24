@@ -4,6 +4,7 @@ import { UtilityService } from '@shared/services/utility.service';
 import { ImageService, ImageLoadOptions } from '@shared/services/image.service';
 import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 import { CommonModule } from '@angular/common';
+import { environment } from '@env/environment';
 
 @Component({
   selector: 'worky-image',
@@ -117,6 +118,12 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
     this.imageFullyLoaded = false; // Reset fully loaded flag
     this._cdr.markForCheck();
 
+    // Normalize image URL if it's a relative path (not starting with http/https)
+    const normalizedSrc = this._utilityService.normalizeImageUrl(
+      this.src, 
+      environment.MINIO_BUCKET_URL || ''
+    );
+
     // Use mobile-optimized cache service if available
     const imageService = this._mobileCacheService.isMobile() ? this._mobileCacheService : this._imageService;
 
@@ -132,8 +139,8 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
 
     // Use the appropriate service for loading
     const imageObservable = this._mobileCacheService.isMobile() 
-      ? this._mobileCacheService.loadImage(this.src, 'media', options)
-      : this._imageService.loadImage(this.src, options);
+      ? this._mobileCacheService.loadImage(normalizedSrc, 'media', options)
+      : this._imageService.loadImage(normalizedSrc, options);
 
     imageObservable
       .pipe(takeUntil(this.destroy$))

@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ThematicImageService, ThematicImage } from './service/thematic-image.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 import { Subject, interval } from 'rxjs';
 import { takeUntil, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -23,7 +25,8 @@ export class ThematicImageWidgetComponent implements OnInit, OnDestroy {
   constructor(
     private thematicImageService: ThematicImageService,
     private cdr: ChangeDetectorRef,
-    private logService: LogService
+    private logService: LogService,
+    private utilityService: UtilityService
   ) {}
 
   ngOnInit(): void {
@@ -143,5 +146,13 @@ export class ThematicImageWidgetComponent implements OnInit, OnDestroy {
 
   getCurrentImage(): ThematicImage | null {
     return this.images.length > 0 ? this.images[this.currentIndex] : null;
+  }
+
+  /**
+   * Get normalized image URL for display
+   */
+  getNormalizedImageUrl(imageUrl: string): string {
+    if (!imageUrl) return '';
+    return this.utilityService.normalizeImageUrl(imageUrl, environment.MINIO_BUCKET_URL || '');
   }
 }

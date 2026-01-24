@@ -56,7 +56,6 @@ export class ImageOrganizerComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -66,16 +65,19 @@ export class ImageOrganizerComponent implements OnInit {
       this.images = this.comment ? [...this.comment.media] : [];
     }
 
+
     this.galleryItems = this.images.map(image => {
       if (this.isImageUrl(image.urlCompressed)) {
+        const normalized = this._utilityService.normalizeImageUrl(image.urlCompressed, this.urlMediaApi);
         return {
-          src: this._utilityService.normalizeImageUrl(image.urlCompressed, this.urlMediaApi),
+          src: normalized,
           isImage: true,
           isVideo: false
         };
       } else if (this.isVideoUrl(image.url)) {
+        const normalized = this._utilityService.normalizeImageUrl(image.url, this.urlMediaApi);
         return {
-          src: this._utilityService.normalizeImageUrl(image.url, this.urlMediaApi),
+          src: normalized,
           isImage: false,
           isVideo: true
         };
@@ -97,6 +99,14 @@ export class ImageOrganizerComponent implements OnInit {
 
   isVideoUrl(url: string): boolean {
     return /\.(mp4|ogg|webm|avi|mov)$/i.test(url);
+  }
+
+  /**
+   * Get normalized image URL for display
+   */
+  getNormalizedImageUrl(url: string): string {
+    if (!url) return '';
+    return this._utilityService.normalizeImageUrl(url, this.urlMediaApi);
   }
 
   onImageError(event: Event): void {
