@@ -1,7 +1,9 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { WidgetConfig } from '../worky-news/interface/widget.interface';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 
 @Component({
   selector: 'worky-dynamic-widget',
@@ -19,7 +21,8 @@ export class DynamicWidgetComponent implements OnInit {
 
   constructor(
     private sanitizer: DomSanitizer,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private injector: Injector
   ) {}
 
   ngOnInit(): void {
@@ -64,11 +67,19 @@ export class DynamicWidgetComponent implements OnInit {
   }
 
   private renderImageWidget(config: any): void {
-    const imageUrl = config.imageUrl || '';
+    let imageUrl = config.imageUrl || '';
     const altText = config.altText || '';
     const linkUrl = config.linkUrl || '';
     const title = config.title || '';
     const showTitle = this.shouldShowTitle();
+
+    // Normalize image URL if it's a relative path
+    if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://') && 
+        !imageUrl.startsWith('blob:') && !imageUrl.startsWith('data:') && !imageUrl.startsWith('assets/')) {
+      // Use UtilityService and environment to normalize the URL
+      const utilityService = this.injector.get(UtilityService);
+      imageUrl = utilityService.normalizeImageUrl(imageUrl, environment.MINIO_BUCKET_URL || '');
+    }
 
     let html = '';
     if (title && showTitle) {

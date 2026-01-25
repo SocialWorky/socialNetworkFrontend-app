@@ -54,6 +54,7 @@ const NO_CACHE_PATTERNS = [
   '/message',
   '/websocket',
   '/socket',
+  '/records-logs', // Logs should always be read directly from database
 ];
 
 @Injectable({
@@ -275,7 +276,8 @@ export class UnifiedCacheService implements OnDestroy {
       '/comment': [/comment/, /publication/],
       '/friend': [/friend/],
       '/reaction': [/publication/],
-      '/thematic-images': [/thematic/]
+      '/thematic-images': [/thematic/],
+      '/config': [/config/] // Invalidate config cache on mutations
     };
 
     for (const [endpoint, patterns] of Object.entries(resourcePatterns)) {

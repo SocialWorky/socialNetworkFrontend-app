@@ -104,6 +104,15 @@
         </button>
         
         <button 
+          class="flex items-center gap-2 px-6 py-3 border border-orange-500 rounded-lg bg-slate-700 text-orange-400 font-semibold text-sm cursor-pointer transition-all duration-200 hover:bg-orange-500 hover:text-white"
+          (click)="clearPendingLogs()"
+          title="Clear pending logs from frontend queue"
+        >
+          <i class="material-icons">clear_all</i>
+          Clear Pending Logs
+        </button>
+        
+        <button 
           class="flex items-center gap-2 px-6 py-3 border border-green-500 rounded-lg bg-slate-700 text-green-400 font-semibold text-sm cursor-pointer transition-all duration-200 hover:bg-green-500 hover:text-white"
           (click)="exportLogs()"
         >
@@ -161,13 +170,19 @@
             [class.border-blue-500]="isExpanded(log._id)"
             [class.shadow-blue-250]="isExpanded(log._id)">
             <div class="flex items-center gap-4 p-4 cursor-pointer transition-all duration-200 hover:bg-slate-700/30 group-hover:bg-slate-700/20" (click)="toggleMetadata(log._id)">
-              <div class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider min-w-[80px] justify-center shadow-md" 
-                   [class]="log.level === 'error' ? 'bg-red-500/15 text-red-300 border border-red-500/40' :
-                            log.level === 'warn' ? 'bg-yellow-500/15 text-yellow-300 border border-yellow-500/40' :
-                            log.level === 'info' ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40' :
-                            'bg-slate-500/15 text-slate-300 border border-slate-500/40'">
-                <i class="material-icons text-base">{{ getLevelIcon(log.level) }}</i>
-                <span>{{ log.level.toUpperCase() }}</span>
+              <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider min-w-[80px] justify-center shadow-md" 
+                     [class]="log.level === 'error' ? 'bg-red-500/15 text-red-300 border border-red-500/40' :
+                              log.level === 'warn' ? 'bg-yellow-500/15 text-yellow-300 border border-yellow-500/40' :
+                              log.level === 'info' ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40' :
+                              'bg-slate-500/15 text-slate-300 border border-slate-500/40'">
+                  <i class="material-icons text-base">{{ getLevelIcon(log.level) }}</i>
+                  <span>{{ log.level.toUpperCase() }}</span>
+                </div>
+                <div *ngIf="log.resolved" class="flex items-center gap-1 px-2 py-1 bg-green-500/15 text-green-300 border border-green-500/40 rounded-lg text-xs font-semibold uppercase tracking-wider">
+                  <i class="material-icons text-sm">check_circle</i>
+                  <span>{{ 'admin.log.status.resolved' | workyTranslations }}</span>
+                </div>
               </div>
               
               <div class="flex-1 min-w-0">
@@ -181,6 +196,13 @@
                   {{ log.timestamp | date: 'dd/MM/yy HH:mm:ss' }}
                 </div>
                 <div class="flex gap-2">
+                  <button 
+                    *ngIf="hasPublicationId(log)"
+                    class="w-8 h-8 border border-blue-600 rounded-md bg-blue-500/20 text-blue-400 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-blue-500/30 hover:border-blue-500 hover:text-blue-300" 
+                    (click)="openPublicationModal(log, $event)" 
+                    [title]="'View Publication'">
+                    <i class="material-icons text-lg">article</i>
+                  </button>
                   <button class="w-8 h-8 border border-slate-600 rounded-md bg-slate-700/50 text-slate-400 flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-slate-600 hover:border-slate-500 hover:text-white" (click)="onCopy(log); $event.stopPropagation()" [title]="'admin.log.actions.copyLog' | workyTranslations">
                     <i class="material-icons text-lg">content_copy</i>
                   </button>

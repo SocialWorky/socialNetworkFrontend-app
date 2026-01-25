@@ -3,10 +3,12 @@ import { BehaviorSubject, Observable, of, from, throwError, firstValueFrom } fro
 import { catchError, map, switchMap, tap, timeout, retryWhen, delay } from 'rxjs/operators';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { ImageService, ImageLoadOptions } from './image.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ConnectionQualityService } from './connection-quality.service';
 import { DeviceDetectionService } from './device-detection.service';
 import { EnhancedLoggingService } from './enhanced-logging.service';
+import { UtilityService } from './utility.service';
+import { environment } from '@env/environment';
 
 // iOS-specific optimizations
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -131,7 +133,7 @@ export class MobileImageCacheService {
   
   // NEW: Load control to prevent infinite loading
   private currentLoads = 0;
-  private loadQueue: Array<{ url: string; resolve: (url: string) => void; reject: (error: any) => void }> = [];
+  private loadQueue: Array<{ url: string; resolve: (url: string) => void; reject: (error: any) => void; options?: ImageLoadOptions }> = [];
   private isProcessingQueue = false;
 
   constructor(
@@ -140,7 +142,8 @@ export class MobileImageCacheService {
     private http: HttpClient,
     private connectionQualityService: ConnectionQualityService,
     private deviceDetectionService: DeviceDetectionService,
-    private enhancedLoggingService: EnhancedLoggingService
+    private enhancedLoggingService: EnhancedLoggingService,
+    private _utilityService: UtilityService
   ) {
     this.initializeService();
   }
@@ -354,7 +357,8 @@ export class MobileImageCacheService {
         this.currentLoads++;
         
         try {
-          const url = await this.loadImageInternal(item.url);
+          // Pass options if available in queue item
+          const url = await this.loadImageInternal(item.url, item.options || {});
           item.resolve(url);
         } catch (error) {
           item.reject(error);
@@ -374,8 +378,11 @@ export class MobileImageCacheService {
 
   /**
    * NEW: Internal load method with strict limits
+   * Note: URL should already be normalized when passed to this method
    */
-  private async loadImageInternal(imageUrl: string): Promise<string> {
+  private async loadImageInternal(imageUrl: string, options: ImageLoadOptions & { imageType?: 'profile' | 'publication' | 'media' } = {}): Promise<string> {
+    // Ensure URL is normalized (should already be normalized, but double-check)
+    const normalizedUrl = this._utilityService.normalizeImageUrl(imageUrl, environment.MINIO_BUCKET_URL || '');
     const config = this.getCurrentConfig();
     
     // Check if we're at the limit
@@ -383,62 +390,117 @@ export class MobileImageCacheService {
       throw new Error('Too many concurrent loads');
     }
 
-    // Check memory cache first with size limit
-    if (this.memoryCache.has(imageUrl)) {
-      const cached = this.memoryCache.get(imageUrl)!;
-      if (this.isCacheValid(cached)) {
+    // Determine imageType from options or default to 'media'
+    const imageType = options.imageType || 'media';
+
+    // Check memory cache first with size limit (use normalized URL for cache key)
+    if (this.memoryCache.has(normalizedUrl)) {
+      const cached = this.memoryCache.get(normalizedUrl)!;
+      if (this.isCacheValid(cached) && this.isBlobValid(cached.blob)) {
         this.updateAccessMetrics(cached);
         this.cacheHits++;
         this.updateMetrics();
         return this.createObjectURL(cached.blob);
       } else {
-        this.memoryCache.delete(imageUrl);
+        // Cache entry is invalid or blob is corrupted - remove it
+        this.memoryCache.delete(normalizedUrl);
+        // Also clear from persistent cache if blob is invalid
+        if (!this.isBlobValid(cached.blob)) {
+          await this.clearImageFromCache(normalizedUrl);
+        }
       }
     }
 
     // For Safari iOS, skip persistent cache entirely
     if (isIOS) {
-      return this.loadFromNetworkInternal(imageUrl, 'media', { timeout: 10000 });
+      return this.loadFromNetworkInternal(normalizedUrl, imageType, { ...options, timeout: options.timeout || 10000 });
     }
 
-    // For non-iOS browsers, use persistent cache
-    const cachedImage = await this.getFromPersistentCache(imageUrl);
+    // For non-iOS browsers, use persistent cache (use normalized URL for cache key)
+    const cachedImage = await this.getFromPersistentCache(normalizedUrl);
     if (cachedImage && this.isCacheValid(cachedImage)) {
-      // Store in memory cache with size limit
-      if (this.memoryCache.size < config.maxMemoryCacheSize) {
-        this.memoryCache.set(imageUrl, cachedImage);
-      } else {
-        // Remove oldest entry if cache is full
-        const oldestKey = this.memoryCache.keys().next().value;
-        if (oldestKey) {
-          this.memoryCache.delete(oldestKey);
-          this.memoryCache.set(imageUrl, cachedImage);
+      // Validate blob before using it - corrupted blobs can cause 404-like errors
+      if (this.isBlobValid(cachedImage.blob)) {
+        // Store in memory cache with size limit
+        if (this.memoryCache.size < config.maxMemoryCacheSize) {
+          this.memoryCache.set(normalizedUrl, cachedImage);
+        } else {
+          // Remove oldest entry if cache is full
+          const oldestKey = this.memoryCache.keys().next().value;
+          if (oldestKey) {
+            this.memoryCache.delete(oldestKey);
+            this.memoryCache.set(normalizedUrl, cachedImage);
+          }
         }
+        this.updateAccessMetrics(cachedImage);
+        this.cacheHits++;
+        this.updateMetrics();
+        return this.createObjectURL(cachedImage.blob);
+      } else {
+        // Blob is invalid - clear from cache and load from network
+        this.logService.log(
+          LevelLogEnum.WARN,
+          'MobileImageCacheService',
+          'Invalid blob found in cache - clearing and reloading from network',
+          { imageUrl: normalizedUrl, blobSize: cachedImage.blob?.size, blobType: cachedImage.blob?.type }
+        );
+        await this.clearImageFromCache(normalizedUrl);
+        // Fall through to load from network
       }
-      this.updateAccessMetrics(cachedImage);
-      this.cacheHits++;
-      this.updateMetrics();
-      return this.createObjectURL(cachedImage.blob);
     }
 
-    // Load from network
-    return this.loadFromNetworkInternal(imageUrl, 'media', { timeout: 15000 });
+    // Load from network (URL already normalized) - pass options for context in error logs
+    return this.loadFromNetworkInternal(normalizedUrl, imageType, { ...options, timeout: options.timeout || 15000 });
   }
 
   /**
    * Load image with strict load control
    */
   loadImage(imageUrl: string, imageType: 'profile' | 'publication' | 'media' = 'media', options: ImageLoadOptions = {}): Observable<string> {
+    // Normalize URL before using it
+    const normalizedUrl = this._utilityService.normalizeImageUrl(imageUrl, environment.MINIO_BUCKET_URL || '');
+    
+    // Validate that normalized URL is absolute (http/https/blob/data)
+    // If URL is still relative, it means MINIO_BUCKET_URL is not configured
+    const isValidUrl = normalizedUrl.startsWith('http://') ||
+                       normalizedUrl.startsWith('https://') ||
+                       normalizedUrl.startsWith('blob:') ||
+                       normalizedUrl.startsWith('data:');
+    
+    if (!isValidUrl) {
+      // URL is still relative - cannot load
+      this.logService.log(
+        LevelLogEnum.WARN,
+        'MobileImageCacheService',
+        'Cannot load image - URL is relative and MINIO_BUCKET_URL may not be configured',
+        { originalUrl: imageUrl, normalizedUrl, imageType, minioBucketUrl: environment.MINIO_BUCKET_URL }
+      );
+      return new Observable(observer => {
+        observer.error(new Error('Invalid image URL - URL is relative and MINIO_BUCKET_URL is not configured'));
+        observer.complete();
+      });
+    }
+    
+    // Add imageType to options for context in error logs
+    // Preserve all original options including publicationId, commentId, etc.
+    const optionsWithType = { ...options, imageType } as any;
+    
+    // Debug: Log if publicationId is being passed (temporary)
+    if ((options as any)?.publicationId) {
+      // Publication ID is being passed - this is good
+    }
+    
     const config = this.getCurrentConfig();
     
     // Check if we're at the limit
     if (this.currentLoads >= config.maxConcurrentLoads) {
-      // Queue the load request
+      // Queue the load request with options for context
       return new Observable(observer => {
         this.loadQueue.push({
-          url: imageUrl,
+          url: normalizedUrl,
           resolve: (url: string) => observer.next(url),
-          reject: (error: any) => observer.error(error)
+          reject: (error: any) => observer.error(error),
+          options: optionsWithType // Include options with imageType for context in error logs
         });
         
         this.processLoadQueue();
@@ -447,9 +509,59 @@ export class MobileImageCacheService {
 
     // Try to load immediately
     return new Observable(observer => {
-      this.loadImageInternal(imageUrl)
+      // Pass options with imageType to loadImageInternal for context in error logs
+      this.loadImageInternal(normalizedUrl, optionsWithType)
         .then(url => observer.next(url))
-        .catch(error => observer.error(error))
+        .catch(error => {
+          // Log error here as well in case it's not caught in loadFromNetworkInternal
+          // Extract error status - handle both HttpErrorResponse and plain errors
+          let errorStatus: number | null = null;
+          let errorMessage = '';
+          
+          if (error instanceof HttpErrorResponse) {
+            errorStatus = error.status;
+            errorMessage = error.message || error.error?.message || String(error);
+          } else if (error?.status) {
+            errorStatus = error.status;
+            errorMessage = error.message || String(error);
+          } else if (error?.message) {
+            errorMessage = error.message;
+            if (errorMessage.includes('404') || errorMessage.includes('Not Found')) {
+              errorStatus = 404;
+            }
+          }
+          
+          const is404 = errorStatus === 404 || 
+                       errorMessage?.includes('404') || 
+                       errorMessage?.includes('Not Found') ||
+                       (error instanceof HttpErrorResponse && error.status === 404);
+          
+          // Log 404 errors with detailed information (fallback logging)
+          if (is404) {
+            this.logService.log(
+              LevelLogEnum.ERROR,
+              'MobileImageCacheService',
+              'Image not found (404) - Image may have been deleted from storage (caught in Observable)',
+              {
+                imageUrl: normalizedUrl,
+                imageType,
+                errorStatus: errorStatus || 'unknown',
+                errorMessage: errorMessage || String(error),
+                errorName: error?.name,
+                errorType: error?.constructor?.name,
+                isHttpErrorResponse: error instanceof HttpErrorResponse,
+                httpErrorUrl: error instanceof HttpErrorResponse ? error.url : null,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                // Include context if available in options
+                publicationId: (options as any)?.publicationId,
+                commentId: (options as any)?.commentId,
+                mediaId: (options as any)?.mediaId
+              }
+            );
+          }
+          observer.error(error);
+        })
         .finally(() => observer.complete());
     });
   }
@@ -457,17 +569,31 @@ export class MobileImageCacheService {
   private async getFromPersistentCache(imageUrl: string): Promise<CachedImage | null> {
     if (!this.db) return null;
 
+    // Normalize URL before looking it up in cache
+    const normalizedUrl = this._utilityService.normalizeImageUrl(imageUrl, environment.MINIO_BUCKET_URL || '');
+
     return new Promise((resolve, reject) => {
       try {
         const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
         const store = transaction.objectStore(this.STORE_NAME);
-        const request = store.get(imageUrl);
+        // Try to get with normalized URL first
+        const request = store.get(normalizedUrl);
 
-        request.onsuccess = () => resolve(request.result || null);
+        request.onsuccess = () => {
+          const result = request.result;
+          if (result) {
+            // If found with normalized URL, return it
+            resolve(result);
+          } else {
+            // If not found, try with original URL (for backward compatibility with old cache entries)
+            const fallbackRequest = store.get(imageUrl);
+            fallbackRequest.onsuccess = () => resolve(fallbackRequest.result || null);
+            fallbackRequest.onerror = () => resolve(null);
+          }
+        };
         request.onerror = () => {
           // iOS Safari specific error handling
           if (isIOS) {
-  
             resolve(null); // Don't fail completely, fall back to network
           } else {
             reject(request.error);
@@ -476,7 +602,6 @@ export class MobileImageCacheService {
       } catch (error) {
         // iOS Safari sometimes throws errors during IndexedDB operations
         if (isIOS) {
-
           resolve(null); // Don't fail completely, fall back to network
         } else {
           reject(error);
@@ -486,11 +611,30 @@ export class MobileImageCacheService {
   }
 
   private async loadFromNetworkInternal(imageUrl: string, imageType: 'profile' | 'publication' | 'media', options: ImageLoadOptions): Promise<string> {
+    // Validate URL - must be absolute (http/https/blob/data)
+    // If URL is relative, it means MINIO_BUCKET_URL is not configured
+    const isValidUrl = imageUrl && (
+      imageUrl.startsWith('http://') ||
+      imageUrl.startsWith('https://') ||
+      imageUrl.startsWith('blob:') ||
+      imageUrl.startsWith('data:')
+    );
+    
+    if (!isValidUrl) {
+      // URL is still relative - cannot load
+      this.logService.log(
+        LevelLogEnum.WARN,
+        'MobileImageCacheService',
+        'Cannot load image - URL is relative and MINIO_BUCKET_URL may not be configured',
+        { imageUrl, imageType }
+      );
+      throw new Error('Invalid image URL - URL is relative and MINIO_BUCKET_URL is not configured');
+    }
+    
     // Validate URL for iOS Safari
     if (isIOS) {
       if (!imageUrl || !imageUrl.startsWith('http')) {
-
-        throw new Error('Invalid image URL');
+        throw new Error('Invalid image URL for iOS Safari');
       }
     }
 
@@ -501,7 +645,125 @@ export class MobileImageCacheService {
           'Cache-Control': 'max-age=1800' // 30 minutes cache
         }
       }).pipe(
-        timeout(options.timeout || 15000)
+        timeout(options.timeout || 15000),
+        catchError((error: any) => {
+          // Handle HttpErrorResponse from Angular HttpClient
+          let errorStatus: number | null = null;
+          let errorMessage = '';
+          
+          if (error instanceof HttpErrorResponse) {
+            errorStatus = error.status;
+            errorMessage = error.message || error.error?.message || String(error);
+          } else if (error?.status) {
+            // Plain error object with status
+            errorStatus = error.status;
+            errorMessage = error.message || String(error);
+          } else if (error?.message) {
+            // Check if message contains 404
+            errorMessage = error.message;
+            if (errorMessage.includes('404') || errorMessage.includes('Not Found')) {
+              errorStatus = 404;
+            }
+          }
+          
+          // Also check the URL itself for 404 patterns
+          const urlContains404 = imageUrl.includes('404') || imageUrl.includes('not-found');
+          
+          const is404 = errorStatus === 404 || 
+                       errorMessage?.includes('404') || 
+                       errorMessage?.includes('Not Found') ||
+                       urlContains404 ||
+                       (error instanceof HttpErrorResponse && error.status === 404);
+          
+          // Log 404 errors with detailed information
+          if (is404) {
+            // Extract context from options
+            const publicationId = (options as any)?.publicationId;
+            const commentId = (options as any)?.commentId;
+            const mediaId = (options as any)?.mediaId;
+            
+            // Try to extract userId from URL if publicationId is not available
+            let userIdFromUrl: string | null = null;
+            let fullUrlPath: string | null = null;
+            if (!publicationId && imageUrl.includes('/publications/')) {
+              const urlMatch = imageUrl.match(/publications\/([^\/\?]+)/);
+              if (urlMatch && urlMatch[1]) {
+                // Extract userId from URL pattern: userId|timestamp-filename
+                const urlPart = urlMatch[1];
+                fullUrlPath = urlPart;
+                const userIdMatch = urlPart.match(/^([^|]+)/);
+                if (userIdMatch && userIdMatch[1]) {
+                  userIdFromUrl = userIdMatch[1];
+                }
+              }
+            }
+            
+            // Clear invalid image from cache when 404 is detected
+            // This prevents stale cache entries from causing repeated 404 errors
+            this.clearImageFromCache(imageUrl).catch(clearError => {
+              // Log cache clear error but don't block the main error logging
+              this.logService.log(
+                LevelLogEnum.WARN,
+                'MobileImageCacheService',
+                'Failed to clear invalid image from cache',
+                { imageUrl, clearError: String(clearError) }
+              );
+            });
+            
+            const logData: any = {
+              imageUrl,
+              imageType,
+              errorStatus: errorStatus || 'unknown',
+              errorMessage: errorMessage || String(error),
+              errorName: error?.name,
+              errorType: error?.constructor?.name,
+              isHttpErrorResponse: error instanceof HttpErrorResponse,
+              httpErrorUrl: error instanceof HttpErrorResponse ? error.url : null,
+              normalizedUrl: imageUrl,
+              timestamp: new Date().toISOString(),
+              userAgent: navigator.userAgent,
+              // Include context if available in options
+              publicationId: publicationId || null,
+              commentId: commentId || null,
+              mediaId: mediaId || null,
+              // Additional debugging info
+              errorKeys: error ? Object.keys(error) : [],
+              errorString: String(error),
+              // Debug: show all options keys to see what's being passed
+              optionsKeys: options ? Object.keys(options) : [],
+              fullOptions: options,
+              // Cache cleanup info
+              cacheCleared: true,
+              // URL extraction info (if publicationId not available)
+              userIdFromUrl: userIdFromUrl,
+              fullUrlPath: fullUrlPath
+            };
+            
+            // Log to service (will be sent in batch to backend)
+            // This log will appear in the system logs database
+            // Use a more specific message that includes the image URL for easier searching
+            const imageFileName = imageUrl.split('/').pop() || imageUrl;
+            const shortUrl = imageFileName.length > 50 ? imageFileName.substring(0, 50) + '...' : imageFileName;
+            const publicationContext = publicationId || userIdFromUrl || 'unknown';
+            
+            // Create a searchable message that includes key terms for easy filtering in admin panel
+            // Terms: "404", "Image", "Missing", "PublicationId", filename
+            
+            // Force immediate send for critical 404 errors to ensure they appear in logs quickly
+            // Message includes key searchable terms: "404", "Missing Image", "PublicationId", filename
+            // This makes it easy to find in the admin logs panel by searching for "404", "Missing", "Image", or the filename
+            const logMessage = `[404 Missing Image] File: ${shortUrl} | PublicationId: ${publicationContext} | Image deleted from storage or cache invalid. Cache cleared automatically.`;
+            
+            this.logService.log(
+              LevelLogEnum.ERROR,
+              'MobileImageCacheService',
+              logMessage,
+              logData,
+              true // forceImmediate = true for critical errors
+            );
+          }
+          throw error;
+        })
       )
     );
 
@@ -546,7 +808,8 @@ export class MobileImageCacheService {
       });
     }
 
-    // Store in memory cache with size limit
+    // Store in memory cache with size limit (use normalized URL as key)
+    // imageUrl is already normalized at this point (from loadImageInternal)
     if (this.memoryCache.size < config.maxMemoryCacheSize) {
       this.memoryCache.set(imageUrl, cachedImage);
     } else {
@@ -634,6 +897,34 @@ export class MobileImageCacheService {
     return Date.now() < cachedImage.expiresAt;
   }
 
+  /**
+   * Validate that a blob is actually a valid image blob
+   * Checks for size, type, and basic integrity
+   */
+  private isBlobValid(blob: Blob | null | undefined): boolean {
+    if (!blob) {
+      return false;
+    }
+
+    // Check blob size - must be greater than 0
+    if (blob.size === 0) {
+      return false;
+    }
+
+    // Check blob type - must be an image type
+    if (!blob.type || !blob.type.startsWith('image/')) {
+      return false;
+    }
+
+    // Additional validation: check if blob is not too small (likely corrupted)
+    // Minimum size for a valid image is typically around 100 bytes
+    if (blob.size < 100) {
+      return false;
+    }
+
+    return true;
+  }
+
   private isGoogleImage(url: string): boolean {
     return url.includes('googleusercontent.com') || url.includes('google.com');
   }
@@ -670,7 +961,12 @@ export class MobileImageCacheService {
   /**
    * Preload images with strict limits
    */
-  preloadImages(imageUrls: string[], imageType: 'profile' | 'publication' | 'media' = 'media', priority: 'high' | 'medium' | 'low' = 'medium'): void {
+  preloadImages(
+    imageUrls: string[], 
+    imageType: 'profile' | 'publication' | 'media' = 'media', 
+    priority: 'high' | 'medium' | 'low' = 'medium',
+    options?: ImageLoadOptions
+  ): void {
     const config = this.getCurrentConfig();
     
     // Limit preload based on device type - very conservative
@@ -678,12 +974,18 @@ export class MobileImageCacheService {
     const urlsToPreload = imageUrls.slice(0, maxPreload);
     
     urlsToPreload.forEach(url => {
-      this.loadImage(url, imageType, { priority }).subscribe({
+      // Merge priority with any additional options (like publicationId, commentId, etc.)
+      const loadOptions = {
+        priority,
+        ...options
+      } as any;
+      
+      this.loadImage(url, imageType, loadOptions).subscribe({
         next: () => {
           // Image preloaded successfully - no need to log
         },
         error: (error) => {
-          // Don't log every preload error to reduce noise
+          // Error handled by loadImage with context logging if options provided
         }
       });
     });
@@ -727,8 +1029,19 @@ export class MobileImageCacheService {
    * Useful when an image is updated and needs to be refreshed
    */
   async clearImageFromCache(imageUrl: string): Promise<void> {
-    // Clear from memory cache
-    if (this.memoryCache.has(imageUrl)) {
+    // Normalize URL before clearing from cache
+    const normalizedUrl = this._utilityService.normalizeImageUrl(imageUrl, environment.MINIO_BUCKET_URL || '');
+    
+    // Clear from memory cache (try both normalized and original URL for backward compatibility)
+    if (this.memoryCache.has(normalizedUrl)) {
+      const cached = this.memoryCache.get(normalizedUrl);
+      if (cached) {
+        this.cacheSize -= cached.size;
+      }
+      this.memoryCache.delete(normalizedUrl);
+    }
+    // Also try with original URL in case it was cached with the original URL
+    if (imageUrl !== normalizedUrl && this.memoryCache.has(imageUrl)) {
       const cached = this.memoryCache.get(imageUrl);
       if (cached) {
         this.cacheSize -= cached.size;
@@ -736,12 +1049,16 @@ export class MobileImageCacheService {
       this.memoryCache.delete(imageUrl);
     }
 
-    // Clear from persistent cache
+    // Clear from persistent cache (try both normalized and original URL)
     if (this.db && !isIOS) {
       try {
         const transaction = this.db.transaction([this.STORE_NAME], 'readwrite');
         const store = transaction.objectStore(this.STORE_NAME);
-        store.delete(imageUrl);
+        store.delete(normalizedUrl);
+        // Also try with original URL for backward compatibility
+        if (imageUrl !== normalizedUrl) {
+          store.delete(imageUrl);
+        }
       } catch (error) {
         // Ignore errors when clearing specific image
       }

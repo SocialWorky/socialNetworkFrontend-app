@@ -8,6 +8,8 @@ import { NotificationPanelService } from '@shared/modules/notifications-panel/se
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { UserService } from '@shared/services/core-apis/users.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 
 @Component({
   selector: 'worky-sidebar-menu',
@@ -36,21 +38,23 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
     private _notificationPanelService: NotificationPanelService,
     private _logService: LogService,
     private _globalEventService: GlobalEventService,
-    private _userService: UserService
+    private _userService: UserService,
+    private _utilityService: UtilityService
   ) { }
 
   ngOnInit() {
     this.decodedToken = this._authService.getDecodedToken()!;
     this.userName = this.decodedToken.username;
-    this.userAvatar = this.decodedToken.avatar || '';
+    // Normalize avatar URL from token
+    this.userAvatar = this.decodedToken.avatar ? this._utilityService.normalizeImageUrl(this.decodedToken.avatar, environment.MINIO_BUCKET_URL || '') : '';
     this.userFullName = this.decodedToken.name || '';
     
-    // Subscribe to profile image updates
+    // Subscribe to profile image updates - normalize URL
     this._globalEventService.profileImage$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(newImageUrl => {
         if (newImageUrl) {
-          this.userAvatar = newImageUrl;
+          this.userAvatar = this._utilityService.normalizeImageUrl(newImageUrl, environment.MINIO_BUCKET_URL || '');
           this._cdr.markForCheck();
         }
       });
@@ -75,7 +79,8 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
       if (this.decodedToken?.id) {
         const freshUserData = await this._userService.getUserById(this.decodedToken.id).toPromise();
         if (freshUserData) {
-          this.userAvatar = freshUserData.avatar || '';
+          // Normalize avatar URL from fresh user data
+          this.userAvatar = freshUserData.avatar ? this._utilityService.normalizeImageUrl(freshUserData.avatar, environment.MINIO_BUCKET_URL || '') : '';
           this.userFullName = freshUserData.name + ' ' + freshUserData.lastName || '';
           this.userName = freshUserData.username || '';
           this._cdr.markForCheck();

@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, Observable, Subject, takeUntil, tap, map } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Socket } from 'ngx-socket-io';
 
 import { environment } from '../../../../../environments/environment';
 import { Config, ConfigServiceInterface } from '@shared/interfaces/config.interface';
+import { UnifiedCacheService } from '@shared/services/unified-cache.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,14 +22,22 @@ export class ConfigService {
   constructor(
     private http: HttpClient,
     private socket: Socket,
+    private cacheService: UnifiedCacheService,
   ) {
     this.subscribeToNotification();
     this.apiUrl = environment.API_URL;
   }
 
-  getConfig(): Observable<any> {
+  getConfig(bypassCache: boolean = false): Observable<any> {
     const url = `${this.apiUrl}/config`;
-    return this.http.get<any>(url);
+    
+    // Instead of using headers that cause CORS issues, use query params to bypass cache
+    const params: any = {};
+    if (bypassCache) {
+      params._t = new Date().getTime(); // Add timestamp to force fresh request
+    }
+    
+    return this.http.get<any>(url, { params });
   }
 
   getConfigServices(): Observable<ConfigServiceInterface> {
@@ -40,6 +49,9 @@ export class ConfigService {
     const url = `${this.apiUrl}/config`;
     return this.http.put<Config>(url, config).pipe(
       tap((updatedConfig) => {
+        // Invalidate cache for config endpoint
+        this.cacheService.clearByPattern(/config/);
+        
         this.socket.emit('updateConfig', updatedConfig);
         this.configSubject.next(updatedConfig);
       })

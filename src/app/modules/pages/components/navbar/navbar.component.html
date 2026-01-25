@@ -4,7 +4,7 @@
       <div class="worky-brand">
         <!-- Brand Logo-->
         <a [routerLink]="['/']" *ngIf="logoUrl !== ''">
-          <img class="worky-logo" src="{{ logoUrl }}" alt="{{ title }}" style="margin-top: 2px;" loading="lazy">
+          <img class="worky-logo" [src]="getNormalizedLogoUrl(logoUrl)" [alt]="title" style="margin-top: 2px;" loading="lazy" (error)="logoUrl = ''">
         </a>
         <!-- Search -->
         <form
@@ -79,7 +79,7 @@
       <div class="worky-brand-mobile">
         <!-- Brand Logo -->
         <a [routerLink]="['/']" *ngIf="logoUrl !== ''">
-          <img class="worky-logo-mobile" src="{{ logoUrl }}" alt="{{ title }}" loading="lazy">
+          <img class="worky-logo-mobile" [src]="getNormalizedLogoUrl(logoUrl)" [alt]="title" loading="lazy" (error)="logoUrl = ''">
         </a>
         <!-- Search -->
         <form

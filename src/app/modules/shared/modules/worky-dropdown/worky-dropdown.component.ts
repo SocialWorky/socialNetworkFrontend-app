@@ -12,6 +12,8 @@ import { Token } from '@shared/interfaces/token.interface';
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 
 @Component({
     selector: 'worky-dropdown',
@@ -71,7 +73,8 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
     private _renderer: Renderer2,
     private _deviceDetectionService: DeviceDetectionService,
     private _actionSheetController: ActionSheetController,
-    private _mobileImageCacheService: MobileImageCacheService
+    private _mobileImageCacheService: MobileImageCacheService,
+    private _utilityService: UtilityService
   ) {
     this.decodedToken = this._authService.getDecodedToken()!;
   }
@@ -86,7 +89,8 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
           await this._mobileImageCacheService.clearProfileImagesFromCache();
         }
 
-        this.profileImageUrl = newImageUrl;
+        // Normalize URL before using it
+        this.profileImageUrl = newImageUrl ? this._utilityService.normalizeImageUrl(newImageUrl, environment.MINIO_BUCKET_URL || '') : null;
         // Force refresh user data to get updated avatar
         if (this.img === 'avatar') {
           this.getUser();
@@ -111,7 +115,8 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
       const response = await firstValueFrom(this._userService.getUserById(this.decodedToken.id).pipe(takeUntil(this._unsubscribe$)));
       if (response) {
         this.user = response;
-        this.profileImageUrl = response.avatar;
+        // Normalize avatar URL before using it
+        this.profileImageUrl = response.avatar ? this._utilityService.normalizeImageUrl(response.avatar, environment.MINIO_BUCKET_URL || '') : null;
         this.loaderAvatar = false;
         this._cdr.markForCheck();
       } else {
@@ -120,6 +125,13 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
     } catch (error) {
       this.loaderAvatar = false;
     }
+  }
+
+  getNormalizedImageUrl(url: string | boolean | undefined): string {
+    if (!url || typeof url !== 'string' || url === 'avatar') {
+      return '';
+    }
+    return this._utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
   }
 
   checkDropdownDirection() {

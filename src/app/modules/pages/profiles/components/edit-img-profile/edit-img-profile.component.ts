@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, AfterViewChecked, Input, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, AfterViewChecked, Input, AfterViewInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, lastValueFrom, takeUntil } from 'rxjs';
 import Cropper from 'cropperjs';
@@ -21,7 +21,7 @@ import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service
     styleUrls: ['./edit-img-profile.component.scss'],
     standalone: false
 })
-export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDestroy, AfterViewInit {
+export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDestroy, AfterViewInit, OnChanges {
   private unsubscribe$ = new Subject<void>();
 
   imageSrc: string = '';
@@ -66,13 +66,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
   ) {}
 
   ngAfterViewInit(): void {
-    if (this.profileImage) {
-      // Normalize the profile image URL to ensure it uses MinIO bucket URL
-      this.previews[0].url = this._utilityService.normalizeImageUrl(
-        this.profileImage,
-        environment.MINIO_BUCKET_URL || ''
-      );
-    }
+    // Preview URL is already set in updatePreviewUrl()
     // Load Cropper.js CSS from CDN
     this._lazyCssService.loadCss('https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css', 'cropper');
   }
@@ -84,6 +78,17 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
 
   ngOnInit(): void {
     this._authService.getDecodedToken();
+    this.updatePreviewUrl();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Update preview URL when profileImage input changes
+    if (changes['profileImage'] && !changes['profileImage'].firstChange) {
+      this.updatePreviewUrl();
+    }
+  }
+
+  private updatePreviewUrl(): void {
     // Normalize the profile image URL to ensure it uses MinIO bucket URL
     if (this.profileImage) {
       this.previews[0].url = this._utilityService.normalizeImageUrl(
@@ -93,6 +98,7 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     } else {
       this.previews[0].url = this.imgCoverDefault;
     }
+    this._cdr.markForCheck();
   }
 
   ngAfterViewChecked() {

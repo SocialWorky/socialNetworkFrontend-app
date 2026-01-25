@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { catchError, map, timeout, retryWhen, delay, switchMap } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { CacheService } from './cache.service';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { environment } from '@env/environment';
+import { UtilityService } from './utility.service';
 
 export interface MediaCacheOptions {
   quality?: 'low' | 'medium' | 'high';
@@ -61,7 +62,8 @@ export class MediaCacheService {
   constructor(
     private http: HttpClient,
     private cacheService: CacheService,
-    private logService: LogService
+    private logService: LogService,
+    private injector: Injector
   ) {
     this.initializeCache();
     this.startLoadHistoryCleanup();
@@ -106,8 +108,12 @@ export class MediaCacheService {
   }
 
   loadMedia(url: string, options: MediaCacheOptions = {}): Observable<string> {
+    // Normalize URL before using it
+    const utilityService = this.injector.get(UtilityService);
+    const normalizedUrl = utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
+    
     const finalOptions = { ...this.DEFAULT_OPTIONS, ...options };
-    const cacheKey = this.generateCacheKey(url, finalOptions.quality || 'medium');
+    const cacheKey = this.generateCacheKey(normalizedUrl, finalOptions.quality || 'medium');
 
     // NEW: Check if we can load more
     if (!this.canLoadMore()) {
@@ -192,7 +198,11 @@ export class MediaCacheService {
     // NEW: Record load attempt
     this.recordLoad();
 
-    return this.http.get(url, { responseType: 'blob' }).pipe(
+    // Ensure URL is normalized (should already be normalized, but double-check)
+    const utilityService = this.injector.get(UtilityService);
+    const normalizedUrl = utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
+
+    return this.http.get(normalizedUrl, { responseType: 'blob' }).pipe(
       timeout(options.timeout || 20000), // Reduced timeout
       map(blob => {
         // Validate downloaded blob
@@ -217,7 +227,7 @@ export class MediaCacheService {
         }
 
         const cachedMedia: CachedMedia = {
-          url,
+          url: normalizedUrl,
           blob,
           type: blob.type,
           size: blob.size,

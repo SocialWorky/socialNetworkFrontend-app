@@ -1,9 +1,22 @@
 export interface Config {
+  settings?: {
+    logoUrl?: string;
+    title?: string;
+    themeColors?: string;
+    privacyPolicy?: string;
+    contactEmail?: string;
+    faviconUrl?: string;
+    loginMethods?: string;
+    urlSite?: string;
+    description?: string;
+    invitationCode?: boolean;
+  };
+  customCss?: string;
+  // Legacy flat structure for backward compatibility
   logoUrl?: string;
   title?: string;
   themeColors?: string;
   privacyPolicy?: string;
-  customCss?: string;
   contactEmail?: string;
   faviconUrl?: string;
   loginMethods?: string;

@@ -698,15 +698,18 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
             firstMedia.url,
             this.urlMediaApi || ''
           );
+          // Pass publicationId for context in error logs
           this._mobileImageCacheService.loadImage(normalizedUrl, 'publication', {
             priority: 'low',
-            timeout: 15000
-          }).subscribe({
+            timeout: 15000,
+            publicationId: publication._id || undefined,
+            mediaId: firstMedia._id || undefined
+          } as any).subscribe({
             next: () => {
               // Image preloaded successfully - no need to log
             },
             error: (error) => {
-              // Don't log every preload error to reduce noise
+              // Error handled by MobileImageCacheService with context logging
             }
           });
         }

@@ -174,8 +174,9 @@
           <div class="flex gap-8 items-start lg:flex-row flex-col lg:items-start items-center">
             <div class="relative w-36 h-36 border-2 border-slate-600 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center group cursor-pointer">
               <img
-                [src]="imagePreview || configForm.get('logoUrl')?.value || defaultLogo"
+                [src]="imagePreview || getNormalizedImageUrl(configForm.get('logoUrl')?.value)"
                 [alt]="'admin.siteConfig.logoPreview' | workyTranslations"
+                (error)="onImageError($event)"
                 class="w-full h-full object-contain p-4"
               />
               <div class="absolute inset-0 bg-slate-800/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">

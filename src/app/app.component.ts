@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, Renderer2, Injector } from '@angular/core';
 import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
 import { filter, map, Subject, switchMap, takeUntil, timer, of, catchError, retryWhen, delay, tap, take, groupBy, mergeMap, debounceTime, retry } from 'rxjs';
@@ -472,6 +472,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   applyConfig(configData: any) {
+    if (!configData || !configData.settings) {
+      return;
+    }
+
     if (configData.customCss) {
       const styleElement = this._renderer.createElement('style');
       styleElement.id = 'custom-css';
@@ -487,12 +491,68 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   updateFavicon(logoUrl: string) {
-    const link: HTMLLinkElement =
-      document.querySelector("link[rel*='icon']") || document.createElement('link');
-    link.type = 'image/png';
-    link.rel = 'icon';
-    link.href = logoUrl;
-    document.getElementsByTagName('head')[0].appendChild(link);
+    if (!logoUrl) {
+      return;
+    }
+
+    // Normalize the URL - handle MinIO relative paths
+    let normalizedUrl = logoUrl;
+    
+    // If it's a relative MinIO path, normalize it
+    if (logoUrl && !logoUrl.startsWith('http://') && !logoUrl.startsWith('https://') && !logoUrl.startsWith('data:') && !logoUrl.startsWith('blob:') && !logoUrl.startsWith('assets/')) {
+      // It's likely a MinIO path, normalize it
+      normalizedUrl = this._utilityService.normalizeImageUrl(logoUrl, environment.MINIO_BUCKET_URL || '');
+    }
+
+    // Detect image type from URL extension
+    const getImageType = (url: string): string => {
+      const lowerUrl = url.toLowerCase();
+      if (lowerUrl.includes('.jpg') || lowerUrl.includes('.jpeg')) return 'image/jpeg';
+      if (lowerUrl.includes('.png')) return 'image/png';
+      if (lowerUrl.includes('.svg')) return 'image/svg+xml';
+      if (lowerUrl.includes('.gif')) return 'image/gif';
+      if (lowerUrl.includes('.webp')) return 'image/webp';
+      if (lowerUrl.includes('.ico')) return 'image/x-icon';
+      // Default to PNG if cannot determine
+      return 'image/png';
+    };
+
+    // Find and remove all existing favicon links (including shortcut icon, apple-touch-icon, etc.)
+    const existingLinks = document.querySelectorAll("link[rel*='icon'], link[rel='shortcut icon'], link[rel='apple-touch-icon']");
+    existingLinks.forEach(link => link.remove());
+
+    // Add timestamp to force browser refresh
+    const timestamp = new Date().getTime();
+    const separator = normalizedUrl.includes('?') ? '&' : '?';
+    const faviconUrl = normalizedUrl + separator + 'v=' + timestamp;
+    const imageType = getImageType(normalizedUrl);
+
+    // Create standard favicon
+    const faviconLink = document.createElement('link');
+    faviconLink.rel = 'icon';
+    faviconLink.type = imageType;
+    faviconLink.href = faviconUrl;
+    document.head.appendChild(faviconLink);
+
+    // Also create shortcut icon for better browser compatibility
+    const shortcutLink = document.createElement('link');
+    shortcutLink.rel = 'shortcut icon';
+    shortcutLink.type = imageType;
+    shortcutLink.href = faviconUrl;
+    document.head.appendChild(shortcutLink);
+
+    // Create apple-touch-icon for iOS devices
+    const appleTouchLink = document.createElement('link');
+    appleTouchLink.rel = 'apple-touch-icon';
+    appleTouchLink.href = faviconUrl;
+    document.head.appendChild(appleTouchLink);
+    
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'AppComponent',
+      'Favicon updated',
+      { originalUrl: logoUrl, normalizedUrl: faviconUrl, imageType }
+    );
   }
 
   private async checkAuthenticationAndInitializeWidgets(): Promise<void> {

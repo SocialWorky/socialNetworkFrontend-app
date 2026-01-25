@@ -306,17 +306,52 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
         // Only preload first image to reduce load
         const firstMedia = publication.media[0];
         if (firstMedia && firstMedia.url) {
-          this._mobileImageCacheService.loadImage(firstMedia.url, 'publication', {
-            priority: 'low',
-            timeout: 15000
-          }).subscribe({
-            next: () => {
-              // Image preloaded successfully - no need to log
-            },
-            error: (error) => {
-              // Don't log every preload error to reduce noise
-            }
-          });
+          // Normalize URL before preloading
+          const normalizedUrl = this._utilityService.normalizeImageUrl(firstMedia.url, environment.MINIO_BUCKET_URL || '');
+          
+          // Only preload if URL is absolute (http/https/blob/data)
+          // Skip if URL is still relative (MINIO_BUCKET_URL may not be configured)
+          const isValidUrl = normalizedUrl.startsWith('http://') ||
+                             normalizedUrl.startsWith('https://') ||
+                             normalizedUrl.startsWith('blob:') ||
+                             normalizedUrl.startsWith('data:');
+          
+          if (isValidUrl) {
+            this._mobileImageCacheService.loadImage(normalizedUrl, 'publication', {
+              priority: 'low',
+              timeout: 15000,
+              publicationId: publication._id // Pass publication ID for context in logs
+            } as any).subscribe({
+              next: () => {
+                // Image preloaded successfully - no need to log
+              },
+              error: (error: any) => {
+                // Log 404 errors with publication context
+                const errorStatus = error?.status || error?.error?.status || (error?.message?.includes('404') ? 404 : null);
+                const is404 = errorStatus === 404 || error?.message?.includes('404') || error?.message?.includes('Not Found');
+                
+                if (is404) {
+                  this._logService.log(
+                    LevelLogEnum.ERROR,
+                    'ProfilesComponent',
+                    'Image not found (404) during preload - Image may have been deleted from storage',
+                    {
+                      imageUrl: normalizedUrl,
+                      originalUrl: firstMedia.url,
+                      publicationId: publication._id,
+                      publicationAuthor: publication.author ? `${publication.author.name} ${publication.author.lastName}` : null,
+                      mediaIndex: 0,
+                      mediaCount: publication.media.length,
+                      timestamp: new Date().toISOString(),
+                      userAgent: navigator.userAgent,
+                      errorStatus: errorStatus || 'unknown',
+                      errorMessage: error?.message || String(error)
+                    }
+                  );
+                }
+              }
+            });
+          }
         }
       }
     });
@@ -772,9 +807,9 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
             const cacheBustUrl = urlImgUpload + '?t=' + Date.now();
             this._globalEventService.updateProfileImage(cacheBustUrl);
 
-            // Update local user data
+            // Update local user data - normalize URL
             if (this.userData) {
-              this.userData.avatar = cacheBustUrl;
+              this.userData.avatar = this._utilityService.normalizeImageUrl(cacheBustUrl, environment.MINIO_BUCKET_URL || '');
             }
 
             setTimeout(() => {
@@ -1020,12 +1055,12 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       // Use Object.assign for a more subtle update
       if (this.userData && updatedUserData) {
-        // Update basic properties immutably
+        // Update basic properties immutably - normalize avatar URL
         Object.assign(this.userData, {
           name: updatedUserData.name,
           lastName: updatedUserData.lastName,
           username: updatedUserData.username,
-          avatar: updatedUserData.avatar
+          avatar: updatedUserData.avatar ? this._utilityService.normalizeImageUrl(updatedUserData.avatar, environment.MINIO_BUCKET_URL || '') : updatedUserData.avatar
         });
         
         // Actualizar propiedades del perfil de forma inmutable

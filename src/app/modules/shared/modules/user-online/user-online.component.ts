@@ -8,6 +8,8 @@ import { NotificationUsersService } from '@shared/services/notifications/notific
 import { AuthService } from '@auth/services/auth.service';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 
 @Component({
     selector: 'worky-user-online',
@@ -50,6 +52,7 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
     private _authService: AuthService,
     private _globalEventService: GlobalEventService,
     private _logService: LogService,
+    private _utilityService: UtilityService
   ) {
     this.checkAndInitializeUser();
   }
@@ -154,9 +157,12 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
   private updateCurrentUserAvatar(newImageUrl: string): void {
     if (!this.currentUser) return;
 
+    // Normalize URL before updating
+    const normalizedUrl = this._utilityService.normalizeImageUrl(newImageUrl, environment.MINIO_BUCKET_URL || '');
+
     const updatedUsers = this.usersOnline().map(user => {
       if (user.id === this.currentUser?.id) {
-        return { ...user, avatar: newImageUrl };
+        return { ...user, avatar: normalizedUrl };
       }
       return user;
     });

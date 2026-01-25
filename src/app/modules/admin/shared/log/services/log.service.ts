@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { Observable } from 'rxjs';
@@ -57,10 +57,40 @@ export class LogService {
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
     
-    return this._http.get<LogsResponse>(this.urlApi, { params });
+    // Add headers to prevent caching - logs should always be read directly from database
+    const headers = new HttpHeaders({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    
+    return this._http.get<LogsResponse>(this.urlApi, { 
+      params,
+      headers
+    });
   }
 
   getLogStats(): Observable<LogStats> {
-    return this._http.get<LogStats>(`${this.urlApi}/stats`);
+    // Add headers to prevent caching - stats should always be read directly from database
+    const headers = new HttpHeaders({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    
+    return this._http.get<LogStats>(`${this.urlApi}/stats`, { headers });
+  }
+
+  /**
+   * Mark a log as resolved
+   */
+  markAsResolved(logId: string): Observable<{ message: string }> {
+    const headers = new HttpHeaders({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    
+    return this._http.patch<{ message: string }>(`${this.urlApi}/${logId}/resolve`, {}, { headers });
   }
 }

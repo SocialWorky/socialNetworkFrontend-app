@@ -155,6 +155,25 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
       this._cdr.markForCheck();
       return;
     }
+    
+    // Early check: if URL looks like a relative MinIO path, ensure MINIO_BUCKET_URL is configured
+    const knownMinIOPatterns = ['profileImg/', 'publications/', 'uploads/', 'config/', 'users/', 'comments/', 'thematic-images/', 'widgets/', 'profile/'];
+    const looksLikeMinIOPath = knownMinIOPatterns.some(pattern => imgValue.startsWith(pattern) || imgValue.startsWith('/' + pattern));
+    
+    if (looksLikeMinIOPath && (!environment.MINIO_BUCKET_URL || environment.MINIO_BUCKET_URL.trim() === '')) {
+      // URL looks like MinIO path but MINIO_BUCKET_URL is not configured
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'WorkyAvatarComponent',
+        'MINIO_BUCKET_URL is not configured - cannot load MinIO image',
+        { originalUrl: imgValue, minioBucketUrl: environment.MINIO_BUCKET_URL }
+      );
+      this.isGeneratedAvatar = true;
+      this.isLoading = false;
+      this.hasError = false;
+      this._cdr.markForCheck();
+      return;
+    }
 
     // Normalize URL for MinIO (handles both absolute and relative URLs)
     const normalizedUrl = this._utilityService.normalizeImageUrl(
@@ -163,15 +182,26 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     );
 
     // Check if normalized URL is valid (absolute URL, blob, or data URI)
-    const isValidUrl = normalizedUrl.startsWith('http://') ||
-                       normalizedUrl.startsWith('https://') ||
-                       normalizedUrl.startsWith('blob:') ||
-                       normalizedUrl.startsWith('data:');
+    // Also check if normalizedUrl is empty (means MINIO_BUCKET_URL is not configured)
+    const isValidUrl = normalizedUrl && normalizedUrl.trim() !== '' && (
+      normalizedUrl.startsWith('http://') ||
+      normalizedUrl.startsWith('https://') ||
+      normalizedUrl.startsWith('blob:') ||
+      normalizedUrl.startsWith('data:')
+    );
 
     if (isValidUrl) {
       this.tryLoadImage(normalizedUrl);
     } else {
-      // Invalid URL after normalization - show initials
+      // Invalid URL after normalization - this means normalizeImageUrl returned a relative path or empty string
+      // This should not happen if MINIO_BUCKET_URL is configured correctly
+      // Log warning and show initials instead of trying to load invalid URL
+      this._logService.log(
+        LevelLogEnum.WARN,
+        'WorkyAvatarComponent',
+        'Invalid URL after normalization - MINIO_BUCKET_URL may not be configured',
+        { originalUrl: imgValue, normalizedUrl, minioBucketUrl: environment.MINIO_BUCKET_URL }
+      );
       this.isGeneratedAvatar = true;
       this.isLoading = false;
       this.hasError = false;
@@ -180,15 +210,41 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private tryLoadImage(imageUrl: string): void {
+    // Double-check that URL is normalized (should already be normalized from generateAvatar)
+    // But normalize again to be safe, in case it wasn't normalized properly
+    const normalizedUrl = this._utilityService.normalizeImageUrl(imageUrl, environment.MINIO_BUCKET_URL || '');
+    
+    // Validate that normalized URL is absolute
+    const isValidUrl = normalizedUrl.startsWith('http://') ||
+                       normalizedUrl.startsWith('https://') ||
+                       normalizedUrl.startsWith('blob:') ||
+                       normalizedUrl.startsWith('data:');
+    
+    if (!isValidUrl) {
+      // URL is still relative after normalization - MINIO_BUCKET_URL may not be configured
+      this._logService.log(
+        LevelLogEnum.WARN,
+        'WorkyAvatarComponent',
+        'URL is still relative after normalization - cannot load image',
+        { originalUrl: imageUrl, normalizedUrl, minioBucketUrl: environment.MINIO_BUCKET_URL }
+      );
+      this.imageData = '';
+      this.isGeneratedAvatar = true;
+      this.isLoading = false;
+      this.hasError = true;
+      this._cdr.markForCheck();
+      return;
+    }
+
     this.isLoading = true;
     this._cdr.markForCheck();
 
     // Check if URL has cache-busting parameter (indicates fresh upload)
-    const hasCacheBuster = imageUrl.includes('?t=');
+    const hasCacheBuster = normalizedUrl.includes('?t=');
 
     const timeout = setTimeout(() => {
       if (this.isLoading) {
-        this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Image load timeout, falling back to initials', { url: imageUrl });
+        this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Image load timeout, falling back to initials', { url: normalizedUrl });
         this.imageData = '';
         this.isGeneratedAvatar = true;
         this.isLoading = false;
@@ -197,31 +253,31 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
       }
     }, 3000);
 
-    if (this.isGoogleImage(imageUrl)) {
-      this.loadGoogleImage(imageUrl, timeout);
+    if (this.isGoogleImage(normalizedUrl)) {
+      this.loadGoogleImage(normalizedUrl, timeout);
     } else {
       if (this._mobileCacheService.isMobile()) {
         // If URL has cache buster, clear old cached version first
         if (hasCacheBuster) {
-          const baseUrl = imageUrl.split('?')[0];
+          const baseUrl = normalizedUrl.split('?')[0];
           this._mobileCacheService.clearImageFromCache(baseUrl)
             .then(() => {
-              this.loadImageWithMobileCache(imageUrl, timeout);
+              this.loadImageWithMobileCache(normalizedUrl, timeout);
             })
             .catch(() => {
               // If clearing cache fails, try loading anyway
-              this.loadImageWithMobileCache(imageUrl, timeout);
+              this.loadImageWithMobileCache(normalizedUrl, timeout);
             });
         } else {
-          this.loadImageWithMobileCache(imageUrl, timeout);
+          this.loadImageWithMobileCache(normalizedUrl, timeout);
         }
       } else {
         const img = new Image();
-        img.src = imageUrl;
+        img.src = normalizedUrl;
 
         img.onload = () => {
           clearTimeout(timeout);
-          this.imageData = imageUrl;
+          this.imageData = normalizedUrl;
           this.isLoading = false;
           this.isGeneratedAvatar = false;
           this.hasError = false;
@@ -231,7 +287,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
 
         img.onerror = () => {
           clearTimeout(timeout);
-          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image, falling back to initials', { url: imageUrl });
+          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image, falling back to initials', { url: normalizedUrl });
           this.imageData = '';
           this.isGeneratedAvatar = true;
           this.isLoading = false;
@@ -267,13 +323,39 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private loadImageDirectly(imageUrl: string, timeout: NodeJS.Timeout): void {
+    // Normalize URL before using it (double-check)
+    const normalizedUrl = this._utilityService.normalizeImageUrl(imageUrl, environment.MINIO_BUCKET_URL || '');
+    
+    // Validate that normalized URL is absolute
+    const isValidUrl = normalizedUrl.startsWith('http://') ||
+                       normalizedUrl.startsWith('https://') ||
+                       normalizedUrl.startsWith('blob:') ||
+                       normalizedUrl.startsWith('data:');
+    
+    if (!isValidUrl) {
+      // URL is still relative - cannot load
+      this._logService.log(
+        LevelLogEnum.WARN,
+        'WorkyAvatarComponent',
+        'URL is still relative in loadImageDirectly - cannot load image',
+        { originalUrl: imageUrl, normalizedUrl }
+      );
+      clearTimeout(timeout);
+      this.imageData = '';
+      this.isGeneratedAvatar = true;
+      this.isLoading = false;
+      this.hasError = true;
+      this._cdr.markForCheck();
+      return;
+    }
+
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.src = imageUrl;
+    img.src = normalizedUrl;
 
     img.onload = () => {
       clearTimeout(timeout);
-      this.imageData = imageUrl;
+      this.imageData = normalizedUrl;
       this.isLoading = false;
       this.isGeneratedAvatar = false;
       this.hasError = false;
@@ -283,7 +365,7 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
 
     img.onerror = () => {
       clearTimeout(timeout);
-      this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Direct image load also failed, falling back to initials', { url: imageUrl });
+      this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Direct image load also failed, falling back to initials', { url: normalizedUrl });
       this.imageData = '';
       this.isGeneratedAvatar = true;
       this.isLoading = false;

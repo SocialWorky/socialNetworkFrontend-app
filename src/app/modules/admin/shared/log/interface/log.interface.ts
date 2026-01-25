@@ -12,4 +12,6 @@ export interface LogsList {
   context: string;
   metadata: [];
   timestamp: Date;
+  resolved?: boolean;
+  resolvedAt?: Date;
 }

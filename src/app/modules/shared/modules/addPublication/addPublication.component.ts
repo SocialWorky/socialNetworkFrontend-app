@@ -186,9 +186,9 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     
     this.decodedToken = token;
     
-    // Set initial avatar from token if available
+    // Set initial avatar from token if available - normalize URL
     if (this.decodedToken.avatar && this.decodedToken.avatar.trim() !== '' && this.decodedToken.avatar !== 'null' && this.decodedToken.avatar !== 'undefined') {
-      this.profileImageUrl = this.decodedToken.avatar;
+      this.profileImageUrl = this._utilityService.normalizeImageUrl(this.decodedToken.avatar, environment.MINIO_BUCKET_URL || '');
     }
     
     this.postPrivacy(TypePrivacy.PUBLIC);
@@ -198,9 +198,9 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     this.subscription = this._globalEventService.profileImage$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(newImageUrl => {
-        // Only update if we have a valid new image URL
+        // Only update if we have a valid new image URL - normalize URL
         if (newImageUrl && newImageUrl.trim() !== '' && newImageUrl !== 'null' && newImageUrl !== 'undefined') {
-          this.profileImageUrl = newImageUrl;
+          this.profileImageUrl = this._utilityService.normalizeImageUrl(newImageUrl, environment.MINIO_BUCKET_URL || '');
           this._cdr.markForCheck();
         }
         if (this.type === TypePublishing.POST_PROFILE) {
@@ -410,14 +410,14 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
         next: (response: User) => {
-          // Handle avatar URL - use the avatar as it comes from the server
+          // Handle avatar URL - normalize URL from server
           if (response.avatar && response.avatar.trim() !== '' && response.avatar !== 'null' && response.avatar !== 'undefined') {
-            this.profileImageUrl = response.avatar;
+            this.profileImageUrl = this._utilityService.normalizeImageUrl(response.avatar, environment.MINIO_BUCKET_URL || '');
           } else {
-            // If server doesn't have avatar, keep the one from token if available
+            // If server doesn't have avatar, keep the one from token if available - normalize URL
             if (!this.profileImageUrl && this.decodedToken.avatar && this.decodedToken.avatar.trim() !== '' && this.decodedToken.avatar !== 'null' && this.decodedToken.avatar !== 'undefined') {
-              // Keep the avatar from token
-              this.profileImageUrl = this.decodedToken.avatar;
+              // Keep the avatar from token - normalize URL
+              this.profileImageUrl = this._utilityService.normalizeImageUrl(this.decodedToken.avatar, environment.MINIO_BUCKET_URL || '');
             } else if (!this.profileImageUrl) {
               // Only set to null if we don't have any avatar
               this.profileImageUrl = null;

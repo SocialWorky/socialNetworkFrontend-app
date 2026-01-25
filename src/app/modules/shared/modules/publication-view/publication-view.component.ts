@@ -204,12 +204,13 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this.routeUrl = this._router.url;
     this.isProfile = this.routeUrl.includes('profile');
 
-    // Subscribe to profile image updates
+    // Subscribe to profile image updates - normalize URL
     this._globalEventService.profileImage$
       .pipe(takeUntil(this.destroy$))
       .subscribe(newImageUrl => {
         if (newImageUrl && this.publication.author._id === this.dataUser?.id) {
-          this.publication.author.avatar = newImageUrl;
+          // Normalize URL before assigning
+          this.publication.author.avatar = this._utilityService.normalizeImageUrl(newImageUrl, environment.MINIO_BUCKET_URL || '');
           this._cdr.markForCheck();
         }
       });

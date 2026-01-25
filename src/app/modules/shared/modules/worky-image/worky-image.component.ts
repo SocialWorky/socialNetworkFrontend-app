@@ -73,6 +73,10 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
   @Input() loadingTimeout: number = 10000; // 10 seconds timeout
   @Input() maxRetries: number = 2;
   @Input() priority: 'high' | 'medium' | 'low' = 'medium';
+  @Input() publicationId?: string | null; // Context for error logging
+  @Input() commentId?: string | null; // Context for error logging
+  @Input() mediaId?: string | null; // Context for error logging
+  @Input() imageType: 'profile' | 'publication' | 'media' = 'media'; // Image type for cache and error logging
   @Output() imageClick = new EventEmitter<MouseEvent>();
 
   currentSrc: string = '';
@@ -137,10 +141,20 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
       priority: this.priority
     };
 
+    // Add context IDs to options for error logging (cast to any to allow dynamic properties)
+    const optionsWithContext = {
+      ...options,
+      publicationId: this.publicationId || undefined,
+      commentId: this.commentId || undefined,
+      mediaId: this.mediaId || undefined
+    } as any;
+
     // Use the appropriate service for loading
+    // Use the provided imageType or default to 'media'
+    const finalImageType = this.imageType || 'media';
     const imageObservable = this._mobileCacheService.isMobile() 
-      ? this._mobileCacheService.loadImage(normalizedSrc, 'media', options)
-      : this._imageService.loadImage(normalizedSrc, options);
+      ? this._mobileCacheService.loadImage(normalizedSrc, finalImageType, optionsWithContext)
+      : this._imageService.loadImage(normalizedSrc, optionsWithContext);
 
     imageObservable
       .pipe(takeUntil(this.destroy$))
@@ -153,6 +167,18 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
           this._cdr.markForCheck();
         },
         error: (error: any) => {
+          // Log 404 errors with detailed information
+          if (error?.status === 404 || error?.message?.includes('404') || error?.message?.includes('Not Found')) {
+            // Try to get LogService if available (inject it if not already)
+            // For now, we'll log to console as fallback
+            console.error('[WorkyImageComponent] Image not found (404):', {
+              originalSrc: this.src,
+              normalizedSrc: normalizedSrc,
+              errorStatus: error?.status,
+              errorMessage: error?.message,
+              timestamp: new Date().toISOString()
+            });
+          }
           this.setError();
         }
       });

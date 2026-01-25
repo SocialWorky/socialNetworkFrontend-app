@@ -260,6 +260,22 @@ export class UtilityService {
       return url;
     }
     
+    // Store original URL for logging if needed
+    const originalUrl = url;
+    
+    // Handle URLs that start with /uploads/, /publications/, /profileImg/, etc. (old format)
+    // These are being interpreted as relative paths by the browser
+    // Convert them to relative paths without leading slash
+    if (url.startsWith('/uploads/') || url.startsWith('/publications/') || 
+        url.startsWith('/config/') || url.startsWith('/users/') ||
+        url.startsWith('/comments/') || url.startsWith('/thematic-images/') ||
+        url.startsWith('/widgets/') || url.startsWith('/profile/') ||
+        url.startsWith('/profileImg/')) {
+      // Remove leading slash to make it a proper relative path
+      url = url.slice(1);
+    }
+    
+    
     // Detect and convert old file-service URLs to relative paths
     // This handles URLs that were saved before the MinIO migration
     if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -299,9 +315,21 @@ export class UtilityService {
     
     // If still no baseUrl and URL looks like a relative path, this is a problem
     if (!finalBaseUrl || finalBaseUrl.trim() === '') {
-      // If URL looks like a relative path (starts with publications/, users/, etc.)
-      // and we don't have a baseUrl, return the URL as is (will likely fail)
-      // The component should ensure MINIO_BUCKET_URL is passed
+      // If URL looks like a relative path (starts with publications/, users/, profileImg/, etc.)
+      // and we don't have a baseUrl, this is a critical error
+      // Check if it's a known MinIO path pattern
+      const knownMinIOPatterns = ['profileImg/', 'publications/', 'uploads/', 'config/', 'users/', 'comments/', 'thematic-images/', 'widgets/', 'profile/'];
+      const isKnownMinIOPath = knownMinIOPatterns.some(pattern => url.startsWith(pattern) || url.startsWith('/' + pattern));
+      
+      if (isKnownMinIOPath) {
+        // This is a MinIO path but we don't have baseUrl - log error
+        // Return empty string to prevent 404 errors - components should handle empty URLs gracefully
+        console.error('[UtilityService] MINIO_BUCKET_URL is not configured. Cannot normalize URL:', url);
+        console.error('[UtilityService] Please configure NG_APP_MINIO_BUCKET_URL in your environment variables.');
+        return ''; // Return empty string instead of relative URL to prevent 404
+      }
+      
+      // Not a known MinIO path, return as is (might be an asset path or something else)
       return url;
     }
     
@@ -316,15 +344,34 @@ export class UtilityService {
     // Clean the URL - remove leading slash if present, we'll add it
     let cleanUrl = url.startsWith('/') ? url.slice(1) : url;
     
-    // Encode pipe separator (|) as %7C for valid HTTP URLs
-    // This must be done on the final URL path, not before constructing the URL
-    // MinIO stores files with | in the name, but HTTP requires proper encoding
-    if (cleanUrl.includes('|')) {
-      // Split by / to preserve path structure, then encode each segment
+    // If it's already a full URL (http/https/blob/data) or an asset path, return as is
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || 
+        cleanUrl.startsWith('blob:') || cleanUrl.startsWith('data:') || 
+        cleanUrl.startsWith('assets/')) {
+      return cleanUrl;
+    }
+    
+    // At this point, cleanUrl is a relative path that needs to be normalized
+    // Examples: "profileImg/compressed|...", "publications/...", "config/...", etc.
+    
+    // For MinIO, handle special characters properly
+    // New files use / (forward slash) instead of | (pipe) for better compatibility
+    // Old files may still have | which needs proper encoding
+    // MinIO requires proper URL encoding for special characters in object names
+    if (cleanUrl.includes('|') || cleanUrl.includes(' ') || cleanUrl.includes('%') || cleanUrl.includes('&')) {
+      // Split by / to preserve path structure, then encode each segment separately
       const urlParts = cleanUrl.split('/');
       cleanUrl = urlParts.map(part => {
-        // Encode the pipe character in each part
-        return part.replace(/\|/g, '%7C');
+        // If the part is already encoded, decode it first to avoid double encoding
+        try {
+          const decoded = decodeURIComponent(part);
+          // Re-encode to ensure proper encoding for MinIO
+          // This handles |, spaces, and other special characters
+          return encodeURIComponent(decoded);
+        } catch {
+          // If decoding fails, encode as is
+          return encodeURIComponent(part);
+        }
       }).join('/');
     }
     

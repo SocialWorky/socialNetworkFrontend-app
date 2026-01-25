@@ -12,6 +12,8 @@ import { NotificationService } from '@shared/services/notifications/notification
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service'
 import { ConfigService } from '@shared/services/core-apis/config.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 
 import { ScrollService } from '@shared/services/scroll.service';
 import { Token } from '@shared/interfaces/token.interface';
@@ -75,7 +77,8 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     private _scrollService: ScrollService,
     private _appUpdateManagerService: AppUpdateManagerService,
     private _messageService: MessageService,
-    private _notificationMessageChatService: NotificationMessageChatService
+    private _notificationMessageChatService: NotificationMessageChatService,
+    private _utilityService: UtilityService
   ) {
     this.menuProfile();
   }
@@ -138,8 +141,9 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   getConfig() {
     this._configService.getConfig().pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {
-        this.applyConfig(data);
-        this._cdr.markForCheck();
+        if (data) {
+          this.applyConfig(data);
+        }
       },
       error: (error) => {
         // Error getting config - no need to log every config fetch error
@@ -156,11 +160,34 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private applyConfig(configData: any) {
-    if (configData) {
-      this.title = configData.settings.title;
-      this.logoUrl = configData.settings.logoUrl;
-      this._cdr.markForCheck();
+    if (configData && configData.settings) {
+      this.title = configData.settings.title || 'Social Network App';
+      // Normalize logo URL for MinIO paths - store the raw URL, normalization happens in template
+      this.logoUrl = configData.settings.logoUrl || '';
+      // Force change detection to update the view
+      this._cdr.detectChanges();
     }
+  }
+
+  /**
+   * Get normalized logo URL for display
+   */
+  getNormalizedLogoUrl(url: string | null | undefined): string {
+    if (!url) return '';
+    // If it's already a full URL (http/https), return as is
+    if (typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'))) {
+      return url;
+    }
+    // If it's a blob URL (preview) or data URL, return as is
+    if (typeof url === 'string' && (url.startsWith('blob:') || url.startsWith('data:'))) {
+      return url;
+    }
+    // If it's an asset path, return as is
+    if (typeof url === 'string' && url.startsWith('assets/')) {
+      return url;
+    }
+    // Normalize MinIO URLs
+    return this._utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
   }
 
   ngOnDestroy() {

@@ -4,6 +4,8 @@ import { Subject, takeUntil } from 'rxjs';
 import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 
 export interface OptimizedImageOptions {
   type?: 'profile' | 'publication' | 'media';
@@ -208,7 +210,8 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
   constructor(
     private mobileImageCache: MobileImageCacheService,
     private logService: LogService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private utilityService: UtilityService
   ) {}
 
   ngOnInit(): void {
@@ -246,6 +249,9 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Normalize URL before using it
+    const normalizedSrc = this.utilityService.normalizeImageUrl(this.src, environment.MINIO_BUCKET_URL || '');
+
     this.isLoading = true;
     this.hasError = false;
     this.cdr.markForCheck();
@@ -259,14 +265,14 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
     }, 30000); // 30 seconds timeout
 
     // Validate URL for Safari iOS
-    if (this.isSafariIOS() && !this.src.startsWith('http')) {
+    if (this.isSafariIOS() && !normalizedSrc.startsWith('http')) {
       // Invalid image URL for Safari iOS - no need to log every URL validation
       this.handleError();
       return;
     }
 
-    // Load image using mobile cache service
-    this.mobileImageCache.loadImage(this.src, this.options.type || 'media', {
+    // Load image using mobile cache service (URL already normalized)
+    this.mobileImageCache.loadImage(normalizedSrc, this.options.type || 'media', {
       priority: this.options.priority,
       timeout: 30000
     }).pipe(
@@ -285,8 +291,24 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
         
         // Image loaded successfully - no need to log every successful load
       },
-      error: (error) => {
-        // Failed to load image - no need to log every image load failure
+      error: (error: any) => {
+        // Log 404 errors with detailed information
+        if (error?.status === 404 || error?.message?.includes('404') || error?.message?.includes('Not Found')) {
+          this.logService.log(
+            LevelLogEnum.ERROR,
+            'OptimizedImageComponent',
+            'Image not found (404) - Image may have been deleted from storage',
+            {
+              originalSrc: this.src,
+              normalizedSrc: normalizedSrc,
+              imageType: this.options.type || 'media',
+              errorStatus: error?.status,
+              errorMessage: error?.message,
+              timestamp: new Date().toISOString(),
+              userAgent: navigator.userAgent
+            }
+          );
+        }
         this.handleError();
       }
     });
@@ -305,8 +327,64 @@ export class OptimizedImageComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  onImageError(): void {
-    // Image failed to load - no need to log every image error
+  onImageError(event?: Event): void {
+    // Try to extract image URL from event if available
+    let failedImageUrl = this.src;
+    if (event && event.target) {
+      const imgElement = event.target as HTMLImageElement;
+      failedImageUrl = imgElement.src || this.src;
+    }
+    
+    const normalizedSrc = this.utilityService.normalizeImageUrl(this.src, environment.MINIO_BUCKET_URL || '');
+    
+    // If image comes from cache (blob URL) and fails, clear cache and retry from network
+    if (this.imageSrc && this.imageSrc.startsWith('blob:')) {
+      // Image from cache failed - likely corrupted blob
+      this.logService.log(
+        LevelLogEnum.WARN,
+        'OptimizedImageComponent',
+        'Image from cache failed to load - clearing cache and reloading from network',
+        {
+          originalSrc: this.src,
+          normalizedSrc: normalizedSrc,
+          blobUrl: this.imageSrc,
+          imageType: this.options.type || 'media',
+          timestamp: new Date().toISOString()
+        }
+      );
+      
+      // Clear cache and retry loading from network
+      this.mobileImageCache.clearImageFromCache(normalizedSrc).then(() => {
+        // Retry loading from network (will bypass cache)
+        this.loadImage();
+      }).catch(() => {
+        // If clearing fails, just show error
+        this.handleError();
+      });
+      return;
+    }
+    
+    // Image from network failed - might be 404 or other error
+    // Still try to clear cache in case there's a stale entry
+    this.mobileImageCache.clearImageFromCache(normalizedSrc).catch(() => {
+      // Ignore errors when clearing cache
+    });
+    
+    // Log 404 errors with detailed information
+    this.logService.log(
+      LevelLogEnum.ERROR,
+      'OptimizedImageComponent',
+      'Image failed to load (404 or other error) - Image may have been deleted from storage',
+      {
+        originalSrc: this.src,
+        failedImageUrl: failedImageUrl,
+        normalizedSrc: normalizedSrc,
+        imageType: this.options.type || 'media',
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent
+      }
+    );
+    
     this.handleError();
   }
 

@@ -26,6 +26,8 @@ import { Alerts, Position } from '@shared/enums/alerts.enum';
 
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { translations } from '@translations/translations';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 
 @Component({
   selector: 'worky-chat-window',
@@ -111,7 +113,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
     private _dialog: MatDialog,
     private _deviceDetectionService: DeviceDetectionService,
     private _lazyCssService: LazyCssService,
-    private _alertService: AlertService
+    private _alertService: AlertService,
+    private _utilityService: UtilityService
   ) {
     this.setupMessageOptions();
   }
@@ -778,10 +781,12 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
         }
         
         const userName = this.decodedToken.name || this.decodedToken.username || '';
+        // Normalize avatar URL before sending notification
+        const normalizedAvatar = this.decodedToken.avatar ? this._utilityService.normalizeImageUrl(this.decodedToken.avatar, environment.MINIO_BUCKET_URL || '') : this.decodedToken.avatar;
         const userInfo = {
           userId: this.currentUserId!,
           userName: userName,
-          userAvatar: this.decodedToken.avatar
+          userAvatar: normalizedAvatar
         };
         
         this._notificationMessageChatService.sendNotificationMessageChat(messageWithChatId, userInfo);

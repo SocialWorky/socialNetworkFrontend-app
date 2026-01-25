@@ -6,10 +6,12 @@ import { LoadingController } from '@ionic/angular';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
-import { environment } from '@env/environment';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
+import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 
 @Component({
     selector: 'worky-site-config',
@@ -29,8 +31,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
   selectedFileName: string = '';
 
-  urlApiFile = `${environment.APIFILESERVICE}config/`;
-
   isLoading = true;
   loadUpdateConfigButtons = false;
 
@@ -48,6 +48,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
     private _alertService: AlertService,
     private _loadingCtrl: LoadingController,
     private _logService: LogService,
+    private _utilityService: UtilityService,
   ) {
     this.configForm = this._fb.group({
       logoUrl: [''],
@@ -74,11 +75,35 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  getSiteConfig() {
+  getSiteConfig(bypassCache: boolean = false) {
     this.isLoading = true;
     this.error = null;
-    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe({
+    this._configService.getConfig(bypassCache).pipe(takeUntil(this.destroy$)).subscribe({
       next: (configData) => {
+        this._logService.log(
+          LevelLogEnum.INFO,
+          'SiteConfigComponent',
+          'Configuration loaded from server',
+          { 
+            configData,
+            invitationCode: configData?.settings?.invitationCode,
+            invitationCodeType: typeof configData?.settings?.invitationCode,
+            title: configData?.settings?.title
+          }
+        );
+
+        if (!configData || !configData.settings) {
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'SiteConfigComponent',
+            'Invalid config data structure',
+            { configData }
+          );
+          this.isLoading = false;
+          this._cdr.markForCheck();
+          return;
+        }
+
         let loginMethods = { email: false, google: false };
 
         if (configData.settings.loginMethods) {
@@ -95,7 +120,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
           }
         }
 
-        this.configForm.patchValue({
+        const formValues = {
           logoUrl: configData.settings.logoUrl || '',
           title: configData.settings.title || '',
           privacyPolicy: configData.settings.privacyPolicy || '',
@@ -103,15 +128,25 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
           faviconUrl: configData.settings.faviconUrl || '',
           urlSite: configData.settings.urlSite || '',
           description: configData.settings.description || '',
-          invitationCode: configData.settings.invitationCode || false,
+          invitationCode: configData.settings.invitationCode ?? false,
           loginMethods: {
-            email: JSON.parse(String(loginMethods.email)),
-            google: JSON.parse(String(loginMethods.google)),
+            email: Boolean(loginMethods.email),
+            google: Boolean(loginMethods.google),
           },
-        });
+        };
+
+        this._logService.log(
+          LevelLogEnum.INFO,
+          'SiteConfigComponent',
+          'Updating form with loaded values',
+          { formValues }
+        );
+
+        this.configForm.patchValue(formValues, { emitEvent: false });
 
         this.isLoading = false;
-        this._cdr.markForCheck();
+        // Force change detection to update UI
+        this._cdr.detectChanges();
       },
       error: (error) => {
         this._logService.log(
@@ -133,11 +168,60 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
     
     if (this.configForm.valid) {
       if (this.imageFile) {
-        this._fileUploadService.uploadFile([this.imageFile], 'config').pipe(takeUntil(this.destroy$)).subscribe({
+        // Use PROFILE_IMG type to ensure synchronous processing and immediate response
+        this._fileUploadService.uploadFile([this.imageFile], 'config', null, null, TypePublishing.PROFILE_IMG).pipe(takeUntil(this.destroy$)).subscribe({
           next: (response) => {
-            this.configForm.patchValue({ logoUrl: this.urlApiFile + response[0].filenameCompressed });
-            this.imageFile = null;
-            this.submitUpdateConfig();
+            // Handle the actual response structure: {message: string, files: Array}
+            if (response && typeof response === 'object' && response.files && Array.isArray(response.files) && response.files.length > 0) {
+              const uploadedFile = response.files[0];
+              // Use urlCompressed or url - these are relative MinIO paths like "config/filename.jpg"
+              const logoUrl = uploadedFile.urlCompressed || uploadedFile.url || '';
+              
+              if (!logoUrl) {
+                this._logService.log(
+                  LevelLogEnum.ERROR,
+                  'SiteConfigComponent',
+                  'No URL found in upload response',
+                  { response, uploadedFile }
+                );
+                this.loadUpdateConfigButtons = false;
+                this.error = translations['admin.siteConfig.errors.uploadError'];
+                this._alertService.showAlert(
+                  translations['admin.siteConfig.errors.title'],
+                  translations['admin.siteConfig.errors.uploadError'],
+                  Alerts.ERROR,
+                  Position.CENTER,
+                  true,
+                  translations['button.ok']
+                );
+                this._cdr.markForCheck();
+                return;
+              }
+              
+              this.configForm.patchValue({ logoUrl });
+              this.imageFile = null;
+              this.imagePreview = null;
+              this.selectedFileName = '';
+              this.submitUpdateConfig();
+            } else {
+              this._logService.log(
+                LevelLogEnum.ERROR,
+                'SiteConfigComponent',
+                'Invalid response structure from file upload service',
+                { response }
+              );
+              this.loadUpdateConfigButtons = false;
+              this.error = translations['admin.siteConfig.errors.uploadError'];
+              this._alertService.showAlert(
+                translations['admin.siteConfig.errors.title'],
+                translations['admin.siteConfig.errors.uploadError'],
+                Alerts.ERROR,
+                Position.CENTER,
+                true,
+                translations['button.ok']
+              );
+              this._cdr.markForCheck();
+            }
           },
           error: (error) => {
             this._logService.log(
@@ -176,12 +260,40 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
     await loadingReaction.present();
 
-    const config = { ...this.configForm.value };
+    // Build config object with all fields explicitly
+    const config: any = {
+      logoUrl: this.configForm.get('logoUrl')?.value || '',
+      title: this.configForm.get('title')?.value || '',
+      privacyPolicy: this.configForm.get('privacyPolicy')?.value || '',
+      contactEmail: this.configForm.get('contactEmail')?.value || '',
+      faviconUrl: this.configForm.get('faviconUrl')?.value || '',
+      urlSite: this.configForm.get('urlSite')?.value || '',
+      description: this.configForm.get('description')?.value || '',
+      invitationCode: Boolean(this.configForm.get('invitationCode')?.value),
+      loginMethods: JSON.stringify(this.configForm.get('loginMethods')?.value || { email: false, google: false }),
+    };
 
-    config.loginMethods = JSON.stringify(this.configForm.value.loginMethods);
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'SiteConfigComponent',
+      'Sending configuration update',
+      { 
+        config, 
+        formValue: this.configForm.value,
+        invitationCodeValue: this.configForm.get('invitationCode')?.value,
+        invitationCodeType: typeof this.configForm.get('invitationCode')?.value
+      }
+    );
 
     this._configService.updateConfig(config).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
+        this._logService.log(
+          LevelLogEnum.INFO,
+          'SiteConfigComponent',
+          'Configuration updated successfully',
+          { response }
+        );
+
         this._alertService.showAlert(
           translations['admin.siteConfig.success.title'],
           translations['admin.siteConfig.success.message'],
@@ -193,9 +305,67 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
         this._configService.setConfig(response);
 
+        // Clear preview and file selection after successful save
+        this.imagePreview = null;
+        this.imageFile = null;
+        this.selectedFileName = '';
+
         loadingReaction.dismiss();
         this.loadUpdateConfigButtons = false;
-        this._cdr.markForCheck();
+        
+        // Update form with response data immediately
+        // Response has structure: { settings: {...}, customCss: string, ... }
+        if (response && response.settings) {
+          let loginMethods = { email: false, google: false };
+          if (response.settings.loginMethods) {
+            try {
+              loginMethods = JSON.parse(response.settings.loginMethods);
+            } catch (error) {
+              this._logService.log(
+                LevelLogEnum.ERROR,
+                'SiteConfigComponent',
+                'Error parsing loginMethods from response',
+                { error: String(error) }
+              );
+            }
+          }
+
+          this._logService.log(
+            LevelLogEnum.INFO,
+            'SiteConfigComponent',
+            'Updating form with saved values',
+            { 
+              responseSettings: response.settings,
+              invitationCode: response.settings.invitationCode,
+              invitationCodeType: typeof response.settings.invitationCode
+            }
+          );
+
+          this.configForm.patchValue({
+            logoUrl: response.settings.logoUrl || '',
+            title: response.settings.title || '',
+            privacyPolicy: response.settings.privacyPolicy || '',
+            contactEmail: response.settings.contactEmail || '',
+            faviconUrl: response.settings.faviconUrl || '',
+            urlSite: response.settings.urlSite || '',
+            description: response.settings.description || '',
+            invitationCode: response.settings.invitationCode ?? false,
+            loginMethods: {
+              email: Boolean(loginMethods.email),
+              google: Boolean(loginMethods.google),
+            },
+          }, { emitEvent: false });
+        }
+        
+        // Force change detection
+        this._cdr.detectChanges();
+        
+        // Reload configuration from server to ensure we have the latest data
+        // Use bypassCache to force fresh data from server
+        // Use a small delay to allow the previous request to complete
+        setTimeout(() => {
+          this.getSiteConfig(true);
+        }, 500);
       },
       error: (error) => {
         this._logService.log(
@@ -228,6 +398,39 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
     } else {
       this.imagePreview = null;
       this.selectedFileName = '';
+    }
+  }
+
+  /**
+   * Get normalized image URL for display
+   */
+  getNormalizedImageUrl(url: string | null | undefined): string {
+    if (!url) return this.defaultLogo;
+    // If it's a blob URL (preview) or data URL, return as is
+    if (typeof url === 'string' && (url.startsWith('blob:') || url.startsWith('data:'))) {
+      return url;
+    }
+    // If it's already a full URL (http/https), return as is
+    if (typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'))) {
+      return url;
+    }
+    // Normalize MinIO URLs
+    return this._utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
+  }
+
+  /**
+   * Handle image load error
+   */
+  onImageError(event: any): void {
+    this._logService.log(
+      LevelLogEnum.WARN,
+      'SiteConfigComponent',
+      'Image failed to load',
+      { src: event.target?.src }
+    );
+    // Fallback to default logo on error
+    if (event.target) {
+      event.target.src = this.defaultLogo;
     }
   }
 }

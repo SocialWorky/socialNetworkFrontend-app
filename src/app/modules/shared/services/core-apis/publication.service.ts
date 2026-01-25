@@ -197,6 +197,74 @@ export class PublicationService {
   }
 
   /**
+   * Remove a media file from a publication
+   * Used when media file is missing (404) and needs to be removed
+   */
+  removeMediaFromPublication(publicationId: string, mediaId: string): Observable<{ message: string; remainingMedia: number }> {
+    const url = `${this.baseUrl}/publications/${publicationId}/media/${mediaId}`;
+    return this.http.delete<{ message: string; remainingMedia: number }>(url).pipe(
+      catchError(this.handleError),
+      switchMap((response) => {
+        // Clear memory cache for this publication
+        this.publicationCache.delete(publicationId);
+
+        // Clear list cache as well since the publication changed
+        this.publicationListCache.clear();
+
+        // Update IndexedDB to remove the media from the local publication
+        return from(this.updateIndexedDBAfterMediaRemoval(publicationId, mediaId)).pipe(
+          map(() => response),
+          catchError(() => of(response)) // Don't fail if IndexedDB update fails
+        );
+      }),
+      tap((response) => {
+        // Log the action
+        this.logService.log(
+          LevelLogEnum.INFO,
+          'PublicationService',
+          'Media removed from publication',
+          {
+            publicationId,
+            mediaId,
+            remainingMedia: response.remainingMedia
+          }
+        );
+      })
+    );
+  }
+
+  /**
+   * Update IndexedDB after media removal
+   */
+  private async updateIndexedDBAfterMediaRemoval(publicationId: string, mediaId: string): Promise<void> {
+    try {
+      const localPublication = await this._publicationDatabase.getPublication(publicationId);
+      if (localPublication && localPublication.media) {
+        const updatedMedia = localPublication.media.filter((m: any) => m._id !== mediaId);
+        await this._publicationDatabase.updatePublicationMedia(
+          publicationId,
+          updatedMedia,
+          updatedMedia.length > 0
+        );
+        this.logService.log(
+          LevelLogEnum.INFO,
+          'PublicationService',
+          'IndexedDB updated after media removal',
+          { publicationId, mediaId, remainingMedia: updatedMedia.length }
+        );
+      }
+    } catch (error) {
+      this.logService.log(
+        LevelLogEnum.WARN,
+        'PublicationService',
+        'Failed to update IndexedDB after media removal',
+        { publicationId, mediaId, error }
+      );
+      throw error;
+    }
+  }
+
+  /**
    * Update publication in local cache
    */
   private updateLocalPublication(id: string, data: EditPublication): void {

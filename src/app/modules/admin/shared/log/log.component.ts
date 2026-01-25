@@ -1,11 +1,14 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Clipboard } from '@angular/cdk/clipboard';
+import { MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil } from 'rxjs';
 
 import { LogService, LogStats, LogsResponse } from './services/log.service';
 import { LogsList } from './interface/log.interface';
 import { GenericSnackbarService } from '@shared/services/generic-snackbar.service';
 import { PaginationConfig } from '@admin/shared/components/pagination/pagination.component';
+import { LogService as FrontendLogService } from '@shared/services/core-apis/log.service';
+import { PublicationViewModalComponent, PublicationViewModalData } from './components/publication-view-modal/publication-view-modal.component';
 
 @Component({
     selector: 'worky-log',
@@ -79,9 +82,11 @@ export class LogComponent implements OnInit, OnDestroy {
 
   constructor(
     private _logService: LogService,
+    private _frontendLogService: FrontendLogService,
     private _clipboard: Clipboard,
     private _genericSnackbarService: GenericSnackbarService,
     private _cdr: ChangeDetectorRef,
+    private _dialog: MatDialog,
   ) {}
 
   ngOnInit() {
@@ -143,6 +148,24 @@ export class LogComponent implements OnInit, OnDestroy {
   refreshLogs() {
     this.loadLogs();
     this.loadLogStats();
+  }
+
+  /**
+   * Clear pending logs from frontend queue
+   * This prevents logs that were deleted from backend from being sent again
+   */
+  clearPendingLogs(): void {
+    const pendingCount = this._frontendLogService.getPendingLogsCount();
+    this._frontendLogService.clearPendingLogs();
+    
+    if (pendingCount > 0) {
+      this._genericSnackbarService.info(`Cleared ${pendingCount} pending logs from queue`);
+    } else {
+      this._genericSnackbarService.info('No pending logs in queue');
+    }
+    
+    // Refresh logs to show updated state
+    this.refreshLogs();
   }
 
   filterByLevel(level: string) {
@@ -322,5 +345,76 @@ export class LogComponent implements OnInit, OnDestroy {
 
   trackByLogId(index: number, log: LogsList): string {
     return log._id;
+  }
+
+  /**
+   * Check if log has publicationId in metadata
+   */
+  hasPublicationId(log: LogsList): boolean {
+    if (!log.metadata || typeof log.metadata !== 'object') return false;
+    return !!(log.metadata as any)?.publicationId;
+  }
+
+  /**
+   * Get publicationId from log metadata
+   */
+  getPublicationId(log: LogsList): string | null {
+    if (!log.metadata || typeof log.metadata !== 'object') return null;
+    return (log.metadata as any)?.publicationId || null;
+  }
+
+  /**
+   * Get imageUrl from log metadata
+   */
+  getImageUrl(log: LogsList): string | null {
+    if (!log.metadata || typeof log.metadata !== 'object') return null;
+    return (log.metadata as any)?.imageUrl || 
+           (log.metadata as any)?.failedImageUrl || 
+           (log.metadata as any)?.normalizedUrl || null;
+  }
+
+  /**
+   * Get mediaId from log metadata
+   */
+  getMediaId(log: LogsList): string | null {
+    if (!log.metadata || typeof log.metadata !== 'object') return null;
+    return (log.metadata as any)?.mediaId || null;
+  }
+
+  /**
+   * Open publication view modal
+   */
+  openPublicationModal(log: LogsList, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    const publicationId = this.getPublicationId(log);
+    if (!publicationId) {
+      this._genericSnackbarService.info('No publication ID found in log metadata');
+      return;
+    }
+
+    const modalData: PublicationViewModalData = {
+      publicationId: publicationId,
+      imageUrl: this.getImageUrl(log) || undefined,
+      mediaId: this.getMediaId(log) || undefined,
+      logId: log._id // Pass log ID to mark as resolved after fixing
+    };
+
+    const dialogRef = this._dialog.open(PublicationViewModalComponent, {
+      width: '90%',
+      maxWidth: '900px',
+      maxHeight: '90vh',
+      data: modalData,
+      panelClass: 'publication-modal-panel'
+    });
+
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result) => {
+      // Refresh logs after modal closes to see if issue was resolved
+      if (result?.refreshed) {
+        this.refreshLogs();
+      }
+    });
   }
 }
