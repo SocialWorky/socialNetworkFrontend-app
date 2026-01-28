@@ -29,7 +29,7 @@ export class FileUploadService {
     const id = this._authService.getDecodedToken()?.id;
     const formData = new FormData();
 
-    formData.append('userId', `${id}|`);
+    formData.append('userId', `${id}`);
     formData.append('destination', destination);
 
     if (idReference) {

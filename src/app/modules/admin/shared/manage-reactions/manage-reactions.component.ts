@@ -16,6 +16,7 @@ import { TypePublishing } from '@shared/modules/addPublication/enum/addPublicati
 import { UtilityService } from '@shared/services/utility.service';
 import { SocketService, ConnectionState } from '@shared/services/socket.service';
 import { EmojiEventsService } from '@shared/services/emoji-events.service';
+import { ImageService } from '@shared/services/image.service';
 
 @Component({
     selector: 'worky-manage-reactions',
@@ -56,7 +57,8 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     private _utilityService: UtilityService,
     private _socketService: SocketService,
     private _emojiEventsService: EmojiEventsService,
-    private _logService: LogService
+    private _logService: LogService,
+    private _imageService: ImageService
   ) {
     this.reactionForm = this._fb.group({
       name: ['', Validators.required],
@@ -127,18 +129,28 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     return new Promise((resolve) => {
       this.isLoading = true;
       this.error = null;
-      
+
+      // Clear image cache to ensure fresh images are loaded
+      if (forceRefresh) {
+        this._imageService.clearCache();
+      }
+
       this._customReactionsService.getCustomReactionsAll(forceRefresh)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (reactions: CustomReactionList[]) => {
+            // Add cache-buster timestamp to emoji URLs when force refreshing
+            const cacheBuster = forceRefresh ? `?t=${Date.now()}` : '';
+
             const filteredReactions = reactions
               .filter((reaction) => reaction.isDeleted === false)
               .map((reaction) => ({
                 ...reaction,
+                // Add cache-buster to emoji URL to bypass browser/service-worker cache
+                emoji: forceRefresh && reaction.emoji ? `${reaction.emoji}${cacheBuster}` : reaction.emoji,
                 zoomed: false,
               }));
-            
+
             this.reactionsList = [...filteredReactions];
             this.isLoading = false;
             this._cdr.detectChanges();
@@ -301,7 +313,10 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
   }
 
   handleImageProcessed(message: any) {
-    this.reactionForm.patchValue({ emoji: this.urlApiFile + message.data.compressed });
+    const emojiUrl = message.data?.urlCompressed || message.data?.compressed;
+    const finalUrl = this.urlApiFile + emojiUrl;
+
+    this.reactionForm.patchValue({ emoji: finalUrl });
     this._cdr.markForCheck();
     this._utilityService.sleep(1000);
     this.submitReaction();
@@ -378,7 +393,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
               fileInput.value = '';
             }
             loadingReaction.dismiss();
-            this.listReactions();
+            this.listReactions(true);  // Force refresh to bypass cache
             this.loadReactionsButtons = false;
             this._cdr.markForCheck();
           },
@@ -413,7 +428,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
             translations['button.ok'],
           );
 
-          this.listReactions();
+          this.listReactions(true);  // Force refresh to update list
         },
         error: (err) => {
           this._logService.log(

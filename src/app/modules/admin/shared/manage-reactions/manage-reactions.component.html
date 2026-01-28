@@ -7,9 +7,9 @@
         <p class="text-slate-300 text-lg">{{ 'admin.manageReactions.subtitle' | workyTranslations }}</p>
       </div>
       <div class="flex gap-4 items-center lg:flex-row flex-col lg:w-auto w-full">
-        <button 
+        <button
           class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-slate-600 text-white hover:bg-slate-500 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-lg"
-          (click)="listReactions()" 
+          (click)="listReactions(true)"
           [disabled]="loadReactionsButtons">
           <i class="material-icons" [class.animate-spin]="loadReactionsButtons">refresh</i>
           <span>{{ 'admin.manageReactions.reload' | workyTranslations }}</span>

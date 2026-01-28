@@ -153,7 +153,6 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.resetPagination();
 
     await this.loadPublications();
-    await this.checkForMorePublications();
 
     this.subscribeToNotificationNewPublication();
     this.subscribeToNotificationDeletePublication();
@@ -291,45 +290,18 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const currentPublications = this.publications();
-    if (currentPublications.length === 0) {
-    } else {
-      const totalExpected = this.page * this.pageSize;
-      if (currentPublications.length >= totalExpected) {
-        return;
-      }
-    }
-
     this.loaderPublications = true;
     
     try {
-      // Check cache first using PublicationCacheService
-      const cacheKey = `publications_${this.page}_${this.pageSize}_${TypePublishing.ALL}`;
-      const cachedPublications = this._publicationCacheService.getPublicationListFromCache(cacheKey);
-      
-      let newPublicationsResponse;
-      
-      if (cachedPublications) {
-        // Use cached data
-        newPublicationsResponse = {
-          publications: cachedPublications,
-          total: cachedPublications.length
-        };
-
-      } else {
-        // Load from server using PublicationDataService
-        newPublicationsResponse = await firstValueFrom(
-          this._publicationDataService.getAllPublicationsFromServer(this.page, this.pageSize, TypePublishing.ALL)
-        );
-        
-        // Cache the response
-        if (newPublicationsResponse.publications.length > 0) {
-          this._publicationCacheService.addPublicationListToCache(cacheKey, newPublicationsResponse.publications);
-        }
-      }
+      // Always load from server to get accurate total count
+      // Cache is handled at the service level, but we need the total from server
+      const newPublicationsResponse = await firstValueFrom(
+        this._publicationDataService.getAllPublicationsFromServer(this.page, this.pageSize, TypePublishing.ALL)
+      );
 
       const currentPublications = this.publications();
       const newPublicationsList = newPublicationsResponse.publications;
+      const totalFromServer = newPublicationsResponse.total || 0;
 
       if (this.page === 1) {
         this.publications.set(newPublicationsList);
@@ -344,13 +316,22 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }
 
+      // Calculate how many items we've actually loaded from the server
+      // This accounts for the current page and items received
+      const itemsLoadedFromServer = (this.page - 1) * this.pageSize + newPublicationsList.length;
+
+      // Determine if there are more publications to load
       if (newPublicationsList.length === 0) {
+        // No publications returned, definitely no more
         this.hasMorePublications = false;
-      } else if (newPublicationsResponse.total && this.publications().length >= newPublicationsResponse.total) {
-        this.hasMorePublications = false;
+      } else if (totalFromServer > 0) {
+        // Use the total from server (which is already filtered by privacy, friends, etc.)
+        this.hasMorePublications = itemsLoadedFromServer < totalFromServer;
       } else if (newPublicationsList.length < this.pageSize) {
+        // Got fewer items than requested, likely no more
         this.hasMorePublications = false;
       } else {
+        // Got full page, assume there might be more
         this.hasMorePublications = true;
       }
 
@@ -360,11 +341,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // Optimize preload to prevent excessive image loading
       this.preloadPublicationsMediaOptimized();
-      await this.checkForMorePublications();
 
     } catch (error) {
       this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error loading publications', { error });
       this.loaderPublications = false;
+      // On error, don't block future loads - allow retry
+      this.hasMorePublications = true;
     }
   }
 
@@ -639,45 +621,21 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   public checkIfMorePublicationsAvailable(): void {
-    if (this.publications().length === 0) {
+    // This method is deprecated - hasMorePublications is now calculated
+    // correctly from the paginated response in loadPublications().
+    // The total from getCountPublications() is unfiltered and incorrect.
+    // If needed, trigger a new loadPublications() call instead.
+    if (this.publications().length === 0 && !this.loaderPublications) {
       this.hasMorePublications = true;
-      return;
+      this.loadPublications();
     }
-
-    if (!this.hasMorePublications) {
-      return;
-    }
-
-    this._publicationService.getCountPublications().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (totalCount) => {
-        const currentCount = this.publications().length;
-        this.hasMorePublications = currentCount < totalCount;
-      },
-      error: (error) => {
-        this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error checking total publications', { error });
-        this.hasMorePublications = true;
-      }
-    });
   }
 
   private async checkForMorePublications(): Promise<void> {
-    try {
-      const totalCount = await firstValueFrom(
-        this._publicationService.getCountPublications()
-      );
-      
-      const currentCount = this.publications().length;
-      const hasMore = currentCount < totalCount;
-            
-      if (this.hasMorePublications !== hasMore) {
-        this.hasMorePublications = hasMore;
-        this._cdr.markForCheck();
-      }
-    } catch (error) {
-      this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error checking total publications', { error });
-    }
+    // This method is no longer needed as we calculate hasMorePublications
+    // directly from the paginated response which includes the correct total.
+    // The total from getCountPublications() is unfiltered and incorrect for this use case.
+    // Removed to prevent incorrect hasMorePublications calculation.
   }
 
   // NEW: Optimized preload method to prevent excessive image loading
@@ -724,7 +682,6 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this._cdr.markForCheck();
     
     try {
-      // Mostrar indicador de refresh moderno
       this.showModernRefreshIndicator();
       
       // Force publications update
