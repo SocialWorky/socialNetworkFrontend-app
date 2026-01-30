@@ -180,8 +180,21 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
     await this._authApiService.loginUser(credentials).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (response: any) => {
-        if (response && response.token) {
-          localStorage.setItem('token', response.token);
+        if (response && (response.token || response.accessToken)) {
+          // Store access token (use accessToken if available, fallback to token for backwards compatibility)
+          const accessToken = response.accessToken || response.token;
+          localStorage.setItem('token', accessToken);
+
+          // Store refresh token if available
+          if (response.refreshToken) {
+            localStorage.setItem('refreshToken', response.refreshToken);
+          }
+
+          // Store token expiration time if available
+          if (response.expiresIn) {
+            const expiresAt = Date.now() + (response.expiresIn * 1000);
+            localStorage.setItem('tokenExpiresAt', String(expiresAt));
+          }
 
           localStorage.setItem('lastLogin', new Date().toISOString());
 
@@ -303,8 +316,22 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
         password: await this._authService.generatePassword(),
       };
 
-      const response = await this._authApiService.loginGoogle(dataGoogle).toPromise() as { token: string, user: User };
-      localStorage.setItem('token', response?.token);
+      const response = await this._authApiService.loginGoogle(dataGoogle).toPromise() as { token: string, accessToken?: string, refreshToken?: string, expiresIn?: number, user: User };
+
+      // Store access token (use accessToken if available, fallback to token for backwards compatibility)
+      const accessToken = response?.accessToken || response?.token;
+      localStorage.setItem('token', accessToken);
+
+      // Store refresh token if available
+      if (response?.refreshToken) {
+        localStorage.setItem('refreshToken', response.refreshToken);
+      }
+
+      // Store token expiration time if available
+      if (response?.expiresIn) {
+        const expiresAt = Date.now() + (response.expiresIn * 1000);
+        localStorage.setItem('tokenExpiresAt', String(expiresAt));
+      }
 
       const body = document.body;
       if (response.user.isDarkMode) {

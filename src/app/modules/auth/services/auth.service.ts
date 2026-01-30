@@ -185,6 +185,8 @@ export class AuthService {
     this.databaseCleanup.cleanupOnLogout();
 
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('tokenExpiresAt');
     localStorage.removeItem('lastLogin');
     sessionStorage.clear();
     this.router.navigate(['/auth']);
