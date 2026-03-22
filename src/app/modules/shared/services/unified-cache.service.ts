@@ -277,7 +277,8 @@ export class UnifiedCacheService implements OnDestroy {
       '/friend': [/friend/],
       '/reaction': [/publication/],
       '/thematic-images': [/thematic/],
-      '/config': [/config/] // Invalidate config cache on mutations
+      '/config': [/config/], // Invalidate config cache on mutations
+      '/widgets': [/widgets/] // Invalidate widget cache on mutations
     };
 
     for (const [endpoint, patterns] of Object.entries(resourcePatterns)) {
