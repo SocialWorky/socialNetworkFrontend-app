@@ -32,9 +32,12 @@
             <worky-button-skeleton width="100px" height="35px"></worky-button-skeleton>
           </div>
           <div class="dropdown-privacy" *ngIf="!privacyLoading && (!typePublishing.POST_PROFILE || (idUserProfile === userToken && typePublishing.POST_PROFILE) || (typePublishing.POST && !idUserProfile))">
-            <div class="form-select" [innerHTML]="privacyFront"
+            <div class="form-select"
               data-bs-toggle="dropdown"
               aria-expanded="false">
+              <i class="material-icons">{{ privacyFront.icon }}</i>
+              {{ privacyFront.label }}
+              <i class="material-icons">arrow_drop_down</i>
             </div>
             <ul
               class="dropdown-menu "

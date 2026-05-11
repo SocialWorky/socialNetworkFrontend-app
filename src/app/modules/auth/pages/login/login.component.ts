@@ -378,11 +378,10 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
         LevelLogEnum.ERROR,
         'LoginComponent',
         'Google login failed',
-        { 
+        {
           error: error instanceof Error ? error.message : String(error)
         }
       );
-      console.error('Error during Google login:', error);
     } finally {
       accessibleLoading.hide(loadingElement);
     }
@@ -497,7 +496,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     this._cdr.markForCheck();
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.closeResetPasswordModal();
     });
   }

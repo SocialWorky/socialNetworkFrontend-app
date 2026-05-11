@@ -77,7 +77,6 @@ export class PublicationService implements OnDestroy {
   }
 
   private handleError(error: any) {
-    console.error('An error occurred', error);
     return throwError(() => new Error('Something went wrong; please try again later.'));
   }
 
@@ -445,10 +444,7 @@ export class PublicationService implements OnDestroy {
     const url = `${this.baseUrl}/publications/${publicationId}`;
     
     return this.http.get<PublicationView[]>(url).pipe(
-      catchError((error) => {
-        console.error('Error sincronizando publicación específica:', error);
-        return of([]);
-      }),
+      catchError(() => of([])),
       map((publications) => {
         if (publications.length > 0) {
           const publication = publications[0];

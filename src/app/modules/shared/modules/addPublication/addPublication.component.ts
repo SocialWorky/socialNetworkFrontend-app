@@ -73,7 +73,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   privacy = TypePrivacy.PUBLIC;
 
-  privacyFront = '';
+  privacyFront: { icon: string; label: string } = { icon: 'language', label: '' };
 
   previews: { url: string; type: string }[] = [];
 
@@ -702,15 +702,15 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     switch (privacy) {
       case TypePrivacy.PUBLIC:
         this.privacy = TypePrivacy.PUBLIC;
-        this.privacyFront = `<i class="material-icons">language</i> ${translations['publishing.privacy-public']} <i class="material-icons">arrow_drop_down</i>`;
+        this.privacyFront = { icon: 'language', label: translations['publishing.privacy-public'] };
         break;
       case TypePrivacy.FRIENDS:
         this.privacy = TypePrivacy.FRIENDS;
-        this.privacyFront = `<i class="material-icons">group</i> ${translations['publishing.privacy-friends']} <i class="material-icons">arrow_drop_down</i>`;
+        this.privacyFront = { icon: 'group', label: translations['publishing.privacy-friends'] };
         break;
       case TypePrivacy.PRIVATE:
         this.privacy = TypePrivacy.PRIVATE;
-        this.privacyFront = `<i class="material-icons">lock</i> ${translations['publishing.privacy-private']} <i class="material-icons">arrow_drop_down</i>`;
+        this.privacyFront = { icon: 'lock', label: translations['publishing.privacy-private'] };
         break;
     }
   }
