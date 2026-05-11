@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, from, throwError, firstValueFrom } from 'rxjs';
-import { catchError, map, switchMap, tap, timeout, retryWhen, delay } from 'rxjs/operators';
+import { catchError, map, switchMap, tap, timeout } from 'rxjs/operators';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { ImageService, ImageLoadOptions } from './image.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';

@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, AfterViewChecked, ChangeDetectionStrategy, OnChanges, SimpleChanges, HostListener } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, firstValueFrom } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
 import { MessageService } from '../../services/message.service';
@@ -878,9 +878,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
     this.currentPage = page;
 
     try {
-      const response = await this._messageService.getMessagesWithUser(this.otherUserId, page, 25, 'DESC')
-        .pipe(takeUntil(this.unsubscribe$))
-        .toPromise();
+      const response = await firstValueFrom(
+        this._messageService.getMessagesWithUser(this.otherUserId, page, 25, 'DESC')
+          .pipe(takeUntil(this.unsubscribe$))
+      );
 
       if (response && response.messages && response.messages.length > 0) {
         const existingIds = new Set(this.messages.map(m => m._id));

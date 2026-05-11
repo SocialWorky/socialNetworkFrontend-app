@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { async, last, Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -50,8 +50,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
 
   @ViewChild('emailInput') emailInput!: ElementRef;
-
-  private unsubscribe$ = new Subject<void>();
 
   constructor(
     private _authApiService: AuthApiService,
@@ -121,8 +119,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private checkLastLogin() {
@@ -178,7 +176,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     );
     const loadingElement = accessibleLoading.show();
 
-    await this._authApiService.loginUser(credentials).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._authApiService.loginUser(credentials).pipe(takeUntil(this.destroy$)).subscribe({
       next: async (response: any) => {
         if (response && (response.token || response.accessToken)) {
           // Store access token (use accessToken if available, fallback to token for backwards compatibility)
@@ -394,7 +392,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     // Usar el nuevo sistema de loading accesible
     const loading = await this._loadingService.showLoading(translations['login.messageValidationEmailLoading']);
 
-    await this._authApiService.validateEmailWithToken(tokenValidate).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._authApiService.validateEmailWithToken(tokenValidate).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
         if (response && response.message) {
           this._alertService.showAlert(
@@ -447,7 +445,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     // Usar el nuevo sistema de loading accesible
     const loading = await this._loadingService.showLoading(translations['login.messageResetPasswordLoading']);
 
-    await this._authApiService.forgotPassword(emailResponse).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._authApiService.forgotPassword(emailResponse).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
         if (response && response.message) {
           this._alertService.showAlert(

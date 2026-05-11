@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, signal, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Subject, firstValueFrom } from 'rxjs';
-import { filter, takeUntil, debounceTime, distinctUntilChanged, throttleTime, map } from 'rxjs/operators';
+import { filter, takeUntil, debounceTime, distinctUntilChanged, throttleTime, map, switchMap } from 'rxjs/operators';
 import { ActivatedRoute } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 
@@ -266,19 +266,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       const visiblePublications = Math.ceil(clientHeight / publicationHeight);
       const remainingPublications = currentPublications.length - currentPublicationIndex - visiblePublications;
       
-      // Load more publications when approaching the end with larger threshold
-      if (remainingPublications <= 10 && remainingPublications > 0) { // Increased from 5 to 10
-        // Add delay to prevent rapid loading
-        setTimeout(() => {
-          this.loadPublications();
-        }, 300);
-      }
-      
-      // Alternative threshold-based loading with larger threshold
-      const threshold = 500; // Increased from 200 to 500
+      // Load more when approaching the end (by publication count or scroll position)
+      const threshold = 500;
       const position = scrollTop + clientHeight;
-      if (position >= scrollHeight - threshold) {
-        // Add delay to prevent rapid loading
+      if ((remainingPublications <= 10 && remainingPublications > 0) || position >= scrollHeight - threshold) {
         setTimeout(() => {
           this.loadPublications();
         }, 300);
@@ -351,44 +342,35 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private async subscribeToNotificationNewPublication() {
+  private subscribeToNotificationNewPublication() {
     this._notificationPublicationService.notificationNewPublication$
       .pipe(
         takeUntil(this.destroy$),
-        filter((notifications: NotificationNewPublication[]) => !!notifications?.[0]?.publications?._id)
+        filter((notifications: NotificationNewPublication[]) => !!notifications?.[0]?.publications?._id),
+        switchMap((notifications: NotificationNewPublication[]) =>
+          this._publicationService.syncSpecificPublication(notifications[0].publications._id)
+        )
       )
       .subscribe({
-        next: async (notifications: NotificationNewPublication[]) => {
-          const notification = notifications[0];
-          
-          this._publicationService.syncSpecificPublication(notification.publications._id)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-              next: (newPublication) => {
-                if (newPublication) {
-                  const publicationsCurrent = this.publications();
-                  
-                  const existingIndex = publicationsCurrent.findIndex(pub => pub._id === newPublication._id);
-                  
-                  if (existingIndex === -1) {
-                    const fixedPublications = publicationsCurrent.filter(pub => pub.fixed);
-                    const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed);
-                    
-                    const updatedPublications = [
-                      ...fixedPublications,
-                      newPublication,
-                      ...nonFixedPublications
-                    ];
-                    
-                    this.publications.set(updatedPublications);
-                    this._cdr.markForCheck();
-                  }
-                }
-              },
-              error: (error) => {
-                // Error syncing new publication - no need to log every sync error
-              }
-            });
+        next: (newPublication) => {
+          if (newPublication) {
+            const publicationsCurrent = this.publications();
+            const existingIndex = publicationsCurrent.findIndex(pub => pub._id === newPublication._id);
+
+            if (existingIndex === -1) {
+              const fixedPublications = publicationsCurrent.filter(pub => pub.fixed);
+              const nonFixedPublications = publicationsCurrent.filter(pub => !pub.fixed);
+
+              const updatedPublications = [
+                ...fixedPublications,
+                newPublication,
+                ...nonFixedPublications
+              ];
+
+              this.publications.set(updatedPublications);
+              this._cdr.markForCheck();
+            }
+          }
         },
         error: (error) => {
           // Error in new publications notification subscription - no need to log every subscription error
@@ -448,29 +430,27 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  private async subscribeToNotificationComment() {
+  private subscribeToNotificationComment() {
     this._notificationCommentService.notificationComment$
-     .pipe(takeUntil(this.destroy$))
-     .subscribe({
-      next: async (data: any) => {
-        if (data.postId) {
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((data: any) => !!data?.postId),
+        switchMap((data: any) => this._publicationService.getPublicationId(data.postId))
+      )
+      .subscribe({
+        next: (publication: PublicationView[]) => {
           const publicationsCurrent = this.publications();
-          this._publicationService.getPublicationId(data.postId).pipe(takeUntil(this.destroy$)).subscribe({
-            next: (publication: PublicationView[]) => {
-              const index = publicationsCurrent.findIndex(pub => pub._id === publication[0]._id);
-              if (index !== -1) {
-                publicationsCurrent[index] = publication[0];
-                this.publications.set(publicationsCurrent);
-                this._cdr.markForCheck();
-              }
-            },
-          });
+          const index = publicationsCurrent.findIndex(pub => pub._id === publication[0]._id);
+          if (index !== -1) {
+            publicationsCurrent[index] = publication[0];
+            this.publications.set(publicationsCurrent);
+            this._cdr.markForCheck();
+          }
+        },
+        error: (error) => {
+          // Error in comments notification subscription - no need to log every subscription error
         }
-      },
-      error: (error) => {
-        // Error in comments notification subscription - no need to log every subscription error
-      }
-    });
+      });
   }
 
   private async getParamsPublication(): Promise<boolean> {

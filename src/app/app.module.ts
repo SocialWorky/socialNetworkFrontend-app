@@ -9,7 +9,6 @@ import { FormsModule } from '@angular/forms';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 
-import { AuthModule } from './modules/auth/auth.module';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
@@ -52,7 +51,6 @@ const config: SocketIoConfig = {
     BrowserAnimationsModule,
     IonicModule.forRoot(),
     AppRoutingModule,
-    AuthModule,
     SocketIoModule.forRoot(config),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),

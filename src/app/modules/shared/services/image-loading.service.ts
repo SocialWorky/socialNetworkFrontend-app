@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError, from } from 'rxjs';
-import { catchError, map, switchMap, timeout, retryWhen, delay } from 'rxjs/operators';
+import { catchError, map, switchMap, timeout, retry } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { ImageService, ImageLoadOptions } from './image.service';
@@ -63,17 +63,7 @@ export class ImageLoadingService {
 
     return this.loadFromNetwork(imageUrl, imageType, options).pipe(
       timeout(timeoutValue),
-      retryWhen(errors => 
-        errors.pipe(
-          delay(retryConfig.retryDelay),
-          map((error, index) => {
-            if (index >= retryConfig.maxRetries) {
-              throw error;
-            }
-            return error;
-          })
-        )
-      ),
+      retry({ count: retryConfig.maxRetries, delay: retryConfig.retryDelay }),
       map(result => {
         const loadTime = performance.now() - startTime;
         this.trackLoadTime(loadTime);

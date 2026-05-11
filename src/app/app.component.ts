@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, Renderer2, Injector } from '@angular/core';
 import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
-import { filter, map, Subject, switchMap, takeUntil, timer, of, catchError, retryWhen, delay, tap, take, groupBy, mergeMap, debounceTime, retry } from 'rxjs';
+import { filter, map, Subject, switchMap, takeUntil, timer, of, catchError, tap, take, groupBy, mergeMap, debounceTime, retry } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 
 import { getTranslationsLanguage } from '../translations/translations';
@@ -196,12 +196,14 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-
+    this.accessibilityObserver?.disconnect();
   }
+
+  private accessibilityObserver: MutationObserver | null = null;
 
   private setupAccessibilityFix(): void {
     // Create a MutationObserver to watch for aria-hidden changes on the root element
-    const observer = new MutationObserver((mutations) => {
+    this.accessibilityObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'aria-hidden') {
           const target = mutation.target as HTMLElement;
@@ -220,16 +222,11 @@ export class AppComponent implements OnInit, OnDestroy {
     // Start observing the root element
     const rootElement = this.document.querySelector('worky-root');
     if (rootElement) {
-      observer.observe(rootElement, {
+      this.accessibilityObserver.observe(rootElement, {
         attributes: true,
         attributeFilter: ['aria-hidden']
       });
     }
-
-    // Clean up observer on destroy
-    this.destroy$.subscribe(() => {
-      observer.disconnect();
-    });
   }
 
   private setupMediaReadyDebouncer(): void {

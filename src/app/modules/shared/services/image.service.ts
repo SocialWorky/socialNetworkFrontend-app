@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of, throwError, timer } from 'rxjs';
-import { retryWhen, delayWhen, take, catchError, switchMap, timeout } from 'rxjs/operators';
+import { take, catchError, switchMap, timeout } from 'rxjs/operators';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { environment } from '@env/environment';
