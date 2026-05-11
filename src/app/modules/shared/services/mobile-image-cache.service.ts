@@ -640,10 +640,7 @@ export class MobileImageCacheService {
 
     const response = await firstValueFrom(
       this.http.get(imageUrl, {
-        responseType: 'blob',
-        headers: {
-          'Cache-Control': 'max-age=1800' // 30 minutes cache
-        }
+        responseType: 'blob'
       }).pipe(
         timeout(options.timeout || 15000),
         catchError((error: any) => {

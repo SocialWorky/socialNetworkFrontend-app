@@ -141,7 +141,7 @@ export class NotificationMessageChatService implements OnDestroy {
   }
 
   sendNotificationMessageChat(message: any, userInfo?: { userId: string; userName: string; userAvatar?: string }) {
-    if (!message || !message.content) {
+    if (!message || (!message.content && !message.urlFile)) {
       return;
     }
 
@@ -186,6 +186,7 @@ export class NotificationMessageChatService implements OnDestroy {
     }
 
     if (message.urlFile) {
+      chatMessagePayload.urlFile = message.urlFile;
       chatMessagePayload.metadata = { urlFile: message.urlFile };
     }
 

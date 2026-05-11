@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { SecurityContext } from '@angular/core';
 import { WidgetConfig } from '../worky-news/interface/widget.interface';
 import { UtilityService } from '@shared/services/utility.service';
 import { environment } from '@env/environment';
@@ -63,7 +64,8 @@ export class DynamicWidgetComponent implements OnInit {
 
   private renderHtmlWidget(config: any): void {
     const htmlContent = config.htmlContent || '';
-    this.safeHtml = this.sanitizer.bypassSecurityTrustHtml(htmlContent);
+    const sanitized = this.sanitizer.sanitize(SecurityContext.HTML, htmlContent) ?? '';
+    this.safeHtml = this.sanitizer.bypassSecurityTrustHtml(sanitized);
   }
 
   private renderImageWidget(config: any): void {
@@ -161,19 +163,26 @@ export class DynamicWidgetComponent implements OnInit {
   }
 
   private renderIframeWidget(config: any): void {
-    const url = config.url || '';
+    const rawUrl = config.url || '';
     const height = config.height || '400px';
     const width = config.width || '100%';
 
-    if (url) {
-      const html = `<iframe src="${this.escapeHtml(url)}" width="${this.escapeHtml(width)}" height="${this.escapeHtml(height)}" frameborder="0" allowfullscreen class="dynamic-widget-iframe"></iframe>`;
-      this.safeHtml = this.sanitizer.bypassSecurityTrustHtml(html);
+    if (!rawUrl) return;
+    try {
+      const parsed = new URL(rawUrl);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return;
+    } catch {
+      return;
     }
+
+    const html = `<iframe src="${this.escapeHtml(rawUrl)}" width="${this.escapeHtml(width)}" height="${this.escapeHtml(height)}" frameborder="0" allowfullscreen class="dynamic-widget-iframe"></iframe>`;
+    this.safeHtml = this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
   private renderCustomWidget(config: any): void {
     const htmlContent = config.htmlContent || config.content || '';
-    this.safeHtml = this.sanitizer.bypassSecurityTrustHtml(htmlContent);
+    const sanitized = this.sanitizer.sanitize(SecurityContext.HTML, htmlContent) ?? '';
+    this.safeHtml = this.sanitizer.bypassSecurityTrustHtml(sanitized);
   }
 
   private escapeHtml(text: string): string {

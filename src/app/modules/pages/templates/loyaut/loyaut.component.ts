@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
 
@@ -12,7 +12,8 @@ import { WidgetPosition } from '@shared/modules/worky-widget/worky-news/interfac
     selector: 'worky-loyaut',
     templateUrl: './loyaut.component.html',
     styleUrls: ['./loyaut.component.scss'],
-    standalone: false
+    standalone: false,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoyautComponent implements OnInit, OnDestroy {
 
@@ -41,7 +42,6 @@ export class LoyautComponent implements OnInit, OnDestroy {
   }
 
   get token() {
-    this._authService.getDecodedToken();
     return this._authService.getDecodedToken();
   }
 

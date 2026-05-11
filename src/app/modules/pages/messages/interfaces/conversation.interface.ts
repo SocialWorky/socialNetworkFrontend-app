@@ -2,6 +2,7 @@ import { Message, MessageType } from './message.interface';
 
 export interface Conversation {
   userId: string;
+  chatId?: string;
   lastMessage: string;
   lastMessageDate: string;
   unreadCount: number;

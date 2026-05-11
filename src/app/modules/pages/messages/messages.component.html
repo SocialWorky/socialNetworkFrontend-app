@@ -43,6 +43,7 @@
     <worky-chat-window
       *ngIf="selectedUserId"
       [otherUserId]="selectedUserId"
+      [chatId]="selectedChatId"
       [messages]="messages"
       [isLoading]="isLoadingMessages && isInitialLoad"
       [totalPages]="messagesTotalPages"

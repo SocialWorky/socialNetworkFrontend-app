@@ -38,8 +38,10 @@ import { environment } from '@env/environment';
 })
 export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked, OnChanges {
   private unsubscribe$ = new Subject<void>();
+  private readonly _socketHandlers: { event: string; handler: (data: any) => void }[] = [];
 
   @Input() otherUserId: string | null = null;
+  @Input() chatId: string | null = null;
   @Input() messages: Message[] = [];
   @Input() isLoading = false;
   @Input() totalPages: number = 1;
@@ -119,15 +121,18 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
     this.setupMessageOptions();
   }
 
+  private _onSocket(event: string, handler: (data: any) => void): void {
+    this._socketService.listenEvent(event, handler);
+    this._socketHandlers.push({ event, handler });
+  }
+
   ngOnInit() {
     this.decodedToken = this._authService.getDecodedToken()!;
     this.currentUserId = this.decodedToken.id;
-    
+
     this.preloadEmojiMartCss();
 
-      this._socketService.listenEvent('chatUsers', (data: any) => {
-        // Event received, room joined successfully
-      });
+    this._onSocket('chatUsers', (_data: any) => {});
 
     if (this.otherUserId && this.currentUserId) {
       this.joinChatRoom();
@@ -162,7 +167,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
           }
 
           if (data.isReadEvent) {
-            const expectedChatId = this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
+            const expectedChatId = this.chatId || this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
             const socketChatId = data.chatId;
 
             if (socketChatId && socketChatId === expectedChatId && data.messageId) {
@@ -189,21 +194,13 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
               return;
             }
 
-            const expectedChatId = this._messageService.generateChatId(this.currentUserId, this.otherUserId);
+            const expectedChatId = this.chatId || this._messageService.generateChatId(this.currentUserId, this.otherUserId);
             const socketChatId = data.chatId;
 
             let shouldUpdate = true;
 
             if (socketChatId) {
-              const chatIdParts = socketChatId.split('_');
-              if (chatIdParts.length === 2) {
-                const hasCurrentUser = chatIdParts.includes(this.currentUserId);
-                const hasOtherUser = chatIdParts.includes(this.otherUserId);
-                shouldUpdate = hasCurrentUser && hasOtherUser;
-              } else if (socketChatId !== expectedChatId) {
-                const hasBothUsers = socketChatId.includes(this.currentUserId) && socketChatId.includes(this.otherUserId);
-                shouldUpdate = hasBothUsers;
-              }
+              shouldUpdate = socketChatId === expectedChatId;
             }
 
             if (shouldUpdate) {
@@ -230,11 +227,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
               return;
             }
 
-            const expectedChatId = this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
+            const expectedChatId = this.chatId || this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
             const socketChatId = data.chatId;
 
-            if (!socketChatId || socketChatId === expectedChatId || 
-                (socketChatId.includes(this.currentUserId!) && socketChatId.includes(this.otherUserId!))) {
+            if (!socketChatId || socketChatId === expectedChatId) {
               if (data.deleteForEveryone) {
                 const messageIndex = this.messages.findIndex(m => m._id === data.messageId);
                 if (messageIndex !== -1) {
@@ -294,8 +290,11 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
             }
 
             const messageId = socketMessage._id || socketMessage.messageId || `temp_${Date.now()}_${Math.random()}`;
-            const expectedChatId = this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
+            const expectedChatId = this.chatId || this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
             const chatId = socketMessage.chatId || expectedChatId;
+            if (!this.chatId && socketMessage.chatId) {
+              this.chatId = socketMessage.chatId;
+            }
 
             const receiverId = socketMessage.receiverId || (isFromOtherUser ? this.currentUserId : this.otherUserId);
 
@@ -487,7 +486,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
         }
       });
 
-    this._socketService.listenEvent('newExternalMessage', (message: ExternalMessage) => {
+    this._onSocket('newExternalMessage', (message: ExternalMessage) => {
       if (message.type === TypePublishing.MESSAGE) {
         this.updateContentMessage(
           message.idReference, 
@@ -499,12 +498,12 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       }
     });
 
-    this._socketService.listenEvent('messageRead', (data: any) => {
+    this._onSocket('messageRead', (data: any) => {
       if (!data || !data.messageId) {
         return;
       }
 
-      const expectedChatId = this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
+      const expectedChatId = this.chatId || this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
       const socketChatId = data.chatId;
 
       if (socketChatId && socketChatId !== expectedChatId) {
@@ -514,12 +513,12 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       this.updateMessageReadStatus(data.messageId);
     });
 
-    this._socketService.listenEvent('userTyping', (data: any) => {
+    this._onSocket('userTyping', (data: any) => {
       if (!data || !data.userId) {
         return;
       }
 
-      const expectedChatId = this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
+      const expectedChatId = this.chatId || this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
       const socketChatId = data.chatId;
 
       if (data.userId === this.otherUserId) {
@@ -537,7 +536,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       }
     });
 
-    this._socketService.listenEvent('messageEdited', (data: any) => {
+    this._onSocket('messageEdited', (data: any) => {
       if (!data || !data.messageId || !data.newContent) {
         return;
       }
@@ -559,21 +558,13 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
         return;
       }
 
-      const expectedChatId = this._messageService.generateChatId(this.currentUserId, this.otherUserId);
+      const expectedChatId = this.chatId || this._messageService.generateChatId(this.currentUserId, this.otherUserId);
       const socketChatId = data.chatId;
 
       let shouldUpdate = true;
 
       if (socketChatId) {
-        const chatIdParts = socketChatId.split('_');
-        if (chatIdParts.length === 2) {
-          const hasCurrentUser = chatIdParts.includes(this.currentUserId);
-          const hasOtherUser = chatIdParts.includes(this.otherUserId);
-          shouldUpdate = hasCurrentUser && hasOtherUser;
-        } else if (socketChatId !== expectedChatId) {
-          const hasBothUsers = socketChatId.includes(this.currentUserId) && socketChatId.includes(this.otherUserId);
-          shouldUpdate = hasBothUsers;
-        }
+        shouldUpdate = socketChatId === expectedChatId;
       }
 
       if (shouldUpdate && messageIndex !== -1) {
@@ -594,15 +585,15 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       }
     });
 
-    this._socketService.listenEvent('messageDeleted', (data: any) => {
+    this._onSocket('messageDeleted', (data: any) => {
       if (!data || !data.messageId) {
         return;
       }
 
-      const expectedChatId = this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
+      const expectedChatId = this.chatId || this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
       const socketChatId = data.chatId;
 
-      if (socketChatId && socketChatId === expectedChatId) {
+      if (!socketChatId || socketChatId === expectedChatId) {
         const messageIndex = this.messages.findIndex(m => m._id === data.messageId);
         if (messageIndex !== -1) {
           if (data.deleteForEveryone) {
@@ -695,19 +686,23 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
   ngOnDestroy() {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
-    
+
+    this._socketHandlers.forEach(({ event, handler }) => {
+      this._socketService.removeEventListener(event, handler);
+    });
+    this._socketHandlers.length = 0;
+
     if (this.typingTimeout) {
       clearTimeout(this.typingTimeout);
     }
 
     if (this.isTyping && this.otherUserId && this.currentUserId) {
-      const chatId = this._messageService.generateChatId(this.currentUserId, this.otherUserId);
+      const chatId = this.chatId || this._messageService.generateChatId(this.currentUserId, this.otherUserId);
       this._socketService.emitEvent('typingStop', {
         userId: this.currentUserId,
-        chatId: chatId
+        chatId: chatId,
       });
     }
-
   }
 
   sendMessage(type: string = this.plainText, content?: string, urlFile?: string) {
@@ -772,8 +767,10 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
 
     this._messageService.createMessage(messageData).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (newMessage) => {
-        const generatedChatId = this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
-        const chatId = generatedChatId;
+        const chatId = newMessage.chatId || this.chatId || this._messageService.generateChatId(this.currentUserId!, this.otherUserId!);
+        if (!this.chatId && newMessage.chatId) {
+          this.chatId = newMessage.chatId;
+        }
         const messageWithChatId = { ...newMessage, chatId };
         
         if (messageWithChatId.replyTo) {
@@ -830,14 +827,15 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       return;
     }
 
-    const chatId = this._messageService.generateChatId(this.currentUserId, this.otherUserId);
+    const chatId = this.chatId || this._messageService.generateChatId(this.currentUserId, this.otherUserId);
 
     if (!this.isTyping) {
       this.isTyping = true;
       this._socketService.emitEvent('typingStart', {
         userId: this.currentUserId,
         userName: this.decodedToken.name,
-        chatId: chatId
+        chatId: chatId,
+        receiverId: this.otherUserId
       });
     }
 
@@ -849,7 +847,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       this.isTyping = false;
       this._socketService.emitEvent('typingStop', {
         userId: this.currentUserId,
-        chatId: chatId
+        chatId: chatId,
+        receiverId: this.otherUserId
       });
       return;
     }
@@ -858,7 +857,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       this.isTyping = false;
       this._socketService.emitEvent('typingStop', {
         userId: this.currentUserId,
-        chatId: chatId
+        chatId: chatId,
+        receiverId: this.otherUserId
       });
     }, 3000);
   }
@@ -1137,8 +1137,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       return;
     }
 
-    const chatId = this._messageService.generateChatId(this.currentUserId, this.otherUserId);
-    
+    const chatId = this.chatId || this._messageService.generateChatId(this.currentUserId, this.otherUserId);
+
     this._messageService.markMessagesAsRead({ chatId, senderId: this.otherUserId })
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
@@ -1321,11 +1321,11 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       return;
     }
 
-    const chatId = this._messageService.generateChatId(this.currentUserId, this.otherUserId);
+    const resolvedChatId = this.chatId || this._messageService.generateChatId(this.currentUserId, this.otherUserId);
 
     if (this._socketService.isConnected()) {
       this._socketService.emitEvent('joinChat', {
-        chatId: chatId,
+        chatId: resolvedChatId,
         userId: this.currentUserId
       });
     } else {
@@ -1338,13 +1338,13 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
         .subscribe({
           next: (state) => {
             if (state.connected && this.currentUserId && this.otherUserId) {
-              const chatId = this._messageService.generateChatId(this.currentUserId, this.otherUserId);
-              
+              const resolvedChatId = this.chatId || this._messageService.generateChatId(this.currentUserId, this.otherUserId);
+
               this._socketService.emitEvent('joinChat', {
-                chatId: chatId,
+                chatId: resolvedChatId,
                 userId: this.currentUserId
               });
-              
+
               if (this._connectionSubscription) {
                 this._connectionSubscription.unsubscribe();
                 this._connectionSubscription = null;
@@ -1411,7 +1411,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       return;
     }
 
-    const chatId = this._messageService.generateChatId(this.currentUserId, this.otherUserId);
+    const chatId = this.chatId || this._messageService.generateChatId(this.currentUserId, this.otherUserId);
 
     this._messageService.updateMessage(messageId, {
       content: this.editingMessageContent.trim()
@@ -1527,7 +1527,7 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       return;
     }
 
-    const chatId = this._messageService.generateChatId(this.currentUserId, this.otherUserId);
+    const chatId = this.chatId || this._messageService.generateChatId(this.currentUserId, this.otherUserId);
 
     this._messageService.deleteMessage(message._id).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: () => {

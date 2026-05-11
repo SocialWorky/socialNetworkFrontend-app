@@ -26,6 +26,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   conversations: Conversation[] = [];
   selectedUserId: string | null = null;
+  selectedChatId: string | null = null;
   messages: Message[] = [];
   messagesTotalPages: number = 1;
   currentUserId: string | null = null;
@@ -115,7 +116,7 @@ this.isMobile = this._deviceDetectionService.isMobile();
       }
 
       if (this.selectedUserId) {
-        const expectedChatId = this._messageService.generateChatId(this.currentUserId!, this.selectedUserId);
+        const expectedChatId = this.selectedChatId || this._messageService.generateChatId(this.currentUserId!, this.selectedUserId);
         const socketChatId = data.chatId;
 
         if (socketChatId && socketChatId !== expectedChatId) {
@@ -265,7 +266,7 @@ this.isMobile = this._deviceDetectionService.isMobile();
 
           if (data.isReadEvent) {
             if (this.selectedUserId && data.messageId && data.chatId) {
-              const expectedChatId = this._messageService.generateChatId(this.currentUserId!, this.selectedUserId);
+              const expectedChatId = this.selectedChatId || this._messageService.generateChatId(this.currentUserId!, this.selectedUserId);
               const socketChatId = data.chatId;
 
               if (socketChatId === expectedChatId) {
@@ -356,8 +357,8 @@ this.isMobile = this._deviceDetectionService.isMobile();
               return;
             }
 
-            const expectedChatId = this._messageService.generateChatId(this.currentUserId!, otherUserId);
-            const chatId = socketChatId && socketChatId === expectedChatId ? socketChatId : expectedChatId;
+            const expectedChatId = (otherUserId === this.selectedUserId ? this.selectedChatId : null) || this._messageService.generateChatId(this.currentUserId!, otherUserId);
+            const chatId = socketChatId || expectedChatId;
 
             const isCurrentChat = otherUserId === this.selectedUserId;
             
@@ -484,6 +485,7 @@ this.isMobile = this._deviceDetectionService.isMobile();
   private addNewConversation(userId: string, message: Message, isFromOtherUser: boolean = true) {
     const newConversation: Conversation = {
       userId: userId,
+      chatId: message.chatId,
       lastMessage: message.content,
       lastMessageDate: message.timestamp,
       lastMessageType: message.type,
@@ -493,7 +495,7 @@ this.isMobile = this._deviceDetectionService.isMobile();
 
     this.conversations = [newConversation, ...this.conversations];
     this.sortConversationsByDate();
-    this.joinChatRoom(userId);
+    this.joinChatRoom(userId, message.chatId);
     this._cdr.markForCheck();
   }
 
@@ -504,17 +506,17 @@ this.isMobile = this._deviceDetectionService.isMobile();
 
     this.conversations.forEach(conversation => {
       if (conversation.userId) {
-        this.joinChatRoom(conversation.userId);
+        this.joinChatRoom(conversation.userId, conversation.chatId);
       }
     });
   }
 
-  private joinChatRoom(otherUserId: string) {
+  private joinChatRoom(otherUserId: string, realChatId?: string) {
     if (!this.currentUserId || !otherUserId || !this._socketService.isConnected()) {
       return;
     }
 
-    const chatId = this._messageService.generateChatId(this.currentUserId, otherUserId);
+    const chatId = realChatId || this._messageService.generateChatId(this.currentUserId, otherUserId);
 
     this._socketService.emitEvent('joinChat', {
       chatId: chatId,
@@ -675,6 +677,7 @@ this.isMobile = this._deviceDetectionService.isMobile();
     }
 
     this.selectedUserId = conversation.userId;
+    this.selectedChatId = conversation.chatId || null;
     this.messagesTotalPages = 1;
     const wasInitialLoad = this.isInitialLoad;
     this.messages = [];
@@ -737,6 +740,9 @@ this.isMobile = this._deviceDetectionService.isMobile();
 
   onMessageSent(newMessage?: Message) {
     if (this.selectedUserId && newMessage) {
+      if (!this.selectedChatId && newMessage.chatId) {
+        this.selectedChatId = newMessage.chatId;
+      }
       const isTempMessage = newMessage._id?.startsWith('temp_');
       const isErrorMessage = newMessage._id?.startsWith('error_');
       const existingMessage = this.messages.find(m => m._id === newMessage._id);
@@ -798,7 +804,7 @@ this.isMobile = this._deviceDetectionService.isMobile();
           
           validNewConversations.forEach(conversation => {
             if (conversation.userId) {
-              this.joinChatRoom(conversation.userId);
+              this.joinChatRoom(conversation.userId, conversation.chatId);
             }
           });
           
@@ -818,6 +824,7 @@ this.isMobile = this._deviceDetectionService.isMobile();
 
   onBackClicked() {
     this.selectedUserId = null;
+    this.selectedChatId = null;
     this._location.replaceState('/messages');
     this._cdr.markForCheck();
   }

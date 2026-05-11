@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { LogService, LevelLogEnum } from './log.service';
@@ -6,7 +6,7 @@ import { LogService, LevelLogEnum } from './log.service';
 @Injectable({
   providedIn: 'root'
 })
-export class PublicationCacheService {
+export class PublicationCacheService implements OnDestroy {
   // Cache para publicaciones individuales
   private publicationCache = new Map<string, { publication: PublicationView; timestamp: number }>();
   private readonly PUBLICATION_CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
@@ -16,9 +16,15 @@ export class PublicationCacheService {
   private publicationListCache = new Map<string, { publications: PublicationView[]; timestamp: number }>();
   private readonly LIST_CACHE_DURATION = 1 * 60 * 1000; // 1 minute
 
+  private _cleanupTimer: ReturnType<typeof setInterval> | undefined;
+
   constructor(private logService: LogService) {
     // Clean expired cache every 5 minutes
-    setInterval(() => this.cleanExpiredCache(), 5 * 60 * 1000);
+    this._cleanupTimer = setInterval(() => this.cleanExpiredCache(), 5 * 60 * 1000);
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this._cleanupTimer);
   }
 
   /**

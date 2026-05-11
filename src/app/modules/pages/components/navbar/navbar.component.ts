@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, ChangeDetectorRef, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 
@@ -27,7 +27,8 @@ import { Conversation, PaginatedResponse } from '../../messages/interfaces/conve
     selector: 'worky-navbar',
     templateUrl: './navbar.component.html',
     styleUrls: ['./navbar.component.scss'],
-    standalone: false
+    standalone: false,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   private unsubscribe$ = new Subject<void>();
@@ -165,7 +166,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
       // Normalize logo URL for MinIO paths - store the raw URL, normalization happens in template
       this.logoUrl = configData.settings.logoUrl || '';
       // Force change detection to update the view
-      this._cdr.detectChanges();
+      this._cdr.markForCheck();
     }
   }
 

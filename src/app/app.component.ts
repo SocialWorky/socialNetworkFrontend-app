@@ -479,7 +479,7 @@ export class AppComponent implements OnInit, OnDestroy {
     if (configData.customCss) {
       const styleElement = this._renderer.createElement('style');
       styleElement.id = 'custom-css';
-      styleElement.innerHTML = String(configData.customCss);
+      this._renderer.setProperty(styleElement, 'textContent', String(configData.customCss));
       this._renderer.appendChild(this.document.head, styleElement);
     }
 

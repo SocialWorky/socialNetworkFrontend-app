@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, timer } from 'rxjs';
-import { retryWhen, delayWhen, take, catchError } from 'rxjs/operators';
+import { retry, catchError } from 'rxjs/operators';
 import { LogService, LevelLogEnum } from './modules/shared/services/core-apis/log.service';
 
 @Injectable()
@@ -26,24 +26,13 @@ export class TimeoutInterceptor implements HttpInterceptor {
     }
 
     return next.handle(processedRequest).pipe(
-      retryWhen(errors => 
-        errors.pipe(
-          delayWhen((error, index) => {
-            if (index >= this.MAX_RETRIES) {
-              return throwError(() => error);
-            }
-            
-            // Only retry on specific errors
-            if (this.shouldRetry(error)) {
-              // Retrying request - no need to log every retry attempt
-              return timer(this.RETRY_DELAY * (index + 1));
-            }
-            
-            return throwError(() => error);
-          }),
-          take(this.MAX_RETRIES)
-        )
-      ),
+      retry({
+        count: this.MAX_RETRIES,
+        delay: (error, retryCount) => {
+          if (!this.shouldRetry(error)) throw error;
+          return timer(this.RETRY_DELAY * retryCount);
+        },
+      }),
       catchError((error: HttpErrorResponse) => {
         this.handleError(error, request);
         return throwError(() => error);
