@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, timer } from 'rxjs';
-import { retry, catchError } from 'rxjs/operators';
+import { retry, catchError, timeout } from 'rxjs/operators';
 import { LogService, LevelLogEnum } from './modules/shared/services/core-apis/log.service';
 
 @Injectable()
@@ -26,6 +26,7 @@ export class TimeoutInterceptor implements HttpInterceptor {
     }
 
     return next.handle(processedRequest).pipe(
+      timeout(this.DEFAULT_TIMEOUT),
       retry({
         count: this.MAX_RETRIES,
         delay: (error, retryCount) => {

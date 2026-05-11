@@ -98,6 +98,13 @@ export class AppComponent implements OnInit, OnDestroy {
     );
     this.applyCustomConfig();
 
+    // Schedule loading screen removal before any async operations
+    // so it always fires regardless of downstream await durations
+    setTimeout(() => {
+      this._loadingService.setLoading(false);
+      document.getElementById('loading-screen')?.remove();
+    }, 2000);
+
     // Only initialize widget data if user is authenticated
     await this.checkAuthenticationAndInitializeWidgets();
 
@@ -171,11 +178,6 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       });
     }, 500);
-
-    setTimeout(() => {
-      this._loadingService.setLoading(false);
-      document.getElementById('loading-screen')?.remove();
-    }, 2000);
 
     if(localStorage.getItem('token')) this.currentUserId = this._authService.getDecodedToken()!.id;
 

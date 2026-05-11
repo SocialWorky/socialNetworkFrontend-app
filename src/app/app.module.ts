@@ -12,6 +12,7 @@ import localeEs from '@angular/common/locales/es';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { AuthInterceptor } from './auth.interceptor';
 import { CacheInterceptor } from './cache.interceptor';
 import { DeduplicationInterceptor } from './deduplication.interceptor';
@@ -51,6 +52,7 @@ const config: SocketIoConfig = {
     BrowserAnimationsModule,
     IonicModule.forRoot(),
     AppRoutingModule,
+    AuthModule,
     SocketIoModule.forRoot(config),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
