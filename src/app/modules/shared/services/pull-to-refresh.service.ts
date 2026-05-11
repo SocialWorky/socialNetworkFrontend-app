@@ -63,7 +63,6 @@ export class PullToRefreshService implements OnDestroy {
     container.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
     container.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
     
-    // Eventos del mouse para desarrollo
     container.addEventListener('mousedown', this.handleMouseDown.bind(this), { passive: false });
     container.addEventListener('mousemove', this.handleMouseMove.bind(this), { passive: false });
     container.addEventListener('mouseup', this.handleMouseUp.bind(this), { passive: false });

@@ -371,7 +371,6 @@ export class WidgetConfigService {
       }),
       catchError((error) => {
         if (error.status === 404) {
-          // El widget no existe, crearlo
           return this.createWidget(widget);
         }
         // Re-throw other errors

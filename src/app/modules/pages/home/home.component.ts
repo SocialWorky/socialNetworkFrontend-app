@@ -190,7 +190,6 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.destroy$.next();
     this.destroy$.complete();
     
-    // Limpiar pull-to-refresh
     if (this.contentContainer?.nativeElement) {
       this._pullToRefreshService.destroyPullToRefresh(
         this.contentContainer.nativeElement

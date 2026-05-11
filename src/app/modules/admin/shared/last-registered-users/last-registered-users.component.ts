@@ -171,12 +171,7 @@ export class LastRegisteredUsersComponent implements OnInit, OnDestroy {
     this.unsubscribe$.complete();
   }
 
-  /**
-   * Método auxiliar para traducciones
-   */
   private translate(key: string): string {
-    // Por ahora retornamos las claves directamente
-    // In a real environment, this should use a translation service
     const translations: { [key: string]: string } = {
       'admin.lastRegisteredUsers.alerts.success': 'Éxito',
       'admin.lastRegisteredUsers.alerts.userActivated': 'Usuario activado exitosamente',

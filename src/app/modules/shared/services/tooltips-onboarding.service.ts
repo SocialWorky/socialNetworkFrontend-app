@@ -24,7 +24,6 @@ export class TooltipsOnboardingService {
   }
 
   private async initializeDriver() {
-    // Cargar CSS de driver.js de forma lazy
     await this.loadDriverCss();
     
     this._driverObj = driver({

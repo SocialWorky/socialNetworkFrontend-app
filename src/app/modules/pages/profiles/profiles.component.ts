@@ -1051,7 +1051,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isUpdatingProfile = true;
     this._cdr.markForCheck();
     
-    // Usar setTimeout para dar tiempo a que se muestre el skeleton
+    // Small delay to ensure the skeleton is rendered before updating
     setTimeout(() => {
       // Use Object.assign for a more subtle update
       if (this.userData && updatedUserData) {

@@ -89,7 +89,6 @@ export class UserManagementService {
           observer.complete();
         },
         error: (error) => {
-          // Error al obtener usuarios - no need to log every user fetch error
           this.loadingSubject.next(false);
           observer.error(error);
         }

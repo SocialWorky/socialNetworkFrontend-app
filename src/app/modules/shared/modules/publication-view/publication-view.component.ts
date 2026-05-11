@@ -653,7 +653,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async fixedPublications(publication: PublicationView) {
-    // Usar el nuevo sistema de loading accesible
     const loading = await this._loadingService.showLoading(
       !publication.fixed ? translations['publicationsView.loadingFixedPublication'] : translations['publicationsView.loadingUnfixedPublication']
     );

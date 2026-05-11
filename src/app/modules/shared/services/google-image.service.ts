@@ -106,8 +106,7 @@ export class GoogleImageService {
    */
   private isValidGoogleImageUrl(url: string): boolean {
     if (!url || typeof url !== 'string') return false;
-    
-    // Verificar que sea una URL de Google
+
     const googleDomains = [
       'lh3.googleusercontent.com',
       'lh4.googleusercontent.com',

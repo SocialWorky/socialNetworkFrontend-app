@@ -39,7 +39,6 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
   isLoading = false;
   isMaintenanceMode = false;
   
-  // Estados separados para mejor control
   backendConnected: boolean = false;
   adminAuthenticated: boolean = false;
   canManageVersions: boolean = false;
@@ -103,21 +102,15 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
     this.updateMaintenanceFieldState();
   }
 
-  /**
-   * SOLUCIÓN DEFINITIVA: Inicialización correcta del componente
-   */
   private async initializeComponentCorrectly(): Promise<void> {
     try {
       this.isLoading = true;
       
-      // PASO 1: Verificar conectividad del backend de manera CORRECTA
       await this.checkBackendConnectivityCorrectly();
-      
-      // STEP 2: If backend is connected, verify authentication
+
       if (this.backendConnected) {
         await this.checkAdminAuthenticationCorrectly();
-        
-        // STEP 3: Load data if everything is OK
+
         if (this.canManageVersions) {
           await this.loadVersions();
           await this.loadCurrentVersion();
@@ -131,12 +124,8 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * SOLUCIÓN DEFINITIVA: Verificación CORRECTA de conectividad del backend
-   */
   private async checkBackendConnectivityCorrectly(): Promise<void> {
     try {
-      // Usar HEAD request para verificar conectividad sin procesar respuesta
       const response = await firstValueFrom(
         this.http.head(`${environment.API_URL}/app/version`, { 
           observe: 'response'
@@ -166,12 +155,8 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * SOLUCIÓN DEFINITIVA: Verificación CORRECTA de autenticación de admin
-   */
   private async checkAdminAuthenticationCorrectly(): Promise<void> {
     try {
-      // PASO 1: Verificar token en localStorage
       const token = this.authService.getDecodedToken();
       
       if (!token || token.role !== 'admin') {
@@ -189,7 +174,6 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
       // STEP 2: Valid token and is admin
       this.adminAuthenticated = true;
       
-      // PASO 3: Verificar permisos con el endpoint
       await this.verifyAdminPermissionsCorrectly();
       
     } catch (error) {
@@ -204,12 +188,8 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * SOLUCIÓN DEFINITIVA: Verificación CORRECTA de permisos de admin
-   */
   private async verifyAdminPermissionsCorrectly(): Promise<void> {
     try {
-      // Intentar acceder al endpoint protegido
       const response = await firstValueFrom(
         this.http.get<any>(`${environment.API_URL}/app/versions`)
       );
@@ -218,35 +198,32 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
       this.canManageVersions = true;
       
     } catch (error: any) {
-      // Manejar diferentes tipos de error
       if (error?.status === 401) {
         // Token expired or invalid
         this.adminAuthenticated = false;
         this.canManageVersions = false;
-        
+
         this.alertService.showAlert(
-          'Sesión Expirada', 
-          'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', 
+          'Sesión Expirada',
+          'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
           Alerts.WARNING
         );
-        
+
       } else if (error?.status === 403) {
-        // Sin permisos suficientes
         this.canManageVersions = false;
-        
+
         this.alertService.showAlert(
-          'Permisos Insuficientes', 
-          'No tienes permisos para gestionar versiones.', 
+          'Permisos Insuficientes',
+          'No tienes permisos para gestionar versiones.',
           Alerts.WARNING
         );
-        
+
       } else if (error?.status === 404) {
         // Endpoint not found, but user is authenticated
         // Assume can manage versions (endpoint may not exist yet)
         this.canManageVersions = true;
         
       } else {
-        // Otro tipo de error - asumir que puede gestionar versiones
         this.canManageVersions = true;
       }
     }
@@ -432,11 +409,10 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
             Alerts.WARNING
           );
         } else if (error?.status === 403) {
-          // Sin permisos
           this.canManageVersions = false;
           this.alertService.showAlert(
-            'Permisos Insuficientes', 
-            'No tienes permisos para crear versiones.', 
+            'Permisos Insuficientes',
+            'No tienes permisos para crear versiones.',
             Alerts.WARNING
           );
         } else {
@@ -484,11 +460,10 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
           Alerts.WARNING
         );
       } else if (error?.status === 403) {
-        // Sin permisos
         this.canManageVersions = false;
         this.alertService.showAlert(
-          'Permisos Insuficientes', 
-          'No tienes permisos para activar versiones.', 
+          'Permisos Insuficientes',
+          'No tienes permisos para activar versiones.',
           Alerts.WARNING
         );
       } else {
@@ -505,9 +480,6 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Actualizar el estado del campo de mensaje de mantenimiento
-   */
   private updateMaintenanceFieldState(): void {
     const messageControl = this.maintenanceForm.get('message');
     if (messageControl) {
@@ -568,11 +540,10 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
           Alerts.WARNING
         );
       } else if (error?.status === 403) {
-        // Sin permisos
         this.canManageVersions = false;
         this.alertService.showAlert(
-          'Permisos Insuficientes', 
-          'No tienes permisos para cambiar el modo mantenimiento.', 
+          'Permisos Insuficientes',
+          'No tienes permisos para cambiar el modo mantenimiento.',
           Alerts.WARNING
         );
       } else {
@@ -621,58 +592,43 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Refrescar la autenticación y permisos
-   */
   async refreshAuthentication() {
     try {
       this.isLoading = true;
-      this.isInitializationComplete = false; // Ocultar interfaz durante refresh
-      
-      // Check if authentication is ready
+      this.isInitializationComplete = false;
+
       const token = this.authService.getDecodedToken();
       const authReady = token && token.role === 'admin';
-      
+
       if (authReady) {
-        // Reinicializar el componente
         await this.initializeComponentCorrectly();
       } else {
-        // Mostrar mensaje de error
         this.alertService.showAlert(
-          'Error de Autenticación', 
-          'No se pudo verificar la autenticación. Por favor, inicia sesión nuevamente.', 
+          'Error de Autenticación',
+          'No se pudo verificar la autenticación. Por favor, inicia sesión nuevamente.',
           Alerts.WARNING
         );
-        // Marcar como completa para mostrar el error
         this.isInitializationComplete = true;
       }
-      
+
     } catch (error) {
       console.error('❌ Error refreshing authentication:', error);
-      // Marcar como completa para mostrar el error
       this.isInitializationComplete = true;
     } finally {
       this.isLoading = false;
     }
   }
 
-  /**
-   * Forzar verificación completa de conectividad y autenticación
-   */
   private async forceFullVerification(): Promise<void> {
-    // Resetear estados
     this.backendConnected = false;
     this.adminAuthenticated = false;
     this.canManageVersions = false;
-    
-    // Verificar conectividad
+
     await this.checkBackendConnectivityCorrectly();
-    
+
     if (this.backendConnected) {
-      // Verify authentication
       await this.checkAdminAuthenticationCorrectly();
-      
-      // Load data if everything is ok
+
       if (this.canManageVersions) {
         await this.loadVersions();
         await this.loadCurrentVersion();
@@ -682,11 +638,10 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
     } else {
       console.error('❌ Backend not connected after full verification');
     }
-    
   }
 
   /**
-   * Verificar permisos de administrador con el endpoint
+   * Verify admin permissions with the endpoint
    */
   private async verifyAdminPermissions(): Promise<void> {
     try {
@@ -705,21 +660,17 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
           Alerts.WARNING
         );
       } else if (error?.status === 403) {
-        // Sin permisos suficientes
         this.canManageVersions = false;
-        
+
         this.alertService.showAlert(
-          'Permisos Insuficientes', 
-          'No tienes permisos para gestionar versiones.', 
+          'Permisos Insuficientes',
+          'No tienes permisos para gestionar versiones.',
           Alerts.WARNING
         );
       } else if (error?.status === 404) {
-        // Endpoint not found, but user is authenticated
-        // Assume can manage versions (endpoint may not exist yet)
+        // Endpoint not found, but user is authenticated — assume can manage versions
         this.canManageVersions = true;
-        
       } else {
-        // Otro tipo de error - asumir que puede gestionar versiones
         this.canManageVersions = true;
       }
     }
@@ -763,95 +714,65 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
     return statusText;
   }
 
-  /**
-   * Verificar si se pueden mostrar las funcionalidades de gestión
-   */
   canShowManagementFeatures(): boolean {
     const result = this.isInitializationComplete && this.backendConnected && this.adminAuthenticated && this.canManageVersions;
     
     return result;
   }
 
-  /**
-   * Inicialización del componente
-   */
   private async initializeWithDetailedLogging(): Promise<void> {
     try {
       this.isLoading = true;
       this.isInitializationComplete = false;
-      
-      // PASO 1: Verificar localStorage y token
+
       await this.diagnoseAuthenticationState();
-      
-      // PASO 2: Verificar conectividad del backend
       await this.diagnoseBackendConnectivity();
-      
-      // STEP 3: Verify admin authentication
       await this.diagnoseAdminAuthentication();
-      
-      // PASO 4: Verificar permisos
       await this.diagnoseAdminPermissions();
-      
-      // STEP 5: Load data if everything is ok
+
       if (this.canManageVersions) {
         await this.loadVersions();
         await this.loadCurrentVersion();
       }
-      
-      // Mark initialization as complete
+
       this.isInitializationComplete = true;
-      
-      // Force UI update
       this.cdr.detectChanges();
-      
-      // Log final
       this.logFinalDiagnosis();
-      
+
     } catch (error) {
-      console.error('Error durante inicialización:', error);
-      // Still mark as complete to show error
+      console.error('Error during initialization:', error);
       this.isInitializationComplete = true;
-      // Force UI update
       this.cdr.detectChanges();
     } finally {
       this.isLoading = false;
     }
   }
 
-  /**
-   * Verificar estado de autenticación en localStorage
-   */
   private async diagnoseAuthenticationState(): Promise<void> {
     try {
-      // Verificar localStorage
       const rawToken = localStorage.getItem('token');
       const hasRawToken = !!rawToken && rawToken !== 'undefined' && rawToken !== 'null';
-      
+
       if (!hasRawToken) {
         return;
       }
-      
-      // Verificar si se puede decodificar el token
+
       const decodedToken = this.authService.getDecodedToken();
       const hasDecodedToken = !!decodedToken;
       const tokenRole = decodedToken?.role;
       const isAdmin = tokenRole === 'admin';
-      
+
       if (!isAdmin) {
         return;
       }
-      
+
     } catch (error) {
-      console.error('Error diagnosticando estado de autenticación:', error);
+      console.error('Error diagnosing authentication state:', error);
     }
   }
 
-  /**
-   * Verificar conectividad del backend
-   */
   private async diagnoseBackendConnectivity(): Promise<void> {
     try {
-      // Intentar HEAD request primero
       try {
         const headResponse = await firstValueFrom(
           this.http.head(`${environment.API_URL}/app/version`, { 
@@ -887,38 +808,31 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
       }
       
     } catch (error) {
-      console.error('Error durante diagnóstico de conectividad:', error);
-      // Por defecto, asumir conectado si hay error
+      console.error('Error diagnosing backend connectivity:', error);
+      // Default to connected if error is thrown without a status (network-level issue)
       this.backendConnected = true;
     }
   }
 
-  /**
-   * Verificar autenticación de admin
-   */
   private async diagnoseAdminAuthentication(): Promise<void> {
     try {
-      // Verificar token nuevamente
       const token = this.authService.getDecodedToken();
-      
+
       if (!token || token.role !== 'admin') {
         this.adminAuthenticated = false;
         this.canManageVersions = false;
         return;
       }
-      
+
       this.adminAuthenticated = true;
-      
+
     } catch (error) {
       this.adminAuthenticated = false;
       this.canManageVersions = false;
-      console.error('Error durante diagnóstico de autenticación de admin:', error);
+      console.error('Error diagnosing admin authentication:', error);
     }
   }
 
-  /**
-   * Verificar permisos de admin
-   */
   private async diagnoseAdminPermissions(): Promise<void> {
     if (!this.adminAuthenticated) {
       return;
@@ -932,27 +846,19 @@ export class VersionManagementComponent implements OnInit, OnDestroy {
       this.canManageVersions = true;
       
     } catch (error: any) {
-      // Manejar diferentes tipos de error
       if (error?.status === 401) {
         this.adminAuthenticated = false;
         this.canManageVersions = false;
       } else if (error?.status === 403) {
         this.canManageVersions = false;
       } else if (error?.status === 404) {
-        // Endpoint no encontrado, pero usuario autenticado
+        // Endpoint not found but user is authenticated — assume can manage versions
         this.canManageVersions = true;
       } else {
-        // Otro tipo de error - asumir permisos
         this.canManageVersions = true;
       }
     }
   }
 
-  /**
-   * Log del estado final
-   */
-  private logFinalDiagnosis(): void {
-    // Only log in case of error or for critical audit
-    // Routine info logs are not necessary
-  }
+  private logFinalDiagnosis(): void {}
 }

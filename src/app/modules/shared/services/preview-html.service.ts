@@ -25,7 +25,6 @@ export class ContentService {
   }
 
   private async initializeMarked() {
-    // Cargar CSS de highlight.js de forma lazy
     await this.loadHighlightJsCss();
     
     const renderer = new marked.Renderer();

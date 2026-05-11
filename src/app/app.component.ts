@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, Renderer2, Injector } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
-import { filter, map, Subject, switchMap, takeUntil, timer, of, catchError, tap, take, groupBy, mergeMap, debounceTime, retry } from 'rxjs';
+import { filter, map, Subject, switchMap, takeUntil, timer, of, catchError, take, groupBy, mergeMap, debounceTime, retry } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 
 import { getTranslationsLanguage } from '../translations/translations';
@@ -21,7 +21,7 @@ import { MediaEventsService } from '@shared/services/media-events.service';
 import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget-config.service';
 import { environment } from '@env/environment';
 import { DevCacheService } from '@shared/services/dev-cache.service';
-import { CacheService } from '@shared/services/cache.service';
+
 import { CacheOptimizationService } from '@shared/services/cache-optimization.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { AppUpdateManagerService } from '@shared/services/app-update-manager.service';
@@ -66,7 +66,6 @@ export class AppComponent implements OnInit, OnDestroy {
     private _mediaEventsService: MediaEventsService,
     private _widgetConfigService: WidgetConfigService,
     private devCacheService: DevCacheService,
-    private cacheService: CacheService,
     private _cacheOptimizationService: CacheOptimizationService,
     private _logService: LogService,
     private _appUpdateManagerService: AppUpdateManagerService,
@@ -402,7 +401,7 @@ export class AppComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const { publication, comment } = result;
+      const { publication } = result;
 
       // Manually construct the full media array from all collected messages
       const constructedMedia: ImageOrganizer[] = collectedMessages.map(msg => {
@@ -569,7 +568,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
   private setupDevMode(): void {
-    // Generar datos mock para desarrollo
     this.devCacheService.generateMockData();
     
     // Cache operations log disabled to avoid spam
@@ -598,8 +596,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private initializeAppUpdates(): void {
-    // App update manager is automatically initialized in its constructor
-    // This method can be used for additional app update initialization if needed
+    void this._appUpdateManagerService;
   }
 
   /**

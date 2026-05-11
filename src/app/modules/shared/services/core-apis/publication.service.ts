@@ -287,7 +287,6 @@ export class PublicationService implements OnDestroy {
       catchError(this.handleError),
       map((data: any) => {
         this._notificationPublicationService.sendNotificationNewPublication(data);
-        // Verificar si data tiene la estructura correcta antes de guardar
         if (data && data.publications && data.publications._id) {
           this._publicationDatabase.addPublication(data.publications as PublicationView);
           this.addToPublicationCache(data.publications._id, data.publications as PublicationView);
@@ -308,7 +307,7 @@ export class PublicationService implements OnDestroy {
       map((data) => {
         this._notificationPublicationService.sendNotificationDeletePublication({ _id: id });
         this._publicationDatabase.deletePublication(id);
-        this.publicationCache.delete(id); // Limpiar cache
+        this.publicationCache.delete(id);
         return data;
       })
     );

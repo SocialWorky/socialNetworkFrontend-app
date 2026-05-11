@@ -169,7 +169,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       password: password,
     };
 
-    // Usar el nuevo sistema de loading accesible
     const accessibleLoading = this._loadingService.createAccessibleLoading(
       translations['login.messageLoading'],
       'Verificando credenciales...'
@@ -284,7 +283,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async loginGoogle() {
-    // Usar el nuevo sistema de loading accesible
     const accessibleLoading = this._loadingService.createAccessibleLoading(
       translations['login.messageLoading'],
       translations['login.signInWithGoogle']
@@ -388,7 +386,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async validateEmailWithToken(tokenValidate: string) {
-    // Usar el nuevo sistema de loading accesible
     const loading = await this._loadingService.showLoading(translations['login.messageValidationEmailLoading']);
 
     await this._authApiService.validateEmailWithToken(tokenValidate).pipe(takeUntil(this.destroy$)).subscribe({
@@ -441,7 +438,6 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const emailResponse = await this._emailNotificationService.sendEmailToRecoverPassword(email);
 
-    // Usar el nuevo sistema de loading accesible
     const loading = await this._loadingService.showLoading(translations['login.messageResetPasswordLoading']);
 
     await this._authApiService.forgotPassword(emailResponse).pipe(takeUntil(this.destroy$)).subscribe({

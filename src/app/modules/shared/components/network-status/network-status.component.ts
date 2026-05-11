@@ -231,7 +231,6 @@ export class NetworkStatusComponent implements OnInit, OnDestroy {
   }
 
   private showNetworkToast(): void {
-    // Verificar si ya se han aplicado optimizaciones
     const optimizationApplied = localStorage.getItem('networkOptimization') === 'enabled';
     
     if (optimizationApplied) {

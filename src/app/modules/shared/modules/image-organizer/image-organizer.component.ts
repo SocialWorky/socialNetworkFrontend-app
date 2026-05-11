@@ -249,7 +249,7 @@ export class ImageOrganizerComponent implements OnInit {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
     
-    // Doble reset para asegurar que se aplique
+    // Double reset to ensure styles are applied (browser rendering timing)
     setTimeout(() => {
       [document.body, document.documentElement].forEach(resetStyles);
       window.scrollTo(0, 0);

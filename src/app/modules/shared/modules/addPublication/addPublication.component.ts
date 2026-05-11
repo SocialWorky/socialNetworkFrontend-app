@@ -213,7 +213,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       , 1000);
 
     this.simulateProgressiveLoading();
-    // Cargar recursos necesarios de forma lazy
     this.loadRequiredResources();
     
     // Safety timeout to prevent infinite skeleton loading
@@ -456,7 +455,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   toggleEmojiMenu() {
     this.showEmojiMenu = !this.showEmojiMenu;
     
-    // Cargar CSS de emoji-mart solo cuando se abre
     if (this.showEmojiMenu) {
       this.loadEmojiMartCss();
     }

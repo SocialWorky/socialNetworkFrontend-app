@@ -220,7 +220,6 @@ export class EnhancedLoggingService {
         }
       };
     } catch (error) {
-      // Fallback metadata en caso de error
       return {
         deviceInfo: {
           isMobile: false,
@@ -299,7 +298,6 @@ export class EnhancedLoggingService {
         maxTouchPoints: navigator.maxTouchPoints
       };
     } catch (error) {
-      // Fallback device info en caso de error
       return {
         isMobile: false,
         isTablet: false,
