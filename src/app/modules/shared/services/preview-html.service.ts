@@ -149,36 +149,61 @@ export class ContentService {
     return nonImageAndNonCodeBlockUrls;
   }
 
+  private extractDomain(url: string): string {
+    try {
+      return new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+      return url;
+    }
+  }
+
+  private escapeAttr(str: string): string {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
   private generatePreviewHTML(url: string, metadata: any): { previewHtml: string, isYouTube: boolean } {
-    // Detectar si es un enlace de YouTube
     const youTubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i;
     const youTubeMatch = url.match(youTubeRegex);
 
     if (youTubeMatch) {
       const videoId = youTubeMatch[1];
-      const youTubeHtml = `
-        <div class="link-preview-youtube">
-          <iframe width="100%" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-        </div>
-      `;
-      return { previewHtml: youTubeHtml, isYouTube: true };
+      return {
+        previewHtml: `<div class="link-preview-youtube"><iframe width="100%" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe></div>`,
+        isYouTube: true,
+      };
     }
 
     if (!metadata || !metadata.ogTitle) return { previewHtml: '', isYouTube: false };
 
-    const displayTitle = metadata.ogTitle || metadata.twitterTitle || metadata.linkedinTitle;
-    const displayDescription = metadata.ogDescription || metadata.twitterDescription || metadata.linkedinDescription;
-    const displayImage = metadata.ogImage?.url || metadata.twitterImage?.url || metadata.linkedinImage;
+    const title = metadata.ogTitle || metadata.twitterTitle || metadata.linkedinTitle || '';
+    const description = metadata.ogDescription || metadata.twitterDescription || metadata.linkedinDescription || '';
+    const rawImage = metadata.ogImage?.url || metadata.twitterImage?.url || metadata.linkedinImage || '';
+    const image = rawImage.startsWith('http://') || rawImage.startsWith('https://') ? rawImage : '';
+
+    const domain = this.extractDomain(url);
+    const faviconSrc = `https://www.google.com/s2/favicons?domain=${domain}&amp;sz=16`;
+
+    const imageBlock = image
+      ? `<div class="lp-image"><img src="${this.escapeAttr(image)}" alt="${this.escapeAttr(title)}" /></div>`
+      : '';
+
+    const descBlock = description
+      ? `<div class="lp-desc">${this.escapeAttr(description)}</div>`
+      : '';
 
     const previewHtml = `
-      <div class="link-preview-content" style="border: 1px solid #ddd; padding: 10px; border-radius: 5px; margin-bottom: 10px; display: flex; align-items: center;">
-        ${displayImage ? `<div style="flex-shrink: 0; width: 100px; height: 100px; overflow: hidden; margin-right: 10px;"><img src="${displayImage}" alt="Preview Image" style="width: 100%; height: auto;"></div>` : ''}
-        <div class="link-preview-info" style="flex-grow: 1; text-align: left;">
-          <h3 style="margin: 0; font-size: 1.2em; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${displayTitle}</h3>
-          <p style="margin: 5px 0; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${displayDescription}</p>
+      <a href="${this.escapeAttr(url)}" target="_blank" rel="noopener noreferrer" class="lp-card">
+        ${imageBlock}
+        <div class="lp-body">
+          <div class="lp-domain">
+            <img class="lp-favicon" src="${faviconSrc}" alt="" />
+            <span>${this.escapeAttr(domain)}</span>
+          </div>
+          <div class="lp-title">${this.escapeAttr(title)}</div>
+          ${descBlock}
         </div>
-      </div>
-    `;
+      </a>`;
+
     return { previewHtml, isYouTube: false };
   }
 }

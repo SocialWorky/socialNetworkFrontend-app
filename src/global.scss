@@ -485,48 +485,80 @@ img, video {
     height: auto;
   }
 
-  .link-preview {
-    display: flex;
-    overflow: hidden;
-    max-height: 150px;
-    cursor: pointer;
-    border: 1px solid #cccccc70;
-    box-shadow: 0px 0px 20px 4px rgb(0 0 0 / 7%);
+  .lp-card {
+    display: block;
+    text-decoration: none;
+    border: 1px solid var(--worky-color-grey);
     border-radius: 12px;
-    padding: 10px;
-    margin: 10px 10px;
+    overflow: hidden;
+    margin: 12px 0;
+    cursor: pointer;
+    background-color: var(--worky-color-module-container);
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+
+    &:hover {
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
   }
 
-  .link-preview-content {
+  .lp-image {
+    width: 100%;
+    height: 196px;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  .lp-body {
+    padding: 12px 16px 14px;
+  }
+
+  .lp-domain {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: var(--worky-color-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    margin-bottom: 6px;
   }
 
-  .link-preview-info {
-    display: flex;
-    flex-direction: column;
-    h3 {
-      font-size: 1.2rem;
-      margin: 0;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      overflow: hidden;
-      color: map.get(color.$worky-navy, 100);
-    }
-    p {
-      padding: 5px;
-      font-size: 1rem;
-      color: map.get(color.$worky-navy, 56);
-      margin: 0;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 3;
-      line-clamp: 3;
-      overflow: hidden;
-    }
+  .lp-favicon {
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 2px;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  .lp-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--worky-color-text);
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+
+  .lp-desc {
+    font-size: 0.8rem;
+    color: var(--worky-color-navy);
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
   }
 
 .cdk-global-overlay-wrapper .cdk-overlay-pane {
