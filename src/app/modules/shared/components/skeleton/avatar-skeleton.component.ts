@@ -1,22 +1,24 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'worky-avatar-skeleton',
   template: `
-    <div 
-      role="status" 
-      class="animate-pulse"
+    <div
+      role="status"
+      aria-label="Loading avatar"
+      class="sk-shimmer sk-avatar"
       [style.width]="size"
       [style.height]="size">
-      
-      <div class="w-full h-full bg-gray-200 rounded-full dark:bg-gray-700"></div>
     </div>
   `,
+  styles: [`
+    :host { display: inline-block; }
+    .sk-avatar { border-radius: 50%; overflow: hidden; }
+  `],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule]
+  imports: []
 })
 export class AvatarSkeletonComponent {
   @Input() size: string = '40px';
-} 
+}

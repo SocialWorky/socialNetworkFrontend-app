@@ -15,73 +15,10 @@
   }
 
   &.loading {
-    .image-skeleton {
+    worky-image-skeleton {
       display: block;
       width: 100%;
       height: 100%;
-
-      .skeleton-placeholder {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: colors.$worky-color-light;
-        border-radius: 4px;
-        overflow: hidden;
-
-        &.rounded-lg {
-          border-radius: 8px;
-        }
-
-        .w-full {
-          width: 100%;
-        }
-
-        .h-full {
-          height: 100%;
-        }
-
-        .bg-gray-200 {
-          background-color: #e5e7eb;
-        }
-
-        .dark\:bg-gray-700 {
-          @media (prefers-color-scheme: dark) {
-            background-color: #374151;
-          }
-        }
-
-        .flex {
-          display: flex;
-        }
-
-        .items-center {
-          align-items: center;
-        }
-
-        .justify-center {
-          justify-content: center;
-        }
-
-        .w-8 {
-          width: 2rem;
-        }
-
-        .h-8 {
-          height: 2rem;
-        }
-
-        .text-gray-300 {
-          color: #d1d5db;
-        }
-
-        .dark\:text-gray-600 {
-          @media (prefers-color-scheme: dark) {
-            color: #4b5563;
-          }
-        }
-      }
     }
   }
 
@@ -139,16 +76,4 @@
   }
 }
 
-// Pulse animation for skeleton
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-} 
+ 

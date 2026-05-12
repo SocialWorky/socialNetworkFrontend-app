@@ -8,7 +8,12 @@
     'more-five-images': (publication?.media?.length ?? 0) > 5
   }">
   <div *ngFor="let _ of [].constructor((publication?.media?.length ?? 0) > 5 ? 5 : (publication?.media?.length ?? 0)); let i = index" class="gallery-item skeleton-item">
-    <worky-image-skeleton width="100%" height="100%"></worky-image-skeleton>
+    <worky-image-skeleton
+      width="100%"
+      height="100%"
+      [rounded]="false"
+      [mediaType]="isVideoUrl(publication?.media?.[i]?.url ?? '') ? 'video' : 'image'">
+    </worky-image-skeleton>
   </div>
 </div>
 
@@ -40,14 +45,15 @@
 
         <ng-container *ngIf="isVideoUrl(image.urlCompressed)">
           <div class="video-container">
-            <worky-image 
-              [src]="getNormalizedImageUrl(image.urlThumbnail)" 
-              alt="Image" 
+            <worky-image
+              [src]="getNormalizedImageUrl(image.urlThumbnail)"
+              alt="Image"
               [publicationId]="publication?._id"
               [commentId]="comment?._id"
               [mediaId]="image._id"
               [imageType]="type === 'publication' ? 'publication' : (type === 'comment' ? 'media' : 'media')"
-              (load)="onImageLoad()" 
+              mediaType="video"
+              (load)="onImageLoad()"
               (error)="onImageError($event)">
             </worky-image>
           </div>

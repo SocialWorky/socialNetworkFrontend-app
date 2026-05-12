@@ -977,3 +977,30 @@ worky-root[inert] ion-loading {
     opacity: 0.7;
   }
 }
+
+/* ───────── Skeleton shimmer ───────── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.sk-shimmer {
+  background: linear-gradient(90deg, #eceef1 25%, #f5f6f8 50%, #eceef1 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.dark-mode .sk-shimmer {
+  background: linear-gradient(90deg, #2d3748 25%, #3d4a5c 50%, #2d3748 75%);
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-shimmer {
+    animation: none;
+    background: #eceef1;
+  }
+  .dark-mode .sk-shimmer {
+    background: #2d3748;
+  }
+}
