@@ -89,17 +89,27 @@ export class FileUploadService {
     urlThumbnail: string,
     urlCompressed: string,
     _idPublications: string,
-    type: TypePublishing
+    type: TypePublishing,
+    extras?: {
+      urlThumbnailWebP?: string;
+      urlPreview?: string;
+      urlPreviewWebP?: string;
+      urlCompressedWebP?: string;
+      urlFull?: string;
+      urlFullWebP?: string;
+      blurHash?: string;
+    }
   ) {
     const urlApi = environment.API_URL;
 
     const body = {
-      url: url,
-      urlThumbnail: urlThumbnail,
-      urlCompressed: urlCompressed,
+      url,
+      urlThumbnail,
+      urlCompressed,
       _idPublication: _idPublications,
-      isPublications: type === TypePublishing.POST ? true : false,
-      isComment: type === TypePublishing.COMMENT ? true : false
+      isPublications: type === TypePublishing.POST,
+      isComment: type === TypePublishing.COMMENT,
+      ...extras,
     };
 
     return this.http.post<any>(`${urlApi}/media/create`, body);

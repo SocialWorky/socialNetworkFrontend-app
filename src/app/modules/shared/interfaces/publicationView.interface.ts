@@ -42,11 +42,24 @@ export interface User {
 }
 
 export interface MediaFileUpload {
-  filename: string;
-  thumbnail: string;
-  optimized?: string;
-  compressed?: string;
-  originalname?: string;
+  filename:          string;
+  thumbnail:         string;
+  optimized?:        string;
+  compressed?:       string;
+  originalname?:     string;
+  url?:              string;
+  urlThumbnail?:     string;
+  urlThumbnailWebP?: string;
+  urlPreview?:       string;
+  urlPreviewWebP?:   string;
+  urlCompressed?:    string;
+  urlCompressedWebP?: string;
+  urlFull?:          string;
+  urlFullWebP?:      string;
+  urlOptimized?:     string;
+  blurHash?:         string;
+  deduplicated?:     boolean;
+  name?:             string;
 }
 
 export interface Comment {
