@@ -115,7 +115,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
         next: async () => {
           try {
             const publicationsUpdated = await firstValueFrom(
-              this._publicationService.getPublicationId(this.publication?._id!).pipe(takeUntil(this.destroy$))
+              this._publicationService.getPublicationId(this.publication?._id!, true).pipe(takeUntil(this.destroy$))
             );
 
             if (publicationsUpdated && publicationsUpdated.length > 0) {
@@ -176,7 +176,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
       }
 
       const publicationsUpdated = await firstValueFrom(
-        this._publicationService.getPublicationId(this.publication?._id!).pipe(takeUntil(this.destroy$))
+        this._publicationService.getPublicationId(this.publication?._id!, true).pipe(takeUntil(this.destroy$))
       );
 
       if (publicationsUpdated && publicationsUpdated.length > 0) {
@@ -221,7 +221,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
       next: async () => {
         try {
           const publicationsUpdated = await firstValueFrom(
-            this._publicationService.getPublicationId(this.publication?._id!).pipe(takeUntil(this.destroy$))
+            this._publicationService.getPublicationId(this.publication?._id!, true).pipe(takeUntil(this.destroy$))
           );
 
           if (publicationsUpdated) {
@@ -289,7 +289,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   refreshPublications() {
     if (!this.publication?._id) return;
 
-    this._publicationService.getPublicationId(this.publication._id).pipe(
+    this._publicationService.getPublicationId(this.publication._id, true).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: (publicationList: PublicationView[]) => {
