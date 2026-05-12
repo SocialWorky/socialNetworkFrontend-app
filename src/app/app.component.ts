@@ -301,61 +301,50 @@ export class AppComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Fetch the base publication to get latest comments, reactions, etc., bypassing cache.
+    // The backend now debounces per idReference: by the time this fires, all files for
+    // this publication have been processed and their /media/create records persisted.
+    // Re-fetching bypasses the cache so we get the complete media array from the DB.
     this._publicationService.getPublicationId(publicationId, true).pipe(
       take(1),
       catchError(err => {
         this._logService.log(LevelLogEnum.ERROR, 'AppComponent', `Failed to fetch base publication ${publicationId}`, { error: err });
-        return of(null); // Return null to handle the error gracefully
+        return of(null);
       })
     ).subscribe(publications => {
       if (publications && publications.length > 0) {
         const basePublication = publications[0];
 
-        // Manually construct the full media array from all collected messages
-        const constructedMedia: ImageOrganizer[] = collectedMessages.map(msg => {
-          // Normalize URLs for MinIO
-          // The msg.data object contains the result from uploadService.processFile
-          // which includes url, urlThumbnail, urlCompressed as relative MinIO paths
+        // Prefer the media array already persisted in the DB — it contains ALL files for
+        // this publication. Only fall back to constructing from socket data when the DB
+        // has no media (e.g. /media/create failed for all files).
+        if (!basePublication.media || basePublication.media.length === 0) {
           const baseUrl = environment.MINIO_BUCKET_URL || '';
-          
-          // Use the MinIO URLs directly from the data object
-          // These are already relative paths like "publications/filename.jpg" or "publications/compressed|filename.jpg"
           const getFullPath = (relativePath: string) => {
             if (!relativePath) return '';
-            // If already a full URL, return as is
             if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
               return relativePath;
             }
-            // Normalize the relative path with the base URL
             return this._utilityService.normalizeImageUrl(relativePath, baseUrl);
           };
-          
-          // Prefer urlCompressed/urlThumbnail from data, fallback to constructing from filename/thumbnail if needed
-          const url = msg.data.url ? getFullPath(msg.data.url) : '';
-          const urlThumbnail = msg.data.urlThumbnail ? getFullPath(msg.data.urlThumbnail) : 
-            (msg.data.thumbnail ? getFullPath(`${msg.urlMedia || 'publications/'}${msg.data.thumbnail}`) : '');
-          const urlCompressed = msg.data.urlCompressed ? getFullPath(msg.data.urlCompressed) :
-            (msg.data.compressed ? getFullPath(`${msg.urlMedia || 'publications/'}${msg.data.compressed}`) : url);
-          
-          return {
-            _id: '', // Not critical for the view
-            url: url,
-            urlThumbnail: urlThumbnail,
-            urlCompressed: urlCompressed || url, // Fallback to url if urlCompressed is not available
-            comments: [],
-            type: MediaType.IMAGE // This can be enhanced to detect video/image from file extension
-          };
-        });
 
-        // Merge and update view
-        basePublication.media = constructedMedia;
-        basePublication.containsMedia = false; // The media is now present
-        
+          basePublication.media = collectedMessages.map(msg => ({
+            _id: '',
+            url: msg.data?.url ? getFullPath(msg.data.url) : '',
+            urlThumbnail: msg.data?.urlThumbnail
+              ? getFullPath(msg.data.urlThumbnail)
+              : msg.data?.thumbnail ? getFullPath(`${msg.urlMedia || 'publications/'}${msg.data.thumbnail}`) : '',
+            urlCompressed: msg.data?.urlCompressed
+              ? getFullPath(msg.data.urlCompressed)
+              : msg.data?.compressed ? getFullPath(`${msg.urlMedia || 'publications/'}${msg.data.compressed}`) : (msg.data?.url ? getFullPath(msg.data.url) : ''),
+            comments: [],
+            type: MediaType.IMAGE,
+          }));
+        }
+
+        basePublication.containsMedia = false;
         this.updatePublicationView(basePublication);
       }
 
-      // Clean up collector for this publication ID
       this.mediaCollector.delete(publicationId);
     });
   }
@@ -616,7 +605,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this._mediaEventsService.notifyMediaProcessed({
       idReference: publication._id,
       media: publication.media,
-      containsMedia: true
+      containsMedia: false
     });
 
     // Notify NotificationPublicationService to update publication in lists (HomeComponent, etc)

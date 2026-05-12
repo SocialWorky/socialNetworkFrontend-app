@@ -93,7 +93,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     content: ['', [Validators.required, Validators.minLength(1)]],
     privacy: [''],
     authorId: [''],
-    extraData: [''],
+    extraData: [null],
     containsMedia: [false],
     userReceivingId: [''],
   });
@@ -628,14 +628,15 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   private setExtraData() {
-    const extraData: ExtraData = {
-      locations: {
-        title: this.nameGeoLocation,
-        urlMap: this.dataGeoLocation,
-      }
-    };
     if (this.nameGeoLocation || this.dataGeoLocation) {
-      this.myForm.controls['extraData'].setValue(JSON.stringify(extraData));
+      this.myForm.controls['extraData'].setValue({
+        locations: {
+          title: this.nameGeoLocation,
+          urlMap: this.dataGeoLocation,
+        },
+      });
+    } else {
+      this.myForm.controls['extraData'].setValue(null);
     }
   }
 

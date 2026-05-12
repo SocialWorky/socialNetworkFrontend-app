@@ -1,5 +1,5 @@
 <div class="upload-file-modal" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
-  <input #fileInput type="file" multiple accept="image/*,video/*" (change)="onFileSelected($event)" hidden>
+  <input #fileInput type="file" multiple accept="image/jpeg,image/png,image/gif,image/bmp,image/tiff,image/webp,video/mp4,video/mpeg,video/quicktime,video/avi" (change)="onFileSelected($event)" hidden>
   <div class="drag-drop-container" (click)="fileInput.click()">
     <div class="drag-drop-content">
       <p>{{ 'imageUpload.dragDropText' | workyTranslations }}</p>

@@ -4,7 +4,7 @@ import { AuthService } from '@auth/services/auth.service';
 import { environment } from '@env/environment';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { catchError, retry, timeout } from 'rxjs/operators';
-import { throwError } from 'rxjs';
+import { throwError, timer } from 'rxjs';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Injectable({
@@ -50,7 +50,15 @@ export class FileUploadService {
 
     return this.http.post<any>(url, formData).pipe(
       timeout(60000),
-      retry(2),
+      retry({
+        count: 2,
+        delay: (error, attempt) => {
+          if (error?.status >= 400 && error?.status < 500) {
+            return throwError(() => error);
+          }
+          return timer(attempt * 1000);
+        },
+      }),
       catchError(error => {
         this._logService.log(
           LevelLogEnum.ERROR,

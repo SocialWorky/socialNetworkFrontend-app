@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { catchError, map, Observable, Subject, throwError, from, of, switchMap, tap, forkJoin, firstValueFrom, filter, shareReplay } from 'rxjs';
 
@@ -162,11 +162,9 @@ export class PublicationService implements OnDestroy {
    * Get publication by ID with optimized cache
    */
   getPublicationId(id: string, forceRefresh: boolean = false): Observable<PublicationView[]> {
-    // If forcing refresh, clear the specific cache entry first
     if (forceRefresh) {
       this.publicationCache.delete(id);
     } else {
-      // Check cache first
       const cached = this.publicationCache.get(id);
       if (cached && this.isCacheValid(cached.timestamp, this.PUBLICATION_CACHE_DURATION)) {
         return of([cached.publication]);
@@ -174,14 +172,21 @@ export class PublicationService implements OnDestroy {
     }
 
     const url = `${this.baseUrl}/publications/${id}`;
-    return this.http.get<PublicationView[]>(url).pipe(
+
+    // When forceRefresh is true, bypass the CacheInterceptor via Cache-Control: no-cache
+    // so the request always reaches the backend and returns fresh DB data.
+    const headers = new HttpHeaders(
+      forceRefresh ? { 'Cache-Control': 'no-cache' } : {}
+    );
+
+    return this.http.get<PublicationView[]>(url, { headers }).pipe(
       tap((publications) => {
         publications.forEach(pub => {
           this._publicationDatabase.addPublication(pub);
           this.addToPublicationCache(pub._id, pub);
         });
       }),
-      shareReplay(1) // Share response between multiple subscribers
+      shareReplay(1)
     );
   }
 

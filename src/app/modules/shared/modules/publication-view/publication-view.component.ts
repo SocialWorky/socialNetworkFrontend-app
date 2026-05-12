@@ -755,7 +755,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           
           const updatedPublication = publication[0];
 
-          // Stop polling if no more pending media (publication or comments)
           const hasPendingPublicationMedia = updatedPublication.containsMedia && !updatedPublication.media?.length;
           const hasPendingCommentMedia = updatedPublication.comment?.some(
             (c: any) => c.containsMedia && (!c.media || c.media.length === 0)
@@ -764,7 +763,17 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           if (!hasPendingPublicationMedia && !hasPendingCommentMedia) {
             this.stopPolling();
           }
-          
+
+          // Block ALL poll-based UI updates while containsMedia = true.
+          // The backend's count-based batching sends ONE socket notification only after
+          // ALL files finish. That socket drives buildPublicationWithCollectedMedia which
+          // fetches the complete media set and clears containsMedia locally.
+          // Allowing partial DB updates here (e.g. 1 of 5 photos) would show the overlay
+          // disappearing prematurely before all files are ready.
+          if (updatedPublication.containsMedia) {
+            return;
+          }
+
           if (this.publication.media.length > updatedPublication.media.length) {
             return;
           }
@@ -774,10 +783,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
             this.publication.containsMedia !== updatedPublication.containsMedia ||
             JSON.stringify(this.publication.media) !== JSON.stringify(updatedPublication.media);
 
-          // Check if any comment's media has changed (compare by comment ID, not index)
           const hasCommentMediaChanges = updatedPublication.comment?.some((updatedComment: any) => {
             const currentComment = this.publication.comment?.find((c: any) => c._id === updatedComment._id);
-            if (!currentComment) return true; // New comment
+            if (!currentComment) return true;
             const currentMediaLength = currentComment.media?.length || 0;
             const updatedMediaLength = updatedComment.media?.length || 0;
             return currentMediaLength !== updatedMediaLength;
@@ -789,7 +797,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
             this.publication.fixed !== updatedPublication.fixed ||
             JSON.stringify(this.publication.reaction) !== JSON.stringify(updatedPublication.reaction);
 
-          // Force update if there are pending media that are now ready
           const pendingMediaNowReady = !hasPendingPublicationMedia && !hasPendingCommentMedia &&
             (this.publication.containsMedia || this.publication.comment?.some((c: any) => c.containsMedia));
 
@@ -798,11 +805,11 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
             this.publication = { ...updatedPublication };
             this.loadReactionsImg(updatedPublication);
             this.checkDataLink(updatedPublication._id);
-            
+
             if (hasMediaChanges) {
               this.mediaLoading = false;
             }
-            
+
             this._cdr.markForCheck();
           }
         },
