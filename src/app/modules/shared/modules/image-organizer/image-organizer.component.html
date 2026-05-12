@@ -44,10 +44,10 @@
         </ng-container>
 
         <ng-container *ngIf="isVideoUrl(image.urlCompressed)">
-          <div class="video-container">
+          <div class="video-thumbnail-wrapper">
             <worky-image
               [src]="getNormalizedImageUrl(image.urlThumbnail)"
-              alt="Image"
+              alt="Video thumbnail"
               [publicationId]="publication?._id"
               [commentId]="comment?._id"
               [mediaId]="image._id"
@@ -56,6 +56,15 @@
               (load)="onImageLoad()"
               (error)="onImageError($event)">
             </worky-image>
+            <div class="video-play-overlay">
+              <div class="play-button-circle">
+                <span class="material-icons">play_arrow</span>
+              </div>
+            </div>
+            <div class="video-badge">
+              <span class="material-icons">videocam</span>
+              <span>VIDEO</span>
+            </div>
           </div>
         </ng-container>
       </div>
