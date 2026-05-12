@@ -103,9 +103,13 @@ export class ChatInputComponent {
       const buttonRect = this.emojiWrapper.nativeElement.getBoundingClientRect();
       const picker = document.querySelector('.emoji-picker-container') as HTMLElement;
       if (picker) {
+        const pickerWidth = 352;
         picker.style.position = 'fixed';
         picker.style.bottom = `${window.innerHeight - buttonRect.top + 10}px`;
-        picker.style.right = `${window.innerWidth - buttonRect.right}px`;
+        picker.style.right = '';
+        const leftPos = buttonRect.left;
+        const maxLeft = window.innerWidth - pickerWidth - 8;
+        picker.style.left = `${Math.min(leftPos, maxLeft)}px`;
       }
     }
   }

@@ -12,6 +12,8 @@ import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
 import { SocketService } from '@shared/services/socket.service';
+import { UserService } from '@shared/services/core-apis/users.service';
+import { User } from '@shared/interfaces/user.interface';
 import { translations } from '@translations/translations';
 
 @Component({
@@ -41,10 +43,28 @@ export class MessagesComponent implements OnInit, OnDestroy {
   totalPages = 1;
 
   isMobile = false;
+  searchTerm = '';
+  userInfoMap: Map<string, User> = new Map();
+  showNewChatPanel = false;
+  newChatSearchTerm = '';
+  newChatResults: User[] = [];
+  isSearchingNewChat = false;
 
   decodedToken!: Token;
 
-constructor(
+  get filteredConversations(): Conversation[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) return this.conversations;
+    return this.conversations.filter(conv => {
+      const userInfo = this.userInfoMap.get(conv.userId);
+      if (!userInfo) return false;
+      const fullName = `${userInfo.name || ''} ${userInfo.lastName || ''}`.trim().toLowerCase();
+      const username = (userInfo.username || '').toLowerCase();
+      return fullName.includes(term) || username.includes(term);
+    });
+  }
+
+  constructor(
     private _messageService: MessageService,
     private _authService: AuthService,
     private _router: Router,
@@ -54,9 +74,10 @@ constructor(
     private _logService: LogService,
     private _deviceDetectionService: DeviceDetectionService,
     private _notificationMessageChatService: NotificationMessageChatService,
-    private _socketService: SocketService
+    private _socketService: SocketService,
+    private _userService: UserService
   ) {
-this.isMobile = this._deviceDetectionService.isMobile();
+    this.isMobile = this._deviceDetectionService.isMobile();
   }
 
   ngOnInit() {
@@ -496,6 +517,63 @@ this.isMobile = this._deviceDetectionService.isMobile();
     this.conversations = [newConversation, ...this.conversations];
     this.sortConversationsByDate();
     this.joinChatRoom(userId, message.chatId);
+    this.prefetchUserInfo([userId]);
+    this._cdr.markForCheck();
+  }
+
+  openNewChat() {
+    this.showNewChatPanel = !this.showNewChatPanel;
+    if (!this.showNewChatPanel) {
+      this.newChatSearchTerm = '';
+      this.newChatResults = [];
+    }
+    this._cdr.markForCheck();
+  }
+
+  searchNewChatUsers(term: string) {
+    this.newChatSearchTerm = term;
+    if (!term.trim()) {
+      this.newChatResults = [];
+      this._cdr.markForCheck();
+      return;
+    }
+
+    this.isSearchingNewChat = true;
+    this._cdr.markForCheck();
+
+    this._userService.getUserByName(term.trim()).pipe(takeUntil(this.unsubscribe$)).subscribe({
+      next: (user) => {
+        if (user && user._id !== this.currentUserId) {
+          this.newChatResults = [user];
+          this.userInfoMap.set(user._id, user);
+        } else {
+          this.newChatResults = [];
+        }
+        this.isSearchingNewChat = false;
+        this._cdr.markForCheck();
+      },
+      error: () => {
+        this.newChatResults = [];
+        this.isSearchingNewChat = false;
+        this._cdr.markForCheck();
+      }
+    });
+  }
+
+  startChatWithUser(user: User) {
+    this.showNewChatPanel = false;
+    this.newChatSearchTerm = '';
+    this.newChatResults = [];
+    const existingConversation = this.conversations.find(c => c.userId === user._id);
+    if (existingConversation) {
+      this.selectConversation(existingConversation);
+    } else {
+      this.selectedUserId = user._id;
+      this.selectedChatId = null;
+      this.messages = [];
+      this._location.replaceState(`/messages/${user._id}`);
+      this.loadMessages(user._id);
+    }
     this._cdr.markForCheck();
   }
 
@@ -546,6 +624,20 @@ this.isMobile = this._deviceDetectionService.isMobile();
     this.unsubscribe$.complete();
   }
 
+  private prefetchUserInfo(userIds: string[]) {
+    const unique = [...new Set(userIds.filter(Boolean))];
+    unique.forEach(userId => {
+      if (this.userInfoMap.has(userId)) return;
+      this._userService.getUserById(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
+        next: (user) => {
+          this.userInfoMap.set(userId, user);
+          this._cdr.markForCheck();
+        },
+        error: () => {}
+      });
+    });
+  }
+
   loadConversations() {
     this.isLoadingConversations = true;
     this.error = null;
@@ -553,7 +645,6 @@ this.isMobile = this._deviceDetectionService.isMobile();
 
     this._messageService.getConversations(this.page, this.pageSize).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: PaginatedResponse<Conversation>) => {
-        // Filter out conversations with invalid userId (deleted users)
         const validConversations = (response.conversations || []).filter(conv => {
           if (!conv.userId) {
             this._logService.log(
@@ -566,11 +657,12 @@ this.isMobile = this._deviceDetectionService.isMobile();
           }
           return true;
         });
-        
+
         this.conversations = validConversations;
         this.totalPages = response.totalPages;
         this.isLoadingConversations = false;
         this.joinAllChatRooms();
+        this.prefetchUserInfo(validConversations.map(c => c.userId));
         this._cdr.markForCheck();
       },
       error: (error: any) => {
@@ -801,13 +893,14 @@ this.isMobile = this._deviceDetectionService.isMobile();
           
           this.conversations = [...this.conversations, ...validNewConversations];
           this.totalPages = response.totalPages;
-          
+
           validNewConversations.forEach(conversation => {
             if (conversation.userId) {
               this.joinChatRoom(conversation.userId, conversation.chatId);
             }
           });
-          
+
+          this.prefetchUserInfo(validNewConversations.map(c => c.userId));
           this._cdr.markForCheck();
         },
         error: (error: any) => {

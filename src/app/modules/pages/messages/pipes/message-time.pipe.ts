@@ -8,7 +8,7 @@ import { DatePipe } from '@angular/common';
 export class MessageTimePipe implements PipeTransform {
   private datePipe = new DatePipe('es');
 
-  transform(value: string | Date, format: 'short' | 'long' | 'relative' = 'short'): string {
+  transform(value: string | Date, format: 'short' | 'long' | 'relative' | 'conversation' = 'conversation'): string {
     if (!value) return '';
 
     const date = typeof value === 'string' ? new Date(value) : value;
@@ -18,7 +18,22 @@ export class MessageTimePipe implements PipeTransform {
     const diffInHours = Math.floor(diffInMinutes / 60);
     const diffInDays = Math.floor(diffInHours / 24);
 
-    if (format === 'relative') {
+    const isToday = date.toDateString() === now.toDateString();
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = date.toDateString() === yesterday.toDateString();
+
+    if (format === 'conversation') {
+      if (isToday) {
+        return this.datePipe.transform(date, 'HH:mm') || '';
+      } else if (isYesterday) {
+        return 'Ayer';
+      } else if (diffInDays < 7) {
+        return this.datePipe.transform(date, 'EEE') || '';
+      } else {
+        return this.datePipe.transform(date, 'dd/MM/yy') || '';
+      }
+    } else if (format === 'relative') {
       if (diffInSeconds < 60) {
         return 'Ahora';
       } else if (diffInMinutes < 60) {
@@ -31,14 +46,12 @@ export class MessageTimePipe implements PipeTransform {
         return this.datePipe.transform(date, 'dd/MM/yyyy') || '';
       }
     } else if (format === 'long') {
-      const isToday = date.toDateString() === now.toDateString();
       if (isToday) {
         return this.datePipe.transform(date, 'HH:mm') || '';
       } else {
         return this.datePipe.transform(date, 'dd/MM/yyyy HH:mm') || '';
       }
     } else {
-      const isToday = date.toDateString() === now.toDateString();
       if (isToday) {
         return this.datePipe.transform(date, 'HH:mm') || '';
       } else {

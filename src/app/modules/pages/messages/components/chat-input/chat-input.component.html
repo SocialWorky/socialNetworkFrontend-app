@@ -19,51 +19,53 @@
                     getReplyMessagePreview(replyingToMessage) }}</span>
                 <span class="reply-preview-message" *ngIf="replyingToMessage.type === MessageType.IMAGE">📷 {{
                     'messages.image' | workyTranslations }}</span>
-                <span class="reply-preview-message" *ngIf="replyingToMessage.type === MessageType.VIDEO">📷 {{
+                <span class="reply-preview-message" *ngIf="replyingToMessage.type === MessageType.VIDEO">🎥 {{
                     'messages.video' | workyTranslations }}</span>
                 <span class="reply-preview-message" *ngIf="replyingToMessage.isDeleted">{{ 'messages.deleted' |
                     workyTranslations }}</span>
             </div>
         </div>
     </div>
-    <div class="message-input-container">
+
+    <div class="input-row">
+        <div class="actions-left">
+            <div #emojiWrapper class="action-btn emoji-wrapper"
+                [matTooltip]="'message.emojis' | workyTranslations" matTooltipClass="extra-mat-tooltip">
+                <i class="material-icons" (click)="toggleEmojiPicker($event)">mood</i>
+                <div *ngIf="showEmojiPicker" class="emoji-picker-container" [class.ready]="emojiPickerReady"
+                    (click)="$event.stopPropagation()">
+                    <emoji-mart *ngIf="emojiPickerReady" [darkMode]="false" [showPreview]="true" [enableSearch]="true"
+                        [perLine]="7" [emojiSize]="24" (emojiSelect)="addEmoji($event); $event.stopPropagation()">
+                    </emoji-mart>
+                </div>
+            </div>
+
+            <div class="action-btn" [matTooltip]="'message.searchGif' | workyTranslations"
+                matTooltipClass="extra-mat-tooltip" (click)="openGifSearch()">
+                <i class="material-icons">gif_box</i>
+            </div>
+
+            <div class="action-btn" [matTooltip]="'message.uploadImage' | workyTranslations"
+                matTooltipClass="extra-mat-tooltip" (click)="openUploadModal()">
+                <i class="material-icons">attach_file</i>
+            </div>
+        </div>
+
         <div class="input-wrapper">
             <textarea #messageInput class="message-input" [ngModel]="messageContent"
                 (ngModelChange)="messageContent = $event; handleTyping()" (input)="autoResize($event)"
                 (keydown)="onKeyPress($event)" [placeholder]="'messageChat.placeholder' | workyTranslations" rows="1"
                 [disabled]="isSending || !otherUserId">
-      </textarea>
+            </textarea>
         </div>
 
-        <div>
+        <div class="actions-right">
             <div *ngIf="isSending" class="loader"></div>
             <button *ngIf="!isSending" type="submit" (click)="onSendMessage()"
-                [disabled]="!messageContent.trim() || !otherUserId" class="send-button">
-                <span>{{ 'messageChat.send' | workyTranslations }}</span>
+                [disabled]="!messageContent.trim() || !otherUserId" class="send-button"
+                [matTooltip]="'messageChat.send' | workyTranslations" matTooltipClass="extra-mat-tooltip">
+                <i class="material-icons">send</i>
             </button>
-        </div>
-    </div>
-
-    <div class="content-footer-bar">
-        <div class="extra-content-item gif-icon" [matTooltip]="'message.searchGif' | workyTranslations"
-            matTooltipClass="extra-mat-tooltip" (click)="openGifSearch()">
-            <i class="material-icons">gif</i>
-        </div>
-
-        <div class="extra-content-item file-upload" [matTooltip]="'message.uploadImage' | workyTranslations"
-            matTooltipClass="extra-mat-tooltip" (click)="openUploadModal()">
-            <i class="material-icons">add_photo_alternate</i>
-        </div>
-
-        <div #emojiWrapper class="extra-content-item emoji-wrapper" [matTooltip]="'message.emojis' | workyTranslations"
-            matTooltipClass="extra-mat-tooltip">
-            <i class="material-icons" (click)="toggleEmojiPicker($event)">moods</i>
-            <div *ngIf="showEmojiPicker" class="emoji-picker-container" [class.ready]="emojiPickerReady"
-                (click)="$event.stopPropagation()">
-                <emoji-mart *ngIf="emojiPickerReady" [darkMode]="false" [showPreview]="true" [enableSearch]="true"
-                    [perLine]="7" [emojiSize]="24" (emojiSelect)="addEmoji($event); $event.stopPropagation()">
-                </emoji-mart>
-            </div>
         </div>
     </div>
 </div>

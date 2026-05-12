@@ -24,23 +24,31 @@
   position: relative;
 }
 
+// ─── Chat Header — theme-aware, no gradient ───────────────────────────────────
+
 .chat-header {
   flex-shrink: 0;
   background: colors.$worky-color-module-container;
   border-bottom: 1px solid colors.$worky-color-grey;
-  padding: 12px 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 0 18px;
+  height: 60px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
   z-index: 10;
+  display: flex;
+  align-items: center;
 
   .back-button {
     cursor: pointer;
     margin-right: 12px;
     color: colors.$worky-color-text;
     font-size: 24px;
-    transition: color 0.2s ease;
+    transition: color 0.2s ease, transform 0.15s ease;
+    display: flex;
+    align-items: center;
 
     &:hover {
-      color: colors.$worky-color-primary;
+      color: colors.$worky-color-text;
+      transform: translateX(-2px);
     }
   }
 }
@@ -49,6 +57,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
 }
 
 .user-info {
@@ -66,14 +75,15 @@
 .user-name {
   margin: 0;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   color: colors.$worky-color-text;
+  letter-spacing: -0.1px;
 }
 
 .user-status-container {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .user-status-indicator {
@@ -83,64 +93,73 @@
   display: inline-block;
   flex-shrink: 0;
   border: 2px solid colors.$worky-color-module-container;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .status-online {
   background-color: map.get(colors.$worky-green, 100);
-  box-shadow: 
-    0 0 4px rgba(map.get(colors.$worky-green, 100), 0.4), 
-    0 1px 2px rgba(0, 0, 0, 0.2),
-    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  border-color: colors.$worky-color-module-container;
+  box-shadow:
+    0 0 5px rgba(map.get(colors.$worky-green, 100), 0.6),
+    0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .status-inactive {
   background-color: map.get(colors.$worky-red, 100);
-  box-shadow: 
-    0 0 4px rgba(map.get(colors.$worky-red, 100), 0.4), 
-    0 1px 2px rgba(0, 0, 0, 0.2),
-    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  border-color: colors.$worky-color-module-container;
+  box-shadow:
+    0 0 5px rgba(map.get(colors.$worky-red, 100), 0.5),
+    0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .status-offline {
-  background-color: map.get(colors.$worky-grey, 100);
-  box-shadow: 
-    0 0 4px rgba(map.get(colors.$worky-grey, 100), 0.3), 
-    0 1px 2px rgba(0, 0, 0, 0.2),
-    inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  background-color: colors.$worky-color-grey;
+  border-color: colors.$worky-color-module-container;
 }
 
 .user-status-text {
   font-size: 12px;
   color: colors.$worky-color-text;
+  opacity: 0.65;
+  font-weight: 400;
 }
 
+// ─── Skeleton states — theme-aware shimmer ────────────────────────────────────
+
 .avatar-skeleton {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: linear-gradient(90deg, colors.$worky-color-greyLight 25%, colors.$worky-color-grey 50%, colors.$worky-color-greyLight 75%);
+  background: linear-gradient(
+    90deg,
+    colors.$worky-color-greyLight 25%,
+    colors.$worky-color-grey 50%,
+    colors.$worky-color-greyLight 75%
+  );
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
 }
 
 .name-skeleton {
-  width: 120px;
-  height: 16px;
-  border-radius: 4px;
-  background: linear-gradient(90deg, colors.$worky-color-greyLight 25%, colors.$worky-color-grey 50%, colors.$worky-color-greyLight 75%);
+  width: 130px;
+  height: 15px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    colors.$worky-color-greyLight 25%,
+    colors.$worky-color-grey 50%,
+    colors.$worky-color-greyLight 75%
+  );
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
 }
 
 @keyframes loading {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
+
+// ─── Messages Scroll Area ─────────────────────────────────────────────────────
 
 .messages-container {
   flex: 1;
@@ -155,21 +174,21 @@
   touch-action: pan-y;
   overscroll-behavior: contain;
   scroll-behavior: smooth;
-  
+
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   &::-webkit-scrollbar-thumb {
-    background: rgba(colors.$worky-color-black, 0.2);
+    background: rgba(0, 0, 0, 0.18);
     border-radius: 3px;
-    
+
     &:hover {
-      background: rgba(colors.$worky-color-black, 0.3);
+      background: rgba(0, 0, 0, 0.28);
     }
   }
 }
@@ -182,42 +201,35 @@
   align-items: stretch;
 }
 
+// ─── Date Divider ─────────────────────────────────────────────────────────────
+
 .date-divider {
   text-align: center;
   margin: 1rem 0;
-  
+
   span {
     background: colors.$worky-color-module-container;
-    padding: 0.5rem 1rem;
+    border: 1px solid colors.$worky-color-grey;
+    padding: 0.3rem 1rem;
     color: colors.$worky-color-text;
-    font-size: 0.9rem;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 20px;
+    opacity: 0.8;
   }
 }
+
+// ─── Triangle — side-pointing arrow connecting avatar to bubble ───────────────
 
 .message-triangle {
-  position: relative;
-  height: 0;
   width: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-bottom: 10px solid colors.$worky-color-greyLight;
-  margin-bottom: -1px;
+  height: 0;
   flex-shrink: 0;
   align-self: flex-start;
-  margin-top: 0;
-
-  .message-sent & {
-    right: 9px;
-    border-bottom-color: map.get(colors.$worky-blue, 24);
-  }
-
-  .message-received & {
-    left: 10px;
-    border-bottom-color: colors.$worky-color-module-container;
-  }
+  margin-top: 14px;
 }
+
+// ─── Message rows ─────────────────────────────────────────────────────────────
 
 .message-sent,
 .message-received {
@@ -230,8 +242,8 @@
   }
 
   &.no-avatar {
-    padding-left: 60px;
-    padding-right: 60px;
+    padding-left: 48px;
+    padding-right: 48px;
   }
 }
 
@@ -243,6 +255,22 @@
   justify-content: flex-start;
 }
 
+// Triangle directions per message side — only visible on first-group
+
+.message-received .message-triangle {
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid colors.$worky-color-module-container;
+  margin-left: -1px;
+}
+
+.message-sent .message-triangle {
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 8px solid #1a5fa8;
+  margin-right: -1px;
+}
+
 .content-message {
   word-break: break-word;
   max-width: 75%;
@@ -250,23 +278,24 @@
   position: relative;
 }
 
+// ─── Bubble base ─────────────────────────────────────────────────────────────
+
 .sent-content,
 .received-content {
-  line-height: 1.2;
-  border-radius: 1rem;
-  padding: 0.5rem 1rem;
+  line-height: 1.45;
+  border-radius: 18px;
+  padding: 0.6rem 1rem;
   display: inline-block;
   max-width: 100%;
   word-break: break-word;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  
+
   ::ng-deep markdown {
     display: flex;
     flex-direction: column;
     white-space: pre-wrap;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    
+
     img, video {
       max-width: 200px;
       border-radius: 8px;
@@ -278,7 +307,7 @@
     display: inline-block;
     cursor: pointer;
     max-width: 100%;
-    
+
     img, video {
       max-width: 200px;
       border-radius: 8px;
@@ -290,7 +319,7 @@
     height: auto;
     border-radius: 8px;
     transition: transform 0.2s;
-    
+
     &:hover {
       transform: scale(1.02);
     }
@@ -301,7 +330,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(colors.$worky-color-light, 0.8);
+    background-color: rgba(255, 255, 255, 0.85);
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -309,78 +338,94 @@
     align-items: center;
     justify-content: center;
     font-size: 24px;
-    color: colors.$worky-color-black;
+    color: colors.$worky-color-primary;
     font-weight: bold;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   }
 }
 
+// ─── Sent bubbles — bright blue ───────────────────────────────────────────────
+
 .message-sent {
   .sent-content {
-    background: map.get(colors.$worky-blue, 24);
-    color: colors.$worky-color-greyLight;
+    background: #1a5fa8;
+    color: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
   }
-  
-  &.first-group.last-group .sent-content { 
-    border-radius: 1rem 0 1rem 1rem; 
-  }
-  &.first-group .sent-content { 
-    border-radius: 1rem 0 0 1rem; 
-  }
-  &.grouped .sent-content { 
-    border-radius: 1rem 0 0 1rem; 
-  }
-  &.last-group .sent-content { 
-    border-radius: 1rem 0 1rem 1rem;
-    margin-bottom: 15px;
+
+  // TR near avatar (slightly less), BR flat for continuity
+  &.first-group.last-group .sent-content { border-radius: 18px 14px 18px 18px; }
+  &.first-group:not(.last-group) .sent-content { border-radius: 18px 14px 4px 18px; }
+  &.grouped:not(.first-group):not(.last-group) .sent-content { border-radius: 18px 4px 4px 18px; }
+  &.last-group:not(.first-group) .sent-content {
+    border-radius: 18px 4px 18px 18px;
+    margin-bottom: 14px;
   }
 }
+
+// ─── Received bubbles — theme-aware ──────────────────────────────────────────
 
 .message-received {
   .received-content {
     background: colors.$worky-color-module-container;
     color: colors.$worky-color-text;
-    border: 1px solid colors.$worky-color-grey;
+    border: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 0, 0, 0.06);
   }
-  
-  &.first-group.last-group .received-content { 
-    border-radius: 0 1rem 1rem 1rem; 
-  }
-  &.first-group .received-content { 
-    border-radius: 0 1rem 0 0; 
-  }
-  &.grouped .received-content { 
-    border-radius: 0 1rem 1rem 0; 
-  }
-  &.last-group .received-content { 
-    border-radius: 0 1rem 1rem 1rem;
-    margin-bottom: 15px;
+
+  // TL near avatar (slightly less), BL flat for continuity
+  &.first-group.last-group .received-content { border-radius: 14px 18px 18px 18px; }
+  &.first-group:not(.last-group) .received-content { border-radius: 14px 18px 18px 4px; }
+  &.grouped:not(.first-group):not(.last-group) .received-content { border-radius: 4px 18px 18px 4px; }
+  &.last-group:not(.first-group) .received-content {
+    border-radius: 4px 18px 18px 18px;
+    margin-bottom: 14px;
   }
 }
 
+// ─── Message In Animation ─────────────────────────────────────────────────────
+
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.message-sent .content-message,
+.message-received .content-message {
+  animation: messageIn 0.2s ease-out both;
+}
+
+// ─── Footer / timestamp ───────────────────────────────────────────────────────
 
 .content-footer {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 4px;
-  font-size: 11px;
-  opacity: 0.75;
-  
+  gap: 4px;
+  margin-top: 3px;
+  font-size: 10.5px;
+  opacity: 0.65;
+  padding-right: 2px;
+
   small {
-    font-size: 11px;
+    font-size: 10.5px;
   }
-  
+
   i {
-    font-size: 16px;
+    font-size: 15px;
   }
 }
 
 .edited-badge {
   font-size: 10px;
   font-style: italic;
-  opacity: 0.8;
+  opacity: 0.75;
 }
 
 .deleted-message-indicator {
@@ -388,13 +433,15 @@
   align-items: center;
   gap: 6px;
   font-style: italic;
-  opacity: 0.7;
+  opacity: 0.65;
   padding: 8px 0;
 
   i {
     font-size: 16px;
   }
 }
+
+// ─── Editing state ────────────────────────────────────────────────────────────
 
 .content-message {
   position: relative;
@@ -407,10 +454,12 @@
       border: 2px solid colors.$worky-color-primary;
       position: relative;
       z-index: 10000;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
     }
   }
 }
+
+// ─── Message action buttons ───────────────────────────────────────────────────
 
 .message-actions {
   position: absolute;
@@ -457,13 +506,13 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.12);
   padding: 0;
 
   &:hover {
     background: colors.$worky-color-greyLight;
     transform: scale(1.1);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
   }
 
   &:active {
@@ -475,6 +524,8 @@
     color: colors.$worky-color-text;
   }
 }
+
+// ─── Context menu ─────────────────────────────────────────────────────────────
 
 .message-menu-overlay {
   position: fixed;
@@ -503,32 +554,16 @@
     color: colors.$worky-color-text;
     position: relative;
 
-    &:first-child {
-      padding-top: 14px;
-    }
+    &:first-child { padding-top: 14px; }
+    &:last-child  { padding-bottom: 14px; }
 
-    &:last-child {
-      padding-bottom: 14px;
-    }
-
-    &:hover {
-      background: colors.$worky-color-greyLight;
-    }
-
-    &:active {
-      background: colors.$worky-color-grey;
-    }
+    &:hover { background: colors.$worky-color-greyLight; }
+    &:active { background: colors.$worky-color-grey; }
 
     &.delete {
       color: map.get(colors.$worky-red, 100);
-
-      &:hover {
-        background: map.get(colors.$worky-red, 3);
-      }
-
-      &:active {
-        background: map.get(colors.$worky-red, 6);
-      }
+      &:hover  { background: map.get(colors.$worky-red, 3); }
+      &:active { background: map.get(colors.$worky-red, 6); }
     }
 
     i {
@@ -540,22 +575,16 @@
       justify-content: center;
     }
 
-    span {
-      flex: 1;
-    }
+    span { flex: 1; }
   }
 }
 
 @keyframes menuSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+// ─── Inline edit form ─────────────────────────────────────────────────────────
 
 .edit-message-container {
   display: flex;
@@ -583,7 +612,7 @@
   &:focus {
     outline: none;
     border-color: colors.$worky-color-primary;
-    box-shadow: 0 0 0 3px rgba(map.get(colors.$worky-blue, 100), 0.1);
+    box-shadow: 0 0 0 3px rgba(17, 51, 85, 0.1);
   }
 }
 
@@ -611,7 +640,7 @@
   color: colors.$worky-color-light;
 
   &:hover {
-    background: map.get(colors.$worky-blue, 72);
+    background: map.get(colors.$worky-navy, 72);
     transform: scale(1.1);
   }
 }
@@ -625,12 +654,17 @@
   }
 }
 
+// ─── Deleted bubble ───────────────────────────────────────────────────────────
+
 .sent-content.deleted,
 .received-content.deleted {
-  opacity: 0.6;
+  opacity: 0.55;
   background: colors.$worky-color-greyLight !important;
   color: colors.$worky-color-text !important;
+  box-shadow: none !important;
 }
+
+// ─── Loading / empty states ───────────────────────────────────────────────────
 
 .loading-messages {
   display: flex;
@@ -657,6 +691,7 @@
   color: colors.$worky-color-text;
   font-size: 12px;
   font-style: italic;
+  opacity: 0.5;
 }
 
 .scroll-to-bottom-button {
@@ -667,29 +702,27 @@
   height: 40px;
   border-radius: 50%;
   background: colors.$worky-color-primary;
-  color: colors.$worky-color-light;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 12px rgba(17, 51, 85, 0.3);
   transition: all 0.2s ease;
   z-index: 100;
 
   &:hover {
-    background: map.get(colors.$worky-blue, 72);
+    background: map.get(colors.$worky-navy, 72);
     transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 16px rgba(17, 51, 85, 0.4);
   }
 
-  i {
-    font-size: 24px;
-  }
+  i { font-size: 24px; }
 }
 
 @keyframes spin {
   from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  to   { transform: rotate(360deg); }
 }
 
 .loader-container {
@@ -699,36 +732,38 @@
   padding: 40px;
 }
 
+// ─── Emoji picker ─────────────────────────────────────────────────────────────
+
 .emoji-picker-container {
   position: fixed;
   z-index: 10000;
   background: colors.$worky-color-module-container;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
   max-height: 400px;
   overflow: hidden;
   width: 352px;
   opacity: 0;
   transform: translateY(10px);
   transition: opacity 0.2s ease, transform 0.2s ease;
-  
+
   &.ready {
     opacity: 1;
     transform: translateY(0);
   }
-  
+
   ::ng-deep {
     emoji-mart {
       border: none;
       display: block;
-      
+
       .emoji-mart {
         border: none !important;
         border-radius: 12px;
         background: colors.$worky-color-module-container !important;
         width: 100% !important;
       }
-      
+
       .emoji-mart-search {
         padding: 8px;
         input {
@@ -737,16 +772,9 @@
           padding: 8px 12px;
         }
       }
-      
-      .emoji-mart-scroll {
-        max-height: 300px;
-        overflow-y: auto;
-      }
-      
-      .emoji-mart-bar {
-        border-top: 1px solid colors.$worky-color-grey;
-      }
-      
+
+      .emoji-mart-scroll { max-height: 300px; overflow-y: auto; }
+      .emoji-mart-bar { border-top: 1px solid colors.$worky-color-grey; }
       .emoji-mart-category-label {
         background: colors.$worky-color-module-container;
         color: colors.$worky-color-text;
@@ -755,12 +783,14 @@
   }
 }
 
+// ─── Input area ───────────────────────────────────────────────────────────────
+
 .message-footer-container {
   display: flex;
   align-items: center;
   flex-direction: column;
   background-color: colors.$worky-color-module-container;
-  border-radius: 0.5rem;
+  border-radius: 12px;
   padding: 0.3rem;
   margin: 0.5rem;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
@@ -769,6 +799,13 @@
   width: calc(100% - 1rem);
   position: relative;
   min-height: 80px;
+  border: 1px solid colors.$worky-color-grey;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus-within {
+    border-color: colors.$worky-color-primary;
+    box-shadow: 0 0 0 3px rgba(17, 51, 85, 0.08);
+  }
 }
 
 .reply-preview-container {
@@ -814,9 +851,7 @@
   border-radius: 4px;
   transition: background 0.2s ease;
 
-  &:hover {
-    background: colors.$worky-color-grey;
-  }
+  &:hover { background: colors.$worky-color-grey; }
 
   i {
     font-size: 18px;
@@ -883,48 +918,6 @@
   gap: 8px;
 }
 
-.reply-preview-line {
-  width: 3px;
-  height: 100%;
-  background: colors.$worky-color-primary;
-  border-radius: 2px;
-  flex-shrink: 0;
-
-  .sent-content & {
-    background: rgba(255, 255, 255, 0.5);
-  }
-}
-
-.reply-preview-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  overflow: hidden;
-}
-
-.reply-preview-author {
-  font-size: 11px;
-  font-weight: 600;
-  color: colors.$worky-color-primary;
-
-  .sent-content & {
-    color: rgba(255, 255, 255, 0.9);
-  }
-}
-
-.reply-preview-message {
-  font-size: 12px;
-  color: colors.$worky-color-text;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  .sent-content & {
-    color: rgba(255, 255, 255, 0.8);
-  }
-}
-
 .message-input-container {
   display: flex;
   align-items: center;
@@ -948,10 +941,9 @@
     max-height: 6rem;
     resize: none;
     overflow-y: hidden;
-    padding: 0.5rem 0.5rem;
+    padding: 0.5rem;
     border-radius: 8px;
     border: 1px solid colors.$worky-color-grey;
-    font-size: 1rem;
     box-sizing: border-box;
     transition: all 0.2s ease;
 
@@ -959,7 +951,7 @@
       outline: none;
       border-color: colors.$worky-color-primary;
       background: colors.$worky-color-module-container;
-      box-shadow: 0 0 0 3px rgba(map.get(colors.$worky-blue, 100), 0.1);
+      box-shadow: 0 0 0 3px rgba(17, 51, 85, 0.1);
     }
 
     &:disabled {
@@ -981,23 +973,21 @@
     padding: 8px 16px;
     border-radius: 20px;
     border: none;
-    background: linear-gradient(135deg, colors.$worky-color-primary 0%, map.get(colors.$worky-blue, 72) 100%);
-    color: colors.$worky-color-light;
+    background: colors.$worky-color-primary;
+    color: #ffffff;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(map.get(colors.$worky-blue, 100), 0.3);
+    box-shadow: 0 2px 8px rgba(17, 51, 85, 0.3);
 
     &:hover:not(:disabled) {
-      background: linear-gradient(135deg, map.get(colors.$worky-blue, 72) 0%, map.get(colors.$worky-blue, 56) 100%);
+      background: map.get(colors.$worky-navy, 72);
       transform: scale(1.05);
-      box-shadow: 0 4px 8px rgba(map.get(colors.$worky-blue, 100), 0.4);
+      box-shadow: 0 4px 12px rgba(17, 51, 85, 0.4);
     }
 
-    &:active:not(:disabled) {
-      transform: scale(0.95);
-    }
+    &:active:not(:disabled) { transform: scale(0.95); }
 
     &:disabled {
       opacity: 0.5;
@@ -1006,6 +996,8 @@
     }
   }
 }
+
+// ─── Typing indicator ─────────────────────────────────────────────────────────
 
 .typing-message {
   display: flex;
@@ -1019,68 +1011,49 @@
 
 .typing-bubble {
   background: colors.$worky-color-module-container;
-  border: 1px solid colors.$worky-color-grey;
-  border-radius: 18px;
-  padding: 10px 16px;
-  max-width: 80px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  border-radius: 18px 18px 18px 4px;
+  padding: 12px 18px;
+  max-width: 90px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .typing-dots {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 0;
+  gap: 5px;
+  padding: 2px 0;
 
   span {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: colors.$worky-color-text;
+    background-color: #1a5fa8;
     display: inline-block;
     animation: typingDot 1.4s infinite ease-in-out;
 
-    &:nth-child(1) {
-      animation-delay: -0.32s;
-    }
-
-    &:nth-child(2) {
-      animation-delay: -0.16s;
-    }
-
-    &:nth-child(3) {
-      animation-delay: 0;
-    }
+    &:nth-child(1) { animation-delay: -0.32s; }
+    &:nth-child(2) { animation-delay: -0.16s; }
+    &:nth-child(3) { animation-delay: 0; }
   }
 }
 
 @keyframes typingDot {
-  0%, 60%, 100% {
-    transform: translateY(0);
-    opacity: 0.7;
-  }
-  30% {
-    transform: translateY(-10px);
-    opacity: 1;
-  }
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30%           { transform: translateY(-8px); opacity: 1; }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+
+// ─── Content footer bar (emoji / attachment row) ──────────────────────────────
 
 .content-footer-bar {
   display: flex;
   width: 100%;
   padding: 3px 10px;
-  gap: 10px;
+  gap: 6px;
   cursor: pointer;
   color: colors.$worky-color-text;
 
@@ -1091,64 +1064,44 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease;
     cursor: pointer;
+    opacity: 0.6;
 
     &:hover {
-      background: colors.$worky-color-greyLight;
+      background: rgba(17, 51, 85, 0.07);
+      opacity: 1;
     }
 
-    i {
-      font-size: 24px;
-    }
+    i { font-size: 24px; }
   }
 
   .emoji-wrapper {
     position: relative;
-    
-    i {
-      font-size: 24px;
-    }
+    i { font-size: 24px; }
   }
 }
+
+// ─── Avatar group helper ──────────────────────────────────────────────────────
 
 .avatar-group-wrapper {
   width: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   height: 100%;
   position: relative;
 
-  .worky-avatar {
-    flex-shrink: 0;
-  }
-
-  .message-triangle {
-    position: absolute;
-    bottom: -1px;
-    z-index: 1;
-
-    &.sent {
-      right: 0;
-      border-bottom-color: colors.$worky-color-primary;
-      border-left: 10px solid colors.$worky-color-primary;
-      border-right: 10px solid transparent;
-    }
-
-    &.received {
-      left: 0;
-      border-bottom-color: colors.$worky-color-module-container;
-      border-right: 10px solid colors.$worky-color-module-container;
-      border-left: 10px solid transparent;
-    }
-  }
+  .worky-avatar { flex-shrink: 0; }
 }
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
 
 @media (max-width: 768px) {
   .chat-header {
-    padding: 10px 12px;
+    padding: 0 12px;
+    height: 58px;
   }
 
   .messages-container {
@@ -1160,23 +1113,16 @@
     right: 12px;
     width: 36px;
     height: 36px;
-
-    i {
-      font-size: 20px;
-    }
+    i { font-size: 20px; }
   }
 
   .message-footer-container {
     padding: 0.2rem;
   }
 
-  .message-actions {
-    right: -25px;
-  }
-
+  .message-actions { right: -25px; }
   .message-menu {
     right: -10px;
     min-width: 160px;
   }
 }
-

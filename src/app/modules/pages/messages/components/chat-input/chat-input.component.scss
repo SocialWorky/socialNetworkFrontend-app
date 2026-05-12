@@ -2,311 +2,346 @@
 @use "src/assets/styles/worky-palettes" as colors;
 @use "sass:map";
 
+// ─── Main container ───────────────────────────────────────────────────────────
+
 .message-footer-container {
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    background-color: colors.$worky-color-module-container;
-    border-radius: 0.5rem;
-    padding: 0.3rem;
-    margin: 0.5rem;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
-    z-index: 10;
-    flex-shrink: 0;
-    width: calc(100% - 1rem);
-    position: relative;
-    min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  background-color: colors.$worky-color-module-container;
+  border-radius: 14px;
+  padding: 6px 8px;
+  margin: 6px 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  z-index: 10;
+  flex-shrink: 0;
+  position: relative;
+  border: 1.5px solid colors.$worky-color-grey;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus-within {
+    border-color: #113355;
+    box-shadow: 0 0 0 3px rgba(17, 51, 85, 0.1), 0 2px 12px rgba(0, 0, 0, 0.07);
+  }
 }
 
+// ─── Reply preview strip ──────────────────────────────────────────────────────
+
 .reply-preview-container {
-    width: 100%;
-    background: colors.$worky-color-greyLight;
-    border: 1px solid colors.$worky-color-grey;
-    border-radius: 8px;
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  width: 100%;
+  background: colors.$worky-color-greyLight;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-left: 3px solid #113355;
 }
 
 .reply-preview-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .reply-preview-info {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: colors.$worky-color-text;
-    font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: colors.$worky-color-text;
+  font-weight: 500;
 
-    i {
-        font-size: 16px;
-        color: colors.$worky-color-primary;
-    }
+  i {
+    font-size: 14px;
+    color: #113355;
+  }
 }
 
 .reply-preview-close {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    transition: background 0.2s ease;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s ease;
 
-    &:hover {
-        background: colors.$worky-color-grey;
-    }
+  &:hover { background: colors.$worky-color-grey; }
 
-    i {
-        font-size: 18px;
-        color: colors.$worky-color-text;
-    }
+  i {
+    font-size: 16px;
+    color: colors.$worky-color-text;
+  }
 }
 
 .reply-preview-message-content {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-left: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .reply-preview-line {
-    width: 3px;
-    height: 100%;
-    background: colors.$worky-color-primary;
-    border-radius: 2px;
-    flex-shrink: 0;
+  width: 2px;
+  align-self: stretch;
+  background: #113355;
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 
 .reply-preview-text {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1;
-    overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  overflow: hidden;
 }
 
 .reply-preview-label {
-    font-weight: 600;
-    color: colors.$worky-color-primary;
+  font-weight: 600;
+  color: #113355;
+  font-size: 12px;
 }
 
 .reply-preview-message {
-    font-size: 12px;
-    color: colors.$worky-color-text;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  font-size: 12px;
+  color: colors.$worky-color-text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.65;
 }
 
-.message-input-container {
+// ─── Input row ────────────────────────────────────────────────────────────────
+
+.input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  width: 100%;
+}
+
+.actions-left {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  padding-bottom: 4px;
+}
+
+.actions-right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-bottom: 4px;
+}
+
+// ─── Icon action buttons (emoji, attachment) ──────────────────────────────────
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+  position: relative;
+  color: colors.$worky-color-text;
+  opacity: 0.5;
+
+  &:hover {
+    background: rgba(17, 51, 85, 0.07);
+    opacity: 1;
+  }
+
+  i {
+    font-size: 22px;
     display: flex;
     align-items: center;
-    width: 100%;
-    flex-shrink: 0;
+    justify-content: center;
+  }
+}
 
-    .input-wrapper {
-        display: flex;
-        flex-grow: 1;
-        margin: 5px;
-        border-radius: 8px;
-    }
+.emoji-wrapper {
+  position: relative;
+}
 
-    .message-input {
-        color: colors.$worky-color-text;
-        font-size: 1rem;
-        background-color: colors.$worky-color-greyLight;
-        width: 100%;
-        height: 40px;
-        min-height: 1.5rem;
-        max-height: 6rem;
-        resize: none;
-        overflow-y: hidden;
-        padding: 0.5rem 0.5rem;
-        border-radius: 8px;
-        border: 1px solid colors.$worky-color-grey;
-        font-size: 1rem;
-        box-sizing: border-box;
-        transition: all 0.2s ease;
+// ─── Text input ───────────────────────────────────────────────────────────────
 
-        &:focus {
-            outline: none;
-            border-color: colors.$worky-color-primary;
-            background: colors.$worky-color-module-container;
-            box-shadow: 0 0 0 3px rgba(map.get(colors.$worky-blue, 100), 0.1);
-        }
+.input-wrapper {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+}
 
-        &:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-    }
+.message-input {
+  color: colors.$worky-color-text;
+  font-size: 0.95rem;
+  background-color: transparent;
+  width: 100%;
+  height: 40px;
+  min-height: 40px;
+  max-height: 120px;
+  resize: none;
+  overflow-y: hidden;
+  padding: 10px 4px;
+  border: none;
+  box-sizing: border-box;
+  line-height: 1.4;
+  font-family: inherit;
 
-    .loader {
-        width: 20px;
-        height: 20px;
-        border: 2px solid colors.$worky-color-grey;
-        border-top: 2px solid colors.$worky-color-primary;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
+  &:focus { outline: none; }
 
-    .send-button {
-        padding: 8px 16px;
-        border-radius: 20px;
-        border: none;
-        background: linear-gradient(135deg, colors.$worky-color-primary 0%, map.get(colors.$worky-blue, 72) 100%);
-        color: colors.$worky-color-light;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 4px rgba(map.get(colors.$worky-blue, 100), 0.3);
+  &::placeholder {
+    color: colors.$worky-color-text;
+    opacity: 0.38;
+  }
 
-        &:hover:not(:disabled) {
-            background: linear-gradient(135deg, map.get(colors.$worky-blue, 72) 0%, map.get(colors.$worky-blue, 56) 100%);
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(map.get(colors.$worky-blue, 100), 0.4);
-        }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
 
-        &:active:not(:disabled) {
-            transform: scale(0.95);
-        }
+// ─── Loading spinner ──────────────────────────────────────────────────────────
 
-        &:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-    }
+.loader {
+  width: 24px;
+  height: 24px;
+  border: 2px solid colors.$worky-color-grey;
+  border-top: 2px solid #113355;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 5px;
+}
+
+// ─── Send button — navy circle ────────────────────────────────────────────────
+
+.send-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #113355 0%, #1a4a80 100%);
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(17, 51, 85, 0.3);
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1a4a80 0%, #1a5fa8 100%);
+    transform: scale(1.08);
+    box-shadow: 0 4px 14px rgba(17, 51, 85, 0.4);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.92);
+    box-shadow: 0 1px 4px rgba(17, 51, 85, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  i {
+    font-size: 19px;
+    transform: translateX(1px);
+  }
 }
 
 @keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
+
+// ─── Emoji picker ─────────────────────────────────────────────────────────────
 
 .emoji-picker-container {
-    position: fixed;
-    z-index: 10000;
-    background: colors.$worky-color-module-container;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    max-height: 400px;
-    overflow: hidden;
-    width: 352px;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
+  position: fixed;
+  z-index: 10000;
+  background: colors.$worky-color-module-container;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  max-height: 400px;
+  overflow: hidden;
+  width: 352px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
 
-    &.ready {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  &.ready {
+    opacity: 1;
+    transform: translateY(0);
+  }
 
-    ::ng-deep {
-        emoji-mart {
-            border: none;
-            display: block;
+  ::ng-deep {
+    emoji-mart {
+      border: none;
+      display: block;
 
-            .emoji-mart {
-                border: none !important;
-                border-radius: 12px;
-                background: colors.$worky-color-module-container !important;
-                width: 100% !important;
-            }
+      .emoji-mart {
+        border: none !important;
+        border-radius: 12px;
+        background: colors.$worky-color-module-container !important;
+        width: 100% !important;
+      }
 
-            .emoji-mart-search {
-                padding: 8px;
-
-                input {
-                    border-radius: 8px;
-                    border: 1px solid colors.$worky-color-grey;
-                    padding: 8px 12px;
-                }
-            }
-
-            .emoji-mart-scroll {
-                max-height: 300px;
-                overflow-y: auto;
-            }
-
-            .emoji-mart-bar {
-                border-top: 1px solid colors.$worky-color-grey;
-            }
-
-            .emoji-mart-category-label {
-                background: colors.$worky-color-module-container;
-                color: colors.$worky-color-text;
-            }
+      .emoji-mart-search {
+        padding: 8px;
+        input {
+          border-radius: 8px;
+          border: 1px solid colors.$worky-color-grey;
+          padding: 8px 12px;
         }
+      }
+
+      .emoji-mart-scroll {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .emoji-mart-bar {
+        border-top: 1px solid colors.$worky-color-grey;
+      }
+
+      .emoji-mart-category-label {
+        background: colors.$worky-color-module-container;
+        color: colors.$worky-color-text;
+      }
     }
+  }
 }
 
-.content-footer-bar {
-    display: flex;
-    width: 100%;
-    padding: 3px 10px;
-    gap: 10px;
-    cursor: pointer;
-    color: colors.$worky-color-text;
-
-    .extra-content-item {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
-        min-height: 36px;
-        border-radius: 50%;
-        transition: background 0.2s ease;
-        cursor: pointer;
-        position: relative;
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-
-        &:hover {
-            background: colors.$worky-color-greyLight;
-        }
-
-        i {
-            font-size: 24px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-            width: 24px;
-            height: 24px;
-            margin: 0;
-            padding: 0;
-        }
-    }
-
-    .emoji-wrapper {
-        i {
-            justify-content: flex-start;
-            font-size: 24px;
-        }
-    }
-}
+// ─── Responsive ───────────────────────────────────────────────────────────────
 
 @media (max-width: 768px) {
-    .message-footer-container {
-        padding: 0.2rem;
-    }
+  .message-footer-container {
+    margin: 4px 6px;
+    padding: 4px 6px;
+    border-radius: 12px;
+  }
+
+  .action-btn {
+    width: 30px;
+    height: 30px;
+    i { font-size: 20px; }
+  }
+
+  .send-button {
+    width: 34px;
+    height: 34px;
+    i { font-size: 17px; }
+  }
 }

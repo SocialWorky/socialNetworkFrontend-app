@@ -1,4 +1,5 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'sass:map';
 
 :host {
   display: block;
@@ -26,6 +27,8 @@
   overscroll-behavior: none;
 }
 
+// ─── Conversations Sidebar ────────────────────────────────────────────────────
+
 .conversations-sidebar {
   width: 380px;
   min-width: 320px;
@@ -33,7 +36,7 @@
   display: flex;
   flex-direction: column;
   background: color.$worky-color-module-container;
-  box-shadow: 2px 0 8px rgba(color.$worky-color-black, 0.05);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
 
   &.hidden {
     display: none;
@@ -41,24 +44,245 @@
 }
 
 .conversations-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid color.$worky-color-grey;
+  padding: 0 20px;
+  height: 60px;
   background: color.$worky-color-module-container;
-  box-shadow: 0 2px 4px rgba(color.$worky-color-black, 0.02);
+  border-bottom: 1px solid color.$worky-color-grey;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 
   h2 {
     margin: 0;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     color: color.$worky-color-text;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.2px;
   }
 }
+
+.compose-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.15s ease;
+  color: color.$worky-color-text;
+  flex-shrink: 0;
+
+  &:hover {
+    background: color.$worky-color-greyLight;
+    transform: scale(1.05);
+  }
+
+  &.active {
+    background: rgba(26, 95, 168, 0.1);
+    color: #1a5fa8;
+  }
+
+  i {
+    font-size: 20px;
+  }
+}
+
+// ─── Search Bar ───────────────────────────────────────────────────────────────
+
+.search-bar-container {
+  padding: 10px 14px 8px;
+  background: color.$worky-color-module-container;
+  border-bottom: 1px solid color.$worky-color-grey;
+  flex-shrink: 0;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: color.$worky-color-greyLight;
+  border: 1.5px solid transparent;
+  border-radius: 22px;
+  padding: 8px 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+
+  &:focus-within {
+    border-color: color.$worky-color-primary;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 0 3px rgba(17, 51, 85, 0.08);
+    background: color.$worky-color-module-container;
+  }
+}
+
+.search-icon {
+  font-size: 18px;
+  color: color.$worky-color-text;
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: color.$worky-color-text;
+  flex: 1;
+  min-width: 0;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: color.$worky-color-text;
+    opacity: 0.4;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.clear-search-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: color.$worky-color-text;
+  opacity: 0.45;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  i {
+    font-size: 16px;
+  }
+}
+
+// ─── New Chat Panel ───────────────────────────────────────────────────────────
+
+.new-chat-panel {
+  background: color.$worky-color-module-container;
+  border-bottom: 1px solid color.$worky-color-grey;
+  flex-shrink: 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.new-chat-search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid color.$worky-color-grey;
+
+  .search-icon {
+    color: color.$worky-color-primary;
+    opacity: 1;
+  }
+
+  .search-input {
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+.new-chat-loading {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+
+.new-chat-results {
+  display: flex;
+  flex-direction: column;
+}
+
+.new-chat-result-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: color.$worky-color-greyLight;
+  }
+}
+
+.new-chat-result-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.new-chat-result-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: color.$worky-color-text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.new-chat-result-username {
+  font-size: 12px;
+  color: color.$worky-color-text;
+  opacity: 0.6;
+}
+
+.new-chat-no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 16px;
+  color: color.$worky-color-text;
+  opacity: 0.5;
+
+  i {
+    font-size: 32px;
+  }
+
+  span {
+    font-size: 13px;
+  }
+}
+
+// ─── Conversations List ───────────────────────────────────────────────────────
 
 .conversations-list {
   flex: 1;
   overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 2px;
+  }
 }
+
+// ─── State containers ─────────────────────────────────────────────────────────
 
 .loader-container,
 .error-container {
@@ -66,14 +290,91 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  min-height: 200px;
+  padding: 40px 20px;
+  gap: 12px;
+  color: color.$worky-color-text;
+  opacity: 0.6;
+
+  i {
+    font-size: 32px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.loader {
+  width: 24px;
+  height: 24px;
+  border: 2px solid color.$worky-color-grey;
+  border-top: 2px solid color.$worky-color-primary;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.retry-btn {
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: 1.5px solid color.$worky-color-primary;
+  background: transparent;
+  color: color.$worky-color-primary;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: color.$worky-color-primary;
+    color: color.$worky-color-light;
+  }
 }
 
 .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 40px 20px;
-  text-align: center;
+  gap: 12px;
   color: color.$worky-color-text;
+  opacity: 0.6;
+
+  i {
+    font-size: 40px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    text-align: center;
+  }
+}
+
+.start-chat-btn {
+  padding: 10px 22px;
+  border-radius: 22px;
+  border: none;
+  background: color.$worky-color-primary;
+  color: color.$worky-color-light;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 1;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(17, 51, 85, 0.25);
+
+  &:hover {
+    background: map.get(color.$worky-navy, 72);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(17, 51, 85, 0.3);
+  }
 }
 
 .load-more-btn {
@@ -83,12 +384,16 @@
   background: transparent;
   cursor: pointer;
   color: color.$worky-color-primary;
+  font-size: 13px;
   font-weight: 500;
+  transition: background 0.15s ease;
 
   &:hover {
     background: color.$worky-color-greyLight;
   }
 }
+
+// ─── Chat Area ────────────────────────────────────────────────────────────────
 
 .chat-container {
   flex: 1;
@@ -113,6 +418,8 @@
   }
 }
 
+// ─── Empty Chat Illustration ──────────────────────────────────────────────────
+
 .empty-chat {
   display: flex;
   flex-direction: column;
@@ -120,18 +427,47 @@
   justify-content: center;
   height: 100%;
   color: color.$worky-color-text;
-  font-size: 16px;
   padding: 40px;
+  gap: 20px;
+  text-align: center;
+
+  .empty-chat-illustration {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #113355 0%, #1a4a80 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(17, 51, 85, 0.22);
+
+    i {
+      font-size: 48px;
+      color: #ffffff;
+      opacity: 0.9;
+    }
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: color.$worky-color-text;
+  }
 
   p {
     margin: 0;
-    font-weight: 500;
+    font-size: 14px;
+    opacity: 0.55;
+    max-width: 280px;
+    line-height: 1.6;
   }
 }
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
 
 @media (max-width: 768px) {
   .conversations-sidebar {
     width: 100%;
   }
 }
-

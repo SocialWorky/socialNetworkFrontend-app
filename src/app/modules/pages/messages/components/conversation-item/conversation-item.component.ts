@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -15,17 +15,18 @@ import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ConversationItemComponent implements OnInit, OnDestroy {
+export class ConversationItemComponent implements OnInit, OnDestroy, OnChanges {
   private unsubscribe$ = new Subject<void>();
 
   @Input() conversation!: Conversation;
   @Input() isSelected = false;
   @Input() currentUserId: string | null = null;
+  @Input() providedUserInfo: User | null = null;
 
   userInfo: User | null = null;
   isLoadingUser = false;
   MessageType = MessageType;
-  private static _userInfoCache = new Map<string, User>();
+  static _userInfoCache = new Map<string, User>();
 
   constructor(
     private _router: Router,
@@ -35,6 +36,12 @@ export class ConversationItemComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    if (this.providedUserInfo) {
+      this.userInfo = this.providedUserInfo;
+      this.isLoadingUser = false;
+      return;
+    }
+
     if (this.conversation.userId) {
       const cachedUser = ConversationItemComponent._userInfoCache.get(this.conversation.userId);
       if (cachedUser) {
@@ -44,6 +51,14 @@ export class ConversationItemComponent implements OnInit, OnDestroy {
       } else {
         this.loadUserInfo();
       }
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['providedUserInfo'] && changes['providedUserInfo'].currentValue) {
+      this.userInfo = changes['providedUserInfo'].currentValue;
+      this.isLoadingUser = false;
+      this._cdr.markForCheck();
     }
   }
 

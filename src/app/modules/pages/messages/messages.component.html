@@ -1,33 +1,93 @@
 <div class="messages-container" [class.mobile]="isMobile">
   <div class="conversations-sidebar" [class.hidden]="selectedUserId && isMobile">
+
     <div class="conversations-header">
       <h2>{{ 'messages.title' | workyTranslations }}</h2>
+      <button class="compose-btn" (click)="openNewChat()" [class.active]="showNewChatPanel"
+        [matTooltip]="'messages.newChat' | workyTranslations" matTooltipPosition="left">
+        <i class="material-icons">{{ showNewChatPanel ? 'close' : 'edit_square' }}</i>
+      </button>
     </div>
 
-    <div *ngIf="isLoadingConversations" class="loader-container">
+    <div class="search-bar-container">
+      <div class="search-input-wrapper">
+        <i class="material-icons search-icon">search</i>
+        <input
+          type="text"
+          class="search-input"
+          [placeholder]="'messages.searchPlaceholder' | workyTranslations"
+          [(ngModel)]="searchTerm"
+          [disabled]="showNewChatPanel" />
+        <button *ngIf="searchTerm" class="clear-search-btn" (click)="searchTerm = ''">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="showNewChatPanel" class="new-chat-panel">
+      <div class="new-chat-search-wrapper">
+        <i class="material-icons search-icon">person_search</i>
+        <input
+          type="text"
+          class="search-input"
+          [placeholder]="'messages.searchUsers' | workyTranslations"
+          [ngModel]="newChatSearchTerm"
+          (ngModelChange)="searchNewChatUsers($event)"
+          autofocus />
+      </div>
+      <div *ngIf="isSearchingNewChat" class="new-chat-loading">
+        <div class="loader"></div>
+      </div>
+      <div class="new-chat-results">
+        <div *ngFor="let user of newChatResults" class="new-chat-result-item" (click)="startChatWithUser(user)">
+          <worky-avatar [size]="40" [name]="user.name + ' ' + user.lastName" [img]="user.avatar"></worky-avatar>
+          <div class="new-chat-result-info">
+            <span class="new-chat-result-name">{{ user.name }} {{ user.lastName }}</span>
+            <span class="new-chat-result-username">&#64;{{ user.username }}</span>
+          </div>
+        </div>
+        <div *ngIf="newChatSearchTerm && !isSearchingNewChat && newChatResults.length === 0" class="new-chat-no-results">
+          <i class="material-icons">person_off</i>
+          <span>{{ 'messages.noSearchResults' | workyTranslations }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoadingConversations && !showNewChatPanel" class="loader-container">
       <div class="loader"></div>
     </div>
 
-    <div *ngIf="error && !isLoadingConversations" class="error-container">
+    <div *ngIf="error && !isLoadingConversations && !showNewChatPanel" class="error-container">
+      <i class="material-icons">error_outline</i>
       <p>{{ error }}</p>
-      <button (click)="loadConversations()">{{ 'messages.retry' | workyTranslations }}</button>
+      <button class="retry-btn" (click)="loadConversations()">{{ 'messages.retry' | workyTranslations }}</button>
     </div>
 
-    <div *ngIf="!isLoadingConversations && !error" class="conversations-list">
+    <div *ngIf="!isLoadingConversations && !error && !showNewChatPanel" class="conversations-list">
       <worky-conversation-item
-        *ngFor="let conversation of conversations; trackBy: trackByConversationId"
+        *ngFor="let conversation of filteredConversations; trackBy: trackByConversationId"
         [conversation]="conversation"
         [isSelected]="selectedUserId === conversation.userId"
         [currentUserId]="currentUserId"
+        [providedUserInfo]="userInfoMap.get(conversation.userId) || null"
         (click)="selectConversation(conversation)">
       </worky-conversation-item>
 
-      <div *ngIf="conversations.length === 0" class="empty-state">
+      <div *ngIf="filteredConversations.length === 0 && searchTerm" class="empty-state">
+        <i class="material-icons">search_off</i>
+        <p>{{ 'messages.noSearchResults' | workyTranslations }}</p>
+      </div>
+
+      <div *ngIf="conversations.length === 0 && !searchTerm" class="empty-state">
+        <i class="material-icons">chat_bubble_outline</i>
         <p>{{ 'messages.noConversations' | workyTranslations }}</p>
+        <button class="start-chat-btn" (click)="openNewChat()">
+          {{ 'messages.newChat' | workyTranslations }}
+        </button>
       </div>
 
       <button
-        *ngIf="page < totalPages"
+        *ngIf="page < totalPages && !searchTerm"
         (click)="loadMoreConversations()"
         class="load-more-btn">
         {{ 'messages.loadMore' | workyTranslations }}
@@ -37,7 +97,11 @@
 
   <div class="chat-container" [class.hidden]="!selectedUserId && isMobile">
     <div *ngIf="!selectedUserId" class="empty-chat">
-      <p>{{ 'messages.selectConversation' | workyTranslations }}</p>
+      <div class="empty-chat-illustration">
+        <i class="material-icons">forum</i>
+      </div>
+      <h3>{{ 'messages.title' | workyTranslations }}</h3>
+      <p>{{ 'messages.startConversation' | workyTranslations }}</p>
     </div>
 
     <worky-chat-window
@@ -52,4 +116,3 @@
     </worky-chat-window>
   </div>
 </div>
-

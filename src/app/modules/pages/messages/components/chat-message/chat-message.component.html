@@ -150,8 +150,8 @@
           <div class="content-footer">
             <small>{{ formatTime(message.timestamp) }}</small>
             <span *ngIf="message.isEdited" class="edited-badge">{{ 'messages.edited' | workyTranslations }}</span>
-            <i *ngIf="!message.isRead" class="material-icons">done</i>
-            <i *ngIf="message.isRead" class="material-icons">done_all</i>
+            <i *ngIf="!message.isRead" class="material-icons tick-sent">done</i>
+            <i *ngIf="message.isRead" class="material-icons tick-read">done_all</i>
           </div>
         </div>
       </div>

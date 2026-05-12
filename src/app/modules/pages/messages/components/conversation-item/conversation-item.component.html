@@ -1,8 +1,8 @@
-<div class="conversation-item" [class.selected]="isSelected">
+<div class="conversation-item" [class.selected]="isSelected" [class.has-unread]="conversation.unreadCount > 0">
   <div class="avatar-wrapper">
     <worky-avatar
       *ngIf="!isLoadingUser"
-      [size]="50"
+      [size]="48"
       [name]="userName"
       [img]="userAvatar">
     </worky-avatar>
@@ -13,20 +13,37 @@
     <div class="conversation-header">
       <span class="user-name" *ngIf="!isLoadingUser">{{ userName }}</span>
       <span class="user-name-skeleton" *ngIf="isLoadingUser"></span>
-      <span class="time">{{ conversation.lastMessageDate | messageTime }}</span>
+      <span class="time" [class.time-unread]="conversation.unreadCount > 0">
+        {{ conversation.lastMessageDate | messageTime }}
+      </span>
     </div>
     <div class="conversation-preview">
       <span class="last-message" *ngIf="!isLoadingUser">
-        <span *ngIf="lastMessageType === null">{{ 'messages.noMessages' | workyTranslations }}</span>
-        <span *ngIf="lastMessageType === MessageType.IMAGE">{{ 'message.typeImage' | workyTranslations }}</span>
-        <span *ngIf="lastMessageType === MessageType.VIDEO">{{ 'message.typeVideo' | workyTranslations }}</span>
-        <span *ngIf="lastMessageType === MessageType.AUDIO">{{ 'message.typeAudio' | workyTranslations }}</span>
-        <span *ngIf="lastMessageType === MessageType.FILE">{{ 'message.typeFile' | workyTranslations }}</span>
-        <span *ngIf="lastMessageType === MessageType.TEXT">{{ displayLastMessage }}</span>
+        <ng-container *ngIf="lastMessageType === null">
+          <span>{{ 'messages.noMessages' | workyTranslations }}</span>
+        </ng-container>
+        <ng-container *ngIf="lastMessageType === MessageType.IMAGE">
+          <i class="material-icons message-type-icon">image</i>
+          {{ 'message.typeImage' | workyTranslations }}
+        </ng-container>
+        <ng-container *ngIf="lastMessageType === MessageType.VIDEO">
+          <i class="material-icons message-type-icon">videocam</i>
+          {{ 'message.typeVideo' | workyTranslations }}
+        </ng-container>
+        <ng-container *ngIf="lastMessageType === MessageType.AUDIO">
+          <i class="material-icons message-type-icon">mic</i>
+          {{ 'message.typeAudio' | workyTranslations }}
+        </ng-container>
+        <ng-container *ngIf="lastMessageType === MessageType.FILE">
+          <i class="material-icons message-type-icon">attach_file</i>
+          {{ 'message.typeFile' | workyTranslations }}
+        </ng-container>
+        <ng-container *ngIf="lastMessageType === MessageType.TEXT">{{ displayLastMessage }}</ng-container>
       </span>
       <span class="message-skeleton" *ngIf="isLoadingUser"></span>
-      <span *ngIf="conversation.unreadCount > 0 && !isLoadingUser" class="badge">{{ conversation.unreadCount }}</span>
+      <span *ngIf="conversation.unreadCount > 0 && !isLoadingUser" class="badge">
+        {{ conversation.unreadCount > 99 ? '99+' : conversation.unreadCount }}
+      </span>
     </div>
   </div>
 </div>
-

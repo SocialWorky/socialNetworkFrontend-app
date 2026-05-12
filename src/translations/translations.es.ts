@@ -230,7 +230,13 @@ export const translations = {
   'messages.noMessages': 'Sin mensajes',
   'messages.serviceUnavailable': 'El servicio de mensajes no está disponible',
   'messages.loadError': 'Error al cargar conversaciones',
-  
+  'messages.searchPlaceholder': 'Buscar conversaciones...',
+  'messages.newChat': 'Nuevo mensaje',
+  'messages.noSearchResults': 'No se encontraron conversaciones',
+  'messages.startConversation': 'Selecciona una conversación o inicia una nueva',
+  'messages.searchUsers': 'Buscar usuarios',
+  'messages.newChatWith': 'Nuevo chat con',
+
   // MESSAGE COMPONENT
   'message.loadingPrevious': 'Cargando mensajes anteriores...',
   'message.noMoreMessages': 'No hay más mensajes que mostrar',
