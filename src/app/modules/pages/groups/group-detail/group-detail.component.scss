@@ -1,0 +1,17 @@
+.group-detail { max-width: 860px; margin: 0 auto; }
+.group-cover { height: 200px; background: var(--worky-skeleton); background-size: cover; background-position: center; position: relative; border-radius: 0 0 12px 12px; }
+.group-cover-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; background: linear-gradient(transparent, rgba(0,0,0,.6)); color: #fff; border-radius: 0 0 12px 12px; }
+.group-body { padding: 16px; }
+.group-meta-row { font-size: 13px; color: var(--worky-text-secondary); margin-bottom: 8px; }
+.group-desc { font-size: 14px; margin-bottom: 12px; }
+.group-actions { margin-bottom: 16px; }
+.btn-join, .btn-leave { padding: 8px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
+.btn-join { background: var(--worky-primary); color: #fff; }
+.btn-leave { background: var(--worky-error-bg, #ffebee); color: var(--worky-error); }
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--worky-border); margin-bottom: 16px; button { padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--worky-text-secondary); &.active { color: var(--worky-primary); border-bottom: 2px solid var(--worky-primary); } } }
+.privacy-badge { font-size: 11px; background: rgba(255,255,255,.2); padding: 2px 8px; border-radius: 20px; }
+.pub-card { background: var(--worky-surface); border: 1px solid var(--worky-border); border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+.member-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--worky-border-light, var(--worky-border)); }
+.role-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--worky-primary-light, #e7f3ff); color: var(--worky-primary); }
+.pending-section { background: var(--worky-warning, #fffbeb); border: 1px solid var(--worky-border); border-radius: 8px; padding: 12px; margin-bottom: 16px; }
+.loading, .empty, .private-notice { text-align: center; padding: 40px; color: var(--worky-text-secondary); }

@@ -59,6 +59,9 @@
 
       <div class="worky-profile" *ngIf="!isMobile">
         <!-- Messages -->
+        <a [routerLink]="['/groups']" class="item-navbar-actions" [title]="'groups.title' | workyTranslations">
+          <ion-icon name="people-circle-outline"></ion-icon>
+        </a>
         <a [routerLink]="['/messages']" class="item-navbar-actions">
           <worky-dropdown
             icon="chat"

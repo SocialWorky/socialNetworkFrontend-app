@@ -1,0 +1,13 @@
+// Groups list — Tailwind utility classes handle most styling
+.groups-list-page { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+.groups-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
+.group-card { border-radius: 12px; overflow: hidden; cursor: pointer; background: var(--worky-surface); border: 1px solid var(--worky-border); transition: transform .15s; &:hover { transform: translateY(-2px); } }
+.group-cover { height: 120px; background: var(--worky-skeleton); background-size: cover; background-position: center; position: relative; }
+.privacy-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.6); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 20px; }
+.group-info { padding: 12px; }
+.group-meta { font-size: 12px; color: var(--worky-text-secondary); margin: 4px 0 8px; display: flex; gap: 8px; }
+.btn-primary, .btn-join { padding: 8px 16px; border-radius: 8px; border: none; background: var(--worky-primary); color: #fff; font-weight: 600; cursor: pointer; font-size: 13px; }
+.joined-badge { font-size: 12px; color: var(--worky-success); font-weight: 600; }
+.search-bar input { width: 100%; padding: 10px 16px; border-radius: 24px; border: 1px solid var(--worky-border); background: var(--worky-input-bg); font-size: 14px; }
+.loading, .empty { text-align: center; padding: 40px; color: var(--worky-text-secondary); }

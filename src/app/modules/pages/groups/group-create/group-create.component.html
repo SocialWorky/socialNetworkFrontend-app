@@ -1,0 +1,33 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="create-form">
+  <h3>{{ 'groups.create' | workyTranslations }}</h3>
+
+  <div class="field">
+    <label>{{ 'groups.name' | workyTranslations }}</label>
+    <input formControlName="name" [placeholder]="'groups.name' | workyTranslations" maxlength="120" />
+  </div>
+
+  <div class="field">
+    <label>{{ 'groups.description' | workyTranslations }}</label>
+    <textarea formControlName="description" rows="3"></textarea>
+  </div>
+
+  <div class="field">
+    <label>{{ 'groups.category' | workyTranslations }}</label>
+    <input formControlName="category" [placeholder]="'groups.category' | workyTranslations" maxlength="80" />
+  </div>
+
+  <div class="field">
+    <label>{{ 'groups.privacy' | workyTranslations }}</label>
+    <select formControlName="privacy">
+      <option *ngFor="let opt of privacyOptions" [value]="opt">
+        {{ ('groups.' + opt) | workyTranslations }}
+      </option>
+    </select>
+  </div>
+
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <button type="submit" [disabled]="form.invalid || isSubmitting" class="btn-primary">
+    {{ 'groups.create' | workyTranslations }}
+  </button>
+</form>

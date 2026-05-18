@@ -1,0 +1,69 @@
+<div *ngIf="isLoading" class="loading">{{ 'analytics.loading' | workyTranslations }}</div>
+
+<div *ngIf="!isLoading && group" class="group-detail">
+  <!-- Cover + Header -->
+  <div class="group-cover" [style.backgroundImage]="group.coverImage ? 'url(' + group.coverImage + ')' : ''">
+    <div class="group-cover-overlay">
+      <h1>{{ group.name }}</h1>
+      <span class="privacy-badge">{{ ('groups.' + group.privacy) | workyTranslations }}</span>
+    </div>
+  </div>
+
+  <div class="group-body">
+    <div class="group-meta-row">
+      <span>{{ group.memberCount }} {{ 'groups.members' | workyTranslations }}</span>
+      <span *ngIf="group.category">· {{ group.category }}</span>
+    </div>
+    <p *ngIf="group.description" class="group-desc">{{ group.description }}</p>
+
+    <div class="group-actions">
+      <button *ngIf="!group.isMember" class="btn-join" (click)="joinGroup()">
+        {{ 'groups.join' | workyTranslations }}
+      </button>
+      <button *ngIf="group.isMember && group.createdBy !== currentUserId" class="btn-leave" (click)="leaveGroup()">
+        {{ 'groups.leave' | workyTranslations }}
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button [class.active]="activeTab === 'publications'" (click)="activeTab = 'publications'">
+        {{ 'groups.publications' | workyTranslations }}
+      </button>
+      <button [class.active]="activeTab === 'members'" (click)="activeTab = 'members'">
+        {{ 'groups.members' | workyTranslations }}
+      </button>
+    </div>
+
+    <!-- Publications tab -->
+    <div *ngIf="activeTab === 'publications'">
+      <div *ngIf="!group.isMember && group.privacy !== 'public'" class="private-notice">
+        {{ 'groups.join' | workyTranslations }}
+      </div>
+      <div *ngFor="let pub of publications" class="pub-card">
+        <strong>{{ pub.author?.name }}</strong>: {{ pub.content }}
+      </div>
+      <div *ngIf="group.isMember && publications.length === 0" class="empty">
+        {{ 'groups.noGroups' | workyTranslations }}
+      </div>
+    </div>
+
+    <!-- Members tab -->
+    <div *ngIf="activeTab === 'members'">
+      <!-- Pending requests (admin/mod only) -->
+      <div *ngIf="pendingMembers.length > 0" class="pending-section">
+        <h4>{{ 'groups.pendingRequests' | workyTranslations }} ({{ pendingMembers.length }})</h4>
+        <div *ngFor="let m of pendingMembers" class="member-row">
+          <span>{{ m.userId }}</span>
+          <button (click)="approveMember(m.userId)">{{ 'groups.approve' | workyTranslations }}</button>
+          <button (click)="rejectMember(m.userId)">{{ 'groups.reject' | workyTranslations }}</button>
+        </div>
+      </div>
+      <!-- Active members -->
+      <div *ngFor="let m of members" class="member-row">
+        <span>{{ m.userId }}</span>
+        <span class="role-badge">{{ m.role }}</span>
+      </div>
+    </div>
+  </div>
+</div>

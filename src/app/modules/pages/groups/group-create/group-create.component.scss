@@ -1,0 +1,4 @@
+.create-form { background: var(--worky-surface); border: 1px solid var(--worky-border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.field { margin-bottom: 12px; label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; } input, textarea, select { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--worky-border); background: var(--worky-input-bg); font-size: 14px; } }
+.btn-primary { padding: 10px 24px; border-radius: 8px; border: none; background: var(--worky-primary); color: #fff; font-weight: 600; cursor: pointer; &:disabled { opacity: .6; cursor: not-allowed; } }
+.error { color: var(--worky-error); font-size: 13px; margin-bottom: 8px; }

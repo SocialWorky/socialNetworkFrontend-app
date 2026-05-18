@@ -30,6 +30,10 @@ const routes: Routes = [
         path: 'subscribe',
         loadChildren: () => import('./subscribe/subscribe.module').then(m => m.SubscribeModule)
       },
+      {
+        path: 'groups',
+        loadChildren: () => import('./groups/groups.module').then(m => m.GroupsModule)
+      },
 
       { path: '**', redirectTo: '', pathMatch: 'full' }
     ],
