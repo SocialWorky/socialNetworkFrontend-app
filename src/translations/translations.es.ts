@@ -1309,6 +1309,19 @@ export const translations = {
   'admin.widgetBuilder.typeForm.alerts.confirm.delete': 'Eliminar Tipo de Widget',
   'admin.widgetBuilder.typeForm.alerts.confirm.deleteMessage': '¿Estás seguro de que deseas eliminar este tipo de widget? Esta acción no se puede deshacer.',
   
+  // Stories
+  'story.myStory': 'Mi Historia',
+  'story.addStory': 'Agregar Historia',
+  'story.views': '{0} vistas',
+  'story.noViews': 'Nadie ha visto tu historia todavía',
+  'story.viewedBy': 'Visto por',
+  'story.premiumDuration': 'Tu historia dura 72h (Premium)',
+  'story.freeDuration': 'Tu historia dura 24h',
+  'story.deleteConfirm': '¿Eliminar esta historia?',
+  'story.close': 'Cerrar historia',
+  'story.publish': 'Publicar historia',
+  'story.addText': 'Agregar texto (opcional)',
+
   // Límite diario de mensajes
   'messages.dailyLimitReached': 'Has alcanzado tu límite diario de mensajes ({0}/{1})',
   'messages.upgradeForUnlimited': 'Suscríbete para mensajes ilimitados',

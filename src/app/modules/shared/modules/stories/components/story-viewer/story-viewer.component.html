@@ -1,0 +1,45 @@
+<div class="story-overlay" *ngIf="visible && currentStory" (click)="onTap($event)">
+
+  <!-- Progress bars -->
+  <div class="progress-bar-container">
+    <div *ngFor="let seg of progressSegments" class="progress-segment">
+      <div class="progress-fill" [style.width.%]="getSegmentFill(seg)"></div>
+    </div>
+  </div>
+
+  <!-- Author info -->
+  <div class="story-header" (click)="$event.stopPropagation()">
+    <worky-avatar [size]="36" [img]="currentGroup!.user.avatar" [name]="currentGroup!.user.name + ' ' + currentGroup!.user.lastName"></worky-avatar>
+    <div class="author-info">
+      <span class="author-name">{{ currentGroup!.user.name }} {{ currentGroup!.user.lastName }}</span>
+      <span class="story-time">{{ currentStory!.createdAt | date:'HH:mm' }}</span>
+    </div>
+    <button class="close-btn" (click)="close()" [attr.aria-label]="'story.close' | workyTranslations">✕</button>
+  </div>
+
+  <!-- Media -->
+  <div class="story-media-container">
+    <img *ngIf="currentStory!.mediaType === 'image'"
+         [src]="currentStory!.mediaUrl"
+         class="story-media"
+         alt="Story image">
+    <video *ngIf="currentStory!.mediaType === 'video'"
+           [src]="currentStory!.mediaUrl"
+           class="story-media"
+           autoplay
+           muted
+           playsinline
+           (loadedmetadata)="onVideoDuration($any($event.target).duration)">
+    </video>
+  </div>
+
+  <!-- Text overlay -->
+  <div *ngIf="currentStory!.textOverlay" class="text-overlay">
+    {{ currentStory!.textOverlay }}
+  </div>
+
+  <!-- Navigation areas (invisible but clickable) -->
+  <div class="nav-left" (click)="$event.stopPropagation(); prev()"></div>
+  <div class="nav-right" (click)="$event.stopPropagation(); next()"></div>
+
+</div>

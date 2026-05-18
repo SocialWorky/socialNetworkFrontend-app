@@ -33,6 +33,7 @@ import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.mod
 import { SharedModule } from '@shared/shared.module';
 import { SyncIndicatorComponent } from '@shared/components/sync-indicator/sync-indicator.component';
 import { MessagesModule } from './messages/messages.module';
+import { StoriesModule } from '@shared/modules/stories/stories.module';
 
 
 @NgModule({
@@ -72,6 +73,7 @@ import { MessagesModule } from './messages/messages.module';
     SharedModule,
     SyncIndicatorComponent,
     MessagesModule,
+    StoriesModule,
   ]
 })
 export class PagesModule { }

@@ -22,6 +22,7 @@ import { DeviceDetectionService } from '@shared/services/device-detection.servic
 import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
+import { StoriesService, StoryFeedGroup } from '@shared/services/core-apis/stories.service';
 import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
 import { Token } from '@shared/interfaces/token.interface';
 import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
@@ -43,6 +44,14 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   WidgetPosition = WidgetPosition;
 
   publications = signal<PublicationView[]>([]);
+  feedStories = signal<import('@shared/services/core-apis/stories.service').StoryFeedGroup[]>([]);
+  viewerOpen = false;
+  viewerGroupIndex = 0;
+  storyCreateOpen = false;
+
+  get currentUserId(): string {
+    return this.dataUser?.id ?? '';
+  }
 
   page = 1;
 
@@ -135,7 +144,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private _logService: LogService,
     private _imagePreloadService: ImagePreloadService,
     private _mobileImageCacheService: MobileImageCacheService,
-    private _utilityService: UtilityService
+    private _utilityService: UtilityService,
+    private readonly _storiesService: StoriesService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Home');
@@ -147,6 +157,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     await this._authService.isAuthenticated();
     this.dataUser = this._authService.getDecodedToken();
     this._notificationUsersService.loginUser();
+
+    // Load stories feed
+    this._storiesService.feedStories$.pipe(takeUntil(this.destroy$)).subscribe((groups) => {
+      this.feedStories.set(groups);
+    });
+    this._storiesService.loadFeedStories().pipe(takeUntil(this.destroy$)).subscribe();
 
     this.paramPublication = await this.getParamsPublication();
     if (this.paramPublication) return;
@@ -781,6 +797,24 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     `;
     
     return indicator;
+  }
+
+  openStoryViewer(groupIndex: number): void {
+    this.viewerGroupIndex = groupIndex;
+    this.viewerOpen = true;
+  }
+
+  closeStoryViewer(): void {
+    this.viewerOpen = false;
+  }
+
+  openStoryCreate(): void {
+    this.storyCreateOpen = true;
+  }
+
+  onStoryPublished(): void {
+    this.storyCreateOpen = false;
+    this._storiesService.loadFeedStories().pipe(takeUntil(this.destroy$)).subscribe();
   }
 }
 

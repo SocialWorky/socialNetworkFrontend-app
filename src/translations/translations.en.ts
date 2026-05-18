@@ -1329,6 +1329,19 @@ export const translations = {
   'admin.widgetBuilder.typeForm.alerts.confirm.delete': 'Delete Widget Type',
   'admin.widgetBuilder.typeForm.alerts.confirm.deleteMessage': 'Are you sure you want to delete this widget type? This action cannot be undone.',
   
+  // Stories
+  'story.myStory': 'My Story',
+  'story.addStory': 'Add Story',
+  'story.views': '{0} views',
+  'story.noViews': 'No one has seen your story yet',
+  'story.viewedBy': 'Seen by',
+  'story.premiumDuration': 'Your story lasts 72h (Premium)',
+  'story.freeDuration': 'Your story lasts 24h',
+  'story.deleteConfirm': 'Delete this story?',
+  'story.close': 'Close story',
+  'story.publish': 'Publish story',
+  'story.addText': 'Add text (optional)',
+
   // Messages daily limit
   'messages.dailyLimitReached': 'You have reached your daily message limit ({0}/{1})',
   'messages.upgradeForUnlimited': 'Subscribe for unlimited messages',

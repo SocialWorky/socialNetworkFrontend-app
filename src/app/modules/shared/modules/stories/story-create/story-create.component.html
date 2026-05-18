@@ -1,0 +1,50 @@
+<div class="story-create-overlay">
+  <div class="story-create-modal">
+
+    <div class="modal-header">
+      <h3>{{ 'story.addStory' | workyTranslations }}</h3>
+      <button class="close-btn" (click)="closed.emit()">✕</button>
+    </div>
+
+    <!-- File input -->
+    <div class="file-input-area" *ngIf="!preview">
+      <label for="story-file-input" class="file-label">
+        <span class="file-icon">📷</span>
+        <span>Seleccionar foto o video</span>
+      </label>
+      <input id="story-file-input" type="file" accept="image/*,video/*" (change)="onFileChange($event)" hidden>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-area" *ngIf="preview">
+      <img *ngIf="mediaType === 'image'" [src]="preview" class="preview-media" alt="preview">
+      <video *ngIf="mediaType === 'video'" [src]="preview" class="preview-media" controls muted></video>
+
+      <button class="change-btn" (click)="preview = null; selectedFile = null">Cambiar</button>
+    </div>
+
+    <!-- Text overlay -->
+    <div class="text-input-area">
+      <input type="text"
+             [(ngModel)]="textOverlay"
+             [placeholder]="'story.addText' | workyTranslations"
+             maxlength="200"
+             class="text-input">
+    </div>
+
+    <!-- Duration info -->
+    <p class="duration-hint">{{ 'story.freeDuration' | workyTranslations }}</p>
+
+    <!-- Actions -->
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closed.emit()" [disabled]="isUploading">
+        Cancelar
+      </button>
+      <button class="publish-btn" (click)="publish()" [disabled]="!selectedFile || isUploading">
+        <span *ngIf="!isUploading">{{ 'story.publish' | workyTranslations }}</span>
+        <span *ngIf="isUploading">Publicando...</span>
+      </button>
+    </div>
+
+  </div>
+</div>
