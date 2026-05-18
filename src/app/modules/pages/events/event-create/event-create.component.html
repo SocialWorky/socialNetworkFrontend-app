@@ -1,0 +1,20 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="create-form">
+  <h3>{{ 'events.create' | workyTranslations }}</h3>
+  <div class="field"><label>{{ 'events.title' | workyTranslations }}</label><input formControlName="title" maxlength="200" /></div>
+  <div class="field"><label>{{ 'events.description' | workyTranslations }}</label><textarea formControlName="description" rows="3"></textarea></div>
+  <div class="field"><label>{{ 'events.date' | workyTranslations }}</label><input type="datetime-local" formControlName="date" /></div>
+  <div class="field">
+    <label>{{ 'events.location' | workyTranslations }}</label>
+    <div style="display:flex;gap:8px;margin-bottom:4px;">
+      <label style="display:flex;align-items:center;gap:4px;font-weight:400;"><input type="radio" formControlName="locationType" value="physical" /> {{ 'events.physical' | workyTranslations }}</label>
+      <label style="display:flex;align-items:center;gap:4px;font-weight:400;"><input type="radio" formControlName="locationType" value="virtual" /> {{ 'events.virtual' | workyTranslations }}</label>
+    </div>
+    <input formControlName="location" [placeholder]="'events.location' | workyTranslations" maxlength="500" />
+  </div>
+  <div style="display:flex;gap:12px;">
+    <div class="field" style="flex:1;"><label>{{ 'events.price' | workyTranslations }} (CLP)</label><input type="number" formControlName="price" min="0" /></div>
+    <div class="field" style="flex:1;"><label>{{ 'events.maxTickets' | workyTranslations }}</label><input type="number" formControlName="maxTickets" min="0" /></div>
+  </div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+  <button type="submit" [disabled]="form.invalid || isSubmitting" class="btn-primary">{{ 'events.publish' | workyTranslations }}</button>
+</form>

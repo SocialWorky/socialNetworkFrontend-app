@@ -1,0 +1,48 @@
+<div *ngIf="isLoading" class="loading">{{ 'analytics.loading' | workyTranslations }}</div>
+<div *ngIf="!isLoading && event" class="event-detail">
+  <div class="event-hero" [style.backgroundImage]="event.coverImage ? 'url(' + event.coverImage + ')' : ''">
+    <span class="status-badge" [class]="'status-' + event.status">{{ event.status }}</span>
+  </div>
+  <div class="event-body">
+    <h1>{{ event.title }}</h1>
+    <div class="event-meta">
+      <span>📅 {{ formatDate(event.date) }}</span>
+      <span>{{ event.locationType === 'physical' ? '📍' : '🌐' }} {{ event.location || event.locationType }}</span>
+      <span class="price">{{ formatPrice(event.price) }}</span>
+    </div>
+    <p *ngIf="event.description" class="description">{{ event.description }}</p>
+
+    <!-- Capacity -->
+    <div class="capacity" *ngIf="event.maxTickets > 0">
+      <span>{{ event.ticketsSold }} / {{ event.maxTickets }} {{ 'events.attendees' | workyTranslations }}</span>
+      <span *ngIf="event.ticketsAvailable != null && event.ticketsAvailable > 0" class="available">· {{ event.ticketsAvailable }} {{ 'events.ticketsLeft' | workyTranslations }}</span>
+      <span *ngIf="event.ticketsAvailable === 0" class="sold-out">· {{ 'events.soldOut' | workyTranslations }}</span>
+    </div>
+
+    <!-- Ticket action -->
+    <div *ngIf="myTicket" class="my-ticket">
+      <div style="color:#22c55e;font-weight:600;margin-bottom:8px;">✓ {{ 'events.registered' | workyTranslations }}</div>
+      <div *ngIf="myTicket.qrCode" style="font-family:monospace;background:var(--worky-input-bg);padding:12px;border-radius:8px;font-size:13px;word-break:break-all;">
+        <div style="font-size:11px;font-weight:600;margin-bottom:4px;">{{ 'events.qrCode' | workyTranslations }}</div>
+        {{ myTicket.qrCode }}
+      </div>
+    </div>
+    <button *ngIf="canRegister && !isCreator"
+      (click)="registerOrBuy()"
+      [disabled]="isRegistering"
+      class="btn-register">
+      {{ event.price === 0 ? ('events.register' | workyTranslations) : ('events.buyTicket' | workyTranslations) }}
+    </button>
+    <div *ngIf="error" class="error">{{ error }}</div>
+
+    <!-- Creator admin panel -->
+    <div *ngIf="isCreator" class="admin-panel">
+      <h4>{{ 'events.attendees' | workyTranslations }} ({{ attendees.length }})</h4>
+      <div *ngFor="let t of attendees" class="attendee-row">
+        <span>{{ t.userId }}</span>
+        <span class="qr-code">{{ t.qrCode }}</span>
+      </div>
+      <button *ngIf="event.status === 'published'" (click)="cancelEvent()" class="btn-cancel">{{ 'events.cancel' | workyTranslations }}</button>
+    </div>
+  </div>
+</div>
