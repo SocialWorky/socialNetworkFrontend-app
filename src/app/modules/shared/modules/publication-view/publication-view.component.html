@@ -153,16 +153,15 @@
 
   <div class="publication-body">
 
-    <!-- Premium content blocked overlay -->
-    <div *ngIf="publication.isPremiumBlocked"
-         style="background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.04));border:1px solid rgba(245,158,11,0.25);border-radius:12px;padding:20px;text-align:center;margin-bottom:8px;">
-      <div style="font-size:2em;margin-bottom:8px;">⭐</div>
-      <p style="font-weight:700;margin:0 0 4px;font-size:0.95em;">{{ 'premium.contentLocked' | workyTranslations }}</p>
-      <p style="font-size:0.8em;opacity:0.7;margin:0 0 12px;">{{ 'premium.contentLockedDesc' | workyTranslations }}</p>
-      <a routerLink="/subscribe"
-         style="display:inline-block;padding:8px 20px;background:#f59e0b;color:#fff;border-radius:8px;font-weight:700;font-size:0.85em;text-decoration:none;">
-        {{ 'subscription.upgradeNow' | workyTranslations }}
-      </a>
+    <!-- Premium content blocked — click opens subscription wall -->
+    <div *ngIf="publication.isPremiumBlocked" class="premium-block" (click)="showSubscriptionWall()">
+      <div *ngIf="publication.content" class="premium-preview">{{ publication.content }}</div>
+      <div class="premium-overlay">
+        <div class="lock-icon-ring">
+          <i class="material-icons">lock</i>
+        </div>
+        <p class="premium-title">{{ 'premium.contentLocked' | workyTranslations }}</p>
+      </div>
     </div>
 
     <div class="publication-content" *ngIf="publication.content && !publication.isPremiumBlocked">
@@ -177,11 +176,6 @@
         <div class="publication-youtube-preview" [innerHTML]="result.youTubeHtml"></div>
         <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
       </div>
-    </div>
-
-    <!-- Truncated preview for blocked premium content -->
-    <div class="publication-content" *ngIf="publication.content && publication.isPremiumBlocked">
-      <div class="content" style="opacity:0.6;font-style:italic;font-size:0.9em;">{{ publication.content }}</div>
     </div>
 
     <worky-processing-media *ngIf="!publication.media.length && publication.containsMedia && !publication.isPremiumBlocked"></worky-processing-media>

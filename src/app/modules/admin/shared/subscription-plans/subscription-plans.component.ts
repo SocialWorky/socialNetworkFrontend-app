@@ -5,7 +5,7 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { filter, Subject, switchMap, takeUntil } from 'rxjs';
 import {
   SubscriptionPlan,
@@ -14,6 +14,19 @@ import {
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
+
+const PLATFORM_FEATURES = [
+  { id: 'feed', labelKey: 'admin.feature.feed' },
+  { id: 'chat', labelKey: 'admin.feature.chat' },
+  { id: 'friends', labelKey: 'admin.feature.friends' },
+  { id: 'notifications', labelKey: 'admin.feature.notifications' },
+  { id: 'profile', labelKey: 'admin.feature.profile' },
+  { id: 'media_upload', labelKey: 'admin.feature.media_upload' },
+  { id: 'search', labelKey: 'admin.feature.search' },
+  { id: 'reactions', labelKey: 'admin.feature.reactions' },
+  { id: 'comments', labelKey: 'admin.feature.comments' },
+  { id: 'widgets', labelKey: 'admin.feature.widgets' },
+];
 
 @Component({
   selector: 'worky-subscription-plans',
@@ -31,6 +44,8 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
   editingPlan: SubscriptionPlan | null = null;
 
   planForm: FormGroup;
+  readonly platformFeatures = PLATFORM_FEATURES;
+  selectedFeatures: string[] = [];
 
   private destroy$ = new Subject<void>();
 
@@ -46,12 +61,21 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
       priceClp: [null, [Validators.required, Validators.min(1)]],
       durationDays: [null, [Validators.required, Validators.min(1)]],
       isActive: [true],
-      features: this.fb.array([]),
     });
   }
 
-  get features(): FormArray {
-    return this.planForm.get('features') as FormArray;
+  isFeatureSelected(id: string): boolean {
+    return this.selectedFeatures.includes(id);
+  }
+
+  toggleFeature(id: string): void {
+    const idx = this.selectedFeatures.indexOf(id);
+    if (idx === -1) {
+      this.selectedFeatures.push(id);
+    } else {
+      this.selectedFeatures.splice(idx, 1);
+    }
+    this.cdr.markForCheck();
   }
 
   ngOnInit(): void {
@@ -76,15 +100,14 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
   openCreateForm(): void {
     this.editingPlan = null;
     this.planForm.reset({ isActive: true });
-    this.features.clear();
+    this.selectedFeatures = [];
     this.showForm = true;
     this.cdr.markForCheck();
   }
 
   openEditForm(plan: SubscriptionPlan): void {
     this.editingPlan = plan;
-    this.features.clear();
-    plan.features.forEach((f) => this.features.push(this.fb.control(f, Validators.required)));
+    this.selectedFeatures = [...plan.features];
     this.planForm.patchValue({
       name: plan.name,
       description: plan.description ?? '',
@@ -102,20 +125,10 @@ export class SubscriptionPlansComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  addFeature(): void {
-    this.features.push(this.fb.control('', Validators.required));
-    this.cdr.markForCheck();
-  }
-
-  removeFeature(index: number): void {
-    this.features.removeAt(index);
-    this.cdr.markForCheck();
-  }
-
   savePlan(): void {
     if (this.planForm.invalid) return;
     this.isSaving = true;
-    const dto = this.planForm.value;
+    const dto = { ...this.planForm.value, features: this.selectedFeatures };
 
     const request$ = this.editingPlan
       ? this.plansService.update(this.editingPlan._id, dto)

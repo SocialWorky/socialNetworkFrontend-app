@@ -61,7 +61,7 @@
           <ul class="space-y-2">
             <li *ngFor="let feature of plan.features" class="flex items-center gap-2 text-sm text-slate-300">
               <i class="material-icons text-green-400 text-base">check_circle</i>
-              {{ feature }}
+              {{ ('admin.feature.' + feature) | workyTranslations }}
             </li>
           </ul>
         </div>

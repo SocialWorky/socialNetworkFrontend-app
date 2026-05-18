@@ -50,7 +50,7 @@
           <td class="py-3 pr-4">
             <div class="flex flex-wrap gap-1">
               <span *ngFor="let f of plan.features"
-                class="px-2 py-0.5 bg-slate-700 text-slate-300 rounded text-xs">{{ f }}</span>
+                class="px-2 py-0.5 bg-slate-700 text-slate-300 rounded text-xs">{{ ('admin.feature.' + f) | workyTranslations }}</span>
             </div>
           </td>
           <td class="py-3 pr-4">
@@ -130,23 +130,21 @@
 
         <!-- Features -->
         <div>
-          <div class="flex items-center justify-between mb-2">
-            <label class="text-sm font-medium text-slate-300">{{ 'admin.planFeatures' | workyTranslations }}</label>
-            <button type="button" (click)="addFeature()"
-              class="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300">
-              <i class="material-icons text-sm">add</i>
-              {{ 'admin.addFeature' | workyTranslations }}
-            </button>
-          </div>
-          <div formArrayName="features" class="grid gap-2">
-            <div *ngFor="let ctrl of features.controls; let i = index" class="flex gap-2">
-              <input type="text" [formControlName]="i"
-                class="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-blue-500">
-              <button type="button" (click)="removeFeature(i)"
-                class="p-2 text-slate-400 hover:text-red-400 transition-colors">
-                <i class="material-icons text-base">remove_circle_outline</i>
-              </button>
-            </div>
+          <label class="block text-sm font-medium text-slate-300 mb-3">{{ 'admin.planFeatures' | workyTranslations }}</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label *ngFor="let feature of platformFeatures"
+              (click)="toggleFeature(feature.id)"
+              class="flex items-center gap-2 p-2.5 rounded-lg cursor-pointer transition-all border hover:bg-slate-700/30"
+              [ngClass]="isFeatureSelected(feature.id)
+                ? 'bg-blue-500/10 border-blue-500'
+                : 'border-slate-700'">
+              <input type="checkbox"
+                [checked]="isFeatureSelected(feature.id)"
+                (click)="$event.stopPropagation()"
+                (change)="toggleFeature(feature.id)"
+                class="accent-blue-500 w-4 h-4 flex-shrink-0">
+              <span class="text-sm text-slate-300 select-none">{{ feature.labelKey | workyTranslations }}</span>
+            </label>
           </div>
         </div>
       </div>

@@ -57,6 +57,7 @@ export const translations = {
   'button.close': 'Cerrar',
   'button.delete': 'Eliminar',
   'button.cancel': 'Cancelar',
+  'button.save': 'Guardar',
   'button.yes': 'Sí',
   'button.no': 'No',
   
@@ -1390,6 +1391,16 @@ export const translations = {
   'admin.priceCLP': 'Precio (CLP)',
   'admin.durationDays': 'Duración (días)',
   'admin.planDeleteConfirm': '¿Estás seguro de que deseas eliminar este plan? Los suscriptores activos no serán afectados.',
+  'admin.feature.feed': 'Publicaciones',
+  'admin.feature.chat': 'Chat / Mensajes',
+  'admin.feature.friends': 'Amigos',
+  'admin.feature.notifications': 'Notificaciones',
+  'admin.feature.profile': 'Perfil',
+  'admin.feature.media_upload': 'Subir Multimedia',
+  'admin.feature.search': 'Buscar Usuarios',
+  'admin.feature.reactions': 'Reacciones',
+  'admin.feature.comments': 'Comentarios',
+  'admin.feature.widgets': 'Widgets',
 
   // Suscripción — Vista del usuario
   'subscription.title': 'Planes de Suscripción',
@@ -1416,6 +1427,8 @@ export const translations = {
   'subscription.subscriptionRequired': 'Este contenido requiere una suscripción premium activa.',
   'subscription.subscriptionExpired': 'Tu suscripción ha expirado. Renueva para seguir disfrutando de las funciones premium.',
   'subscription.upgradeNow': 'Mejorar Ahora',
+  'subscription.viewPlans': 'Ver Planes',
+  'subscription.notNow': 'Ahora no',
   'subscription.noPremiumPlan': 'No hay planes premium disponibles en este momento.',
   'subscription.redirectingToPayment': 'Redirigiendo al pago...',
   'subscription.managePlan': 'Gestionar Plan',

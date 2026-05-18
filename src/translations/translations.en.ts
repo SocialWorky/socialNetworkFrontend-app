@@ -57,6 +57,7 @@ export const translations = {
   'button.close': 'Close',
   'button.delete': 'Delete',
   'button.cancel': 'Cancel',
+  'button.save': 'Save',
   'button.yes': 'Yes',
   'button.no': 'No',
   
@@ -1410,6 +1411,16 @@ export const translations = {
   'admin.priceCLP': 'Price (CLP)',
   'admin.durationDays': 'Duration (days)',
   'admin.planDeleteConfirm': 'Are you sure you want to delete this plan? Active subscribers will not be affected.',
+  'admin.feature.feed': 'Publications',
+  'admin.feature.chat': 'Chat / Messages',
+  'admin.feature.friends': 'Friends',
+  'admin.feature.notifications': 'Notifications',
+  'admin.feature.profile': 'Profile',
+  'admin.feature.media_upload': 'Upload Media',
+  'admin.feature.search': 'Search Users',
+  'admin.feature.reactions': 'Reactions',
+  'admin.feature.comments': 'Comments',
+  'admin.feature.widgets': 'Widgets',
 
   // Subscription — User-facing
   'subscription.title': 'Subscription Plans',
@@ -1436,6 +1447,8 @@ export const translations = {
   'subscription.subscriptionRequired': 'This content requires an active premium subscription.',
   'subscription.subscriptionExpired': 'Your subscription has expired. Renew to continue enjoying premium features.',
   'subscription.upgradeNow': 'Upgrade Now',
+  'subscription.viewPlans': 'View Plans',
+  'subscription.notNow': 'Not now',
   'subscription.noPremiumPlan': 'No premium plans available at this time.',
   'subscription.redirectingToPayment': 'Redirecting to payment...',
   'subscription.managePlan': 'Manage Plan',

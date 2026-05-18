@@ -7,11 +7,12 @@ import {
   HttpErrorResponse,
   HttpClient
 } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject, of } from 'rxjs';
+import { Observable, throwError, BehaviorSubject, of, EMPTY } from 'rxjs';
 import { catchError, filter, take, switchMap, finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { environment } from '@env/environment';
 import { LogService, LevelLogEnum } from './modules/shared/services/core-apis/log.service';
+import { SubscriptionWallService } from './modules/shared/services/subscription-wall.service';
 
 interface RefreshTokenResponse {
   accessToken: string;
@@ -27,7 +28,8 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(
     private router: Router,
     private http: HttpClient,
-    private logService: LogService
+    private logService: LogService,
+    private subscriptionWallService: SubscriptionWallService,
   ) {}
 
   intercept(
@@ -44,7 +46,16 @@ export class AuthInterceptor implements HttpInterceptor {
 
     const isApiRequest = apiUrls.some((url) => request.url.startsWith(url));
 
-    if (isApiRequest) {
+    const AUTH_URLS = [
+      '/user/login', '/user/loginGoogle', '/user/create',
+      '/auth/refresh',
+      '/email/forgotPassword', '/email/resetPassword',
+      '/records-logs',      // internal logging — must never block
+      '/app/version',       // version check on startup
+    ];
+    const isAuthUrl = AUTH_URLS.some((path) => request.url.includes(path));
+
+    if (isApiRequest && !isAuthUrl) {
       const token = localStorage.getItem('token');
       if (token && token !== 'undefined' && token !== 'null') {
         request = this.addToken(request, token);
@@ -54,15 +65,22 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401 && isApiRequest) {
-          // Don't try to refresh if this is already a refresh request
           if (request.url.includes('/auth/refresh')) {
             this.clearSession();
             this.redirectToLogin();
             return throwError(() => error);
           }
-
           return this.handle401Error(request, next);
         }
+
+        if (error.status === 402 && isApiRequest) {
+          if (request.method === 'GET' || isAuthUrl) {
+            return EMPTY;
+          }
+          this.subscriptionWallService.show();
+          return throwError(() => error);
+        }
+
         return throwError(() => error);
       })
     );

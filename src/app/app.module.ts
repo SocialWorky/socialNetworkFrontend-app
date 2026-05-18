@@ -12,6 +12,8 @@ import localeEs from '@angular/common/locales/es';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+import { SubscriptionWallComponent } from './modules/shared/components/subscription-wall/subscription-wall.component';
+import { TranslationsModule } from './modules/shared/modules/translations/translations.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthInterceptor } from './auth.interceptor';
 import { CacheInterceptor } from './cache.interceptor';
@@ -46,6 +48,7 @@ const config: SocketIoConfig = {
 @NgModule({
   declarations: [
     AppComponent,
+    SubscriptionWallComponent,
   ],
   imports: [
     BrowserModule,
@@ -53,6 +56,7 @@ const config: SocketIoConfig = {
     IonicModule.forRoot(),
     AppRoutingModule,
     AuthModule,
+    TranslationsModule,
     SocketIoModule.forRoot(config),
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
