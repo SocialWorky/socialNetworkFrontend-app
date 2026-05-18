@@ -19,6 +19,7 @@ import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
 import { ReportsService } from '@shared/services/core-apis/reports.service';
 import { ReportCreate } from '@shared/interfaces/report.interface';
 import { ReportType, ReportStatus } from '@shared/enums/report.enum';
+import { BoostService, BoostPackage } from '@shared/services/core-apis/boost.service';
 import { ReportResponseComponent } from '../publication-view/report-response/report-response.component';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { CommentService } from '@shared/services/core-apis/comment.service';
@@ -156,7 +157,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _mediaEventsService: MediaEventsService,
     private _alertService: AlertService,
     private _globalEventService: GlobalEventService,
-    private _notificationPublicationService: NotificationPublicationService
+    private _notificationPublicationService: NotificationPublicationService,
+    private readonly _boostService: BoostService,
   ) {}
 
   async ngAfterViewInit() {
@@ -559,6 +561,17 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       function: this.fixedPublications.bind(this),
       title: !this.publication.fixed ? translations['publicationsView.fixedPublication'] : translations['publicationsView.unfixedPublication']
     };
+
+    if (userId === this.dataUser?.id) {
+      const menuBoostPublication = {
+        icon: 'rocket_launch',
+        function: this.openBoostModal.bind(this),
+        title: translations['boost.boostPublication'],
+      };
+      if (!this.dataLinkActions.find(e => e.title === translations['boost.boostPublication'])) {
+        this.dataLinkActions.push(menuBoostPublication);
+      }
+    }
 
     if (userId === this.dataUser?.id || this.dataUser?.role === RoleUser.ADMIN) {
 
@@ -1068,4 +1081,41 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     return this.nameGeoLocation !== '' && !this.locationLoading;
   }
 
+  // --- Boost ---
+  showBoostModal = false;
+  boostPackages: BoostPackage[] = [];
+  isBoostingPublication = false;
+
+  isBoostActive(): boolean {
+    return !!(this.publication?.isBoosted && this.publication?.boostedUntil && new Date(this.publication.boostedUntil) > new Date());
+  }
+
+  openBoostModal(): void {
+    this._boostService.getActivePackages().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (pkgs) => {
+        this.boostPackages = pkgs;
+        this.showBoostModal = true;
+        this._cdr.markForCheck();
+      },
+    });
+  }
+
+  boostPublication(packageId: string): void {
+    this.showBoostModal = false;
+    this.isBoostingPublication = true;
+    this._boostService.initiateBoost(this.publication._id, packageId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: ({ checkoutUrl }) => {
+        this.isBoostingPublication = false;
+        window.location.href = checkoutUrl;
+      },
+      error: () => {
+        this.isBoostingPublication = false;
+        this._cdr.markForCheck();
+      },
+    });
+  }
+
+  formatBoostPrice(priceClp: number): string {
+    return this._boostService.formatPrice(priceClp);
+  }
 }

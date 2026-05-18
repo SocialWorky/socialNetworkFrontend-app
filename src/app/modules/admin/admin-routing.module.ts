@@ -14,6 +14,7 @@ import { WidgetBuilderComponent } from './shared/widget-builder/widget-builder.c
 import { WebhooksComponent } from './shared/webhooks/webhooks.component';
 import { VersionManagementComponent } from './shared/version-management/version-management.component';
 import { SubscriptionPlansComponent } from './shared/subscription-plans/subscription-plans.component';
+import { BoostPackagesComponent } from './shared/boost-packages/boost-packages.component';
 import { translations } from '@translations/translations';
 
 
@@ -39,6 +40,7 @@ export const routes: Routes = [
           { title: translations['admin.sideMenu.items.invitations'], path: 'invitations-code', component: InvitationsCodeComponent },
           { title: translations['admin.sideMenu.items.webhooks'], path: 'webhooks', component: WebhooksComponent },
           { title: translations['admin.sideMenu.items.subscriptionPlans'], path: 'subscription-plans', component: SubscriptionPlansComponent },
+          { title: translations['admin.sideMenu.items.boostPackages'], path: 'boost-packages', component: BoostPackagesComponent },
         ],
       },
       { 

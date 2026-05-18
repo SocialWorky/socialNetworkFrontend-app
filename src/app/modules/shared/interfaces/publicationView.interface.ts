@@ -25,6 +25,8 @@ export interface PublicationView {
     isFriendshipPending?: string;
     isPremiumContent?: boolean;
     isPremiumBlocked?: boolean;
+    isBoosted?: boolean;
+    boostedUntil?: string;
 }
 
 export interface EditPublication {

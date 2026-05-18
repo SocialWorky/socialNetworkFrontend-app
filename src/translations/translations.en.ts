@@ -1329,6 +1329,23 @@ export const translations = {
   'admin.widgetBuilder.typeForm.alerts.confirm.delete': 'Delete Widget Type',
   'admin.widgetBuilder.typeForm.alerts.confirm.deleteMessage': 'Are you sure you want to delete this widget type? This action cannot be undone.',
   
+  // Boost publications
+  'boost.badge': 'Promoted',
+  'boost.boostPublication': 'Boost publication',
+  'boost.choosePackage': 'Choose a boost package',
+  'boost.hours': '{0}h boost',
+  'boost.active': 'Boost active until {0}',
+  'boost.noPackages': 'No boost packages available',
+  'boost.success': 'Your publication is now boosted!',
+  'boost.redirecting': 'Redirecting to payment...',
+  'boost.cancel': 'Cancel',
+  'admin.boostPackages': 'Boost Packages',
+  'admin.sideMenu.items.boostPackages': 'Boost Packages',
+  'admin.boostDurationHours': 'Duration (hours)',
+  'admin.createBoostPackage': 'Create Boost Package',
+  'admin.editBoostPackage': 'Edit Boost Package',
+  'admin.boostDeleteConfirm': 'Delete this boost package? Active boosts will not be affected.',
+
   // Stories
   'story.myStory': 'My Story',
   'story.addStory': 'Add Story',

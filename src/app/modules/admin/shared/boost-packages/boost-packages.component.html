@@ -1,0 +1,116 @@
+<div class="bg-slate-900 rounded-2xl border border-slate-700 p-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center">
+        <i class="material-icons text-amber-400">rocket_launch</i>
+      </div>
+      <h2 class="text-lg font-bold text-slate-100">{{ 'admin.boostPackages' | workyTranslations }}</h2>
+    </div>
+    <button (click)="openCreateForm()"
+      class="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-amber-500 text-white hover:bg-amber-600 transition-all">
+      <i class="material-icons text-base">add</i>
+      {{ 'admin.createBoostPackage' | workyTranslations }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="flex justify-center py-12">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!isLoading && packages.length === 0" class="text-center py-12 text-slate-400">
+    <i class="material-icons text-5xl mb-3">rocket_launch</i>
+    <p>{{ 'admin.noPlansDefined' | workyTranslations }}</p>
+  </div>
+
+  <!-- Table -->
+  <div *ngIf="!isLoading && packages.length > 0" class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-slate-400 border-b border-slate-700">
+          <th class="pb-3 pr-4">{{ 'admin.planName' | workyTranslations }}</th>
+          <th class="pb-3 pr-4">{{ 'admin.priceCLP' | workyTranslations }}</th>
+          <th class="pb-3 pr-4">{{ 'admin.boostDurationHours' | workyTranslations }}</th>
+          <th class="pb-3 pr-4">{{ 'admin.planActive' | workyTranslations }}</th>
+          <th class="pb-3">{{ 'common.actions' | workyTranslations }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let pkg of packages" class="border-b border-slate-800 hover:bg-slate-800/40 transition-colors">
+          <td class="py-3 pr-4">
+            <span class="font-semibold text-slate-100">{{ pkg.name }}</span>
+            <span *ngIf="pkg.description" class="block text-xs text-slate-400 mt-0.5">{{ pkg.description }}</span>
+          </td>
+          <td class="py-3 pr-4 text-amber-400 font-semibold">{{ formatPrice(pkg.priceClp) }}</td>
+          <td class="py-3 pr-4 text-slate-300">{{ pkg.durationHours }}h</td>
+          <td class="py-3 pr-4">
+            <span [class]="pkg.isActive ? 'px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-semibold' : 'px-2 py-1 bg-slate-700 text-slate-400 rounded text-xs font-semibold'">
+              {{ (pkg.isActive ? 'admin.planActive' : 'admin.planInactive') | workyTranslations }}
+            </span>
+          </td>
+          <td class="py-3">
+            <div class="flex gap-2">
+              <button (click)="openEditForm(pkg)" class="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors">
+                <i class="material-icons text-base">edit</i>
+              </button>
+              <button (click)="deletePackage(pkg)" class="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors">
+                <i class="material-icons text-base">delete</i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Form Modal -->
+  <div *ngIf="showForm" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md" [formGroup]="packageForm">
+      <div class="flex items-center justify-between p-6 border-b border-slate-700">
+        <h3 class="text-lg font-bold text-slate-100">
+          {{ (editingPackage ? 'admin.editBoostPackage' : 'admin.createBoostPackage') | workyTranslations }}
+        </h3>
+        <button (click)="closeForm()" class="text-slate-400 hover:text-slate-100"><i class="material-icons">close</i></button>
+      </div>
+      <div class="p-6 grid gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1">{{ 'admin.planName' | workyTranslations }}</label>
+          <input type="text" formControlName="name" class="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-300 mb-1">Descripción</label>
+          <input type="text" formControlName="description" class="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-1">{{ 'admin.priceCLP' | workyTranslations }}</label>
+            <input type="number" formControlName="priceClp" min="1" class="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-1">{{ 'admin.boostDurationHours' | workyTranslations }}</label>
+            <input type="number" formControlName="durationHours" min="1" class="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" formControlName="isActive" class="absolute opacity-0 w-0 h-0 peer">
+            <div class="w-10 h-5 bg-slate-600 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+          </label>
+          <span class="text-sm text-slate-300">{{ 'admin.planActive' | workyTranslations }}</span>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 p-6 border-t border-slate-700">
+        <button (click)="closeForm()" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-slate-100 transition-colors">
+          {{ 'common.close' | workyTranslations }}
+        </button>
+        <button (click)="savePackage()" [disabled]="packageForm.invalid || isSaving"
+          class="flex items-center gap-2 px-5 py-2 rounded-lg font-semibold text-sm bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-all">
+          <i class="material-icons text-base">{{ isSaving ? 'hourglass_empty' : 'save' }}</i>
+          {{ (isSaving ? 'common.loading' : 'button.save') | workyTranslations }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

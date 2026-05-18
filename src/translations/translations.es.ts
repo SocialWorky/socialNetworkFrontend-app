@@ -1309,6 +1309,23 @@ export const translations = {
   'admin.widgetBuilder.typeForm.alerts.confirm.delete': 'Eliminar Tipo de Widget',
   'admin.widgetBuilder.typeForm.alerts.confirm.deleteMessage': '¿Estás seguro de que deseas eliminar este tipo de widget? Esta acción no se puede deshacer.',
   
+  // Boost de publicaciones
+  'boost.badge': 'Promocionado',
+  'boost.boostPublication': 'Boostear publicación',
+  'boost.choosePackage': 'Elige un paquete de boost',
+  'boost.hours': 'Boost de {0}h',
+  'boost.active': 'Boost activo hasta {0}',
+  'boost.noPackages': 'No hay paquetes de boost disponibles',
+  'boost.success': '¡Tu publicación está siendo promovida!',
+  'boost.redirecting': 'Redirigiendo al pago...',
+  'boost.cancel': 'Cancelar',
+  'admin.boostPackages': 'Paquetes de Boost',
+  'admin.sideMenu.items.boostPackages': 'Paquetes de Boost',
+  'admin.boostDurationHours': 'Duración (horas)',
+  'admin.createBoostPackage': 'Crear Paquete de Boost',
+  'admin.editBoostPackage': 'Editar Paquete de Boost',
+  'admin.boostDeleteConfirm': '¿Eliminar este paquete de boost? Los boosts activos no serán afectados.',
+
   // Stories
   'story.myStory': 'Mi Historia',
   'story.addStory': 'Agregar Historia',
