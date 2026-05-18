@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, map, Observable, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, Subject, takeUntil, tap } from 'rxjs';
+import { Socket } from 'ngx-socket-io';
 import { environment } from '@env/environment';
 
 export interface SubscriptionPlan {
@@ -23,8 +24,9 @@ export interface UserSubscription {
 }
 
 @Injectable({ providedIn: 'root' })
-export class SubscriptionService {
+export class SubscriptionService implements OnDestroy {
   private readonly apiUrl = environment.API_URL;
+  private readonly destroy$ = new Subject<void>();
 
   private subscriptionSubject = new BehaviorSubject<UserSubscription | null>(null);
   subscription$ = this.subscriptionSubject.asObservable();
@@ -33,7 +35,31 @@ export class SubscriptionService {
     map((sub) => sub?.status === 'active' && sub.expiresAt != null && new Date(sub.expiresAt) > new Date()),
   );
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly socket: Socket,
+  ) {
+    this.listenToSubscriptionEvents();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private listenToSubscriptionEvents(): void {
+    this.socket.fromEvent('subscription:activated')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.loadMySubscription().subscribe());
+
+    this.socket.fromEvent('subscription:expired')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.subscriptionSubject.next(null));
+
+    this.socket.fromEvent('subscription:cancelled')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.subscriptionSubject.next(null));
+  }
 
   loadMySubscription(): Observable<UserSubscription | null> {
     return this.http.get<UserSubscription | null>(`${this.apiUrl}/subscriptions/my`).pipe(

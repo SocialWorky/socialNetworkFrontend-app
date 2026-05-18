@@ -16,6 +16,7 @@ import { TextSkeletonComponent } from './components/skeleton/text-skeleton.compo
 import { AvatarSkeletonComponent } from './components/skeleton/avatar-skeleton.component';
 import { ButtonSkeletonComponent } from './components/skeleton/button-skeleton.component';
 import { NetworkStatusComponent } from './components/network-status/network-status.component';
+import { PremiumBadgeComponent } from './components/premium-badge/premium-badge.component';
 
 
 @NgModule({
@@ -35,7 +36,8 @@ import { NetworkStatusComponent } from './components/network-status/network-stat
     NetworkStatusComponent
   ],
   declarations: [
-    AccessibleLoadingComponent
+    AccessibleLoadingComponent,
+    PremiumBadgeComponent,
   ],
   exports: [
     CommonModule,
@@ -51,7 +53,8 @@ import { NetworkStatusComponent } from './components/network-status/network-stat
     TextSkeletonComponent,
     AvatarSkeletonComponent,
     ButtonSkeletonComponent,
-    NetworkStatusComponent
+    NetworkStatusComponent,
+    PremiumBadgeComponent,
   ],
   providers: [
     PullToRefreshService,

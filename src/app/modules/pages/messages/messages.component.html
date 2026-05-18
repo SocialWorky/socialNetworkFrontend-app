@@ -42,7 +42,10 @@
         <div *ngFor="let user of newChatResults" class="new-chat-result-item" (click)="startChatWithUser(user)">
           <worky-avatar [size]="40" [name]="user.name + ' ' + user.lastName" [img]="user.avatar"></worky-avatar>
           <div class="new-chat-result-info">
-            <span class="new-chat-result-name">{{ user.name }} {{ user.lastName }}</span>
+            <span class="new-chat-result-name">
+              {{ user.name }} {{ user.lastName }}
+              <app-premium-badge [isPremium]="user.isPremium"></app-premium-badge>
+            </span>
             <span class="new-chat-result-username">&#64;{{ user.username }}</span>
           </div>
         </div>

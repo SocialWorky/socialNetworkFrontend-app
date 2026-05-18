@@ -35,6 +35,7 @@
           <span (click)="viewProfile(publication.author._id)" class="name link-name">
             {{ publication.author.name }} {{ publication.author.lastName }}
           </span>
+          <app-premium-badge [isPremium]="publication.author.isPremium"></app-premium-badge>
           <i *ngIf="publication.userReceiving" class="material-icons">keyboard_arrow_right</i>
           <ng-container *ngIf="publication.userReceiving">
               <span (click)="viewProfile(publication.userReceiving._id)" class="name link-name">

@@ -33,12 +33,13 @@ export interface EditPublication {
 }
 
 export interface User {
-    _id:      string;
-    username: string;
-    name:     string;
-    lastName: string;
-    avatar:   string;
-    email:    string;
+    _id:        string;
+    username:   string;
+    name:       string;
+    lastName:   string;
+    avatar:     string;
+    email:      string;
+    isPremium?: boolean;
 }
 
 export interface MediaFileUpload {

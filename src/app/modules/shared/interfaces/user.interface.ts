@@ -15,4 +15,5 @@ export interface User {
   profile: ProfileData;
   isDarkMode: boolean;
   lastConnection: string;
+  isPremium?: boolean;
 }
