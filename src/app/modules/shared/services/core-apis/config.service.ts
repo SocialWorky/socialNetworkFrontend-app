@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, Observable, Subject, takeUntil, tap, map } from 'rxjs';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Socket } from 'ngx-socket-io';
 
 import { environment } from '../../../../../environments/environment';
@@ -14,10 +14,12 @@ export class ConfigService {
   private apiUrl: string;
 
   private configSubject = new BehaviorSubject<any>(null);
+  private subscriptionModeSubject = new BehaviorSubject<boolean>(false);
 
   private _unsubscribeAll = new Subject<void>();
 
   config$ = this.configSubject.asObservable();
+  subscriptionMode$ = this.subscriptionModeSubject.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -28,16 +30,25 @@ export class ConfigService {
     this.apiUrl = environment.API_URL;
   }
 
+  configSnapshot(): any {
+    return this.configSubject.value;
+  }
+
   getConfig(bypassCache: boolean = false): Observable<any> {
     const url = `${this.apiUrl}/config`;
-    
-    // Instead of using headers that cause CORS issues, use query params to bypass cache
     const params: any = {};
     if (bypassCache) {
-      params._t = new Date().getTime(); // Add timestamp to force fresh request
+      params._t = new Date().getTime();
     }
-    
-    return this.http.get<any>(url, { params });
+    return this.http.get<any>(url, { params }).pipe(
+      tap((config) => {
+        if (config) {
+          this.configSubject.next(config);
+          const mode = config?.settings?.subscriptionMode ?? false;
+          this.subscriptionModeSubject.next(mode);
+        }
+      }),
+    );
   }
 
   getConfigServices(): Observable<ConfigServiceInterface> {
@@ -63,6 +74,13 @@ export class ConfigService {
     this.configSubject.next(config);
   }
 
+  getSubscriptionMode(): Observable<boolean> {
+    return this.http.get<{ subscriptionMode: boolean; plans: any[] }>(`${this.apiUrl}/config/subscription-mode`).pipe(
+      map(res => res.subscriptionMode),
+      tap(mode => this.subscriptionModeSubject.next(mode)),
+    );
+  }
+
   private subscribeToNotification() {
     this.socket.fromEvent('updateConfig')
       .pipe(
@@ -73,6 +91,8 @@ export class ConfigService {
       )
       .subscribe((data: any) => {
         this.configSubject.next(data);
+        const mode = data?.settings?.subscriptionMode ?? false;
+        this.subscriptionModeSubject.next(mode);
       });
   }
   getLoginMethods(): Observable<{ email: boolean, google: boolean }> {

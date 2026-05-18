@@ -10,6 +10,7 @@ export interface Config {
     urlSite?: string;
     description?: string;
     invitationCode?: boolean;
+    subscriptionMode?: boolean;
   };
   customCss?: string;
   // Legacy flat structure for backward compatibility
@@ -23,6 +24,7 @@ export interface Config {
   urlSite?: string;
   description?: string;
   invitationCode?: boolean;
+  subscriptionMode?: boolean;
 }
 
 export interface ConfigServiceInterface {

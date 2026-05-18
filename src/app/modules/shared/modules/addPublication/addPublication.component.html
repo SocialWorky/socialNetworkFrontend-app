@@ -234,8 +234,8 @@
 
     <div class="publishing-footer">
       <div>
-        <!-- Premium content toggle — only shown for POST type -->
-        <div *ngIf="type === typePublishing.POST || type === typePublishing.POST_PROFILE"
+        <!-- Premium content toggle — only shown for POST type when subscription mode is enabled -->
+        <div *ngIf="(type === typePublishing.POST || type === typePublishing.POST_PROFILE) && subscriptionModeEnabled"
              class="premium-toggle-row" (click)="togglePremiumContent()" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 0;user-select:none;">
           <span style="font-size:1.1em;">⭐</span>
           <span style="font-size:0.85em;color:var(--worky-text-secondary)">{{ 'premium.isPremiumToggle' | workyTranslations }}</span>

@@ -61,6 +61,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       urlSite: [''],
       description: [''],
       invitationCode: [false],
+      subscriptionMode: [false],
       loginMethods: this._fb.group({
         email: [false],
         google: [false],
@@ -141,6 +142,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
           urlSite: configData.settings.urlSite || '',
           description: configData.settings.description || '',
           invitationCode: configData.settings.invitationCode ?? false,
+          subscriptionMode: configData.settings.subscriptionMode ?? false,
           loginMethods: {
             email: Boolean(loginMethods.email),
             google: Boolean(loginMethods.google),
@@ -282,6 +284,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       urlSite: this.configForm.get('urlSite')?.value || '',
       description: this.configForm.get('description')?.value || '',
       invitationCode: Boolean(this.configForm.get('invitationCode')?.value),
+      subscriptionMode: Boolean(this.configForm.get('subscriptionMode')?.value),
       loginMethods: JSON.stringify(this.configForm.get('loginMethods')?.value || { email: false, google: false }),
     };
 
@@ -362,6 +365,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
             urlSite: response.settings.urlSite || '',
             description: response.settings.description || '',
             invitationCode: response.settings.invitationCode ?? false,
+            subscriptionMode: response.settings.subscriptionMode ?? false,
             loginMethods: {
               email: Boolean(loginMethods.email),
               google: Boolean(loginMethods.google),

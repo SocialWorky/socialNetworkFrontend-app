@@ -345,7 +345,11 @@ export const translations = {
   'admin.siteConfig.logoUrl.placeholder': 'https://example.com/logo.png',
   'admin.siteConfig.fileInput.selectFile': 'Select file',
   'admin.siteConfig.fileInput.noFileSelected': 'No files selected',
-  
+  'admin.subscriptionMode.label': 'Subscription Mode',
+  'admin.subscriptionMode.description': 'When enabled, users must have an active subscription to access the platform.',
+  'admin.subscriptionMode.enabled': 'Enabled',
+  'admin.subscriptionMode.disabled': 'Disabled',
+
   // ADMIN WIDGET MANAGEMENT FIELDS
   'admin.widgetManagement.fields.widget': 'Widget',
   'admin.widgetManagement.fields.selectWidget': 'Select widget',
@@ -1422,6 +1426,9 @@ export const translations = {
   'subscription.perMonth': 'per month',
   'subscription.perYear': 'per year',
   'subscription.days': '{0} days',
+  'subscription.accessRequired': 'Subscription Required',
+  'subscription.accessRequiredMessage': 'This platform requires an active subscription to access content.',
+  'subscription.noPlansAvailable': 'No plans available. Please contact the administrator.',
   'subscription.cancelSubscription': 'Cancel Subscription',
   'subscription.cancelConfirm': 'Are you sure you want to cancel your subscription?',
   'subscription.paymentSuccessful': 'Payment successful! Your premium subscription is now active.',

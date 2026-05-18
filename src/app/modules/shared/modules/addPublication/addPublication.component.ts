@@ -49,6 +49,7 @@ import { Router } from '@angular/router';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { LazyCssService } from '@shared/services/core-apis/lazy-css.service';
 import { FontLoaderService } from '@shared/services/core-apis/font-loader.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
 
 @Component({
     selector: 'worky-add-publication',
@@ -118,6 +119,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   optionsButtonsLoading: boolean = true;
   publishButtonLoading: boolean = true;
 
+  subscriptionModeEnabled = false;
+
   private unsubscribe$ = new Subject<void>();
   private mailSendNotification: MailSendValidateData = {} as MailSendValidateData;
   private subscription?: Subscription;
@@ -177,10 +180,25 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _router: Router,
     private _logService: LogService,
     private _lazyCssService: LazyCssService,
-    private _fontLoaderService: FontLoaderService
+    private _fontLoaderService: FontLoaderService,
+    private _configService: ConfigService,
   ) { }
 
   async ngOnInit() {
+    this._configService.subscriptionMode$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(mode => {
+        this.subscriptionModeEnabled = mode;
+        this._cdr.markForCheck();
+      });
+
+    // Load subscription mode status if not already set by a prior config load
+    if (!this._configService.configSnapshot()) {
+      this._configService.getSubscriptionMode()
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe();
+    }
+
     // Wait for authentication before getting token
     await this._authService.isAuthenticated();
     
