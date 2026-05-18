@@ -96,7 +96,18 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     extraData: [null],
     containsMedia: [false],
     userReceivingId: [''],
+    isPremiumContent: [false],
   });
+
+  get isPremiumContent(): boolean {
+    return this.myForm.get('isPremiumContent')?.value ?? false;
+  }
+
+  togglePremiumContent(): void {
+    const current = this.myForm.get('isPremiumContent')?.value;
+    this.myForm.patchValue({ isPremiumContent: !current });
+    this._cdr.markForCheck();
+  }
 
   avatarLoading: boolean = true;
   nameLoading: boolean = true;

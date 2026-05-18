@@ -179,6 +179,13 @@ export class UserManagementService {
     return this.userService.userEdit(id, { role });
   }
 
+  toggleVerification(userId: string): Observable<{ userId: string; isVerified: boolean }> {
+    return this.http.put<{ userId: string; isVerified: boolean }>(
+      `${environment.API_URL}/user/verify/${userId}`,
+      {},
+    );
+  }
+
   getUsersCount(): Observable<{ total: number; byStatus: Record<UserStatus, number>; byRole: Record<UserRole, number> }> {
     return new Observable(observer => {
       this.userService.getAllUsers().subscribe({

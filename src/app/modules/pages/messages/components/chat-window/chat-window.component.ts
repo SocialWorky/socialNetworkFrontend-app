@@ -54,6 +54,8 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
   currentUserId: string | null = null;
   messageContent = '';
   isSending = false;
+  isDailyLimitReached = false;
+  dailyLimitResetAt: string | null = null;
 
   decodedToken!: Token;
   otherUserInfo: User | null = null;
@@ -801,6 +803,12 @@ export class ChatWindowComponent implements OnInit, OnDestroy, AfterViewInit, Af
       },
       error: (error) => {
         this.isSending = false;
+        if (error?.status === 429 && error?.error?.message === 'daily_limit_reached') {
+          this.isDailyLimitReached = true;
+          this.dailyLimitResetAt = error.error.resetAt ?? null;
+          this._cdr.markForCheck();
+          return;
+        }
         const errorMessage: Message = {
           ...tempMessage,
           _id: `error_${tempMessageId}`,

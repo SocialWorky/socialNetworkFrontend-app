@@ -1309,6 +1309,23 @@ export const translations = {
   'admin.widgetBuilder.typeForm.alerts.confirm.delete': 'Eliminar Tipo de Widget',
   'admin.widgetBuilder.typeForm.alerts.confirm.deleteMessage': '¿Estás seguro de que deseas eliminar este tipo de widget? Esta acción no se puede deshacer.',
   
+  // Límite diario de mensajes
+  'messages.dailyLimitReached': 'Has alcanzado tu límite diario de mensajes ({0}/{1})',
+  'messages.upgradeForUnlimited': 'Suscríbete para mensajes ilimitados',
+  'messages.limitBanner': 'Límite diario alcanzado — suscríbete para mensajes ilimitados',
+
+  // Contenido premium
+  'premium.contentLocked': 'Contenido Premium',
+  'premium.contentLockedDesc': 'Suscríbete para ver este contenido exclusivo',
+  'premium.isPremiumToggle': 'Contenido premium (solo suscriptores)',
+  'premium.makePremium': 'Hacer Premium',
+  'premium.unlockWithPremium': 'Desbloquear con Premium',
+
+  // Badge de verificación
+  'verified.badge': 'Verificado',
+  'verified.verifyUser': 'Verificar usuario',
+  'verified.unverifyUser': 'Quitar verificación',
+
   // Admin — Configuración de pagos Payku
   'admin.paykuConfig': 'Configuración de Pagos (Payku)',
   'admin.paykuEnabled': 'Habilitar Pagos',

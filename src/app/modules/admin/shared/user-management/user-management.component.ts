@@ -349,4 +349,30 @@ export class UserManagementComponent implements OnInit, OnDestroy {
         }
       });
   }
+
+  toggleVerification(user: User): void {
+    this.userService.toggleVerification(user._id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result) => {
+          const idx = this.users.findIndex(u => u._id === user._id);
+          if (idx !== -1) {
+            this.users = [
+              ...this.users.slice(0, idx),
+              { ...this.users[idx], isVerified: result.isVerified },
+              ...this.users.slice(idx + 1),
+            ];
+          }
+          this.alertService.showAlert(
+            result.isVerified ? 'Usuario Verificado' : 'Verificación Eliminada',
+            result.isVerified ? `${user.name} ahora tiene el badge de verificación.` : `Se eliminó la verificación de ${user.name}.`,
+            result.isVerified ? Alerts.SUCCESS : Alerts.WARNING,
+            Position.CENTER,
+            true,
+            'Aceptar',
+          );
+          this._cdr.markForCheck();
+        },
+      });
+  }
 }

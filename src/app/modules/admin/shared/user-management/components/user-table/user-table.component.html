@@ -149,6 +149,10 @@
                   <mat-icon class="text-cyan-400">email</mat-icon>
                   <span>{{ 'admin.userManagement.table.resendVerification' | workyTranslations }}</span>
                 </button>
+                <button mat-menu-item (click)="toggleVerification.emit(user)" class="text-slate-100 hover:bg-slate-700">
+                  <mat-icon [class]="user.isVerified ? 'text-yellow-400' : 'text-blue-400'">{{ user.isVerified ? 'verified_user' : 'new_releases' }}</mat-icon>
+                  <span>{{ (user.isVerified ? 'verified.unverifyUser' : 'verified.verifyUser') | workyTranslations }}</span>
+                </button>
               </mat-menu>
             </div>
           </div>

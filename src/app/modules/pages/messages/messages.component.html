@@ -44,6 +44,7 @@
           <div class="new-chat-result-info">
             <span class="new-chat-result-name">
               {{ user.name }} {{ user.lastName }}
+              <app-verified-badge [isVerified]="user.isVerified"></app-verified-badge>
               <app-premium-badge [isPremium]="user.isPremium"></app-premium-badge>
             </span>
             <span class="new-chat-result-username">&#64;{{ user.username }}</span>

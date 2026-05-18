@@ -17,6 +17,7 @@ export class UserTableComponent {
   @Output() editUser = new EventEmitter<User>();
   @Output() toggleUserStatus = new EventEmitter<User>();
   @Output() sendVerificationEmail = new EventEmitter<User>();
+  @Output() toggleVerification = new EventEmitter<User>();
 
   getStatusColor(status: string): string {
     switch (status) {
