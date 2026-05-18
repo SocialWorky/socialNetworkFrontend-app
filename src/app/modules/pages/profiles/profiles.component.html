@@ -130,6 +130,31 @@
 
     <div class="content-section-wall">
 
+      <!-- Analytics panel: own profile + premium -->
+      <div *ngIf="isCurrentUser && profileStats" class="worky-module-container" style="margin-bottom:16px;">
+        <div style="padding:16px;border-radius:12px;background:var(--worky-surface);">
+          <h4 style="margin:0 0 12px;font-weight:600;">{{ 'analytics.profileStats' | workyTranslations }}</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <div style="font-size:12px;color:var(--worky-text-secondary);">{{ 'analytics.last7Days' | workyTranslations }} · {{ 'analytics.profileVisits' | workyTranslations }}</div>
+              <strong style="font-size:20px;">{{ profileStats.profileVisits.last7Days }}</strong>
+            </div>
+            <div>
+              <div style="font-size:12px;color:var(--worky-text-secondary);">{{ 'analytics.last30Days' | workyTranslations }} · {{ 'analytics.profileVisits' | workyTranslations }}</div>
+              <strong style="font-size:20px;">{{ profileStats.profileVisits.last30Days }}</strong>
+            </div>
+            <div>
+              <div style="font-size:12px;color:var(--worky-text-secondary);">{{ 'analytics.last7Days' | workyTranslations }} · {{ 'analytics.friendsGained' | workyTranslations }}</div>
+              <strong style="font-size:20px;">{{ profileStats.friendsGained.last7Days }}</strong>
+            </div>
+            <div>
+              <div style="font-size:12px;color:var(--worky-text-secondary);">{{ 'analytics.totalPublications' | workyTranslations }}</div>
+              <strong style="font-size:20px;">{{ profileStats.totalPublications }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div *ngIf="(isFriend && !isFriendPending.status) || isCurrentUser" class="worky-module-container">
 
         <worky-add-publication 

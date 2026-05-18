@@ -15,6 +15,40 @@
     </worky-dropdown>
   </div>
 
+  <!-- Analytics stats panel (own premium publications) -->
+  <div *ngIf="showAnalyticsPanel" class="boost-modal-overlay" (click)="closeAnalyticsPanel()">
+    <div class="boost-modal" (click)="$event.stopPropagation()">
+      <h4>{{ 'analytics.publicationStats' | workyTranslations }}</h4>
+      <div *ngIf="isLoadingStats" style="text-align:center;padding:16px;">
+        {{ 'analytics.loading' | workyTranslations }}
+      </div>
+      <div *ngIf="statsError" style="text-align:center;color:#e53935;padding:16px;">
+        {{ 'analytics.error' | workyTranslations }}
+      </div>
+      <div *ngIf="publicationStats && !isLoadingStats">
+        <div class="boost-package-item">
+          <span class="boost-package-name">{{ 'analytics.views' | workyTranslations }}</span>
+          <strong>{{ publicationStats.views }}</strong>
+        </div>
+        <div class="boost-package-item">
+          <span class="boost-package-name">{{ 'analytics.comments' | workyTranslations }}</span>
+          <strong>{{ publicationStats.comments }}</strong>
+        </div>
+        <div class="boost-package-item">
+          <span class="boost-package-name">{{ 'analytics.engagementRate' | workyTranslations }}</span>
+          <strong>{{ publicationStats.engagementRate }}%</strong>
+        </div>
+        <div *ngFor="let r of publicationStats.reactions" class="boost-package-item">
+          <span class="boost-package-name">{{ r.type }}</span>
+          <strong>{{ r.count }}</strong>
+        </div>
+      </div>
+      <button class="boost-cancel-btn" (click)="closeAnalyticsPanel()">
+        {{ 'button.close' | workyTranslations }}
+      </button>
+    </div>
+  </div>
+
   <!-- Boost package selector modal -->
   <div *ngIf="showBoostModal" class="boost-modal-overlay" (click)="showBoostModal = false">
     <div class="boost-modal" (click)="$event.stopPropagation()">

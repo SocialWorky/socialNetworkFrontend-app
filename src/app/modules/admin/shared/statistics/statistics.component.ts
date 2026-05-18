@@ -8,6 +8,7 @@ import { CommentService } from '@shared/services/core-apis/comment.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { ReportStatus } from '@shared/enums/report.enum';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
+import { AnalyticsService, AdminOverview } from '@shared/services/core-apis/analytics.service';
 import * as _ from 'lodash';
 
 @Component({
@@ -128,17 +129,39 @@ export class StatisticsComponent implements OnInit {
     return this.ReportsStatusPendingCount > 0 ? 4.5 : 2.0;
   }
 
+  adminOverview: AdminOverview | null = null;
+  isLoadingOverview = true;
+
   constructor(
     private _publicationService: PublicationService,
     private _userService: UserService,
     private _cdr: ChangeDetectorRef,
     private _reportsService: ReportsService,
     private _commentService: CommentService,
-    private _logService: LogService
+    private _logService: LogService,
+    private readonly _analyticsService: AnalyticsService,
   ) { }
 
   async ngOnInit() {
     await this.loadAllStatistics();
+    this.loadAdminOverview();
+  }
+
+  loadAdminOverview(): void {
+    this.isLoadingOverview = true;
+    this._analyticsService.getAdminOverview()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe({
+        next: (overview) => {
+          this.adminOverview = overview;
+          this.isLoadingOverview = false;
+          this._cdr.markForCheck();
+        },
+        error: () => {
+          this.isLoadingOverview = false;
+          this._cdr.markForCheck();
+        },
+      });
   }
 
   async refreshStatistics() {

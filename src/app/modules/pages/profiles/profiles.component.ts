@@ -8,6 +8,8 @@ import * as _ from 'lodash';
 
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
+import { AnalyticsService, ProfileStats } from '@shared/services/core-apis/analytics.service';
+import { SubscriptionService } from '@shared/services/subscription.service';
 import { UserService } from '@shared/services/core-apis/users.service';
 import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
@@ -78,6 +80,8 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   isCurrentUser: boolean = false;
 
+  profileStats: ProfileStats | null = null;
+
   dataUser: Token | null = null;
 
   isFriend: boolean = false;
@@ -139,7 +143,9 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     private _pullToRefreshService: PullToRefreshService,
     private _utilityService: UtilityService,
     private _preloadService: PreloadService,
-    private _mobileImageCacheService: MobileImageCacheService
+    private _mobileImageCacheService: MobileImageCacheService,
+    private readonly _analyticsService: AnalyticsService,
+    private readonly _subscriptionService: SubscriptionService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
@@ -156,6 +162,21 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     await this.getDataProfile();
 
     this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe();
+
+    // Fire-and-forget: register profile visit (self-visits are ignored by the backend)
+    this._analyticsService.registerProfileVisit(this.idUserProfile).subscribe({ error: () => {} });
+
+    // Load analytics if viewing own profile and premium
+    this.isCurrentUser = this.idUserProfile === (this._authService.getDecodedToken()?.id ?? '');
+    if (this.isCurrentUser && this._subscriptionService.isPremiumSnapshot()) {
+      this._analyticsService.getProfileStats().pipe(takeUntil(this.destroy$)).subscribe({
+        next: (stats) => {
+          this.profileStats = stats;
+          this._cdr.markForCheck();
+        },
+        error: () => {},
+      });
+    }
 
     this.getUserFriend();
 

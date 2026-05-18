@@ -20,6 +20,8 @@ import { ReportsService } from '@shared/services/core-apis/reports.service';
 import { ReportCreate } from '@shared/interfaces/report.interface';
 import { ReportType, ReportStatus } from '@shared/enums/report.enum';
 import { BoostService, BoostPackage } from '@shared/services/core-apis/boost.service';
+import { AnalyticsService, PublicationStats } from '@shared/services/core-apis/analytics.service';
+import { SubscriptionService } from '@shared/services/subscription.service';
 import { ReportResponseComponent } from '../publication-view/report-response/report-response.component';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { CommentService } from '@shared/services/core-apis/comment.service';
@@ -159,6 +161,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _globalEventService: GlobalEventService,
     private _notificationPublicationService: NotificationPublicationService,
     private readonly _boostService: BoostService,
+    private readonly _analyticsService: AnalyticsService,
+    private readonly _subscriptionService: SubscriptionService,
   ) {}
 
   async ngAfterViewInit() {
@@ -570,6 +574,17 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       };
       if (!this.dataLinkActions.find(e => e.title === translations['boost.boostPublication'])) {
         this.dataLinkActions.push(menuBoostPublication);
+      }
+
+      if (this._subscriptionService.isPremiumSnapshot()) {
+        const menuViewStats = {
+          icon: 'bar_chart',
+          function: this.openAnalyticsPanel.bind(this),
+          title: translations['analytics.viewStats'],
+        };
+        if (!this.dataLinkActions.find(e => e.title === translations['analytics.viewStats'])) {
+          this.dataLinkActions.push(menuViewStats);
+        }
       }
     }
 
@@ -1117,5 +1132,44 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   formatBoostPrice(priceClp: number): string {
     return this._boostService.formatPrice(priceClp);
+  }
+
+  // --- Analytics panel ---
+  showAnalyticsPanel = false;
+  publicationStats: PublicationStats | null = null;
+  isLoadingStats = false;
+  statsError = false;
+
+  get isOwnPublication(): boolean {
+    return this.dataUser?.id === this.publication?.author?._id;
+  }
+
+  get isCurrentUserPremium(): boolean {
+    return this._subscriptionService.isPremiumSnapshot();
+  }
+
+  openAnalyticsPanel(): void {
+    this.showAnalyticsPanel = true;
+    this.isLoadingStats = true;
+    this.statsError = false;
+    this._analyticsService.getPublicationStats(this.publication._id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (stats) => {
+          this.publicationStats = stats;
+          this.isLoadingStats = false;
+          this._cdr.markForCheck();
+        },
+        error: () => {
+          this.isLoadingStats = false;
+          this.statsError = true;
+          this._cdr.markForCheck();
+        },
+      });
+  }
+
+  closeAnalyticsPanel(): void {
+    this.showAnalyticsPanel = false;
+    this.publicationStats = null;
   }
 }
