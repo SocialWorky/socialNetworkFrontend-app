@@ -22,17 +22,19 @@ import { environment } from '@env/environment';
 export class SiteConfigComponent implements OnInit, OnDestroy {
 
   configForm: FormGroup;
+  paykuForm: FormGroup;
 
   defaultLogo = 'assets/img/navbar/worky-your-logo.png';
 
   imageFile: File | null = null;
-
   imagePreview: string | ArrayBuffer | null = null;
-
   selectedFileName: string = '';
 
   isLoading = true;
   loadUpdateConfigButtons = false;
+  loadingPayku = false;
+  paykuHasExistingPrivateToken = false;
+  paykuHasExistingWebhookSecret = false;
 
   loginMethods = { email: true, google: true };
 
@@ -64,10 +66,20 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
         google: [false],
       }),
     });
+
+    this.paykuForm = this._fb.group({
+      enabled: [false],
+      mode: ['sandbox'],
+      privateToken: [''],
+      publicToken: [''],
+      webhookSecret: [''],
+      currency: ['CLP'],
+    });
   }
 
   ngOnInit() {
     this.getSiteConfig();
+    this.loadPaykuConfig();
   }
 
   ngOnDestroy() {
@@ -416,6 +428,66 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
     }
     // Normalize MinIO URLs
     return this._utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
+  }
+
+  loadPaykuConfig() {
+    this._configService.getConfigServices().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (servicesConfig: any) => {
+        const payku = servicesConfig?.services?.payku;
+        if (!payku) return;
+        this.paykuHasExistingPrivateToken = !!payku.privateToken;
+        this.paykuHasExistingWebhookSecret = !!payku.webhookSecret;
+        this.paykuForm.patchValue({
+          enabled: payku.enabled ?? false,
+          mode: payku.mode ?? 'sandbox',
+          publicToken: payku.publicToken ?? '',
+          currency: payku.currency ?? 'CLP',
+          privateToken: '',
+          webhookSecret: '',
+        }, { emitEvent: false });
+        this._cdr.markForCheck();
+      },
+    });
+  }
+
+  savePaykuConfig() {
+    if (this.paykuForm.invalid) return;
+    this.loadingPayku = true;
+    const formVal = this.paykuForm.value;
+    const payload: any = {
+      services: {
+        payku: {
+          enabled: formVal.enabled,
+          mode: formVal.mode,
+          publicToken: formVal.publicToken,
+          currency: formVal.currency,
+        },
+      },
+    };
+    if (formVal.privateToken) payload.services.payku.privateToken = formVal.privateToken;
+    if (formVal.webhookSecret) payload.services.payku.webhookSecret = formVal.webhookSecret;
+
+    this._configService.updateConfig(payload).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.loadingPayku = false;
+        this.paykuHasExistingPrivateToken = this.paykuHasExistingPrivateToken || !!formVal.privateToken;
+        this.paykuHasExistingWebhookSecret = this.paykuHasExistingWebhookSecret || !!formVal.webhookSecret;
+        this.paykuForm.patchValue({ privateToken: '', webhookSecret: '' }, { emitEvent: false });
+        this._alertService.showAlert(
+          translations['admin.paykuSaved'],
+          '',
+          Alerts.SUCCESS,
+          Position.CENTER,
+          true,
+          translations['button.ok'],
+        );
+        this._cdr.markForCheck();
+      },
+      error: () => {
+        this.loadingPayku = false;
+        this._cdr.markForCheck();
+      },
+    });
   }
 
   /**

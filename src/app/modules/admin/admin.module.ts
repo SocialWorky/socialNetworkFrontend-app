@@ -20,6 +20,7 @@ import { InvitationsCodeComponent } from './shared/invitations-code/invitations-
 import { LogComponent } from './shared/log/log.component';
 import { WebhooksComponent } from './shared/webhooks/webhooks.component';
 import { WidgetManagementComponent } from './shared/widget-management/widget-management.component';
+import { SubscriptionPlansComponent } from './shared/subscription-plans/subscription-plans.component';
 
 import { VersionManagementComponent } from './shared/version-management/version-management.component';
 
@@ -50,6 +51,7 @@ import { MaterialModule } from '@shared/modules/material/material.module';
     LogComponent,
     WebhooksComponent,
     VersionManagementComponent,
+    SubscriptionPlansComponent,
   ],
   imports: [
     CommonModule,

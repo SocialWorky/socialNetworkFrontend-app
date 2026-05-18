@@ -22,9 +22,13 @@ const routes: Routes = [
         path: 'messages', 
         loadChildren: () => import('./messages/messages.module').then(m => m.MessagesModule)
       },
-      { 
-        path: 'messages/:userIdMessages', 
+      {
+        path: 'messages/:userIdMessages',
         loadChildren: () => import('./messages/messages.module').then(m => m.MessagesModule)
+      },
+      {
+        path: 'subscribe',
+        loadChildren: () => import('./subscribe/subscribe.module').then(m => m.SubscribeModule)
       },
 
       { path: '**', redirectTo: '', pathMatch: 'full' }
