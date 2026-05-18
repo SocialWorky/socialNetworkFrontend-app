@@ -9,30 +9,6 @@
     <worky-widget-container [position]="WidgetPosition.TOP"></worky-widget-container>
   </div>
   
-  <!-- Nearby content toggle -->
-  <div class="worky-module-container" style="margin-bottom:4px;">
-    <button
-      (click)="toggleNearbyContent()"
-      style="width:100%;padding:10px 16px;border-radius:12px;border:1px solid var(--worky-border);background:var(--worky-surface);cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;">
-      <span>📍</span>
-      <span>{{ 'explore.nearbyContentToggle' | workyTranslations }}</span>
-      <span *ngIf="showNearbyContent" style="margin-left:auto;color:#1877f2;">✓</span>
-    </button>
-  </div>
-
-  <!-- Nearby publications feed -->
-  <div *ngIf="showNearbyContent">
-    <div *ngIf="nearbyPublicationsLoading" style="text-align:center;padding:16px;color:var(--worky-text-secondary);">
-      {{ 'analytics.loading' | workyTranslations }}
-    </div>
-    <div *ngIf="!nearbyPublicationsLoading && nearbyPublications.length === 0" style="text-align:center;padding:16px;color:var(--worky-text-secondary);">
-      {{ 'explore.noNearbyContent' | workyTranslations }}
-    </div>
-    <div *ngFor="let pub of nearbyPublications" class="worky-module-container">
-      <worky-publication-view [publication]="pub" [type]="typePublishing.POST"></worky-publication-view>
-    </div>
-  </div>
-
   <!-- Stories carousel -->
   <div class="worky-module-container stories-container">
     <worky-stories-carousel

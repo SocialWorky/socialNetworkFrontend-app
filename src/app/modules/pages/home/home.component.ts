@@ -50,10 +50,6 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   viewerGroupIndex = 0;
   storyCreateOpen = false;
 
-  showNearbyContent = false;
-  nearbyPublications: any[] = [];
-  nearbyPublicationsLoading = false;
-
   get currentUserId(): string {
     return this.dataUser?.id ?? '';
   }
@@ -823,25 +819,5 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this._storiesService.loadFeedStories().pipe(takeUntil(this.destroy$)).subscribe();
   }
 
-  toggleNearbyContent(): void {
-    this.showNearbyContent = !this.showNearbyContent;
-    if (this.showNearbyContent && this.nearbyPublications.length === 0) {
-      this.nearbyPublicationsLoading = true;
-      this._exploreService.getNearbyPublications()
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (res: any) => {
-            this.nearbyPublications = res?.publications ?? [];
-            this.nearbyPublicationsLoading = false;
-            this._cdr.markForCheck();
-          },
-          error: () => {
-            this.nearbyPublicationsLoading = false;
-            this._cdr.markForCheck();
-          },
-        });
-    }
-    this._cdr.markForCheck();
-  }
 }
 
