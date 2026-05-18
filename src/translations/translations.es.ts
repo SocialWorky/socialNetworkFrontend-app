@@ -1423,6 +1423,25 @@ export const translations = {
   'common.close': 'Cerrar',
   'common.ok': 'Aceptar',
 
+  // Creator subscriptions
+  'creator.title': 'Página de creador',
+  'creator.activate': 'Activar',
+  'creator.deactivate': 'Desactivar',
+  'creator.monthlyPrice': 'Precio mensual',
+  'creator.description': 'Qué obtienen los suscriptores',
+  'creator.benefits': 'Beneficios',
+  'creator.save': 'Guardar',
+  'creator.subscribers': 'Suscriptores',
+  'creator.monthlyRevenue': 'Ingresos del mes',
+  'creator.expiringThisWeek': 'Vencen esta semana',
+  'creator.subscribe': 'Suscribirse',
+  'creator.subscribed': 'Suscrito',
+  'creator.cancelSubscription': 'Cancelar suscripción',
+  'creator.exclusiveContent': 'Contenido exclusivo',
+  'creator.subscribeToUnlock': 'Suscríbete para acceder al contenido exclusivo de este creador',
+  'creator.configPanel': 'Configurar',
+  'creator.priceLabel': 'por mes',
+
   // Tips / Propinas
   'tips.sendTip': 'Enviar propina 💸',
   'tips.amount': 'Monto (CLP)',

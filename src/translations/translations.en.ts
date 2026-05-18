@@ -1443,6 +1443,25 @@ export const translations = {
   'common.close': 'Close',
   'common.ok': 'OK',
 
+  // Creator subscriptions
+  'creator.title': 'Creator Page',
+  'creator.activate': 'Activate',
+  'creator.deactivate': 'Deactivate',
+  'creator.monthlyPrice': 'Monthly price',
+  'creator.description': 'What subscribers get',
+  'creator.benefits': 'Benefits',
+  'creator.save': 'Save',
+  'creator.subscribers': 'Subscribers',
+  'creator.monthlyRevenue': 'Monthly revenue',
+  'creator.expiringThisWeek': 'Expiring this week',
+  'creator.subscribe': 'Subscribe',
+  'creator.subscribed': 'Subscribed',
+  'creator.cancelSubscription': 'Cancel subscription',
+  'creator.exclusiveContent': 'Exclusive content',
+  'creator.subscribeToUnlock': 'Subscribe to access exclusive content from this creator',
+  'creator.configPanel': 'Configure',
+  'creator.priceLabel': 'per month',
+
   // Tips / Propinas
   'tips.sendTip': 'Send Tip 💸',
   'tips.amount': 'Amount (CLP)',

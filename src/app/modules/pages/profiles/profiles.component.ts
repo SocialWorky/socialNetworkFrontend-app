@@ -12,6 +12,7 @@ import { AnalyticsService, ProfileStats } from '@shared/services/core-apis/analy
 import { SubscriptionService } from '@shared/services/subscription.service';
 import { ExploreService, LocationStatus } from '@shared/services/core-apis/explore.service';
 import { TipsService, Tip } from '@shared/services/core-apis/tips.service';
+import { CreatorProfileService, CreatorProfile, CreatorStats } from '@shared/services/core-apis/creator-profile.service';
 import { UserService } from '@shared/services/core-apis/users.service';
 import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
@@ -93,6 +94,16 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   isSendingTip = false;
   receivedTips: Tip[] = [];
 
+  // Creator profile
+  myCreatorProfile: CreatorProfile | null = null;
+  myCreatorStats: CreatorStats | null = null;
+  showCreatorConfig = false;
+  creatorMonthlyPrice = 3000;
+  creatorDescription = '';
+  isSavingCreator = false;
+  viewedCreatorProfile: CreatorProfile | null = null;
+  isSubscribingToCreator = false;
+
   dataUser: Token | null = null;
 
   isFriend: boolean = false;
@@ -159,6 +170,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _subscriptionService: SubscriptionService,
     private readonly _exploreService: ExploreService,
     private readonly _tipsService: TipsService,
+    private readonly _creatorProfileService: CreatorProfileService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
@@ -181,6 +193,23 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Load analytics if viewing own profile and premium
     this.isCurrentUser = this.idUserProfile === (this._authService.getDecodedToken()?.id ?? '');
+
+    // Load creator profile data
+    if (this.isCurrentUser) {
+      this._creatorProfileService.getMyStats().pipe(takeUntil(this.destroy$)).subscribe({
+        next: (stats) => { this.myCreatorStats = stats; this._cdr.markForCheck(); },
+        error: () => {},
+      });
+      this._creatorProfileService.getPublicProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (p) => { this.myCreatorProfile = p; this.creatorMonthlyPrice = p.monthlyPrice || 3000; this.creatorDescription = p.description || ''; this._cdr.markForCheck(); },
+        error: () => {},
+      });
+    } else {
+      this._creatorProfileService.getPublicProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (p) => { this.viewedCreatorProfile = p; this._cdr.markForCheck(); },
+        error: () => {},
+      });
+    }
 
     // Load received tips for own profile
     if (this.isCurrentUser) {
@@ -1125,6 +1154,49 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       this.isUpdatingProfile = false;
       this._cdr.markForCheck();
     }, 300); // Aumentado a 300ms para mejor experiencia visual
+  }
+
+  // --- Creator profile ---
+  saveCreatorConfig(): void {
+    if (this.isSavingCreator) return;
+    this.isSavingCreator = true;
+    this._creatorProfileService.upsertProfile({
+      monthlyPrice: this.creatorMonthlyPrice,
+      description: this.creatorDescription,
+      isActive: true,
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (p) => {
+        this.myCreatorProfile = p;
+        this.showCreatorConfig = false;
+        this.isSavingCreator = false;
+        this._cdr.markForCheck();
+      },
+      error: () => { this.isSavingCreator = false; this._cdr.markForCheck(); },
+    });
+  }
+
+  deactivateCreatorPage(): void {
+    this._creatorProfileService.upsertProfile({ monthlyPrice: this.creatorMonthlyPrice, isActive: false })
+      .pipe(takeUntil(this.destroy$)).subscribe({
+        next: (p) => { this.myCreatorProfile = p; this._cdr.markForCheck(); },
+      });
+  }
+
+  subscribeToCreator(): void {
+    if (this.isSubscribingToCreator || !this.idUserProfile) return;
+    this.isSubscribingToCreator = true;
+    this._creatorProfileService.initiateSubscription(this.idUserProfile)
+      .pipe(takeUntil(this.destroy$)).subscribe({
+        next: ({ checkoutUrl }) => {
+          this.isSubscribingToCreator = false;
+          window.location.href = checkoutUrl;
+        },
+        error: () => { this.isSubscribingToCreator = false; this._cdr.markForCheck(); },
+      });
+  }
+
+  formatCreatorPrice(price: number): string {
+    return this._creatorProfileService.formatPrice(price);
   }
 
   // --- Tips ---
