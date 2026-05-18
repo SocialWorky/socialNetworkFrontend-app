@@ -153,18 +153,7 @@
 
   <div class="publication-body">
 
-    <!-- Premium content blocked — click opens subscription wall -->
-    <div *ngIf="publication.isPremiumBlocked" class="premium-block" (click)="showSubscriptionWall()">
-      <div *ngIf="publication.content" class="premium-preview">{{ publication.content }}</div>
-      <div class="premium-overlay">
-        <div class="lock-icon-ring">
-          <i class="material-icons">lock</i>
-        </div>
-        <p class="premium-title">{{ 'premium.contentLocked' | workyTranslations }}</p>
-      </div>
-    </div>
-
-    <div class="publication-content" *ngIf="publication.content && !publication.isPremiumBlocked">
+    <div class="publication-content" *ngIf="publication.content">
       <!-- Contenido con skeleton individual -->
       <div *ngIf="contentLoading" class="content-skeleton">
         <worky-text-skeleton width="100%"></worky-text-skeleton>
@@ -178,9 +167,9 @@
       </div>
     </div>
 
-    <worky-processing-media *ngIf="!publication.media.length && publication.containsMedia && !publication.isPremiumBlocked"></worky-processing-media>
+    <worky-processing-media *ngIf="!publication.media.length && publication.containsMedia"></worky-processing-media>
 
-    <worky-image-organizer *ngIf="publication.media.length && !publication.isPremiumBlocked"
+    <worky-image-organizer *ngIf="publication.media.length"
       [publication]="publication"
       [isLoading]="mediaLoading"
       type="publication"

@@ -64,7 +64,7 @@ export class WidgetConfigService {
   ) {}
 
   getAllWidgets(): Observable<WidgetConfig[]> {
-    return this.http.get<WidgetConfig[]>(`${this.apiUrl}`).pipe(
+    return this.http.get<WidgetConfig[]>(`${this.apiUrl}/layout`).pipe(
       tap(widgets => {
         if (!widgets || widgets.length === 0) {
           this.widgetsSubject.next(this.defaultWidgets);
@@ -74,8 +74,7 @@ export class WidgetConfigService {
         this.isLoading = false;
       }),
       catchError((error) => {
-        // Only log error if it's not an authentication error
-        if (error.status !== 401) {
+        if (error.status !== 401 && error.status !== 403) {
           this.logService.log(LevelLogEnum.ERROR, 'WidgetConfigService', 'Error getting widgets', { error: error.message, status: error.status });
         }
         this.widgetsSubject.next(this.defaultWidgets);

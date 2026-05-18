@@ -100,16 +100,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     isPremiumContent: [false],
   });
 
-  get isPremiumContent(): boolean {
-    return this.myForm.get('isPremiumContent')?.value ?? false;
-  }
-
-  togglePremiumContent(): void {
-    const current = this.myForm.get('isPremiumContent')?.value;
-    this.myForm.patchValue({ isPremiumContent: !current });
-    this._cdr.markForCheck();
-  }
-
   avatarLoading: boolean = true;
   nameLoading: boolean = true;
   privacyLoading: boolean = true;
@@ -118,8 +108,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   markdownButtonsLoading: boolean = true;
   optionsButtonsLoading: boolean = true;
   publishButtonLoading: boolean = true;
-
-  subscriptionModeEnabled = false;
 
   private unsubscribe$ = new Subject<void>();
   private mailSendNotification: MailSendValidateData = {} as MailSendValidateData;
@@ -185,13 +173,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   ) { }
 
   async ngOnInit() {
-    this._configService.subscriptionMode$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(mode => {
-        this.subscriptionModeEnabled = mode;
-        this._cdr.markForCheck();
-      });
-
     // Load subscription mode status if not already set by a prior config load
     if (!this._configService.configSnapshot()) {
       this._configService.getSubscriptionMode()

@@ -22,7 +22,6 @@ import { ReportType, ReportStatus } from '@shared/enums/report.enum';
 import { BoostService, BoostPackage } from '@shared/services/core-apis/boost.service';
 import { AnalyticsService, PublicationStats } from '@shared/services/core-apis/analytics.service';
 import { SubscriptionService } from '@shared/services/subscription.service';
-import { SubscriptionWallService } from '@shared/services/subscription-wall.service';
 import { ReportResponseComponent } from '../publication-view/report-response/report-response.component';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { CommentService } from '@shared/services/core-apis/comment.service';
@@ -164,12 +163,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private readonly _boostService: BoostService,
     private readonly _analyticsService: AnalyticsService,
     private readonly _subscriptionService: SubscriptionService,
-    private readonly _subscriptionWallService: SubscriptionWallService,
   ) {}
-
-  showSubscriptionWall(): void {
-    this._subscriptionWallService.show();
-  }
 
   async ngAfterViewInit() {
     this.getUserFriendPending();

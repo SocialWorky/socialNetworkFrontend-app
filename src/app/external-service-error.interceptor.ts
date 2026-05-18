@@ -22,6 +22,8 @@ export class ExternalServiceErrorInterceptor implements HttpInterceptor {
     'weather-api.worky.cl',
     'weather-api-dev.worky.cl',
     'weather-api-prod.worky.cl',
+    'api.opencagedata.com',
+    'api.openweathermap.org',
   ];
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -39,9 +41,12 @@ export class ExternalServiceErrorInterceptor implements HttpInterceptor {
         // Status 502 = Bad Gateway (service unavailable)
         // Status 503 = Service Unavailable
         // Status 504 = Gateway Timeout
-        if (error.status === 0 || 
-            error.status === 502 || 
-            error.status === 503 || 
+        if (error.status === 0 ||
+            error.status === 401 ||
+            error.status === 403 ||
+            error.status === 429 ||
+            error.status === 502 ||
+            error.status === 503 ||
             error.status === 504) {
           
           // Return empty response based on expected response type
