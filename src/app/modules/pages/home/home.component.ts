@@ -23,6 +23,7 @@ import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { StoriesService, StoryFeedGroup } from '@shared/services/core-apis/stories.service';
+import { ExploreService } from '@shared/services/core-apis/explore.service';
 import { NotificationNewPublication } from '@shared/interfaces/notificationPublication.interface';
 import { Token } from '@shared/interfaces/token.interface';
 import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
@@ -48,6 +49,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   viewerOpen = false;
   viewerGroupIndex = 0;
   storyCreateOpen = false;
+
+  showNearbyContent = false;
+  nearbyPublications: any[] = [];
+  nearbyPublicationsLoading = false;
 
   get currentUserId(): string {
     return this.dataUser?.id ?? '';
@@ -146,6 +151,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private _mobileImageCacheService: MobileImageCacheService,
     private _utilityService: UtilityService,
     private readonly _storiesService: StoriesService,
+    private readonly _exploreService: ExploreService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Home');
@@ -815,6 +821,27 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   onStoryPublished(): void {
     this.storyCreateOpen = false;
     this._storiesService.loadFeedStories().pipe(takeUntil(this.destroy$)).subscribe();
+  }
+
+  toggleNearbyContent(): void {
+    this.showNearbyContent = !this.showNearbyContent;
+    if (this.showNearbyContent && this.nearbyPublications.length === 0) {
+      this.nearbyPublicationsLoading = true;
+      this._exploreService.getNearbyPublications()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (res: any) => {
+            this.nearbyPublications = res?.publications ?? [];
+            this.nearbyPublicationsLoading = false;
+            this._cdr.markForCheck();
+          },
+          error: () => {
+            this.nearbyPublicationsLoading = false;
+            this._cdr.markForCheck();
+          },
+        });
+    }
+    this._cdr.markForCheck();
   }
 }
 

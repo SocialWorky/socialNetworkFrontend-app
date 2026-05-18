@@ -1443,6 +1443,20 @@ export const translations = {
   'common.close': 'Close',
   'common.ok': 'OK',
 
+  // Explore / Discovery
+  'explore.title': 'Discover',
+  'explore.nearbyUsers': 'Nearby People',
+  'explore.nearbyContent': 'Nearby Content',
+  'explore.enableDiscovery': 'Enable Discovery',
+  'explore.disableDiscovery': 'Disable Discovery',
+  'explore.discoveryEnabled': 'Discovery active in {0}',
+  'explore.locationPermissionDenied': 'Location permission denied',
+  'explore.geoUnavailable': 'Location service unavailable, try again',
+  'explore.nearbyContentToggle': 'Show nearby content',
+  'explore.noNearbyUsers': 'No nearby users found',
+  'explore.noNearbyContent': 'No nearby content found',
+  'explore.premiumFirst': 'Premium members appear first',
+
   // Analytics
   'analytics.title': 'Analytics',
   'analytics.publicationStats': 'Publication Stats',

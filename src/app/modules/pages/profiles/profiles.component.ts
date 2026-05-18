@@ -10,6 +10,7 @@ import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { AnalyticsService, ProfileStats } from '@shared/services/core-apis/analytics.service';
 import { SubscriptionService } from '@shared/services/subscription.service';
+import { ExploreService, LocationStatus } from '@shared/services/core-apis/explore.service';
 import { UserService } from '@shared/services/core-apis/users.service';
 import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
@@ -82,6 +83,9 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   profileStats: ProfileStats | null = null;
 
+  locationStatus: LocationStatus = { discoveryEnabled: false, city: null, country: null };
+  isTogglingDiscovery = false;
+
   dataUser: Token | null = null;
 
   isFriend: boolean = false;
@@ -146,6 +150,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     private _mobileImageCacheService: MobileImageCacheService,
     private readonly _analyticsService: AnalyticsService,
     private readonly _subscriptionService: SubscriptionService,
+    private readonly _exploreService: ExploreService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
@@ -1100,5 +1105,52 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       this.isUpdatingProfile = false;
       this._cdr.markForCheck();
     }, 300); // Aumentado a 300ms para mejor experiencia visual
+  }
+
+  toggleDiscovery(): void {
+    if (this.isTogglingDiscovery) return;
+
+    if (this.locationStatus.discoveryEnabled) {
+      this.isTogglingDiscovery = true;
+      this._exploreService.disableDiscovery()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (status) => {
+            this.locationStatus = status;
+            this.isTogglingDiscovery = false;
+            this._cdr.markForCheck();
+          },
+          error: () => {
+            this.isTogglingDiscovery = false;
+            this._cdr.markForCheck();
+          },
+        });
+      return;
+    }
+
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        this.isTogglingDiscovery = true;
+        this._exploreService
+          .updateLocation(position.coords.latitude, position.coords.longitude, true)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (status) => {
+              this.locationStatus = status;
+              this.isTogglingDiscovery = false;
+              this._cdr.markForCheck();
+            },
+            error: () => {
+              this.isTogglingDiscovery = false;
+              this._cdr.markForCheck();
+            },
+          });
+      },
+      () => {
+        // geolocation denied — do nothing, toggle stays off
+      },
+    );
   }
 }

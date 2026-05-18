@@ -7,6 +7,7 @@ import { DeviceDetectionService } from '@shared/services/device-detection.servic
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { UserService } from '@shared/services/core-apis/users.service';
+import { ExploreService, ExploreUser } from '@shared/services/core-apis/explore.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
@@ -48,6 +49,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   resizeSubscription: Subscription | undefined;
 
   users: any[] = [];
+  nearbyUsers: ExploreUser[] = [];
 
   token: Token | null = null;
 
@@ -79,7 +81,8 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     private _appUpdateManagerService: AppUpdateManagerService,
     private _messageService: MessageService,
     private _notificationMessageChatService: NotificationMessageChatService,
-    private _utilityService: UtilityService
+    private _utilityService: UtilityService,
+    private readonly _exploreService: ExploreService,
   ) {
     this.menuProfile();
   }
@@ -218,9 +221,19 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.searchTerm.trim().length >= 3) {
       this._userService.getUserByName(this.searchTerm).pipe(takeUntil(this.unsubscribe$)).subscribe((data: any) => {
         this.users = data;
+        this._cdr.markForCheck();
+      });
+      // Load nearby users alongside text search results
+      this._exploreService.getNearbyUsers().pipe(takeUntil(this.unsubscribe$)).subscribe({
+        next: (nearby) => {
+          this.nearbyUsers = nearby;
+          this._cdr.markForCheck();
+        },
+        error: () => {},
       });
     } else {
       this.users = [];
+      this.nearbyUsers = [];
       this._cdr.markForCheck();
     }
   }

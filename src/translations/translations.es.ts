@@ -1423,6 +1423,20 @@ export const translations = {
   'common.close': 'Cerrar',
   'common.ok': 'Aceptar',
 
+  // Explore / Discovery
+  'explore.title': 'Descubrir',
+  'explore.nearbyUsers': 'Personas cercanas',
+  'explore.nearbyContent': 'Contenido cercano',
+  'explore.enableDiscovery': 'Activar Discovery',
+  'explore.disableDiscovery': 'Desactivar Discovery',
+  'explore.discoveryEnabled': 'Discovery activo en {0}',
+  'explore.locationPermissionDenied': 'Permiso de ubicación denegado',
+  'explore.geoUnavailable': 'Servicio de ubicación no disponible, intenta de nuevo',
+  'explore.nearbyContentToggle': 'Mostrar contenido cercano',
+  'explore.noNearbyUsers': 'No se encontraron usuarios cercanos',
+  'explore.noNearbyContent': 'No hay contenido cercano disponible',
+  'explore.premiumFirst': 'Los miembros premium aparecen primero',
+
   // Analytics
   'analytics.title': 'Analytics',
   'analytics.publicationStats': 'Estadísticas de publicación',

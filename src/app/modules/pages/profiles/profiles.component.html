@@ -130,6 +130,26 @@
 
     <div class="content-section-wall">
 
+      <!-- Discovery toggle: own profile only -->
+      <div *ngIf="isCurrentUser" class="worky-module-container" style="margin-bottom:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;background:var(--worky-surface);">
+          <div>
+            <div style="font-weight:600;font-size:14px;">{{ 'explore.enableDiscovery' | workyTranslations }}</div>
+            <div *ngIf="locationStatus.discoveryEnabled && locationStatus.city" style="font-size:12px;color:var(--worky-text-secondary);">
+              {{ 'explore.discoveryEnabled' | workyTranslations:'arguments':locationStatus.city }}
+            </div>
+          </div>
+          <button
+            (click)="toggleDiscovery()"
+            [disabled]="isTogglingDiscovery"
+            [style.background]="locationStatus.discoveryEnabled ? '#ef4444' : '#1877f2'"
+            [style.color]="'#fff'"
+            style="padding:8px 16px;border-radius:20px;border:none;cursor:pointer;font-weight:600;font-size:13px;">
+            {{ (locationStatus.discoveryEnabled ? 'explore.disableDiscovery' : 'explore.enableDiscovery') | workyTranslations }}
+          </button>
+        </div>
+      </div>
+
       <!-- Analytics panel: own profile + premium -->
       <div *ngIf="isCurrentUser && profileStats" class="worky-module-container" style="margin-bottom:16px;">
         <div style="padding:16px;border-radius:12px;background:var(--worky-surface);">
