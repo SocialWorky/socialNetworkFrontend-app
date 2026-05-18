@@ -1423,6 +1423,22 @@ export const translations = {
   'common.close': 'Cerrar',
   'common.ok': 'Aceptar',
 
+  // Tips / Propinas
+  'tips.sendTip': 'Enviar propina 💸',
+  'tips.amount': 'Monto (CLP)',
+  'tips.message': 'Mensaje (opcional)',
+  'tips.send': 'Enviar',
+  'tips.cancel': 'Cancelar',
+  'tips.received': 'Propinas recibidas',
+  'tips.sent': 'Propinas enviadas',
+  'tips.noTips': 'Aún no hay propinas',
+  'tips.from': 'de',
+  'tips.to': 'para',
+  'tips.redirecting': 'Redirigiendo...',
+  'tips.successMessage': '¡Propina enviada con éxito!',
+  'tips.minAmount': 'Mínimo CLP 500',
+  'tips.maxAmount': 'Máximo CLP 50.000',
+
   // Groups / Communities
   'groups.title': 'Grupos',
   'groups.create': 'Crear grupo',

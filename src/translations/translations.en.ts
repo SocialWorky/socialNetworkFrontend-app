@@ -1443,6 +1443,22 @@ export const translations = {
   'common.close': 'Close',
   'common.ok': 'OK',
 
+  // Tips / Propinas
+  'tips.sendTip': 'Send Tip 💸',
+  'tips.amount': 'Amount (CLP)',
+  'tips.message': 'Message (optional)',
+  'tips.send': 'Send',
+  'tips.cancel': 'Cancel',
+  'tips.received': 'Tips Received',
+  'tips.sent': 'Tips Sent',
+  'tips.noTips': 'No tips yet',
+  'tips.from': 'from',
+  'tips.to': 'to',
+  'tips.redirecting': 'Redirecting...',
+  'tips.successMessage': 'Tip sent successfully!',
+  'tips.minAmount': 'Minimum CLP 500',
+  'tips.maxAmount': 'Maximum CLP 50,000',
+
   // Groups / Communities
   'groups.title': 'Groups',
   'groups.create': 'Create Group',

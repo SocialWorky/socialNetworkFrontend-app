@@ -75,13 +75,20 @@
             <span basic-button-text>{{ 'profiles.acceptFriendship' | workyTranslations }}</span>
           </worky-buttons>
 
-          <worky-buttons *ngIf="isFriend && !isCurrentUser" 
+          <worky-buttons *ngIf="isFriend && !isCurrentUser"
             [workyButtonType]="WorkyButtonType.Outline"
-            [theme]="WorkyButtonTheme.Basic" 
-            [width]="'100%'" 
+            [theme]="WorkyButtonTheme.Basic"
+            [width]="'100%'"
             (click)="cancelFriendship(idPendingFriend)">
             <span basic-button-text>{{ 'profiles.unfollow' | workyTranslations }}</span>
           </worky-buttons>
+
+          <!-- Send tip button (not own profile) -->
+          <button *ngIf="!isCurrentUser"
+            (click)="showTipModal = true"
+            style="margin-top:8px;width:100%;padding:8px;border-radius:8px;border:1px solid #f59e0b;background:transparent;color:#f59e0b;font-weight:600;cursor:pointer;font-size:13px;">
+            {{ 'tips.sendTip' | workyTranslations }}
+          </button>
 
         </div>
       </div>
@@ -129,6 +136,55 @@
     </div>
 
     <div class="content-section-wall">
+
+      <!-- Tip modal overlay -->
+      <div *ngIf="showTipModal" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;" (click)="showTipModal = false">
+        <div style="background:var(--worky-surface,#fff);border-radius:16px;padding:24px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.2);" (click)="$event.stopPropagation()">
+          <h3 style="margin:0 0 16px;font-size:18px;">{{ 'tips.sendTip' | workyTranslations }} 💸</h3>
+          <!-- Amount presets -->
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+            <button *ngFor="let preset of [500, 1000, 2000, 5000]"
+              (click)="tipAmount = preset"
+              [style.background]="tipAmount === preset ? '#f59e0b' : 'transparent'"
+              [style.color]="tipAmount === preset ? '#fff' : '#f59e0b'"
+              style="padding:6px 16px;border-radius:20px;border:1px solid #f59e0b;cursor:pointer;font-weight:600;font-size:13px;">
+              CLP {{ preset | number:'1.0-0' }}
+            </button>
+          </div>
+          <!-- Custom amount -->
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">{{ 'tips.amount' | workyTranslations }}</label>
+            <input type="number" [(ngModel)]="tipAmount" min="500" max="50000" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--worky-border,#ddd);font-size:14px;" />
+          </div>
+          <!-- Message -->
+          <div style="margin-bottom:16px;">
+            <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">{{ 'tips.message' | workyTranslations }}</label>
+            <textarea [(ngModel)]="tipMessage" rows="2" maxlength="500" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--worky-border,#ddd);font-size:14px;resize:none;"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button (click)="showTipModal = false" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--worky-border,#ddd);background:transparent;cursor:pointer;font-weight:600;">
+              {{ 'tips.cancel' | workyTranslations }}
+            </button>
+            <button (click)="sendTip()" [disabled]="isSendingTip || tipAmount < 500 || tipAmount > 50000" style="flex:1;padding:10px;border-radius:8px;border:none;background:#f59e0b;color:#fff;font-weight:600;cursor:pointer;">
+              {{ isSendingTip ? ('tips.redirecting' | workyTranslations) : ('tips.send' | workyTranslations) }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Received tips history (own profile only) -->
+      <div *ngIf="isCurrentUser && receivedTips.length > 0" class="worky-module-container" style="margin-bottom:8px;">
+        <div style="padding:16px;border-radius:12px;background:var(--worky-surface);">
+          <h4 style="margin:0 0 12px;font-weight:600;">{{ 'tips.received' | workyTranslations }} 💸</h4>
+          <div *ngFor="let tip of receivedTips" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--worky-border,#ddd);">
+            <div style="flex:1;">
+              <span style="font-weight:600;font-size:13px;">{{ formatTipAmount(tip.amount) }}</span>
+              <span *ngIf="tip.senderName" style="font-size:12px;color:var(--worky-text-secondary);margin-left:6px;">{{ 'tips.from' | workyTranslations }} {{ tip.senderName }}</span>
+              <div *ngIf="tip.message" style="font-size:12px;font-style:italic;color:var(--worky-text-secondary);margin-top:2px;">"{{ tip.message }}"</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Discovery toggle: own profile only -->
       <div *ngIf="isCurrentUser" class="worky-module-container" style="margin-bottom:8px;">
