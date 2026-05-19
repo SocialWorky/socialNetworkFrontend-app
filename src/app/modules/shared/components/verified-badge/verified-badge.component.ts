@@ -13,13 +13,13 @@ import { environment } from '@env/environment';
         [src]="badgeUrl"
         title="Cuenta verificada"
         aria-label="Cuenta verificada"
-        style="display:inline-flex;width:1.1em;height:1.1em;margin-left:3px;vertical-align:middle;object-fit:contain;"
+        style="display:inline-flex;width:1.1em;height:1.1em;margin-left:3px;margin-right:3px;vertical-align:middle;object-fit:contain;"
       />
       <ng-template #defaultBadge>
         <span
           title="Cuenta verificada"
           aria-label="Cuenta verificada"
-          style="display:inline-flex;align-items:center;color:#1DA1F2;font-size:0.9em;margin-left:2px;cursor:default;user-select:none;">
+          style="display:inline-flex;align-items:center;color:#1DA1F2;font-size:0.9em;margin-left:2px;margin-right:3px;cursor:default;user-select:none;">
           ✓
         </span>
       </ng-template>
