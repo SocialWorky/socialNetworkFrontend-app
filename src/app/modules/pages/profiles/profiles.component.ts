@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom, lastValueFrom, of, Subject, takeUntil } from 'rxjs';
 import { catchError, filter, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import * as _ from 'lodash';
+import { translations } from '@translations/translations';
 
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
@@ -195,6 +196,14 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isCurrentUser = this.idUserProfile === (this._authService.getDecodedToken()?.id ?? '');
 
     // Creator profile and tips features are temporarily disabled
+
+    // Load discovery status for own profile
+    if (this.isCurrentUser) {
+      this._exploreService.getLocationStatus().pipe(takeUntil(this.destroy$)).subscribe({
+        next: (status) => { this.locationStatus = status; this._cdr.markForCheck(); },
+        error: () => {},
+      });
+    }
 
     if (this.isCurrentUser && this._subscriptionService.isPremiumSnapshot()) {
       this._analyticsService.getProfileStats().pipe(takeUntil(this.destroy$)).subscribe({
@@ -1219,11 +1228,15 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      alert(translations['explore.geoUnavailable']);
+      return;
+    }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         this.isTogglingDiscovery = true;
+        this._cdr.markForCheck();
         this._exploreService
           .updateLocation(position.coords.latitude, position.coords.longitude, true)
           .pipe(takeUntil(this.destroy$))
@@ -1240,7 +1253,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
           });
       },
       () => {
-        // geolocation denied — do nothing, toggle stays off
+        alert(translations['explore.locationPermissionDenied']);
       },
     );
   }

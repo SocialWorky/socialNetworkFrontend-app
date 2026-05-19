@@ -39,6 +39,12 @@ export class ExploreService {
 
   constructor(private readonly http: HttpClient) {}
 
+  getLocationStatus(): Observable<LocationStatus> {
+    return this.http
+      .get<LocationStatus>(`${this.apiUrl}/explore/location`)
+      .pipe(tap((status) => this._locationStatus$.next(status)));
+  }
+
   updateLocation(lat: number, lng: number, enabled: boolean): Observable<LocationStatus> {
     const body = enabled ? { enabled, lat, lng } : { enabled };
     return this.http

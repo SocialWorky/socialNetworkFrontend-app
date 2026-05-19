@@ -187,22 +187,62 @@
       </div>
 
       <!-- Discovery toggle: own profile only -->
-      <div *ngIf="false" class="worky-module-container" style="margin-bottom:8px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;background:var(--worky-surface);">
-          <div>
-            <div style="font-weight:600;font-size:14px;">{{ 'explore.enableDiscovery' | workyTranslations }}</div>
-            <div *ngIf="locationStatus.discoveryEnabled && locationStatus.city" style="font-size:12px;color:var(--worky-text-secondary);">
-              {{ 'explore.discoveryEnabled' | workyTranslations:'arguments':locationStatus.city }}
+      <div *ngIf="isCurrentUser" class="worky-module-container" style="margin-bottom:8px;">
+        <div style="padding:16px 18px;">
+
+          <!-- Header row -->
+          <div style="display:flex;align-items:center;gap:14px;">
+
+            <!-- Icon bubble -->
+            <div [style.background]="locationStatus.discoveryEnabled ? 'rgba(34,197,94,0.12)' : 'rgba(var(--worky-color-navy-rgb, 17,51,85), 0.08)'"
+                 style="width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.3s;">
+              <span class="material-symbols-rounded"
+                    [style.color]="locationStatus.discoveryEnabled ? '#22c55e' : 'var(--worky-color-icon)'"
+                    style="font-size:24px;transition:color 0.3s;">
+                {{ locationStatus.discoveryEnabled ? 'location_on' : 'location_off' }}
+              </span>
             </div>
+
+            <!-- Text block -->
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+                <span style="font-weight:700;font-size:14px;color:var(--worky-color-text);">
+                  {{ 'explore.enableDiscovery' | workyTranslations }}
+                </span>
+                <!-- Active badge -->
+                <span *ngIf="locationStatus.discoveryEnabled"
+                      style="display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,0.12);color:#22c55e;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;letter-spacing:0.02em;">
+                  <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>
+                  {{ locationStatus.city ? ('explore.discoveryEnabled' | workyTranslations:'arguments':locationStatus.city) : ('explore.discoveryEnabledNoCity' | workyTranslations) }}
+                </span>
+              </div>
+              <div style="font-size:12px;color:var(--worky-color-icon);line-height:1.4;">
+                {{ locationStatus.discoveryEnabled
+                  ? ('explore.discoveryDescriptionActive' | workyTranslations)
+                  : ('explore.discoveryDescription' | workyTranslations) }}
+              </div>
+            </div>
+
+            <!-- Action button -->
+            <button
+              (click)="toggleDiscovery()"
+              [disabled]="isTogglingDiscovery"
+              style="flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:none;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.2s ease;outline:none;"
+              [style.background]="locationStatus.discoveryEnabled ? 'rgba(239,68,68,0.1)' : 'var(--worky-color-navy)'"
+              [style.color]="locationStatus.discoveryEnabled ? '#ef4444' : 'var(--worky-color-light)'"
+              [style.opacity]="isTogglingDiscovery ? '0.6' : '1'"
+              [style.cursor]="isTogglingDiscovery ? 'not-allowed' : 'pointer'">
+              <span *ngIf="isTogglingDiscovery" class="material-symbols-rounded" style="font-size:15px;animation:spin 0.8s linear infinite;">autorenew</span>
+              <span *ngIf="!isTogglingDiscovery" class="material-symbols-rounded" style="font-size:15px;">
+                {{ locationStatus.discoveryEnabled ? 'location_off' : 'near_me' }}
+              </span>
+              <span *ngIf="!isTogglingDiscovery">
+                {{ (locationStatus.discoveryEnabled ? 'explore.disableDiscovery' : 'explore.enableDiscovery') | workyTranslations }}
+              </span>
+            </button>
+
           </div>
-          <button
-            (click)="toggleDiscovery()"
-            [disabled]="isTogglingDiscovery"
-            [style.background]="locationStatus.discoveryEnabled ? '#ef4444' : '#1877f2'"
-            [style.color]="'#fff'"
-            style="padding:8px 16px;border-radius:20px;border:none;cursor:pointer;font-weight:600;font-size:13px;">
-            {{ (locationStatus.discoveryEnabled ? 'explore.disableDiscovery' : 'explore.enableDiscovery') | workyTranslations }}
-          </button>
+
         </div>
       </div>
 
