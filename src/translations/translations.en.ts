@@ -1423,6 +1423,15 @@ export const translations = {
   'admin.feature.comments': 'Comments',
   'admin.feature.widgets': 'Widgets',
 
+  // Admin — Subscription plan assignment
+  'admin.userManagement.table.actions.assignPlan': 'Assign plan',
+  'admin.subscriptions.assignPlanTitle': 'Assign Subscription Plan',
+  'admin.subscriptions.selectPlan': 'Select plan',
+  'admin.subscriptions.confirmAssign': 'Confirm assignment',
+  'admin.subscriptions.assignPlanSuccess': 'Plan assigned successfully',
+  'admin.subscriptions.assignPlanError': 'Could not assign the plan. The user may already have an active subscription.',
+  'admin.subscriptions.noPlansAvailable': 'No active plans available. Go to Subscription Plans to create one.',
+
   // Subscription — User-facing
   'subscription.title': 'Subscription Plans',
   'subscription.choosePlan': 'Choose the plan that best suits you',

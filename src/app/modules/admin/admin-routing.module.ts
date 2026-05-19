@@ -17,6 +17,7 @@ import { SubscriptionPlansComponent } from './shared/subscription-plans/subscrip
 import { BoostPackagesComponent } from './shared/boost-packages/boost-packages.component';
 import { ManageSubscriptionsComponent } from './shared/manage-subscriptions/manage-subscriptions.component';
 import { translations } from '@translations/translations';
+import { adminSubscriptionEnabledGuard } from './guards/admin-subscription-enabled.guard';
 
 
 export const routes: Routes = [
@@ -40,8 +41,8 @@ export const routes: Routes = [
           { title: translations['admin.sideMenu.items.css'], path: 'custom-css', component: CustomCssComponent },
           { title: translations['admin.sideMenu.items.invitations'], path: 'invitations-code', component: InvitationsCodeComponent },
           { title: translations['admin.sideMenu.items.webhooks'], path: 'webhooks', component: WebhooksComponent },
-          { title: translations['admin.sideMenu.items.subscriptionPlans'], path: 'subscription-plans', component: SubscriptionPlansComponent },
-          { title: translations['admin.sideMenu.items.manageSubscriptions'], path: 'manage-subscriptions', component: ManageSubscriptionsComponent },
+          { title: translations['admin.sideMenu.items.subscriptionPlans'], path: 'subscription-plans', component: SubscriptionPlansComponent, canActivate: [adminSubscriptionEnabledGuard] },
+          { title: translations['admin.sideMenu.items.manageSubscriptions'], path: 'manage-subscriptions', component: ManageSubscriptionsComponent, canActivate: [adminSubscriptionEnabledGuard] },
           { title: translations['admin.sideMenu.items.boostPackages'], path: 'boost-packages', component: BoostPackagesComponent },
         ],
       },

@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
 
 import { routes } from '@admin/admin-routing.module';
 import { AuthService } from '@auth/services/auth.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { ConfigService } from '@services/core-apis/config.service';
 import { translations } from '@translations/translations';
 
 @Component({
@@ -11,7 +13,15 @@ import { translations } from '@translations/translations';
     styleUrls: ['./side-menu.component.scss'],
     standalone: false
 })
-export class SideMenuComponent implements OnInit {
+export class SideMenuComponent implements OnInit, OnDestroy {
+
+  private static readonly SUBSCRIPTION_PATHS = new Set([
+    'subscription-plans',
+    'manage-subscriptions',
+    'boost-packages',
+  ]);
+
+  private destroy$ = new Subject<void>();
 
   title: string = translations['admin.sideMenu-title'];
   subTitle: string = translations['admin.sideMenu-subTitle'];
@@ -19,20 +29,12 @@ export class SideMenuComponent implements OnInit {
   userAvatar: string = '';
   expandedMenus: { [key: string]: boolean } = {};
 
-  menuItems = routes
-    .flatMap((route) => route.children ?? [])
-    .filter((route) => route)
-    .map((route) => ({
-      ...route,
-      children: route.children
-        ? route.children.filter((child) => child.path && !child.path.includes(':'))
-        : null,
-    }))
-    .filter((route) => route.children || (route.path && !route.path.includes(':')));
+  menuItems: any[] = [];
 
   constructor(
     private _authService: AuthService,
-    private _logService: LogService
+    private _logService: LogService,
+    private _configService: ConfigService,
   ) { }
 
   ngOnInit() {
@@ -48,6 +50,35 @@ export class SideMenuComponent implements OnInit {
         { error: String(error) }
       );
     }
+
+    this._configService.subscriptionMode$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(enabled => {
+        this.menuItems = this.buildMenuItems(enabled);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private buildMenuItems(subscriptionEnabled: boolean): any[] {
+    return routes
+      .flatMap((route) => route.children ?? [])
+      .filter((route) => route)
+      .map((route) => ({
+        ...route,
+        children: route.children
+          ? route.children.filter((child) => {
+              if (!subscriptionEnabled && SideMenuComponent.SUBSCRIPTION_PATHS.has(child.path ?? '')) {
+                return false;
+              }
+              return child.path && !child.path.includes(':');
+            })
+          : null,
+      }))
+      .filter((route) => route.children || (route.path && !route.path.includes(':')));
   }
 
   logout() {

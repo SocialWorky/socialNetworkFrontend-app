@@ -1403,6 +1403,15 @@ export const translations = {
   'admin.feature.comments': 'Comentarios',
   'admin.feature.widgets': 'Widgets',
 
+  // Admin — Asignación de plan de suscripción
+  'admin.userManagement.table.actions.assignPlan': 'Asignar plan',
+  'admin.subscriptions.assignPlanTitle': 'Asignar plan de suscripción',
+  'admin.subscriptions.selectPlan': 'Seleccionar plan',
+  'admin.subscriptions.confirmAssign': 'Confirmar asignación',
+  'admin.subscriptions.assignPlanSuccess': 'Plan asignado exitosamente',
+  'admin.subscriptions.assignPlanError': 'No se pudo asignar el plan. El usuario puede tener una suscripción activa.',
+  'admin.subscriptions.noPlansAvailable': 'No hay planes activos. Ve a Planes de Suscripción para crear uno.',
+
   // Suscripción — Vista del usuario
   'subscription.title': 'Planes de Suscripción',
   'subscription.choosePlan': 'Elige el plan que mejor se adapte a ti',

@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { User } from '@shared/interfaces/user.interface';
 
+
 @Component({
   selector: 'worky-user-table',
   templateUrl: './user-table.component.html',
@@ -12,12 +13,14 @@ export class UserTableComponent {
   @Input() loading = false;
   @Input() totalUsers = 0;
   @Input() loadingStates: any = {};
-  
+  @Input() subscriptionModeEnabled = false;
+
   @Output() viewUserDetails = new EventEmitter<User>();
   @Output() editUser = new EventEmitter<User>();
   @Output() toggleUserStatus = new EventEmitter<User>();
   @Output() sendVerificationEmail = new EventEmitter<User>();
   @Output() toggleVerification = new EventEmitter<User>();
+  @Output() assignPlan = new EventEmitter<User>();
 
   getStatusColor(status: string): string {
     switch (status) {
