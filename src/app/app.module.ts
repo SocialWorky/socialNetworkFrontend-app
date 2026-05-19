@@ -13,6 +13,7 @@ import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { SubscriptionWallComponent } from './modules/shared/components/subscription-wall/subscription-wall.component';
+import { FeatureWallComponent } from './modules/shared/components/feature-wall/feature-wall.component';
 import { TranslationsModule } from './modules/shared/modules/translations/translations.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthInterceptor } from './auth.interceptor';
@@ -49,6 +50,7 @@ const config: SocketIoConfig = {
   declarations: [
     AppComponent,
     SubscriptionWallComponent,
+    FeatureWallComponent,
   ],
   imports: [
     BrowserModule,

@@ -1442,6 +1442,9 @@ export const translations = {
   'subscription.verifyingPaymentHint': 'Esto puede tardar unos segundos',
   'subscription.paymentProcessing': 'Pago en proceso',
   'subscription.paymentProcessingHint': 'Tu pago fue recibido. La suscripción se activará en breve. Si no se activa en unos minutos, contacta al soporte.',
+  'subscription.featureNotInPlan': 'Tu plan actual no incluye esta funcionalidad. Mejora tu plan para acceder a ella.',
+  'featureWall.title': 'Función no incluida en tu plan',
+  'featureWall.currentPlan': 'Tu plan actual incluye',
 
   // Common translations
   'common.reset': 'Restablecer',

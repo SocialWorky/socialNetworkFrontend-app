@@ -13,6 +13,8 @@ import { Router } from '@angular/router';
 import { environment } from '@env/environment';
 import { LogService, LevelLogEnum } from './modules/shared/services/core-apis/log.service';
 import { SubscriptionWallService } from './modules/shared/services/subscription-wall.service';
+import { FeatureWallService } from './modules/shared/services/feature-wall.service';
+import { SubscriptionService } from './modules/shared/services/subscription.service';
 
 interface RefreshTokenResponse {
   accessToken: string;
@@ -30,6 +32,8 @@ export class AuthInterceptor implements HttpInterceptor {
     private http: HttpClient,
     private logService: LogService,
     private subscriptionWallService: SubscriptionWallService,
+    private featureWallService: FeatureWallService,
+    private subscriptionService: SubscriptionService,
   ) {}
 
   intercept(
@@ -78,6 +82,13 @@ export class AuthInterceptor implements HttpInterceptor {
             return EMPTY;
           }
           this.subscriptionWallService.show();
+          return throwError(() => error);
+        }
+
+        if (error.status === 403 && isApiRequest && error.error?.message === 'feature_not_in_plan') {
+          const blockedFeature: string = error.error?.feature ?? '';
+          const planFeatures: string[] = this.subscriptionService.getPlanFeatures();
+          this.featureWallService.show(blockedFeature, planFeatures);
           return throwError(() => error);
         }
 

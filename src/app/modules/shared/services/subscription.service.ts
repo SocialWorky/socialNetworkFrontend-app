@@ -92,4 +92,16 @@ export class SubscriptionService implements OnDestroy {
     const sub = this.subscriptionSubject.value;
     return sub?.status === 'active' && sub.expiresAt != null && new Date(sub.expiresAt) > new Date();
   }
+
+  hasFeature(feature: string): boolean {
+    const sub = this.subscriptionSubject.value;
+    if (!this.isPremiumSnapshot()) return false;
+    return sub?.plan?.features?.includes(feature) ?? false;
+  }
+
+  getPlanFeatures(): string[] {
+    const sub = this.subscriptionSubject.value;
+    if (!this.isPremiumSnapshot()) return [];
+    return sub?.plan?.features ?? [];
+  }
 }

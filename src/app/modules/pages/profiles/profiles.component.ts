@@ -11,6 +11,7 @@ import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { AnalyticsService, ProfileStats } from '@shared/services/core-apis/analytics.service';
 import { SubscriptionService } from '@shared/services/subscription.service';
+import { FeatureWallService } from '@shared/services/feature-wall.service';
 import { ExploreService, LocationStatus } from '@shared/services/core-apis/explore.service';
 import { CreatorProfileService, CreatorProfile, CreatorStats } from '@shared/services/core-apis/creator-profile.service';
 import { UserService } from '@shared/services/core-apis/users.service';
@@ -164,6 +165,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _subscriptionService: SubscriptionService,
     private readonly _exploreService: ExploreService,
     private readonly _creatorProfileService: CreatorProfileService,
+    private readonly _featureWallService: FeatureWallService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
@@ -742,6 +744,10 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   followMyFriend(_id: string) {
+    if (this._configService.subscriptionModeSnapshot() && this._subscriptionService.isPremiumSnapshot() && !this._subscriptionService.hasFeature('friends')) {
+      this._featureWallService.show('friends', this._subscriptionService.getPlanFeatures());
+      return;
+    }
     this._friendsService.requestFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: async () => {
         this.loadPublications();

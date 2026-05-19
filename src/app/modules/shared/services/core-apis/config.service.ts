@@ -34,6 +34,10 @@ export class ConfigService {
     return this.configSubject.value;
   }
 
+  subscriptionModeSnapshot(): boolean {
+    return this.subscriptionModeSubject.value;
+  }
+
   getConfig(bypassCache: boolean = false): Observable<any> {
     const url = `${this.apiUrl}/config`;
     const params: any = {};

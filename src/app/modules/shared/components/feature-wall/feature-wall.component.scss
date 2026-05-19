@@ -1,0 +1,227 @@
+// ── Overlay ────────────────────────────────────────────────────────────────
+.feature-wall-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(2, 6, 23, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: overlayIn 220ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+// ── Card ───────────────────────────────────────────────────────────────────
+.feature-wall-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: #0f172a;
+  border: 1px solid rgba(249, 115, 22, 0.22);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(249, 115, 22, 0.06),
+    0 24px 64px rgba(0, 0, 0, 0.6),
+    0 0 80px rgba(249, 115, 22, 0.08);
+  animation: cardIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+// ── Glow halo ──────────────────────────────────────────────────────────────
+.glow-halo {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(249, 115, 22, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+// ── Icon ring ──────────────────────────────────────────────────────────────
+.icon-ring {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin: 32px auto 0;
+  border-radius: 50%;
+  background: rgba(249, 115, 22, 0.1);
+  border: 1.5px solid rgba(249, 115, 22, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-ring-pulse {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  animation: ringPulse 2.4s ease-in-out infinite;
+}
+
+.icon-lock {
+  font-size: 2rem;
+  color: #fb923c;
+  filter: drop-shadow(0 0 10px rgba(249, 115, 22, 0.5));
+  animation: lockFloat 3s ease-in-out infinite;
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────
+.wall-header {
+  padding: 20px 28px 0;
+  text-align: center;
+}
+
+.wall-title {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: -0.01em;
+}
+
+.wall-desc {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #94a3b8;
+  line-height: 1.55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  .blocked-icon {
+    font-size: 1.1rem;
+    color: #fb923c;
+  }
+}
+
+// ── Current plan features ──────────────────────────────────────────────────
+.features-section {
+  padding: 20px 24px;
+  margin-top: 16px;
+  border-top: 1px solid rgba(51, 65, 85, 0.6);
+  border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+}
+
+.features-label {
+  margin: 0 0 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.feature-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  border-radius: 10px;
+  opacity: 0;
+  animation: chipIn 240ms cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+}
+
+.feature-icon {
+  font-size: 0.95rem;
+  color: #34d399;
+  flex-shrink: 0;
+}
+
+.feature-label {
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ── Actions ────────────────────────────────────────────────────────────────
+.wall-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 24px 24px;
+}
+
+.btn-plans {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 24px;
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+  box-shadow: 0 4px 20px rgba(234, 88, 12, 0.35);
+
+  .material-icons { font-size: 1.1rem; color: #fed7aa; }
+
+  &:hover {
+    background: linear-gradient(135deg, #c2410c, #9a3412);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 28px rgba(234, 88, 12, 0.45);
+  }
+
+  &:active { transform: translateY(0); }
+}
+
+.btn-dismiss {
+  background: none;
+  border: none;
+  color: #475569;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 140ms ease;
+
+  &:hover { color: #94a3b8; }
+}
+
+// ── Animations ─────────────────────────────────────────────────────────────
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.93); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes chipIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes ringPulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50%       { transform: scale(1.12); opacity: 0.1; }
+}
+
+@keyframes lockFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-3px); }
+}

@@ -16,6 +16,9 @@ import { Token } from '@shared/interfaces/token.interface';
 import { UtilityService } from '@shared/services/utility.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { environment } from '@env/environment';
+import { FeatureWallService } from '@shared/services/feature-wall.service';
+import { SubscriptionService } from '@shared/services/subscription.service';
+import { ConfigService } from '@services/core-apis/config.service';
 
 @Component({
     selector: 'worky-reactions',
@@ -62,7 +65,10 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
     private _emailNotificationService: EmailNotificationService,
     private _notificationService: NotificationService,
     private _utilityService: UtilityService,
-    private _logService: LogService
+    private _logService: LogService,
+    private readonly _featureWallService: FeatureWallService,
+    private readonly _subscriptionService: SubscriptionService,
+    private readonly _configService: ConfigService,
   ) {}
 
   ngOnInit() {
@@ -85,7 +91,17 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
     return this._utilityService.normalizeImageUrl(emojiUrl, environment.MINIO_BUCKET_URL || '');
   }
 
+  private _reactionsFeatureBlocked(): boolean {
+    return this._configService.subscriptionModeSnapshot()
+      && this._subscriptionService.isPremiumSnapshot()
+      && !this._subscriptionService.hasFeature('reactions');
+  }
+
   addReaction(reaction: CustomReactionList) {
+    if (this._reactionsFeatureBlocked()) {
+      this._featureWallService.show('reactions', this._subscriptionService.getPlanFeatures());
+      return;
+    }
     this.hideReactions();
     this.unlockReactions = false;
     
@@ -149,6 +165,10 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   async deleteReaction(idReaction: string) {
+    if (this._reactionsFeatureBlocked()) {
+      this._featureWallService.show('reactions', this._subscriptionService.getPlanFeatures());
+      return;
+    }
     this.hideReactions();
     this.unlockReactions = false;
 
@@ -200,6 +220,10 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   editReaction(id: string, reaction: CustomReactionList) {
+    if (this._reactionsFeatureBlocked()) {
+      this._featureWallService.show('reactions', this._subscriptionService.getPlanFeatures());
+      return;
+    }
     this.hideReactions();
     this.unlockReactions = false;
     

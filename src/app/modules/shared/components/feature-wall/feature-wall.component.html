@@ -1,0 +1,46 @@
+<div *ngIf="isVisible" class="feature-wall-overlay" (click)="onOverlayClick($event)" role="dialog" aria-modal="true">
+
+  <div class="feature-wall-card">
+
+    <!-- Glow halo -->
+    <div class="glow-halo"></div>
+
+    <!-- Icon -->
+    <div class="icon-ring">
+      <div class="icon-ring-pulse"></div>
+      <i class="material-icons icon-lock">lock_upgrade</i>
+    </div>
+
+    <!-- Header -->
+    <div class="wall-header">
+      <h2 class="wall-title">{{ title }}</h2>
+      <p class="wall-desc">
+        <i class="material-icons blocked-icon">{{ blockedFeature.icon }}</i>
+        {{ blockedFeature.label }}
+      </p>
+    </div>
+
+    <!-- Current plan features -->
+    <div class="features-section" *ngIf="planFeatures.length">
+      <p class="features-label">{{ currentPlanLabel }}</p>
+      <div class="features-grid">
+        <div *ngFor="let feature of planFeatures; let i = index"
+             class="feature-chip"
+             [style.animation-delay]="(i * 30 + 80) + 'ms'">
+          <i class="material-icons feature-icon">{{ feature.icon }}</i>
+          <span class="feature-label">{{ feature.label }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="wall-actions">
+      <button class="btn-plans" (click)="goToPlans()">
+        <i class="material-icons">upgrade</i>
+        {{ viewPlansLabel }}
+      </button>
+      <button class="btn-dismiss" (click)="dismiss()">{{ notNowLabel }}</button>
+    </div>
+
+  </div>
+</div>

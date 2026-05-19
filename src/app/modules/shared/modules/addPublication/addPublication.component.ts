@@ -50,6 +50,8 @@ import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service
 import { LazyCssService } from '@shared/services/core-apis/lazy-css.service';
 import { FontLoaderService } from '@shared/services/core-apis/font-loader.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
+import { FeatureWallService } from '@shared/services/feature-wall.service';
+import { SubscriptionService } from '@shared/services/subscription.service';
 
 @Component({
     selector: 'worky-add-publication',
@@ -170,6 +172,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _lazyCssService: LazyCssService,
     private _fontLoaderService: FontLoaderService,
     private _configService: ConfigService,
+    private readonly _featureWallService: FeatureWallService,
+    private readonly _subscriptionService: SubscriptionService,
   ) { }
 
   async ngOnInit() {
@@ -558,6 +562,10 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   private async onSavePublication(filesBackup: File[] = [], previewsBackup: any[] = []) {
+    if (this._configService.subscriptionModeSnapshot() && this._subscriptionService.isPremiumSnapshot() && !this._subscriptionService.hasFeature('feed')) {
+      this._featureWallService.show('feed', this._subscriptionService.getPlanFeatures());
+      return;
+    }
     this.setExtraData();
 
     if (this.type === TypePublishing.POST_PROFILE && this.idUserProfile !== this.decodedToken.id) {

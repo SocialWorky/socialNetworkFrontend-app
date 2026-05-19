@@ -39,6 +39,8 @@ import { GlobalEventService } from '@shared/services/globalEventService.service'
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { UtilityService } from '@shared/services/utility.service';
+import { ConfigService } from '@services/core-apis/config.service';
+import { FeatureWallService } from '@shared/services/feature-wall.service';
 
 
 @Component({
@@ -163,6 +165,8 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private readonly _boostService: BoostService,
     private readonly _analyticsService: AnalyticsService,
     private readonly _subscriptionService: SubscriptionService,
+    private readonly _configService: ConfigService,
+    private readonly _featureWallService: FeatureWallService,
   ) {}
 
   async ngAfterViewInit() {
@@ -545,6 +549,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   commentOn(index: number) {
+    if (this._configService.subscriptionModeSnapshot() && this._subscriptionService.isPremiumSnapshot() && !this._subscriptionService.hasFeature('comments')) {
+      this._featureWallService.show('comments', this._subscriptionService.getPlanFeatures());
+      return;
+    }
     this.viewCommentSection = this.viewCommentSection === index ? -1 : index;
   }
 

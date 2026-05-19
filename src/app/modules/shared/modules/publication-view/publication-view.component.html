@@ -215,7 +215,8 @@
       <div class="publication-footer-actions-item" *ngIf="actionsLoading">
         <worky-button-skeleton width="80px" height="30px"></worky-button-skeleton>
       </div>
-      <div class="publication-footer-actions-item no-select-text" *ngIf="!actionsLoading" (click)="commentOn(indexPublication!)">
+      <div class="publication-footer-actions-item no-select-text" *ngIf="!actionsLoading" (click)="commentOn(indexPublication!)"
+        [title]="'publicationsView.spanComment' | workyTranslations">
         <i class="material-icons">comment</i>
         <span>{{ 'publicationsView.spanComment' | workyTranslations }}</span>
       </div>
