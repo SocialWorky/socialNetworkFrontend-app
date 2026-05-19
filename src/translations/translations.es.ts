@@ -1435,6 +1435,12 @@ export const translations = {
   'subscription.managePlan': 'Gestionar Plan',
   'subscription.renewPlan': 'Renovar Plan',
   'subscription.features': 'Qué incluye',
+  'subscription.pendingSubscriptionError': 'Ya tienes un pago pendiente. Completa el pago o espera a que expire antes de intentarlo nuevamente.',
+  'subscription.paymentServiceUnavailable': 'El servicio de pagos no está disponible en este momento. Contacta al administrador.',
+  'subscription.verifyingPayment': 'Verificando tu pago...',
+  'subscription.verifyingPaymentHint': 'Esto puede tardar unos segundos',
+  'subscription.paymentProcessing': 'Pago en proceso',
+  'subscription.paymentProcessingHint': 'Tu pago fue recibido. La suscripción se activará en breve. Si no se activa en unos minutos, contacta al soporte.',
 
   // Common translations
   'common.reset': 'Restablecer',

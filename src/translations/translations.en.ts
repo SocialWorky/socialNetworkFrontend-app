@@ -1455,6 +1455,12 @@ export const translations = {
   'subscription.managePlan': 'Manage Plan',
   'subscription.renewPlan': 'Renew Plan',
   'subscription.features': 'What\'s included',
+  'subscription.pendingSubscriptionError': 'You already have a pending payment. Complete the payment or wait for it to expire before trying again.',
+  'subscription.paymentServiceUnavailable': 'Payment service is currently unavailable. Please contact the administrator.',
+  'subscription.verifyingPayment': 'Verifying your payment...',
+  'subscription.verifyingPaymentHint': 'This may take a few seconds',
+  'subscription.paymentProcessing': 'Payment processing',
+  'subscription.paymentProcessingHint': 'Your payment was received. The subscription will activate shortly. If it does not activate within a few minutes, please contact support.',
 
   // Common translations
   'common.reset': 'Reset',

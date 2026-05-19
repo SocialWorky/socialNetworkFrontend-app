@@ -7,6 +7,8 @@ import {
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { SubscriptionPlan, SubscriptionService, UserSubscription } from '@shared/services/subscription.service';
+import { AlertService } from '@shared/services/alert.service';
+import { Alerts } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
 
 @Component({
@@ -28,6 +30,7 @@ export class SubscribeComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly subscriptionService: SubscriptionService,
+    private readonly alertService: AlertService,
     private readonly cdr: ChangeDetectorRef,
   ) {}
 
@@ -65,11 +68,32 @@ export class SubscribeComponent implements OnInit, OnDestroy {
 
     this.subscriptionService.initiatePayment(plan._id).pipe(takeUntil(this.destroy$)).subscribe({
       next: ({ checkoutUrl }) => {
+        if (!checkoutUrl || !checkoutUrl.startsWith('http')) {
+          this.initiatingPlanId = null;
+          this.cdr.markForCheck();
+          this.alertService.showAlert(
+            translations['subscription.paymentFailed'],
+            translations['subscription.paymentServiceUnavailable'],
+            Alerts.ERROR,
+          );
+          return;
+        }
         window.location.href = checkoutUrl;
       },
-      error: () => {
+      error: (err: any) => {
         this.initiatingPlanId = null;
         this.cdr.markForCheck();
+        const serverMsg: string = err?.error?.message ?? '';
+        const key = serverMsg.includes('pending')
+          ? 'subscription.pendingSubscriptionError'
+          : serverMsg.includes('not enabled') || err?.status === 503
+            ? 'subscription.paymentServiceUnavailable'
+            : 'subscription.paymentFailed';
+        this.alertService.showAlert(
+          translations['subscription.paymentFailed'],
+          translations[key] ?? translations['subscription.paymentFailed'],
+          Alerts.ERROR,
+        );
       },
     });
   }
