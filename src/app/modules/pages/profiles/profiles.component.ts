@@ -194,33 +194,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     // Load analytics if viewing own profile and premium
     this.isCurrentUser = this.idUserProfile === (this._authService.getDecodedToken()?.id ?? '');
 
-    // Load creator profile data
-    if (this.isCurrentUser) {
-      this._creatorProfileService.getMyStats().pipe(takeUntil(this.destroy$)).subscribe({
-        next: (stats) => { this.myCreatorStats = stats; this._cdr.markForCheck(); },
-        error: () => {},
-      });
-      this._creatorProfileService.getPublicProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
-        next: (p) => { this.myCreatorProfile = p; this.creatorMonthlyPrice = p.monthlyPrice || 3000; this.creatorDescription = p.description || ''; this._cdr.markForCheck(); },
-        error: () => {},
-      });
-    } else {
-      this._creatorProfileService.getPublicProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
-        next: (p) => { this.viewedCreatorProfile = p; this._cdr.markForCheck(); },
-        error: () => {},
-      });
-    }
-
-    // Load received tips for own profile
-    if (this.isCurrentUser) {
-      this._tipsService.getReceived().pipe(takeUntil(this.destroy$)).subscribe({
-        next: (res) => {
-          this.receivedTips = res.tips;
-          this._cdr.markForCheck();
-        },
-        error: () => {},
-      });
-    }
+    // Creator profile and tips features are temporarily disabled
 
     if (this.isCurrentUser && this._subscriptionService.isPremiumSnapshot()) {
       this._analyticsService.getProfileStats().pipe(takeUntil(this.destroy$)).subscribe({
