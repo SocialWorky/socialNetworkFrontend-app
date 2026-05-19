@@ -1396,6 +1396,7 @@ export const translations = {
   // Admin — Subscription plans
   'admin.subscriptionPlans': 'Subscription Plans',
   'admin.sideMenu.items.subscriptionPlans': 'Subscription Plans',
+  'admin.sideMenu.items.manageSubscriptions': 'Subscription Management',
   'admin.createPlan': 'Create Plan',
   'admin.editPlan': 'Edit Plan',
   'admin.deletePlan': 'Delete Plan',
