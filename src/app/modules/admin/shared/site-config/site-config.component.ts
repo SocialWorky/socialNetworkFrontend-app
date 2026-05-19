@@ -30,6 +30,14 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
   imagePreview: string | ArrayBuffer | null = null;
   selectedFileName: string = '';
 
+  badgeFile: File | null = null;
+  badgePreview: string | ArrayBuffer | null = null;
+  badgeSelectedFileName: string = '';
+
+  premiumBadgeFile: File | null = null;
+  premiumBadgePreview: string | ArrayBuffer | null = null;
+  premiumBadgeSelectedFileName: string = '';
+
   isLoading = true;
   loadUpdateConfigButtons = false;
   loadingPayku = false;
@@ -62,6 +70,8 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       description: [''],
       invitationCode: [false],
       subscriptionMode: [false],
+      verifiedBadgeUrl: [''],
+      premiumBadgeUrl: [''],
       loginMethods: this._fb.group({
         email: [false],
         google: [false],
@@ -143,6 +153,8 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
           description: configData.settings.description || '',
           invitationCode: configData.settings.invitationCode ?? false,
           subscriptionMode: configData.settings.subscriptionMode ?? false,
+          verifiedBadgeUrl: configData.settings.verifiedBadgeUrl || '',
+          premiumBadgeUrl: configData.settings.premiumBadgeUrl || '',
           loginMethods: {
             email: Boolean(loginMethods.email),
             google: Boolean(loginMethods.google),
@@ -179,92 +191,101 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
   updateConfig() {
     this.loadUpdateConfigButtons = true;
     this.error = null;
-    
-    if (this.configForm.valid) {
-      if (this.imageFile) {
-        // Use PROFILE_IMG type to ensure synchronous processing and immediate response
-        this._fileUploadService.uploadFile([this.imageFile], 'config', null, null, TypePublishing.PROFILE_IMG).pipe(takeUntil(this.destroy$)).subscribe({
-          next: (response) => {
-            // Handle the actual response structure: {message: string, files: Array}
-            if (response && typeof response === 'object' && response.files && Array.isArray(response.files) && response.files.length > 0) {
-              const uploadedFile = response.files[0];
-              // Use urlCompressed or url - these are relative MinIO paths like "config/filename.jpg"
-              const logoUrl = uploadedFile.urlCompressed || uploadedFile.url || '';
-              
-              if (!logoUrl) {
-                this._logService.log(
-                  LevelLogEnum.ERROR,
-                  'SiteConfigComponent',
-                  'No URL found in upload response',
-                  { response, uploadedFile }
-                );
-                this.loadUpdateConfigButtons = false;
-                this.error = translations['admin.siteConfig.errors.uploadError'];
-                this._alertService.showAlert(
-                  translations['admin.siteConfig.errors.title'],
-                  translations['admin.siteConfig.errors.uploadError'],
-                  Alerts.ERROR,
-                  Position.CENTER,
-                  true,
-                  translations['button.ok']
-                );
-                this._cdr.markForCheck();
-                return;
-              }
-              
-              this.configForm.patchValue({ logoUrl });
-              this.imageFile = null;
-              this.imagePreview = null;
-              this.selectedFileName = '';
-              this.submitUpdateConfig();
-            } else {
-              this._logService.log(
-                LevelLogEnum.ERROR,
-                'SiteConfigComponent',
-                'Invalid response structure from file upload service',
-                { response }
-              );
-              this.loadUpdateConfigButtons = false;
-              this.error = translations['admin.siteConfig.errors.uploadError'];
-              this._alertService.showAlert(
-                translations['admin.siteConfig.errors.title'],
-                translations['admin.siteConfig.errors.uploadError'],
-                Alerts.ERROR,
-                Position.CENTER,
-                true,
-                translations['button.ok']
-              );
-              this._cdr.markForCheck();
-            }
-          },
-          error: (error) => {
-            this._logService.log(
-              LevelLogEnum.ERROR,
-              'SiteConfigComponent',
-              'Error uploading configuration file',
-              { error: String(error) }
-            );
-            this.loadUpdateConfigButtons = false;
-            this.error = translations['admin.siteConfig.errors.uploadError'];
-            this._alertService.showAlert(
-              translations['admin.siteConfig.errors.title'],
-              translations['admin.siteConfig.errors.uploadError'],
-              Alerts.ERROR,
-              Position.CENTER,
-              true,
-              translations['button.ok']
-            );
-            this._cdr.markForCheck();
-          }
-        });
-      } else {
-        this.submitUpdateConfig();
-      }
-    } else {
+
+    if (!this.configForm.valid) {
       this.loadUpdateConfigButtons = false;
       this.error = translations['admin.siteConfig.errors.requiredFields'];
       this._cdr.markForCheck();
+      return;
     }
+
+    if (this.imageFile) {
+      this._fileUploadService.uploadFile([this.imageFile], 'config', null, null, TypePublishing.PROFILE_IMG).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (response) => {
+          if (response?.files?.length > 0) {
+            const logoUrl = response.files[0].urlCompressed || response.files[0].url || '';
+            if (!logoUrl) {
+              this._handleUploadError('No URL found in upload response', { response });
+              return;
+            }
+            this.configForm.patchValue({ logoUrl });
+            this.imageFile = null;
+            this.imagePreview = null;
+            this.selectedFileName = '';
+            this._uploadBadgeOrSubmit();
+          } else {
+            this._handleUploadError('Invalid response structure from file upload service', { response });
+          }
+        },
+        error: (error) => this._handleUploadError('Error uploading logo file', { error: String(error) }),
+      });
+    } else {
+      this._uploadBadgeOrSubmit();
+    }
+  }
+
+  private _uploadBadgeOrSubmit(): void {
+    if (this.badgeFile) {
+      this._fileUploadService.uploadFile([this.badgeFile], 'config', null, null, TypePublishing.PROFILE_IMG).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (response) => {
+          if (response?.files?.length > 0) {
+            const verifiedBadgeUrl = response.files[0].urlCompressed || response.files[0].url || '';
+            if (!verifiedBadgeUrl) {
+              this._handleUploadError('No URL found in badge upload response', { response });
+              return;
+            }
+            this.configForm.patchValue({ verifiedBadgeUrl });
+            this.badgeFile = null;
+            this.badgePreview = null;
+            this.badgeSelectedFileName = '';
+            this._uploadPremiumBadgeOrSubmit();
+          } else {
+            this._handleUploadError('Invalid response structure from badge upload', { response });
+          }
+        },
+        error: (error) => this._handleUploadError('Error uploading badge file', { error: String(error) }),
+      });
+    } else {
+      this._uploadPremiumBadgeOrSubmit();
+    }
+  }
+
+  private _uploadPremiumBadgeOrSubmit(): void {
+    if (this.premiumBadgeFile) {
+      this._fileUploadService.uploadFile([this.premiumBadgeFile], 'config', null, null, TypePublishing.PROFILE_IMG).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (response) => {
+          if (response?.files?.length > 0) {
+            const premiumBadgeUrl = response.files[0].urlCompressed || response.files[0].url || '';
+            if (!premiumBadgeUrl) {
+              this._handleUploadError('No URL found in premium badge upload response', { response });
+              return;
+            }
+            this.configForm.patchValue({ premiumBadgeUrl });
+            this.premiumBadgeFile = null;
+            this.premiumBadgePreview = null;
+            this.premiumBadgeSelectedFileName = '';
+            this.submitUpdateConfig();
+          } else {
+            this._handleUploadError('Invalid response structure from premium badge upload', { response });
+          }
+        },
+        error: (error) => this._handleUploadError('Error uploading premium badge file', { error: String(error) }),
+      });
+    } else {
+      this.submitUpdateConfig();
+    }
+  }
+
+  private _handleUploadError(msg: string, context: object): void {
+    this._logService.log(LevelLogEnum.ERROR, 'SiteConfigComponent', msg, context);
+    this.loadUpdateConfigButtons = false;
+    this.error = translations['admin.siteConfig.errors.uploadError'];
+    this._alertService.showAlert(
+      translations['admin.siteConfig.errors.title'],
+      translations['admin.siteConfig.errors.uploadError'],
+      Alerts.ERROR, Position.CENTER, true, translations['button.ok'],
+    );
+    this._cdr.markForCheck();
   }
 
   async submitUpdateConfig() {
@@ -285,6 +306,8 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       description: this.configForm.get('description')?.value || '',
       invitationCode: Boolean(this.configForm.get('invitationCode')?.value),
       subscriptionMode: Boolean(this.configForm.get('subscriptionMode')?.value),
+      verifiedBadgeUrl: this.configForm.get('verifiedBadgeUrl')?.value || '',
+      premiumBadgeUrl: this.configForm.get('premiumBadgeUrl')?.value || '',
       loginMethods: JSON.stringify(this.configForm.get('loginMethods')?.value || { email: false, google: false }),
     };
 
@@ -318,7 +341,17 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
           translations['button.ok']
         );
 
-        this._configService.setConfig(response);
+        // Merge form values into response so badge components update immediately,
+        // even if the backend response omits newly-added fields (e.g. before restart)
+        const mergedResponse = {
+          ...response,
+          settings: {
+            ...(response.settings || {}),
+            verifiedBadgeUrl: this.configForm.get('verifiedBadgeUrl')?.value || response.settings?.verifiedBadgeUrl || '',
+            premiumBadgeUrl: this.configForm.get('premiumBadgeUrl')?.value || response.settings?.premiumBadgeUrl || '',
+          },
+        };
+        this._configService.setConfig(mergedResponse);
 
         // Clear preview and file selection after successful save
         this.imagePreview = null;
@@ -366,6 +399,8 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
             description: response.settings.description || '',
             invitationCode: response.settings.invitationCode ?? false,
             subscriptionMode: response.settings.subscriptionMode ?? false,
+            verifiedBadgeUrl: response.settings.verifiedBadgeUrl || '',
+            premiumBadgeUrl: response.settings.premiumBadgeUrl || '',
             loginMethods: {
               email: Boolean(loginMethods.email),
               google: Boolean(loginMethods.google),
@@ -409,12 +444,61 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
         this._cdr.markForCheck();
       };
       reader.readAsDataURL(file);
-
       this.configForm.patchValue({ logoUrl: '' });
     } else {
       this.imagePreview = null;
       this.selectedFileName = '';
     }
+  }
+
+  onBadgeFileChange(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.badgeFile = file;
+      this.badgeSelectedFileName = file.name;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.badgePreview = e.target.result;
+        this._cdr.markForCheck();
+      };
+      reader.readAsDataURL(file);
+      this.configForm.patchValue({ verifiedBadgeUrl: '' });
+    } else {
+      this.badgePreview = null;
+      this.badgeSelectedFileName = '';
+    }
+  }
+
+  removeBadge() {
+    this.badgeFile = null;
+    this.badgePreview = null;
+    this.badgeSelectedFileName = '';
+    this.configForm.patchValue({ verifiedBadgeUrl: '' });
+  }
+
+  onPremiumBadgeFileChange(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.premiumBadgeFile = file;
+      this.premiumBadgeSelectedFileName = file.name;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.premiumBadgePreview = e.target.result;
+        this._cdr.markForCheck();
+      };
+      reader.readAsDataURL(file);
+      this.configForm.patchValue({ premiumBadgeUrl: '' });
+    } else {
+      this.premiumBadgePreview = null;
+      this.premiumBadgeSelectedFileName = '';
+    }
+  }
+
+  removePremiumBadge() {
+    this.premiumBadgeFile = null;
+    this.premiumBadgePreview = null;
+    this.premiumBadgeSelectedFileName = '';
+    this.configForm.patchValue({ premiumBadgeUrl: '' });
   }
 
   /**

@@ -179,8 +179,8 @@ export class UserManagementService {
     return this.userService.userEdit(id, { role });
   }
 
-  toggleVerification(userId: string): Observable<{ userId: string; isVerified: boolean }> {
-    return this.http.put<{ userId: string; isVerified: boolean }>(
+  toggleVerification(userId: string): Observable<{ userId: string; isAccountVerified: boolean }> {
+    return this.http.put<{ userId: string; isAccountVerified: boolean }>(
       `${environment.API_URL}/user/verify/${userId}`,
       {},
     );

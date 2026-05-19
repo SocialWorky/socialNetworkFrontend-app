@@ -330,7 +330,19 @@ export const translations = {
   'admin.siteConfig.fields.logoUrl': 'Logo URL',
   'admin.siteConfig.fields.uploadLogo': 'Upload Logo',
   'admin.siteConfig.fields.privacyPolicy': 'Privacy Policy',
-  
+
+  'admin.siteConfig.verifiedBadge.title': 'Verification Badge',
+  'admin.siteConfig.verifiedBadge.subtitle': 'Upload a custom image to use as the verified account badge. If none is set, a default checkmark is shown.',
+  'admin.siteConfig.verifiedBadge.upload': 'Upload Badge Image',
+  'admin.siteConfig.verifiedBadge.remove': 'Remove badge',
+  'admin.siteConfig.verifiedBadge.removeHint': 'Will revert to the default ✓ checkmark.',
+
+  'admin.siteConfig.premiumBadge.title': 'Premium Badge',
+  'admin.siteConfig.premiumBadge.subtitle': 'Upload a custom image for the premium member badge. Only shown when subscription mode is enabled. Falls back to ⭐ if none set.',
+  'admin.siteConfig.premiumBadge.upload': 'Upload Premium Badge Image',
+  'admin.siteConfig.premiumBadge.remove': 'Remove badge',
+  'admin.siteConfig.premiumBadge.removeHint': 'Will revert to the default ⭐ star.',
+
   // ADMIN SITE CONFIG ERRORS
   'admin.siteConfig.errors.title': 'Error',
   'admin.siteConfig.errors.loadError': 'Error loading site configuration. Please try again.',

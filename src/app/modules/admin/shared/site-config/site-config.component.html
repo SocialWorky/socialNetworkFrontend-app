@@ -233,6 +233,160 @@
         </div>
       </div>
 
+      <!-- Verified Badge Section -->
+      <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+        <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+          <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+            <i class="material-icons">verified_user</i>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.siteConfig.verifiedBadge.title' | workyTranslations }}</h3>
+            <p class="text-sm text-slate-400">{{ 'admin.siteConfig.verifiedBadge.subtitle' | workyTranslations }}</p>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <div class="flex gap-8 items-start lg:flex-row flex-col lg:items-start items-center">
+
+            <!-- Preview -->
+            <div class="relative w-24 h-24 border-2 border-slate-600 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center group">
+              <ng-container *ngIf="badgePreview || configForm.get('verifiedBadgeUrl')?.value; else badgePlaceholder">
+                <img
+                  [src]="badgePreview || getNormalizedImageUrl(configForm.get('verifiedBadgeUrl')?.value)"
+                  alt="Badge preview"
+                  class="w-full h-full object-contain p-3"
+                />
+              </ng-container>
+              <ng-template #badgePlaceholder>
+                <span style="color:#1DA1F2;font-size:2rem;font-weight:bold;">✓</span>
+              </ng-template>
+            </div>
+
+            <div class="flex-1 space-y-4 w-full">
+              <!-- Upload button -->
+              <div class="space-y-2">
+                <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                  <i class="material-icons text-blue-500 text-base">upload</i>
+                  {{ 'admin.siteConfig.verifiedBadge.upload' | workyTranslations }}
+                </label>
+                <div class="relative">
+                  <input
+                    #badgeFileInput
+                    type="file"
+                    (change)="onBadgeFileChange($event)"
+                    accept="image/*"
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  >
+                  <div class="w-full px-4 py-3 border-2 border-dashed border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5 cursor-pointer flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <i class="material-icons text-blue-500">upload_file</i>
+                      <span class="text-slate-400">{{ badgeSelectedFileName || ('admin.siteConfig.fileInput.noFileSelected' | workyTranslations) }}</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="px-4 py-2 bg-blue-500 text-white text-sm font-semibold rounded-lg hover:bg-blue-600 transition-colors duration-200"
+                      (click)="badgeFileInput.click()"
+                    >
+                      {{ 'admin.siteConfig.fileInput.selectFile' | workyTranslations }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Remove badge -->
+              <div class="flex items-center gap-3" *ngIf="configForm.get('verifiedBadgeUrl')?.value || badgePreview">
+                <button
+                  type="button"
+                  class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-red-400 border border-red-500/40 hover:bg-red-500/10 transition-colors duration-200"
+                  (click)="removeBadge()"
+                >
+                  <i class="material-icons text-base">delete</i>
+                  {{ 'admin.siteConfig.verifiedBadge.remove' | workyTranslations }}
+                </button>
+                <span class="text-xs text-slate-500">{{ 'admin.siteConfig.verifiedBadge.removeHint' | workyTranslations }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premium Badge Section -->
+      <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+        <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-b border-white/10">
+          <div class="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center text-white text-xl">
+            <i class="material-icons">workspace_premium</i>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.siteConfig.premiumBadge.title' | workyTranslations }}</h3>
+            <p class="text-sm text-slate-400">{{ 'admin.siteConfig.premiumBadge.subtitle' | workyTranslations }}</p>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <div class="flex gap-8 items-start lg:flex-row flex-col lg:items-start items-center">
+
+            <!-- Preview -->
+            <div class="relative w-24 h-24 border-2 border-slate-600 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center group">
+              <ng-container *ngIf="premiumBadgePreview || configForm.get('premiumBadgeUrl')?.value; else premiumPlaceholder">
+                <img
+                  [src]="premiumBadgePreview || getNormalizedImageUrl(configForm.get('premiumBadgeUrl')?.value)"
+                  alt="Premium badge preview"
+                  class="w-full h-full object-contain p-3"
+                />
+              </ng-container>
+              <ng-template #premiumPlaceholder>
+                <span style="font-size:2rem;">⭐</span>
+              </ng-template>
+            </div>
+
+            <div class="flex-1 space-y-4 w-full">
+              <!-- Upload button -->
+              <div class="space-y-2">
+                <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                  <i class="material-icons text-amber-500 text-base">upload</i>
+                  {{ 'admin.siteConfig.premiumBadge.upload' | workyTranslations }}
+                </label>
+                <div class="relative">
+                  <input
+                    #premiumBadgeFileInput
+                    type="file"
+                    (change)="onPremiumBadgeFileChange($event)"
+                    accept="image/*"
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  >
+                  <div class="w-full px-4 py-3 border-2 border-dashed border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 hover:border-amber-500 hover:bg-amber-500/5 cursor-pointer flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <i class="material-icons text-amber-500">upload_file</i>
+                      <span class="text-slate-400">{{ premiumBadgeSelectedFileName || ('admin.siteConfig.fileInput.noFileSelected' | workyTranslations) }}</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="px-4 py-2 bg-amber-500 text-white text-sm font-semibold rounded-lg hover:bg-amber-600 transition-colors duration-200"
+                      (click)="premiumBadgeFileInput.click()"
+                    >
+                      {{ 'admin.siteConfig.fileInput.selectFile' | workyTranslations }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Remove badge -->
+              <div class="flex items-center gap-3" *ngIf="configForm.get('premiumBadgeUrl')?.value || premiumBadgePreview">
+                <button
+                  type="button"
+                  class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-red-400 border border-red-500/40 hover:bg-red-500/10 transition-colors duration-200"
+                  (click)="removePremiumBadge()"
+                >
+                  <i class="material-icons text-base">delete</i>
+                  {{ 'admin.siteConfig.premiumBadge.remove' | workyTranslations }}
+                </button>
+                <span class="text-xs text-slate-500">{{ 'admin.siteConfig.premiumBadge.removeHint' | workyTranslations }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Legal Section -->
       <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
         <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">

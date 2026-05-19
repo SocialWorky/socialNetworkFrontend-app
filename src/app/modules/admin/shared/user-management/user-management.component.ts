@@ -378,14 +378,14 @@ export class UserManagementComponent implements OnInit, OnDestroy {
           if (idx !== -1) {
             this.users = [
               ...this.users.slice(0, idx),
-              { ...this.users[idx], isVerified: result.isVerified },
+              { ...this.users[idx], isAccountVerified: result.isAccountVerified },
               ...this.users.slice(idx + 1),
             ];
           }
           this.alertService.showAlert(
-            result.isVerified ? 'Usuario Verificado' : 'Verificación Eliminada',
-            result.isVerified ? `${user.name} ahora tiene el badge de verificación.` : `Se eliminó la verificación de ${user.name}.`,
-            result.isVerified ? Alerts.SUCCESS : Alerts.WARNING,
+            result.isAccountVerified ? 'Usuario Verificado' : 'Verificación Eliminada',
+            result.isAccountVerified ? `${user.name} ahora tiene el badge de verificación.` : `Se eliminó la verificación de ${user.name}.`,
+            result.isAccountVerified ? Alerts.SUCCESS : Alerts.WARNING,
             Position.CENTER,
             true,
             'Aceptar',

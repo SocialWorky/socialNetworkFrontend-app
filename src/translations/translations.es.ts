@@ -354,7 +354,19 @@ export const translations = {
   'admin.siteConfig.fields.logoUrl': 'URL del Logo',
   'admin.siteConfig.fields.uploadLogo': 'Subir Logo',
   'admin.siteConfig.fields.privacyPolicy': 'Política de Privacidad',
-  
+
+  'admin.siteConfig.verifiedBadge.title': 'Insignia de Verificación',
+  'admin.siteConfig.verifiedBadge.subtitle': 'Sube una imagen personalizada para usar como insignia de cuenta verificada. Si no hay ninguna, se muestra el ✓ por defecto.',
+  'admin.siteConfig.verifiedBadge.upload': 'Subir Imagen de Insignia',
+  'admin.siteConfig.verifiedBadge.remove': 'Eliminar insignia',
+  'admin.siteConfig.verifiedBadge.removeHint': 'Volverá al ✓ por defecto.',
+
+  'admin.siteConfig.premiumBadge.title': 'Insignia Premium',
+  'admin.siteConfig.premiumBadge.subtitle': 'Sube una imagen personalizada para la insignia de miembro premium. Solo se muestra si el modo de suscripción está activo. Si no hay imagen, se usa ⭐ por defecto.',
+  'admin.siteConfig.premiumBadge.upload': 'Subir Imagen de Insignia Premium',
+  'admin.siteConfig.premiumBadge.remove': 'Eliminar insignia',
+  'admin.siteConfig.premiumBadge.removeHint': 'Volverá a la ⭐ por defecto.',
+
   // ADMIN SITE CONFIG ERRORS
   'admin.siteConfig.errors.title': 'Error',
   'admin.siteConfig.errors.loadError': 'Error al cargar la configuración del sitio. Por favor, intenta de nuevo.',

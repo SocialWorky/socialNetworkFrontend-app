@@ -28,6 +28,7 @@ export interface UserUpdateRequest {
   lastName?: string;
   role?: string;
   isVerified?: boolean;
+  isAccountVerified?: boolean;
   isActive?: boolean;
   avatar?: string;
   token?: string;

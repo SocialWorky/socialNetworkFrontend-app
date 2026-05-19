@@ -11,6 +11,8 @@ export interface Config {
     description?: string;
     invitationCode?: boolean;
     subscriptionMode?: boolean;
+    verifiedBadgeUrl?: string;
+    premiumBadgeUrl?: string;
   };
   customCss?: string;
   // Legacy flat structure for backward compatibility
@@ -25,6 +27,8 @@ export interface Config {
   description?: string;
   invitationCode?: boolean;
   subscriptionMode?: boolean;
+  verifiedBadgeUrl?: string;
+  premiumBadgeUrl?: string;
 }
 
 export interface ConfigServiceInterface {

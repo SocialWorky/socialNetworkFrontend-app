@@ -43,8 +43,9 @@ export interface User {
     lastName:     string;
     avatar:       string;
     email:        string;
-    isPremium?:   boolean;
-    isVerified?:  boolean;
+    isPremium?:          boolean;
+    isVerified?:         boolean;
+    isAccountVerified?:  boolean;
 }
 
 export interface MediaFileUpload {
