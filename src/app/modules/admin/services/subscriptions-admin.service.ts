@@ -75,6 +75,14 @@ export class SubscriptionsAdminService {
     return this.http.put<AdminSubscription>(`${this.apiUrl}/${subscriptionId}/cancel`, {});
   }
 
+  delete(subscriptionId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${subscriptionId}`);
+  }
+
+  changePlan(subscriptionId: string, planId: string, note?: string): Observable<AdminSubscription> {
+    return this.http.put<AdminSubscription>(`${this.apiUrl}/${subscriptionId}/change-plan`, { planId, note });
+  }
+
   searchUsers(query: string): Observable<UserSearchResult[]> {
     return this.http.get<UserSearchResult[]>(`${this.userApiUrl}/username/${encodeURIComponent(query)}`);
   }

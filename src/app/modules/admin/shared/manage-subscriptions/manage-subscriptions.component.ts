@@ -50,14 +50,68 @@ export class ManageSubscriptionsComponent implements OnInit, OnDestroy {
   selectedSubscription: AdminSubscription | null = null;
   get showDetailModal(): boolean { return !!this.selectedSubscription; }
 
+  // Change plan panel (inside detail modal)
+  showChangePlanPanel = false;
+  changePlanId = '';
+  isChangingPlan = false;
+
+  // Deletable statuses
+  readonly deletableStatuses = ['failed', 'cancelled', 'expired'];
+
   openDetail(sub: AdminSubscription): void {
     this.selectedSubscription = sub;
+    this.showChangePlanPanel = false;
+    this.changePlanId = '';
     this.cdr.markForCheck();
   }
 
   closeDetail(): void {
     this.selectedSubscription = null;
+    this.showChangePlanPanel = false;
+    this.changePlanId = '';
     this.cdr.markForCheck();
+  }
+
+  deleteSubscription(sub: AdminSubscription): void {
+    this.alertService.showConfirmation(
+      '¿Eliminar suscripción?',
+      `Se eliminará permanentemente este registro. Esta acción no se puede deshacer.`,
+      'Eliminar', 'Cancelar', Alerts.WARNING,
+    ).pipe(takeUntil(this.destroy$)).subscribe((confirmed) => {
+      if (!confirmed) return;
+      this.svc.delete(sub._id).pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
+          this.closeDetail();
+          this.loadSubscriptions();
+          this.alertService.showAlert('Eliminada', 'La suscripción fue eliminada.', Alerts.SUCCESS, Position.CENTER, true, 'OK');
+        },
+        error: (err) => {
+          this.alertService.showAlert('Error', err?.error?.message ?? 'No se pudo eliminar.', Alerts.ERROR, Position.CENTER, true, 'OK');
+        },
+      });
+    });
+  }
+
+  confirmChangePlan(): void {
+    if (!this.selectedSubscription || !this.changePlanId) return;
+    this.isChangingPlan = true;
+    this.cdr.markForCheck();
+
+    this.svc.changePlan(this.selectedSubscription._id, this.changePlanId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (newSub) => {
+          this.isChangingPlan = false;
+          this.loadSubscriptions();
+          this.closeDetail();
+          this.alertService.showAlert('Plan cambiado', `La suscripción ahora usa el plan "${newSub.plan?.name}".`, Alerts.SUCCESS, Position.CENTER, true, 'OK');
+        },
+        error: (err) => {
+          this.isChangingPlan = false;
+          this.cdr.markForCheck();
+          this.alertService.showAlert('Error', err?.error?.message ?? 'No se pudo cambiar el plan.', Alerts.ERROR, Position.CENTER, true, 'OK');
+        },
+      });
   }
 
   // Assign modal

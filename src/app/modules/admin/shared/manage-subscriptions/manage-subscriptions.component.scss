@@ -1,7 +1,24 @@
-// All visual styles are handled by Tailwind utility classes.
-// This file intentionally left minimal.
-
 select option {
   background-color: #1e293b;
   color: #e2e8f0;
+}
+
+// The worky-avatar host element has no explicit background so the browser
+// may render it with a default white bg. Force it transparent here.
+:host ::ng-deep worky-avatar {
+  background-color: transparent !important;
+  display: inline-flex !important;
+  line-height: 0 !important;
+}
+
+// Also make the inner .avatar wrapper transparent — the colored circle
+// comes from .avatar-initials background, so the wrapper itself needs no fill.
+:host ::ng-deep worky-avatar .avatar {
+  background-color: transparent !important;
+}
+
+// Dark skeleton to match the admin dark theme
+:host ::ng-deep worky-avatar .avatar .skeleton-placeholder {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%) !important;
+  background-size: 200% 100% !important;
 }
