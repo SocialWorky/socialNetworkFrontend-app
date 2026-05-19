@@ -1,66 +1,66 @@
-<div class="min-h-screen bg-slate-950 py-12 px-4">
+<div class="subscribe-page">
 
   <!-- Loading -->
-  <div *ngIf="isLoading" class="flex justify-center items-center py-24">
-    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+  <div *ngIf="isLoading" class="subscribe-loading">
+    <div class="subscribe-spinner"></div>
   </div>
 
   <ng-container *ngIf="!isLoading">
 
     <!-- Active subscription banner -->
-    <div *ngIf="isActive()" class="max-w-2xl mx-auto mb-8 p-6 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-2xl">
-      <div class="flex items-center gap-3 mb-2">
-        <i class="material-icons text-yellow-400 text-2xl">star</i>
-        <h2 class="text-lg font-bold text-slate-100">{{ 'subscription.currentPlan' | workyTranslations }}: {{ currentSubscription?.plan?.name }}</h2>
+    <div *ngIf="isActive()" class="subscribe-active-banner">
+      <div class="subscribe-active-banner__header">
+        <i class="material-icons subscribe-active-banner__icon">star</i>
+        <h2 class="subscribe-active-banner__title">
+          {{ 'subscription.currentPlan' | workyTranslations }}: {{ currentSubscription?.plan?.name }}
+        </h2>
       </div>
-      <p class="text-slate-400 text-sm">
+      <p class="subscribe-active-banner__expiry">
         {{ 'subscription.expiresOn' | workyTranslations }}:
         {{ currentSubscription?.expiresAt | date:'dd/MM/yyyy' }}
       </p>
-      <button (click)="cancelSubscription()"
-        class="mt-4 text-sm text-red-400 hover:text-red-300 underline transition-colors">
+      <button (click)="cancelSubscription()" class="subscribe-active-banner__cancel">
         {{ 'subscription.cancelSubscription' | workyTranslations }}
       </button>
     </div>
 
     <!-- Page title -->
-    <div class="text-center mb-12">
-      <h1 class="text-3xl font-bold text-slate-100 mb-3">{{ 'subscription.title' | workyTranslations }}</h1>
-      <p class="text-slate-400">Elige el plan que mejor se adapte a ti</p>
+    <div class="subscribe-header">
+      <h1 class="subscribe-header__title">{{ 'subscription.title' | workyTranslations }}</h1>
+      <p class="subscribe-header__subtitle">{{ 'subscription.choosePlan' | workyTranslations }}</p>
     </div>
 
     <!-- No plans -->
-    <div *ngIf="plans.length === 0" class="text-center text-slate-400 py-16">
-      <i class="material-icons text-5xl mb-4">credit_card_off</i>
+    <div *ngIf="plans.length === 0" class="subscribe-empty">
+      <i class="material-icons subscribe-empty__icon">credit_card_off</i>
       <p>{{ 'subscription.noPremiumPlan' | workyTranslations }}</p>
     </div>
 
     <!-- Plans grid -->
-    <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div *ngFor="let plan of plans"
-        class="relative bg-slate-900 border border-slate-700 rounded-2xl p-6 flex flex-col hover:border-blue-500/50 transition-all duration-300">
+    <div class="plans-grid">
+      <div *ngFor="let plan of plans" class="plan-card">
 
         <!-- Plan name -->
-        <div class="mb-4">
-          <div class="flex items-center gap-2 mb-1">
-            <i class="material-icons text-yellow-400 text-lg">star</i>
-            <h3 class="text-lg font-bold text-slate-100">{{ plan.name }}</h3>
+        <div class="plan-card__header">
+          <div class="plan-card__name-row">
+            <i class="material-icons plan-card__star">star</i>
+            <h3 class="plan-card__name">{{ plan.name }}</h3>
           </div>
-          <p *ngIf="plan.description" class="text-sm text-slate-400">{{ plan.description }}</p>
+          <p *ngIf="plan.description" class="plan-card__description">{{ plan.description }}</p>
         </div>
 
         <!-- Price -->
-        <div class="mb-6">
-          <span class="text-3xl font-extrabold text-white">{{ formatPrice(plan.priceClp) }}</span>
-          <span class="text-slate-400 text-sm ml-2">/ {{ plan.durationDays }} {{ 'subscription.days' | workyTranslations }}</span>
+        <div class="plan-card__price">
+          <span class="plan-card__price-amount">{{ formatPrice(plan.priceClp) }}</span>
+          <span class="plan-card__price-period">/ {{ plan.durationDays }} {{ 'subscription.days' | workyTranslations }}</span>
         </div>
 
         <!-- Features -->
-        <div *ngIf="plan.features?.length" class="mb-6 flex-1">
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">{{ 'subscription.features' | workyTranslations }}</p>
-          <ul class="space-y-2">
-            <li *ngFor="let feature of plan.features" class="flex items-center gap-2 text-sm text-slate-300">
-              <i class="material-icons text-green-400 text-base">check_circle</i>
+        <div *ngIf="plan.features?.length" class="plan-card__features">
+          <p class="plan-card__features-label">{{ 'subscription.features' | workyTranslations }}</p>
+          <ul class="plan-card__features-list">
+            <li *ngFor="let feature of plan.features" class="plan-card__feature-item">
+              <i class="material-icons plan-card__feature-icon">check_circle</i>
               {{ ('admin.feature.' + feature) | workyTranslations }}
             </li>
           </ul>
@@ -70,16 +70,14 @@
         <button
           (click)="subscribe(plan)"
           [disabled]="!!initiatingPlanId || isActive()"
-          class="w-full py-3 px-6 rounded-xl font-bold text-sm transition-all duration-200
-            bg-blue-500 text-white hover:bg-blue-600
-            disabled:opacity-50 disabled:cursor-not-allowed
-            flex items-center justify-center gap-2">
+          class="plan-card__cta"
+          [class.plan-card__cta--loading]="initiatingPlanId === plan._id">
           <ng-container *ngIf="initiatingPlanId === plan._id">
-            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            <div class="plan-card__cta-spinner"></div>
             {{ 'subscription.redirectingToPayment' | workyTranslations }}
           </ng-container>
           <ng-container *ngIf="initiatingPlanId !== plan._id">
-            <i class="material-icons text-base">{{ isActive() ? 'check' : 'payment' }}</i>
+            <i class="material-icons plan-card__cta-icon">{{ isActive() ? 'check' : 'payment' }}</i>
             {{ (isActive() ? 'subscription.currentPlan' : 'subscription.subscribe') | workyTranslations }}
           </ng-container>
         </button>

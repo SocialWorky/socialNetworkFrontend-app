@@ -1424,6 +1424,7 @@ export const translations = {
 
   // Subscription — User-facing
   'subscription.title': 'Subscription Plans',
+  'subscription.choosePlan': 'Choose the plan that best suits you',
   'subscription.premium': 'Premium',
   'subscription.premiumBadge': 'Premium Member',
   'subscription.subscribe': 'Subscribe',

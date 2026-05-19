@@ -1404,6 +1404,7 @@ export const translations = {
 
   // Suscripción — Vista del usuario
   'subscription.title': 'Planes de Suscripción',
+  'subscription.choosePlan': 'Elige el plan que mejor se adapte a ti',
   'subscription.premium': 'Premium',
   'subscription.premiumBadge': 'Miembro Premium',
   'subscription.subscribe': 'Suscribirse',
