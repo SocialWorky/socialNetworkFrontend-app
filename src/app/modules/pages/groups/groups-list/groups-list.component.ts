@@ -3,6 +3,7 @@ import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { GroupsService, Group } from '@shared/services/core-apis/groups.service';
+import { AuthService } from '@auth/services/auth.service';
 
 @Component({
   selector: 'worky-groups-list',
@@ -20,6 +21,7 @@ export class GroupsListComponent implements OnInit, OnDestroy {
   pageSize = 20;
   isLoading = true;
   showCreateForm = false;
+  isAdmin = false;
 
   searchControl = new FormControl('');
 
@@ -27,9 +29,12 @@ export class GroupsListComponent implements OnInit, OnDestroy {
     private readonly groupsService: GroupsService,
     private readonly router: Router,
     private readonly cdr: ChangeDetectorRef,
+    private readonly authService: AuthService,
   ) {}
 
   ngOnInit(): void {
+    const token = this.authService.getDecodedToken();
+    this.isAdmin = token?.role === 'admin';
     this.loadGroups();
 
     this.searchControl.valueChanges

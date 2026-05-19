@@ -2,18 +2,18 @@
   <div class="events-header">
     <h1>{{ 'events.title' | workyTranslations }}</h1>
     <div style="display:flex;gap:8px;align-items:center;">
-      <select [(ngModel)]="filterType" (change)="loadEvents()" style="padding:6px 12px;border-radius:8px;border:1px solid var(--worky-border);">
+      <select [(ngModel)]="filterType" (change)="loadEvents()">
         <option value="">{{ 'events.upcoming' | workyTranslations }}</option>
         <option value="physical">{{ 'events.physical' | workyTranslations }}</option>
         <option value="virtual">{{ 'events.virtual' | workyTranslations }}</option>
       </select>
-      <button class="btn-primary" (click)="showCreateForm = !showCreateForm">
+      <button *ngIf="isAdmin" class="btn-primary" (click)="showCreateForm = !showCreateForm">
         {{ 'events.create' | workyTranslations }}
       </button>
     </div>
   </div>
 
-  <worky-event-create *ngIf="showCreateForm" (created)="onEventCreated()"></worky-event-create>
+  <worky-event-create *ngIf="isAdmin && showCreateForm" (created)="onEventCreated()"></worky-event-create>
 
   <div *ngIf="isLoading" class="loading">{{ 'analytics.loading' | workyTranslations }}</div>
 

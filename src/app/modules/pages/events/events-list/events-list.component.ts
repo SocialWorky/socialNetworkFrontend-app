@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnIni
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { EventsService, SocialEvent } from '@shared/services/core-apis/events.service';
+import { AuthService } from '@auth/services/auth.service';
 
 @Component({
   selector: 'worky-events-list',
@@ -19,14 +20,18 @@ export class EventsListComponent implements OnInit, OnDestroy {
   isLoading = true;
   showCreateForm = false;
   filterType = '';
+  isAdmin = false;
 
   constructor(
     private readonly eventsService: EventsService,
     private readonly router: Router,
     private readonly cdr: ChangeDetectorRef,
+    private readonly authService: AuthService,
   ) {}
 
   ngOnInit(): void {
+    const token = this.authService.getDecodedToken();
+    this.isAdmin = token?.role === 'admin';
     this.loadEvents();
   }
 
