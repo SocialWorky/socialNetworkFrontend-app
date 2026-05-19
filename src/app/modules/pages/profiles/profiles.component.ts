@@ -12,7 +12,6 @@ import { AuthService } from '@auth/services/auth.service';
 import { AnalyticsService, ProfileStats } from '@shared/services/core-apis/analytics.service';
 import { SubscriptionService } from '@shared/services/subscription.service';
 import { ExploreService, LocationStatus } from '@shared/services/core-apis/explore.service';
-import { TipsService, Tip } from '@shared/services/core-apis/tips.service';
 import { CreatorProfileService, CreatorProfile, CreatorStats } from '@shared/services/core-apis/creator-profile.service';
 import { UserService } from '@shared/services/core-apis/users.service';
 import { User } from '@shared/interfaces/user.interface';
@@ -89,12 +88,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   locationStatus: LocationStatus = { discoveryEnabled: false, city: null, country: null };
   isTogglingDiscovery = false;
 
-  showTipModal = false;
-  tipAmount = 1000;
-  tipMessage = '';
-  isSendingTip = false;
-  receivedTips: Tip[] = [];
-
   // Creator profile
   myCreatorProfile: CreatorProfile | null = null;
   myCreatorStats: CreatorStats | null = null;
@@ -170,7 +163,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _analyticsService: AnalyticsService,
     private readonly _subscriptionService: SubscriptionService,
     private readonly _exploreService: ExploreService,
-    private readonly _tipsService: TipsService,
     private readonly _creatorProfileService: CreatorProfileService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
@@ -194,8 +186,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Load analytics if viewing own profile and premium
     this.isCurrentUser = this.idUserProfile === (this._authService.getDecodedToken()?.id ?? '');
-
-    // Creator profile and tips features are temporarily disabled
 
     // Load discovery status for own profile
     if (this.isCurrentUser) {
@@ -1180,31 +1170,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   formatCreatorPrice(price: number): string {
     return this._creatorProfileService.formatPrice(price);
-  }
-
-  // --- Tips ---
-  sendTip(): void {
-    if (this.isSendingTip || !this.idUserProfile) return;
-    if (this.tipAmount < 500 || this.tipAmount > 50000) return;
-    this.isSendingTip = true;
-    this._tipsService
-      .initiateTip(this.idUserProfile, this.tipAmount, this.tipMessage || undefined)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: ({ checkoutUrl }) => {
-          this.isSendingTip = false;
-          this.showTipModal = false;
-          window.location.href = checkoutUrl;
-        },
-        error: () => {
-          this.isSendingTip = false;
-          this._cdr.markForCheck();
-        },
-      });
-  }
-
-  formatTipAmount(amount: number): string {
-    return this._tipsService.formatAmount(amount);
   }
 
   toggleDiscovery(): void {
