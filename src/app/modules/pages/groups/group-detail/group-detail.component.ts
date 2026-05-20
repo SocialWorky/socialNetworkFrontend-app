@@ -17,6 +17,7 @@ import { environment } from '@env/environment';
 import { translations } from '@translations/translations';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
+import { UnifiedCacheService } from '@shared/services/unified-cache.service';
 
 @Component({
   selector: 'worky-group-detail',
@@ -53,6 +54,7 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
     private readonly fileUploadService: FileUploadService,
     private readonly cdr: ChangeDetectorRef,
     private readonly alertService: AlertService,
+    private readonly cacheService: UnifiedCacheService,
   ) {}
 
   ngOnInit(): void {
@@ -278,6 +280,7 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
             this.members = [...this.members, { ...restoredMember, status: 'active' as any, role: restoredMember.role }];
             if (this.group) (this.group as any).memberCount = (this.group.memberCount ?? 0) + 1;
           }
+          this.cacheService.clearByTags(['publication']);
           this.alertService.showAlert(translations['groups.unbanSuccess'], '', Alerts.SUCCESS, Position.TOP_END);
           this.cdr.markForCheck();
         },

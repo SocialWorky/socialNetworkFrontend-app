@@ -122,7 +122,7 @@
             </ng-container>
 
             <span class="name">
-              <ng-container *ngIf="!isProfile">
+              <ng-container *ngIf="!isProfile && !publication.groupId">
                 <i *ngIf="shouldShowPendingIndicator" class="material-icons">fiber_manual_record</i>
 
                 <a *ngIf="shouldShowFollowButton" class="follow-my-friend"
