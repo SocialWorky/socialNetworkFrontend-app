@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, firstValueFrom, takeUntil } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -82,7 +82,11 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       this._cdr.markForCheck();
     });
     if (this.token) {
-      this._router.navigate(['/home']);
+      const decoded = this._authService.getDecodedToken();
+      const target = decoded?.role === 'admin' && !this._deviceDetectionService.isMobile()
+        ? '/admin'
+        : '/home';
+      this._router.navigate([target]);
     }
   }
 
@@ -175,111 +179,94 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     );
     const loadingElement = accessibleLoading.show();
 
-    await this._authApiService.loginUser(credentials).pipe(takeUntil(this.destroy$)).subscribe({
-      next: async (response: any) => {
-        if (response && (response.token || response.accessToken)) {
-          // Store access token (use accessToken if available, fallback to token for backwards compatibility)
-          const accessToken = response.accessToken || response.token;
-          localStorage.setItem('token', accessToken);
+    try {
+      const response: any = await firstValueFrom(
+        this._authApiService.loginUser(credentials).pipe(takeUntil(this.destroy$))
+      );
 
-          // Store refresh token if available
-          if (response.refreshToken) {
-            localStorage.setItem('refreshToken', response.refreshToken);
-          }
+      if (response && (response.token || response.accessToken)) {
+        const accessToken = response.accessToken || response.token;
+        localStorage.setItem('token', accessToken);
 
-          // Store token expiration time if available
-          if (response.expiresIn) {
-            const expiresAt = Date.now() + (response.expiresIn * 1000);
-            localStorage.setItem('tokenExpiresAt', String(expiresAt));
-          }
-
-          localStorage.setItem('lastLogin', new Date().toISOString());
-
-          localStorage.setItem('isDarkMode', response.user.isDarkMode.toString());
-
-          const body = document.body;
-          if (response.user.isDarkMode) {
-            body.classList.add('dark-mode');
-          } else {
-            body.classList.remove('dark-mode');
-          }
-
-          const tokenResponse = await this._authService.getDecodedToken()!;
-
-          localStorage.setItem('isTooltipActive', tokenResponse.isTooltipActive.toString());
-
-          this._socketService.updateToken(localStorage.getItem('token')!);
-          this._socketService.emitEvent('loginUser', localStorage.getItem('token'));
-
-          this._notificationUsersService.loginUser();
-
-          // Initialize user databases after successful login
-          await this._databaseManager.initializeForUser(tokenResponse.id);
-
-          // User login successful - no need to log every successful login
-
-          this._cdr.markForCheck();
-
-          if (tokenResponse?.role === 'admin' && !this._deviceDetectionService.isMobile()) {
-            this._router.navigate(['/admin']);
-          } else {
-            this._router.navigate(['/home']);
-          }
-          
-          // Hide loading on success
-          accessibleLoading.hide(loadingElement);
+        if (response.refreshToken) {
+          localStorage.setItem('refreshToken', response.refreshToken);
         }
-      },
-      error: (e: any) => {
-        this._logService.log(
-          LevelLogEnum.WARN,
-          'LoginComponent',
-          'User login failed',
-          { 
-            email: credentials.email, 
-            error: e.error?.message || e.message,
-            status: e.status 
-          }
-        );
 
-        if (e.error.message === 'User is not verified') {
-          this._alertService.showAlert(
-            translations['alert.title_emailValidated_error'],
-            translations['alert.message_emailValidated_error'],
-            Alerts.ERROR,
-            Position.CENTER,
-            true,
-            translations['button.ok'],
-          );
-          accessibleLoading.hide(loadingElement);
+        if (response.expiresIn) {
+          const expiresAt = Date.now() + (response.expiresIn * 1000);
+          localStorage.setItem('tokenExpiresAt', String(expiresAt));
         }
-        if (e.error.message === 'Unauthorized access. Please provide valid credentials to access this resource') {
-          this._alertService.showAlert(
-            translations['alert.title_error_credentials'],
-            translations['alert.message_error_credentials'],
-            Alerts.ERROR,
-            Position.CENTER,
-            true,
-            translations['button.ok'],
-          );
-          accessibleLoading.hide(loadingElement);
+
+        localStorage.setItem('lastLogin', new Date().toISOString());
+        localStorage.setItem('isDarkMode', response.user.isDarkMode.toString());
+
+        const body = document.body;
+        if (response.user.isDarkMode) {
+          body.classList.add('dark-mode');
+        } else {
+          body.classList.remove('dark-mode');
         }
-        if (e.status === 500) {
-          this._alertService.showAlert(
-            translations['alert.title_error_server'],
-            translations['alert.message_error_server'],
-            Alerts.ERROR,
-            Position.CENTER,
-            true,
-            translations['button.ok'],
-          );
-          accessibleLoading.hide(loadingElement);
+
+        const tokenResponse = this._authService.getDecodedToken()!;
+        localStorage.setItem('isTooltipActive', tokenResponse.isTooltipActive.toString());
+
+        this._socketService.updateToken(localStorage.getItem('token')!);
+        this._socketService.emitEvent('loginUser', localStorage.getItem('token'));
+        this._notificationUsersService.loginUser();
+
+        await this._databaseManager.initializeForUser(tokenResponse.id);
+
+        this._cdr.markForCheck();
+
+        if (tokenResponse?.role === 'admin' && !this._deviceDetectionService.isMobile()) {
+          await this._router.navigate(['/admin']);
+        } else {
+          await this._router.navigate(['/home']);
         }
-      },
-      complete: () => {
-        accessibleLoading.hide(loadingElement);
       }
-    });
+    } catch (e: any) {
+      this._logService.log(
+        LevelLogEnum.WARN,
+        'LoginComponent',
+        'User login failed',
+        {
+          email: credentials.email,
+          error: e.error?.message || e.message,
+          status: e.status
+        }
+      );
+
+      if (e.error?.message === 'User is not verified') {
+        this._alertService.showAlert(
+          translations['alert.title_emailValidated_error'],
+          translations['alert.message_emailValidated_error'],
+          Alerts.ERROR,
+          Position.CENTER,
+          true,
+          translations['button.ok'],
+        );
+      } else if (e.error?.message === 'Unauthorized access. Please provide valid credentials to access this resource') {
+        this._alertService.showAlert(
+          translations['alert.title_error_credentials'],
+          translations['alert.message_error_credentials'],
+          Alerts.ERROR,
+          Position.CENTER,
+          true,
+          translations['button.ok'],
+        );
+      } else if (e.status === 500) {
+        this._alertService.showAlert(
+          translations['alert.title_error_server'],
+          translations['alert.message_error_server'],
+          Alerts.ERROR,
+          Position.CENTER,
+          true,
+          translations['button.ok'],
+        );
+      }
+    } finally {
+      accessibleLoading.hide(loadingElement);
+    }
   }
 
   async loginGoogle() {

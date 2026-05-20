@@ -189,9 +189,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
         .subscribe();
     }
 
-    // Wait for authentication before getting token
-    await this._authService.isAuthenticated();
-    
     const token = this._authService.getDecodedToken();
     if (!token) {
       this._logService.log(

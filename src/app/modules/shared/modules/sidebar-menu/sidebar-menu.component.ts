@@ -62,9 +62,7 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
     // Get fresh user data
     this.getFreshUserData();
     
-    this._authService.isAuthenticated().then(isAuth => {
-      this.isAuthenticated = isAuth;
-    });
+    this.isAuthenticated = this._authService.isAuthenticated();
 
     this.getNotification();
   }

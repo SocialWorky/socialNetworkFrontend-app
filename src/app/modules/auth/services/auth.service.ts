@@ -2,17 +2,14 @@ import { Injectable } from '@angular/core';
 import { jwtDecode } from 'jwt-decode';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { NetworkOptimizationService } from '@shared/services/network-optimization.service';
 
 import { environment } from '@env/environment';
 import { Token } from '../../shared/interfaces/token.interface';
 import { AuthGoogleService } from './auth-google.service';
-import { UserService } from '../../shared/services/core-apis/users.service';
 import { DatabaseCleanupService } from '@shared/services/database/database-cleanup.service';
-
-import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -25,15 +22,14 @@ export class AuthService {
     private http: HttpClient,
     private _authGoogleService: AuthGoogleService,
     private _router: Router,
-    private _userService: UserService,
     private logService: LogService,
     private databaseCleanup: DatabaseCleanupService,
     private networkOptimizationService: NetworkOptimizationService
   ) {}
 
-  async isAuthenticated(): Promise<boolean> {
+  isAuthenticated(): boolean {
     const token = localStorage.getItem('token');
-    
+
     if (!token || token === 'undefined' || token === 'null') {
       this.clearSession();
       return false;
@@ -44,34 +40,12 @@ export class AuthService {
       const currentTime = Math.floor(Date.now() / 1000);
 
       if (!decodedToken || !decodedToken.exp || decodedToken.exp <= currentTime) {
-        // Token expired or invalid - no need to log every token validation
         this.clearSession();
         return false;
       }
 
-      // Try to get user data to verify token is still valid
-      try {
-        const user = await firstValueFrom(this._userService.getUserById(decodedToken.id));
-        if (user) {
-          return true;
-        } else {
-          // User not found in database - no need to log every user validation
-          this.clearSession();
-          return false;
-        }
-      } catch (userError) {
-        // If user fetch fails, token might be invalid
-        this.logService.log(
-          LevelLogEnum.ERROR,
-          'AuthService',
-          'Failed to verify user with token',
-          { userId: decodedToken.id, error: userError }
-        );
-        this.clearSession();
-        return false;
-      }
+      return true;
     } catch (error) {
-      // Failed to decode token - no need to log every decode failure
       this.clearSession();
       return false;
     }

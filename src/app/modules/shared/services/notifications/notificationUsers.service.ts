@@ -84,13 +84,15 @@ export class NotificationUsersService implements OnDestroy {
     
     this._socket.on('disconnect', (reason: string) => {
       this._lastConnectionCheck = Date.now();
-      
-      this.scheduleReconnection();
+      // 'io client disconnect' means we intentionally disconnected (e.g., updateToken).
+      // The caller is responsible for reconnecting — don't schedule a redundant attempt.
+      if (reason !== 'io client disconnect') {
+        this.scheduleReconnection();
+      }
     });
-    
+
     this._socket.on('connect_error', (error: any) => {
       this._lastConnectionCheck = Date.now();
-      
       this.scheduleReconnection();
     });
     
@@ -483,6 +485,10 @@ export class NotificationUsersService implements OnDestroy {
 
   public loginUser() {
     if (!this._decodeToken?.id) {
+      this._decodeToken = this._authService.getDecodedToken()!;
+    }
+
+    if (!this._decodeToken?.id) {
       this._logService.log(
         LevelLogEnum.ERROR,
         'NotificationUsersService',
@@ -491,7 +497,7 @@ export class NotificationUsersService implements OnDestroy {
       );
       return;
     }
-    
+
     const token = localStorage.getItem('token');
     if (!token) {
       this._logService.log(

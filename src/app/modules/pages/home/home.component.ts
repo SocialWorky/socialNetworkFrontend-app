@@ -156,7 +156,6 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async ngOnInit(): Promise<void> {
-    await this._authService.isAuthenticated();
     this.dataUser = this._authService.getDecodedToken();
     this._notificationUsersService.loginUser();
 
@@ -300,7 +299,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.loaderPublications = true;
-    
+    this._cdr.markForCheck();
+
     try {
       // Always load from server to get accurate total count
       // Cache is handled at the service level, but we need the total from server
@@ -354,8 +354,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     } catch (error) {
       this._logService.log(LevelLogEnum.ERROR, 'HomeComponent', 'Error loading publications', { error });
       this.loaderPublications = false;
-      // On error, don't block future loads - allow retry
       this.hasMorePublications = true;
+      this._cdr.markForCheck();
     }
   }
 

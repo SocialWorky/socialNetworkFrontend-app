@@ -11,11 +11,11 @@ export class HomeAdminComponent  implements OnInit {
 
   token = localStorage.getItem('token');
 
-  constructor(private _router: Router) { 
+  constructor(private _router: Router) {
     if (!this.token) {
-      this._router.navigate(['/login']);
+      this._router.navigate(['/auth/login']);
     }
- }
+  }
 
   ngOnInit() {}
 

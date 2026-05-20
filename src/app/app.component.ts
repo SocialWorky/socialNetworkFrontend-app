@@ -105,7 +105,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }, 2000);
 
     // Only initialize widget data if user is authenticated
-    await this.checkAuthenticationAndInitializeWidgets();
+    this.checkAuthenticationAndInitializeWidgets();
 
     // Initialize app update checks
     this.initializeAppUpdates();
@@ -542,15 +542,9 @@ export class AppComponent implements OnInit, OnDestroy {
     );
   }
 
-  private async checkAuthenticationAndInitializeWidgets(): Promise<void> {
-    try {
-      const isAuthenticated = await this._authService.isAuthenticated();
-      if (isAuthenticated) {
-        this._widgetConfigService.initializeData();
-      }
-    } catch (error) {
-      // User is not authenticated, widgets won't be initialized
-      // This is expected behavior for non-authenticated users
+  private checkAuthenticationAndInitializeWidgets(): void {
+    if (this._authService.isAuthenticated()) {
+      this._widgetConfigService.initializeData();
     }
   }
 
