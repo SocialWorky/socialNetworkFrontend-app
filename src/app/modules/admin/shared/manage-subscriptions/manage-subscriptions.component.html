@@ -314,7 +314,7 @@
 
             <div *ngIf="selectedSubscription.latestPayment.paykuPayload?.['note']" class="flex items-start justify-between gap-4">
               <span class="text-xs text-slate-500 flex-shrink-0">Nota</span>
-              <span class="text-xs text-slate-400 text-right">{{ selectedSubscription.latestPayment.paykuPayload?.['note'] }}</span>
+              <span class="text-xs text-slate-400 text-right">{{ selectedSubscription.latestPayment.paykuPayload['note'] }}</span>
             </div>
 
             <div class="flex items-center justify-between">
