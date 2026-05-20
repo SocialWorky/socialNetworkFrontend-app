@@ -198,3 +198,18 @@
     width: 75%;
   }
 }
+
+// Landscape phones: reduce navbar-reserved height to avoid crushing content
+@media (orientation: landscape) and (max-height: 500px) {
+  .content-social-app {
+    @include breakpoints.below-sm {
+      margin-top: 56px;
+    }
+  }
+
+  .social-content-center {
+    @include breakpoints.below-sm {
+      height: calc(100dvh - 56px);
+    }
+  }
+}

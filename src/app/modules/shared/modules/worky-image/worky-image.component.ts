@@ -2,7 +2,6 @@ import { Component, Input, OnInit, OnDestroy, ChangeDetectorRef, Output, EventEm
 import { Subject, takeUntil } from 'rxjs';
 import { UtilityService } from '@shared/services/utility.service';
 import { ImageService, ImageLoadOptions } from '@shared/services/image.service';
-import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 import { CommonModule } from '@angular/common';
 import { environment } from '@env/environment';
 import { ImageSkeletonComponent } from '@shared/components/skeleton/image-skeleton.component';
@@ -87,7 +86,6 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
   constructor(
     private _utilityService: UtilityService,
     private _imageService: ImageService,
-    private _mobileCacheService: MobileImageCacheService,
     private _cdr: ChangeDetectorRef
   ) {}
 
@@ -121,12 +119,9 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
 
     // Normalize image URL if it's a relative path (not starting with http/https)
     const normalizedSrc = this._utilityService.normalizeImageUrl(
-      this.src, 
+      this.src,
       environment.MINIO_BUCKET_URL || ''
     );
-
-    // Use mobile-optimized cache service if available
-    const imageService = this._mobileCacheService.isMobile() ? this._mobileCacheService : this._imageService;
 
     const options: ImageLoadOptions = {
       maxRetries: this.maxRetries,
@@ -138,20 +133,11 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
       priority: this.priority
     };
 
-    // Add context IDs to options for error logging (cast to any to allow dynamic properties)
-    const optionsWithContext = {
-      ...options,
-      publicationId: this.publicationId || undefined,
-      commentId: this.commentId || undefined,
-      mediaId: this.mediaId || undefined
-    } as any;
-
-    // Use the appropriate service for loading
-    // Use the provided imageType or default to 'media'
-    const finalImageType = this.imageType || 'media';
-    const imageObservable = this._mobileCacheService.isMobile() 
-      ? this._mobileCacheService.loadImage(normalizedSrc, finalImageType, optionsWithContext)
-      : this._imageService.loadImage(normalizedSrc, optionsWithContext);
+    // Always use ImageService: it returns the URL directly and lets the browser
+    // fetch the image natively via <img src>. This avoids XHR blob-fetching which
+    // requires CORS headers on the image server (MinIO) and causes load failures
+    // on mobile where the server may not have CORS configured for XHR requests.
+    const imageObservable = this._imageService.loadImage(normalizedSrc, options);
 
     imageObservable
       .pipe(takeUntil(this.destroy$))

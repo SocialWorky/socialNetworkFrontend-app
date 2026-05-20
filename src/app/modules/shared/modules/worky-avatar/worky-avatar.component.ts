@@ -256,45 +256,30 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
     if (this.isGoogleImage(normalizedUrl)) {
       this.loadGoogleImage(normalizedUrl, timeout);
     } else {
-      if (this._mobileCacheService.isMobile()) {
-        // If URL has cache buster, clear old cached version first
-        if (hasCacheBuster) {
-          const baseUrl = normalizedUrl.split('?')[0];
-          this._mobileCacheService.clearImageFromCache(baseUrl)
-            .then(() => {
-              this.loadImageWithMobileCache(normalizedUrl, timeout);
-            })
-            .catch(() => {
-              // If clearing cache fails, try loading anyway
-              this.loadImageWithMobileCache(normalizedUrl, timeout);
-            });
-        } else {
-          this.loadImageWithMobileCache(normalizedUrl, timeout);
-        }
-      } else {
-        const img = new Image();
-        img.src = normalizedUrl;
+      // Use native Image() for all platforms — avoids XHR blob-fetch which requires
+      // CORS headers on MinIO. Browser-native image loading works without CORS.
+      const img = new Image();
+      img.src = normalizedUrl;
 
-        img.onload = () => {
-          clearTimeout(timeout);
-          this.imageData = normalizedUrl;
-          this.isLoading = false;
-          this.isGeneratedAvatar = false;
-          this.hasError = false;
-          this._cdr.markForCheck();
-          this.load.emit();
-        };
+      img.onload = () => {
+        clearTimeout(timeout);
+        this.imageData = normalizedUrl;
+        this.isLoading = false;
+        this.isGeneratedAvatar = false;
+        this.hasError = false;
+        this._cdr.markForCheck();
+        this.load.emit();
+      };
 
-        img.onerror = () => {
-          clearTimeout(timeout);
-          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image, falling back to initials', { url: normalizedUrl });
-          this.imageData = '';
-          this.isGeneratedAvatar = true;
-          this.isLoading = false;
-          this.hasError = true;
-          this._cdr.markForCheck();
-        };
-      }
+      img.onerror = () => {
+        clearTimeout(timeout);
+        this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image, falling back to initials', { url: normalizedUrl });
+        this.imageData = '';
+        this.isGeneratedAvatar = true;
+        this.isLoading = false;
+        this.hasError = true;
+        this._cdr.markForCheck();
+      };
     }
   }
 

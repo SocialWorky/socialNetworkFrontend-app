@@ -498,8 +498,15 @@ export class MobileImageCacheService {
         this.loadQueue.push({
           url: normalizedUrl,
           resolve: (url: string) => observer.next(url),
-          reject: (error: any) => observer.error(error),
-          options: optionsWithType // Include options with imageType for context in error logs
+          reject: (error: any) => {
+            // Mirror ImageService behavior: use fallbackUrl on error
+            if (options.fallbackUrl) {
+              observer.next(options.fallbackUrl);
+            } else {
+              observer.error(error);
+            }
+          },
+          options: optionsWithType
         });
         
         this.processLoadQueue();
@@ -559,7 +566,12 @@ export class MobileImageCacheService {
               }
             );
           }
-          observer.error(error);
+          // Mirror ImageService behavior: use fallbackUrl on error instead of propagating
+          if (options.fallbackUrl) {
+            observer.next(options.fallbackUrl);
+          } else {
+            observer.error(error);
+          }
         })
         .finally(() => observer.complete());
     });

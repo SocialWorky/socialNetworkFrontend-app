@@ -19,6 +19,9 @@
     display: flex;
     padding: 2px;
     align-items: center;
+    @include breakpoints.tablet-only {
+      width: 100%;
+    }
     @include breakpoints.below-sm {
       width: 100%;
       flex-direction: column;
@@ -93,6 +96,10 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
       overflow-y: auto;
       z-index: 9999;
+      @include breakpoints.tablet-only {
+        width: min(400px, 90vw);
+        margin-left: 0;
+      }
       @include breakpoints.below-sm {
         width: 98%;
         margin-left: 0;
