@@ -53,15 +53,18 @@ export class GroupCreateComponent implements OnDestroy {
   }
 
   submit(): void {
+    this.form.markAllAsTouched();
     if (this.form.invalid || this.isSubmitting) return;
     this.isSubmitting = true;
     this.error = null;
+    this.cdr.markForCheck();
 
     this.groupsService.createGroup(this.form.value)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           this.isSubmitting = false;
+          this.cdr.markForCheck();
           this.created.emit();
         },
         error: () => {

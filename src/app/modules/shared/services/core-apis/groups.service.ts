@@ -9,6 +9,7 @@ export interface Group {
   name: string;
   description: string | null;
   coverImage: string | null;
+  avatarImage?: string | null;
   category: string | null;
   privacy: 'public' | 'private' | 'secret';
   createdBy: string;
@@ -31,6 +32,7 @@ export interface CreateGroupPayload {
   name: string;
   description?: string;
   coverImage?: string;
+  avatarImage?: string;
   category?: string;
   privacy?: 'public' | 'private' | 'secret';
 }

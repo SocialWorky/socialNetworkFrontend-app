@@ -84,6 +84,7 @@ export class GroupsListComponent implements OnInit, OnDestroy {
 
   onGroupCreated(): void {
     this.showCreateForm = false;
+    this.cdr.markForCheck();
     this.loadGroups();
   }
 }

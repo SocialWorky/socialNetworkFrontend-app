@@ -1580,6 +1580,13 @@ export const translations = {
   'groups.privateDesc': 'Solo miembros aprobados pueden ver el contenido',
   'groups.secretDesc': 'No aparece en búsquedas, solo por invitación',
   'groups.creating': 'Creando…',
+  'groups.nameRequired': 'El nombre del grupo es obligatorio',
+  'groups.addCover': 'Agregar foto de portada',
+  'groups.groupInfo': 'Información del grupo',
+  'groups.createdAt': 'Creado',
+  'groups.privateContent': 'Únete al grupo para ver el contenido',
+  'groups.noPosts': 'Aún no hay publicaciones en este grupo',
+  'groups.noMembers': 'No hay miembros activos',
 
   // Explore / Discovery
   'explore.title': 'Descubrir',

@@ -7,6 +7,8 @@ import { GroupsListComponent } from './groups-list/groups-list.component';
 import { GroupDetailComponent } from './group-detail/group-detail.component';
 import { GroupCreateComponent } from './group-create/group-create.component';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
+import { WorkyAvatarModule } from '../../shared/modules/worky-avatar/worky-avatar.module';
+import { AddPublicationModule } from '../../shared/modules/addPublication/addPublication.module';
 
 @NgModule({
   declarations: [
@@ -20,6 +22,8 @@ import { TranslationsModule } from '@shared/modules/translations/translations.mo
     FormsModule,
     GroupsRoutingModule,
     TranslationsModule,
+    WorkyAvatarModule,
+    AddPublicationModule,
   ],
 })
 export class GroupsModule {}

@@ -100,6 +100,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     containsMedia: [false],
     userReceivingId: [''],
     isPremiumContent: [false],
+    groupId: [''],
   });
 
   avatarLoading: boolean = true;
@@ -116,6 +117,10 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   private subscription?: Subscription;
 
   @Input() type?: TypePublishing;
+
+  @Input() groupId?: string;
+
+  @Output() published = new EventEmitter<void>();
 
   @Input() idPublication?: string;
 
@@ -206,6 +211,9 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     }
     
     this.postPrivacy(TypePrivacy.PUBLIC);
+    if (this.groupId) {
+      this.myForm.patchValue({ groupId: this.groupId });
+    }
     this.getUser();
     
     // Subscribe to profile image updates, but only update if newImageUrl is not null
@@ -579,8 +587,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     await this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: async (message: any) => {
         await this.handlePublicationResponse(message, filesBackup);
-        // Clear content after successful creation
         this.myForm.controls['content'].setValue('');
+        this.published.emit();
       },
       error: error => {
         this._logService.log(

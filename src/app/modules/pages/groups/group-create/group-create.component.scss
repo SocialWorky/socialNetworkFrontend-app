@@ -1,7 +1,6 @@
 @use "src/assets/styles/worky-variables" as variables;
 @use "src/assets/styles/worky-palettes" as colors;
 @use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
-@use "sass:map";
 
 .create-panel {
   background: colors.$worky-color-module-container;
@@ -25,7 +24,7 @@
   justify-content: space-between;
   padding: 20px 24px;
   border-bottom: 1px solid colors.$worky-color-greyLight;
-  background: map.get(colors.$worky-navy, 93);
+  background: colors.$worky-color-module-container;
 }
 
 .panel-header-left {
@@ -61,7 +60,7 @@
   svg {
     width: 20px;
     height: 20px;
-    stroke: #fff;
+    stroke: colors.$worky-color-light;
   }
 }
 
@@ -84,10 +83,7 @@
     color: colors.$worky-color-text;
   }
 
-  svg {
-    width: 16px;
-    height: 16px;
-  }
+  svg { width: 16px; height: 16px; }
 }
 
 // ── Form ─────────────────────────────────────────────────────────────────────
@@ -141,9 +137,7 @@ form {
   pointer-events: none;
 }
 
-.textarea-count {
-  bottom: 10px;
-}
+.textarea-count { bottom: 10px; }
 
 input,
 textarea,
@@ -168,26 +162,20 @@ select {
   &:focus {
     outline: none;
     border-color: colors.$worky-color-navy;
-    box-shadow: 0 0 0 3px map.get(colors.$worky-navy, 93);
+    box-shadow: 0 0 0 3px colors.$worky-color-greyLight;
   }
 
   &.invalid {
     border-color: colors.$worky-color-red;
 
     &:focus {
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+      box-shadow: 0 0 0 3px colors.$worky-color-greyLight;
     }
   }
 }
 
-.input-wrap input {
-  padding-right: 52px;
-}
-
-textarea {
-  padding-right: 52px;
-  line-height: 1.5;
-}
+.input-wrap input { padding-right: 52px; }
+textarea { padding-right: 52px; line-height: 1.5; }
 
 // ── Privacy cards ────────────────────────────────────────────────────────────
 
@@ -209,30 +197,23 @@ textarea {
   border: 1.5px solid colors.$worky-color-greyLight;
   border-radius: 10px;
   cursor: pointer;
+  background: colors.$worky-color-module-container;
   transition: border-color 0.15s ease, background 0.15s ease;
   position: relative;
 
-  input[type="radio"] {
-    display: none;
-  }
+  input[type="radio"] { display: none; }
 
   &:hover {
-    border-color: map.get(colors.$worky-navy, 56);
-    background: map.get(colors.$worky-navy, 93);
+    border-color: colors.$worky-color-navy;
+    background: colors.$worky-color-input-background;
   }
 
   &.selected {
     border-color: colors.$worky-color-navy;
-    background: map.get(colors.$worky-navy, 93);
+    background: colors.$worky-color-input-background;
 
-    .privacy-check {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    .privacy-icon {
-      opacity: 1;
-    }
+    .privacy-check { opacity: 1; transform: scale(1); }
+    .privacy-icon   { opacity: 1; }
   }
 }
 
@@ -245,30 +226,14 @@ textarea {
   justify-content: center;
   flex-shrink: 0;
   opacity: 0.75;
+  background: colors.$worky-color-greyLight;
   transition: opacity 0.15s ease;
 
-  svg {
-    width: 17px;
-    height: 17px;
-  }
+  svg { width: 17px; height: 17px; }
 
-  &--public {
-    background: rgba(34, 197, 94, 0.12);
-    color: #16a34a;
-    svg { stroke: #16a34a; }
-  }
-
-  &--private {
-    background: rgba(234, 179, 8, 0.12);
-    color: #b45309;
-    svg { stroke: #b45309; }
-  }
-
-  &--secret {
-    background: rgba(139, 92, 246, 0.12);
-    color: #7c3aed;
-    svg { stroke: #7c3aed; }
-  }
+  &--public  { color: colors.$worky-color-green;       svg { stroke: colors.$worky-color-green; } }
+  &--private { color: colors.$worky-color-yellow-text; svg { stroke: colors.$worky-color-yellow-text; } }
+  &--secret  { color: colors.$worky-color-purple;      svg { stroke: colors.$worky-color-purple; } }
 }
 
 .privacy-text {
@@ -307,8 +272,14 @@ textarea {
   svg {
     width: 11px;
     height: 11px;
-    stroke: #fff;
+    stroke: colors.$worky-color-light;
   }
+}
+
+.field-error {
+  font-size: 12px;
+  color: colors.$worky-color-red;
+  margin-top: 2px;
 }
 
 // ── Error banner ─────────────────────────────────────────────────────────────
@@ -318,8 +289,8 @@ textarea {
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: colors.$worky-color-greyLight;
+  border: 1px solid colors.$worky-color-red;
   border-radius: 8px;
   color: colors.$worky-color-red;
   font-size: 13px;
@@ -352,7 +323,7 @@ textarea {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background 0.15s ease;
 
   &:hover {
     background: colors.$worky-color-greyLight;
@@ -368,24 +339,15 @@ textarea {
   border-radius: 8px;
   border: none;
   background: colors.$worky-color-navy;
-  color: #fff;
+  color: colors.$worky-color-light;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.15s ease, transform 0.1s ease;
 
-  &:hover:not(:disabled) {
-    opacity: 0.88;
-  }
-
-  &:active:not(:disabled) {
-    transform: scale(0.98);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  &:hover:not(:disabled)  { opacity: 0.88; }
+  &:active:not(:disabled) { transform: scale(0.98); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 .btn-spinner svg {

@@ -21,6 +21,8 @@ export class LoyautComponent implements OnInit, OnDestroy {
 
   isProfile: boolean = false;
 
+  isGroupDetail: boolean = false;
+
   isMessages: boolean = false;
 
   navbarVisible: boolean = true;
@@ -82,12 +84,14 @@ export class LoyautComponent implements OnInit, OnDestroy {
       .subscribe((event: NavigationEnd) => {
         this.routeUrl = event.url;
         this.isProfile = this.routeUrl.includes('profile');
+        this.isGroupDetail = /\/groups\/[^/]/.test(this.routeUrl);
         this.isMessages = this.routeUrl.includes('messages');
         this._cdr.markForCheck();
       });
 
     this.routeUrl = this._router.url;
     this.isProfile = this.routeUrl.includes('profile');
+    this.isGroupDetail = /\/groups\/[^/]/.test(this.routeUrl);
     this.isMessages = this.routeUrl.includes('messages');
     this._cdr.markForCheck();
   }

@@ -1600,6 +1600,13 @@ export const translations = {
   'groups.privateDesc': 'Only approved members can see the content',
   'groups.secretDesc': 'Does not appear in searches, invite only',
   'groups.creating': 'Creating…',
+  'groups.nameRequired': 'Group name is required',
+  'groups.addCover': 'Add cover photo',
+  'groups.groupInfo': 'Group information',
+  'groups.createdAt': 'Created',
+  'groups.privateContent': 'Join the group to see content',
+  'groups.noPosts': 'No posts in this group yet',
+  'groups.noMembers': 'No active members',
 
   // Explore / Discovery
   'explore.title': 'Discover',
