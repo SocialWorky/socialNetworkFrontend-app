@@ -23,6 +23,17 @@ body {
 
 img, video {
   width: 100%;
+  height: auto; // Preserve aspect ratio and prevent layout shift (CLS)
+}
+
+// Prevent auto-zoom on input focus in iOS Safari (triggers when font-size < 16px)
+// Also ensures consistent input sizing across all mobile browsers
+@media (max-width: 1060px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
 }
 
 .dark-mode {
@@ -610,7 +621,10 @@ img, video {
   width: 100%;
   margin-top: 10px;
   iframe {
-    height: 300px;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    display: block;
   }
 }
 
