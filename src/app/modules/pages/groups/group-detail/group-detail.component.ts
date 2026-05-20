@@ -15,6 +15,8 @@ import { FileUploadService } from '@shared/services/core-apis/file-upload.servic
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { environment } from '@env/environment';
 import { translations } from '@translations/translations';
+import { AlertService } from '@shared/services/alert.service';
+import { Alerts, Position } from '@shared/enums/alerts.enum';
 
 @Component({
   selector: 'worky-group-detail',
@@ -38,6 +40,7 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
   publications: any[] = [];
   activeTab: 'publications' | 'members' = 'publications';
   isLoading = true;
+  isBanned = false;
   isUploadingCover = false;
   isUploadingAvatar = false;
   currentUserId = '';
@@ -49,6 +52,7 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
     private readonly authService: AuthService,
     private readonly fileUploadService: FileUploadService,
     private readonly cdr: ChangeDetectorRef,
+    private readonly alertService: AlertService,
   ) {}
 
   ngOnInit(): void {
@@ -95,8 +99,11 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
           }
         }
       },
-      error: () => {
+      error: (err) => {
         this.isLoading = false;
+        if (err?.error?.message === 'group_access_denied_banned') {
+          this.isBanned = true;
+        }
         this.cdr.markForCheck();
       },
     });
@@ -205,38 +212,76 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
   kickMember(): void {
     const userId = this.menuMember?.userId;
     if (!this.group || !userId) return;
-    if (!confirm(translations['groups.kickConfirm'])) return;
-    this.groupsService.removeMember(this.group._id, userId).pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => {
-        this.members = this.members.filter((m) => m.userId !== userId);
-        this.menuMember = null;
-        this.cdr.markForCheck();
-      },
+    const groupId = this.group._id;
+    this.alertService.showConfirmation(
+      translations['groups.kickConfirm'],
+      '',
+      translations['button.yes'] || 'Sí',
+      translations['button.no'] || 'No',
+      Alerts.WARNING,
+      Position.CENTER,
+    ).pipe(takeUntil(this.destroy$)).subscribe((confirmed) => {
+      if (!confirmed) return;
+      this.groupsService.removeMember(groupId, userId).pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
+          this.members = this.members.filter((m) => m.userId !== userId);
+          this.menuMember = null;
+          this.cdr.markForCheck();
+        },
+      });
     });
   }
 
   banMember(): void {
     const userId = this.menuMember?.userId;
     if (!this.group || !userId) return;
-    if (!confirm(translations['groups.banConfirm'])) return;
-    this.groupsService.banMember(this.group._id, userId).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (banned) => {
-        this.members = this.members.filter((m) => m.userId !== userId);
-        this.bannedMembers = [...this.bannedMembers, banned];
-        this.menuMember = null;
-        this.cdr.markForCheck();
-      },
+    const groupId = this.group._id;
+    this.alertService.showConfirmation(
+      translations['groups.banConfirm'],
+      '',
+      translations['button.yes'] || 'Sí',
+      translations['button.no'] || 'No',
+      Alerts.WARNING,
+      Position.CENTER,
+    ).pipe(takeUntil(this.destroy$)).subscribe((confirmed) => {
+      if (!confirmed) return;
+      this.groupsService.banMember(groupId, userId).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (banned) => {
+          this.members = this.members.filter((m) => m.userId !== userId);
+          this.bannedMembers = [...this.bannedMembers, banned];
+          this.menuMember = null;
+          if (this.group) (this.group as any).memberCount = Math.max(0, (this.group.memberCount ?? 1) - 1);
+          this.alertService.showAlert(translations['groups.banSuccess'], '', Alerts.SUCCESS, Position.TOP_END);
+          this.cdr.markForCheck();
+        },
+      });
     });
   }
 
   unbanMember(userId: string): void {
     if (!this.group) return;
-    if (!confirm(translations['groups.unbanConfirm'])) return;
-    this.groupsService.unbanMember(this.group._id, userId).pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => {
-        this.bannedMembers = this.bannedMembers.filter((m) => m.userId !== userId);
-        this.cdr.markForCheck();
-      },
+    const groupId = this.group._id;
+    this.alertService.showConfirmation(
+      translations['groups.unbanConfirm'],
+      '',
+      translations['button.yes'] || 'Sí',
+      translations['button.no'] || 'No',
+      Alerts.QUESTION,
+      Position.CENTER,
+    ).pipe(takeUntil(this.destroy$)).subscribe((confirmed) => {
+      if (!confirmed) return;
+      const restoredMember = this.bannedMembers.find((m) => m.userId === userId);
+      this.groupsService.unbanMember(groupId, userId).pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
+          this.bannedMembers = this.bannedMembers.filter((m) => m.userId !== userId);
+          if (restoredMember) {
+            this.members = [...this.members, { ...restoredMember, status: 'active' as any, role: restoredMember.role }];
+            if (this.group) (this.group as any).memberCount = (this.group.memberCount ?? 0) + 1;
+          }
+          this.alertService.showAlert(translations['groups.unbanSuccess'], '', Alerts.SUCCESS, Position.TOP_END);
+          this.cdr.markForCheck();
+        },
+      });
     });
   }
 

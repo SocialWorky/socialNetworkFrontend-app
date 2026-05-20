@@ -1602,6 +1602,8 @@ export const translations = {
   'groups.banSuccess': 'Usuario bloqueado del grupo',
   'groups.unbanSuccess': 'Usuario desbloqueado',
   'groups.cannotBanAdmin': 'No puedes bloquear a un administrador',
+  'groups.bannedNotice': 'Has sido bloqueado de este grupo',
+  'groups.bannedDescription': 'Ya no tienes acceso a este grupo ni a su contenido.',
 
   // Explore / Discovery
   'explore.title': 'Descubrir',

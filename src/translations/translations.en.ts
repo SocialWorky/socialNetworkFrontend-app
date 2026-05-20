@@ -1622,6 +1622,8 @@ export const translations = {
   'groups.banSuccess': 'User banned from group',
   'groups.unbanSuccess': 'User unbanned',
   'groups.cannotBanAdmin': 'You cannot ban an admin',
+  'groups.bannedNotice': 'You have been banned from this group',
+  'groups.bannedDescription': 'You no longer have access to this group or its content.',
 
   // Explore / Discovery
   'explore.title': 'Discover',

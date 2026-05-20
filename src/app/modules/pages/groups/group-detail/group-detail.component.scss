@@ -757,3 +757,99 @@
   align-items: center;
   gap: 8px;
 }
+
+.gd-banned-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid colors.$worky-color-greyLight;
+  gap: 12px;
+
+  &:last-child { border-bottom: none; }
+}
+
+.gd-banned-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.gd-banned-avatar {
+  position: relative;
+  flex-shrink: 0;
+
+  .gd-banned-icon-overlay {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 16px;
+    height: 16px;
+    background: colors.$worky-color-red;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid colors.$worky-color-module-container;
+
+    svg {
+      width: 10px;
+      height: 10px;
+      stroke: #fff;
+      stroke-width: 2.5;
+    }
+  }
+}
+
+.gd-banned-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.gd-banned-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: colors.$worky-color-text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gd-banned-username {
+  font-size: 11px;
+  color: colors.$worky-color-icon;
+}
+
+.gd-banned-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+
+  svg {
+    width: 56px;
+    height: 56px;
+    stroke: colors.$worky-color-red;
+    opacity: 0.8;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: colors.$worky-color-red;
+    margin: 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: colors.$worky-color-icon;
+    margin: 0;
+    max-width: 360px;
+  }
+}

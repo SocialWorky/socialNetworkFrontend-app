@@ -2,6 +2,14 @@
   <div class="gd-spinner"></div>
 </div>
 
+<div *ngIf="!isLoading && isBanned" class="gd-banned-notice">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+  </svg>
+  <h3>{{ 'groups.bannedNotice' | workyTranslations }}</h3>
+  <p>{{ 'groups.bannedDescription' | workyTranslations }}</p>
+</div>
+
 <div *ngIf="!isLoading && group" class="gd-page">
 
   <!-- ── Cover ────────────────────────────────────────────────────── -->
@@ -333,11 +341,30 @@
               {{ 'groups.bannedMembers' | workyTranslations }}
               <span class="gd-count-badge">{{ bannedMembers.length }}</span>
             </h4>
-            <div *ngFor="let m of bannedMembers" class="gd-pending-row">
-              <span class="gd-pending-id">
-                {{ m.user?.name || '' }} {{ m.user?.lastName || '' }}
-                <small *ngIf="m.user?.username">&#64;{{ m.user?.username }}</small>
-              </span>
+            <div *ngFor="let m of bannedMembers" class="gd-banned-row">
+              <div class="gd-banned-user">
+                <div class="gd-banned-avatar">
+                  <worky-avatar
+                    [size]="40"
+                    [img]="m.user?.avatar || ''"
+                    [name]="(m.user?.name || '') + ' ' + (m.user?.lastName || '')">
+                  </worky-avatar>
+                  <span class="gd-banned-icon-overlay">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                    </svg>
+                  </span>
+                </div>
+                <div class="gd-banned-info">
+                  <ng-container *ngIf="m.user; else bannedIdFallback">
+                    <span class="gd-banned-name">{{ m.user.name }} {{ m.user.lastName }}</span>
+                    <span class="gd-banned-username" *ngIf="m.user.username">&#64;{{ m.user.username }}</span>
+                  </ng-container>
+                  <ng-template #bannedIdFallback>
+                    <span class="gd-banned-name">{{ m.userId }}</span>
+                  </ng-template>
+                </div>
+              </div>
               <button class="gd-btn-sm gd-btn-sm--green" (click)="unbanMember(m.userId)">
                 {{ 'groups.unban' | workyTranslations }}
               </button>
