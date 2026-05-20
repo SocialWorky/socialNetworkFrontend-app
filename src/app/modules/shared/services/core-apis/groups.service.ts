@@ -121,6 +121,18 @@ export class GroupsService {
     return this.http.delete<void>(`${this.apiUrl}/groups/${id}/members/${userId}`);
   }
 
+  banMember(id: string, userId: string): Observable<GroupMember> {
+    return this.http.put<GroupMember>(`${this.apiUrl}/groups/${id}/members/${userId}/ban`, {});
+  }
+
+  unbanMember(id: string, userId: string): Observable<GroupMember> {
+    return this.http.put<GroupMember>(`${this.apiUrl}/groups/${id}/members/${userId}/unban`, {});
+  }
+
+  getBannedMembers(id: string): Observable<GroupMember[]> {
+    return this.http.get<GroupMember[]>(`${this.apiUrl}/groups/${id}/members/banned`);
+  }
+
   getGroupPublications(id: string, page: number = 1): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/groups/${id}/publications`, { params: { page: String(page) } });
   }

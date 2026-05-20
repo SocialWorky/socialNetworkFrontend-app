@@ -1591,6 +1591,17 @@ export const translations = {
   'groups.role.admin': 'Administrador',
   'groups.role.moderator': 'Moderador',
   'groups.role.member': 'Miembro',
+  'groups.kick': 'Expulsar',
+  'groups.ban': 'Bloquear',
+  'groups.unban': 'Desbloquear',
+  'groups.bannedMembers': 'Usuarios bloqueados',
+  'groups.kickConfirm': '¿Expulsar a este usuario del grupo?',
+  'groups.banConfirm': '¿Bloquear a este usuario? No podrá ver el grupo ni sus publicaciones.',
+  'groups.unbanConfirm': '¿Desbloquear a este usuario?',
+  'groups.kickSuccess': 'Usuario expulsado del grupo',
+  'groups.banSuccess': 'Usuario bloqueado del grupo',
+  'groups.unbanSuccess': 'Usuario desbloqueado',
+  'groups.cannotBanAdmin': 'No puedes bloquear a un administrador',
 
   // Explore / Discovery
   'explore.title': 'Descubrir',

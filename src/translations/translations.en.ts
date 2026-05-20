@@ -1611,6 +1611,17 @@ export const translations = {
   'groups.role.admin': 'Admin',
   'groups.role.moderator': 'Moderator',
   'groups.role.member': 'Member',
+  'groups.kick': 'Remove',
+  'groups.ban': 'Ban',
+  'groups.unban': 'Unban',
+  'groups.bannedMembers': 'Banned users',
+  'groups.kickConfirm': 'Remove this user from the group?',
+  'groups.banConfirm': 'Ban this user? They will not be able to see the group or its posts.',
+  'groups.unbanConfirm': 'Unban this user?',
+  'groups.kickSuccess': 'User removed from group',
+  'groups.banSuccess': 'User banned from group',
+  'groups.unbanSuccess': 'User unbanned',
+  'groups.cannotBanAdmin': 'You cannot ban an admin',
 
   // Explore / Discovery
   'explore.title': 'Discover',

@@ -675,3 +675,85 @@
   &--moderator { background: colors.$worky-color-greyLight; color: colors.$worky-color-blue; }
   &--member   { background: colors.$worky-color-greyLight; color: colors.$worky-color-icon; }
 }
+
+.gd-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: colors.$worky-color-icon;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  margin-left: auto;
+
+  &:hover {
+    background: colors.$worky-color-greyLight;
+    color: colors.$worky-color-navy;
+  }
+}
+
+.gd-member-actions {
+  position: relative;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.gd-member-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 100;
+  min-width: 160px;
+  background-color: colors.$worky-color-module-container;
+  border: 1px solid colors.$worky-color-greyLight;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.gd-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  color: colors.$worky-color-text;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background-color: colors.$worky-color-greyLight;
+  }
+
+  &--danger {
+    color: colors.$worky-color-red;
+  }
+}
+
+.gd-panel--banned {
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: 12px;
+  background: colors.$worky-color-module-container;
+  border: 1px solid colors.$worky-color-greyLight;
+}
+
+.gd-panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: colors.$worky-color-icon;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

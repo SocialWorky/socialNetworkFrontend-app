@@ -14,6 +14,7 @@ import { AuthService } from '@auth/services/auth.service';
 import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { environment } from '@env/environment';
+import { translations } from '@translations/translations';
 
 @Component({
   selector: 'worky-group-detail',
@@ -31,6 +32,9 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
   group: (Group & { isMember?: boolean; myRole?: string; isAdmin?: boolean; isModerator?: boolean }) | null = null;
   members: GroupMember[] = [];
   pendingMembers: GroupMember[] = [];
+  bannedMembers: GroupMember[] = [];
+  menuMember: GroupMember | null = null;
+  openMenuUserId: string | null = null;
   publications: any[] = [];
   activeTab: 'publications' | 'members' = 'publications';
   isLoading = true;
@@ -87,6 +91,7 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
           this.loadMembers(groupId);
           if ((g as any).isAdmin || (g as any).isModerator) {
             this.loadPendingMembers(groupId);
+            this.loadBannedMembers(groupId);
           }
         }
       },
@@ -119,6 +124,15 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
     this.groupsService.getPendingMembers(groupId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (pending) => {
         this.pendingMembers = pending;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  private loadBannedMembers(groupId: string): void {
+    this.groupsService.getBannedMembers(groupId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (banned) => {
+        this.bannedMembers = banned;
         this.cdr.markForCheck();
       },
     });
@@ -163,6 +177,64 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
     this.groupsService.rejectMember(this.group._id, userId).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.pendingMembers = this.pendingMembers.filter((m) => m.userId !== userId);
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  openMemberMenu(member: GroupMember): void {
+    this.menuMember = member;
+  }
+
+  toggleMemberMenu(member: GroupMember, event: Event): void {
+    event.stopPropagation();
+    if (this.openMenuUserId === member.userId) {
+      this.openMenuUserId = null;
+    } else {
+      this.menuMember = member;
+      this.openMenuUserId = member.userId;
+    }
+    this.cdr.markForCheck();
+  }
+
+  closeMemberMenu(): void {
+    this.openMenuUserId = null;
+    this.cdr.markForCheck();
+  }
+
+  kickMember(): void {
+    const userId = this.menuMember?.userId;
+    if (!this.group || !userId) return;
+    if (!confirm(translations['groups.kickConfirm'])) return;
+    this.groupsService.removeMember(this.group._id, userId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.members = this.members.filter((m) => m.userId !== userId);
+        this.menuMember = null;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  banMember(): void {
+    const userId = this.menuMember?.userId;
+    if (!this.group || !userId) return;
+    if (!confirm(translations['groups.banConfirm'])) return;
+    this.groupsService.banMember(this.group._id, userId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (banned) => {
+        this.members = this.members.filter((m) => m.userId !== userId);
+        this.bannedMembers = [...this.bannedMembers, banned];
+        this.menuMember = null;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  unbanMember(userId: string): void {
+    if (!this.group) return;
+    if (!confirm(translations['groups.unbanConfirm'])) return;
+    this.groupsService.unbanMember(this.group._id, userId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.bannedMembers = this.bannedMembers.filter((m) => m.userId !== userId);
         this.cdr.markForCheck();
       },
     });

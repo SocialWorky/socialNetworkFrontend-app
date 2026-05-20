@@ -287,7 +287,7 @@
           <p>{{ 'groups.noMembers' | workyTranslations }}</p>
         </div>
 
-        <div class="gd-members-grid">
+        <div class="gd-members-grid" (click)="closeMemberMenu()">
           <div *ngFor="let m of members" class="gd-member-card">
             <div class="gd-member-avatar">
               <worky-avatar
@@ -306,8 +306,44 @@
             <span class="gd-role-badge gd-role-badge--{{ m.role }}">
               {{ ('groups.role.' + m.role) | workyTranslations }}
             </span>
+            <div
+              *ngIf="(group?.isAdmin || group?.isModerator) && m.userId !== currentUserId"
+              class="gd-member-actions">
+              <button class="gd-btn-icon" (click)="toggleMemberMenu(m, $event)">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                  <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+                </svg>
+              </button>
+              <div class="gd-member-dropdown" *ngIf="openMenuUserId === m.userId" (click)="$event.stopPropagation()">
+                <button class="gd-dropdown-item" (click)="kickMember(); closeMemberMenu()">
+                  {{ 'groups.kick' | workyTranslations }}
+                </button>
+                <button class="gd-dropdown-item gd-dropdown-item--danger" (click)="banMember(); closeMemberMenu()">
+                  {{ 'groups.ban' | workyTranslations }}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- Banned members section: admin only -->
+        <ng-container *ngIf="group?.isAdmin && bannedMembers.length > 0">
+          <div class="gd-panel gd-panel--banned">
+            <h4 class="gd-panel-title">
+              {{ 'groups.bannedMembers' | workyTranslations }}
+              <span class="gd-count-badge">{{ bannedMembers.length }}</span>
+            </h4>
+            <div *ngFor="let m of bannedMembers" class="gd-pending-row">
+              <span class="gd-pending-id">
+                {{ m.user?.name || '' }} {{ m.user?.lastName || '' }}
+                <small *ngIf="m.user?.username">&#64;{{ m.user?.username }}</small>
+              </span>
+              <button class="gd-btn-sm gd-btn-sm--green" (click)="unbanMember(m.userId)">
+                {{ 'groups.unban' | workyTranslations }}
+              </button>
+            </div>
+          </div>
+        </ng-container>
 
       </div>
 
