@@ -243,7 +243,7 @@
           [theme]="WorkyButtonTheme.Accent"
           [height]="'40px'"
           [width]="'100%'">
-          <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POST_PROFILE ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
+          <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POST_PROFILE || type === typePublishing.GROUP_POST ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
         </worky-buttons>
         <div *ngIf="loaderSavePublication" class="loader"></div>
       </div>

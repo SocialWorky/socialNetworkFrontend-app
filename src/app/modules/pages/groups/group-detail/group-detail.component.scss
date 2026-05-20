@@ -594,6 +594,13 @@
   border: 1px solid colors.$worky-color-greyLight;
   border-radius: 12px;
   padding: 16px;
+
+  p {
+    color: colors.$worky-color-text;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+  }
 }
 
 .gd-pub-author {

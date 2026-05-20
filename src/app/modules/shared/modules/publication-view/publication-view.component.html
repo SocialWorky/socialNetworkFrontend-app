@@ -101,6 +101,12 @@
                 {{ publication.userReceiving.name }} {{ publication.userReceiving.lastName }}
               </span>
           </ng-container>
+          <ng-container *ngIf="publication.groupId && !publication.userReceiving">
+            <i class="material-icons" style="font-size:16px; vertical-align:middle; color:var(--worky-color-icon);">chevron_right</i>
+            <span class="group-link" (click)="viewGroup(publication.groupId)">
+              {{ publication.group?.name || ('groups.title' | workyTranslations) }}
+            </span>
+          </ng-container>
         </div>
 
         <ng-template #notFriend>
@@ -108,6 +114,12 @@
             <span (click)="viewProfile(publication.author._id)" class="name link-name">
               {{ publication.author.name }} {{ publication.author.lastName }}
             </span>
+            <ng-container *ngIf="publication.groupId && !publication.userReceiving">
+              <i class="material-icons" style="font-size:16px; vertical-align:middle; color:var(--worky-color-icon);">chevron_right</i>
+              <span class="group-link" (click)="viewGroup(publication.groupId)">
+                {{ publication.group?.name || ('groups.title' | workyTranslations) }}
+              </span>
+            </ng-container>
 
             <span class="name">
               <ng-container *ngIf="!isProfile">

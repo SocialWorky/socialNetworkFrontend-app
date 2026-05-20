@@ -1582,6 +1582,7 @@ export const translations = {
   'groups.creating': 'Creando…',
   'groups.nameRequired': 'El nombre del grupo es obligatorio',
   'groups.addCover': 'Agregar foto de portada',
+  'groups.inGroup': 'en',
   'groups.groupInfo': 'Información del grupo',
   'groups.createdAt': 'Creado',
   'groups.privateContent': 'Únete al grupo para ver el contenido',

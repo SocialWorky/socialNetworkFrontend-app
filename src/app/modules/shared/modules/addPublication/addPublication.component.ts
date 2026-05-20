@@ -511,7 +511,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     // Restore content and files for processing in background
     this.myForm.controls['content'].setValue(contentBackup);
     
-    if (this.type === TypePublishing.POST || this.type === TypePublishing.POST_PROFILE) {
+    if (this.type === TypePublishing.POST || this.type === TypePublishing.POST_PROFILE || this.type === TypePublishing.GROUP_POST) {
       this.onSavePublication(filesBackup, previewsBackup);
     } else if (this.type === TypePublishing.COMMENT || this.type === this.typePublishing.IMAGE_VIEW) {
       this.onSaveComment(this.idPublication as string, filesBackup, previewsBackup);
@@ -763,7 +763,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   openUploadModal() {
     const dialogRef = this._dialog.open(ImageUploadModalComponent, {
       data: {
-        maxFiles: this.type === TypePublishing.POST || this.type === TypePublishing.POST_PROFILE ? 10 : 1,
+        maxFiles: this.type === TypePublishing.POST || this.type === TypePublishing.POST_PROFILE || this.type === TypePublishing.GROUP_POST ? 10 : 1,
       }
     });
 

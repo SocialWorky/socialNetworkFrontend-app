@@ -249,12 +249,13 @@
           </button>
         </div>
 
-        <worky-add-publication
-          *ngIf="group.isMember"
-          [type]="typePublishing.GROUP_POST"
-          [groupId]="group._id"
-          (published)="onPublicationCreated()">
-        </worky-add-publication>
+        <div *ngIf="group.isMember" class="worky-module-container">
+          <worky-add-publication
+            [type]="typePublishing.GROUP_POST"
+            [groupId]="group._id"
+            (published)="onPublicationCreated()">
+          </worky-add-publication>
+        </div>
 
         <div *ngIf="group.isMember && publications.length === 0" class="gd-empty">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">

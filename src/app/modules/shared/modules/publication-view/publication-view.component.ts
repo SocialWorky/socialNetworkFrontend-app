@@ -778,6 +778,10 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._router.navigate(['/profile', _id]);
   }
 
+  viewGroup(groupId: string): void {
+    this._router.navigate(['/groups', groupId]);
+  }
+
   refreshPublications(_id?: string) {
     if (_id) {
       // Force refresh to bypass cache when polling for media updates

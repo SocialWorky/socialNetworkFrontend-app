@@ -1602,6 +1602,7 @@ export const translations = {
   'groups.creating': 'Creating…',
   'groups.nameRequired': 'Group name is required',
   'groups.addCover': 'Add cover photo',
+  'groups.inGroup': 'in',
   'groups.groupInfo': 'Group information',
   'groups.createdAt': 'Created',
   'groups.privateContent': 'Join the group to see content',

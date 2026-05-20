@@ -27,6 +27,8 @@ export interface PublicationView {
     isPremiumBlocked?: boolean;
     isBoosted?: boolean;
     boostedUntil?: string;
+    groupId?: string | null;
+    group?: { _id: string; name: string } | null;
 }
 
 export interface EditPublication {

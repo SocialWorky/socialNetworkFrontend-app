@@ -460,3 +460,16 @@
 
   &:hover { background: #475569; }
 }
+
+.group-link {
+  cursor: pointer;
+  color: var(--worky-color-text);
+  font-weight: 600;
+  font-size: 14px;
+  transition: color 0.15s;
+
+  &:hover {
+    color: var(--worky-color-navy);
+    text-decoration: underline;
+  }
+}
