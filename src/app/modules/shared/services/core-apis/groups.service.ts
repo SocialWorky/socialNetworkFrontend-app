@@ -26,6 +26,13 @@ export interface GroupMember {
   role: 'admin' | 'moderator' | 'member';
   status: 'active' | 'pending' | 'banned';
   joinedAt: string;
+  user?: {
+    _id: string;
+    name: string;
+    lastName: string;
+    username: string;
+    avatar: string;
+  } | null;
 }
 
 export interface CreateGroupPayload {

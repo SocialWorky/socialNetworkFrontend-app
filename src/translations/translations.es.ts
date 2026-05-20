@@ -1588,6 +1588,9 @@ export const translations = {
   'groups.privateContent': 'Únete al grupo para ver el contenido',
   'groups.noPosts': 'Aún no hay publicaciones en este grupo',
   'groups.noMembers': 'No hay miembros activos',
+  'groups.role.admin': 'Administrador',
+  'groups.role.moderator': 'Moderador',
+  'groups.role.member': 'Miembro',
 
   // Explore / Discovery
   'explore.title': 'Descubrir',

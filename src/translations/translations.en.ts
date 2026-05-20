@@ -1608,6 +1608,9 @@ export const translations = {
   'groups.privateContent': 'Join the group to see content',
   'groups.noPosts': 'No posts in this group yet',
   'groups.noMembers': 'No active members',
+  'groups.role.admin': 'Admin',
+  'groups.role.moderator': 'Moderator',
+  'groups.role.member': 'Member',
 
   // Explore / Discovery
   'explore.title': 'Discover',

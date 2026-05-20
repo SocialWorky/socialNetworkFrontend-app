@@ -265,28 +265,50 @@
           <p>{{ 'groups.noPosts' | workyTranslations }}</p>
         </div>
 
-        <div *ngFor="let pub of publications" class="gd-pub-card">
-          <div class="gd-pub-author">
-            <worky-avatar [size]="36" [img]="pub.author?.avatar" [name]="(pub.author?.name || '') + ' ' + (pub.author?.lastName || '')"></worky-avatar>
-            <div>
-              <strong>{{ pub.author?.name }} {{ pub.author?.lastName }}</strong>
-              <span>{{ pub.createdAt | date: 'dd/MM/yyyy' }}</span>
-            </div>
-          </div>
-          <p>{{ pub.content }}</p>
+        <div *ngFor="let pub of publications; let i = index" class="worky-module-container">
+          <worky-publication-view
+            [publication]="pub"
+            [type]="typePublishing.POST"
+            [indexPublication]="i">
+          </worky-publication-view>
         </div>
       </div>
 
       <!-- Members tab -->
       <div *ngIf="activeTab === 'members'" class="gd-tab-content">
-        <div *ngFor="let m of members" class="gd-member-row">
-          <worky-avatar [size]="40" [name]="m.userId"></worky-avatar>
-          <span class="gd-member-id">{{ m.userId }}</span>
-          <span class="gd-role-badge gd-role-badge--{{ m.role }}">{{ m.role }}</span>
-        </div>
+
         <div *ngIf="members.length === 0" class="gd-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
           <p>{{ 'groups.noMembers' | workyTranslations }}</p>
         </div>
+
+        <div class="gd-members-grid">
+          <div *ngFor="let m of members" class="gd-member-card">
+            <div class="gd-member-avatar">
+              <worky-avatar
+                [size]="52"
+                [img]="m.user?.avatar || ''"
+                [name]="(m.user?.name || '') + ' ' + (m.user?.lastName || '')">
+              </worky-avatar>
+              <span class="gd-member-role-dot gd-member-role-dot--{{ m.role }}" [title]="m.role"></span>
+            </div>
+            <div class="gd-member-info">
+              <span class="gd-member-name">
+                {{ m.user?.name || '' }} {{ m.user?.lastName || '' }}
+              </span>
+              <span class="gd-member-username">&#64;{{ m.user?.username || m.userId }}</span>
+            </div>
+            <span class="gd-role-badge gd-role-badge--{{ m.role }}">
+              {{ ('groups.role.' + m.role) | workyTranslations }}
+            </span>
+          </div>
+        </div>
+
       </div>
 
     </main>
