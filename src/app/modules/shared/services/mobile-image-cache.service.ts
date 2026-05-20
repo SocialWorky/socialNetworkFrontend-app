@@ -127,9 +127,9 @@ export class MobileImageCacheService {
   private memoryCache = new Map<string, CachedImage>();
   private cacheSize = 0;
   
-  // NEW: Track created object URLs to prevent memory leaks
+  // Track created object URLs to prevent memory leaks
   private createdObjectUrls = new Set<string>();
-  private maxObjectUrls = 20; // Reduced from 50 to 20
+  private maxObjectUrls = 100; // High enough to cover a full feed page without premature revocation
   
   // NEW: Load control to prevent infinite loading
   private currentLoads = 0;
@@ -315,13 +315,12 @@ export class MobileImageCacheService {
   private cleanupObjectUrls(): void {
     if (this.createdObjectUrls.size > this.maxObjectUrls) {
       const urlsToRemove = Array.from(this.createdObjectUrls).slice(0, this.createdObjectUrls.size - this.maxObjectUrls);
-      
+
       urlsToRemove.forEach(url => {
-        URL.revokeObjectURL(url);
         this.createdObjectUrls.delete(url);
+        // Grace period: components still rendering this URL get time to unmount before revocation
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
       });
-      
-      
     }
   }
 

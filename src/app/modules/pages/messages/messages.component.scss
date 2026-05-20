@@ -466,8 +466,23 @@
 
 // ─── Responsive ───────────────────────────────────────────────────────────────
 
-@media (max-width: 768px) {
+@media (max-width: 1059px) and (min-width: 900px) {
+  .conversations-sidebar {
+    width: 300px;
+    min-width: 260px;
+  }
+}
+
+@media (max-width: 899px) and (min-width: 700px) {
+  .conversations-sidebar {
+    width: 260px;
+    min-width: 220px;
+  }
+}
+
+@media (max-width: 699px) {
   .conversations-sidebar {
     width: 100%;
+    min-width: unset;
   }
 }

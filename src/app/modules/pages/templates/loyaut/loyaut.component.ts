@@ -25,13 +25,15 @@ export class LoyautComponent implements OnInit, OnDestroy {
 
   navbarVisible: boolean = true;
 
+  isMobile: boolean = false;
+
+  isTabletView: boolean = false;
+
   WidgetPosition = WidgetPosition;
 
   private routeSub: Subscription | undefined;
 
-  get isMobile(): boolean {
-    return this._deviceDetectionService.isMobile();
-  }
+  private resizeSub: Subscription | undefined;
 
   get isIOS(): boolean {
     return /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -56,17 +58,23 @@ export class LoyautComponent implements OnInit, OnDestroy {
     private _authService: AuthService,
     private _notificationUsersService: NotificationUsersService,
     private _scrollService: ScrollService
-  ) {}
+  ) {
+    this.updateViewState();
+  }
 
   ngOnInit(): void {
     this._authService.getDecodedToken();
     this._notificationUsersService.refreshUserStatuses();
-    
-    // Apply specific class for iPhone with notch
+
     if (this.isIPhoneWithNotch) {
       document.body.classList.add('iphone-with-notch');
     }
-    
+
+    this.resizeSub = this._deviceDetectionService.getResizeEvent().subscribe(() => {
+      this.updateViewState();
+      this._cdr.markForCheck();
+    });
+
     this.routeSub = this._router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd)
@@ -84,15 +92,19 @@ export class LoyautComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
   }
 
+  private updateViewState(): void {
+    this.isMobile = this._deviceDetectionService.isMobile();
+    this.isTabletView = !this.isMobile && window.innerWidth < 1060;
+  }
+
   ngOnDestroy(): void {
-    if (this.routeSub) {
-      this.routeSub.unsubscribe();
-    }
+    if (this.routeSub) this.routeSub.unsubscribe();
+    if (this.resizeSub) this.resizeSub.unsubscribe();
   }
 
   onScroll(event: any) {
     this._scrollService.onScroll(event);
-    if(!this.isMobile) return;
+    if (!this.isMobile) return;
     const threshold = 100;
     const position = event.target.scrollTop + event.target.clientHeight;
     const height = event.target.scrollHeight;

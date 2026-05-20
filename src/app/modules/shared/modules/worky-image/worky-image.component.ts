@@ -115,7 +115,8 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
     this.isLoading = true;
     this.hasError = false;
     this.canRetry = false;
-    this.imageFullyLoaded = false; // Reset fully loaded flag
+    this.imageFullyLoaded = false;
+    this.currentSrc = ''; // Clear stale blob URL before async reload to prevent ERR_FILE_NOT_FOUND
     this._cdr.markForCheck();
 
     // Normalize image URL if it's a relative path (not starting with http/https)
