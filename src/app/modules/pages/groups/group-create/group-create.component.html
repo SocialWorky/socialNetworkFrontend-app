@@ -1,33 +1,158 @@
-<form [formGroup]="form" (ngSubmit)="submit()" class="create-form">
-  <h3>{{ 'groups.create' | workyTranslations }}</h3>
+<div class="create-panel">
 
-  <div class="field">
-    <label>{{ 'groups.name' | workyTranslations }}</label>
-    <input formControlName="name" [placeholder]="'groups.name' | workyTranslations" maxlength="120" />
+  <div class="panel-header">
+    <div class="panel-header-left">
+      <div class="panel-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div>
+        <h2>{{ 'groups.create' | workyTranslations }}</h2>
+        <p>{{ 'groups.createSubtitle' | workyTranslations }}</p>
+      </div>
+    </div>
+    <button class="close-btn" type="button" (click)="cancel()" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
   </div>
 
-  <div class="field">
-    <label>{{ 'groups.description' | workyTranslations }}</label>
-    <textarea formControlName="description" rows="3"></textarea>
-  </div>
+  <form [formGroup]="form" (ngSubmit)="submit()" autocomplete="off">
 
-  <div class="field">
-    <label>{{ 'groups.category' | workyTranslations }}</label>
-    <input formControlName="category" [placeholder]="'groups.category' | workyTranslations" maxlength="80" />
-  </div>
+    <div class="form-row two-col">
+      <div class="form-field">
+        <label class="field-label">
+          {{ 'groups.name' | workyTranslations }}
+          <span class="required-mark">*</span>
+        </label>
+        <div class="input-wrap">
+          <input
+            formControlName="name"
+            [placeholder]="'groups.namePlaceholder' | workyTranslations"
+            maxlength="120"
+            [class.invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+          />
+          <span class="char-count">{{ nameLength }}/120</span>
+        </div>
+      </div>
 
-  <div class="field">
-    <label>{{ 'groups.privacy' | workyTranslations }}</label>
-    <select formControlName="privacy">
-      <option *ngFor="let opt of privacyOptions" [value]="opt">
-        {{ ('groups.' + opt) | workyTranslations }}
-      </option>
-    </select>
-  </div>
+      <div class="form-field">
+        <label class="field-label">{{ 'groups.category' | workyTranslations }}</label>
+        <input
+          formControlName="category"
+          [placeholder]="'groups.categoryPlaceholder' | workyTranslations"
+          maxlength="80"
+        />
+      </div>
+    </div>
 
-  <div *ngIf="error" class="error">{{ error }}</div>
+    <div class="form-field">
+      <label class="field-label">{{ 'groups.description' | workyTranslations }}</label>
+      <div class="textarea-wrap">
+        <textarea
+          formControlName="description"
+          [placeholder]="'groups.descriptionPlaceholder' | workyTranslations"
+          rows="3"
+          maxlength="500"
+        ></textarea>
+        <span class="char-count textarea-count">{{ descriptionLength }}/500</span>
+      </div>
+    </div>
 
-  <button type="submit" [disabled]="form.invalid || isSubmitting" class="btn-primary">
-    {{ 'groups.create' | workyTranslations }}
-  </button>
-</form>
+    <div class="form-field">
+      <label class="field-label">{{ 'groups.privacy' | workyTranslations }}</label>
+      <div class="privacy-cards">
+
+        <label class="privacy-card" [class.selected]="form.get('privacy')?.value === 'public'">
+          <input type="radio" value="public" formControlName="privacy" />
+          <div class="privacy-icon privacy-icon--public">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+          </div>
+          <div class="privacy-text">
+            <strong>{{ 'groups.public' | workyTranslations }}</strong>
+            <span>{{ 'groups.publicDesc' | workyTranslations }}</span>
+          </div>
+          <div class="privacy-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+        </label>
+
+        <label class="privacy-card" [class.selected]="form.get('privacy')?.value === 'private'">
+          <input type="radio" value="private" formControlName="privacy" />
+          <div class="privacy-icon privacy-icon--private">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <div class="privacy-text">
+            <strong>{{ 'groups.private' | workyTranslations }}</strong>
+            <span>{{ 'groups.privateDesc' | workyTranslations }}</span>
+          </div>
+          <div class="privacy-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+        </label>
+
+        <label class="privacy-card" [class.selected]="form.get('privacy')?.value === 'secret'">
+          <input type="radio" value="secret" formControlName="privacy" />
+          <div class="privacy-icon privacy-icon--secret">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </div>
+          <div class="privacy-text">
+            <strong>{{ 'groups.secret' | workyTranslations }}</strong>
+            <span>{{ 'groups.secretDesc' | workyTranslations }}</span>
+          </div>
+          <div class="privacy-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+        </label>
+
+      </div>
+    </div>
+
+    <div *ngIf="error" class="error-banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ error }}
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" (click)="cancel()">
+        {{ 'button.cancel' | workyTranslations }}
+      </button>
+      <button type="submit" class="btn-create" [disabled]="form.invalid || isSubmitting">
+        <span class="btn-spinner" *ngIf="isSubmitting">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+        </span>
+        {{ isSubmitting ? ('groups.creating' | workyTranslations) : ('groups.create' | workyTranslations) }}
+      </button>
+    </div>
+
+  </form>
+</div>

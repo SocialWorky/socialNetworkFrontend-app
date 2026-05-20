@@ -10,7 +10,7 @@
     <input [formControl]="searchControl" [placeholder]="'groups.searchGroups' | workyTranslations" />
   </div>
 
-  <worky-group-create *ngIf="isAdmin && showCreateForm" (created)="onGroupCreated()"></worky-group-create>
+  <worky-group-create *ngIf="isAdmin && showCreateForm" (created)="onGroupCreated()" (cancelled)="showCreateForm = false"></worky-group-create>
 
   <div *ngIf="isLoading" class="loading">{{ 'analytics.loading' | workyTranslations }}</div>
 

@@ -1572,6 +1572,14 @@ export const translations = {
   'groups.mustTransferAdmin': 'Transfiere el rol de admin antes de salir',
   'groups.memberCount': '{0} miembros',
   'groups.secretGroup': 'Grupo secreto — solo por invitación',
+  'groups.createSubtitle': 'Configura los detalles de tu nuevo grupo',
+  'groups.namePlaceholder': 'Ej: Fotografía urbana, Desarrolladores JS…',
+  'groups.descriptionPlaceholder': 'Describe de qué trata el grupo, sus reglas y objetivos…',
+  'groups.categoryPlaceholder': 'Ej: Tecnología, Arte, Deportes…',
+  'groups.publicDesc': 'Cualquiera puede encontrar y unirse al grupo',
+  'groups.privateDesc': 'Solo miembros aprobados pueden ver el contenido',
+  'groups.secretDesc': 'No aparece en búsquedas, solo por invitación',
+  'groups.creating': 'Creando…',
 
   // Explore / Discovery
   'explore.title': 'Descubrir',

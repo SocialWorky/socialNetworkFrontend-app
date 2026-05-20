@@ -14,6 +14,7 @@ export class GroupCreateComponent implements OnDestroy {
   private destroy$ = new Subject<void>();
 
   @Output() created = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
 
   form: FormGroup;
   isSubmitting = false;
@@ -28,8 +29,8 @@ export class GroupCreateComponent implements OnDestroy {
   ) {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(120)]],
-      description: [''],
-      category: [''],
+      description: ['', Validators.maxLength(500)],
+      category: ['', Validators.maxLength(80)],
       privacy: ['public'],
     });
   }
@@ -37,6 +38,18 @@ export class GroupCreateComponent implements OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  get nameLength(): number {
+    return this.form.get('name')?.value?.length ?? 0;
+  }
+
+  get descriptionLength(): number {
+    return this.form.get('description')?.value?.length ?? 0;
+  }
+
+  cancel(): void {
+    this.cancelled.emit();
   }
 
   submit(): void {
