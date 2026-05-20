@@ -229,7 +229,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       this._fileUploadService.uploadFile([this.badgeFile], 'config', null, null, TypePublishing.PROFILE_IMG).pipe(takeUntil(this.destroy$)).subscribe({
         next: (response) => {
           if (response?.files?.length > 0) {
-            const verifiedBadgeUrl = response.files[0].urlCompressed || response.files[0].url || '';
+            const verifiedBadgeUrl = response.files[0].urlCompressedWebP || response.files[0].urlCompressed || response.files[0].url || '';
             if (!verifiedBadgeUrl) {
               this._handleUploadError('No URL found in badge upload response', { response });
               return;
@@ -255,7 +255,7 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       this._fileUploadService.uploadFile([this.premiumBadgeFile], 'config', null, null, TypePublishing.PROFILE_IMG).pipe(takeUntil(this.destroy$)).subscribe({
         next: (response) => {
           if (response?.files?.length > 0) {
-            const premiumBadgeUrl = response.files[0].urlCompressed || response.files[0].url || '';
+            const premiumBadgeUrl = response.files[0].urlCompressedWebP || response.files[0].urlCompressed || response.files[0].url || '';
             if (!premiumBadgeUrl) {
               this._handleUploadError('No URL found in premium badge upload response', { response });
               return;

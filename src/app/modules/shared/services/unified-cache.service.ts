@@ -238,6 +238,16 @@ export class UnifiedCacheService implements OnDestroy {
       }
     }
 
+    if (this.config.enablePersistence) {
+      try {
+        const sessionKeys = Object.keys(sessionStorage).filter(k => k.startsWith(this.STORAGE_PREFIX) && regex.test(k.replace(this.STORAGE_PREFIX, '')));
+        sessionKeys.forEach(k => sessionStorage.removeItem(k));
+
+        const localKeys = Object.keys(localStorage).filter(k => k.startsWith(this.STORAGE_PREFIX) && regex.test(k.replace(this.STORAGE_PREFIX, '')));
+        localKeys.forEach(k => localStorage.removeItem(k));
+      } catch {}
+    }
+
     return cleared;
   }
 

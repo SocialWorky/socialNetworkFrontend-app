@@ -14,6 +14,7 @@ import { environment } from '@env/environment';
         title="Cuenta verificada"
         aria-label="Cuenta verificada"
         style="display:inline-flex;width:1.1em;height:1.1em;margin-left:3px;margin-right:3px;vertical-align:middle;object-fit:contain;"
+        (error)="onImageError()"
       />
       <ng-template #defaultBadge>
         <span
@@ -41,10 +42,16 @@ export class VerifiedBadgeComponent implements OnInit, OnDestroy {
     private _cdr: ChangeDetectorRef,
   ) {}
 
+  onImageError(): void {
+    this.badgeUrl = null;
+    this._cdr.markForCheck();
+  }
+
   ngOnInit(): void {
     this._configService.config$.pipe(takeUntil(this.destroy$)).subscribe(config => {
       const raw = config?.settings?.verifiedBadgeUrl || config?.verifiedBadgeUrl || null;
-      this.badgeUrl = raw ? this._utilityService.normalizeImageUrl(raw, environment.MINIO_BUCKET_URL || '') : null;
+      const normalized = raw ? this._utilityService.normalizeImageUrl(raw, environment.MINIO_BUCKET_URL || '') : null;
+      this.badgeUrl = normalized || null;
       this._cdr.markForCheck();
     });
   }

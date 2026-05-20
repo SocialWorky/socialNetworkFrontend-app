@@ -74,6 +74,7 @@ export class ConfigService {
   }
 
   setConfig(config: any) {
+    this.cacheService.clearByPattern(/config/);
     this.socket.emit('updateConfig', config);
     this.configSubject.next(config);
   }
@@ -94,6 +95,7 @@ export class ConfigService {
         })
       )
       .subscribe((data: any) => {
+        this.cacheService.clearByPattern(/config/);
         this.configSubject.next(data);
         const mode = data?.settings?.subscriptionMode ?? false;
         this.subscriptionModeSubject.next(mode);
