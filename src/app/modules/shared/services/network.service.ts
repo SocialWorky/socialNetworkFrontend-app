@@ -1,17 +1,19 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { BehaviorSubject, Observable, fromEvent, merge } from 'rxjs';
+import { debounceTime, map } from 'rxjs/operators';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { AuthService } from '@auth/services/auth.service';
+import { environment } from '@env/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NetworkService {
-  private connectionStatus$ = new BehaviorSubject<boolean>(navigator.onLine);
+  // Start as true: if the app loaded, there was internet. navigator.onLine is unreliable on macOS/Chrome.
+  private connectionStatus$ = new BehaviorSubject<boolean>(true);
   private connectionSpeed$ = new BehaviorSubject<string>('unknown');
 
-  private testImageUrl = 'https://static.vecteezy.com/system/resources/previews/004/948/022/non_2x/flat-illustration-of-internet-speed-test-gauge-suitable-for-design-element-of-internet-performance-test-connection-speed-information-and-network-speedometer-free-vector.jpg';
+  private readonly pingUrl = `${environment.API_URL}/health`;
 
   constructor(
     private logService: LogService,
@@ -22,16 +24,41 @@ export class NetworkService {
   }
 
   private initNetworkStatusListener() {
-    window.addEventListener('online', () => this.updateOnlineStatus(true));
-    window.addEventListener('offline', () => this.updateOnlineStatus(false));
+    merge(
+      fromEvent(window, 'online').pipe(map(() => true)),
+      // Debounce offline events to ignore brief blips (macOS sleep/wake, VPN, network switch).
+      // Then verify with a real HTTP ping before declaring offline.
+      fromEvent(window, 'offline').pipe(debounceTime(3000), map(() => false))
+    ).subscribe(async (isOnline) => {
+      if (isOnline) {
+        this.updateOnlineStatus(true);
+      } else {
+        // Verify with a real HTTP check — navigator.onLine is not reliable
+        const confirmed = await this.pingBackend();
+        if (!confirmed) {
+          this.updateOnlineStatus(false);
+        }
+        // If ping succeeds, the browser was wrong about being offline — ignore the event
+      }
+    });
+  }
+
+  private async pingBackend(): Promise<boolean> {
+    try {
+      const response = await fetch(this.pingUrl, {
+        method: 'HEAD',
+        cache: 'no-store',
+        signal: AbortSignal.timeout(5000),
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
   }
 
   private updateOnlineStatus(status: boolean) {
     this.connectionStatus$.next(status);
-    
-    const user = this.authService.getDecodedToken();
-    // Network status changed - no need to log every status change
-    
+
     if (status) {
       this.checkConnectionSpeed();
     } else {
@@ -50,7 +77,7 @@ export class NetworkService {
   private async checkConnectionSpeed() {
     const startTime = Date.now();
     try {
-      const response = await fetch(this.testImageUrl, { method: 'HEAD' });
+      const response = await fetch(this.pingUrl, { method: 'HEAD', cache: 'no-store' });
       if (!response.ok) throw new Error('Network response was not ok');
       const endTime = Date.now();
       const duration = endTime - startTime;
@@ -59,20 +86,10 @@ export class NetworkService {
       if (fileSize > 0) {
         const speedBps = (fileSize * 8) / (duration / 1000);
         const speedKbps = speedBps / 1024;
-
-        let speedCategory: string;
-        if (speedKbps < 256) {
-          speedCategory = 'slow';
-        } else {
-          speedCategory = 'fast';
-        }
-        
-        this.connectionSpeed$.next(speedCategory);
-        
-        const user = this.authService.getDecodedToken();
-        // Connection speed measured - no need to log every speed measurement
+        this.connectionSpeed$.next(speedKbps < 256 ? 'slow' : 'fast');
       } else {
-        this.connectionSpeed$.next('unknown');
+        // No content-length — use round-trip time as proxy
+        this.connectionSpeed$.next(duration > 1000 ? 'slow' : 'fast');
       }
     } catch (error) {
       this.logService.log(
@@ -81,7 +98,7 @@ export class NetworkService {
         'Failed to check connection speed',
         { error: error instanceof Error ? error.message : String(error) }
       );
-      this.connectionSpeed$.next('offline');
+      this.connectionSpeed$.next('unknown');
     }
   }
 }

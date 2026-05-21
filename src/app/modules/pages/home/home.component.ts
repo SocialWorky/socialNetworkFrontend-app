@@ -228,7 +228,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private updateConnectionStatus(isOnline: boolean): void {
     this.showConnectionOverlay = !isOnline;
     this.connectionStatusMessage = isOnline ? '' : 'Estás offline - Usando cache local';
-    
+    this._cdr.markForCheck();
+
     if (this.publications().length === 0) {
       this.loadPublications();
     }
