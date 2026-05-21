@@ -1,0 +1,267 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-inter">
+
+  <div class="bg-slate-700/95 backdrop-blur-lg border border-slate-600 rounded-xl p-6 mb-8 shadow-lg">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div class="flex-1">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent mb-2">
+          {{ 'admin.reports.title' | workyTranslations }}
+        </h1>
+        <p class="text-slate-300 text-lg">{{ 'admin.reports.subtitle' | workyTranslations }}</p>
+      </div>
+      <div class="flex gap-3 flex-wrap">
+        <div class="flex items-center gap-3 px-4 py-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+          <i class="material-icons text-yellow-400 text-xl">pending</i>
+          <div class="flex flex-col leading-tight">
+            <span class="text-2xl font-bold text-yellow-400">{{ countByStatus(ReportStatus.PENDING) }}</span>
+            <span class="text-xs text-slate-400 uppercase tracking-wider">{{ 'admin.reports.filterPending' | workyTranslations }}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 px-4 py-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+          <i class="material-icons text-emerald-400 text-xl">check_circle</i>
+          <div class="flex flex-col leading-tight">
+            <span class="text-2xl font-bold text-emerald-400">{{ countByStatus(ReportStatus.RESOLVED) }}</span>
+            <span class="text-xs text-slate-400 uppercase tracking-wider">{{ 'admin.reports.filterResolved' | workyTranslations }}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+          <i class="material-icons text-red-400 text-xl">cancel</i>
+          <div class="flex flex-col leading-tight">
+            <span class="text-2xl font-bold text-red-400">{{ countByStatus(ReportStatus.REJECTED) }}</span>
+            <span class="text-xs text-slate-400 uppercase tracking-wider">{{ 'admin.reports.filterRejected' | workyTranslations }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden">
+
+    <div class="bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-sm border-b border-slate-600/50 px-6 py-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent">
+            Listado de reportes
+          </h2>
+          <p class="text-slate-400 text-sm mt-1">{{ allReports.length }} reportes en total · Haz clic en una fila para ver el detalle</p>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button
+            *ngFor="let f of filters"
+            (click)="applyFilter(f.value)"
+            [class]="activeFilter === f.value
+              ? 'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ' + f.activeClass
+              : 'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-700/50 border border-slate-600/50 text-slate-300 hover:bg-slate-600/50'">
+            {{ f.label }} ({{ f.value === 'all' ? allReports.length : countByStatus(f.value) }})
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="flex flex-col items-center justify-center min-h-[300px] p-8">
+      <div class="w-14 h-14 border-4 border-slate-600 border-t-orange-500 rounded-full animate-spin"></div>
+      <p class="text-slate-400 text-lg font-medium mt-6">{{ 'admin.reports.loading' | workyTranslations }}</p>
+    </div>
+
+    <div *ngIf="errorMessage && !isLoading" class="flex flex-col items-center justify-center min-h-[300px] p-8">
+      <i class="material-icons text-red-400 text-5xl mb-4">error_outline</i>
+      <p class="text-red-400 text-lg font-medium">{{ errorMessage }}</p>
+      <button (click)="loadReports()" class="mt-4 px-5 py-2 rounded-lg border border-slate-600 bg-slate-700 text-slate-300 hover:bg-slate-600 transition-all duration-200 text-sm font-medium">
+        Reintentar
+      </button>
+    </div>
+
+    <div *ngIf="!isLoading && !errorMessage && filteredReports.length === 0" class="flex flex-col items-center justify-center min-h-[300px] p-8">
+      <i class="material-icons text-slate-500 text-5xl mb-4">inbox</i>
+      <p class="text-slate-400 text-lg">{{ 'admin.reports.empty' | workyTranslations }}</p>
+    </div>
+
+    <div *ngIf="!isLoading && filteredReports.length > 0">
+      <div class="grid grid-cols-12 gap-4 bg-gradient-to-r from-slate-900/80 to-slate-800/80 border-b border-slate-600/50 px-6 py-3">
+        <div class="col-span-1"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">Tipo</span></div>
+        <div class="col-span-3"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">Reportado por</span></div>
+        <div class="col-span-4"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">Motivo</span></div>
+        <div class="col-span-2"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">Estado</span></div>
+        <div class="col-span-1"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">Fecha</span></div>
+        <div class="col-span-1 text-center"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">Ver</span></div>
+      </div>
+
+      <div class="divide-y divide-slate-700/50">
+        <div
+          *ngFor="let report of filteredReports"
+          (click)="openDetail(report)"
+          class="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-slate-700/40 transition-all duration-200 cursor-pointer group"
+          [class.opacity-60]="report.status === ReportStatus.RESOLVED || report.status === ReportStatus.REJECTED">
+
+          <div class="col-span-1 flex items-center">
+            <span class="px-2 py-1 rounded-md text-xs font-medium bg-slate-700 text-slate-300">{{ getTypeLabel(report.type) }}</span>
+          </div>
+
+          <div class="col-span-3 flex items-center gap-2 min-w-0">
+            <worky-avatar [size]="32" [img]="report.reporter?.avatar" [name]="reporterName(report)"></worky-avatar>
+            <div class="min-w-0">
+              <p class="text-sm text-slate-100 font-medium truncate group-hover:text-white">{{ reporterName(report) }}</p>
+              <p class="text-xs text-slate-400 truncate">{{ report.reporter ? '@' + report.reporter.username : '' }}</p>
+            </div>
+          </div>
+
+          <div class="col-span-4 flex items-center">
+            <span class="text-sm text-slate-300 line-clamp-2 group-hover:text-slate-100">{{ report.detail_report || '—' }}</span>
+          </div>
+
+          <div class="col-span-2 flex items-center">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold"
+              [ngClass]="{
+                'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30': report.status === ReportStatus.PENDING,
+                'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30': report.status === ReportStatus.RESOLVED,
+                'bg-red-500/15 text-red-400 border border-red-500/30': report.status === ReportStatus.REJECTED
+              }">
+              {{ getStatusLabel(report.status) }}
+            </span>
+          </div>
+
+          <div class="col-span-1 flex items-center">
+            <span class="text-xs text-slate-400">{{ formatDate(report.createdAt) }}</span>
+          </div>
+
+          <div class="col-span-1 flex items-center justify-center">
+            <span class="p-1.5 rounded-lg text-slate-400 group-hover:text-slate-100 group-hover:bg-slate-600/50 transition-all duration-200">
+              <i class="material-icons text-base leading-none">chevron_right</i>
+            </span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showDetailPanel" class="fixed inset-0 z-50 flex" (click)="closeDetail()">
+  <div class="flex-1 bg-black/50 backdrop-blur-sm"></div>
+
+  <div class="w-full max-w-xl bg-slate-900 border-l border-slate-700 flex flex-col shadow-2xl overflow-hidden"
+       (click)="$event.stopPropagation()">
+
+    <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-orange-500/10 to-red-500/10 border-b border-slate-700 flex-shrink-0">
+      <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center text-white flex-shrink-0">
+        <i class="material-icons text-xl">flag</i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h3 class="text-xl font-semibold text-slate-100">{{ 'admin.reports.detail.title' | workyTranslations }}</h3>
+        <p class="text-sm text-slate-400 mt-0.5" *ngIf="selectedReport">{{ formatDateFull(selectedReport.createdAt) }}</p>
+      </div>
+      <button (click)="closeDetail()" class="p-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-700 transition-all duration-200 flex-shrink-0">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+
+    <div class="flex-1 min-h-0 overflow-y-auto p-6" *ngIf="selectedReport">
+
+      <div class="flex items-center justify-between">
+        <span class="text-slate-400 text-sm font-semibold uppercase tracking-wider">Estado actual</span>
+        <span class="px-3 py-1.5 rounded-full text-sm font-semibold"
+          [ngClass]="{
+            'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30': selectedReport.status === ReportStatus.PENDING,
+            'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30': selectedReport.status === ReportStatus.RESOLVED,
+            'bg-red-500/15 text-red-400 border border-red-500/30': selectedReport.status === ReportStatus.REJECTED
+          }">
+          {{ getStatusLabel(selectedReport.status) }}
+        </span>
+      </div>
+
+      <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
+        <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-3">Reportado por</p>
+        <div class="flex items-center gap-3">
+          <worky-avatar [size]="48" [img]="selectedReport.reporter?.avatar" [name]="reporterName(selectedReport)"></worky-avatar>
+          <div>
+            <p class="text-slate-100 font-semibold">{{ reporterName(selectedReport) }}</p>
+            <p class="text-slate-400 text-sm">{{ selectedReport.reporter ? '@' + selectedReport.reporter.username : selectedReport.reporting_user }}</p>
+            <p class="text-slate-500 text-xs mt-0.5">{{ selectedReport.reporter?.email }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 space-y-3">
+        <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Detalle del reporte</p>
+        <div class="flex gap-3 text-sm">
+          <span class="text-slate-500 w-24 flex-shrink-0">Tipo</span>
+          <span class="text-slate-200 font-medium">{{ getTypeLabel(selectedReport.type) }}</span>
+        </div>
+        <div class="flex gap-3 text-sm">
+          <span class="text-slate-500 w-24 flex-shrink-0">ID reportado</span>
+          <span class="font-mono text-slate-300 text-xs break-all">{{ selectedReport._idReported }}</span>
+        </div>
+        <div class="flex gap-3 text-sm">
+          <span class="text-slate-500 w-24 flex-shrink-0 pt-0.5">Motivo</span>
+          <span class="text-slate-100 leading-relaxed">{{ selectedReport.detail_report || '—' }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="selectedReport.detail_resolution" class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <i class="material-icons text-emerald-400 text-sm">check_circle</i>
+          <p class="text-emerald-400 text-xs font-semibold uppercase tracking-wider">Respuesta del administrador</p>
+        </div>
+        <p class="text-slate-200 text-sm leading-relaxed">{{ selectedReport.detail_resolution }}</p>
+      </div>
+
+    </div>
+
+    <div *ngIf="actionError" class="flex-shrink-0 mx-6 mb-2">
+      <div class="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-sm">
+        <i class="material-icons text-base">error</i>
+        {{ actionError }}
+      </div>
+    </div>
+
+    <div class="flex-shrink-0 border-t border-slate-700 p-6" *ngIf="selectedReport">
+
+      <div *ngIf="selectedReport.status === ReportStatus.PENDING" class="space-y-4">
+        <form [formGroup]="resolutionForm">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            Respuesta del administrador
+          </label>
+          <textarea
+            formControlName="detail_resolution"
+            rows="4"
+            placeholder="Escribe la resolución o motivo que recibirá el usuario..."
+            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800/60 text-slate-100 text-sm resize-none transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
+          </textarea>
+          <p *ngIf="resolutionForm.get('detail_resolution')?.invalid && resolutionForm.get('detail_resolution')?.touched"
+             class="text-red-400 text-xs mt-1 flex items-center gap-1">
+            <i class="material-icons text-sm">error</i>
+            Mínimo 10 caracteres.
+          </p>
+        </form>
+
+        <div class="flex gap-3">
+          <button
+            (click)="resolve()"
+            [disabled]="resolutionForm.invalid || isSubmitting"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm border border-emerald-500 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            <div *ngIf="isSubmitting" class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+            <i *ngIf="!isSubmitting" class="material-icons text-base">check_circle</i>
+            Resolver
+          </button>
+          <button
+            (click)="reject()"
+            [disabled]="resolutionForm.invalid || isSubmitting"
+            class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm border border-orange-500/50 bg-orange-500/10 text-orange-400 hover:bg-orange-500 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="material-icons text-base">cancel</i>
+            Rechazar
+          </button>
+        </div>
+      </div>
+
+      <div [class.mt-4]="selectedReport.status === ReportStatus.PENDING">
+        <button
+          (click)="deleteReport(selectedReport)"
+          class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm border border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-200">
+          <i class="material-icons text-base">delete</i>
+          {{ 'admin.reports.action.delete' | workyTranslations }}
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>

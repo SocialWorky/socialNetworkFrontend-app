@@ -94,6 +94,7 @@ export class CacheInterceptor implements HttpInterceptor {
     if (url.includes('/notification')) tags.push('notification');
     if (url.includes('/config')) tags.push('config');
     if (url.includes('/thematic')) tags.push('thematic');
+    if (url.includes('/reports')) tags.push('reports');
 
     return tags;
   }

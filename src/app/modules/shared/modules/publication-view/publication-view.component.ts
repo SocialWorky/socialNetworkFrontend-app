@@ -562,7 +562,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   checkDataLink(userId: string) {
     this.dataLinkActions = [];
-    this.menuActions();
+    if (userId !== this.dataUser?.id) {
+      this.menuActions();
+    }
     const menuDeletePublications = {
       icon: 'delete',
       function: this.deletePublications.bind(this),
@@ -575,15 +577,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     };
 
     if (userId === this.dataUser?.id) {
-      const menuBoostPublication = {
-        icon: 'rocket_launch',
-        function: this.openBoostModal.bind(this),
-        title: translations['boost.boostPublication'],
-      };
-      if (!this.dataLinkActions.find(e => e.title === translations['boost.boostPublication'])) {
-        this.dataLinkActions.push(menuBoostPublication);
-      }
-
       if (this._subscriptionService.isPremiumSnapshot()) {
         const menuViewStats = {
           icon: 'bar_chart',
@@ -596,8 +589,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       }
     }
 
-    if (userId === this.dataUser?.id || this.dataUser?.role === RoleUser.ADMIN) {
-
+    if (this.dataUser?.role === RoleUser.ADMIN) {
       if (this.publication.fixed) {
         if (!this.dataLinkActions.find((element) => element.title === translations['publicationsView.unfixedPublication'])) {
           this.dataLinkActions.push(menuFixedPublications);
@@ -607,7 +599,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           this.dataLinkActions.push(menuFixedPublications);
         }
       }
+    }
 
+    if (userId === this.dataUser?.id || this.dataUser?.role === RoleUser.ADMIN) {
       if (!this.dataLinkActions.find((element) => element.title === translations['publicationsView.deletePublication'])) {
         this.dataLinkActions.push(menuDeletePublications);
       }
@@ -868,7 +862,11 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async openUploadModal(publication: PublicationView) {
-    const dialogRef = this._dialog.open(ReportResponseComponent, {});
+    const dialogRef = this._dialog.open(ReportResponseComponent, {
+      panelClass: 'worky-report-dialog',
+      maxWidth: '480px',
+      width: '100%',
+    });
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (result: any) => {
       if (result) {
         const loading = await this._loadingService.showLoading(translations['shared.reportResponse.title']);

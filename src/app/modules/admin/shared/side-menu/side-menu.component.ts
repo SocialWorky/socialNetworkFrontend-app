@@ -103,6 +103,7 @@ export class SideMenuComponent implements OnInit, OnDestroy {
     if (titleLower.includes('home') || titleLower.includes('dashboard')) return 'dashboard';
     if (titleLower.includes('user') || titleLower.includes('gestión de usuarios')) return 'people';
     if (titleLower.includes('log')) return 'analytics';
+    if (titleLower.includes('report') || titleLower.includes('reporte')) return 'flag';
     if (titleLower.includes('stat')) return 'bar_chart';
     if (titleLower.includes('config') || titleLower.includes('setting')) return 'settings';
     if (titleLower.includes('template')) return 'description';

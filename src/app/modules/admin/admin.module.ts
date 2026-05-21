@@ -24,6 +24,7 @@ import { SubscriptionPlansComponent } from './shared/subscription-plans/subscrip
 import { BoostPackagesComponent } from './shared/boost-packages/boost-packages.component';
 import { ManageSubscriptionsComponent } from './shared/manage-subscriptions/manage-subscriptions.component';
 import { EmailTemplateManagementComponent } from './shared/email-template-management/email-template-management.component';
+import { ReportsManagementComponent } from './shared/reports-management/reports-management.component';
 
 import { VersionManagementComponent } from './shared/version-management/version-management.component';
 
@@ -58,6 +59,7 @@ import { MaterialModule } from '@shared/modules/material/material.module';
     BoostPackagesComponent,
     ManageSubscriptionsComponent,
     EmailTemplateManagementComponent,
+    ReportsManagementComponent,
   ],
   imports: [
     CommonModule,

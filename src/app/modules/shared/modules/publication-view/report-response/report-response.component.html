@@ -1,32 +1,50 @@
-<div class="content-create-report">
-  <div class="content-create-report__header">
-    <h3 class="content-create-report__title">{{ 'shared.reportResponse.title' | workyTranslations }}</h3>
+<div class="report-dialog">
+
+  <div class="report-dialog__header">
+    <div class="report-dialog__icon-wrap">
+      <span class="material-icons report-dialog__icon">flag</span>
+    </div>
+    <div class="report-dialog__header-text">
+      <h3 class="report-dialog__title">{{ 'shared.reportResponse.title' | workyTranslations }}</h3>
+      <p class="report-dialog__subtitle">{{ 'shared.reportResponse.subtitle' | workyTranslations }}</p>
+    </div>
+    <button class="report-dialog__close" type="button" (click)="cancelReport()">
+      <span class="material-icons">close</span>
+    </button>
   </div>
 
-  <div class="content-create-report__body">
-
+  <div class="report-dialog__body">
     <form [formGroup]="createReportForm" autocomplete="off">
-      <div class="form-report-content">
-        <div class="form-input">
-          <mat-form-field class="worky-input worky-accent">
-            <mat-label>{{ 'shared.reportResponse.reason' | workyTranslations }}</mat-label>
-            <textarea id="detail_report" formControlName="detail_report" matInput></textarea>
-          </mat-form-field>
-
-
-          <div class="content-create-report__actions">
-            <worky-buttons
-              type="submit"
-              [workyButtonType]="WorkyButtonType.Flat"
-              [theme]="WorkyButtonTheme.Accent"
-              (click)="createReportForm.valid && createReport()"
-              [width]="'100%'">
-              <span basic-button-text>{{ 'shared.reportResponse.send' | workyTranslations }}</span>
-            </worky-buttons>
-          </div>
-        </div>
-      </div>
+      <label class="report-dialog__label" for="detail_report">
+        {{ 'shared.reportResponse.reason' | workyTranslations }}
+      </label>
+      <textarea
+        id="detail_report"
+        formControlName="detail_report"
+        class="report-dialog__textarea"
+        rows="5"
+        maxlength="500"
+        [placeholder]="'shared.reportResponse.reason' | workyTranslations">
+      </textarea>
+      <span class="report-dialog__counter">
+        {{ createReportForm.get('detail_report')?.value?.length || 0 }} / 500
+      </span>
     </form>
-
   </div>
+
+  <div class="report-dialog__actions">
+    <button class="report-dialog__btn report-dialog__btn--cancel" type="button" (click)="cancelReport()">
+      {{ 'button.cancel' | workyTranslations }}
+    </button>
+    <worky-buttons
+      type="submit"
+      [workyButtonType]="WorkyButtonType.Flat"
+      [theme]="WorkyButtonTheme.Accent"
+      [disabled]="createReportForm.invalid"
+      (click)="createReportForm.valid && createReport()"
+      [width]="'auto'">
+      <span basic-button-text>{{ 'shared.reportResponse.send' | workyTranslations }}</span>
+    </worky-buttons>
+  </div>
+
 </div>

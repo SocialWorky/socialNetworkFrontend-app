@@ -1051,3 +1051,17 @@ worky-root[inert] ion-loading {
   }
 }
 
+/* ───────── Report dialog ───────── */
+.worky-report-dialog {
+  .mat-mdc-dialog-surface,
+  .mdc-dialog__surface,
+  .mat-dialog-container {
+    background-color: var(--worky-color-module-container) !important;
+    color: var(--worky-color-text) !important;
+    border-radius: 16px !important;
+    padding: 0 !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24) !important;
+    overflow: hidden;
+  }
+}
+

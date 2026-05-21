@@ -2,10 +2,6 @@
   <div class="publication-header-actions"
     (mouseenter)="checkDataLink(publication.author._id)">
     <div *ngIf="publication.fixed" class="material-icons fixed">push_pin</div>
-    <!-- Boost badge -->
-    <span *ngIf="publication.isBoosted && isBoostActive()" class="boost-badge">
-      {{ 'boost.badge' | workyTranslations }}
-    </span>
     <worky-dropdown
       icon="more_horiz"
       [badge]=false
@@ -45,26 +41,6 @@
       </div>
       <button class="boost-cancel-btn" (click)="closeAnalyticsPanel()">
         {{ 'button.close' | workyTranslations }}
-      </button>
-    </div>
-  </div>
-
-  <!-- Boost package selector modal -->
-  <div *ngIf="showBoostModal" class="boost-modal-overlay" (click)="showBoostModal = false">
-    <div class="boost-modal" (click)="$event.stopPropagation()">
-      <h4>{{ 'boost.choosePackage' | workyTranslations }}</h4>
-      <div *ngIf="boostPackages.length === 0" class="boost-no-packages">
-        {{ 'boost.noPackages' | workyTranslations }}
-      </div>
-      <div *ngFor="let pkg of boostPackages" class="boost-package-item" (click)="boostPublication(pkg._id)">
-        <div class="boost-package-info">
-          <span class="boost-package-name">{{ pkg.name }}</span>
-          <span class="boost-package-duration">{{ pkg.durationHours }}h</span>
-        </div>
-        <span class="boost-package-price">{{ formatBoostPrice(pkg.priceClp) }}</span>
-      </div>
-      <button class="boost-cancel-btn" (click)="showBoostModal = false">
-        {{ 'boost.cancel' | workyTranslations }}
       </button>
     </div>
   </div>

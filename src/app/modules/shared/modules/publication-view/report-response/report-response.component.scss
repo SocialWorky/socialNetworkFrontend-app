@@ -1,20 +1,165 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 
-.content-create-report {
-  width: 400px;
+.report-dialog {
   display: flex;
-  padding: 10px;
-  align-items: center;
   flex-direction: column;
-  gap: 20px;
+  width: 100%;
+  min-width: 320px;
+  max-width: 480px;
+  background-color: var(--worky-color-module-container);
+  color: var(--worky-color-text);
+
   @include breakpoints.below-sm {
-    width: 100%;
+    min-width: unset;
   }
-  .content-create-report__body {
-    width: 100%;
-    ::ng-deep mat-form-field {
-        width: 100%;
+
+  // ── Header ──────────────────────────────────
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--worky-color-grey);
+  }
+
+  &__icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 50%;
+    background-color: color-mix(in srgb, var(--worky-color-yellow) 18%, transparent);
+    margin-top: 2px;
+  }
+
+  &__icon {
+    color: var(--worky-color-yellow);
+    font-size: 21px;
+  }
+
+  &__header-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0 0 4px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--worky-color-text);
+    line-height: 1.3;
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--worky-color-text);
+    opacity: 0.65;
+    line-height: 1.4;
+  }
+
+  &__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    color: var(--worky-color-text);
+    opacity: 0.5;
+    transition: opacity 0.2s, background-color 0.2s;
+
+    &:hover {
+      opacity: 1;
+      background-color: var(--worky-color-grey);
+    }
+
+    .material-icons { font-size: 20px; }
+  }
+
+  // ── Body ────────────────────────────────────
+  &__body {
+    padding: 20px 20px 4px;
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
   }
 
+  &__label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--worky-color-text);
+    opacity: 0.75;
+    margin-bottom: 6px;
+  }
+
+  &__textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--worky-color-grey);
+    background-color: var(--worky-color-input-background);
+    color: var(--worky-color-text);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    resize: vertical;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+
+    &::placeholder {
+      color: var(--worky-color-text);
+      opacity: 0.35;
+    }
+
+    &:focus {
+      border-color: var(--worky-color-yellow);
+    }
+  }
+
+  &__counter {
+    display: block;
+    text-align: right;
+    font-size: 0.72rem;
+    color: var(--worky-color-text);
+    opacity: 0.45;
+  }
+
+  // ── Actions ─────────────────────────────────
+  &__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 20px 20px;
+  }
+
+  &__btn {
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s, background-color 0.2s;
+    border: none;
+    font-family: inherit;
+
+    &--cancel {
+      background-color: var(--worky-color-grey);
+      color: var(--worky-color-text);
+
+      &:hover { opacity: 0.75; }
+    }
+  }
 }

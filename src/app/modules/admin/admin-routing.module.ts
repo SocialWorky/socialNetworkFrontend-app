@@ -17,6 +17,7 @@ import { SubscriptionPlansComponent } from './shared/subscription-plans/subscrip
 import { BoostPackagesComponent } from './shared/boost-packages/boost-packages.component';
 import { ManageSubscriptionsComponent } from './shared/manage-subscriptions/manage-subscriptions.component';
 import { EmailTemplateManagementComponent } from './shared/email-template-management/email-template-management.component';
+import { ReportsManagementComponent } from './shared/reports-management/reports-management.component';
 import { translations } from '@translations/translations';
 import { adminSubscriptionEnabledGuard } from './guards/admin-subscription-enabled.guard';
 
@@ -53,6 +54,7 @@ export const routes: Routes = [
         path: 'user-management', 
         loadChildren: () => import('./shared/user-management/user-management.module').then(m => m.UserManagementModule)
       },
+      { title: translations['admin.sideMenu.items.reportsManagement'], path: 'reports-management', component: ReportsManagementComponent },
       { title: translations['admin.sideMenu.items.versionManagement'], path: 'version-management', component: VersionManagementComponent },
       { title: translations['admin.sideMenu.items.logs'], path: 'logs', component: LogComponent },
     ],

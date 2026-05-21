@@ -44,9 +44,35 @@ export class EmailNotificationService {
     return this.http.post(url, data);
   }
 
-  private sendEmailNotification(data: MailSendValidateData) {
+  sendEmailNotification(data: MailSendValidateData) {
     const url = `${this.baseUrl}/email/sendEmail`;
     return this.http.post(url, data);
+  }
+
+  sendIsolatedEmail(
+    toEmail: string,
+    subject: string,
+    title: string,
+    greet: string,
+    message: string,
+    subMessage: string,
+    buttonMessage: string,
+  ): void {
+    const payload = {
+      email: toEmail,
+      subject,
+      title,
+      greet,
+      message,
+      subMessage,
+      buttonMessage,
+      template: TemplateEmail.EMAIL,
+      url: environment.BASE_URL,
+      templateLogo: environment.TEMPLATE_EMAIL_LOGO,
+    };
+    this.http.post(`${this.baseUrl}/email/sendEmail`, payload).subscribe({
+      error: (err) => console.error('[EmailService] sendIsolatedEmail failed:', err),
+    });
   }
 
   private async userById(_idUser: string): Promise<User>{
@@ -61,6 +87,27 @@ export class EmailNotificationService {
           }
         });
       });
+  }
+
+  sendEmailReportResolution(reporterEmail: string, resolution: string, isResolved: boolean) {
+    const message = isResolved
+      ? translations['email.reportResolutionMessage'] + ' ' + translations['email.reportResolutionSubMessageResolved'] + resolution
+      : translations['email.reportResolutionMessage'] + ' ' + translations['email.reportResolutionSubMessageRejected'];
+
+    const payload: MailSendValidateData = {
+      url: `${environment.BASE_URL}`,
+      subject: translations['email.reportResolutionSubject'],
+      title: translations['email.reportResolutionTitle'],
+      greet: translations['email.reportResolutionGreet'],
+      message,
+      subMessage: isResolved ? resolution : '',
+      buttonMessage: translations['email.reportResolutionButtonMessage'],
+      template: TemplateEmail.EMAIL,
+      email: reporterEmail,
+      templateLogo: environment.TEMPLATE_EMAIL_LOGO,
+    };
+
+    this.sendEmailNotification(payload).pipe(takeUntil(this.destroy$)).subscribe();
   }
 
   sendEmailNotificationReport(publication: PublicationView, reportMessage: string) {
