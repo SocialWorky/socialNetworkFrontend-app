@@ -1,81 +1,171 @@
-<div class="notifications-panel" [class.active]="isActive">
-  <div class="content-header">
-    <div class="panel-title">
-      <h2>{{ 'notification.title' | workyTranslations }}</h2>
-    </div>
-    <div class="tabs">
-      <button
-        class="tab-button"
-        [class.active]="currentTab === notificationStatus.UNREAD"
-        (click)="switchTab(notificationStatus.UNREAD)">{{ 'notification.label_unread_btn' | workyTranslations }}</button>
-      <button
-        class="tab-button"
-        [class.active]="currentTab === notificationStatus.ALL"
-        (click)="switchTab(notificationStatus.ALL)">{{ 'notification.label_all_btn' | workyTranslations }}</button>
-    </div>
-    <i class="material-icons" (click)="togglePanel()">close</i>
-  </div>
+<div class="wn-panel" [class.wn-panel--open]="isActive">
 
-  <div class="content-body">
-    <div class="notification-item" *ngFor="let notification of filteredNotifications; let last = last">
-      <div class="notification-item-content"
-        [class.notification-not-viewed]="notification.read === false"
-        [class.last-notification]="last">
-        <div class="notification-item-header">
-          <span class="notification-item-title">{{ notification.content | workyTranslations }}</span>
-          <span class="notification-item-date">{{ 'notification.span_item_date' | workyTranslations }} {{notification.createdAt | workyDate:'relative' }}</span>
-        </div>
-
-        <div class="notification-item-body">
-
-          <div *ngIf="notification.type === type.COMMENT" class="item-body"
-            (click)="goToLink(notification.link, notification._id)">
-            <i class="material-icons">{{ notification.icon }}</i>
-            <div class="content">
-              <span> {{ notification.additionalDataComment?.nameComment }} {{ 'notification.span_item_user_comment' | workyTranslations }} </span>
-              <span class="notification-item-description">{{ notification.additionalDataComment?.comment }}</span>
-            </div>
-          </div>
-
-          <div *ngIf="notification.type === type.LIKE" class="item-body"
-            (click)="goToLink(notification.link, notification._id)">
-            <i class="material-icons">{{ notification.icon }}</i>
-            <div class="content">
-              <span> {{ notification.additionalDataLike?.userNameReaction }} {{ 'notification.span_item_user_reaction' | workyTranslations }} <img src="{{ notification.additionalDataLike?.emoji }}"> </span>
-            </div>
-          </div>
-
-          <div *ngIf="notification.type === type.FRIEND_REQUEST" class="item-body"
-            (click)="goToLink(notification.link, notification._id)">
-            <i class="material-icons">{{ notification.icon }}</i>
-            <div class="content">
-              <span> {{ notification.additionalDataFriendRequest?.sendUserName }} {{ 'notification.span_item_user_friendRequest' | workyTranslations }} </span>
-            </div>
-          </div>
-
-          <div *ngIf="notification.type === type.FRIEND_ACCEPTED" class="item-body"
-            (click)="goToLink(notification.link, notification._id)">
-            <i class="material-icons">{{ notification.icon }}</i>
-            <div class="content">
-              <span> {{ notification.additionalDataFriendAccept?.acceptUserName }} {{ 'notification.span_item_user_friendRequestAccept' | workyTranslations }} </span>
-            </div>
-          </div>
-
-          <div class="action-menu" (mouseenter)="checkDataLinkNotifications()">
-            <worky-dropdown
-              icon="more_horiz"
-              [badge]=false
-              (click)="checkDataLinkNotifications()"
-              [dataLink]="dataLinkActionsNotifications"
-              menuTitle="{{ 'notification.title' | workyTranslations }}"
-              (linkClicked)="handleActionsClickedNotifications($event, notification)">
-            </worky-dropdown>
-          </div>
-
-        </div>
+  <!-- ═══ HEADER ═══════════════════════════════════════════════════════════ -->
+  <div class="wn-header">
+    <div class="wn-header__top">
+      <h2 class="wn-header__title">{{ 'notification.title' | workyTranslations }}</h2>
+      <div class="wn-header__btns">
+        <button class="wn-icon-btn"
+          *ngIf="unreadNotifications > 0 && !isSelectMode"
+          (click)="markAllAsRead()"
+          [title]="'notification.mark_all_read_btn' | workyTranslations">
+          <i class="material-icons">done_all</i>
+        </button>
+        <button class="wn-icon-btn" (click)="toggleSelectMode()">
+          <i class="material-icons">{{ isSelectMode ? 'close' : 'checklist' }}</i>
+        </button>
+        <button class="wn-icon-btn" (click)="togglePanel()">
+          <i class="material-icons">close</i>
+        </button>
       </div>
     </div>
+
+    <div class="wn-tabs">
+      <button class="wn-tab" [class.wn-tab--on]="currentTab === notificationStatus.UNREAD"
+        (click)="switchTab(notificationStatus.UNREAD)">
+        {{ 'notification.label_unread_btn' | workyTranslations }}
+        <span class="wn-tab__pill" *ngIf="unreadNotifications > 0">{{ unreadNotifications }}</span>
+      </button>
+      <button class="wn-tab" [class.wn-tab--on]="currentTab === notificationStatus.ALL"
+        (click)="switchTab(notificationStatus.ALL)">
+        {{ 'notification.label_all_btn' | workyTranslations }}
+      </button>
+    </div>
   </div>
 
-</div>
+  <!-- ═══ BULK BAR ══════════════════════════════════════════════════════════ -->
+  <div class="wn-bulk" *ngIf="isSelectMode">
+    <label class="wn-bulk__all" (click)="toggleSelectAll()">
+      <div class="wn-cb"
+        [class.wn-cb--on]="allSelected"
+        [class.wn-cb--mid]="someSelected && !allSelected">
+        <i class="material-icons" *ngIf="allSelected || (someSelected && !allSelected)">
+          {{ allSelected ? 'check' : 'remove' }}
+        </i>
+      </div>
+      <span>{{ allSelected
+        ? ('notification.deselect_all_btn' | workyTranslations)
+        : ('notification.select_all_btn' | workyTranslations) }}</span>
+    </label>
+    <div class="wn-bulk__ops" *ngIf="someSelected">
+      <span class="wn-bulk__ct">{{ selectedCount }} {{ 'notification.selected_count' | workyTranslations }}</span>
+      <button class="wn-bulk-btn wn-bulk-btn--ok" (click)="bulkMarkAsRead()" [disabled]="isLoading">
+        <i class="material-icons">done_all</i>
+      </button>
+      <button class="wn-bulk-btn wn-bulk-btn--rm" (click)="bulkDelete()" [disabled]="isLoading">
+        <i class="material-icons">delete_outline</i>
+      </button>
+    </div>
+  </div>
 
+  <!-- ═══ LIST ══════════════════════════════════════════════════════════════ -->
+  <div class="wn-list">
+
+    <!-- Empty -->
+    <div class="wn-empty" *ngIf="filteredNotifications.length === 0">
+      <i class="material-icons wn-empty__icon">notifications_none</i>
+      <p class="wn-empty__msg">
+        {{ currentTab === notificationStatus.UNREAD
+          ? ('notification.empty_unread' | workyTranslations)
+          : ('notification.empty_all' | workyTranslations) }}
+      </p>
+    </div>
+
+    <ng-container *ngFor="let g of groupedNotifications; trackBy: trackByLabel">
+
+      <div class="wn-date">{{ g.label | workyTranslations }}</div>
+
+      <!-- Item -->
+      <div class="wn-item"
+        *ngFor="let n of g.items; trackBy: trackById"
+        [class.wn-item--unread]="!n.read"
+        [class.wn-item--selected]="isSelected(n._id)">
+
+        <!-- Checkbox col -->
+        <div class="wn-item__cb" *ngIf="isSelectMode" (click)="toggleSelect(n._id)">
+          <div class="wn-cb" [class.wn-cb--on]="isSelected(n._id)">
+            <i class="material-icons" *ngIf="isSelected(n._id)">check</i>
+          </div>
+        </div>
+
+        <!-- Avatar -->
+        <div class="wn-item__av"
+          (click)="isSelectMode ? toggleSelect(n._id) : goToLink(n.link, n._id)">
+          <worky-avatar
+            [img]="getNotificationAvatar(n)"
+            [name]="getNotificationActorName(n)"
+            [username]="getNotificationActorName(n)"
+            [size]="50">
+          </worky-avatar>
+          <span class="wn-item__badge" [ngClass]="'wn-badge--' + n.type">
+            <i class="material-icons">{{ n.icon }}</i>
+          </span>
+        </div>
+
+        <!-- Text -->
+        <div class="wn-item__msg"
+          (click)="isSelectMode ? toggleSelect(n._id) : goToLink(n.link, n._id)">
+
+          <ng-container *ngIf="n.type === type.COMMENT">
+            <p class="wn-item__text">
+              <strong>{{ n.additionalDataComment?.nameComment }}</strong>
+              {{ 'notification.span_item_user_comment' | workyTranslations }}
+              <em *ngIf="n.additionalDataComment?.comment">
+                "{{ n.additionalDataComment?.comment }}"
+              </em>
+            </p>
+          </ng-container>
+
+          <ng-container *ngIf="n.type === type.LIKE">
+            <p class="wn-item__text">
+              <strong>{{ n.additionalDataLike?.userNameReaction }}</strong>
+              {{ 'notification.span_item_user_reaction' | workyTranslations }}
+              <img *ngIf="isEmojiUrlSafe(n.additionalDataLike?.emoji)"
+                class="wn-item__emoji"
+                [src]="n.additionalDataLike?.emoji"
+                referrerpolicy="no-referrer"
+                (error)="hideEmojiOnError($event)" alt="">
+            </p>
+          </ng-container>
+
+          <ng-container *ngIf="n.type === type.FRIEND_REQUEST">
+            <p class="wn-item__text">
+              <strong>{{ n.additionalDataFriendRequest?.sendUserName }}</strong>
+              {{ 'notification.span_item_user_friendRequest' | workyTranslations }}
+            </p>
+          </ng-container>
+
+          <ng-container *ngIf="n.type === type.FRIEND_ACCEPTED">
+            <p class="wn-item__text">
+              <strong>{{ n.additionalDataFriendAccept?.acceptUserName }}</strong>
+              {{ 'notification.span_item_user_friendRequestAccept' | workyTranslations }}
+            </p>
+          </ng-container>
+
+          <time class="wn-item__time" [class.wn-item__time--new]="!n.read">
+            {{ n.createdAt | workyDate:'relative' }}
+          </time>
+        </div>
+
+        <!-- Right: dot or actions -->
+        <div class="wn-item__side" *ngIf="!isSelectMode">
+          <span class="wn-item__dot" *ngIf="!n.read"></span>
+          <div class="wn-item__acts">
+            <button class="wn-act wn-act--read" *ngIf="!n.read"
+              (click)="markAsRead(n._id); $event.stopPropagation()"
+              [title]="'notification.mark_read_btn' | workyTranslations">
+              <i class="material-icons">check</i>
+            </button>
+            <button class="wn-act wn-act--del"
+              (click)="deleteNotification(n._id); $event.stopPropagation()"
+              [title]="'notification.deleteNotification_btn' | workyTranslations">
+              <i class="material-icons">close</i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </ng-container>
+
+  </div>
+</div>

@@ -1,226 +1,459 @@
-@use 'src/assets/styles/worky-variables' as variables;
-@use 'src/assets/styles/worky-palettes' as colors;
-@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
+@use 'src/assets/styles/worky-palettes' as c;
+@use 'src/assets/styles/worky-breakpoints.scss' as bp;
 @use 'sass:map';
 
-.notifications-panel {
+// ─────────────────────────────────────────────────────────────────────────────
+// PANEL
+// ─────────────────────────────────────────────────────────────────────────────
+.wn-panel {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
   position: fixed;
   top: 0;
-  right: -500px;
-  width: 500px;
+  right: 0;
+  z-index: 1000;
+  width: 360px;
   height: 100dvh;
   height: calc(var(--vh, 1vh) * 100);
-  color: colors.$worky-color-text;
-  background-color: colors.$worky-color-light;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  transition: right 0.3s ease-out;
-  z-index: 1000;
+  background: c.$worky-color-module-container;
+  display: flex;
+  flex-direction: column;
+  // No border/shadow when closed — avoids the glow artifact at the right edge
+  border-left: none;
+  box-shadow: none;
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 
-  @include breakpoints.below-sm {
-    width: 100%;
-    right: -100%;
-    height: 100dvh;
-    height: calc(var(--vh, 1vh) * 100);
-    // Ensure proper top positioning on mobile
-    top: 0;
-    padding-top: 20px;
+  @include bp.below-sm { width: 100%; }
+  @supports (-webkit-touch-callout: none) { height: -webkit-fill-available; top: 0; }
+
+  &--open {
+    transform: translateX(0);
+    border-left: 1px solid c.$worky-color-grey;
+    box-shadow: -12px 0 32px rgba(0, 0, 0, 0.35);
   }
+}
 
-  // iOS-specific fixes for viewport height issues
-  @supports (-webkit-touch-callout: none) {
-    // Force proper height calculation for iOS
-    height: 100vh;
-    height: -webkit-fill-available;
-    height: calc(var(--vh, 1vh) * 100);
-    // Ensure panel starts from the very top
-    top: 0;
-    
-    @include breakpoints.below-sm {
-      height: 100vh;
-      height: -webkit-fill-available;
-      height: calc(var(--vh, 1vh) * 100);
-      // Remove any top margin that might cause issues
-      top: 0;
-      margin-top: 0;
-    }
-  }
+// ─────────────────────────────────────────────────────────────────────────────
+// HEADER
+// ─────────────────────────────────────────────────────────────────────────────
+.wn-header {
+  flex-shrink: 0;
+  background: c.$worky-color-module-container;
+  border-bottom: 1px solid c.$worky-color-grey;
 
-  &.active {
-    right: 0;
-  }
-
-  .content-header {
+  &__top {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 8px;
-    height: 80px;
-    // Remove margin-top to prevent spacing issues
-    margin-top: 0;
+    justify-content: space-between;
+    padding: 16px 12px 10px;
+  }
 
-    @include breakpoints.below-sm {
-      margin-top: 0;
-      // Ensure header is properly positioned
-      position: relative;
-      top: 0;
-    }
+  &__title {
+    font-size: 22px;
+    font-weight: 700;
+    color: c.$worky-color-navy;
+    margin: 0;
+    letter-spacing: -0.2px;
+  }
 
-    .panel-title {
-      margin-bottom: 10px;
+  &__btns {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
 
-      h2 {
-        font-size: 24px;
-        font-weight: bold;
-        color: colors.$worky-color-navy;
-      }
-    }
+// Circular icon buttons (like Facebook's header icons)
+.wn-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: c.$worky-color-input-background;
+  color: c.$worky-color-navy;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
 
-    .tabs {
-      display: flex;
-      gap: 10px;
+  i { font-size: 18px; line-height: 1; }
+  &:hover { background: c.$worky-color-grey; }
+}
 
-      .tab-button {
-        padding: 10px 15px;
-        border: none;
-        border-radius: 20px;
-        background-color: colors.$worky-color-input-background;
-        color: colors.$worky-color-text;
-        font-size: 14px;
-        cursor: pointer;
-        transition: all 0.3s ease;
+// ─────────────────────────────────────────────────────────────────────────────
+// TABS — underline style, blue accent on active
+// ─────────────────────────────────────────────────────────────────────────────
+.wn-tabs {
+  display: flex;
+  padding: 0 4px;
+}
 
-        &.active {
-          background-color: map.get(colors.$worky-navy, 12);
-          color: map.get(colors.$worky-navy, 87);
-        }
+.wn-tab {
+  font-family: inherit;
+  flex: 1;
+  height: 44px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: map.get(c.$worky-navy, 56);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 
-        &:hover:not(.active) {
-          background-color: map.get(colors.$worky-navy, 3);
-          color: map.get(colors.$worky-navy, 87);
-        }
-      }
-    }
+  // Blue underline for active tab
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 8px;
+    right: 8px;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: c.$worky-color-blue;
+    opacity: 0;
+    transform: scaleX(0.6);
+    transition: opacity 0.18s, transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-    i {
-      cursor: pointer;
-      font-size: 24px;
-      color: colors.$worky-color-navy;
+  &--on {
+    color: c.$worky-color-blue;
+    font-weight: 600;
+    &::after { opacity: 1; transform: scaleX(1); }
+  }
+
+  &:hover:not(.wn-tab--on) { color: c.$worky-color-navy; }
+
+  // Count badge shown on the unread tab — decrements in real time
+  &__pill {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: c.$worky-color-blue;
+    color: c.$worky-color-light;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CHECKBOX (circle style like Facebook)
+// ─────────────────────────────────────────────────────────────────────────────
+.wn-cb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid map.get(c.$worky-navy, 72);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+
+  i { font-size: 11px; color: c.$worky-color-light; display: none; }
+
+  &--on, &--mid {
+    border-color: c.$worky-color-blue;
+    background: c.$worky-color-blue;
+    i { display: block; }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BULK BAR
+// ─────────────────────────────────────────────────────────────────────────────
+.wn-bulk {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: c.$worky-color-input-background;
+  border-bottom: 1px solid c.$worky-color-grey;
+
+  &__all {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: c.$worky-color-navy;
+  }
+
+  &__ops {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__ct {
+    font-size: 12px;
+    color: map.get(c.$worky-navy, 56);
+  }
+}
+
+.wn-bulk-btn {
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  i { font-size: 16px; line-height: 1; }
+  &:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  &--ok {
+    background: color-mix(in srgb, c.$worky-color-green, c.$worky-color-module-container 78%);
+    color: c.$worky-color-green;
+    &:hover:not(:disabled) { background: c.$worky-color-green; color: c.$worky-color-light; }
+  }
+  &--rm {
+    background: color-mix(in srgb, c.$worky-color-red, c.$worky-color-module-container 78%);
+    color: c.$worky-color-red;
+    &:hover:not(:disabled) { background: c.$worky-color-red; color: c.$worky-color-light; }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCROLLABLE LIST
+// ─────────────────────────────────────────────────────────────────────────────
+.wn-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &::-webkit-scrollbar { width: 3px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: c.$worky-color-grey; border-radius: 2px; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EMPTY STATE
+// ─────────────────────────────────────────────────────────────────────────────
+.wn-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 64px 24px;
+
+  &__icon { font-size: 42px; color: map.get(c.$worky-navy, 72); }
+  &__msg   { font-size: 14px; color: map.get(c.$worky-navy, 72); text-align: center; margin: 0; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DATE GROUP LABEL (simple, clean — like Facebook's "Hoy")
+// ─────────────────────────────────────────────────────────────────────────────
+.wn-date {
+  padding: 14px 16px 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: c.$worky-color-navy;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NOTIFICATION ITEM
+// This is the core — replicating Facebook's notification row:
+//   [avatar 50px] [text block flex:1] [dot 10px]
+// ─────────────────────────────────────────────────────────────────────────────
+.wn-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 12px;
+  cursor: pointer;
+  transition: background 0.12s;
+  border-radius: 8px;
+  margin: 1px 6px;
+
+  // READ: panel background
+  background: transparent;
+
+  // UNREAD: $worky-color-input-background = #f1f2f3 (light) / #484849 (dark)
+  // This is clearly different from the panel background in BOTH themes.
+  &--unread { background: c.$worky-color-input-background; }
+
+  &--selected {
+    background: color-mix(in srgb, c.$worky-color-blue, c.$worky-color-module-container 88%);
+  }
+
+  // Hover: slightly different from base
+  &:hover {
+    background: color-mix(in srgb, c.$worky-color-input-background, c.$worky-color-module-container 55%);
+
+    .wn-item__dot  { opacity: 0; transform: scale(0); }
+    .wn-item__acts { opacity: 1; pointer-events: all; }
+  }
+
+  &--unread:hover {
+    background: color-mix(in srgb, c.$worky-color-grey, c.$worky-color-input-background 40%);
+  }
+
+  // ── Checkbox col ──────────────────────────────────────────────────────────
+  &__cb {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  // ── Avatar ────────────────────────────────────────────────────────────────
+  &__av {
+    flex-shrink: 0;
+    position: relative;
+    width: 50px;
+    height: 50px;
+  }
+
+  // Type badge: colored circle on bottom-right of avatar
+  &__badge {
+    position: absolute;
+    right: -3px;
+    bottom: -3px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    // Border matches current item background so it "floats" on the avatar
+    border: 2px solid c.$worky-color-module-container;
+    transition: border-color 0.12s;
+
+    i { font-size: 11px; color: c.$worky-color-light; line-height: 1; }
+  }
+
+  // Badge border adapts to item state
+  &--unread &__badge { border-color: c.$worky-color-input-background; }
+
+  // ── Text block ────────────────────────────────────────────────────────────
+  &__msg {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__text {
+    font-size: 14px;
+    line-height: 1.4;
+    color: c.$worky-color-navy;
+    margin: 0;
+    // Max 3 lines, then ellipsis
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    strong { font-weight: 600; }
+
+    // Italic preview (e.g. quoted comment)
+    em {
+      font-style: italic;
+      color: map.get(c.$worky-navy, 56);
     }
   }
 
-  .content-body {
+  &__emoji {
+    width: 16px;
+    height: 16px;
+    vertical-align: text-bottom;
+    margin-left: 2px;
+  }
+
+  // Timestamp — blue when unread, gray when read (matches Facebook)
+  &__time {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: map.get(c.$worky-navy, 56);
+    margin-top: 3px;
+    &--new { color: c.$worky-color-blue; }
+  }
+
+  // ── Right column: dot + hover actions ─────────────────────────────────────
+  &__side {
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    // Calculate height properly considering header
-    height: calc(100dvh - 80px);
-    height: calc((var(--vh, 1vh) * 100) - 80px);
-    overflow-y: auto;
-
-    @include breakpoints.below-sm {
-      height: calc(100dvh - 80px);
-      height: calc((var(--vh, 1vh) * 100) - 80px);
-    }
-
-    // iOS-specific fixes for content body height
-    @supports (-webkit-touch-callout: none) {
-      height: calc(100vh - 80px);
-      height: calc(-webkit-fill-available - 80px);
-      height: calc((var(--vh, 1vh) * 100) - 80px);
-      
-      @include breakpoints.below-sm {
-        height: calc(100vh - 80px);
-        height: calc(-webkit-fill-available - 80px);
-        height: calc((var(--vh, 1vh) * 100) - 80px);
-      }
-    }
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 30px;
+    align-self: stretch;
+    position: relative;
   }
 
-  .notification-item-content {
-    padding: 15px;
-    background-color: colors.$worky-color-greyLight;
-    transition: background-color 0.3s ease;
-
-    &:hover {
-      background-color: colors.$worky-color-grey;
-    }
-
-    &.notification-not-viewed {
-      background-color: map.get(colors.$worky-navy, 93);
-      color: colors.$worky-color-navy;
-      border: 1px solid map.get(colors.$worky-navy, 87);
-
-      &:hover {
-        background-color: map.get(colors.$worky-navy, 72);
-      }
-    }
-
-    .notification-item-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-
-      .notification-item-title {
-        font-size: 16px;
-        font-weight: 500;
-      }
-
-      .notification-item-date {
-        font-size: 12px;
-        color: #7b7b7b;
-      }
-    }
-
-    .notification-item-body {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      justify-content: space-between;
-
-      .item-body {
-        cursor: pointer;
-        display: flex;
-        gap: 10px;
-        margin-top: 10px;
-      }
-
-      i {
-        color: colors.$worky-color-navy;
-      }
-
-      .content {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-
-        span {
-          font-size: 14px;
-        }
-
-        img {
-          width: 25px;
-          height: 25px;
-        }
-      }
-    }
-
-    .action-menu {
-      display: flex;
-      border-radius: 50%;
-      width: 35px;
-      height: 35px;
-      background-color: map.get(colors.$worky-navy, 56);
-      z-index: 1000;
-      ::ng-deep worky-dropdown {
-        display: flex;
-      }
-      ::ng-deep worky-dropdown .nav-link:hover{
-        color: #fff;
-      }
-
-      &:hover {
-        background-color: map.get(colors.$worky-navy, 24);
-      }
-    }
+  // The blue dot — Facebook's signature unread indicator
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: c.$worky-color-blue;
+    flex-shrink: 0;
+    transition: opacity 0.15s, transform 0.15s;
   }
+
+  // Action buttons revealed on hover
+  &__acts {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+}
+
+// Badge background colors (type-coded)
+.wn-badge--comment       { background: c.$worky-color-blue; }
+.wn-badge--like          { background: c.$worky-color-red; }
+.wn-badge--friendRequest { background: c.$worky-color-green; }
+.wn-badge--friendAccept  { background: c.$worky-color-purple; }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HOVER ACTION BUTTONS (circular, like Facebook's context actions)
+// ─────────────────────────────────────────────────────────────────────────────
+.wn-act {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: c.$worky-color-input-background;
+  border-radius: 50%;
+  cursor: pointer;
+  color: map.get(c.$worky-navy, 56);
+  transition: background 0.12s, color 0.12s;
+  i { font-size: 14px; line-height: 1; }
+
+  &--read:hover { background: c.$worky-color-green;  color: c.$worky-color-light; }
+  &--del:hover  { background: c.$worky-color-red;    color: c.$worky-color-light; }
 }

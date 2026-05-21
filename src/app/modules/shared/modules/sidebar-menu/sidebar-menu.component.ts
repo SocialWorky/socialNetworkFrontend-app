@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, skip, takeUntil } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
@@ -65,6 +65,13 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
     this.isAuthenticated = this._authService.isAuthenticated();
 
     this.getNotification();
+
+    // Re-fetch count whenever the notification panel marks/deletes notifications.
+    // skip(1) avoids the BehaviorSubject's immediate emission (already called above).
+    // bypassCache: true forces a fresh HTTP call, skipping the 1-min cache TTL.
+    this._notificationService.notification$
+      .pipe(skip(1), takeUntil(this.unsubscribe$))
+      .subscribe(() => this.getNotification(true));
   }
 
   ngOnDestroy() {
@@ -93,9 +100,9 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
     this._notificationPanelService.togglePanel();
   }
 
-  getNotification() {
+  getNotification(bypassCache = false) {
     const userId = this._authService.getDecodedToken()?.id!;
-    this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._notificationCenterService.getNotifications(userId, bypassCache).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {
         this.notifications = data.filter((notification: any) => !notification.read).length;
         this._cdr.markForCheck();

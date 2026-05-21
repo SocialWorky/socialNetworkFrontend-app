@@ -34,6 +34,13 @@ export class NotificationService implements OnDestroy {
     this.socket.emit('generalNotification', payload);
   }
 
+  // Updates the badge counter locally without a WebSocket roundtrip.
+  // Use this from within the notifications panel (read/delete actions)
+  // to avoid triggering a server broadcast that cascades into the panel.
+  emitLocalUpdate(): void {
+    this._notification.next(undefined);
+  }
+
 
   ngOnDestroy() {
     this._unsubscribeAll.next();

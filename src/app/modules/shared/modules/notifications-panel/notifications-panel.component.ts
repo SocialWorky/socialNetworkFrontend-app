@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit, HostListener } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, firstValueFrom, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 
 import { AuthService } from '@auth/services/auth.service';
@@ -8,12 +8,9 @@ import { NotificationService } from '@shared/services/notifications/notification
 import { NotificationPanelService } from './services/notificationPanel.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { IOSViewportService } from '@shared/services/ios-viewport.service';
-import { translations } from '@translations/translations';
-import { Colors } from '@shared/interfaces/colors.enum';
 
 import { NotificationsData, AdditionalDataComment, AdditionalDataLike, AdditionalDataFriendRequest, AdditionalDataFriendAccept } from './interfaces/notificationsData.interface';
 import { NotificationType, NotificationStatus } from './enums/notificationsType.enum';
-import { DropdownDataLink } from '../worky-dropdown/interfaces/dataLink.interface';
 
 @Component({
     selector: 'worky-notifications-panel',
@@ -23,24 +20,17 @@ import { DropdownDataLink } from '../worky-dropdown/interfaces/dataLink.interfac
 })
 export class NotificationsPanelComponent implements OnInit, OnDestroy, AfterViewInit {
   isActive = false;
-
   currentTab: NotificationStatus = NotificationStatus.UNREAD;
-
   notificationStatus = NotificationStatus;
-
-  listNotifications: NotificationsData[] = [];
-
   formatListNotifications: NotificationsData[] = [];
-
   filteredNotifications: NotificationsData[] = [];
-
-  activeActionId: string | null = null;
-
+  // Computed only inside filterNotifications() — NOT a getter that runs on every CD cycle
+  groupedNotifications: { label: string; items: NotificationsData[] }[] = [];
   type = NotificationType;
-
-  unreadNotifications: number = 0;
-
-  dataLinkActionsNotifications: DropdownDataLink<any>[] = [];
+  unreadNotifications = 0;
+  isSelectMode = false;
+  isLoading = false;
+  selectedIds = new Set<string>();
 
   private destroy$ = new Subject<void>();
 
@@ -55,39 +45,57 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy, AfterView
     private _iosViewportService: IOSViewportService,
   ) {}
 
-  async ngOnInit() {
+  get allSelected(): boolean {
+    return this.filteredNotifications.length > 0 &&
+      this.filteredNotifications.every(n => this.selectedIds.has(n._id));
+  }
+
+  get someSelected(): boolean {
+    return this.selectedIds.size > 0;
+  }
+
+  get selectedCount(): number {
+    return this.selectedIds.size;
+  }
+
+  // trackBy functions prevent DOM recreation on data refresh
+  trackById(_: number, n: NotificationsData): string {
+    return n._id;
+  }
+
+  trackByLabel(_: number, g: { label: string }): string {
+    return g.label;
+  }
+
+  ngOnInit() {
     this._notificationPanelService.getIsActive().pipe(takeUntil(this.destroy$)).subscribe(isActive => {
       this.isActive = isActive;
       if (this.isActive) {
         this.getNotifications();
-        // Force viewport update for iOS when panel opens
         if (this._iosViewportService.isIOSDevice()) {
           setTimeout(() => {
             this._iosViewportService.forceViewportUpdate();
-            // Additional fix for iPhone positioning
             this.fixIPhonePositioning();
           }, 100);
         }
+      } else {
+        this.isSelectMode = false;
+        this.selectedIds.clear();
       }
       this._cdr.markForCheck();
     });
   }
 
   ngAfterViewInit() {
-    // Apply positioning fix after view is initialized
     if (this._iosViewportService.isIOSDevice()) {
-      setTimeout(() => {
-        this.fixIPhonePositioning();
-      }, 50);
+      setTimeout(() => this.fixIPhonePositioning(), 50);
     }
   }
 
   @HostListener('window:resize')
   onResize() {
     if (this.isActive && this._iosViewportService.isIOSDevice()) {
-      setTimeout(() => {
-        this.fixIPhonePositioning();
-      }, 100);
+      setTimeout(() => this.fixIPhonePositioning(), 100);
     }
   }
 
@@ -102,202 +110,282 @@ export class NotificationsPanelComponent implements OnInit, OnDestroy, AfterView
   }
 
   private fixIPhonePositioning(): void {
-    // Specific fix for iPhone positioning issues
-    const notificationPanel = document.querySelector('.notifications-panel') as HTMLElement;
-    if (notificationPanel && this._iosViewportService.isIOSDevice()) {
-      // Ensure panel starts from the very top
-      notificationPanel.style.top = '0';
-      notificationPanel.style.marginTop = '0';
-      notificationPanel.style.position = 'fixed';
-      
-      // Set proper height for iPhone
+    const panel = document.querySelector('.wn-panel') as HTMLElement;
+    if (panel && this._iosViewportService.isIOSDevice()) {
+      panel.style.top = '0';
+      panel.style.marginTop = '0';
+      panel.style.position = 'fixed';
       const height = window.innerHeight;
-      notificationPanel.style.height = `${height}px`;
-      notificationPanel.style.height = '-webkit-fill-available';
-      notificationPanel.style.height = `calc(var(--vh, 1vh) * 100)`;
-      
-      // Update content body height
-      const contentBody = notificationPanel.querySelector('.content-body') as HTMLElement;
-      if (contentBody) {
-        const headerHeight = 80;
-        const bodyHeight = height - headerHeight;
-        
-        contentBody.style.height = `${bodyHeight}px`;
-        contentBody.style.height = `calc(-webkit-fill-available - ${headerHeight}px)`;
-        contentBody.style.height = `calc((var(--vh, 1vh) * 100) - ${headerHeight}px)`;
-      }
-      
-      // Ensure header is properly positioned
-      const contentHeader = notificationPanel.querySelector('.content-header') as HTMLElement;
-      if (contentHeader) {
-        contentHeader.style.marginTop = '0';
-        contentHeader.style.top = '0';
-        contentHeader.style.position = 'relative';
-      }
-      
-      // iPhone positioning fix applied - no need to log every positioning fix
+      panel.style.height = `${height}px`;
+      panel.style.height = '-webkit-fill-available';
+      panel.style.height = `calc(var(--vh, 1vh) * 100)`;
     }
   }
 
   switchTab(tab: NotificationStatus) {
     this.currentTab = tab;
+    this.selectedIds.clear();
     this.filterNotifications();
   }
 
   filterNotifications() {
     if (this.currentTab === 'unread') {
-      this.filteredNotifications = this.formatListNotifications.filter(notification => !notification.read);
+      this.filteredNotifications = this.formatListNotifications.filter(n => !n.read);
     } else {
       this.filteredNotifications = [...this.formatListNotifications];
     }
+    this._computeGroups();
   }
 
-  openActions(notificationId: string, event: MouseEvent) {
-    event.stopPropagation();
-    this.activeActionId = this.activeActionId === notificationId ? null : notificationId;
+  // Computed here (not in a getter) so arrays are stable between CD cycles
+  private _computeGroups(): void {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const yesterdayStart = todayStart - 86400000;
+    const weekStart = todayStart - 6 * 86400000;
+
+    const today: NotificationsData[] = [];
+    const yesterday: NotificationsData[] = [];
+    const thisWeek: NotificationsData[] = [];
+    const older: NotificationsData[] = [];
+
+    for (const n of this.filteredNotifications) {
+      const t = new Date(n.createdAt).getTime();
+      if (t >= todayStart) today.push(n);
+      else if (t >= yesterdayStart) yesterday.push(n);
+      else if (t >= weekStart) thisWeek.push(n);
+      else older.push(n);
+    }
+
+    this.groupedNotifications = [
+      { label: 'notification.group_today', items: today },
+      { label: 'notification.group_yesterday', items: yesterday },
+      { label: 'notification.group_week', items: thisWeek },
+      { label: 'notification.group_older', items: older },
+    ].filter(g => g.items.length > 0);
   }
 
-  async deleteNotification(notificationId: string) {
-    await this._notificationCenterService.deleteNotification(notificationId).pipe(takeUntil(this.destroy$)).subscribe({
+  toggleSelectMode(): void {
+    this.isSelectMode = !this.isSelectMode;
+    if (!this.isSelectMode) this.selectedIds.clear();
+    this._cdr.markForCheck();
+  }
+
+  toggleSelect(id: string): void {
+    if (this.selectedIds.has(id)) {
+      this.selectedIds.delete(id);
+    } else {
+      this.selectedIds.add(id);
+    }
+    this._cdr.markForCheck();
+  }
+
+  toggleSelectAll(): void {
+    if (this.allSelected) {
+      this.selectedIds.clear();
+    } else {
+      this.filteredNotifications.forEach(n => this.selectedIds.add(n._id));
+    }
+    this._cdr.markForCheck();
+  }
+
+  isSelected(id: string): boolean {
+    return this.selectedIds.has(id);
+  }
+
+  bulkMarkAsRead(): void {
+    const ids = [...this.selectedIds].filter(id =>
+      this.filteredNotifications.find(n => n._id === id && !n.read)
+    );
+    if (!ids.length) {
+      this.selectedIds.clear();
+      this.isSelectMode = false;
+      this._cdr.markForCheck();
+      return;
+    }
+    this.isLoading = true;
+    this._notificationCenterService.markMultipleAsRead(ids).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
-        this.getNotifications();
-        this._notificationService.sendNotification();
-        this.activeActionId = null;
+        const idSet = new Set(ids);
+        this.formatListNotifications.forEach(n => { if (idSet.has(n._id)) n.read = true; });
+        this.unreadNotifications = this.formatListNotifications.filter(n => !n.read).length;
+        this.selectedIds.clear();
+        this.isSelectMode = false;
+        this.isLoading = false;
+        this.filterNotifications();
+        this._notificationService.emitLocalUpdate();
+        this._cdr.markForCheck();
+      },
+      error: () => { this.isLoading = false; this._cdr.markForCheck(); }
+    });
+  }
+
+  bulkDelete(): void {
+    const ids = [...this.selectedIds];
+    if (!ids.length) return;
+    this.isLoading = true;
+    this._notificationCenterService.deleteMultipleNotifications(ids).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        const idSet = new Set(ids);
+        const removedUnread = this.formatListNotifications.filter(n => idSet.has(n._id) && !n.read).length;
+        this.formatListNotifications = this.formatListNotifications.filter(n => !idSet.has(n._id));
+        this.unreadNotifications = Math.max(0, this.unreadNotifications - removedUnread);
+        this.selectedIds.clear();
+        this.isSelectMode = false;
+        this.isLoading = false;
+        this.filterNotifications();
+        this._notificationService.emitLocalUpdate();
+        this._cdr.markForCheck();
+      },
+      error: () => { this.isLoading = false; this._cdr.markForCheck(); }
+    });
+  }
+
+  markAllAsRead(): void {
+    const userId = this._authService.getDecodedToken()?.id!;
+    this._notificationCenterService.markAllAsRead(userId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.formatListNotifications.forEach(n => n.read = true);
+        this.unreadNotifications = 0;
+        this.filterNotifications();
+        this._notificationService.emitLocalUpdate();
+        this._cdr.markForCheck();
+      }
+    });
+  }
+
+  deleteNotification(notificationId: string) {
+    this._notificationCenterService.deleteNotification(notificationId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        const idx = this.formatListNotifications.findIndex(n => n._id === notificationId);
+        if (idx !== -1) {
+          const wasUnread = !this.formatListNotifications[idx].read;
+          this.formatListNotifications.splice(idx, 1);
+          if (wasUnread) this.unreadNotifications = Math.max(0, this.unreadNotifications - 1);
+        }
+        this.filterNotifications();
+        this._notificationService.emitLocalUpdate();
+        this._cdr.markForCheck();
       },
       error: (error) => {
-        const currentUser = this._authService.getDecodedToken();
-        this._logService.log(
-          LevelLogEnum.ERROR,
-          'NotificationsPanelComponent',
-          'Error delete notification',
-          {
-            user: currentUser,
-            notificationId,
-            message: error,
-          },
-        );
+        this._logService.log(LevelLogEnum.ERROR, 'NotificationsPanelComponent', 'Error delete notification', {
+          user: this._authService.getDecodedToken(),
+          notificationId,
+          message: error,
+        });
       },
     });
   }
 
-  checkDataLinkNotifications() {
-    this.dataLinkActionsNotifications = [];
-    const menuActionsNotifications = {
-      icon: 'delete',
-      function: this.deleteNotification.bind(this),
-      title: translations['notification.deleteNotification_btn'],
-      color: Colors.RED
-    };
-
-    this.dataLinkActionsNotifications.push(menuActionsNotifications);
-
-    this._cdr.markForCheck();
-  }
-
-  handleActionsClickedNotifications(data: DropdownDataLink<any>, notification: any) {
-    if (data.function && typeof data.function === 'function') {
-      data.function(notification._id);
-    } else if (data.link) {
-      this._router.navigate([data.link]);
-    }
-  }
-
-  async getNotifications() {
+  // Full HTTP fetch — only called when panel opens for the first time
+  getNotifications() {
     const userId = this._authService.getDecodedToken()?.id!;
     this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
         this.unreadNotifications = 0;
         this.formatListNotifications = [];
         response.forEach((notification: NotificationsData) => {
-          if (!notification.read) {
-            this.unreadNotifications++;
-          }
+          if (!notification.read) this.unreadNotifications++;
 
           if (notification.type === this.type.COMMENT) {
             const additionalDataComment: AdditionalDataComment = JSON.parse(notification.additionalData as string);
-            notification.icon = 'comment';
-            this.formatListNotifications.push({
-              ...notification,
-              additionalDataComment,
-            });
-          }
-
-          if (notification.type === this.type.LIKE) {
+            this.formatListNotifications.push({ ...notification, icon: 'comment', additionalDataComment });
+          } else if (notification.type === this.type.LIKE) {
             const additionalDataLike: AdditionalDataLike = JSON.parse(notification.additionalData as string);
-            notification.icon = 'add_reaction';
-            this.formatListNotifications.push({
-              ...notification,
-              additionalDataLike,
-            });
-          }
-
-          if (notification.type === this.type.FRIEND_REQUEST) {
+            this.formatListNotifications.push({ ...notification, icon: 'add_reaction', additionalDataLike });
+          } else if (notification.type === this.type.FRIEND_REQUEST) {
             const additionalDataFriendRequest: AdditionalDataFriendRequest = JSON.parse(notification.additionalData as string);
-            notification.icon = 'person_add';
-            this.formatListNotifications.push({
-              ...notification,
-              additionalDataFriendRequest,
-            });
-          }
-
-          if (notification.type === this.type.FRIEND_ACCEPTED) {
+            this.formatListNotifications.push({ ...notification, icon: 'person_add', additionalDataFriendRequest });
+          } else if (notification.type === this.type.FRIEND_ACCEPTED) {
             const additionalDataFriendAccept: AdditionalDataFriendAccept = JSON.parse(notification.additionalData as string);
-            notification.icon = 'person_add';
-            this.formatListNotifications.push({
-              ...notification,
-              additionalDataFriendAccept,
-            });
+            this.formatListNotifications.push({ ...notification, icon: 'how_to_reg', additionalDataFriendAccept });
           }
-
         });
         this.formatListNotifications.sort((a, b) => {
           if (a.read === b.read) return 0;
-          return a.read && !b.read ? 1 : -1;
+          return a.read ? 1 : -1;
         });
         this.filterNotifications();
         this._cdr.markForCheck();
       },
       error: (error) => {
-        const currentUser = this._authService.getDecodedToken();
-        this._logService.log(
-          LevelLogEnum.ERROR,
-          'NotificationsPanelComponent',
-          'Error get notifications',
-          {
-            user: currentUser,
-            message: error,
-          },
-        );
+        this._logService.log(LevelLogEnum.ERROR, 'NotificationsPanelComponent', 'Error get notifications', {
+          user: this._authService.getDecodedToken(),
+          message: error,
+        });
       },
     });
   }
 
-  async goToLink(link: string, _id: string) {
-    await this.markAsRead(_id);
-    this._notificationService.sendNotification();
-    this.togglePanel();
-    setTimeout(() => {
-      this._router.navigateByUrl(link);
-    }, 1000);
+  hideEmojiOnError(event: Event): void {
+    (event.target as HTMLImageElement).style.display = 'none';
   }
 
-  async markAsRead(_id: string) {
-    await this._notificationCenterService.updateNotification(_id).pipe(takeUntil(this.destroy$)).subscribe({
+  isEmojiUrlSafe(url: string | undefined): boolean {
+    if (!url) return false;
+    const blocked = ['seeklogo.com', 'fbcdn.net'];
+    try {
+      const host = new URL(url).hostname;
+      return !blocked.some(d => host.includes(d));
+    } catch {
+      return false;
+    }
+  }
+
+  getNotificationAvatar(notification: NotificationsData): string {
+    if (notification.type === this.type.COMMENT) return notification.additionalDataComment?.avatarComment || '';
+    if (notification.type === this.type.LIKE) return notification.additionalDataLike?.userAvatarReaction || '';
+    if (notification.type === this.type.FRIEND_REQUEST) return notification.additionalDataFriendRequest?.sendUserAvatar || '';
+    if (notification.type === this.type.FRIEND_ACCEPTED) return notification.additionalDataFriendAccept?.acceptUserAvatar || '';
+    return '';
+  }
+
+  getNotificationActorName(notification: NotificationsData): string {
+    if (notification.type === this.type.COMMENT) return notification.additionalDataComment?.nameComment || '';
+    if (notification.type === this.type.LIKE) return notification.additionalDataLike?.userNameReaction || '';
+    if (notification.type === this.type.FRIEND_REQUEST) return notification.additionalDataFriendRequest?.sendUserName || '';
+    if (notification.type === this.type.FRIEND_ACCEPTED) return notification.additionalDataFriendAccept?.acceptUserName || '';
+    return '';
+  }
+
+  // Properly awaits the HTTP call before navigating
+  async goToLink(link: string, _id: string) {
+    try {
+      await firstValueFrom(
+        this._notificationCenterService.updateNotification(_id).pipe(takeUntil(this.destroy$))
+      );
+      const n = this.formatListNotifications.find(x => x._id === _id);
+      if (n && !n.read) {
+        n.read = true;
+        this.unreadNotifications = Math.max(0, this.unreadNotifications - 1);
+      }
+      this.filterNotifications();
+      this._notificationService.emitLocalUpdate();
+    } catch {
+      // Don't block navigation on mark-as-read failure
+    }
+    this.togglePanel();
+    setTimeout(() => this._router.navigateByUrl(link), 300);
+  }
+
+  markAsRead(_id: string) {
+    this._notificationCenterService.updateNotification(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
-        this.getNotifications();
+        const n = this.formatListNotifications.find(x => x._id === _id);
+        if (n && !n.read) {
+          n.read = true;
+          this.unreadNotifications = Math.max(0, this.unreadNotifications - 1);
+        }
+        this.filterNotifications();
+        this._notificationService.emitLocalUpdate();
+        this._cdr.markForCheck();
       },
       error: (error) => {
-        const currentUser = this._authService.getDecodedToken();
-        this._logService.log(
-          LevelLogEnum.ERROR,
-          'NotificationsPanelComponent',
-          'Error mark as read notification',
-          {
-            user: currentUser,
-            notificationId: _id,
-            message: error,
-          },
-        );
+        this._logService.log(LevelLogEnum.ERROR, 'NotificationsPanelComponent', 'Error mark as read notification', {
+          user: this._authService.getDecodedToken(),
+          notificationId: _id,
+          message: error,
+        });
       },
     });
   }

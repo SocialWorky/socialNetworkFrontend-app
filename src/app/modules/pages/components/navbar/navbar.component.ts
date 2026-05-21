@@ -102,9 +102,8 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     this._notificationService.notification$.pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: () => {
-        setTimeout(() => {
-          this.getNotification();
-        }, 1000)
+        // bypassCache=true: skip the 1-min cache so the badge reflects the real count
+        setTimeout(() => this.getNotification(true), 800);
       },
       error: (error) => {
         // Error getting notifications - no need to log every notification fetch error
@@ -289,9 +288,9 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     this.searchTerm = '';
   }
 
-  async getNotification() {
+  async getNotification(bypassCache = false) {
     const userId = this._authService.getDecodedToken()?.id!;
-    this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._notificationCenterService.getNotifications(userId, bypassCache).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {
         this.notifications = data.filter((notification: any) => !notification.read).length;
         this._cdr.markForCheck();
