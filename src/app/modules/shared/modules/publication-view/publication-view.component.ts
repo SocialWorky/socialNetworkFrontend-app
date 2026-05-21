@@ -724,7 +724,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   async followMyFriend(_idUser: string) {
     this._friendsService.requestFriend(_idUser).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
-        this._emailNotificationService.sendFriendRequestNotification(_idUser);
         this.viewProfile(_idUser);
       },
       error: (error) => {
@@ -768,7 +767,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._friendsService.acceptFriendship(_id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.getUserFriendPending();
-        this._emailNotificationService.acceptFriendRequestNotification(idUser);
         this.viewProfile(idUser);
       }
     });

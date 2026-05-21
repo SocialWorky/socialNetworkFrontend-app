@@ -23,6 +23,7 @@ import { WidgetManagementComponent } from './shared/widget-management/widget-man
 import { SubscriptionPlansComponent } from './shared/subscription-plans/subscription-plans.component';
 import { BoostPackagesComponent } from './shared/boost-packages/boost-packages.component';
 import { ManageSubscriptionsComponent } from './shared/manage-subscriptions/manage-subscriptions.component';
+import { EmailTemplateManagementComponent } from './shared/email-template-management/email-template-management.component';
 
 import { VersionManagementComponent } from './shared/version-management/version-management.component';
 
@@ -56,6 +57,7 @@ import { MaterialModule } from '@shared/modules/material/material.module';
     SubscriptionPlansComponent,
     BoostPackagesComponent,
     ManageSubscriptionsComponent,
+    EmailTemplateManagementComponent,
   ],
   imports: [
     CommonModule,

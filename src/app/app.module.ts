@@ -38,6 +38,7 @@ const config: SocketIoConfig = {
   options: {
     query: { token: localStorage.getItem('authToken') || localStorage.getItem('token') },
     transports: ['websocket'],
+    autoConnect: false,  // connection is initiated explicitly after login via connectToWebSocket()
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,

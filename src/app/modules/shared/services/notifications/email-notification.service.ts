@@ -9,8 +9,6 @@ import { AuthService } from '@auth/services/auth.service';
 import { UserService } from '@shared/services/core-apis/users.service';
 import { Subject, takeUntil } from 'rxjs';
 import { User } from '@shared/interfaces/user.interface';
-import { CustomReactionList } from '@admin/interfaces/customReactions.interface';
-import { CenterSocketNotificationsService } from '@shared/services/notifications/centerSocketNotifications.service';
 import { Token } from '@shared/interfaces/token.interface';
 
 
@@ -30,7 +28,6 @@ export class EmailNotificationService {
     private http: HttpClient,
     private _authService: AuthService,
     private _userService: UserService,
-    private _centerSocketNotificationsService: CenterSocketNotificationsService
   ) {
     this.baseUrl = environment.API_URL;
     this.dataUser = this._authService.getDecodedToken();
@@ -106,68 +103,6 @@ export class EmailNotificationService {
     this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
 
     this.sendEmailNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();
-  }
-
-  //TODO: Implementa notificaciones por email y sistema -> solicitud de amistad.
-  async sendFriendRequestNotification(_idUser: string) {
-    await this.userById(_idUser).then((user) => {
-      this.mailSendDataValidate.url = `${environment.BASE_URL}/profile/${this.dataUser?.id}`;
-      this.mailSendDataValidate.subject = translations['email.sendFriendRequestSubject'];
-      this.mailSendDataValidate.title = translations['email.sendFriendRequestTitle'];
-      this.mailSendDataValidate.greet = translations['email.sendFriendRequestGreet'];
-      this.mailSendDataValidate.message = translations['email.sendFriendRequestMessage']
-      this.mailSendDataValidate.subMessage = `${translations['email.sendFriendRequestSubMessage']} ${this.dataUser?.name}`;
-      this.mailSendDataValidate.buttonMessage = `${translations['email.sendFriendRequestButtonMessage']} ${this.dataUser?.name}`;
-      this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
-      this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
-      this.mailSendDataValidate.email = user.email;
-
-      this._centerSocketNotificationsService.senFriendRequestNotification(user);
-
-      this.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();
-
-    });
-  }
-
-  async acceptFriendRequestNotification(_idUser: string) {
-    await this.userById(_idUser).then((user) => {
-      this.mailSendDataValidate.url = `${environment.BASE_URL}/profile/${this.dataUser?.id}`;
-      this.mailSendDataValidate.subject = translations['email.acceptFriendRequestSubject'];
-      this.mailSendDataValidate.title = translations['email.acceptFriendRequestTitle'];
-      this.mailSendDataValidate.greet = translations['email.acceptFriendRequestGreet'];
-      this.mailSendDataValidate.message = translations['email.acceptFriendRequestMessage']
-      this.mailSendDataValidate.subMessage = `${translations['email.acceptFriendRequestSubMessage']} ${this.dataUser?.name}`;
-      this.mailSendDataValidate.buttonMessage = `${translations['email.acceptFriendRequestButtonMessage']} ${this.dataUser?.name}`;
-      this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
-      this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
-      this.mailSendDataValidate.email = user.email;
-
-      this._centerSocketNotificationsService.acceptFriendRequestNotification(user);
-
-      this.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();
-    });
-  }
-
-  //TODO: Implement email and system notifications -> reaction to a publication.
-  async reactionsNotification(publication: PublicationView, reaction: CustomReactionList) {
-
-    if (this.dataUser?.id === publication.author._id) return;
-
-    this.mailSendDataValidate.url = `${environment.BASE_URL}/publication/${publication._id}`;
-    this.mailSendDataValidate.subject = 'Han reaccionado a tu publicación';
-    this.mailSendDataValidate.title = 'Notificación de reacción';
-    this.mailSendDataValidate.greet = 'Hola';
-    this.mailSendDataValidate.message = 'El usuario ' + this.dataUser?.name + ' ha reaccionado a tu publicación';
-    this.mailSendDataValidate.subMessage = 'Su reacción fue: <img src="'+ reaction.emoji +'" width="20px" alt="'+ reaction.name +'"> ' + reaction.name;
-    this.mailSendDataValidate.buttonMessage = 'Ver publicación';
-    this.mailSendDataValidate.template = TemplateEmail.NOTIFICATION;
-    this.mailSendDataValidate.email = publication?.author.email;
-    this.mailSendDataValidate.templateLogo = environment.TEMPLATE_EMAIL_LOGO;
-
-    this._centerSocketNotificationsService.reactionInPublicationNotification(publication, reaction);
-
-    this.sendNotification(this.mailSendDataValidate).pipe(takeUntil(this.destroy$)).subscribe();
-
   }
 
   //TODO: Implement email notification for password recovery.

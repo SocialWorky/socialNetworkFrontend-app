@@ -9,7 +9,6 @@ import { ReactionsService } from '@shared/services/core-apis/reactions.service';
 import { AuthService } from '@auth/services/auth.service';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { PublicationsReactions } from '@shared/interfaces/reactions.interface';
-import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { Token } from '@shared/interfaces/token.interface';
@@ -62,7 +61,6 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
     private _reactionsService: ReactionsService,
     private _authService: AuthService,
     private _publicationService: PublicationService,
-    private _emailNotificationService: EmailNotificationService,
     private _notificationService: NotificationService,
     private _utilityService: UtilityService,
     private _logService: LogService,
@@ -144,7 +142,6 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
 
             this.reactionsVisible = false;
             this._notificationService.sendNotification(this.publication);
-            this._emailNotificationService.reactionsNotification(this.publication!, reaction);
             this.refreshPublications();
           } catch (error) {
             // Handle any errors in the async operations

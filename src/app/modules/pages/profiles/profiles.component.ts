@@ -29,7 +29,6 @@ import { environment } from '@env/environment';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { ProfileService } from './services/profile.service';
 import { ProfileNotificationService } from '@shared/services/notifications/profile-notification.service';
-import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
@@ -149,7 +148,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     private _globalEventService: GlobalEventService,
     private _profileService: ProfileService,
     private _profileNotificationService: ProfileNotificationService,
-    private _emailNotificationService: EmailNotificationService,
     private _router: Router,
     private _deviceDetectionService: DeviceDetectionService,
     private _scrollService: ScrollService,
@@ -752,7 +750,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       next: async () => {
         this.loadPublications();
         this.getUserFriendPending();
-        this._emailNotificationService.sendFriendRequestNotification(_id);
         this._cdr.markForCheck();
       },
       error: (error) => {
@@ -784,7 +781,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       next: async () => {
         this.getUserFriendPending();
         this.loadPublications();
-        this._emailNotificationService.acceptFriendRequestNotification(this.idUserProfile);
         this._cdr.markForCheck();
       },
       error: (error) => {

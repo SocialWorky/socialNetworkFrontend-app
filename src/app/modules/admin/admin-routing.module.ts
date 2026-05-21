@@ -16,6 +16,7 @@ import { VersionManagementComponent } from './shared/version-management/version-
 import { SubscriptionPlansComponent } from './shared/subscription-plans/subscription-plans.component';
 import { BoostPackagesComponent } from './shared/boost-packages/boost-packages.component';
 import { ManageSubscriptionsComponent } from './shared/manage-subscriptions/manage-subscriptions.component';
+import { EmailTemplateManagementComponent } from './shared/email-template-management/email-template-management.component';
 import { translations } from '@translations/translations';
 import { adminSubscriptionEnabledGuard } from './guards/admin-subscription-enabled.guard';
 
@@ -44,6 +45,7 @@ export const routes: Routes = [
           { title: translations['admin.sideMenu.items.subscriptionPlans'], path: 'subscription-plans', component: SubscriptionPlansComponent, canActivate: [adminSubscriptionEnabledGuard] },
           { title: translations['admin.sideMenu.items.manageSubscriptions'], path: 'manage-subscriptions', component: ManageSubscriptionsComponent, canActivate: [adminSubscriptionEnabledGuard] },
           { title: translations['admin.sideMenu.items.boostPackages'], path: 'boost-packages', component: BoostPackagesComponent },
+          { title: translations['admin.emailTemplates.menuTitle'], path: 'email-templates', component: EmailTemplateManagementComponent },
         ],
       },
       { 

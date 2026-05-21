@@ -36,9 +36,7 @@ import { MediaFileUpload, PublicationView } from '@shared/interfaces/publication
 import { UserService } from '@shared/services/core-apis/users.service';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { User } from '@shared/interfaces/user.interface';
-import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { environment } from '@env/environment';
-import { MailSendValidateData, TemplateEmail } from '@shared/interfaces/mail.interface';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationType } from '@shared/modules/notifications-panel/enums/notificationsType.enum';
 import { GifSearchComponent } from '../gif-search/gif-search.component';
@@ -113,7 +111,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   publishButtonLoading: boolean = true;
 
   private unsubscribe$ = new Subject<void>();
-  private mailSendNotification: MailSendValidateData = {} as MailSendValidateData;
   private subscription?: Subscription;
 
   @Input() type?: TypePublishing;
@@ -168,7 +165,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     private _fileUploadService: FileUploadService,
     private _userService: UserService,
     private _globalEventService: GlobalEventService,
-    private _emailNotificationService: EmailNotificationService,
     private _notificationCenterService: NotificationCenterService,
     private _tooltipsOnboardingService: TooltipsOnboardingService,
     private _utilityService: UtilityService,
@@ -677,7 +673,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     const publication = await lastValueFrom(this._publicationService.getPublicationId(idPublication, true).pipe(takeUntil(this.unsubscribe$)));
     this._publicationService.updatePublications(publication);
     if (comment) {
-      this.sendEmailNotificationReaction(publication[0], comment);
       this.createNotificationAndSendComment(publication[0], comment);
     }
   }
@@ -814,25 +809,6 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   removeFile(index: number) {
     this.selectedFiles.splice(index, 1);
     this.previews.splice(index, 1);
-  }
-
-  sendEmailNotificationReaction(publication: any, comment: any) {
-    if (this.userToken === publication.author._id) return;
-
-    this.mailSendNotification = {
-      url: `${environment.BASE_URL}/publication/${publication._id}`,
-      subject: translations['email.commentPublicationSubject'],
-      title: translations['email.commentPublicationTitle'],
-      greet: translations['email.commentPublicationGreet'],
-      message: this.replaceVariables(translations['email.commentPublicationMessage'], { 'name': this.user.name, 'lastName': this.user.lastName }),
-      subMessage: this.replaceVariables(translations['email.commentPublicationSubMessage'], { 'comment': comment.content }),
-      buttonMessage: translations['email.commentPublicationButtonMessage'],
-      template: TemplateEmail.NOTIFICATION,
-      templateLogo: environment.TEMPLATE_EMAIL_LOGO,
-      email: publication?.author.email,
-    };
-
-    this._emailNotificationService.sendNotification(this.mailSendNotification).pipe(takeUntil(this.unsubscribe$)).subscribe();
   }
 
   private async updatePublications(type: TypePublishing, idUserProfile?: string) {
