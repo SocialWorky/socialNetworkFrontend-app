@@ -36,6 +36,21 @@ export interface AdminOverview {
   activeSubscriptions: number;
   estimatedMonthlyRevenue: number;
   updatedAt: string;
+  totalUsers: number;
+  activeUsers: number;
+  pendingVerificationUsers: number;
+  newUsersThisWeek: number;
+  totalPublications: number;
+  publicationsWithMedia: number;
+  totalComments: number;
+  commentsToday: number;
+  totalReactions: number;
+  reactionsToday: number;
+  pendingReports: number;
+  resolvedReports: number;
+  todayReports: number;
+  publicationsThisWeek: number;
+  publicationsLastWeek: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -79,7 +94,9 @@ export class AnalyticsService {
 
   getAdminOverview(): Observable<AdminOverview> {
     return this.http
-      .get<AdminOverview>(`${this.apiUrl}/analytics/admin/overview`)
+      .get<AdminOverview>(`${this.apiUrl}/analytics/admin/overview`, {
+        headers: { 'Cache-Control': 'no-cache' },
+      })
       .pipe(tap((overview) => this._adminOverview$.next(overview)));
   }
 }
