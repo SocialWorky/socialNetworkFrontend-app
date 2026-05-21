@@ -129,6 +129,7 @@ export class AuthInterceptor implements HttpInterceptor {
           }),
           catchError((err) => {
             this.isRefreshing = false;
+            this.refreshTokenSubject.next('');
             this.clearSession();
             this.redirectToLogin();
             return throwError(() => err);
@@ -145,12 +146,15 @@ export class AuthInterceptor implements HttpInterceptor {
         return throwError(() => new Error('No refresh token available'));
       }
     } else {
-      // Wait for the refresh to complete and retry
+      // Wait for the refresh to complete and retry, or fail if refresh errored
       return this.refreshTokenSubject.pipe(
         filter(token => token !== null),
         take(1),
         switchMap(token => {
-          return next.handle(this.addToken(request, token!));
+          if (!token) {
+            return throwError(() => new Error('Token refresh failed'));
+          }
+          return next.handle(this.addToken(request, token));
         })
       );
     }

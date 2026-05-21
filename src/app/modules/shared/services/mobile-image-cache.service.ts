@@ -259,14 +259,17 @@ export class MobileImageCacheService {
     request.onerror = (event) => {
       const error = (event.target as IDBOpenDBRequest).error;
       this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'IndexedDB open error', { error: error?.message });
-      
-      // For iOS Safari, don't fail completely, just use memory cache
-      if (isIOS) {
 
+      if (isIOS) {
         resolve();
       } else {
         reject(error);
       }
+    };
+
+    request.onblocked = () => {
+      this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'IndexedDB open blocked by another connection, resolving without db');
+      resolve();
     };
 
     request.onsuccess = () => {

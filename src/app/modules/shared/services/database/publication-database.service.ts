@@ -74,7 +74,7 @@ export class PublicationDatabaseService {
 
   async initDatabase(): Promise<void> {
     this.checkUserChange();
-    
+
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.getDatabaseName(), this.DB_VERSION);
 
@@ -83,10 +83,14 @@ export class PublicationDatabaseService {
         this.db = request.result;
         resolve();
       };
+      request.onblocked = () => {
+        this.logService.log(LevelLogEnum.WARN, 'PublicationDatabaseService', 'IndexedDB open blocked by another connection, resolving without db');
+        resolve();
+      };
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
-        
+
         if (!db.objectStoreNames.contains(this.STORE_NAME)) {
           const store = db.createObjectStore(this.STORE_NAME, { keyPath: '_id' });
           store.createIndex('createdAt', 'createdAt', { unique: false });

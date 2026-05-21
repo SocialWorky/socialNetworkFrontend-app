@@ -144,7 +144,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   async checkSessionGoogle() {
     setTimeout(() => {
       if (sessionStorage.getItem('id_token')) {
-        if (!this.token) {
+        if (!localStorage.getItem('token')) {
           this.loginGoogle();
         }
       }
@@ -207,22 +207,29 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
           body.classList.remove('dark-mode');
         }
 
-        const tokenResponse = this._authService.getDecodedToken()!;
+        const tokenResponse = this._authService.getDecodedToken();
+        if (!tokenResponse) {
+          throw new Error('Failed to decode token after login');
+        }
         localStorage.setItem('isTooltipActive', tokenResponse.isTooltipActive.toString());
 
         this._socketService.updateToken(localStorage.getItem('token')!);
         this._socketService.emitEvent('loginUser', localStorage.getItem('token'));
         this._notificationUsersService.loginUser();
 
-        await this._databaseManager.initializeForUser(tokenResponse.id);
+        this._databaseManager.initializeForUser(tokenResponse.id).catch(err => {
+          this._logService.log(LevelLogEnum.WARN, 'LoginComponent', 'Database init failed, proceeding with navigation', { error: err?.message });
+        });
 
         this._cdr.markForCheck();
+        accessibleLoading.hide(loadingElement);
 
-        if (tokenResponse?.role === 'admin' && !this._deviceDetectionService.isMobile()) {
-          await this._router.navigate(['/admin']);
-        } else {
-          await this._router.navigate(['/home']);
+        const target = tokenResponse?.role === 'admin' && !this._deviceDetectionService.isMobile() ? '/admin' : '/home';
+        const navigated = await this._router.navigate([target]);
+        if (!navigated) {
+          window.location.replace(target === '/admin' ? '/admin' : '/');
         }
+        return;
       }
     } catch (e: any) {
       this._logService.log(
@@ -255,6 +262,15 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
           translations['button.ok'],
         );
       } else if (e.status === 500) {
+        this._alertService.showAlert(
+          translations['alert.title_error_server'],
+          translations['alert.message_error_server'],
+          Alerts.ERROR,
+          Position.CENTER,
+          true,
+          translations['button.ok'],
+        );
+      } else if (!e.status) {
         this._alertService.showAlert(
           translations['alert.title_error_server'],
           translations['alert.message_error_server'],
@@ -340,8 +356,9 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       this._socketService.emitEvent('loginUser', localStorage.getItem('token'));
       this._notificationUsersService.loginUser();
 
-      // Initialize user databases after successful Google login
-      await this._databaseManager.initializeForUser(tokenResponse.id);
+      this._databaseManager.initializeForUser(tokenResponse.id).catch(err => {
+        this._logService.log(LevelLogEnum.WARN, 'LoginComponent', 'Database init failed on Google login, proceeding with navigation', { error: err?.message });
+      });
 
       this._logService.log(
         LevelLogEnum.INFO,
@@ -357,7 +374,13 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       );
 
       this._cdr.markForCheck();
-      this._router.navigate(['/home']);
+      accessibleLoading.hide(loadingElement);
+
+      const navigated = await this._router.navigate(['/home']);
+      if (!navigated) {
+        window.location.replace('/');
+      }
+      return;
     } catch (error) {
       this._logService.log(
         LevelLogEnum.ERROR,
