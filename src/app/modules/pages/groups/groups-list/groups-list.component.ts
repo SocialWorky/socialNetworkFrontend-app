@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { GroupsService, Group } from '@shared/services/core-apis/groups.service';
 import { AuthService } from '@auth/services/auth.service';
+import { environment } from '@env/environment';
 
 @Component({
   selector: 'worky-groups-list',
@@ -86,5 +87,11 @@ export class GroupsListComponent implements OnInit, OnDestroy {
     this.showCreateForm = false;
     this.cdr.markForCheck();
     this.loadGroups();
+  }
+
+  getCoverUrl(coverImage: string | null): string {
+    if (!coverImage) return '';
+    if (coverImage.startsWith('http') || coverImage.startsWith('blob:') || coverImage.startsWith('data:')) return coverImage;
+    return `${environment.MINIO_BUCKET_URL}/${coverImage}`;
   }
 }

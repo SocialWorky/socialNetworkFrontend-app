@@ -20,7 +20,7 @@
 
   <div class="groups-grid" *ngIf="!isLoading && groups.length > 0">
     <div class="group-card" *ngFor="let group of groups" (click)="openGroup(group._id)">
-      <div class="group-cover" [style.backgroundImage]="group.coverImage ? 'url(' + group.coverImage + ')' : ''">
+      <div class="group-cover" [style.backgroundImage]="getCoverUrl(group.coverImage) ? 'url(' + getCoverUrl(group.coverImage) + ')' : ''">
         <span class="privacy-badge">{{ ('groups.' + group.privacy) | workyTranslations }}</span>
       </div>
       <div class="group-info">

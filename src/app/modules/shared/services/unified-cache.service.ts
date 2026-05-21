@@ -45,6 +45,7 @@ const ENDPOINT_TTL_CONFIG: Record<string, number> = {
   '/config': 30 * 60 * 1000,        // 30 minutes
   '/friends': 5 * 60 * 1000,        // 5 minutes
   '/thematic-images': 60 * 60 * 1000, // 1 hour
+  '/groups': 3 * 60 * 1000,         // 3 minutes
 };
 
 const NO_CACHE_PATTERNS = [
@@ -290,6 +291,7 @@ export class UnifiedCacheService implements OnDestroy {
       '/config': [/config/],
       '/widgets': [/widgets/],
       '/reports': [/reports/],
+      '/groups': [/groups/],
     };
 
     for (const [endpoint, patterns] of Object.entries(resourcePatterns)) {
