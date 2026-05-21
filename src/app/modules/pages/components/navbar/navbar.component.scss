@@ -250,6 +250,32 @@
     padding: 8px 15px;
     gap: 10px;
 
+    a.item-navbar-actions {
+      width: 35px;
+      min-width: 35px;
+      height: 35px;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      transition: background-color 0.15s ease;
+
+      .navbar-action-icon {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 22px;
+        transition: color 0.15s ease;
+      }
+
+      &:hover {
+        background: map.get(colors.$worky-navy, 72);
+
+        .navbar-action-icon {
+          color: #fff;
+        }
+      }
+    }
+
     ::ng-deep worky-dropdown {
       .item-navbar-actions {
         width: 35px;

@@ -126,6 +126,12 @@
       <!-- Mobile Navigation -->
       <div class="worky-profile-mobile">
         <worky-menu-component></worky-menu-component>
+        <a [routerLink]="['/events']" class="item-navbar-actions" [title]="'events.title' | workyTranslations">
+          <span class="material-symbols-rounded navbar-action-icon">calendar_month</span>
+        </a>
+        <a [routerLink]="['/groups']" class="item-navbar-actions" [title]="'groups.title' | workyTranslations">
+          <span class="material-symbols-rounded navbar-action-icon">groups</span>
+        </a>
         <!-- Messages -->
         <a [routerLink]="['/messages']">
           <worky-dropdown
