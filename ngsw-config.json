@@ -2,6 +2,8 @@
   "$schema": "./node_modules/@angular/service-worker/config/schema.json",
   "index": "/index.html",
   "navigationUrls": [
+    "/**",
+    "!/**/*.*",
     "!/auth/**",
     "!/profile/**",
     "!/messages/**"
@@ -144,7 +146,7 @@
       "cacheConfig": {
         "strategy": "performance",
         "maxSize": 50,
-        "maxAge": 604800000,
+        "maxAge": "7d",
         "timeout": "30s"
       }
     },
@@ -157,7 +159,7 @@
       "cacheConfig": {
         "strategy": "performance",
         "maxSize": 50,
-        "maxAge": 604800000,
+        "maxAge": "7d",
         "timeout": "20s"
       }
     },
@@ -171,7 +173,7 @@
       "cacheConfig": {
         "strategy": "performance",
         "maxSize": 50,
-        "maxAge": 604800000,
+        "maxAge": "7d",
         "timeout": "15s"
       }
     },
@@ -185,7 +187,7 @@
       "cacheConfig": {
         "strategy": "performance",
         "maxSize": 10,
-        "maxAge": 604800000
+        "maxAge": "7d"
       }
     },
     {

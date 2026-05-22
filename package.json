@@ -6,8 +6,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "npm run pwa:setup && ng build",
-    "build:prod": "npm run pwa:setup && ng build --configuration=production",
+    "build": "npm run prepare-meta && npm run generate-manifest && npm run pwa:setup && ng build",
+    "build:prod": "npm run prepare-meta && npm run generate-manifest && npm run pwa:setup && ng build --configuration=production",
     "build:docker": "ng build --configuration=production",
     "build:docker:setup": "npm run pwa:copy-utils && ng build --configuration=production",
     "build:docker:safe": "node scripts/docker-build.js",
