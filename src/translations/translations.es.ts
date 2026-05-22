@@ -433,6 +433,20 @@ export const translations = {
   'admin.subscriptionMode.enabled': 'Activo',
   'admin.subscriptionMode.disabled': 'Inactivo',
 
+  // AGE VERIFICATION
+  'ageVerification.modal.title': 'Verificación de Edad',
+  'ageVerification.modal.body': 'Esta plataforma contiene contenido exclusivo para personas mayores de 18 años.',
+  'ageVerification.modal.accept': 'Tengo 18 años o más — Continuar',
+  'ageVerification.modal.reject': 'No tengo 18 años',
+  'ageVerification.modal.blocked.title': 'Acceso restringido',
+  'ageVerification.modal.blocked.message': 'Este sitio es exclusivo para mayores de 18 años.',
+  'ageVerification.modal.blocked.reload': 'Volver a verificar',
+  'admin.ageVerification.sectionTitle': 'Verificación de Edad',
+  'admin.ageVerification.toggle.title': 'Requerir verificación de mayoría de edad',
+  'admin.ageVerification.toggle.subtitle': 'Los usuarios deben confirmar que tienen 18 años antes de acceder al login.',
+  'admin.ageVerification.modalText.es.label': 'Texto del modal (Español)',
+  'admin.ageVerification.modalText.en.label': 'Texto del modal (Inglés)',
+
   // ADMIN WIDGET MANAGEMENT FIELDS
   'admin.widgetManagement.fields.widget': 'Widget',
   'admin.widgetManagement.fields.selectWidget': 'Seleccionar widget',

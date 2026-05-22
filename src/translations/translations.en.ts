@@ -368,6 +368,20 @@ export const translations = {
   'admin.subscriptionMode.enabled': 'Enabled',
   'admin.subscriptionMode.disabled': 'Disabled',
 
+  // AGE VERIFICATION
+  'ageVerification.modal.title': 'Age Verification',
+  'ageVerification.modal.body': 'This platform contains content exclusively for people aged 18 and over.',
+  'ageVerification.modal.accept': 'I am 18 or older — Continue',
+  'ageVerification.modal.reject': 'I am under 18',
+  'ageVerification.modal.blocked.title': 'Access restricted',
+  'ageVerification.modal.blocked.message': 'This site is exclusively for users aged 18 and over.',
+  'ageVerification.modal.blocked.reload': 'Verify again',
+  'admin.ageVerification.sectionTitle': 'Age Verification',
+  'admin.ageVerification.toggle.title': 'Require age verification',
+  'admin.ageVerification.toggle.subtitle': 'Users must confirm they are 18 or older before accessing login.',
+  'admin.ageVerification.modalText.es.label': 'Modal text (Spanish)',
+  'admin.ageVerification.modalText.en.label': 'Modal text (English)',
+
   // ADMIN WIDGET MANAGEMENT FIELDS
   'admin.widgetManagement.fields.widget': 'Widget',
   'admin.widgetManagement.fields.selectWidget': 'Select widget',

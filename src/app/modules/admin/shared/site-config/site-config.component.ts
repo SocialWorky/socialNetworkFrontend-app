@@ -77,6 +77,9 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
         email: [false],
         google: [false],
       }),
+      ageVerificationEnabled: [false],
+      ageVerificationTextEs: [''],
+      ageVerificationTextEn: [''],
     });
 
     this.paykuForm = this._fb.group({
@@ -161,6 +164,9 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
             email: Boolean(loginMethods.email),
             google: Boolean(loginMethods.google),
           },
+          ageVerificationEnabled: configData.settings.ageVerification?.enabled ?? false,
+          ageVerificationTextEs: configData.settings.ageVerification?.modalText?.es || '',
+          ageVerificationTextEn: configData.settings.ageVerification?.modalText?.en || '',
         };
 
         this._logService.log(
@@ -312,6 +318,13 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       verifiedBadgeUrl: this.configForm.get('verifiedBadgeUrl')?.value || '',
       premiumBadgeUrl: this.configForm.get('premiumBadgeUrl')?.value || '',
       loginMethods: JSON.stringify(this.configForm.get('loginMethods')?.value || { email: false, google: false }),
+      ageVerification: {
+        enabled: Boolean(this.configForm.get('ageVerificationEnabled')?.value),
+        modalText: {
+          es: this.configForm.get('ageVerificationTextEs')?.value || '',
+          en: this.configForm.get('ageVerificationTextEn')?.value || '',
+        },
+      },
     };
 
     this._logService.log(

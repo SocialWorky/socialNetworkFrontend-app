@@ -45,6 +45,10 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
   loginMethods: LoginMethods | undefined;
 
+  showAgeGate = false;
+  ageGateBlocked = false;
+  ageVerificationText = '';
+
   private readonly storageThreshold = 24 * 60 * 60 * 1000; // 24 hours
 
   private destroy$ = new Subject<void>();
@@ -72,14 +76,31 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     private _logService: LogService,
     private _loadingService: LoadingService,
   ) {
-    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
-      const title = configData.settings.title + ' - Login';
-      const description = configData.settings.description;
-      const imageUrl = configData.settings.logoUrl;
-      const urlSite = configData.settings.urlSite;
-      this.loginMethods = JSON.parse(configData.settings.loginMethods);
-      this._metaTagService.updateMetaTags(title, description, imageUrl, urlSite );
-      this._cdr.markForCheck();
+    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (configData) => {
+        const title = configData.settings.title + ' - Login';
+        const description = configData.settings.description;
+        const imageUrl = configData.settings.logoUrl;
+        const urlSite = configData.settings.urlSite;
+        this.loginMethods = JSON.parse(configData.settings.loginMethods);
+        this._metaTagService.updateMetaTags(title, description, imageUrl, urlSite);
+
+        const ageVerification = configData.settings.ageVerification;
+        if (ageVerification?.enabled && sessionStorage.getItem('ageVerified') !== 'true') {
+          const lang = navigator.language?.startsWith('en') ? 'en' : 'es';
+          const text = lang === 'en'
+            ? ageVerification.modalText?.en || ageVerification.modalText?.es || ''
+            : ageVerification.modalText?.es || ageVerification.modalText?.en || '';
+          this.ageVerificationText = text;
+          this.showAgeGate = true;
+        }
+
+        this._cdr.markForCheck();
+      },
+      error: () => {
+        // Fail-open: show login form even if config fetch fails
+        this._cdr.markForCheck();
+      },
     });
     if (this.token) {
       const decoded = this._authService.getDecodedToken();
@@ -100,6 +121,22 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
   get isIPhoneWithNotch(): boolean {
     return this.isIOS && window.screen.height >= 812;
+  }
+
+  onAgeGateAccepted(): void {
+    sessionStorage.setItem('ageVerified', 'true');
+    this.showAgeGate = false;
+    this._cdr.markForCheck();
+  }
+
+  onAgeGateRejected(): void {
+    this.showAgeGate = false;
+    this.ageGateBlocked = true;
+    this._cdr.markForCheck();
+  }
+
+  onAgeGateReload(): void {
+    window.location.reload();
   }
 
   ngOnInit() {

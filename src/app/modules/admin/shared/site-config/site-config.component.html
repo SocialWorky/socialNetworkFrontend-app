@@ -518,6 +518,61 @@
         </div>
       </div>
 
+      <!-- Age Verification -->
+      <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden">
+        <div class="bg-gradient-to-r from-slate-800/80 to-slate-700/80 border-b border-slate-600/50 px-6 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-orange-500/10 rounded-lg flex items-center justify-center">
+              <i class="material-icons text-orange-400 text-base">verified_user</i>
+            </div>
+            <h2 class="text-lg font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
+              {{ 'admin.ageVerification.sectionTitle' | workyTranslations }}
+            </h2>
+          </div>
+        </div>
+        <div class="p-6 space-y-4">
+          <!-- Toggle -->
+          <div class="flex items-center gap-4 p-4 bg-slate-700/30 rounded-xl border border-slate-600/30">
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                formControlName="ageVerificationEnabled"
+                class="absolute opacity-0 w-0 h-0 peer"
+              >
+              <div class="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+            </label>
+            <div class="flex-1">
+              <span class="block text-sm font-semibold text-slate-100">{{ 'admin.ageVerification.toggle.title' | workyTranslations }}</span>
+              <span class="block text-xs text-slate-400">{{ 'admin.ageVerification.toggle.subtitle' | workyTranslations }}</span>
+            </div>
+          </div>
+
+          <!-- Text inputs — shown only when toggle is ON -->
+          <ng-container *ngIf="configForm.get('ageVerificationEnabled')?.value">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">
+                {{ 'admin.ageVerification.modalText.es.label' | workyTranslations }}
+              </label>
+              <textarea
+                formControlName="ageVerificationTextEs"
+                rows="3"
+                class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-orange-500 resize-none"
+              ></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">
+                {{ 'admin.ageVerification.modalText.en.label' | workyTranslations }}
+              </label>
+              <textarea
+                formControlName="ageVerificationTextEn"
+                rows="3"
+                class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-orange-500 resize-none"
+              ></textarea>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
     </form>
   </div>
 
