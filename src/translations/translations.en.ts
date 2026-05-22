@@ -1754,4 +1754,19 @@ export const translations = {
   'analytics.loading': 'Loading stats...',
   'analytics.error': 'Could not load stats',
   'analytics.viewStats': 'View stats',
+
+  'admin.featureFlags.menuTitle': 'Feature Modules',
+  'admin.featureFlags.title': 'Feature Modules',
+  'admin.featureFlags.subtitle': 'Enable or disable platform modules independently',
+  'admin.featureFlags.groups.label': 'Groups Module',
+  'admin.featureFlags.groups.description': 'Allows users to create and join groups',
+  'admin.featureFlags.events.label': 'Events Module',
+  'admin.featureFlags.events.description': 'Allows users to create and attend events',
+  'admin.featureFlags.enabled': 'Enabled',
+  'admin.featureFlags.disabled': 'Disabled',
+  'admin.featureFlags.saved': 'Configuration saved successfully',
+
+  'featureUnavailable.title': 'Module Unavailable',
+  'featureUnavailable.description': 'This module is currently disabled by the administrator.',
+  'featureUnavailable.backButton': 'Go Back',
 };

@@ -1,0 +1,22 @@
+<div class="feature-unavailable-wrapper">
+  <div class="feature-unavailable-card">
+
+    <div class="feature-unavailable-icon-wrapper">
+      <span class="material-symbols-rounded">block</span>
+    </div>
+
+    <h1 class="feature-unavailable-title">
+      {{ 'featureUnavailable.title' | workyTranslations }}
+    </h1>
+
+    <p class="feature-unavailable-description">
+      {{ 'featureUnavailable.description' | workyTranslations }}
+    </p>
+
+    <button class="feature-unavailable-btn" (click)="goBack()">
+      <span class="material-symbols-rounded" style="font-size: 1.1rem;">arrow_back</span>
+      {{ 'featureUnavailable.backButton' | workyTranslations }}
+    </button>
+
+  </div>
+</div>

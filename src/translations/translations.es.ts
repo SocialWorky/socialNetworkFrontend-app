@@ -1734,4 +1734,19 @@ export const translations = {
   'analytics.loading': 'Cargando estadísticas...',
   'analytics.error': 'No se pudieron cargar las estadísticas',
   'analytics.viewStats': 'Ver estadísticas',
+
+  'admin.featureFlags.menuTitle': 'Módulos de la Plataforma',
+  'admin.featureFlags.title': 'Módulos de la Plataforma',
+  'admin.featureFlags.subtitle': 'Habilita o deshabilita módulos de la plataforma de forma independiente',
+  'admin.featureFlags.groups.label': 'Módulo de Grupos',
+  'admin.featureFlags.groups.description': 'Permite a los usuarios crear y unirse a grupos',
+  'admin.featureFlags.events.label': 'Módulo de Eventos',
+  'admin.featureFlags.events.description': 'Permite a los usuarios crear y asistir a eventos',
+  'admin.featureFlags.enabled': 'Habilitado',
+  'admin.featureFlags.disabled': 'Deshabilitado',
+  'admin.featureFlags.saved': 'Configuración guardada exitosamente',
+
+  'featureUnavailable.title': 'Módulo No Disponible',
+  'featureUnavailable.description': 'Este módulo está deshabilitado por el administrador.',
+  'featureUnavailable.backButton': 'Volver',
 };

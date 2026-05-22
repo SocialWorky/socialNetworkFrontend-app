@@ -13,6 +13,8 @@ export interface Config {
     subscriptionMode?: boolean;
     verifiedBadgeUrl?: string;
     premiumBadgeUrl?: string;
+    groupsEnabled?: boolean;
+    eventsEnabled?: boolean;
   };
   customCss?: string;
   // Legacy flat structure for backward compatibility

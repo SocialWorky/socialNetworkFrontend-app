@@ -63,6 +63,9 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   isDarkMode = true;
 
+  groupsEnabled = true;
+  eventsEnabled = true;
+
   @Input() isMessages: boolean = false;
   @Output() navbarStateChange = new EventEmitter<boolean>();
 
@@ -159,6 +162,16 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
       if (configData) {
         this.applyConfig(configData);
       }
+    });
+
+    this._configService.groupsEnabled$.pipe(takeUntil(this.unsubscribe$)).subscribe((enabled) => {
+      this.groupsEnabled = enabled;
+      this._cdr.markForCheck();
+    });
+
+    this._configService.eventsEnabled$.pipe(takeUntil(this.unsubscribe$)).subscribe((enabled) => {
+      this.eventsEnabled = enabled;
+      this._cdr.markForCheck();
     });
   }
 

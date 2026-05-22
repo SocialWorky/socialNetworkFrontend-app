@@ -1,0 +1,77 @@
+@use "src/assets/styles/worky-palettes" as colors;
+
+.feature-unavailable-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px);
+  padding: 2rem;
+}
+
+.feature-unavailable-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  padding: 3rem 2rem;
+  background: colors.$worky-color-module-container;
+  border: 1px solid colors.$worky-color-greyLight;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.feature-unavailable-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: colors.$worky-color-grey;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+
+  .material-symbols-rounded {
+    font-size: 2.5rem;
+    color: colors.$worky-color-icon;
+  }
+}
+
+.feature-unavailable-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: colors.$worky-color-text;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.feature-unavailable-description {
+  font-size: 0.95rem;
+  color: colors.$worky-color-icon;
+  margin: 0;
+  line-height: 1.6;
+  max-width: 300px;
+}
+
+.feature-unavailable-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.6rem 1.75rem;
+  border-radius: 8px;
+  border: 1.5px solid colors.$worky-color-navy;
+  background: transparent;
+  color: colors.$worky-color-navy;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover {
+    background: colors.$worky-color-navy;
+    color: colors.$worky-color-light;
+  }
+}

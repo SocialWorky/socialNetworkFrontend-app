@@ -59,10 +59,10 @@
 
       <div class="worky-profile" *ngIf="!isMobile">
         <!-- Messages -->
-        <a [routerLink]="['/events']" class="item-navbar-actions" [title]="'events.title' | workyTranslations">
+        <a *ngIf="eventsEnabled" [routerLink]="['/events']" class="item-navbar-actions" [title]="'events.title' | workyTranslations">
           <span class="material-symbols-rounded navbar-action-icon">calendar_month</span>
         </a>
-        <a [routerLink]="['/groups']" class="item-navbar-actions" [title]="'groups.title' | workyTranslations">
+        <a *ngIf="groupsEnabled" [routerLink]="['/groups']" class="item-navbar-actions" [title]="'groups.title' | workyTranslations">
           <span class="material-symbols-rounded navbar-action-icon">groups</span>
         </a>
         <a [routerLink]="['/messages']" class="item-navbar-actions">
@@ -126,10 +126,10 @@
       <!-- Mobile Navigation -->
       <div class="worky-profile-mobile">
         <worky-menu-component></worky-menu-component>
-        <a [routerLink]="['/events']" class="item-navbar-actions" [title]="'events.title' | workyTranslations">
+        <a *ngIf="eventsEnabled" [routerLink]="['/events']" class="item-navbar-actions" [title]="'events.title' | workyTranslations">
           <span class="material-symbols-rounded navbar-action-icon">calendar_month</span>
         </a>
-        <a [routerLink]="['/groups']" class="item-navbar-actions" [title]="'groups.title' | workyTranslations">
+        <a *ngIf="groupsEnabled" [routerLink]="['/groups']" class="item-navbar-actions" [title]="'groups.title' | workyTranslations">
           <span class="material-symbols-rounded navbar-action-icon">groups</span>
         </a>
         <!-- Messages -->

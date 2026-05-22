@@ -15,11 +15,15 @@ export class ConfigService {
 
   private configSubject = new BehaviorSubject<any>(null);
   private subscriptionModeSubject = new BehaviorSubject<boolean>(false);
+  private groupsEnabledSubject = new BehaviorSubject<boolean>(true);
+  private eventsEnabledSubject = new BehaviorSubject<boolean>(true);
 
   private _unsubscribeAll = new Subject<void>();
 
   config$ = this.configSubject.asObservable();
   subscriptionMode$ = this.subscriptionModeSubject.asObservable();
+  groupsEnabled$ = this.groupsEnabledSubject.asObservable();
+  eventsEnabled$ = this.eventsEnabledSubject.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -50,6 +54,8 @@ export class ConfigService {
           this.configSubject.next(config);
           const mode = config?.settings?.subscriptionMode ?? false;
           this.subscriptionModeSubject.next(mode);
+          this.groupsEnabledSubject.next(config?.settings?.groupsEnabled ?? true);
+          this.eventsEnabledSubject.next(config?.settings?.eventsEnabled ?? true);
         }
       }),
     );
@@ -99,8 +105,18 @@ export class ConfigService {
         this.configSubject.next(data);
         const mode = data?.settings?.subscriptionMode ?? false;
         this.subscriptionModeSubject.next(mode);
+        this.groupsEnabledSubject.next(data?.settings?.groupsEnabled ?? true);
+        this.eventsEnabledSubject.next(data?.settings?.eventsEnabled ?? true);
       });
   }
+  groupsEnabledSnapshot(): boolean {
+    return this.groupsEnabledSubject.value;
+  }
+
+  eventsEnabledSnapshot(): boolean {
+    return this.eventsEnabledSubject.value;
+  }
+
   getLoginMethods(): Observable<{ email: boolean, google: boolean }> {
     return this.getConfig().pipe(
       map(config => {
