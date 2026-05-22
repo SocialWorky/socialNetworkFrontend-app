@@ -37,21 +37,32 @@ export class LogService {
 
   log(level: LevelLogEnum, context: string, message: string, metadata?: Record<string, any>, forceImmediate: boolean = false) {
     try {
-      // Truncate message if too long
-      const truncatedMessage = message.length > this.MAX_LOG_SIZE 
-        ? message.substring(0, this.MAX_LOG_SIZE) + '...' 
+      const truncatedMessage = message.length > this.MAX_LOG_SIZE
+        ? message.substring(0, this.MAX_LOG_SIZE) + '...'
         : message;
 
-      // Clean metadata if too large
       const cleanMetadata = this.cleanMetadata(metadata);
+      const userId = this.getCurrentUserId();
+      const currentUrl = typeof window !== 'undefined' ? window.location.pathname : undefined;
+      const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent.substring(0, 200) : undefined;
 
-      const logEntry = {
+      const logEntry: Record<string, any> = {
         level,
-        context: context.substring(0, 100), // Limitar contexto a 100 caracteres
-        message: `FRONT: ${truncatedMessage}`,
-        metadata: cleanMetadata,
+        context: context.substring(0, 100),
+        message: truncatedMessage,
+        source: 'frontend',
         timestamp: new Date().toISOString(),
       };
+
+      if (userId) logEntry['userId'] = userId;
+      if (currentUrl) logEntry['path'] = currentUrl;
+      if (cleanMetadata && Object.keys(cleanMetadata).length > 0) logEntry['metadata'] = cleanMetadata;
+      if (metadata?.['event']) logEntry['event'] = metadata['event'];
+      if (metadata?.['statusCode']) logEntry['statusCode'] = metadata['statusCode'];
+      if (metadata?.['durationMs']) logEntry['durationMs'] = metadata['durationMs'];
+      if (metadata?.['errorStack'] || metadata?.['stack']) {
+        logEntry['errorStack'] = (metadata['errorStack'] ?? metadata['stack'] ?? '').substring(0, 3000);
+      }
 
       this._logs.push(logEntry);
 
@@ -95,6 +106,17 @@ export class LogService {
     }
 
     return clean;
+  }
+
+  private getCurrentUserId(): string | undefined {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token || token === 'undefined' || token === 'null') return undefined;
+      const decoded: any = jwtDecode(token);
+      return decoded?.id ?? decoded?.sub ?? undefined;
+    } catch {
+      return undefined;
+    }
   }
 
   private isUserAuthenticated(): boolean {

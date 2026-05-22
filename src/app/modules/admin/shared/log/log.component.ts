@@ -3,56 +3,64 @@ import { Clipboard } from '@angular/cdk/clipboard';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil } from 'rxjs';
 
-import { LogService, LogStats, LogsResponse } from './services/log.service';
-import { LogsList } from './interface/log.interface';
+import { LogService } from './services/log.service';
+import { LogsList, LogStats } from './interface/log.interface';
 import { GenericSnackbarService } from '@shared/services/generic-snackbar.service';
 import { PaginationConfig } from '@admin/shared/components/pagination/pagination.component';
 import { LogService as FrontendLogService } from '@shared/services/core-apis/log.service';
 import { PublicationViewModalComponent, PublicationViewModalData } from './components/publication-view-modal/publication-view-modal.component';
 
 @Component({
-    selector: 'worky-log',
-    templateUrl: './log.component.html',
-    styleUrls: ['./log.component.scss'],
-    standalone: false
+  selector: 'worky-log',
+  templateUrl: './log.component.html',
+  styleUrls: ['./log.component.scss'],
+  standalone: false,
 })
 export class LogComponent implements OnInit, OnDestroy {
 
   logs: LogsList[] = [];
-
-  currentPage: number = 1;
-
-  limit: number = 10;
-
-  totalLogs: number = 0;
-
-  filteredTotal: number = 0;
-
-  totalPages: number = 0;
-
-  hasNextPage: boolean = false;
-
-  hasPrevPage: boolean = false;
+  currentPage = 1;
+  limit = 10;
+  totalLogs = 0;
+  filteredTotal = 0;
+  totalPages = 0;
+  hasNextPage = false;
+  hasPrevPage = false;
 
   logStats: LogStats = {
     total: 0,
     error: 0,
     warn: 0,
     info: 0,
-    debug: 0
+    debug: 0,
+    bySource: { backend: 0, frontend: 0, mobile: 0 },
   };
 
-  expandedMetadata: { [key: string]: boolean } = {};
+  expandedMetadata: Record<string, boolean> = {};
+  isLoading = false;
 
-  isLoading: boolean = false;
+  searchTerm = '';
+  selectedLevel = '';
+  selectedSource = '';
+  selectedEvent = '';
 
-  searchTerm: string = '';
+  autoRefresh = false;
+  Math = Math;
 
-  selectedLevel: string = '';
+  logLevels = [
+    { value: '', label: 'admin.log.levels.all', icon: 'list' },
+    { value: 'error', label: 'admin.log.levels.error', icon: 'error' },
+    { value: 'warn', label: 'admin.log.levels.warn', icon: 'warning' },
+    { value: 'info', label: 'admin.log.levels.info', icon: 'info' },
+    { value: 'debug', label: 'admin.log.levels.debug', icon: 'bug_report' },
+  ];
 
-  autoRefresh: boolean = false;
-
-
+  logSources = [
+    { value: '', label: 'Todos', icon: 'all_inclusive' },
+    { value: 'backend', label: 'Backend', icon: 'dns' },
+    { value: 'frontend', label: 'Frontend', icon: 'web' },
+    { value: 'mobile', label: 'Mobile', icon: 'phone_android' },
+  ];
 
   get paginationConfig(): PaginationConfig {
     return {
@@ -62,22 +70,15 @@ export class LogComponent implements OnInit, OnDestroy {
       itemsPerPage: this.limit,
       showInfo: true,
       showPageNumbers: true,
-      maxPageNumbers: 5
+      maxPageNumbers: 5,
     };
   }
 
+  get hasActiveFilters(): boolean {
+    return !!(this.selectedLevel || this.searchTerm || this.selectedSource || this.selectedEvent);
+  }
+
   private autoRefreshTimer?: any;
-
-  logLevels = [
-    { value: '', label: 'admin.log.levels.all', icon: 'list' },
-    { value: 'error', label: 'admin.log.levels.error', icon: 'error' },
-    { value: 'warn', label: 'admin.log.levels.warn', icon: 'warning' },
-    { value: 'info', label: 'admin.log.levels.info', icon: 'info' },
-    { value: 'debug', label: 'admin.log.levels.debug', icon: 'bug_report' }
-  ];
-
-  Math = Math;
-
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -97,23 +98,22 @@ export class LogComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    if (this.autoRefreshTimer) {
-      clearInterval(this.autoRefreshTimer);
-    }
+    if (this.autoRefreshTimer) clearInterval(this.autoRefreshTimer);
   }
 
   loadLogs() {
     this.isLoading = true;
     this._cdr.markForCheck();
-    
-    this._logService.getLogs(
-      this.currentPage, 
-      this.limit, 
-      this.selectedLevel, 
-      this.searchTerm
-    ).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response: LogsResponse) => {
-        
+
+    this._logService.getLogs({
+      page: this.currentPage,
+      limit: this.limit,
+      level: this.selectedLevel || undefined,
+      search: this.searchTerm || undefined,
+      source: this.selectedSource || undefined,
+      event: this.selectedEvent || undefined,
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (response) => {
         this.logs = response.logs;
         this.totalLogs = response.total;
         this.filteredTotal = response.filteredTotal;
@@ -121,15 +121,13 @@ export class LogComponent implements OnInit, OnDestroy {
         this.currentPage = response.currentPage;
         this.hasNextPage = response.hasNextPage;
         this.hasPrevPage = response.hasPrevPage;
-        
         this.isLoading = false;
         this._cdr.markForCheck();
       },
-      error: (error) => {
-        console.error('Error loading logs:', error);
+      error: () => {
         this.isLoading = false;
         this._cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -139,9 +137,7 @@ export class LogComponent implements OnInit, OnDestroy {
         this.logStats = stats;
         this._cdr.markForCheck();
       },
-      error: (error) => {
-        console.error('Error loading log stats:', error);
-      }
+      error: () => {},
     });
   }
 
@@ -150,44 +146,34 @@ export class LogComponent implements OnInit, OnDestroy {
     this.loadLogStats();
   }
 
-  /**
-   * Clear pending logs from frontend queue
-   * This prevents logs that were deleted from backend from being sent again
-   */
-  clearPendingLogs(): void {
-    const pendingCount = this._frontendLogService.getPendingLogsCount();
-    this._frontendLogService.clearPendingLogs();
-    
-    if (pendingCount > 0) {
-      this._genericSnackbarService.info(`Cleared ${pendingCount} pending logs from queue`);
-    } else {
-      this._genericSnackbarService.info('No pending logs in queue');
-    }
-    
-    // Refresh logs to show updated state
-    this.refreshLogs();
+  filterByLevel(level: string) {
+    this.selectedLevel = this.selectedLevel === level ? '' : level;
+    this.currentPage = 1;
+    this.loadLogs();
   }
 
-  filterByLevel(level: string) {
-    // If clicking the same level, clear the filter
-    if (this.selectedLevel === level) {
-      this.clearFilters();
-      return;
-    }
-    
-    this.selectedLevel = level;
-    this.currentPage = 1; // Reset to first page when filtering
+  filterBySource(source: string) {
+    this.selectedSource = this.selectedSource === source ? '' : source;
+    this.currentPage = 1;
     this.loadLogs();
   }
 
   onSearchChange() {
-    this.currentPage = 1; // Reset to first page when searching
+    this.currentPage = 1;
+    this.loadLogs();
+  }
+
+  onEventFilter(event: string) {
+    this.selectedEvent = event;
+    this.currentPage = 1;
     this.loadLogs();
   }
 
   clearFilters() {
     this.selectedLevel = '';
     this.searchTerm = '';
+    this.selectedSource = '';
+    this.selectedEvent = '';
     this.currentPage = 1;
     this.loadLogs();
   }
@@ -211,20 +197,43 @@ export class LogComponent implements OnInit, OnDestroy {
     }
   }
 
+  clearPendingLogs(): void {
+    const pendingCount = this._frontendLogService.getPendingLogsCount();
+    this._frontendLogService.clearPendingLogs();
+    this._genericSnackbarService.info(
+      pendingCount > 0 ? `Cleared ${pendingCount} pending logs` : 'No pending logs in queue',
+    );
+    this.refreshLogs();
+  }
+
   exportLogs() {
-    const dataToExport = this.logs.map(log => ({
+    const dataToExport = this.logs.map((log) => ({
       timestamp: log.timestamp,
       level: log.level,
-      message: log.message,
+      source: log.source ?? '',
       context: log.context,
-      metadata: log.metadata
+      event: log.event ?? '',
+      message: log.message,
+      userId: log.userId ?? '',
+      method: log.method ?? '',
+      path: log.path ?? '',
+      statusCode: log.statusCode ?? '',
+      durationMs: log.durationMs ?? '',
+      metadata: log.metadata ? JSON.stringify(log.metadata) : '',
     }));
 
-    const csvContent = this.convertToCSV(dataToExport);
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const headers = ['Timestamp', 'Level', 'Source', 'Context', 'Event', 'Message', 'UserId', 'Method', 'Path', 'StatusCode', 'DurationMs', 'Metadata'];
+    const csvRows = [headers.join(',')];
+    for (const row of dataToExport) {
+      const values = Object.values(row).map((v) =>
+        typeof v === 'string' ? `"${v.replace(/"/g, '""')}"` : v,
+      );
+      csvRows.push(values.join(','));
+    }
+
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
+    link.setAttribute('href', URL.createObjectURL(blob));
     link.setAttribute('download', `logs_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
@@ -232,76 +241,32 @@ export class LogComponent implements OnInit, OnDestroy {
     document.body.removeChild(link);
   }
 
-  private convertToCSV(data: any[]): string {
-    const headers = ['Timestamp', 'Level', 'Message', 'Context', 'Metadata'];
-    const csvRows = [headers.join(',')];
-    
-    for (const row of data) {
-      const values = [
-        row.timestamp,
-        row.level,
-        `"${row.message.replace(/"/g, '""')}"`,
-        `"${row.context.replace(/"/g, '""')}"`,
-        `"${JSON.stringify(row.metadata).replace(/"/g, '""')}"`
-      ];
-      csvRows.push(values.join(','));
-    }
-    
-    return csvRows.join('\n');
-  }
-
   getLogCountByLevel(level: string): number {
-    // Use backend stats for accurate counts
-    return this.logStats[level as keyof LogStats] || 0;
+    return (this.logStats as any)[level] ?? 0;
   }
 
   getLevelIcon(level: string): string {
-    const iconMap: { [key: string]: string } = {
-      'error': 'error',
-      'warn': 'warning',
-      'info': 'info',
-      'debug': 'bug_report'
-    };
-    return iconMap[level] || 'help';
+    return ({ error: 'error', warn: 'warning', info: 'info', debug: 'bug_report' } as any)[level] ?? 'help';
+  }
+
+  getSourceIcon(source: string): string {
+    return ({ backend: 'dns', frontend: 'web', mobile: 'phone_android' } as any)[source] ?? 'help_outline';
+  }
+
+  getStatusCodeClass(code: number): string {
+    if (!code) return 'text-slate-400';
+    if (code < 300) return 'text-green-400';
+    if (code < 400) return 'text-blue-400';
+    if (code < 500) return 'text-yellow-400';
+    return 'text-red-400';
   }
 
   changePage(newPage: number | string): void {
-    const pageNumber = typeof newPage === 'string' ? parseInt(newPage, 10) : newPage;
-    
-    if (pageNumber >= 1 && pageNumber <= this.totalPages) {
-      this.currentPage = pageNumber;
+    const p = typeof newPage === 'string' ? parseInt(newPage, 10) : newPage;
+    if (p >= 1 && p <= this.totalPages) {
+      this.currentPage = p;
       this.loadLogs();
     }
-  }
-
-  getPageNumbers(): number[] {
-    const totalPages = this.totalPages;
-    const currentPage = this.currentPage;
-    const maxPageNumbers = 5;
-
-    if (totalPages <= maxPageNumbers) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-
-    let startPage: number;
-    let endPage: number;
-
-    if (currentPage <= Math.ceil(maxPageNumbers / 2)) {
-      startPage = 1;
-      endPage = maxPageNumbers;
-    } else if (currentPage + Math.floor(maxPageNumbers / 2) >= totalPages) {
-      startPage = totalPages - maxPageNumbers + 1;
-      endPage = totalPages;
-    } else {
-      startPage = currentPage - Math.floor(maxPageNumbers / 2);
-      endPage = currentPage + Math.floor(maxPageNumbers / 2);
-    }
-
-    return Array.from({ length: (endPage - startPage + 1) }, (_, i) => startPage + i);
-  }
-
-  isPageActive(page: number): boolean {
-    return this.currentPage === page;
   }
 
   toggleMetadata(logId: string): void {
@@ -309,112 +274,63 @@ export class LogComponent implements OnInit, OnDestroy {
   }
 
   isExpanded(logId: string): boolean {
-    return this.expandedMetadata[logId] || false;
+    return !!this.expandedMetadata[logId];
   }
 
   onCopy(data: any) {
     this._clipboard.copy(JSON.stringify(data, null, 2));
-    this._genericSnackbarService.info('Metadata copied to clipboard!');
+    this._genericSnackbarService.info('Copied to clipboard!');
   }
 
-  getVisiblePageNumbers(): number[] {
-    const totalPages = this.totalPages;
-    const currentPage = this.currentPage;
-    const maxPageNumbers = 5;
-
-    if (totalPages <= maxPageNumbers) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-
-    let startPage: number;
-    let endPage: number;
-
-    if (currentPage <= Math.ceil(maxPageNumbers / 2)) {
-      startPage = 1;
-      endPage = maxPageNumbers;
-    } else if (currentPage + Math.floor(maxPageNumbers / 2) >= totalPages) {
-      startPage = totalPages - maxPageNumbers + 1;
-      endPage = totalPages;
-    } else {
-      startPage = currentPage - Math.floor(maxPageNumbers / 2);
-      endPage = currentPage + Math.floor(maxPageNumbers / 2);
-    }
-
-    return Array.from({ length: (endPage - startPage + 1) }, (_, i) => startPage + i);
-  }
-
-  trackByLogId(index: number, log: LogsList): string {
+  trackByLogId(_: number, log: LogsList): string {
     return log._id;
   }
 
-  /**
-   * Check if log has publicationId in metadata
-   */
+  hasMetadataKeys(metadata: Record<string, any> | null): boolean {
+    if (!metadata) return false;
+    return Object.keys(metadata).length > 0;
+  }
+
   hasPublicationId(log: LogsList): boolean {
-    if (!log.metadata || typeof log.metadata !== 'object') return false;
     return !!(log.metadata as any)?.publicationId;
   }
 
-  /**
-   * Get publicationId from log metadata
-   */
   getPublicationId(log: LogsList): string | null {
-    if (!log.metadata || typeof log.metadata !== 'object') return null;
-    return (log.metadata as any)?.publicationId || null;
+    return (log.metadata as any)?.publicationId ?? null;
   }
 
-  /**
-   * Get imageUrl from log metadata
-   */
   getImageUrl(log: LogsList): string | null {
-    if (!log.metadata || typeof log.metadata !== 'object') return null;
-    return (log.metadata as any)?.imageUrl || 
-           (log.metadata as any)?.failedImageUrl || 
-           (log.metadata as any)?.normalizedUrl || null;
+    if (!log.metadata) return null;
+    return (log.metadata as any)?.imageUrl ?? (log.metadata as any)?.failedImageUrl ?? null;
   }
 
-  /**
-   * Get mediaId from log metadata
-   */
   getMediaId(log: LogsList): string | null {
-    if (!log.metadata || typeof log.metadata !== 'object') return null;
-    return (log.metadata as any)?.mediaId || null;
+    return (log.metadata as any)?.mediaId ?? null;
   }
 
-  /**
-   * Open publication view modal
-   */
   openPublicationModal(log: LogsList, event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-    }
-
+    if (event) event.stopPropagation();
     const publicationId = this.getPublicationId(log);
     if (!publicationId) {
-      this._genericSnackbarService.info('No publication ID found in log metadata');
+      this._genericSnackbarService.info('No publication ID in log metadata');
       return;
     }
 
     const modalData: PublicationViewModalData = {
-      publicationId: publicationId,
-      imageUrl: this.getImageUrl(log) || undefined,
-      mediaId: this.getMediaId(log) || undefined,
-      logId: log._id // Pass log ID to mark as resolved after fixing
+      publicationId,
+      imageUrl: this.getImageUrl(log) ?? undefined,
+      mediaId: this.getMediaId(log) ?? undefined,
+      logId: log._id,
     };
 
-    const dialogRef = this._dialog.open(PublicationViewModalComponent, {
+    this._dialog.open(PublicationViewModalComponent, {
       width: '90%',
       maxWidth: '900px',
       maxHeight: '90vh',
       data: modalData,
-      panelClass: 'publication-modal-panel'
-    });
-
-    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result) => {
-      // Refresh logs after modal closes to see if issue was resolved
-      if (result?.refreshed) {
-        this.refreshLogs();
-      }
+      panelClass: 'publication-modal-panel',
+    }).afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result) => {
+      if (result?.refreshed) this.refreshLogs();
     });
   }
 }
