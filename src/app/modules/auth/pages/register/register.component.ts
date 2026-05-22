@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
 
@@ -21,7 +21,7 @@ import { ConfigService } from '@shared/services/core-apis/config.service';
     styleUrls: ['./register.component.scss'],
     standalone: false
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, OnDestroy {
   registerLoading: boolean = false;
 
   registerForm: FormGroup = new FormGroup({});
@@ -33,6 +33,12 @@ export class RegisterComponent implements OnInit {
   mailDataValidate: MailSendValidateData = {} as MailSendValidateData;
 
   invitationCode = false;
+
+  requirePrivacyPolicy = false;
+
+  privacyPolicyContent = '';
+
+  showPrivacyModal = false;
 
   private unsubscribe$ = new Subject<void>();
 
@@ -49,7 +55,21 @@ export class RegisterComponent implements OnInit {
     private _cdr: ChangeDetectorRef,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.unsubscribe$)).subscribe((configData) => {
-      this.invitationCode = configData.settings.invitationCode;
+      this.invitationCode = configData.settings?.invitationCode ?? false;
+      this.requirePrivacyPolicy = configData.settings?.requirePrivacyPolicy ?? false;
+      this.privacyPolicyContent = configData.settings?.privacyPolicy || '';
+
+      const invCode = this.registerForm.get('invitationCode');
+      if (invCode) {
+        invCode.setValidators(this.invitationCode ? [Validators.required] : []);
+        invCode.updateValueAndValidity();
+      }
+      const privPolicy = this.registerForm.get('acceptedPrivacyPolicy');
+      if (privPolicy) {
+        privPolicy.setValidators(this.requirePrivacyPolicy ? [Validators.requiredTrue] : []);
+        privPolicy.updateValueAndValidity();
+      }
+
       this._cdr.markForCheck();
     });
   }
@@ -69,19 +89,33 @@ export class RegisterComponent implements OnInit {
       username: ['', [Validators.required, Validators.minLength(4)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      invitationCode: [this.invitationCode ? ['', [Validators.required]] : ''],
+      invitationCode: ['', this.invitationCode ? [Validators.required] : []],
+      acceptedPrivacyPolicy: [false, this.requirePrivacyPolicy ? [Validators.requiredTrue] : []],
       role: [RoleUser.USER],
     });
 
-    // Apply specific class for iPhone with notch
     if (this.isIPhoneWithNotch) {
       document.body.classList.add('iphone-with-notch');
     }
   }
 
-  async register() {
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
 
-    if(this.registerForm.invalid) return;
+  openPrivacyModal(): void {
+    this.showPrivacyModal = true;
+    this._cdr.markForCheck();
+  }
+
+  closePrivacyModal(): void {
+    this.showPrivacyModal = false;
+    this._cdr.markForCheck();
+  }
+
+  async register() {
+    if (this.registerForm.invalid) return;
 
     this.registerLoading = true;
 
@@ -104,11 +138,9 @@ export class RegisterComponent implements OnInit {
     const body = this.registerForm.value as RegisterData;
     body.mailDataValidate = this.mailDataValidate;
 
-    if (this.registerForm.invalid) return;
-
     await loading.present();
 
-    await this._authApiRegisterService.registerUser(body).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._authApiRegisterService.registerUser(body).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: () => {
         this._alertService.showAlert(
           translations['alert.title_success_register'],
@@ -122,12 +154,11 @@ export class RegisterComponent implements OnInit {
         loading.dismiss();
       },
       error: (e) => {
-        if (e.error.message === 'E-mail is already in use') {
-          this.registerForm.get('email')?.setErrors({ emailInUse: true });
-          this.registerForm.get('email')?.reset;
-          this.emailInput.nativeElement.focus();
-          this.registerLoading = false;
+        const msg: string = e?.error?.message || '';
 
+        if (msg === 'E-mail is already in use') {
+          this.registerForm.get('email')?.setErrors({ emailInUse: true });
+          this.emailInput.nativeElement.focus();
           this._alertService.showAlert(
             translations['alert.title_error_register'],
             translations['alert.registerEmailInUse'],
@@ -136,14 +167,9 @@ export class RegisterComponent implements OnInit {
             true,
             translations['button.ok'],
           );
-          loading.dismiss();
-        }
-        if (e.error.message === 'Username is already in use') {
+        } else if (msg === 'Username is already in use') {
           this.registerForm.get('username')?.setErrors({ usernameInUse: true });
-          this.registerForm.get('username')?.reset;
           this.userNameInput.nativeElement.focus();
-          this.registerLoading = false;
-
           this._alertService.showAlert(
             translations['alert.title_error_register'],
             translations['alert.registerUsernameInUse'],
@@ -152,9 +178,7 @@ export class RegisterComponent implements OnInit {
             true,
             translations['button.ok'],
           );
-          loading.dismiss();
-        }
-        if (e.error.message === 'Failed send email') {
+        } else if (msg === 'Failed send email') {
           this._alertService.showAlert(
             translations['alert.title_error_send_email'],
             translations['alert.message_error_send_email'],
@@ -164,12 +188,8 @@ export class RegisterComponent implements OnInit {
             translations['button.ok'],
             ['/auth/login'],
           );
-        }
-        if (e.error.message === 'Invalid invitation code') {
+        } else if (msg === 'Invalid invitation code' || msg === 'Invitation code is required') {
           this.registerForm.get('invitationCode')?.setErrors({ invalidInvitationCode: true });
-          this.registerForm.get('invitationCode')?.reset;
-          this.registerLoading = false;
-
           this._alertService.showAlert(
             translations['alert.title_error_register'],
             translations['alert.registerInvalidInvitationCode'],
@@ -178,7 +198,16 @@ export class RegisterComponent implements OnInit {
             true,
             translations['button.ok'],
           );
-          loading.dismiss();
+        } else if (msg === 'Privacy policy acceptance is required') {
+          this.registerForm.get('acceptedPrivacyPolicy')?.setErrors({ required: true });
+          this._alertService.showAlert(
+            translations['alert.title_error_register'],
+            translations['alert.registerPrivacyPolicyRequired'],
+            Alerts.ERROR,
+            Position.CENTER,
+            true,
+            translations['button.ok'],
+          );
         }
 
         this.registerLoading = false;

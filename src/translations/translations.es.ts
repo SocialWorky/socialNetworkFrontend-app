@@ -19,6 +19,10 @@ export const translations = {
   'register.subTitle': 'Rellene el formulario de inscripción y se parte de la comunidad',
   'register.haveAccountLogIn': '¿Ya tienes una cuenta? Inicia sesión',
   'register.messageLoading': 'Registrando...',
+  'register.privacyPolicyAccept': 'He leído y acepto la',
+  'register.privacyPolicyLink': 'Política de Privacidad',
+  'register.privacyPolicyRequired': 'Debes aceptar la política de privacidad para registrarte',
+  'register.privacyPolicyModalTitle': 'Política de Privacidad',
   
   // AUTH VALIDATE EMAIL
   'auth.validateEmail.loading.title': 'Verificando tu email...',
@@ -488,6 +492,8 @@ export const translations = {
   'admin.siteConfig.registration.title': 'Configuración de Registro',
   'admin.siteConfig.registration.invitationCode.title': 'Registro con Código de Invitación',
   'admin.siteConfig.registration.invitationCode.subtitle': 'Requerir código de invitación para registrarse',
+  'admin.siteConfig.registration.requirePrivacyPolicy.title': 'Requerir Aceptación de Política de Privacidad',
+  'admin.siteConfig.registration.requirePrivacyPolicy.subtitle': 'Los usuarios deben aceptar la política de privacidad para registrarse',
   'admin.siteConfig.visualIdentity.title': 'Identidad Visual',
   'admin.siteConfig.visualIdentity.subtitle': 'Logo y elementos visuales del sitio',
   'admin.siteConfig.loginMethods.google.subtitle': 'Permitir registro con cuenta de Google',
@@ -1143,6 +1149,7 @@ export const translations = {
   'alert.title_success_register': 'Registro exitoso',
   'alert.message_success_register': 'Tu registro ha sido exitoso, recibirás un correo para validar tu cuenta',
   'alert.registerInvalidInvitationCode': 'El código de invitación o el Email no es válido',
+  'alert.registerPrivacyPolicyRequired': 'Debes aceptar la política de privacidad para completar tu registro',
   'alert.title_reset_password_message': 'Envió exitoso',
   'alert.message_reset_password_message': 'Se ha enviado un correo electrónico con las instrucciones para restablecer tu contraseña',
   'alert.error_email_title_reset_password': 'Error al enviar el correo',

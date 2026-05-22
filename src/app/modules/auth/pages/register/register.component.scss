@@ -124,3 +124,122 @@
     @include Fonts.worky-h6;
   }
 }
+
+:host {
+  .privacy-policy-check {
+    margin: 12px 0 16px;
+
+    .privacy-policy-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      @include Fonts.worky-text;
+      color: var(--ion-text-color);
+
+      input[type='checkbox'] {
+        margin-top: 3px;
+        flex-shrink: 0;
+        width: 18px;
+        height: 18px;
+        accent-color: color.$worky-color-navy;
+        cursor: pointer;
+      }
+
+      .privacy-policy-link {
+        background: none;
+        border: none;
+        padding: 0;
+        color: color.$worky-color-navy;
+        text-decoration: underline;
+        cursor: pointer;
+        @include Fonts.worky-text;
+        font-size: inherit;
+      }
+    }
+
+    .privacy-policy-error {
+      margin-top: 4px;
+      margin-left: 28px;
+      @include Fonts.worky-text;
+      font-size: 12px;
+      color: color.$worky-color-warn;
+    }
+  }
+}
+
+.privacy-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  backdrop-filter: blur(2px);
+
+  .privacy-modal {
+    background: var(--ion-card-background);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--ion-border-color, var(--ion-color-step-100));
+
+    .privacy-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--ion-border-color, var(--ion-color-step-100));
+
+      h2 {
+        @include Fonts.worky-h6;
+        color: var(--ion-text-color);
+        margin: 0;
+      }
+
+      .privacy-modal-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--ion-color-step-600, #666);
+        display: flex;
+        align-items: center;
+        padding: 6px;
+        border-radius: 50%;
+        transition: background 0.2s, color 0.2s;
+
+        &:hover {
+          background: var(--ion-color-step-100);
+          color: var(--ion-text-color);
+        }
+      }
+    }
+
+    .privacy-modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+
+      .privacy-modal-content {
+        @include Fonts.worky-text;
+        color: var(--ion-color-step-700, var(--ion-text-color));
+        white-space: pre-wrap;
+        word-break: break-word;
+        margin: 0;
+        font-family: inherit;
+        line-height: 1.7;
+      }
+    }
+
+    .privacy-modal-footer {
+      padding: 16px 24px 20px;
+      border-top: 1px solid var(--ion-border-color, var(--ion-color-step-100));
+    }
+  }
+}

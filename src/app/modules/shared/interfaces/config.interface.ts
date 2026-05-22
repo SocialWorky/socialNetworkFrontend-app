@@ -10,6 +10,7 @@ export interface Config {
     urlSite?: string;
     description?: string;
     invitationCode?: boolean;
+    requirePrivacyPolicy?: boolean;
     subscriptionMode?: boolean;
     verifiedBadgeUrl?: string;
     premiumBadgeUrl?: string;

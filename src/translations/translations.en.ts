@@ -19,6 +19,10 @@ export const translations = {
   'register.subTitle': 'Fill out the registration form and be part of the community',
   'register.haveAccountLogIn': 'Already have an account? Sign in',
   'register.messageLoading': 'Registering...',
+  'register.privacyPolicyAccept': 'I have read and accept the',
+  'register.privacyPolicyLink': 'Privacy Policy',
+  'register.privacyPolicyRequired': 'You must accept the privacy policy to register',
+  'register.privacyPolicyModalTitle': 'Privacy Policy',
   
   // AUTH VALIDATE EMAIL
   'auth.validateEmail.loading.title': 'Verifying your email...',
@@ -494,6 +498,8 @@ export const translations = {
   'admin.siteConfig.registration.title': 'Registration Configuration',
   'admin.siteConfig.registration.invitationCode.title': 'Registration with Invitation Code',
   'admin.siteConfig.registration.invitationCode.subtitle': 'Require invitation code to register',
+  'admin.siteConfig.registration.requirePrivacyPolicy.title': 'Require Privacy Policy Acceptance',
+  'admin.siteConfig.registration.requirePrivacyPolicy.subtitle': 'Users must accept the privacy policy to register',
   'admin.siteConfig.visualIdentity.title': 'Visual Identity',
   'admin.siteConfig.visualIdentity.subtitle': 'Logo and site visual elements',
   
@@ -1178,6 +1184,7 @@ export const translations = {
   'alert.title_success_register': 'Successful registration',
   'alert.message_success_register': 'Your registration has been successful, you will receive an email to validate your account',
   'alert.registerInvalidInvitationCode': 'The invitation code or Email is not valid',
+  'alert.registerPrivacyPolicyRequired': 'You must accept the privacy policy to complete your registration',
   'alert.title_reset_password_message': 'Successful send',
   'alert.message_reset_password_message': 'An email has been sent with instructions to reset your password',
   'alert.error_email_title_reset_password': 'Error sending email',
