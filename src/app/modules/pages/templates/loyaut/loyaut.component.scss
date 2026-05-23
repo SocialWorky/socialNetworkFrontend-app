@@ -136,12 +136,16 @@
     height: calc(100dvh - 120px - env(safe-area-inset-top));
     width: 100%;
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    // padding-bottom on the scroll container (not the outer shell) makes the
+    // app background fill the home-indicator zone while keeping content visible
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
 .navbar-hidden .social-content-center {
   @include breakpoints.below-sm {
     height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
@@ -159,7 +163,9 @@
   overflow: hidden;
   @include breakpoints.below-sm {
     padding: 0;
-    height: calc(87dvh - env(safe-area-inset-top));
+    // Use full remaining height so the chat extends to the screen bottom;
+    // the chat input component handles its own safe-area-inset-bottom margin
+    height: calc(100dvh - 120px - env(safe-area-inset-top));
   }
 }
 
@@ -210,6 +216,7 @@
   .social-content-center {
     @include breakpoints.below-sm {
       height: calc(100dvh - 56px - env(safe-area-inset-top));
+      padding-bottom: env(safe-area-inset-bottom);
     }
   }
 }
