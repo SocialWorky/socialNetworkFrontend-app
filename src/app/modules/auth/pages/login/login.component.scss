@@ -8,7 +8,8 @@
   justify-content: center;
   align-items: center;
   min-height: 100dvh;
-  padding-top: 20px;
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-bottom: env(safe-area-inset-bottom);
   @include breakpoints.below-sm {
     height: auto;
   }

@@ -67,7 +67,7 @@
     padding-top: 0px;
     flex-direction: column;
     align-items: center;
-    margin-top: 120px;
+    margin-top: calc(120px + env(safe-area-inset-top));
     position: relative;
     z-index: 1;
     transition: margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -133,7 +133,7 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   @include breakpoints.below-sm {
-    height: calc(100dvh - 120px);
+    height: calc(100dvh - 120px - env(safe-area-inset-top));
     width: 100%;
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -159,7 +159,7 @@
   overflow: hidden;
   @include breakpoints.below-sm {
     padding: 0;
-    height: 87dvh;
+    height: calc(87dvh - env(safe-area-inset-top));
   }
 }
 
@@ -203,13 +203,13 @@
 @media (orientation: landscape) and (max-height: 500px) {
   .content-social-app {
     @include breakpoints.below-sm {
-      margin-top: 56px;
+      margin-top: calc(56px + env(safe-area-inset-top));
     }
   }
 
   .social-content-center {
     @include breakpoints.below-sm {
-      height: calc(100dvh - 56px);
+      height: calc(100dvh - 56px - env(safe-area-inset-top));
     }
   }
 }

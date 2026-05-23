@@ -8,6 +8,8 @@
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(6px);
   padding: 1.5rem;
+  padding-top: max(1.5rem, env(safe-area-inset-top));
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
 }
 
 .age-gate-card {

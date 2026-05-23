@@ -9,6 +9,7 @@
   width: 100%;
   background: colors.$worky-color-content-navbar;
   z-index: 20;
+  padding-top: env(safe-area-inset-top);
   @include breakpoints.below-sm {
     flex-direction: column;
     height: auto;
@@ -363,7 +364,7 @@
       background: colors.$worky-color-content-navbar;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       pointer-events: auto;
-      height: 120px;
+      height: calc(120px + env(safe-area-inset-top));
     }
   }
 

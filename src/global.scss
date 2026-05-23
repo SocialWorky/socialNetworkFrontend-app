@@ -678,6 +678,7 @@ img, video {
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 
