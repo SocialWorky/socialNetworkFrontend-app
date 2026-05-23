@@ -1066,3 +1066,21 @@ worky-root[inert] ion-loading {
   }
 }
 
+/* ───────── Media viewer dialog (full-screen, safe-area-aware) ───────── */
+.view-media-modal-container {
+  .mat-mdc-dialog-surface,
+  .mdc-dialog__surface,
+  .mat-dialog-container {
+    padding: 0 !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    background: #000 !important;
+    /* Extend under notch/home-indicator — content handles its own insets */
+    padding-top: env(safe-area-inset-top) !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+    padding-left: env(safe-area-inset-left) !important;
+    padding-right: env(safe-area-inset-right) !important;
+    box-sizing: border-box !important;
+  }
+}
+

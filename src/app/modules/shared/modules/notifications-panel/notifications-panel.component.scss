@@ -47,6 +47,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 12px 10px;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-right: max(12px, env(safe-area-inset-right));
   }
 
   &__title {
@@ -244,6 +246,7 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  padding-bottom: env(safe-area-inset-bottom);
 
   &::-webkit-scrollbar { width: 3px; }
   &::-webkit-scrollbar-track { background: transparent; }
