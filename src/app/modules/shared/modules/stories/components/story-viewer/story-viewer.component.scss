@@ -11,9 +11,9 @@
 
 .progress-bar-container {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
   display: flex;
   gap: 4px;
   z-index: 10;
@@ -36,9 +36,9 @@
 
 .story-header {
   position: absolute;
-  top: 28px;
-  left: 12px;
-  right: 12px;
+  top: max(28px, calc(env(safe-area-inset-top) + 16px));
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
   display: flex;
   align-items: center;
   gap: 10px;
@@ -88,9 +88,9 @@
 
 .text-overlay {
   position: absolute;
-  bottom: 80px;
-  left: 20px;
-  right: 20px;
+  bottom: max(80px, calc(env(safe-area-inset-bottom) + 60px));
+  left: max(20px, env(safe-area-inset-left));
+  right: max(20px, env(safe-area-inset-right));
   text-align: center;
   color: #fff;
   font-size: 18px;

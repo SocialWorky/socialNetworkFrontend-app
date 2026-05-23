@@ -329,6 +329,7 @@
 @media (max-width: 768px) {
   .message-footer-container {
     margin: 4px 6px;
+    margin-bottom: max(4px, env(safe-area-inset-bottom));
     padding: 4px 6px;
     border-radius: 12px;
   }

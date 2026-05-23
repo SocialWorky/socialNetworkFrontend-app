@@ -1118,6 +1118,7 @@
 
   .message-footer-container {
     padding: 0.2rem;
+    margin-bottom: max(0.5rem, env(safe-area-inset-bottom));
   }
 
   .message-actions { right: -25px; }
