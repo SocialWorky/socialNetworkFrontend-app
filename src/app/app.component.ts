@@ -18,6 +18,7 @@ import { AuthService } from '@auth/services/auth.service';
 
 import { EmojiEventsService } from '@shared/services/emoji-events.service';
 import { MediaEventsService } from '@shared/services/media-events.service';
+import { IOSViewportService } from '@shared/services/ios-viewport.service';
 import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget-config.service';
 import { environment } from '@env/environment';
 import { DevCacheService } from '@shared/services/dev-cache.service';
@@ -70,7 +71,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private _logService: LogService,
     private _appUpdateManagerService: AppUpdateManagerService,
     private _notificationPublicationService: NotificationPublicationService,
-    private _utilityService: UtilityService
+    private _utilityService: UtilityService,
+    private _iosViewportService: IOSViewportService
   ) {
     this._notificationUsersService.setupInactivityListeners();
     if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();

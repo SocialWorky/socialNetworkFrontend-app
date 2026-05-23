@@ -777,12 +777,24 @@ img, video {
 
 /* iOS-specific viewport fixes */
 @supports (-webkit-touch-callout: none) {
-  /* In standalone PWA mode, -webkit-fill-available excludes the home indicator zone (34px),
-     clipping the ion-app (which is 100dvh). Use 100dvh directly so the body fills the
-     full screen and the clip doesn't create a visible gap at the bottom. */
+  /* In standalone PWA mode, 100dvh can under-report the full screen height because
+     iOS may exclude the home-indicator zone (34 px) from the dynamic viewport unit.
+     Using position:fixed + bottom:0 on the root app shell is more reliable than any
+     height unit because it pins the element to the true bottom of the screen. */
   html, body {
     height: 100dvh;
     overflow-x: hidden;
+  }
+
+  /* Pin ion-app to the real screen bottom regardless of dvh accuracy */
+  ion-app.content-worky,
+  .content-worky {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    height: auto !important;
   }
   
   /* Ensure modals take full height on iOS */
