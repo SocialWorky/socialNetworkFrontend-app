@@ -293,6 +293,12 @@ export class UnifiedCacheService implements OnDestroy {
       '/reports': [/reports/],
       '/groups': [/groups/],
       '/invitations-code': [/invitations/],
+      '/boost-packages': [/boost-packages/],
+      '/email-templates': [/email-templates/],
+      '/subscription-plans': [/subscription-plans/],
+      '/subscriptions': [/subscriptions/],
+      '/webhooks': [/webhooks/],
+      '/custom-reactions': [/custom-reactions/],
     };
 
     for (const [endpoint, patterns] of Object.entries(resourcePatterns)) {

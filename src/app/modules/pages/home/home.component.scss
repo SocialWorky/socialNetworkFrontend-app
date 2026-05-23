@@ -16,12 +16,14 @@
 
   @include breakpoints.below-md {
     height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom);
+    box-sizing: border-box;
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   &.navbar-visible {
     @include breakpoints.below-md {
-      height: calc(100dvh - 120px);
+      height: calc(100dvh - 120px - env(safe-area-inset-top));
     }
   }
 }
@@ -34,7 +36,6 @@
   ::ng-deep .widget-container.top {
     max-width: 100%;
     width: 100%;
-    padding: 6px;
     margin: 0;
   }
   
@@ -43,7 +44,7 @@
   }
   
   @include breakpoints.below-sm {
-    margin: 15px -1px 0px -1px;
+    margin: 3px -1px 0px -1px;
   }
 }
 

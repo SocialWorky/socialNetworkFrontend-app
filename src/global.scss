@@ -490,7 +490,7 @@ img, video {
     box-shadow: 1px 2px 8px 1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
     @include breakpoints.below-sm {
-      margin: 15px -1px 0px -1px;
+      margin: 3px -1px 0px -1px;
     }
   }
 
@@ -777,10 +777,11 @@ img, video {
 
 /* iOS-specific viewport fixes */
 @supports (-webkit-touch-callout: none) {
-  /* Fix for iOS viewport height issues */
+  /* In standalone PWA mode, -webkit-fill-available excludes the home indicator zone (34px),
+     clipping the ion-app (which is 100dvh). Use 100dvh directly so the body fills the
+     full screen and the clip doesn't create a visible gap at the bottom. */
   html, body {
-    height: 100vh;
-    height: -webkit-fill-available;
+    height: 100dvh;
     overflow-x: hidden;
   }
   

@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription, forkJoin, of } from 'rxjs';
 import { tap, catchError, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
 import { environment } from '@env/environment';
 import { WidgetConfig, WidgetLayout, WidgetPosition, WidgetStatus } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
@@ -15,6 +14,8 @@ export class WidgetConfigService {
   private widgetLayoutSubject = new BehaviorSubject<WidgetLayout | null>(null);
   private widgetsSubject = new BehaviorSubject<WidgetConfig[]>([]);
   private isLoading = false;
+  private refreshTrigger$ = new Subject<void>();
+  private refreshPipelineSubscription: Subscription;
   
   public widgetLayout$ = this.widgetLayoutSubject.asObservable();
   public widgets$ = this.widgetsSubject.asObservable();
@@ -61,7 +62,14 @@ export class WidgetConfigService {
   constructor(
     private http: HttpClient,
     private logService: LogService
-  ) {}
+  ) {
+    this.refreshPipelineSubscription = this.refreshTrigger$.pipe(
+      switchMap(() => forkJoin([
+        this.getAllWidgets(),
+        this.getWidgetLayout()
+      ]))
+    ).subscribe();
+  }
 
   getAllWidgets(): Observable<WidgetConfig[]> {
     return this.http.get<WidgetConfig[]>(`${this.apiUrl}/layout`).pipe(
@@ -248,12 +256,8 @@ export class WidgetConfigService {
   }
 
   private refreshData(): void {
-    // Only refresh if not already loading
-    if (!this.isLoading) {
-      this.isLoading = true;
-      this.getAllWidgets().subscribe();
-      this.getWidgetLayout().subscribe();
-    }
+    this.isLoading = true;
+    this.refreshTrigger$.next();
   }
 
   private updateWidgetInCache(updatedWidget: WidgetConfig): void {
