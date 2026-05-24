@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: socialworky/worky-frontend-dev:a9fb03756afa1f28b2e32eeb3b0d45e20b9c8c04
+        image: socialworky/worky-frontend-dev:d3a41c4246603ddaae799d578bbe67ea07ad4916
         ports:
         - containerPort: 80
           protocol: TCP
