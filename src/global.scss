@@ -3,22 +3,26 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 @use 'sass:map';
 
-html, body {
+html {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100dvh;
-  // Match app background so the safe-area zone never shows a different color
-  background-color: color.$worky-color-app-background;
+  // Use nav bar color for html so the home-indicator zone (safe-area-inset-bottom)
+  // matches the bottom nav bar background on both iOS and Android
+  background-color: color.$worky-color-content-navbar;
 }
 body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100dvh;
   overflow: hidden;
   position: fixed;
   top: 0;
   left: 0;
-  margin: 0;
   font-family: var.$worky-font-family-global;
-  background-color: color.$worky-color-app-background;
+  background-color: color.$worky-color-content-navbar;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }

@@ -23,6 +23,9 @@
     grid-template:
     "header" 60px
     "main" 1fr;
+    // On mobile, use nav bar color as app background so the area between
+    // the last post and the bottom nav bar is visually seamless
+    background-color: color.$worky-color-content-navbar;
   }
 
   .navbar-content {
