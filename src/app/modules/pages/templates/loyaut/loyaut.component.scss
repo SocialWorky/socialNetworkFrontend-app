@@ -21,7 +21,7 @@
     
   @include breakpoints.below-sm {
     grid-template:
-    "header" 120px
+    "header" 60px
     "main" 1fr;
   }
 
@@ -67,7 +67,7 @@
     padding-top: 0px;
     flex-direction: column;
     align-items: center;
-    margin-top: calc(120px + env(safe-area-inset-top));
+    margin-top: calc(60px + env(safe-area-inset-top));
     position: relative;
     z-index: 1;
     transition: margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -133,7 +133,7 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   @include breakpoints.below-sm {
-    height: calc(100dvh - 120px - env(safe-area-inset-top));
+    height: calc(100dvh - 60px - env(safe-area-inset-top));
     width: 100%;
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -159,9 +159,7 @@
   overflow: hidden;
   @include breakpoints.below-sm {
     padding: 0;
-    // Use full remaining height so the chat extends to the screen bottom;
-    // the chat input component handles its own safe-area-inset-bottom margin
-    height: calc(100dvh - 120px - env(safe-area-inset-top));
+    height: calc(100dvh - 60px - 56px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
 

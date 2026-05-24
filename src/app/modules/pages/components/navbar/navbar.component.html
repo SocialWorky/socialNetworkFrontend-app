@@ -123,42 +123,6 @@
         </form>
       </div>
 
-      <!-- Mobile Navigation -->
-      <div class="worky-profile-mobile">
-        <worky-menu-component></worky-menu-component>
-        <a *ngIf="eventsEnabled" [routerLink]="['/events']" class="item-navbar-actions" [title]="'events.title' | workyTranslations">
-          <span class="material-symbols-rounded navbar-action-icon">calendar_month</span>
-        </a>
-        <a *ngIf="groupsEnabled" [routerLink]="['/groups']" class="item-navbar-actions" [title]="'groups.title' | workyTranslations">
-          <span class="material-symbols-rounded navbar-action-icon">groups</span>
-        </a>
-        <!-- Messages -->
-        <a [routerLink]="['/messages']">
-          <worky-dropdown
-            icon="chat"
-            [badgeValue]="unreadMessages > 0 ? unreadMessages : null"
-            [isMenu]="false"
-            [badge]="true">
-          </worky-dropdown>
-        </a>
-        <!-- Notification -->
-        <worky-dropdown
-          icon="notifications"
-          [badgeValue]="notifications > 0 ? notifications : null"
-          (click)="toggleNotificationsPanel()"
-          [isMenu]=false
-          [badge]=true>
-        </worky-dropdown>
-        <!-- Profile -->
-        <worky-dropdown
-          [badge]=false
-          img="avatar"
-          [size]="30"
-          [dataLink]="dataLinkProfile"
-          (linkClicked)="handleLinkClicked($event)">
-        </worky-dropdown>
-      </div>
-
       <!-- Mobile Search Results -->
       <ul *ngIf="users.length > 0" class="search-results-mobile">
         <li *ngFor="let user of users" (click)="viewProfile(user._id)">
@@ -172,5 +136,34 @@
       </ul>
   </nav>
 </div>
+
+<!-- Mobile Bottom Navigation Bar -->
+<nav class="bottom-nav-mobile" *ngIf="isMobile">
+  <a class="bottom-nav-item" [routerLink]="['/']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+    <span class="material-symbols-rounded bottom-nav-icon">home</span>
+  </a>
+  <a class="bottom-nav-item" [routerLink]="['/profile']" routerLinkActive="active">
+    <span class="material-symbols-rounded bottom-nav-icon">person</span>
+  </a>
+  <a *ngIf="groupsEnabled" class="bottom-nav-item" [routerLink]="['/groups']" routerLinkActive="active">
+    <span class="material-symbols-rounded bottom-nav-icon">groups</span>
+  </a>
+  <a class="bottom-nav-item" [routerLink]="['/messages']" routerLinkActive="active">
+    <span class="material-symbols-rounded bottom-nav-icon">chat</span>
+    <span class="bottom-nav-badge" *ngIf="unreadMessages > 0">{{ unreadMessages > 99 ? '99+' : unreadMessages }}</span>
+  </a>
+  <div class="bottom-nav-item" (click)="toggleNotificationsPanel()">
+    <span class="material-symbols-rounded bottom-nav-icon">notifications</span>
+    <span class="bottom-nav-badge" *ngIf="notifications > 0">{{ notifications > 99 ? '99+' : notifications }}</span>
+  </div>
+  <worky-dropdown
+    class="bottom-nav-item"
+    [badge]=false
+    img="avatar"
+    [size]="28"
+    [dataLink]="dataLinkProfile"
+    (linkClicked)="handleLinkClicked($event)">
+  </worky-dropdown>
+</nav>
 
 <worky-notifications-panel></worky-notifications-panel>

@@ -20,10 +20,17 @@
     box-sizing: border-box;
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  @include breakpoints.below-sm {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
 
   &.navbar-visible {
     @include breakpoints.below-md {
       height: calc(100dvh - 120px - env(safe-area-inset-top));
+    }
+    @include breakpoints.below-sm {
+      height: calc(100dvh - 60px - env(safe-area-inset-top));
+      padding-bottom: calc(56px + env(safe-area-inset-bottom));
     }
   }
 }
