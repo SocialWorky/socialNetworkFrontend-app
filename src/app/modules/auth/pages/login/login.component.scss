@@ -15,7 +15,7 @@
   }
   .content {
     width: 100%;
-    color: color.$worky-color-text;
+    color: color.$worky-color-icon;
     display: flex;
     @include breakpoints.below-sm {
       flex-direction: column;
@@ -70,11 +70,11 @@
           .line {
             flex: 1;
             height: 1px;
-            background-color: map.get(color.$worky-navy, 24);
+            background-color: rgba(255, 255, 255, 0.3);
           }
 
           .text {
-            color: map.get(color.$worky-navy, 24);
+            color: rgba(255, 255, 255, 0.6);
             margin: 0 10px;
             position: relative;
             z-index: 1;
@@ -122,7 +122,8 @@
           @include Fonts.worky-text;
           margin-block-end: 20px;
           margin-block-start: 5px;
-          color: map.get(color.$worky-navy, 24)
+          color: color.$worky-color-icon;
+          opacity: 0.7;
         }
         @include breakpoints.below-sm {
           display: none;

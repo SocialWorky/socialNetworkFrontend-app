@@ -34,7 +34,7 @@
       }
     }
     .content-register {
-      color: color.$worky-color-text;
+      color: color.$worky-color-icon;
       width: 50%;
       padding: 3%;
 
@@ -65,7 +65,8 @@
 
           span {
             @include Fonts.worky-text;
-            color: color.$worky-color-navy;
+            color: color.$worky-color-icon;
+            opacity: 0.8;
           }
         }
 
@@ -93,7 +94,8 @@
         @include Fonts.worky-text;
         margin-block-end: 20px;
         margin-block-start: 5px;
-        color: map.get(color.$worky-navy, 24);
+        color: color.$worky-color-icon;
+        opacity: 0.7;
       }
       @include breakpoints.below-sm {
         display: none;
@@ -136,7 +138,7 @@
       gap: 10px;
       cursor: pointer;
       @include Fonts.worky-text;
-      color: var(--ion-text-color);
+      color: color.$worky-color-icon;
 
       input[type='checkbox'] {
         margin-top: 3px;
@@ -151,7 +153,7 @@
         background: none;
         border: none;
         padding: 0;
-        color: color.$worky-color-navy;
+        color: color.$worky-color-blue;
         text-decoration: underline;
         cursor: pointer;
         @include Fonts.worky-text;
