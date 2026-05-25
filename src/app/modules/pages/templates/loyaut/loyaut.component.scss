@@ -74,6 +74,7 @@
     position: relative;
     z-index: 1;
     transition: margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
   }
 
   &.navbar-hidden {
@@ -136,7 +137,7 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   @include breakpoints.below-sm {
-    height: calc(100dvh - 60px - env(safe-area-inset-top));
+    height: calc(100dvh - 60px - 56px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     width: 100%;
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -212,7 +213,10 @@
 
   .social-content-center {
     @include breakpoints.below-sm {
-      height: calc(100dvh - 56px - env(safe-area-inset-top));
+      height: calc(100dvh - 56px - 56px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+      &.navbar-hidden {
+        height: 100dvh;
+      }
     }
   }
 }
