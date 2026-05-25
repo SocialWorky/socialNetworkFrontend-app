@@ -87,6 +87,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     private _utilityService: UtilityService,
     private readonly _exploreService: ExploreService,
   ) {
+    this.isMobile = this._deviceDetectionService.isMobile();
     this.menuProfile();
   }
 
