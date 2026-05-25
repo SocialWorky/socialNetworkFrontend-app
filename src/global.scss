@@ -21,9 +21,10 @@ body {
   position: fixed;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
   font-family: var.$worky-font-family-global;
-  background-color: color.$worky-color-content-navbar;
-  -webkit-overflow-scrolling: touch;
+  background-color: color.$worky-color-app-background;
   overscroll-behavior: contain;
 }
 
@@ -83,6 +84,10 @@ img, video {
   height: 100dvh !important;
   overflow: hidden;
   padding: 0px;
+  // Ionic's default --ion-background-color is white; override so any exposed
+  // edge of ion-app (safe-area zones, dvh under-reporting gap) shows the nav
+  // bar color instead of a white flash at the bottom.
+  //background-color: color.$worky-color-content-navbar;
 }
 
 .fast {
@@ -781,16 +786,24 @@ img, video {
 
 /* iOS-specific viewport fixes */
 @supports (-webkit-touch-callout: none) {
-  /* In standalone PWA mode, 100dvh can under-report the full screen height because
-     iOS may exclude the home-indicator zone (34 px) from the dynamic viewport unit.
-     Using position:fixed + bottom:0 on the root app shell is more reliable than any
-     height unit because it pins the element to the true bottom of the screen. */
-  html, body {
-    height: 100dvh;
+  /* In standalone PWA mode, 100dvh under-reports true screen height because iOS
+     excludes the status bar zone from dvh. body uses top:0+bottom:0 instead so it
+     always stretches to the true screen edges. fixed+inset:0 on ion-app then anchors
+     all fixed children to the real screen bottom. */
+  html {
+    height: 100%;
+    overflow-x: hidden;
+  }
+  body {
+    height: auto;
     overflow-x: hidden;
   }
 
-  /* Pin ion-app to the real screen bottom regardless of dvh accuracy */
+  /* Pin ion-app to the real screen bottom regardless of dvh accuracy.
+     contain:layout (Ionic default) makes position:fixed children use ion-app
+     as their containing block. Removing contain ensures they use the real
+     viewport so bottom:0 means the physical screen bottom, not ion-app's
+     potentially mis-calculated bottom. */
   ion-app.content-worky,
   .content-worky {
     position: fixed !important;
@@ -799,8 +812,23 @@ img, video {
     bottom: 0 !important;
     left: 0 !important;
     height: auto !important;
+    contain: none !important;
   }
-  
+
+  /* Use JS-measured visual viewport height so dvh under-reporting doesn't
+     create a gap at the bottom. IOSViewportService sets --vh. */
+  .content-app {
+    min-height: calc(var(--vh, 1dvh) * 100) !important;
+  }
+
+  /* worky-loyaut must be a block that grows to fill ion-app's flex column */
+  worky-loyaut {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 0 auto !important;
+    min-height: 0 !important;
+  }
+
   /* Ensure modals take full height on iOS */
   .notifications-panel {
     height: 100vh !important;
@@ -808,26 +836,23 @@ img, video {
     height: calc(var(--vh, 1vh) * 100) !important;
     min-height: 100vh;
     min-height: -webkit-fill-available;
-    /* Ensure panel starts from the very top */
     top: 0 !important;
     margin-top: 0 !important;
     position: fixed !important;
   }
-  
-  /* Specific fixes for notification panel content */
+
   .notifications-panel .content-header {
     margin-top: 0 !important;
     top: 0 !important;
     position: relative !important;
   }
-  
+
   .notifications-panel .content-body {
     height: calc(100vh - 80px) !important;
     height: calc(-webkit-fill-available - 80px) !important;
     height: calc((var(--vh, 1vh) * 100) - 80px) !important;
   }
-  
-  /* Fix for iOS Safari 100vh issue */
+
   .modal-backdrop,
   .modal-container,
   .modal-content {
@@ -835,24 +860,18 @@ img, video {
     height: -webkit-fill-available;
     height: calc(var(--vh, 1vh) * 100);
   }
-  
+
   /* Prevent iOS Safari from adjusting viewport on keyboard */
   input, textarea, select {
     font-size: 16px !important;
   }
-  
-  /* Improve scrolling performance on iOS */
-  * {
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Use custom viewport height variable for better iOS support */
+
   .full-height {
     height: 100vh;
     height: -webkit-fill-available;
     height: calc(var(--vh, 1vh) * 100);
   }
-  
+
   .full-height-dvh {
     height: 100dvh;
     height: calc(var(--vh, 1vh) * 100);

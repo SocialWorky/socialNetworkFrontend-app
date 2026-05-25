@@ -5,7 +5,7 @@
 .content-app {
   width: 100%;
   box-sizing: border-box;
-  min-height: calc(var(--vh, 1dvh) * 100);
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -46,13 +46,10 @@
     }
   }
 
-  &.navbar-hidden .navbar-content {
-    @include breakpoints.below-sm {
-      transform: translateY(-100%);
-      height: 0;
-      overflow: hidden;
-    }
-  }
+  // Do NOT apply transform/height/overflow here — the inner .content-navbar.sticky-content
+  // already hides the top bar via its own transform. Applying transform on this wrapper
+  // creates a CSS containing block for all position:fixed descendants (bottom nav,
+  // notifications panel), and overflow:hidden then clips them off-screen.
 }
 
 .content-social-app {
@@ -138,14 +135,16 @@
   overscroll-behavior: contain;
   @include breakpoints.below-sm {
     position: fixed;
-    top: calc(60px + env(safe-area-inset-top));
-    bottom: calc(56px + env(safe-area-inset-bottom));
+    top: calc(50px + env(safe-area-inset-top));
+    bottom: 0px;
     left: 0;
     right: 0;
     width: 100%;
     height: auto;
     margin: 0;
     overflow: hidden;
+    // White background so empty feed area matches post card color instead of dark navy
+    background-color: color.$worky-color-light;
     transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
@@ -178,6 +177,9 @@
   position: relative;
   height: 100%;
   overflow: hidden;
+  @include breakpoints.below-sm {
+    top: 0px;
+  }
 }
 
 .content-profile-app {

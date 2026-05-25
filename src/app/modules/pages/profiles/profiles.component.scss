@@ -3,6 +3,11 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 @use 'sass:map';
 
+:host {
+  display: block;
+  height: 100%;
+}
+
 // Smooth transitions to avoid flickering
 .profile-container {
   transition: opacity 0.2s ease-in-out;

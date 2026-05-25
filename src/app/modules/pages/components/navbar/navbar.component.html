@@ -138,7 +138,7 @@
 </div>
 
 <!-- Mobile Bottom Navigation Bar -->
-<nav class="bottom-nav-mobile" *ngIf="isMobile">
+<nav class="bottom-nav-mobile" *ngIf="isMobile" [class.scrolledTop]="scrolledTop">
   <a class="bottom-nav-item" [routerLink]="['/']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
     <span class="material-symbols-rounded bottom-nav-icon">home</span>
   </a>

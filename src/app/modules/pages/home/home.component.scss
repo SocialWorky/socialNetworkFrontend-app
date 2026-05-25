@@ -2,6 +2,11 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use "sass:map";
 
+:host {
+  display: block;
+  height: 100%;
+}
+
 .content-publications {
   height: 94dvh;
   -webkit-overflow-scrolling: touch;
