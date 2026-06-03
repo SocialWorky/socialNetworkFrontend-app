@@ -30,12 +30,18 @@ function normalizeImageUrl(url: string, baseUrl: string): string {
     url = url.slice(1);
   }
   
-  // If no baseUrl, return empty string for known MinIO paths to prevent 404
+  // When MinIO is not configured, fall back to the file-service URL, which serves
+  // files directly from local storage at its root (GET :type/:filename).
+  if (!baseUrl || baseUrl.trim() === '') {
+    baseUrl = environment.APIFILESERVICE || '';
+  }
+
+  // If still no baseUrl, return empty string for known MinIO paths to prevent 404
   if (!baseUrl || baseUrl.trim() === '') {
     const knownMinIOPatterns = ['profileImg/', 'publications/', 'uploads/', 'config/', 'users/', 'comments/'];
     const isKnownMinIOPath = knownMinIOPatterns.some(pattern => url.startsWith(pattern));
     if (isKnownMinIOPath) {
-      console.error('[main.ts] MINIO_BUCKET_URL is not configured. Cannot normalize URL:', url);
+      console.error('[main.ts] No storage base URL configured (NG_APP_MINIO_BUCKET_URL / NG_APP_APIFILESERVICE). Cannot normalize URL:', url);
       return ''; // Return empty string to prevent 404
     }
     return url;

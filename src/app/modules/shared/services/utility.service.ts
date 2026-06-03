@@ -306,11 +306,13 @@ export class UtilityService {
       }
     }
     
-    // If baseUrl is not provided or is undefined, try to get it from environment
+    // If baseUrl is not provided or is undefined, try to get it from environment.
+    // Prefer the MinIO bucket URL when configured; otherwise fall back to the
+    // file-service URL, which serves files directly from local storage at its
+    // root (GET :type/:filename) when no object store is configured.
     let finalBaseUrl = baseUrl;
     if (!finalBaseUrl || finalBaseUrl.trim() === '') {
-      // Try to get MINIO_BUCKET_URL from environment
-      finalBaseUrl = environment.MINIO_BUCKET_URL || '';
+      finalBaseUrl = environment.MINIO_BUCKET_URL || environment.APIFILESERVICE || '';
     }
     
     // If still no baseUrl and URL looks like a relative path, this is a problem
@@ -322,10 +324,11 @@ export class UtilityService {
       const isKnownMinIOPath = knownMinIOPatterns.some(pattern => url.startsWith(pattern) || url.startsWith('/' + pattern));
       
       if (isKnownMinIOPath) {
-        // This is a MinIO path but we don't have baseUrl - log error
-        // Return empty string to prevent 404 errors - components should handle empty URLs gracefully
-        console.error('[UtilityService] MINIO_BUCKET_URL is not configured. Cannot normalize URL:', url);
-        console.error('[UtilityService] Please configure NG_APP_MINIO_BUCKET_URL in your environment variables.');
+        // Neither MINIO_BUCKET_URL nor APIFILESERVICE is configured - we cannot build
+        // an absolute URL. Return empty string to prevent 404 errors - components
+        // should handle empty URLs gracefully.
+        console.error('[UtilityService] No storage base URL configured. Cannot normalize URL:', url);
+        console.error('[UtilityService] Set NG_APP_MINIO_BUCKET_URL (MinIO) or NG_APP_APIFILESERVICE (local storage) in your environment variables.');
         return ''; // Return empty string instead of relative URL to prevent 404
       }
       
