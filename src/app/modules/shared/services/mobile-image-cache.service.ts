@@ -624,6 +624,34 @@ export class MobileImageCacheService {
     });
   }
 
+  private isCrossOriginUrl(url: string): boolean {
+    try {
+      return new URL(url, window.location.href).origin !== window.location.origin;
+    } catch {
+      return false;
+    }
+  }
+
+  private preloadViaNativeImage(url: string, timeoutMs: number): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      const img = new Image();
+      const timer = setTimeout(() => {
+        img.onload = img.onerror = null;
+        reject(new Error('Native image preload timed out'));
+      }, timeoutMs);
+
+      img.onload = () => {
+        clearTimeout(timer);
+        resolve(url);
+      };
+      img.onerror = () => {
+        clearTimeout(timer);
+        reject(new Error('Native image preload failed'));
+      };
+      img.src = url;
+    });
+  }
+
   private async loadFromNetworkInternal(imageUrl: string, imageType: 'profile' | 'publication' | 'media', options: ImageLoadOptions): Promise<string> {
     // Validate URL - must be absolute (http/https/blob/data)
     // If URL is relative, it means MINIO_BUCKET_URL is not configured
@@ -644,7 +672,15 @@ export class MobileImageCacheService {
       );
       throw new Error('Invalid image URL - URL is relative and MINIO_BUCKET_URL is not configured');
     }
-    
+
+    // Cross-origin images (e.g. MinIO at api-minio.compuelec.cl) cannot be fetched as a blob
+    // via XHR unless the storage server returns CORS headers — and when the server is down the
+    // browser reports the failure as a misleading CORS error. Warm the cache with a native
+    // Image() preload instead (no CORS requirement) and let <img src> render the URL directly.
+    if (this.isCrossOriginUrl(imageUrl)) {
+      return this.preloadViaNativeImage(imageUrl, options.timeout || 15000);
+    }
+
     // Validate URL for iOS Safari
     if (isIOS) {
       if (!imageUrl || !imageUrl.startsWith('http')) {

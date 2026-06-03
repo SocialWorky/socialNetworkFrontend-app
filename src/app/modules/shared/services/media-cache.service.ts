@@ -191,6 +191,14 @@ export class MediaCacheService {
     return url;
   }
 
+  private isCrossOriginUrl(url: string): boolean {
+    try {
+      return new URL(url, window.location.href).origin !== window.location.origin;
+    } catch {
+      return false;
+    }
+  }
+
   private loadFromNetwork(url: string, cacheKey: string, options: MediaCacheOptions): Observable<string> {
     const loadingSubject = new BehaviorSubject<boolean>(true);
     this.loadingMedia.set(cacheKey, loadingSubject);
@@ -201,6 +209,15 @@ export class MediaCacheService {
     // Ensure URL is normalized (should already be normalized, but double-check)
     const utilityService = this.injector.get(UtilityService);
     const normalizedUrl = utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
+
+    // Cross-origin media (e.g. MinIO) cannot be blob-fetched via XHR without CORS headers; a
+    // failed request surfaces as a misleading CORS error. Return the URL directly so the
+    // native <video src> streams it (with range support) instead of buffering a blob.
+    if (this.isCrossOriginUrl(normalizedUrl)) {
+      loadingSubject.next(false);
+      this.loadingMedia.delete(cacheKey);
+      return of(normalizedUrl);
+    }
 
     return this.http.get(normalizedUrl, { responseType: 'blob' }).pipe(
       timeout(options.timeout || 20000), // Reduced timeout
