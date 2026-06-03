@@ -72,9 +72,9 @@ export class WidgetConfigService {
   }
 
   getAllWidgets(): Observable<WidgetConfig[]> {
-    return this.http.get<WidgetConfig[]>(`${this.apiUrl}/layout`).pipe(
+    return this.http.get<WidgetConfig[]>(`${this.apiUrl}`).pipe(
       tap(widgets => {
-        if (!widgets || widgets.length === 0) {
+        if (!Array.isArray(widgets) || widgets.length === 0) {
           this.widgetsSubject.next(this.defaultWidgets);
         } else {
           this.widgetsSubject.next(widgets);
