@@ -3,6 +3,14 @@
 @use "src/assets/styles/worky-variables.scss" as variables;
 @use "sass:map";
 
+// While the emoji picker is open, lift the whole component above the sibling feed
+// cards. The picker's own z-index only orders it WITHIN this host's stacking context;
+// later publication cards in the feed would otherwise paint over the floating picker.
+:host:has(.emoji-menu) {
+  position: relative;
+  z-index: 1000;
+}
+
 .publishing-container {
   padding: 16px;
   .publishing-header {
@@ -339,6 +347,34 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
           }
         }
+
+        // Floating emoji picker — anchored to the (position: relative) emoji icon.
+        // Without this it renders in normal flow and breaks the toolbar layout.
+        .emoji-icon .emoji-menu {
+          position: absolute;
+          top: calc(100% + 8px);
+          right: 0;
+          z-index: 10000;
+          border-radius: 10px;
+          overflow: hidden;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+          animation: emoji-menu-fade 0.15s ease;
+
+          ::ng-deep .emoji-mart {
+            border: none;
+            max-width: 100%;
+          }
+
+          @include breakpoints.below-sm {
+            position: fixed;
+            top: auto;
+            bottom: 16px;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            max-width: calc(100vw - 24px);
+          }
+        }
       }
     }
   }
@@ -355,4 +391,9 @@
       gap: 3px;
     }
   }
+}
+
+@keyframes emoji-menu-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
