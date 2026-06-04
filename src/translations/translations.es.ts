@@ -259,6 +259,11 @@ export const translations = {
   
   // GIF SEARCH
   'gifSearch.placeholder': 'Buscar GIFs',
+  'gifSearch.size.fixedHeight': 'Altura fija',
+  'gifSearch.size.fixedWidth': 'Ancho fijo',
+  'gifSearch.size.original': 'Original',
+  'gifSearch.noResults': 'No se encontraron GIFs',
+  'gifSearch.poweredBy': 'Con tecnología de',
   
   // LOCATION SEARCH
   'locationSearch.placeholder': 'Buscar',

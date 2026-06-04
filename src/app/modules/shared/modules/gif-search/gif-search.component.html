@@ -1,21 +1,75 @@
-<div class="content-search-gif">
-  <div class="search-term">
-    <input type="text" [formControl]="searchTerm" placeholder="{{ 'gifSearch.placeholder' | workyTranslations }}" />
-    <div class="content-options">
-      <label>
-        <input type="radio" name="size" (click)="setImageSize('fixed_height')" checked /> Altura Fija
-      </label>
-      <label>
-        <input type="radio" name="size" (click)="setImageSize('fixed_width')" /> Anchura Fija
-      </label>
-      <label>
-        <input type="radio" name="size" (click)="setImageSize('original')" /> Original
-      </label>
+<div class="gif-search">
+  <div class="gif-search__header">
+    <div class="gif-search__input-wrap">
+      <i class="material-icons gif-search__search-icon">search</i>
+      <input
+        type="text"
+        class="gif-search__input"
+        [formControl]="searchTerm"
+        placeholder="{{ 'gifSearch.placeholder' | workyTranslations }}" />
+      <button
+        *ngIf="searchTerm.value"
+        type="button"
+        class="gif-search__clear"
+        (click)="clearSearch()">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+
+    <div class="gif-search__sizes" role="group">
+      <button
+        type="button"
+        class="gif-search__size-pill"
+        [class.active]="selectedSize === 'fixed_height'"
+        (click)="setImageSize('fixed_height')">
+        {{ 'gifSearch.size.fixedHeight' | workyTranslations }}
+      </button>
+      <button
+        type="button"
+        class="gif-search__size-pill"
+        [class.active]="selectedSize === 'fixed_width'"
+        (click)="setImageSize('fixed_width')">
+        {{ 'gifSearch.size.fixedWidth' | workyTranslations }}
+      </button>
+      <button
+        type="button"
+        class="gif-search__size-pill"
+        [class.active]="selectedSize === 'original'"
+        (click)="setImageSize('original')">
+        {{ 'gifSearch.size.original' | workyTranslations }}
+      </button>
     </div>
   </div>
-  <div class="gif-results">
-    <div *ngFor="let gif of gifs" (click)="selectGif(gif.images[selectedSize].url)">
-      <img [src]="gif.images[selectedSize].url" alt="GIF" class="large" />
+
+  <div class="gif-search__body">
+    <div *ngIf="isLoading" class="gif-search__loading">
+      <div class="gif-search__spinner"></div>
     </div>
+
+    <div *ngIf="!isLoading && gifs.length" class="gif-search__grid">
+      <button
+        type="button"
+        class="gif-search__card"
+        *ngFor="let gif of gifs; trackBy: trackByGifId"
+        (click)="selectGif(gif.images[selectedSize].url)">
+        <img
+          [src]="gif.images['fixed_width_small']?.url || gif.images['fixed_width']?.url || gif.images[selectedSize].url"
+          alt="GIF"
+          loading="lazy" />
+        <span class="gif-search__card-overlay">
+          <i class="material-icons">add</i>
+        </span>
+      </button>
+    </div>
+
+    <div *ngIf="!isLoading && !gifs.length" class="gif-search__empty">
+      <i class="material-icons">sentiment_dissatisfied</i>
+      <p>{{ 'gifSearch.noResults' | workyTranslations }}</p>
+    </div>
+  </div>
+
+  <div class="gif-search__footer">
+    <span class="gif-search__powered">{{ 'gifSearch.poweredBy' | workyTranslations }}</span>
+    <span class="gif-search__brand">GIPHY</span>
   </div>
 </div>
