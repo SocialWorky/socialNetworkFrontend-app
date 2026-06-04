@@ -1147,6 +1147,36 @@ worky-root[inert] ion-loading {
   }
 }
 
+/* ───────── Emoji picker dialog ─────────
+   The emoji-mart picker brings its own surface (light or .emoji-mart-dark via the
+   [darkMode] input). Shrink the dialog to wrap the picker exactly — Material's default
+   min-width would otherwise leave an empty transparent area around it. */
+.emoji-picker-dialog {
+  width: fit-content !important;
+  height: fit-content !important;
+  max-width: 95vw !important;
+
+  .mat-mdc-dialog-surface,
+  .mdc-dialog__surface,
+  .mat-dialog-container {
+    display: block !important;
+    width: fit-content !important;
+    min-width: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  emoji-mart,
+  .emoji-mart {
+    display: block !important;
+    border: none !important;
+    border-radius: 12px !important;
+  }
+}
+
 /* ───────── Media viewer dialog (full-screen, safe-area-aware) ───────── */
 .view-media-modal-container {
   .mat-mdc-dialog-surface,

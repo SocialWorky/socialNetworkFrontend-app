@@ -3,14 +3,6 @@
 @use "src/assets/styles/worky-variables.scss" as variables;
 @use "sass:map";
 
-// While the emoji picker is open, lift the whole component above the sibling feed
-// cards. The picker's own z-index only orders it WITHIN this host's stacking context;
-// later publication cards in the feed would otherwise paint over the floating picker.
-:host:has(.emoji-menu) {
-  position: relative;
-  z-index: 1000;
-}
-
 .publishing-container {
   padding: 16px;
   .publishing-header {
@@ -348,41 +340,12 @@
           }
         }
 
-        // Elevate the emoji icon (and the picker it anchors) above sibling elements
-        // such as the "Publicar" button. The :hover scale on .extra-content-item creates
-        // a transform stacking context that would otherwise trap the picker's z-index,
-        // letting later siblings paint over it. Giving the icon its own z-index keeps the
-        // whole anchor on top while the menu is open.
-        .emoji-icon:has(.emoji-menu) {
-          z-index: 10000;
-        }
+        // Emoji icon active state (picker open). The picker itself is rendered in a
+        // MatDialog (portaled to <body>), so it has no positioning concerns here.
+        .emoji-icon.active {
+          background-color: color-mix(in srgb, color.$worky-color-input-background, transparent 20%);
 
-        // Floating emoji picker — anchored to the (position: relative) emoji icon.
-        // Without this it renders in normal flow and breaks the toolbar layout.
-        .emoji-icon .emoji-menu {
-          position: absolute;
-          top: calc(100% + 8px);
-          right: 0;
-          z-index: 10000;
-          border-radius: 10px;
-          overflow: hidden;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
-          animation: emoji-menu-fade 0.15s ease;
-
-          ::ng-deep .emoji-mart {
-            border: none;
-            max-width: 100%;
-          }
-
-          @include breakpoints.below-sm {
-            position: fixed;
-            top: auto;
-            bottom: 16px;
-            left: 50%;
-            right: auto;
-            transform: translateX(-50%);
-            max-width: calc(100vw - 24px);
-          }
+          i { color: color-mix(in srgb, var(--worky-color-text), transparent 10%); }
         }
       }
     }
@@ -400,9 +363,4 @@
       gap: 3px;
     }
   }
-}
-
-@keyframes emoji-menu-fade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
 }

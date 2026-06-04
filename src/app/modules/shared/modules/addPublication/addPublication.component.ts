@@ -9,11 +9,12 @@ import {
   AfterViewInit,
   Output,
   EventEmitter,
+  TemplateRef,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonTextarea } from '@ionic/angular';
 import { Subject, Subscription, lastValueFrom, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import {
   WorkyButtonType,
   WorkyButtonTheme
@@ -137,9 +138,17 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
 
   @ViewChild('textarea', { static: false }) textarea!: ElementRef;
 
+  @ViewChild('emojiPickerTpl', { static: false }) emojiPickerTpl!: TemplateRef<unknown>;
+
+  private emojiDialogRef?: MatDialogRef<unknown>;
+
   content: string = '';
 
   showEmojiMenu: boolean = false;
+
+  get isDarkMode(): boolean {
+    return typeof document !== 'undefined' && document.body.classList.contains('dark-mode');
+  }
 
   showUploadModal: boolean = false;
 
@@ -468,22 +477,33 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   toggleEmojiMenu() {
-    this.showEmojiMenu = !this.showEmojiMenu;
-    
-    if (this.showEmojiMenu) {
-      this.loadEmojiMartCss();
+    if (this.emojiDialogRef) {
+      this.emojiDialogRef.close();
+      return;
     }
-  }
 
-  preventClose(event: Event) {
-    event.stopPropagation();
+    this.loadEmojiMartCss();
+
+    this.emojiDialogRef = this._dialog.open(this.emojiPickerTpl, {
+      panelClass: 'emoji-picker-dialog',
+      maxWidth: '95vw',
+      autoFocus: false,
+      restoreFocus: false,
+    });
+
+    this.emojiDialogRef.afterClosed().subscribe(() => {
+      this.emojiDialogRef = undefined;
+      this.showEmojiMenu = false;
+    });
+
+    this.showEmojiMenu = true;
   }
 
   onEmojiClick(event: any) {
     const selectedEmoji = event.emoji.native;
     const currentContent = this.myForm.get('content')?.value;
     this.myForm.get('content')?.setValue(currentContent + selectedEmoji);
-    this.showEmojiMenu = false;
+    this.emojiDialogRef?.close();
   }
 
   onSave() {
