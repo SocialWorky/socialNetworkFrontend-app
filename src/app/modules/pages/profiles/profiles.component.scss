@@ -122,7 +122,8 @@
       .btn-container-header {
         width: 150px;
         display: flex;
-        justify-content: flex-end;
+        flex-direction: column;
+        gap: 8px;
       }
     }
 

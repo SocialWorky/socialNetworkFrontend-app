@@ -26,6 +26,7 @@ import { ReportResponseComponent } from '../publication-view/report-response/rep
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { CommentService } from '@shared/services/core-apis/comment.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
+import { CenterSocketNotificationsService } from '@shared/services/notifications/centerSocketNotifications.service';
 import { Reactions } from './interfaces/reactions.interface';
 import { Colors } from '@shared/interfaces/colors.enum';
 import { ScrollService } from '@shared/services/scroll.service';
@@ -168,6 +169,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private readonly _subscriptionService: SubscriptionService,
     private readonly _configService: ConfigService,
     private readonly _featureWallService: FeatureWallService,
+    private _centerSocketNotificationsService: CenterSocketNotificationsService,
   ) {}
 
   async ngAfterViewInit() {
@@ -236,6 +238,25 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           if (data?._id === this.publication._id) {
             this.updatePublicationIfNeeded(data);
           }
+        }
+      });
+
+    this._notificationService.notification$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Only refresh posts with an active pending relationship — avoids one
+        // uncached friends request per visible post on every app-wide ping.
+        const hasPendingRelation =
+          !!this.publication?.isFriendshipPending ||
+          !!this.userRequest?._id ||
+          !!this.userReceive?._id;
+        if (
+          hasPendingRelation &&
+          this.dataUser?.id &&
+          this.publication?.author?._id &&
+          this.dataUser.id !== this.publication.author._id
+        ) {
+          this.getUserFriendPending(true);
         }
       });
 
@@ -728,6 +749,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       }),
     ).subscribe({
       next: () => {
+        this._centerSocketNotificationsService.senFriendRequestNotification(this.publication.author);
         this.viewProfile(_idUser);
       },
       error: (error) => {
@@ -753,16 +775,19 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       }),
     ).subscribe({
       next: () => {
+        this._notificationService.sendNotification();
         this.viewProfile(authorId);
       }
     });
   }
 
-  getUserFriendPending() {
-    this._friendsService.getIsMyFriend(this.dataUser?.id!, this.publication?.author?._id || '').pipe(takeUntil(this.destroy$)).subscribe({
+  getUserFriendPending(bypassCache = false) {
+    this._friendsService.getIsMyFriend(this.dataUser?.id!, this.publication?.author?._id || '', bypassCache).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: FriendsStatus) => {
         this.userRequest = response?.requester;
         this.userReceive = response?.receiver;
+        this.publication.isMyFriend = response?.status === 'accepted';
+        this.publication.isFriendshipPending = response?.status === 'pending' ? response?.id : undefined;
         this._cdr.markForCheck();
       },
       error: (error: any) => {
@@ -788,8 +813,37 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       }),
     ).subscribe({
       next: () => {
+        this._centerSocketNotificationsService.acceptFriendRequestNotification(this.publication.author);
         this.getUserFriendPending();
         this.viewProfile(idUser);
+      }
+    });
+  }
+
+  rejectFriendship(_id: string) {
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.deleteFriend(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
+      next: () => {
+        this.publication.isFriendshipPending = undefined;
+        this.getUserFriendPending();
+        this._notificationService.sendNotification();
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'PublicationViewComponent',
+          'Error rejecting friend request',
+          { error, userId: this.publication?.author?._id }
+        );
       }
     });
   }
@@ -1108,7 +1162,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   get shouldShowAcceptButton(): boolean {
-    return this.userReceive?._id === this.dataUser?.id;
+    return !this.publication.isMyFriend &&
+           !!this.publication.isFriendshipPending &&
+           this.userReceive?._id === this.dataUser?.id;
   }
 
   get shouldShowPendingIndicator(): boolean {

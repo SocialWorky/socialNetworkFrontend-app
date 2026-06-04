@@ -119,6 +119,12 @@
                   {{ 'profiles.acceptFriendship' | workyTranslations }}
                 </a>
 
+                <a *ngIf="shouldShowAcceptButton" class="follow-my-friend reject-friend"
+                  [class.disabled]="friendActionLoading"
+                  (click)="rejectFriendship(publication.isFriendshipPending!)">
+                  {{ 'profiles.rejectFriendship' | workyTranslations }}
+                </a>
+
               </ng-container>
             </span>
 

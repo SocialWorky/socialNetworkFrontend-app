@@ -1227,6 +1227,7 @@ export const translations = {
   'DATE_FNS.X_YEARS': '{{count}} years',
   'DATE_FNS.UNKNOWN': 'some time ago',
   'profiles.acceptFriendship': 'Accept Friendship',
+  'profiles.rejectFriendship': 'Reject',
   'profiles.unfollow': 'Unfollow',
   'profiles.sendMessage': 'Send Message',
   'userOnline.title': 'Online Users',

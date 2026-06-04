@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 
-import { User } from '@shared/interfaces/user.interface';
 import { NotificationType } from '@shared/modules/notifications-panel/enums/notificationsType.enum';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { AuthService } from '@auth/services/auth.service';
@@ -28,8 +27,9 @@ export class CenterSocketNotificationsService {
     this.userToken = this._authService.getDecodedToken();
   }
 
-  senFriendRequestNotification(user: User) {
+  senFriendRequestNotification(user: { _id: string }) {
 
+    this.userToken = this._authService.getDecodedToken();
     if (!this.userToken) return;
 
     const dataNotification = {
@@ -50,8 +50,9 @@ export class CenterSocketNotificationsService {
 
   }
 
-  acceptFriendRequestNotification(user: User) {
+  acceptFriendRequestNotification(user: { _id: string }) {
 
+    this.userToken = this._authService.getDecodedToken();
     if (!this.userToken) return;
 
     const dataNotification = {

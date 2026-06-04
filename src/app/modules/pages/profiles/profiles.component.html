@@ -81,6 +81,16 @@
             <span basic-button-text>{{ 'profiles.acceptFriendship' | workyTranslations }}</span>
           </worky-buttons>
 
+          <worky-buttons *ngIf="isFriendPending.status && userRequest._id === idUserProfile"
+            [workyButtonType]="WorkyButtonType.Outline"
+            [theme]="WorkyButtonTheme.Warn"
+            [loading]="friendActionLoading"
+            [disabled]="friendActionLoading"
+            [width]="'100%'"
+            (click)="rejectFriendship(idPendingFriend)">
+            <span basic-button-text>{{ 'profiles.rejectFriendship' | workyTranslations }}</span>
+          </worky-buttons>
+
           <worky-buttons *ngIf="isFriend && !isCurrentUser"
             [workyButtonType]="WorkyButtonType.Outline"
             [theme]="WorkyButtonTheme.Basic"

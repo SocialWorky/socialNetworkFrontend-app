@@ -21,6 +21,8 @@ import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
+import { CenterSocketNotificationsService } from '@shared/services/notifications/centerSocketNotifications.service';
+import { NotificationService } from '@shared/services/notifications/notification.service';
 import { FriendsService } from '@shared/services/core-apis/friends.service';
 import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
 import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';
@@ -166,6 +168,8 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly _exploreService: ExploreService,
     private readonly _creatorProfileService: CreatorProfileService,
     private readonly _featureWallService: FeatureWallService,
+    private _centerSocketNotificationsService: CenterSocketNotificationsService,
+    private _notificationService: NotificationService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
@@ -225,6 +229,12 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     this._profileNotificationService.profileUpdated$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.getDataProfile();
       this._cdr.markForCheck();
+    });
+
+    this._notificationService.notification$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (!this.isCurrentUser && this.idUserProfile) {
+        this.getUserFriendPending(true);
+      }
     });
 
     this._pullToRefreshService.refresh$.pipe(
@@ -711,8 +721,8 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  private getUserFriendPending(): void {
-    this._friendsService.getIsMyFriend(this._authService.getDecodedToken()?.id!, this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
+  private getUserFriendPending(bypassCache = false): void {
+    this._friendsService.getIsMyFriend(this._authService.getDecodedToken()?.id!, this.idUserProfile, bypassCache).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: FriendsStatus) => {
         this.isFriendPending.status = response?.status === 'pending';
         this.idPendingFriend = response?.id;
@@ -759,6 +769,9 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       }),
     ).subscribe({
       next: async () => {
+        if (this.userData) {
+          this._centerSocketNotificationsService.senFriendRequestNotification(this.userData);
+        }
         this.loadPublications();
         this.getUserFriendPending();
         this._cdr.markForCheck();
@@ -791,7 +804,44 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       next: async () => {
         this.loadPublications();
         this.getUserFriend();
+        this._notificationService.sendNotification();
         this._cdr.markForCheck();
+      },
+      error: () => {
+        // Resync status — the friendship may already be gone (e.g. rejected by the other user)
+        this.getUserFriend();
+        this._cdr.markForCheck();
+      }
+    });
+  }
+
+  rejectFriendship(_id: string) {
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.deleteFriend(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
+      next: async () => {
+        this.loadPublications();
+        this.getUserFriend();
+        this._notificationService.sendNotification();
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error al rechazar la solicitud de amistad',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
       }
     });
   }
@@ -808,6 +858,9 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       }),
     ).subscribe({
       next: async () => {
+        if (this.userData) {
+          this._centerSocketNotificationsService.acceptFriendRequestNotification(this.userData);
+        }
         this.getUserFriendPending();
         this.loadPublications();
         this._cdr.markForCheck();

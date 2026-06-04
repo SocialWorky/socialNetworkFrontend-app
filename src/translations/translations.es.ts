@@ -1192,6 +1192,7 @@ export const translations = {
   'DATE_FNS.X_YEARS': '{{count}} años',
   'DATE_FNS.UNKNOWN': 'hace algún tiempo',
   'profiles.acceptFriendship': 'Aceptar Amistad',
+  'profiles.rejectFriendship': 'Rechazar',
   'profiles.unfollow': 'Dejar de Seguir',
   'profiles.sendMessage': 'Enviar Mensaje',
   'userOnline.title': 'Usuarios Online',
