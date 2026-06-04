@@ -590,6 +590,30 @@ img, video {
   }
 }
 
+// Angular Material dropdown panels (select / autocomplete) render inside the CDK
+// overlay at <body> level. The worky theme leaves their surface transparent, so the
+// options bleed over the page content behind them. Give them a solid surface that
+// adapts to light/dark via the --worky-color-* variables (.dark-mode lives on <body>,
+// which also hosts the overlay container, so the remapping is inherited here).
+.mat-mdc-select-panel.mdc-menu-surface,
+.mat-mdc-autocomplete-panel.mdc-menu-surface {
+  background-color: var(--worky-color-module-container);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+
+  .mat-mdc-option .mdc-list-item__primary-text {
+    color: var(--worky-color-text);
+  }
+
+  .mat-mdc-option:hover:not(.mdc-list-item--disabled),
+  .mat-mdc-option.mat-mdc-option-active {
+    background-color: color-mix(in srgb, var(--worky-color-text) 8%, transparent);
+  }
+
+  .mat-mdc-option.mdc-list-item--selected:not(.mat-mdc-option-multiple) {
+    background-color: color-mix(in srgb, var(--worky-color-text) 14%, transparent);
+  }
+}
+
 .no-select-text {
   user-select: none;
   -webkit-user-select: none;
