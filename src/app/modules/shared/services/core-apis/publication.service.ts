@@ -8,6 +8,7 @@ import { CreatePost } from '@shared/modules/addPublication/interfaces/createPost
 import { EditPublication, Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { PublicationDatabaseService } from '@shared/services/database/publication-database.service';
+import { UnifiedCacheService } from '@shared/services/unified-cache.service';
 import { LogService, LevelLogEnum } from './log.service';
 
 @Injectable({
@@ -47,6 +48,7 @@ export class PublicationService implements OnDestroy {
     private http: HttpClient,
     private _notificationPublicationService: NotificationPublicationService,
     private _publicationDatabase: PublicationDatabaseService,
+    private _unifiedCache: UnifiedCacheService,
     private logService: LogService,
   ) {
     this._publicationDatabase.initDatabase();
@@ -347,8 +349,32 @@ export class PublicationService implements OnDestroy {
   }
 
   updatePublications(newPublications: PublicationView[]): void {
-    this._notificationPublicationService.sendNotificationUpdatePublication(newPublications);  
+    this._notificationPublicationService.sendNotificationUpdatePublication(newPublications);
     this._publicationDatabase.addPublications(newPublications);
+    this.invalidatePublicationFeedCache();
+  }
+
+  /**
+   * Reconcile every cache layer once a publication's media has finished processing.
+   * The async media-processed socket event is not an HTTP mutation, so the persisted
+   * feed cache (and the in-memory caches) keep the stale "processing" state and the
+   * "Procesando medios" overlay reappears on the next feed load until the TTL expires.
+   */
+  onMediaProcessed(publication: PublicationView): void {
+    this._publicationDatabase.addPublication(publication);
+    this.addToPublicationCache(publication._id, publication);
+    this.invalidatePublicationFeedCache();
+  }
+
+  /**
+   * Drop the stale in-memory list cache and the persisted HTTP feed cache so the next
+   * feed load fetches the publication with its resolved media instead of a cached
+   * response still flagged as "processing".
+   */
+  private invalidatePublicationFeedCache(): void {
+    this.publicationListCache.clear();
+    this._unifiedCache.clearByPattern(/publication/);
+    this._unifiedCache.clearByPattern(/feed/);
   }
 
   updatePublicationsDeleted(newPublications: PublicationView[]): void {

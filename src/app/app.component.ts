@@ -597,6 +597,11 @@ export class AppComponent implements OnInit, OnDestroy {
    * Update publication view with new data from backend
    */
   private updatePublicationView(publication: PublicationView): void {
+    // Reconcile every cache layer (IndexedDB, in-memory and persisted HTTP feed cache)
+    // so the resolved media survives a feed reload and the "Procesando medios" overlay
+    // does not reappear from a stale cached response.
+    this._publicationService.onMediaProcessed(publication);
+
     // Notify MediaEventsService for PublicationViewComponent to update individual publication
     this._mediaEventsService.notifyMediaProcessed({
       idReference: publication._id,
