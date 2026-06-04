@@ -116,7 +116,7 @@
                 <a *ngIf="shouldShowAcceptButton" class="follow-my-friend"
                   [class.disabled]="friendActionLoading"
                   (click)="acceptFriendship(publication.isFriendshipPending!, publication.author._id)">
-                  Aceptar Amistad
+                  {{ 'profiles.acceptFriendship' | workyTranslations }}
                 </a>
 
               </ng-container>
