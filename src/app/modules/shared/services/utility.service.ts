@@ -259,7 +259,14 @@ export class UtilityService {
     if (url.startsWith('blob:') || url.startsWith('data:')) {
       return url;
     }
-    
+
+    // Heal paths corrupted by a stringified base URL (e.g. an unset env var
+    // produced "${undefined}/emojis/..."). Strip a stray "undefined/"/"null/"
+    // segment, whether it sits at the start or right after the domain.
+    url = url
+      .replace(/^(undefined|null)\//, '')
+      .replace(/(https?:\/\/[^\/]+)\/(?:undefined|null)\//, '$1/');
+
     // Store original URL for logging if needed
     const originalUrl = url;
     

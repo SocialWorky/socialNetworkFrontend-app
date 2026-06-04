@@ -21,10 +21,66 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '2.6.1',
+  version: '3.0.5',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🎉 GRAN ACTUALIZACIÓN — MONETIZACIÓN Y COMUNIDADES (v3.0.0):
+
+    💳 Suscripciones y pagos:
+    - Added: Sistema de suscripciones con planes y muro de funcionalidades premium
+    - Added: Integración de pagos con Payku
+    - Added: Gestión de suscripciones en panel admin (asignar, cambiar y eliminar planes)
+    - Added: Boost packages para impulsar contenido
+    - Added: Perfiles de creador y sistema de propinas (tipping)
+    - Added: Insignias premium en perfiles y mensajería
+
+    👥 Comunidades:
+    - Added: Grupos (creación, detalle, listado, gestión y baneo de miembros)
+    - Added: Eventos (creación y listado)
+    - Added: Stories con carrusel y visor
+    - Added: Descubrimiento de usuarios y publicaciones cercanas
+
+    ✨ Funcionalidades sociales:
+    - Added: Insignia de cuenta verificada y toggle de verificación
+    - Added: Rechazar solicitudes de amistad
+    - Added: Buscador de GIFs y selector de emojis en publicaciones
+    - Added: Verificación de edad y aceptación de política de privacidad en el registro
+    - Added: Feedback de verificación de email tras el registro
+
+    🛠️ Administración y gestión:
+    - Added: Gestión de feature flags y enrutamiento dinámico
+    - Added: Gestión de reportes
+    - Added: Gestión de plantillas de email
+    - Added: Analytics de usuarios y publicaciones
+    - Enhanced: Navbar con accesos a eventos y grupos, y controles de administración
+
+    📱 Experiencia móvil y PWA:
+    - Added: Navegación inferior móvil (bottom navigation)
+    - Improved: Manejo de safe area insets en iOS y cálculo de viewport en móvil
+    - Improved: Configuración PWA y scripts de build
+    - Added: Componentes skeleton para estados de carga
+
+    🐛 Estabilidad y rendimiento:
+    - Fixed: Manejo de errores y gestión de sesión en el flujo de autenticación
+    - Improved: Normalización de URLs y carga de imágenes cross-origin
+    - Improved: Invalidación de caché de medios y publicaciones
+    - Added: Estados de carga/disabled en botones (protección contra doble click)
+
+    🖼️ Imágenes y compatibilidad MinIO:
+    - Fixed: Reacciones (emojis) que quedaban cargando infinito por URL inválida
+      * Las reacciones se guardaban con la base "horneada" (undefined/emojis/...) → 404
+      * Ahora se guarda la ruta relativa y se resuelve la base al mostrar
+      * normalizeImageUrl sanea automáticamente rutas ya corruptas (undefined/, null/)
+    - Fixed: Portadas y avatares de grupos no cargaban con el mismo origen de error
+    - Fixed: Compatibilidad de URLs de medios CON y SIN MinIO
+      * El alta de publicaciones/comentarios ya no fija la URL al file-service
+      * Toda imagen resuelve su base vía normalizeImageUrl (bucket MinIO o file-service)
+    - Added: Soporte de SMTP corporativo en el backend (puerto/SSL configurable, además de Gmail)
+    - Fixed: Error 401 al crear/activar/listar versiones en el panel de administración
+      * El interceptor de auth excluía /app/version con coincidencia parcial y omitía el token
+      * Ahora solo el chequeo público (GET /app/version) va sin token; las operaciones admin lo envían
+
     🐛 CORRECCIONES DE BUGS (v2.6.1):
     - Fixed: Sistema de gestión de versiones en panel de administración
       * Corregido el manejo de respuestas del backend (no tenía wrapper {success: true})

@@ -11,7 +11,6 @@ import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { translations } from '@translations/translations';
 import { FileUploadService } from '@shared/services/core-apis/file-upload.service';
-import { environment } from '@env/environment';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { UtilityService } from '@shared/services/utility.service';
 import { SocketService, ConnectionState } from '@shared/services/socket.service';
@@ -28,8 +27,6 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
   reactionForm: FormGroup;
 
   reactionsList: CustomReactionList[] = [];
-
-  urlApiFile: string = '';
 
   isLoading = true;
   loadReactionsButtons = false;
@@ -71,17 +68,11 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
   }
 
   private async initializeComponent() {
-    const connected = await this.waitForSocketConnection();
-    
-    if (connected) {
-      this.subscribeToEmojiEvents();
-      this.urlApiFile = `${environment.MINIO_BUCKET_URL}/`;
-      this.listReactions();
-    } else {
-      this.subscribeToEmojiEvents();
-      this.urlApiFile = `${environment.MINIO_BUCKET_URL}/`;
-      this.listReactions();
-    }
+    // Wait for the socket connection so emoji-processed events are received.
+    await this.waitForSocketConnection();
+
+    this.subscribeToEmojiEvents();
+    this.listReactions();
   }
 
   private async waitForSocketConnection(): Promise<boolean> {
@@ -314,9 +305,11 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
 
   handleImageProcessed(message: any) {
     const emojiUrl = message.data?.urlCompressed || message.data?.compressed;
-    const finalUrl = this.urlApiFile + emojiUrl;
 
-    this.reactionForm.patchValue({ emoji: finalUrl });
+    // Store the relative path only; the storage base URL is resolved at display
+    // time via normalizeImageUrl, like every other image type. Baking the base
+    // here produced "undefined/emojis/..." paths whenever MINIO_BUCKET_URL was unset.
+    this.reactionForm.patchValue({ emoji: emojiUrl });
     this._cdr.markForCheck();
     this._utilityService.sleep(1000);
     this.submitReaction();

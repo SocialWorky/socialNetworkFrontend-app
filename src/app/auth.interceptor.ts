@@ -55,9 +55,16 @@ export class AuthInterceptor implements HttpInterceptor {
       '/auth/refresh',
       '/email/forgotPassword', '/email/resetPassword',
       '/records-logs',      // internal logging — must never block
-      '/app/version',       // version check on startup
     ];
-    const isAuthUrl = AUTH_URLS.some((path) => request.url.includes(path));
+
+    // Only the public startup version check (GET /app/version) is auth-free.
+    // The admin endpoints (POST/PUT/DELETE /app/version*, GET /app/versions)
+    // require the JWT, so match the singular path exactly and only for GET.
+    const isPublicVersionCheck =
+      request.method === 'GET' && /\/app\/version(\?|$)/.test(request.url);
+
+    const isAuthUrl =
+      AUTH_URLS.some((path) => request.url.includes(path)) || isPublicVersionCheck;
 
     if (isApiRequest && !isAuthUrl) {
       const token = localStorage.getItem('token');

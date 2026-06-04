@@ -18,6 +18,7 @@ import { translations } from '@translations/translations';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { UnifiedCacheService } from '@shared/services/unified-cache.service';
+import { UtilityService } from '@shared/services/utility.service';
 
 @Component({
   selector: 'worky-group-detail',
@@ -55,6 +56,7 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
     private readonly cdr: ChangeDetectorRef,
     private readonly alertService: AlertService,
     private readonly cacheService: UnifiedCacheService,
+    private readonly utilityService: UtilityService,
   ) {}
 
   ngOnInit(): void {
@@ -75,15 +77,13 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
   get coverBgUrl(): string {
     const img = this.group?.coverImage;
     if (!img) return '';
-    if (img.startsWith('http') || img.startsWith('blob:') || img.startsWith('data:')) return img;
-    return `${environment.MINIO_BUCKET_URL}/${img}`;
+    return this.utilityService.normalizeImageUrl(img, environment.MINIO_BUCKET_URL || '');
   }
 
   get avatarUrl(): string {
     const img = (this.group as any)?.avatarImage;
     if (!img) return '';
-    if (img.startsWith('http') || img.startsWith('blob:') || img.startsWith('data:')) return img;
-    return `${environment.MINIO_BUCKET_URL}/${img}`;
+    return this.utilityService.normalizeImageUrl(img, environment.MINIO_BUCKET_URL || '');
   }
 
   private loadGroup(groupId: string): void {

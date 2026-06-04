@@ -574,7 +574,11 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   private async handleCommentResponse(message: any, idPublication: string, filesBackup: File[] = []) {
     try {
       if (filesBackup.length) {
-        const urlMedia = environment.APIFILESERVICE + 'comments/';
+        // Relative folder only; the storage base (MinIO bucket or file-service)
+        // is resolved at display time via normalizeImageUrl, so this works with
+        // and without MinIO. Sending an absolute URL here would pin it to the
+        // file-service even when MinIO is enabled.
+        const urlMedia = 'comments/';
         const idReference = message.comment._id;
         // Upload files in background using the backup
         await this.uploadFilesInBackground('comments', idReference, urlMedia, TypePublishing.COMMENT, filesBackup);
@@ -666,7 +670,11 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       const hasMedia = filesBackup.length > 0;
       
       if (hasMedia) {
-        const urlMedia = environment.APIFILESERVICE + 'publications/';
+        // Relative folder only; the storage base (MinIO bucket or file-service)
+        // is resolved at display time via normalizeImageUrl, so this works with
+        // and without MinIO. Sending an absolute URL here would pin it to the
+        // file-service even when MinIO is enabled.
+        const urlMedia = 'publications/';
         const idReference = message.publications._id;
         // Upload files in background using the backup
         await this.uploadFilesInBackground('publications', idReference, urlMedia, TypePublishing.POST, filesBackup);

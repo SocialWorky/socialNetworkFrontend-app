@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { GroupsService, Group } from '@shared/services/core-apis/groups.service';
 import { AuthService } from '@auth/services/auth.service';
+import { UtilityService } from '@shared/services/utility.service';
 import { environment } from '@env/environment';
 
 @Component({
@@ -31,6 +32,7 @@ export class GroupsListComponent implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly cdr: ChangeDetectorRef,
     private readonly authService: AuthService,
+    private readonly utilityService: UtilityService,
   ) {}
 
   ngOnInit(): void {
@@ -91,7 +93,6 @@ export class GroupsListComponent implements OnInit, OnDestroy {
 
   getCoverUrl(coverImage: string | null): string {
     if (!coverImage) return '';
-    if (coverImage.startsWith('http') || coverImage.startsWith('blob:') || coverImage.startsWith('data:')) return coverImage;
-    return `${environment.MINIO_BUCKET_URL}/${coverImage}`;
+    return this.utilityService.normalizeImageUrl(coverImage, environment.MINIO_BUCKET_URL || '');
   }
 }
