@@ -159,10 +159,12 @@
             }
           }
            @include breakpoints.below-sm {
-            flex-direction: column;
-            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 8px;
             .send-message-button {
-              margin: 5px 0px 5px 0px
+              margin: 0;
+              .whatsapp-icon { width: 28px; height: 28px; }
+              .message-icon { font-size: 28px; }
             }
           }
 
@@ -170,6 +172,11 @@
               @include Fonts.worky-h3;
               font-weight: bold;
               color: color.$worky-color-navy;
+              margin: 0;
+              @include breakpoints.below-sm {
+                font-size: 20px;
+                line-height: 1.2;
+              }
           }
         }
 
@@ -177,6 +184,21 @@
             font-size: 14px;
             font-weight: medium;
             color: color.$worky-color-navy;
+        }
+
+        @include breakpoints.below-sm {
+          margin-top: 6px;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          span {
+            display: block;
+            line-height: 1.35;
+          }
+          p {
+            font-size: 13px;
+            opacity: 0.6;
+          }
         }
       }
     }
