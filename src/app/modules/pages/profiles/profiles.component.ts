@@ -3,7 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom, lastValueFrom, of, Subject, takeUntil } from 'rxjs';
-import { catchError, filter, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { catchError, filter, switchMap, debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { translations } from '@translations/translations';
 
@@ -71,6 +71,8 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   paramPublication: boolean = false;
 
   loaderPublications: boolean = false;
+
+  friendActionLoading: boolean = false;
 
   userData: User | undefined;
   isLoadingUserData: boolean = true;
@@ -742,11 +744,20 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   followMyFriend(_id: string) {
+    if (this.friendActionLoading) return;
     if (this._configService.subscriptionModeSnapshot() && this._subscriptionService.isPremiumSnapshot() && !this._subscriptionService.hasFeature('friends')) {
       this._featureWallService.show('friends', this._subscriptionService.getPlanFeatures());
       return;
     }
-    this._friendsService.requestFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.requestFriend(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: async () => {
         this.loadPublications();
         this.getUserFriendPending();
@@ -767,7 +778,16 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   cancelFriendship(_id: string) {
-    this._friendsService.deleteFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.deleteFriend(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: async () => {
         this.loadPublications();
         this.getUserFriend();
@@ -777,7 +797,16 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async acceptFriendship(_id: string) {
-    this._friendsService.acceptFriendship(_id).pipe(takeUntil(this.destroy$)).subscribe({
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.acceptFriendship(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: async () => {
         this.getUserFriendPending();
         this.loadPublications();

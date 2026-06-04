@@ -102,16 +102,19 @@
                 <i *ngIf="shouldShowPendingIndicator" class="material-icons">fiber_manual_record</i>
 
                 <a *ngIf="shouldShowFollowButton" class="follow-my-friend"
+                  [class.disabled]="friendActionLoading"
                   (click)="followMyFriend(publication.author._id)">
                   {{ 'publicationsView.follow' | workyTranslations }}
                 </a>
 
                 <a *ngIf="shouldShowCancelButton" class="follow-my-friend"
+                  [class.disabled]="friendActionLoading"
                   (click)="cancelFriendship(publication.isFriendshipPending!, publication.author._id)">
                   {{ 'publicationsView.cancelRequest' | workyTranslations }}
                 </a>
 
                 <a *ngIf="shouldShowAcceptButton" class="follow-my-friend"
+                  [class.disabled]="friendActionLoading"
                   (click)="acceptFriendship(publication.isFriendshipPending!, publication.author._id)">
                   Aceptar Amistad
                 </a>

@@ -229,15 +229,15 @@
         <div *ngIf="publishButtonLoading" class="publish-skeleton">
           <worky-button-skeleton width="100%" height="40px"></worky-button-skeleton>
         </div>
-        <worky-buttons *ngIf="!publishButtonLoading && !loaderSavePublication && myForm.valid || previews.length && !loaderSavePublication"
+        <worky-buttons *ngIf="(!publishButtonLoading && myForm.valid) || previews.length"
           type="submit"
           [workyButtonType]="WorkyButtonType.Flat"
           [theme]="WorkyButtonTheme.Accent"
+          [loading]="loaderSavePublication"
           [height]="'40px'"
           [width]="'100%'">
           <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POST_PROFILE || type === typePublishing.GROUP_POST ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
         </worky-buttons>
-        <div *ngIf="loaderSavePublication" class="loader"></div>
       </div>
     </div>
 

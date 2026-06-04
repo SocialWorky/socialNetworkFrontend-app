@@ -4,6 +4,7 @@
 
 :host {
   .worky-button {
+    position: relative;
     max-width: 100%;
     border-radius: 8px;
     padding: 7px 16px;
@@ -104,6 +105,31 @@
   .worky-button-disabled {
     color: map.get(color.$worky-magenta, 72);
     background-color: map.get(color.$worky-magenta, 24);
+  }
+}
+
+:host {
+  .worky-button-wrapper-hidden {
+    visibility: hidden;
+  }
+
+  .worky-button-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: worky-button-spin 0.7s linear infinite;
+  }
+}
+
+@keyframes worky-button-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

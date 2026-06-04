@@ -12,6 +12,7 @@ export class ButtonsComponent {
   @Input() theme: WorkyButtonTheme = WorkyButtonTheme.Primary;
   @Input() workyButtonType: WorkyButtonType = WorkyButtonType.Flat;
   @Input() disabled = false;
+  @Input() loading = false;
   @Input() width?: string;
   @Input() height?: string;
 
@@ -24,11 +25,11 @@ export class ButtonsComponent {
 
   @HostBinding('class.worky-button-disabled')
   get isDisabled(): boolean {
-    return this.disabled;
+    return this.disabled || this.loading;
   }
 
   onButtonClick() {
-    if (!this.disabled) {
+    if (!this.disabled && !this.loading) {
       this.clickEvent.emit();
     }
   }

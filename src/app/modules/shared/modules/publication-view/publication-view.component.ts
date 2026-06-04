@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { distinctUntilChanged, takeUntil, debounceTime, filter } from 'rxjs/operators';
+import { distinctUntilChanged, takeUntil, debounceTime, filter, finalize } from 'rxjs/operators';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 import * as _ from 'lodash';
@@ -133,6 +133,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   actionsLoading: boolean = true;
   isDeletingPublication: boolean = false;
   isDeletingComment: boolean = false;
+  friendActionLoading: boolean = false;
   translations = translations;
 
   private destroy$ = new Subject<void>();
@@ -716,7 +717,16 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async followMyFriend(_idUser: string) {
-    this._friendsService.requestFriend(_idUser).pipe(takeUntil(this.destroy$)).subscribe({
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.requestFriend(_idUser).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: () => {
         this.viewProfile(_idUser);
       },
@@ -732,7 +742,16 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   cancelFriendship(_id: string, authorId: string) {
-    this._friendsService.deleteFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.deleteFriend(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: () => {
         this.viewProfile(authorId);
       }
@@ -758,7 +777,16 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   acceptFriendship(_id: string, idUser: string) {
-    this._friendsService.acceptFriendship(_id).pipe(takeUntil(this.destroy$)).subscribe({
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.acceptFriendship(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: () => {
         this.getUserFriendPending();
         this.viewProfile(idUser);

@@ -75,10 +75,11 @@
                 </div>
 
                 <div class="form-register-buttons">
-                    <worky-buttons *ngIf="!registerLoading"
+                    <worky-buttons
                         [workyButtonType]="WorkyButtonType.Flat"
                         [theme]="WorkyButtonTheme.Accent"
                         [disabled]="!registerForm.valid"
+                        [loading]="registerLoading"
                         [width]="'100%'">
                         <span basic-button-text>{{ 'button.register' | workyTranslations }}</span>
                     </worky-buttons>

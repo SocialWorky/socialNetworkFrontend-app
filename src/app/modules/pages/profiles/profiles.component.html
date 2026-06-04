@@ -52,24 +52,30 @@
         <div class="btn-container-header">
 
           <worky-buttons *ngIf="!isFriend && !isFriendPending.status && !isCurrentUser"
-            [workyButtonType]="WorkyButtonType.Outline" 
-            [theme]="WorkyButtonTheme.Accent" 
+            [workyButtonType]="WorkyButtonType.Outline"
+            [theme]="WorkyButtonTheme.Accent"
+            [loading]="friendActionLoading"
+            [disabled]="friendActionLoading"
             [width]="'100%'"
             (click)="followMyFriend(idUserProfile)">
             <span basic-button-text>{{ 'publicationsView.follow' | workyTranslations }}</span>
           </worky-buttons>
 
           <worky-buttons *ngIf="isFriendPending.status && userReceives._id === idUserProfile"
-            [workyButtonType]="WorkyButtonType.Outline" 
-            [theme]="WorkyButtonTheme.Warn" 
+            [workyButtonType]="WorkyButtonType.Outline"
+            [theme]="WorkyButtonTheme.Warn"
+            [loading]="friendActionLoading"
+            [disabled]="friendActionLoading"
             [width]="'100%'"
             (click)="cancelFriendship(idPendingFriend)">
             <span basic-button-text>{{ 'publicationsView.cancelRequest' | workyTranslations }}</span>
           </worky-buttons>
 
           <worky-buttons *ngIf="isFriendPending.status && userRequest._id === idUserProfile"
-            [workyButtonType]="WorkyButtonType.Outline" 
-            [theme]="WorkyButtonTheme.Accent" 
+            [workyButtonType]="WorkyButtonType.Outline"
+            [theme]="WorkyButtonTheme.Accent"
+            [loading]="friendActionLoading"
+            [disabled]="friendActionLoading"
             [width]="'100%'"
             (click)="acceptFriendship(idPendingFriend)">
             <span basic-button-text>{{ 'profiles.acceptFriendship' | workyTranslations }}</span>
@@ -78,6 +84,8 @@
           <worky-buttons *ngIf="isFriend && !isCurrentUser"
             [workyButtonType]="WorkyButtonType.Outline"
             [theme]="WorkyButtonTheme.Basic"
+            [loading]="friendActionLoading"
+            [disabled]="friendActionLoading"
             [width]="'100%'"
             (click)="cancelFriendship(idPendingFriend)">
             <span basic-button-text>{{ 'profiles.unfollow' | workyTranslations }}</span>

@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonTextarea } from '@ionic/angular';
-import { Subject, Subscription, lastValueFrom, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, Subscription, lastValueFrom, takeUntil, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import {
   WorkyButtonType,
@@ -507,9 +507,12 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   onSave() {
+    this.loaderSavePublication = true;
+    this._cdr.markForCheck();
+
     this.myForm.controls['authorId'].setValue(this.decodedToken.id);
     this.myForm.controls['privacy'].setValue(this.privacy);
-    
+
     // Store content and files before clearing
     const contentBackup = this.myForm.controls['content'].value;
     const filesBackup = [...this.selectedFiles];
@@ -540,7 +543,13 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
       idMedia: this.type === this.typePublishing.IMAGE_VIEW ? this.idMedia : null,
     };
 
-    this._commentService.createComment(dataComment).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._commentService.createComment(dataComment).pipe(
+      takeUntil(this.unsubscribe$),
+      finalize(() => {
+        this.loaderSavePublication = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: async (message) => {
         await this.handleCommentResponse(message, idPublication, filesBackup);
         // Clear content after successful creation
@@ -585,6 +594,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   private async onSavePublication(filesBackup: File[] = [], previewsBackup: any[] = []) {
     if (this._configService.subscriptionModeSnapshot() && this._subscriptionService.isPremiumSnapshot() && !this._subscriptionService.hasFeature('feed')) {
       this._featureWallService.show('feed', this._subscriptionService.getPlanFeatures());
+      this.loaderSavePublication = false;
+      this._cdr.markForCheck();
       return;
     }
     this.setExtraData();
@@ -597,7 +608,13 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
     const containsMedia = filesBackup.length > 0;
     this.myForm.controls['containsMedia'].setValue(containsMedia);
 
-    await this._publicationService.createPost(this.myForm.value).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._publicationService.createPost(this.myForm.value).pipe(
+      takeUntil(this.unsubscribe$),
+      finalize(() => {
+        this.loaderSavePublication = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: async (message: any) => {
         await this.handlePublicationResponse(message, filesBackup);
         this.myForm.controls['content'].setValue('');

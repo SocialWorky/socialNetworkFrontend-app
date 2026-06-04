@@ -12,7 +12,7 @@ import { AlertService } from '@shared/services/alert.service';
 import { translations } from '@translations/translations';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { TemplateEmail } from '@shared/interfaces/mail.interface';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, finalize } from 'rxjs';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 
 @Component({
@@ -140,7 +140,13 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
     await loading.present();
 
-    this._authApiRegisterService.registerUser(body).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._authApiRegisterService.registerUser(body).pipe(
+      takeUntil(this.unsubscribe$),
+      finalize(() => {
+        this.registerLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: (response) => {
         const emailAlreadyVerified = (response as { isVerified?: boolean })?.isVerified ?? this.invitationCode;
         this._alertService.showAlert(
@@ -211,7 +217,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
           );
         }
 
-        this.registerLoading = false;
         loading.dismiss();
       }
     });

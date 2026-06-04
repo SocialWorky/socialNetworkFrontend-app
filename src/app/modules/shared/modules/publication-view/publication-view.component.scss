@@ -78,6 +78,11 @@
             color: colors.$worky-color-blue;
             font-size: variables.$worky-font-size-3;
             font-weight: 500;
+
+            &.disabled {
+              pointer-events: none;
+              opacity: 0.6;
+            }
           }
 
           @include breakpoints.below-md {
