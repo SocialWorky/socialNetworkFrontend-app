@@ -1,3 +1,5 @@
+@use "src/assets/styles/worky-scrollbar" as scrollbar;
+
 .container-contactos {
     max-height: 400px;
     overflow-y: hidden;
@@ -78,11 +80,8 @@
         overflow-y: auto; /* Muestra el scroll cuando se coloca el cursor sobre el widget */
     }
 
-    /* Makes the scroll thinner */
-    scrollbar-width: thin;
-
-    /* Cambia el color del scroll */
-    scrollbar-color: #ffffff #f0f0f0;
+    /* Thin scrollbar with cross-browser support (standard + WebKit) */
+    @include scrollbar.thin-scrollbar;
 }
 
 

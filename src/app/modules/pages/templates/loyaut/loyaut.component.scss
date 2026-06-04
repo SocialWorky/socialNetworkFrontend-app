@@ -203,6 +203,10 @@
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 // Tablet layout: left sidebar + expanded content, no right sidebar

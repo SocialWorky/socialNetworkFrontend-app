@@ -247,6 +247,8 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding-bottom: env(safe-area-inset-bottom);
+  scrollbar-width: thin;
+  scrollbar-color: c.$worky-color-grey transparent;
 
   &::-webkit-scrollbar { width: 3px; }
   &::-webkit-scrollbar-track { background: transparent; }

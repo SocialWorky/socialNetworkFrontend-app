@@ -691,6 +691,10 @@ img, video {
   -webkit-overflow-scrolling: touch;
   /* padding-bottom belongs on the inner scroll container, not here —
      applying it here creates a visible gap below the app content */
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 

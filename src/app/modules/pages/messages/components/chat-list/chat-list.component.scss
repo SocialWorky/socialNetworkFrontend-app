@@ -26,6 +26,8 @@
   touch-action: pan-y;
   overscroll-behavior: contain;
   scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.18) transparent;
 
   &::-webkit-scrollbar {
     width: 5px;
