@@ -348,6 +348,15 @@
           }
         }
 
+        // Elevate the emoji icon (and the picker it anchors) above sibling elements
+        // such as the "Publicar" button. The :hover scale on .extra-content-item creates
+        // a transform stacking context that would otherwise trap the picker's z-index,
+        // letting later siblings paint over it. Giving the icon its own z-index keeps the
+        // whole anchor on top while the menu is open.
+        .emoji-icon:has(.emoji-menu) {
+          z-index: 10000;
+        }
+
         // Floating emoji picker — anchored to the (position: relative) emoji icon.
         // Without this it renders in normal flow and breaks the toolbar layout.
         .emoji-icon .emoji-menu {
