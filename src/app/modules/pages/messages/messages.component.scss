@@ -1,4 +1,5 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 @use 'sass:map';
 
 :host {
@@ -14,6 +15,14 @@
   overflow: hidden !important;
   overscroll-behavior: none !important;
   height: 100% !important;
+
+  // On mobile .social-content-center is position:fixed with top/bottom anchors that
+  // already define a viewport-bound height. Forcing height:100% there resolves to
+  // 100vh starting below the navbar, pushing the chat input off-screen (and overflow
+  // is hidden, so it can't be scrolled to). Let the fixed anchors define the height.
+  @include breakpoints.below-sm {
+    height: auto !important;
+  }
 }
 
 .messages-container {

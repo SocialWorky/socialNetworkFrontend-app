@@ -115,14 +115,16 @@ export class UserService implements OnDestroy {
   }
 
   /**
-   * Get user by username
+   * Search users by name/lastName. The backend performs a partial ILIKE match and
+   * returns an array of matching users (not a single user).
    */
-  getUserByName(name: string): Observable<User> {
-    const url = `${this.baseUrl}/user/username/${name}`;
-    return this.http.get<User>(url).pipe(
-      tap(user => {
-        // Cache by found user ID
-        this.addToCache(user._id, user);
+  getUserByName(name: string): Observable<User[]> {
+    const url = `${this.baseUrl}/user/username/${encodeURIComponent(name)}`;
+    return this.http.get<User[]>(url).pipe(
+      tap(users => {
+        (users ?? []).forEach(user => {
+          if (user?._id) this.addToCache(user._id, user);
+        });
       }),
       catchError(this.handleError)
     );

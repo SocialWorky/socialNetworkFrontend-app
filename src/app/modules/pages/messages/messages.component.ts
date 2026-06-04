@@ -542,13 +542,10 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this._cdr.markForCheck();
 
     this._userService.getUserByName(term.trim()).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (user) => {
-        if (user && user._id !== this.currentUserId) {
-          this.newChatResults = [user];
-          this.userInfoMap.set(user._id, user);
-        } else {
-          this.newChatResults = [];
-        }
+      next: (users) => {
+        const results = (users ?? []).filter(user => user?._id && user._id !== this.currentUserId);
+        this.newChatResults = results;
+        results.forEach(user => this.userInfoMap.set(user._id, user));
         this.isSearchingNewChat = false;
         this._cdr.markForCheck();
       },
