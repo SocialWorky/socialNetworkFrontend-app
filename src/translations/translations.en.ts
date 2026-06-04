@@ -1197,6 +1197,8 @@ export const translations = {
   'alert.message_error_send_email': 'We are pleased to inform you that your registration has been completed successfully. <br> However, we have detected a technical problem with sending the account validation email. <br> Don\'t worry, your registration is already active. In the next few minutes you will receive a new email with the link to validate your account.',
   'alert.title_success_register': 'Successful registration',
   'alert.message_success_register': 'Your registration has been successful, you will receive an email to validate your account',
+  'alert.title_success_register_verified': 'Registration complete',
+  'alert.message_success_register_verified': 'Your registration has been successful and your email is already validated. You can now sign in.',
   'alert.registerInvalidInvitationCode': 'The invitation code or Email is not valid',
   'alert.registerPrivacyPolicyRequired': 'You must accept the privacy policy to complete your registration',
   'alert.title_reset_password_message': 'Successful send',

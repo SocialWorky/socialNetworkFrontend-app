@@ -141,10 +141,11 @@ export class RegisterComponent implements OnInit, OnDestroy {
     await loading.present();
 
     this._authApiRegisterService.registerUser(body).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: () => {
+      next: (response) => {
+        const emailAlreadyVerified = (response as { isVerified?: boolean })?.isVerified ?? this.invitationCode;
         this._alertService.showAlert(
-          translations['alert.title_success_register'],
-          translations['alert.message_success_register'],
+          emailAlreadyVerified ? translations['alert.title_success_register_verified'] : translations['alert.title_success_register'],
+          emailAlreadyVerified ? translations['alert.message_success_register_verified'] : translations['alert.message_success_register'],
           Alerts.SUCCESS,
           Position.CENTER,
           true,

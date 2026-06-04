@@ -1162,6 +1162,8 @@ export const translations = {
   'alert.message_error_send_email': 'Nos complace informarte que tu registro ha sido completado con éxito. <br> Sin embargo, hemos detectado un problema técnico con el envío del correo electrónico de validación de cuenta. <br> No te preocupes, tu registro ya está activo. En los próximos minutos recibirás un nuevo correo electrónico con el enlace para validar tu cuenta.',
   'alert.title_success_register': 'Registro exitoso',
   'alert.message_success_register': 'Tu registro ha sido exitoso, recibirás un correo para validar tu cuenta',
+  'alert.title_success_register_verified': 'Registro completado',
+  'alert.message_success_register_verified': 'Tu registro ha sido exitoso y tu correo ya está validado. Ya puedes iniciar sesión.',
   'alert.registerInvalidInvitationCode': 'El código de invitación o el Email no es válido',
   'alert.registerPrivacyPolicyRequired': 'Debes aceptar la política de privacidad para completar tu registro',
   'alert.title_reset_password_message': 'Envió exitoso',
