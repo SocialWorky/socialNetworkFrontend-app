@@ -75,6 +75,7 @@ export class CenterSocketNotificationsService {
 
   reactionInPublicationNotification(publication: PublicationView, reaction: CustomReaction) {
 
+    this.userToken = this._authService.getDecodedToken();
     if (!this.userToken) return;
 
     const dataNotification = {

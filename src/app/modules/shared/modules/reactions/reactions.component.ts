@@ -11,6 +11,7 @@ import { PublicationService } from '@shared/services/core-apis/publication.servi
 import { PublicationsReactions } from '@shared/interfaces/reactions.interface';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { NotificationService } from '@shared/services/notifications/notification.service';
+import { CenterSocketNotificationsService } from '@shared/services/notifications/centerSocketNotifications.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { UtilityService } from '@shared/services/utility.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
@@ -62,6 +63,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
     private _authService: AuthService,
     private _publicationService: PublicationService,
     private _notificationService: NotificationService,
+    private _centerSocketNotificationsService: CenterSocketNotificationsService,
     private _utilityService: UtilityService,
     private _logService: LogService,
     private readonly _featureWallService: FeatureWallService,
@@ -127,6 +129,7 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
       }).pipe(takeUntil(this.destroy$))
       .subscribe({
         next: async () => {
+          this.notifyPublicationOwner(reaction);
           try {
             const publicationsUpdated = await firstValueFrom(
               this._publicationService.getPublicationId(this.publication?._id!, true).pipe(takeUntil(this.destroy$))
@@ -160,6 +163,15 @@ export class ReactionsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
+
+  private notifyPublicationOwner(reaction: CustomReactionList) {
+    const isPublicationReaction =
+      this.type === TypePublishing.POST || this.type === TypePublishing.POST_PROFILE;
+    const authorId = this.publication?.author?._id;
+    if (!isPublicationReaction || !authorId || authorId === this.token?.id) return;
+
+    this._centerSocketNotificationsService.reactionInPublicationNotification(this.publication!, reaction);
+  }
 
   async deleteReaction(idReaction: string) {
     if (this._reactionsFeatureBlocked()) {
