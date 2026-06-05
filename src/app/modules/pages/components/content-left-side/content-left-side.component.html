@@ -1,5 +1,5 @@
 <div class="side-left-container">
-  <worky-nearby-users></worky-nearby-users>
+  <worky-nearby-users *ngIf="locationDiscoveryEnabled$ | async"></worky-nearby-users>
 
   <worky-user-online></worky-user-online>
 

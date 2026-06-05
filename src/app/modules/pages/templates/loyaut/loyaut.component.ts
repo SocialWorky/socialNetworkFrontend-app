@@ -6,6 +6,7 @@ import { DeviceDetectionService } from '@shared/services/device-detection.servic
 import { AuthService } from '@auth/services/auth.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { ScrollService } from '@shared/services/scroll.service';
+import { ModuleAvailabilityService } from '@shared/services/module-availability.service';
 import { WidgetPosition } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
 
 @Component({
@@ -59,7 +60,8 @@ export class LoyautComponent implements OnInit, OnDestroy {
     private _cdr: ChangeDetectorRef,
     private _authService: AuthService,
     private _notificationUsersService: NotificationUsersService,
-    private _scrollService: ScrollService
+    private _scrollService: ScrollService,
+    private _moduleAvailabilityService: ModuleAvailabilityService
   ) {
     this.updateViewState();
   }
@@ -67,6 +69,7 @@ export class LoyautComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this._authService.getDecodedToken();
     this._notificationUsersService.refreshUserStatuses();
+    this._moduleAvailabilityService.init();
 
     if (this.isIPhoneWithNotch) {
       document.body.classList.add('iphone-with-notch');

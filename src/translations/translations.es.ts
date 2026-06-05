@@ -1784,6 +1784,8 @@ export const translations = {
   'admin.featureFlags.groups.description': 'Permite a los usuarios crear y unirse a grupos',
   'admin.featureFlags.events.label': 'Módulo de Eventos',
   'admin.featureFlags.events.description': 'Permite a los usuarios crear y asistir a eventos',
+  'admin.featureFlags.locationDiscovery.label': 'Personas cercanas',
+  'admin.featureFlags.locationDiscovery.description': 'Permite compartir ubicación y ver usuarios cercanos',
   'admin.featureFlags.enabled': 'Habilitado',
   'admin.featureFlags.disabled': 'Deshabilitado',
   'admin.featureFlags.saved': 'Configuración guardada exitosamente',

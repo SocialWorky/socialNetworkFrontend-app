@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { WidgetPosition } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
+import { ConfigService } from '@shared/services/core-apis/config.service';
 
 @Component({
     selector: 'worky-content-left-side',
@@ -10,5 +11,7 @@ import { WidgetPosition } from '@shared/modules/worky-widget/worky-news/interfac
 export class ContentLeftSideComponent{
   WidgetPosition = WidgetPosition;
 
-  constructor() { }
+  locationDiscoveryEnabled$ = this._configService.locationDiscoveryEnabled$;
+
+  constructor(private readonly _configService: ConfigService) { }
 }

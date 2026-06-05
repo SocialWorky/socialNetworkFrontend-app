@@ -148,8 +148,8 @@
 
     <div class="content-section-wall">
 
-      <!-- Discovery toggle: own profile only -->
-      <div *ngIf="isCurrentUser" class="worky-module-container" style="margin-bottom:8px;">
+      <!-- Discovery toggle: own profile only, gated by the location-discovery feature flag -->
+      <div *ngIf="isCurrentUser && locationDiscoveryEnabled" class="worky-module-container" style="margin-bottom:8px;">
         <div style="padding:16px 18px;">
 
           <!-- Header row -->

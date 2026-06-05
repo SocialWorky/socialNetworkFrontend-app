@@ -91,6 +91,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   locationStatus: LocationStatus = { discoveryEnabled: false, city: null, country: null };
   isTogglingDiscovery = false;
+  locationDiscoveryEnabled = true;
 
   // Creator profile
   myCreatorProfile: CreatorProfile | null = null;
@@ -174,6 +175,12 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
     });
+    this._configService.locationDiscoveryEnabled$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((enabled) => {
+        this.locationDiscoveryEnabled = enabled;
+        this._cdr.markForCheck();
+      });
     this.idUserProfile = this._activatedRoute.snapshot.paramMap.get('profileId') || '';
   }
 

@@ -17,6 +17,7 @@ export class ConfigService {
   private subscriptionModeSubject = new BehaviorSubject<boolean>(false);
   private groupsEnabledSubject = new BehaviorSubject<boolean>(true);
   private eventsEnabledSubject = new BehaviorSubject<boolean>(true);
+  private locationDiscoveryEnabledSubject = new BehaviorSubject<boolean>(true);
 
   private _unsubscribeAll = new Subject<void>();
 
@@ -24,6 +25,7 @@ export class ConfigService {
   subscriptionMode$ = this.subscriptionModeSubject.asObservable();
   groupsEnabled$ = this.groupsEnabledSubject.asObservable();
   eventsEnabled$ = this.eventsEnabledSubject.asObservable();
+  locationDiscoveryEnabled$ = this.locationDiscoveryEnabledSubject.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -49,16 +51,30 @@ export class ConfigService {
       params._t = new Date().getTime();
     }
     return this.http.get<any>(url, { params }).pipe(
-      tap((config) => {
-        if (config) {
-          this.configSubject.next(config);
-          const mode = config?.settings?.subscriptionMode ?? false;
-          this.subscriptionModeSubject.next(mode);
-          this.groupsEnabledSubject.next(config?.settings?.groupsEnabled ?? true);
-          this.eventsEnabledSubject.next(config?.settings?.eventsEnabled ?? true);
-        }
-      }),
+      tap((config) => this.applyConfigToSubjects(config)),
     );
+  }
+
+  // Single source of truth for pushing a config object to all derived subjects,
+  // so updateConfig/setConfig/socket/getConfig all keep the feature-flag streams in sync.
+  // Each flag is only updated when the incoming config explicitly contains it, so a partial
+  // payload never resets a flag back to its default (e.g. a disabled flag staying visible).
+  private applyConfigToSubjects(config: any): void {
+    if (!config) return;
+    this.configSubject.next(config);
+    const settings = config?.settings ?? {};
+    if (settings.subscriptionMode !== undefined) {
+      this.subscriptionModeSubject.next(!!settings.subscriptionMode);
+    }
+    if (settings.groupsEnabled !== undefined) {
+      this.groupsEnabledSubject.next(!!settings.groupsEnabled);
+    }
+    if (settings.eventsEnabled !== undefined) {
+      this.eventsEnabledSubject.next(!!settings.eventsEnabled);
+    }
+    if (settings.locationDiscoveryEnabled !== undefined) {
+      this.locationDiscoveryEnabledSubject.next(!!settings.locationDiscoveryEnabled);
+    }
   }
 
   getConfigServices(): Observable<ConfigServiceInterface> {
@@ -72,9 +88,9 @@ export class ConfigService {
       tap((updatedConfig) => {
         // Invalidate cache for config endpoint
         this.cacheService.clearByPattern(/config/);
-        
+
         this.socket.emit('updateConfig', updatedConfig);
-        this.configSubject.next(updatedConfig);
+        this.applyConfigToSubjects(updatedConfig);
       })
     );
   }
@@ -82,7 +98,7 @@ export class ConfigService {
   setConfig(config: any) {
     this.cacheService.clearByPattern(/config/);
     this.socket.emit('updateConfig', config);
-    this.configSubject.next(config);
+    this.applyConfigToSubjects(config);
   }
 
   getSubscriptionMode(): Observable<boolean> {
@@ -102,11 +118,7 @@ export class ConfigService {
       )
       .subscribe((data: any) => {
         this.cacheService.clearByPattern(/config/);
-        this.configSubject.next(data);
-        const mode = data?.settings?.subscriptionMode ?? false;
-        this.subscriptionModeSubject.next(mode);
-        this.groupsEnabledSubject.next(data?.settings?.groupsEnabled ?? true);
-        this.eventsEnabledSubject.next(data?.settings?.eventsEnabled ?? true);
+        this.applyConfigToSubjects(data);
       });
   }
   groupsEnabledSnapshot(): boolean {
@@ -115,6 +127,10 @@ export class ConfigService {
 
   eventsEnabledSnapshot(): boolean {
     return this.eventsEnabledSubject.value;
+  }
+
+  locationDiscoveryEnabledSnapshot(): boolean {
+    return this.locationDiscoveryEnabledSubject.value;
   }
 
   getLoginMethods(): Observable<{ email: boolean, google: boolean }> {

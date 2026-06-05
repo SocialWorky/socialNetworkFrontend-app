@@ -8,9 +8,15 @@
   overflow: hidden;
   top: variables.$worky-navbar-height;
 
-  // Top gap below the navbar so the column stays aligned with the other columns.
-  worky-nearby-users {
+  worky-nearby-users,
+  worky-user-online,
+  worky-widget-container {
     display: block;
+  }
+
+  // Top gap below the navbar on whichever item is first (the nearby card is gated by
+  // an admin feature flag, so user-online may become the first item).
+  > *:first-child {
     margin-top: 12px;
   }
 }

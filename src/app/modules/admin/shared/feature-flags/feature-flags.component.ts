@@ -14,6 +14,7 @@ import { TranslationsPipe } from '@shared/modules/translations/pipes/translation
 export class FeatureFlagsComponent implements OnInit {
   groupsEnabled = true;
   eventsEnabled = true;
+  locationDiscoveryEnabled = true;
   isSaving = false;
   savedMessage = false;
 
@@ -27,6 +28,7 @@ export class FeatureFlagsComponent implements OnInit {
     if (snapshot?.settings) {
       this.groupsEnabled = snapshot.settings.groupsEnabled ?? true;
       this.eventsEnabled = snapshot.settings.eventsEnabled ?? true;
+      this.locationDiscoveryEnabled = snapshot.settings.locationDiscoveryEnabled ?? true;
     }
   }
 
@@ -40,12 +42,18 @@ export class FeatureFlagsComponent implements OnInit {
     this.save();
   }
 
+  toggleLocationDiscovery(): void {
+    this.locationDiscoveryEnabled = !this.locationDiscoveryEnabled;
+    this.save();
+  }
+
   private save(): void {
     this.isSaving = true;
     this.savedMessage = false;
     this.configService.updateConfig({
       groupsEnabled: this.groupsEnabled,
       eventsEnabled: this.eventsEnabled,
+      locationDiscoveryEnabled: this.locationDiscoveryEnabled,
     } as any).subscribe({
       next: () => {
         this.isSaving = false;
