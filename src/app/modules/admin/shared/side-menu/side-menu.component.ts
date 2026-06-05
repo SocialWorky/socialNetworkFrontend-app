@@ -113,7 +113,8 @@ export class SideMenuComponent implements OnInit, OnDestroy {
     if (titleLower.includes('reaction')) return 'thumb_up';
     if (titleLower.includes('css') || titleLower.includes('custom')) return 'palette';
     if (titleLower.includes('version') || titleLower.includes('gestión de versiones')) return 'system_update';
-    
+    if (titleLower.includes('cache') || titleLower.includes('caché')) return 'storage';
+
     return 'dashboard';
   }
 

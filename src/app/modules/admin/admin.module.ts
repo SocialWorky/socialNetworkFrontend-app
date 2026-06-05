@@ -27,6 +27,7 @@ import { EmailTemplateManagementComponent } from './shared/email-template-manage
 import { ReportsManagementComponent } from './shared/reports-management/reports-management.component';
 
 import { VersionManagementComponent } from './shared/version-management/version-management.component';
+import { CacheManagementComponent } from './shared/cache-management/cache-management.component';
 
 // Shared Components Module
 import { AdminSharedComponentsModule } from './shared/components/admin-shared-components.module';
@@ -60,6 +61,7 @@ import { MaterialModule } from '@shared/modules/material/material.module';
     ManageSubscriptionsComponent,
     EmailTemplateManagementComponent,
     ReportsManagementComponent,
+    CacheManagementComponent,
   ],
   imports: [
     CommonModule,

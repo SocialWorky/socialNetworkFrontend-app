@@ -21,10 +21,26 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '3.0.5',
+  version: '3.1.0',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🆕 NUEVAS FUNCIONALIDADES Y MEJORAS (v3.1.0):
+
+    🧹 Gestión de caché (admin):
+    - Added: Nuevo panel "Gestión de Caché" en el panel de administración
+      * Limpieza del caché de procesamiento de archivos por destino (emojis, publicaciones, etc.)
+      * Limpieza del caché local del navegador (memoria/sesión/almacenamiento)
+    - Added: Endpoint seguro de limpieza de caché restringido solo a administradores
+
+    🖼️ Imágenes:
+    - Improved: Las imágenes con transparencia ahora se procesan a WebP
+      * Los emojis/stickers/logos conservan el fondo transparente (ya no se ven con fondo negro)
+      * Mejor compresión que JPEG/PNG manteniendo la calidad
+
+    ✅ Cuenta:
+    - Added: Insignia de verificación automática para el usuario superadmin
+
     🎉 GRAN ACTUALIZACIÓN — MONETIZACIÓN Y COMUNIDADES (v3.0.0):
 
     💳 Suscripciones y pagos:
