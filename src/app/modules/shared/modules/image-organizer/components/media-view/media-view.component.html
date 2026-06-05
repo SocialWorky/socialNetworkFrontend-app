@@ -1,7 +1,8 @@
 <div class="content-view-media"
-  [ngClass]="{ 
+  [ngClass]="{
     'mobil': isMobile,
     'desktop': !isMobile,
+    'comments-expanded': commentsExpanded
    }">
 
   <worky-image-loading
@@ -9,6 +10,19 @@
     [imageSelected]="data.imageSelected"
     (imageChanged)="onImageChanged($event)">
   </worky-image-loading>
+
+  <div class="mobile-comment-toggle" *ngIf="isMobile && !commentsExpanded"
+    (click)="toggleComments()"
+    [attr.aria-label]="'publicationsView.ariaOpenComments' | workyTranslations">
+    <i class="material-icons">mode_comment</i>
+    <span *ngIf="commentsCount">{{ commentsCount }}</span>
+  </div>
+
+  <div class="mobile-comment-backdrop" *ngIf="isMobile && commentsExpanded" (click)="toggleComments()"></div>
+
+  <div class="sheet-handle" *ngIf="isMobile && commentsExpanded" (click)="toggleComments()">
+    <span class="sheet-handle-bar"></span>
+  </div>
 
   <worky-message-loading *ngIf="data"
     [images]="data.images"

@@ -15,16 +15,12 @@
 
   &.mobil {
     flex-direction: column;
+    position: relative;
   }
 
   worky-image-loading {
     width: 65%;
     height: 95vh;
-    @include breakpoints.below-sm {
-      width: 100%;
-      height: 25dvh;
-      flex-shrink: 0;
-    }
   }
 
   worky-message-loading {
@@ -36,12 +32,117 @@
     padding: 5px;
     background-color: color-mix(in srgb, var(--worky-color-light), transparent 5%);
     overflow: auto;
-    @include breakpoints.below-sm {
+  }
+
+  &.mobil {
+    worky-image-loading {
       width: 100%;
-      flex: 1;
-      max-height: none;
+      height: 100%;
+      flex: 1 1 auto;
       min-height: 0;
     }
+
+    worky-message-loading {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 82dvh;
+      max-height: 82dvh;
+      padding: 16px 10px 10px;
+      border-radius: 16px 16px 0 0;
+      background-color: var(--worky-color-module-container);
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
+      transform: translateY(101%);
+      transition: transform 0.3s ease;
+      z-index: 6;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    ::ng-deep worky-body-view-content {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+
+      .content-view-comment {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: none;
+        overflow: hidden;
+      }
+
+      .publication-comment {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: none;
+      }
+
+      .content-add-comment {
+        flex: 0 0 auto;
+        margin-top: auto;
+      }
+    }
+
+    .mobile-comment-toggle {
+      position: absolute;
+      bottom: max(20px, env(safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border-radius: 24px;
+      background-color: map.get(colors.$worky-navy, 56);
+      color: colors.$worky-color-light;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+
+      i {
+        font-size: 22px;
+      }
+
+      span {
+        font-size: 15px;
+        font-weight: 600;
+      }
+    }
+
+    .mobile-comment-backdrop {
+      position: absolute;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.45);
+      z-index: 5;
+    }
+
+    .sheet-handle {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 82dvh;
+      display: flex;
+      justify-content: center;
+      padding-bottom: 8px;
+      z-index: 7;
+      cursor: pointer;
+
+      .sheet-handle-bar {
+        width: 44px;
+        height: 5px;
+        border-radius: 3px;
+        background-color: colors.$worky-color-light;
+        opacity: 0.85;
+      }
+    }
+  }
+
+  &.mobil.comments-expanded worky-message-loading {
+    transform: translateY(0);
   }
 
   .close-btn {
@@ -49,6 +150,7 @@
     position: absolute;
     top: max(10px, env(safe-area-inset-top));
     right: max(10px, env(safe-area-inset-right));
+    z-index: 8;
     cursor: pointer;
     color: colors.$worky-color-light;
     font-size: 20px;

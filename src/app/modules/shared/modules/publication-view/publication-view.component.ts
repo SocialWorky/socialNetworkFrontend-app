@@ -100,10 +100,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   dataShareActions: DropdownDataLink<any>[] = [];
 
-  viewCommentSection: number | null = null;
-
-  viewComments: number | null = null;
-
   nameGeoLocation = '';
 
   urrMap = '';
