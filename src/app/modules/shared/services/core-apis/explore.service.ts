@@ -15,6 +15,19 @@ export interface ExploreUser {
   discoveryCountry: string | null;
   isPremium: boolean;
   isVerified: boolean;
+  distanceKm: number;
+}
+
+export interface NearbyUsersResponse {
+  users: ExploreUser[];
+  total: number;
+}
+
+export interface NearbyUsersOptions {
+  radiusKm?: number;
+  page?: number;
+  pageSize?: number;
+  bypassCache?: boolean;
 }
 
 export interface LocationStatus {
@@ -56,14 +69,18 @@ export class ExploreService {
     return this.updateLocation(0, 0, false);
   }
 
-  getNearbyUsers(city?: string, country?: string): Observable<ExploreUser[]> {
+  getNearbyUsers(opts: NearbyUsersOptions = {}): Observable<NearbyUsersResponse> {
     const params: Record<string, string> = {};
-    if (city) params['city'] = city;
-    if (country) params['country'] = country;
+    if (opts.radiusKm != null) params['radiusKm'] = String(opts.radiusKm);
+    if (opts.page != null) params['page'] = String(opts.page);
+    if (opts.pageSize != null) params['pageSize'] = String(opts.pageSize);
+    // Unique URL on demand busts the CacheInterceptor + DeduplicationInterceptor so the
+    // sidebar poll re-queries the backend instead of replaying a stale cached response.
+    if (opts.bypassCache) params['_t'] = String(Date.now());
     return this.http
-      .get<ExploreUser[]>(`${this.apiUrl}/explore/users`, { params })
+      .get<NearbyUsersResponse>(`${this.apiUrl}/explore/users`, { params })
       .pipe(
-        tap((users) => this._nearbyUsers$.next(users)),
+        tap((res) => this._nearbyUsers$.next(res.users)),
         catchError(() => EMPTY),
       );
   }

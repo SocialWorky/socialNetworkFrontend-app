@@ -8,6 +8,27 @@
   height: 100%;
 }
 
+// Discovery (location) toggle: stack on mobile so the title/badge/button don't crowd.
+.discovery-toggle-row {
+  @include breakpoints.below-sm {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  .discovery-toggle-titlerow {
+    @include breakpoints.below-sm {
+      flex-wrap: wrap;
+    }
+  }
+
+  .discovery-toggle-btn {
+    @include breakpoints.below-sm {
+      width: 100%;
+      margin-top: 10px;
+    }
+  }
+}
+
 // Smooth transitions to avoid flickering
 .profile-container {
   transition: opacity 0.2s ease-in-out;

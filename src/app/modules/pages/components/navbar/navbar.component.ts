@@ -238,8 +238,8 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
       });
       // Load nearby users alongside text search results
       this._exploreService.getNearbyUsers().pipe(takeUntil(this.unsubscribe$)).subscribe({
-        next: (nearby) => {
-          this.nearbyUsers = nearby;
+        next: (res) => {
+          this.nearbyUsers = res.users;
           this._cdr.markForCheck();
         },
         error: () => {},

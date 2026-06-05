@@ -1,0 +1,284 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+
+.container-nearby-users {
+  background-color: colors.$worky-color-module-container;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  width: 100%;
+  box-shadow: 1px 2px 8px 1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-bottom: 12px;
+}
+
+.nearby-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: colors.$worky-color-navy;
+  margin: 0 0 0.75rem;
+
+  i {
+    font-size: 20px;
+    color: colors.$worky-color-primary;
+  }
+}
+
+// ─── Controls ─────────────────────────────────────────────────────────────────
+
+.nearby-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.nearby-radius {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nearby-radius-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: colors.$worky-color-navy;
+  opacity: 0.7;
+}
+
+.nearby-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.nearby-chip {
+  border: 1px solid colors.$worky-color-grey;
+  background: transparent;
+  color: colors.$worky-color-text;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--worky-color-text), transparent 92%);
+  }
+
+  &.active {
+    background-color: colors.$worky-color-primary;
+    border-color: colors.$worky-color-primary;
+    color: colors.$worky-color-light;
+  }
+}
+
+.nearby-online-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  border: 1px solid colors.$worky-color-grey;
+  background: transparent;
+  color: colors.$worky-color-text;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  .nearby-online-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: colors.$worky-color-grey;
+    transition: background-color 0.15s ease;
+  }
+
+  &.active {
+    border-color: #22c55e;
+    color: #16a34a;
+
+    .nearby-online-dot {
+      background-color: #22c55e;
+    }
+  }
+}
+
+// ─── List ─────────────────────────────────────────────────────────────────────
+
+.nearby-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nearby-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--worky-color-text), transparent 92%);
+  }
+}
+
+.nearby-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+}
+
+.nearby-status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid colors.$worky-color-module-container;
+
+  &.online {
+    background-color: #22c55e;
+  }
+
+  &.inactive {
+    background-color: #f59e0b;
+  }
+}
+
+.nearby-item-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.nearby-item-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: colors.$worky-color-text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nearby-badge-verified {
+  font-size: 15px;
+  color: #1d9bf0;
+}
+
+.nearby-badge-premium {
+  font-size: 15px;
+  color: #f59e0b;
+}
+
+.nearby-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: colors.$worky-color-navy;
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nearby-item-distance {
+  font-weight: 600;
+}
+
+.nearby-load-more {
+  margin-top: 6px;
+  padding: 7px;
+  border: 1px solid colors.$worky-color-grey;
+  background: transparent;
+  color: colors.$worky-color-primary;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--worky-color-text), transparent 92%);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+}
+
+// ─── States ───────────────────────────────────────────────────────────────────
+
+.nearby-loading,
+.nearby-empty,
+.nearby-activate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 8px;
+  text-align: center;
+  color: colors.$worky-color-navy;
+  font-size: 0.85rem;
+
+  i {
+    font-size: 28px;
+    opacity: 0.6;
+  }
+}
+
+.nearby-activate-btn {
+  margin-top: 4px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 20px;
+  background-color: colors.$worky-color-primary;
+  color: colors.$worky-color-light;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.loading-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid colors.$worky-color-grey;
+  border-top: 2px solid colors.$worky-color-primary;
+  border-radius: 50%;
+  animation: nearby-spin 1s linear infinite;
+
+  &.small {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@keyframes nearby-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

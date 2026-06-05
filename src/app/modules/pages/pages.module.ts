@@ -27,6 +27,7 @@ import { PublicationViewModule } from '@shared/modules/publication-view/publicat
 import { ContactsModule } from '@shared/modules/contacts/contacts.module';
 import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
 import { UserOnlineModule } from '@shared/modules/user-online/user-online.module';
+import { NearbyUsersModule } from '@shared/modules/nearby-users/nearby-users.module';
 import { NotificationsPanelModule } from '@shared/modules/notifications-panel/notifications-panel.module';
 import { ProcessingMediaModule } from '@shared/modules/processing-media/processing-media.module';
 import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.module';
@@ -65,6 +66,7 @@ import { StoriesModule } from '@shared/modules/stories/stories.module';
     ContactsModule,
     WorkyButtonsModule,
     UserOnlineModule,
+    NearbyUsersModule,
     NotificationsPanelModule,
     MarkdownModule.forRoot(),
     PipesSharedModule,

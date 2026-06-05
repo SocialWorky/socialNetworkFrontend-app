@@ -153,7 +153,7 @@
         <div style="padding:16px 18px;">
 
           <!-- Header row -->
-          <div style="display:flex;align-items:center;gap:14px;">
+          <div class="discovery-toggle-row" style="display:flex;align-items:center;gap:14px;">
 
             <!-- Icon bubble -->
             <div [style.background]="locationStatus.discoveryEnabled ? 'rgba(34,197,94,0.12)' : 'rgba(var(--worky-color-navy-rgb, 17,51,85), 0.08)'"
@@ -166,8 +166,8 @@
             </div>
 
             <!-- Text block -->
-            <div style="flex:1;min-width:0;">
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+            <div class="discovery-toggle-text" style="flex:1;min-width:0;">
+              <div class="discovery-toggle-titlerow" style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
                 <span style="font-weight:700;font-size:14px;color:var(--worky-color-text);">
                   {{ 'explore.enableDiscovery' | workyTranslations }}
                 </span>
@@ -187,9 +187,10 @@
 
             <!-- Action button -->
             <button
+              class="discovery-toggle-btn"
               (click)="toggleDiscovery()"
               [disabled]="isTogglingDiscovery"
-              style="flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:none;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.2s ease;outline:none;"
+              style="flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:10px;border:none;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.2s ease;outline:none;"
               [style.background]="locationStatus.discoveryEnabled ? 'rgba(239,68,68,0.1)' : 'var(--worky-color-navy)'"
               [style.color]="locationStatus.discoveryEnabled ? '#ef4444' : 'var(--worky-color-light)'"
               [style.opacity]="isTogglingDiscovery ? '0.6' : '1'"

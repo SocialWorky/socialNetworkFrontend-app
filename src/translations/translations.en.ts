@@ -1763,6 +1763,14 @@ export const translations = {
   'explore.noNearbyUsers': 'No nearby users found',
   'explore.noNearbyContent': 'No nearby content found',
   'explore.premiumFirst': 'Premium members appear first',
+  'explore.nearbyActivatePrompt': 'Enable your location to see nearby people',
+  'explore.nearbyGoToProfile': 'Go to my profile',
+  'explore.loadingNearby': 'Finding nearby people...',
+  'explore.nearbyOnlineOnly': 'Active only',
+  'explore.nearbyNoActive': 'No active people nearby right now',
+  'explore.nearbyLoadMore': 'See more',
+  'explore.nearbyKmAway': '{0} km away',
+  'explore.nearbyRadius': 'Distance',
 
   // Analytics
   'analytics.title': 'Analytics',

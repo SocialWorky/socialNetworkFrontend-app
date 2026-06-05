@@ -8,9 +8,8 @@
   overflow: hidden;
   top: variables.$worky-navbar-height;
 
-  // The removed sidebar-menu card used to provide the top gap below the navbar.
-  // Restore it on the first item so the column stays aligned with the other columns.
-  worky-user-online {
+  // Top gap below the navbar so the column stays aligned with the other columns.
+  worky-nearby-users {
     display: block;
     margin-top: 12px;
   }
