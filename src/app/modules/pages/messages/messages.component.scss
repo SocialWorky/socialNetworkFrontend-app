@@ -9,6 +9,17 @@
   overflow: hidden !important;
   overscroll-behavior: none;
   position: relative;
+
+  // Mobile: the fixed parent .messages-view is a flex column (below); fill it via flex
+  // (flex uses the parent's definite used-height, unlike percentage height which
+  // collapses against its height:auto). Keeps the empty chat input pinned at the bottom.
+  @include breakpoints.below-sm {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+  }
 }
 
 ::ng-deep .messages-view {
@@ -16,12 +27,15 @@
   overscroll-behavior: none !important;
   height: 100% !important;
 
-  // On mobile .social-content-center is position:fixed with top/bottom anchors that
-  // already define a viewport-bound height. Forcing height:100% there resolves to
-  // 100vh starting below the navbar, pushing the chat input off-screen (and overflow
-  // is hidden, so it can't be scrolled to). Let the fixed anchors define the height.
+  // On mobile .social-content-center is position:fixed (top: 50px navbar + safe-area,
+  // bottom: 0). Its used height is definite, but the *computed* height is auto, which
+  // flexbox treats as indefinite — so flex:1 children don't grow. Set an explicit height
+  // matching that geometry so the flex chain distributes real height and the chat input
+  // stays pinned at the bottom (with or without messages).
   @include breakpoints.below-sm {
-    height: auto !important;
+    height: calc(100dvh - 50px - env(safe-area-inset-top)) !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 }
 
@@ -34,6 +48,12 @@
   position: relative;
   touch-action: pan-y;
   overscroll-behavior: none;
+
+  @include breakpoints.below-sm {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+  }
 }
 
 // ─── Conversations Sidebar ────────────────────────────────────────────────────
@@ -416,6 +436,14 @@
   min-height: 0;
   overflow: hidden;
 
+  // Mobile: drop the explicit height:100% (it overrides the flex stretch and collapses
+  // to content height) and reserve the fixed bottom nav (.bottom-nav-mobile, 56px) so the
+  // chat input is not hidden behind it.
+  @include breakpoints.below-sm {
+    height: auto;
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+
   &.hidden {
     display: none;
   }
@@ -426,6 +454,11 @@
     height: 100%;
     width: 100%;
     min-height: 0;
+
+    @include breakpoints.below-sm {
+      flex: 1 1 auto;
+      height: auto;
+    }
   }
 }
 

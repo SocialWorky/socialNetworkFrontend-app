@@ -156,6 +156,14 @@
   }
 }
 
+// When the top navbar is hidden the messages view starts at top:0, so its explicit
+// mobile height (set in messages.component.scss) must span the full viewport.
+.navbar-hidden .messages-view {
+  @include breakpoints.below-sm {
+    height: 100dvh !important;
+  }
+}
+
 .content-messages-app {
   position: relative;
   display: flex;
