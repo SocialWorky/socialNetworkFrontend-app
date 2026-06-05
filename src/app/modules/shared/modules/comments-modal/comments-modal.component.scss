@@ -1,0 +1,127 @@
+@use 'src/assets/styles/worky-variables' as variables;
+@use 'src/assets/styles/worky-palettes' as colors;
+
+.comments-modal {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  background-color: colors.$worky-color-module-container;
+  color: colors.$worky-color-text;
+}
+
+.comments-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid colors.$worky-color-grey;
+  flex: 0 0 auto;
+}
+
+.comments-modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: colors.$worky-color-text;
+}
+
+.comments-modal-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  color: colors.$worky-color-navy;
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--worky-color-text), transparent 90%);
+  }
+
+  i {
+    font-size: 24px;
+  }
+}
+
+.comments-modal-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 12px 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.comments-modal-empty {
+  text-align: center;
+  color: colors.$worky-color-navy;
+  padding: 32px 16px;
+}
+
+.publication-comment-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 14px;
+
+  .publication-comment-content {
+    color: colors.$worky-color-text;
+    max-width: 100%;
+    min-width: 0;
+
+    .publication-comment-data {
+      padding: 0.4rem 1rem;
+      display: flex;
+      flex-direction: column;
+      background-color: colors.$worky-color-greyLight;
+      border-radius: 8px;
+
+      span {
+        font-size: variables.$worky-font-size-2;
+      }
+
+      .content-name-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+
+        .comment-author {
+          color: colors.$worky-color-text;
+        }
+
+        .link-profile {
+          cursor: pointer;
+          color: colors.$worky-color-text;
+        }
+
+        .delete-comment {
+          margin-left: 15px;
+          padding: 5px;
+          background-color: colors.$worky-color-grey;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 15px;
+          color: rgb(166, 0, 0);
+        }
+      }
+
+      .comment-content {
+        word-break: break-word;
+      }
+    }
+
+    .comment-date {
+      margin-left: 5px;
+      font-size: variables.$worky-font-size-0;
+      color: colors.$worky-color-navy;
+    }
+  }
+}
+
+.comments-modal-add {
+  flex: 0 0 auto;
+  border-top: 1px solid colors.$worky-color-grey;
+  padding: 8px 12px;
+  background-color: colors.$worky-color-module-container;
+}

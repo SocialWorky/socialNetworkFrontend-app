@@ -1,0 +1,65 @@
+<div class="comments-modal">
+  <div class="comments-modal-header">
+    <span class="comments-modal-title">{{ 'publicationsView.commentsTitle' | workyTranslations }}</span>
+    <button class="comments-modal-close" type="button" (click)="close()"
+      [attr.aria-label]="'publicationsView.close' | workyTranslations">
+      <i class="material-icons">close</i>
+    </button>
+  </div>
+
+  <div class="comments-modal-list">
+    <div class="comments-modal-empty" *ngIf="!comments.length">
+      {{ 'publicationsView.emptyComments' | workyTranslations }}
+    </div>
+
+    <div class="publication-comment-item" *ngFor="let comment of comments; trackBy: trackByCommentId">
+      <worky-avatar
+        [size]="30"
+        [img]="comment.author.avatar"
+        [name]="comment.author.name + ' ' + comment.author.lastName">
+      </worky-avatar>
+      <div class="publication-comment-content">
+        <div class="publication-comment-data">
+          <div class="content-name-header">
+            <span class="comment-author"
+              [class.link-profile]="comment.author._id !== dataUser?.id"
+              [routerLink]="comment.author._id !== dataUser?.id ? ['/profile/'+ comment.author._id] : null">
+              {{ comment.author.name }} {{ comment.author.lastName }}
+            </span>
+            <div *ngIf="comment.author._id === dataUser?.id"
+              class="material-icons delete-comment"
+              (click)="deleteComment(comment._id, data.publication._id)">delete</div>
+          </div>
+          <div class="comment-content markdown" *ngIf="(comment.content | workyPreviewHtml | async) as result">
+            <div [innerHTML]="result.markdownHtml"></div>
+            <div class="publication-youtube-preview" [innerHTML]="result.youTubeHtml"></div>
+            <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
+          </div>
+
+          <worky-processing-media *ngIf="!comment.media.length && comment.containsMedia"></worky-processing-media>
+
+          <worky-image-organizer *ngIf="comment.media.length"
+            [comment]="comment"
+            [publication]="data.publication"
+            type="comment">
+          </worky-image-organizer>
+        </div>
+        <span class="comment-date">{{ comment.createdAt | workyDate:'relative' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="comments-modal-add">
+    <worky-add-publication
+      [type]="typePublishing.COMMENT"
+      [idPublication]="data.publication._id"
+      [idMedia]="data.idMedia">
+    </worky-add-publication>
+  </div>
+</div>
+
+<worky-accessible-loading
+  [show]="isDeletingComment"
+  [message]="translations['publicationsView.loadingDeleteComment'] | workyTranslations"
+  [fullscreen]="true">
+</worky-accessible-loading>

@@ -42,6 +42,8 @@ import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service
 import { UtilityService } from '@shared/services/utility.service';
 import { ConfigService } from '@services/core-apis/config.service';
 import { FeatureWallService } from '@shared/services/feature-wall.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
+import { CommentsModalComponent } from '../comments-modal/comments-modal.component';
 
 
 @Component({
@@ -170,6 +172,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private readonly _configService: ConfigService,
     private readonly _featureWallService: FeatureWallService,
     private _centerSocketNotificationsService: CenterSocketNotificationsService,
+    private _deviceDetectionService: DeviceDetectionService,
   ) {}
 
   async ngAfterViewInit() {
@@ -570,16 +573,26 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     }
   }
 
-  commentOn(index: number) {
+  openCommentsModal(idMedia?: string) {
     if (this._configService.subscriptionModeSnapshot() && this._subscriptionService.isPremiumSnapshot() && !this._subscriptionService.hasFeature('comments')) {
       this._featureWallService.show('comments', this._subscriptionService.getPlanFeatures());
       return;
     }
-    this.viewCommentSection = this.viewCommentSection === index ? -1 : index;
-  }
 
-  viewCommentsOn(index: number) {
-    this.viewComments = this.viewComments === index ? -1 : index;
+    const isMobile = this._deviceDetectionService.isMobile();
+
+    this._dialog.open(CommentsModalComponent, {
+      width: isMobile ? '100dvw' : '600px',
+      maxWidth: isMobile ? '100dvw' : '95vw',
+      height: isMobile ? '100dvh' : '80vh',
+      maxHeight: isMobile ? '100dvh' : '90vh',
+      panelClass: 'comments-modal-container',
+      autoFocus: false,
+      data: {
+        publication: this.publication,
+        idMedia,
+      },
+    });
   }
 
   checkDataLink(userId: string) {

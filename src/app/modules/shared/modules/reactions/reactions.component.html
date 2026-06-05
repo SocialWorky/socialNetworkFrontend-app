@@ -13,7 +13,6 @@
     <div class="content-text-reaction no-select-text"
         *ngIf="!reactionUserInPublication">
       <i class="material-icons">mood</i>
-      <span>{{ 'publicationsView.spanReaction' | workyTranslations }}</span>
     </div>
 
     <div *ngIf="reactionUserInPublication"
@@ -34,7 +33,6 @@
           mood
         </i>
       </div>
-      <div>{{ reactionUserInPublication.customReaction.name }}</div>
     </div>
 
     <div #reactionPopup

@@ -298,6 +298,12 @@
           background-color: color-mix(in srgb, var(--worky-color-text), transparent 90%);
         }
 
+        .action-count {
+          font-size: 13px;
+          font-weight: 600;
+          line-height: 1;
+        }
+
       }
       @include breakpoints.below-sm {
         .publication-footer-actions-item {

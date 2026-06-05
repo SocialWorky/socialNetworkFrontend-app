@@ -189,10 +189,6 @@
         <span>{{ publication.reaction.length }}</span>
 
       </div>
-      <div class="publication-footer-content-item" *ngIf="publication.comment.length" (click)="viewCommentsOn(indexPublication!)">
-        <span> {{ publication.comment.length }} </span>
-        <span> {{ 'publicationsView.spanComments' | workyTranslations }} </span>
-      </div>
     </div>
 
     <div class="publication-footer-actions">
@@ -212,10 +208,11 @@
       <div class="publication-footer-actions-item" *ngIf="actionsLoading">
         <worky-button-skeleton width="80px" height="30px"></worky-button-skeleton>
       </div>
-      <div class="publication-footer-actions-item no-select-text" *ngIf="!actionsLoading" (click)="commentOn(indexPublication!)"
-        [title]="'publicationsView.spanComment' | workyTranslations">
+      <div class="publication-footer-actions-item no-select-text" *ngIf="!actionsLoading" (click)="openCommentsModal()"
+        [title]="'publicationsView.spanComment' | workyTranslations"
+        [attr.aria-label]="'publicationsView.ariaOpenComments' | workyTranslations">
         <i class="material-icons">comment</i>
-        <span>{{ 'publicationsView.spanComment' | workyTranslations }}</span>
+        <span class="action-count" *ngIf="publication.comment.length">{{ publication.comment.length }}</span>
       </div>
       
       <div class="publication-footer-actions-item" *ngIf="actionsLoading">
@@ -224,7 +221,6 @@
             <div class="publication-footer-actions-item no-select-text" *ngIf="!actionsLoading">
         <worky-dropdown
           icon="share"
-          [title]="'publicationsView.spanShare' | workyTranslations"
           [badge]=false
           (click)="checkDataLink(publication.author._id)"
           [dataLink]="dataShareActions"
@@ -234,51 +230,6 @@
     </div>
   </div>
 
-  <div class="publication-comment-on" *ngIf="viewCommentSection === indexPublication">
-    <worky-add-publication
-      [type]="typePublishing.COMMENT"
-      [idPublication]="publication._id"
-      [indexPublication]="indexPublication">
-    </worky-add-publication>
-  </div>
-
-  <div class="publication-comment" *ngIf="viewComments === indexPublication">
-    <div class="publication-comment-item" *ngFor="let comment of publication.comment">
-      <worky-avatar
-        [size]="30"
-        [img]="comment.author.avatar"
-        [name]="comment.author.name + ' ' + comment.author.lastName">
-      </worky-avatar>
-      <div class="publication-comment-content">
-        <div class="publication-comment-data">
-          <div class="content-name-header">
-            <span class="comment-author"
-              [class.link-profile]="comment.author._id !== dataUser?.id"
-              [routerLink]="comment.author._id !== dataUser?.id ? ['/profile/'+ comment.author._id] : null">
-              {{ comment.author.name }} {{ comment.author.lastName }}
-            </span>
-            <div *ngIf="comment.author._id === dataUser?.id"
-              class="material-icons delete-comment"
-              (click)="deleteComment(comment._id, publication._id)">delete</div>
-          </div>
-          <div class="comment-content markdown" *ngIf="(comment.content | workyPreviewHtml | async) as result">
-            <div [innerHTML]="result.markdownHtml"></div>
-            <div class="publication-youtube-preview" [innerHTML]="result.youTubeHtml"></div>
-            <div class="publication-url-preview" [innerHTML]="result.previewsHtml"></div>
-          </div>
-
-          <worky-processing-media *ngIf="!comment.media.length && comment.containsMedia"></worky-processing-media>
-
-          <worky-image-organizer *ngIf="comment.media.length"
-            [comment]="comment"
-            [publication]="publication"
-            type="comment">
-          </worky-image-organizer>
-        </div>
-        <span class="comment-date">{{ comment.createdAt | workyDate:'relative' }}</span>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- Accessible Loading Component for deletion operations -->

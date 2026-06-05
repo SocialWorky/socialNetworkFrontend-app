@@ -11,6 +11,7 @@ import { WorkyDropdownModule } from '../worky-dropdown/worky-dropdown.module';
 import { ImageOrganizerModule } from '../image-organizer/image-organizer.module';
 import { ReportResponseComponent } from './report-response/report-response.component';
 import { ReactionsModule } from '../reactions/reactions.module';
+import { CommentsModalModule } from '../comments-modal/comments-modal.module';
 import { WorkyButtonsModule } from '../buttons/buttons.module';
 import { MaterialModule } from '@shared/modules/material/material.module';
 import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
@@ -35,6 +36,7 @@ import { SharedModule } from '../../shared.module';
     WorkyDropdownModule,
     ImageOrganizerModule,
     ReactionsModule,
+    CommentsModalModule,
     RouterModule,
     MarkdownModule.forRoot(),
     WorkyButtonsModule,
