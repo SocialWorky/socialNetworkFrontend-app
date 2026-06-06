@@ -46,6 +46,26 @@ export class AlertService {
     });
   }
 
+  showToast(
+    title: string,
+    icon: Alerts = Alerts.SUCCESS,
+    position: Position = Position.TOP_END,
+    timer: number = 2000,
+  ) {
+    Swal.fire({
+      title,
+      icon: icon as any,
+      toast: true,
+      position: position as any,
+      showConfirmButton: false,
+      timer,
+      timerProgressBar: true,
+      customClass: {
+        container: 'custom-swal-container',
+      },
+    });
+  }
+
   showConfirmation(
     title: string,
     message: string,

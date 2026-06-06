@@ -21,10 +21,58 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '3.1.0',
+  version: '3.2.0',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🚀 NOVEDADES (v3.2.0 — 2026-06-06):
+
+    🔗 Compartir publicaciones públicas:
+    - Added: Visor público de publicaciones — al compartir una publicación pública, el
+      enlace ({dominio}/p/{id}) abre la publicación SIN necesidad de iniciar sesión
+      (página renderizada por el servidor, de solo lectura, con CTA a la app)
+    - Added: Previews en redes sociales (Open Graph / Twitter Card) — al pegar el enlace
+      en Facebook, WhatsApp, X, Telegram o LinkedIn se muestra una tarjeta con imagen y título
+    - Changed: El botón compartir ahora aparece SOLO en publicaciones públicas
+    - Fixed: El enlace compartido estaba mal armado (usaba la URL base, sin la publicación);
+      ahora comparte la URL canónica de la publicación, correctamente codificada
+    - Added: Nuevos destinos de compartir — Telegram, Copiar enlace y Compartir nativo
+      (hoja del sistema, vía para Instagram en móvil); WhatsApp ahora usa wa.me (web + app)
+
+    🐛 CORRECCIONES (v3.1.x — 2026-06-06):
+
+    🔌 Módulos de la plataforma en tiempo real:
+    - Fixed: Activar/desactivar un módulo (Grupos, Eventos, Personas cercanas) ahora
+      se refleja al instante en todos los usuarios conectados, sin recargar
+      * El reenvío por WebSocket del cambio de configuración rechazaba al admin por
+        un desajuste de mayúsculas en el rol ('ADMIN' vs 'admin') y nunca emitía
+    - Added: Expulsión activa de ruta — si un usuario está dentro de /groups o /events
+      y el módulo se deshabilita, se le redirige automáticamente a "función no disponible"
+      (antes el guard solo actuaba al navegar, no estando ya dentro)
+
+    🛠️ Panel de administración:
+    - Fixed: En "Dashboard de Estadísticas" el bloque "Resumen de la plataforma" aparecía
+      por encima del título; ahora se muestra debajo del encabezado
+    - Changed: El toggle "Modo de Suscripción" se movió desde "Autenticación" a la sección
+      "Módulos de la Plataforma", junto al resto de módulos
+    - Fixed: La "Configuración de Pagos (Payku)" solo se muestra cuando el modo de
+      suscripción está activado (antes salía siempre)
+    - Fixed: El bloque "Resumen de la plataforma" (suscripciones activas / ingresos del mes)
+      solo se muestra cuando el modo de suscripción está activado
+
+    🌐 Internacionalización:
+    - Fixed: Se externalizaron ~65 textos hardcodeados del panel de administración a
+      claves de traducción (reportes, suscripciones, invitaciones, logs, reacciones,
+      paquetes de boost, módulos), sincronizados en español e inglés
+
+    📱 Móvil:
+    - Fixed: En el muro, la barra de acciones (comentar / compartir / reacción) de la
+      última publicación ya no queda tapada por el navbar inferior al hacer scroll
+      (se reserva el alto del bottom nav + safe area)
+    - Fixed: El navbar superior e inferior ya no titilan al llegar al final del muro
+      (latch con histéresis cerca del fondo + emisión de eventos solo al cambiar de estado,
+      evitando el bucle scroll↔layout que los hacía saltar)
+
     🆕 NUEVAS FUNCIONALIDADES Y MEJORAS (v3.1.0):
 
     🧹 Gestión de caché (admin):

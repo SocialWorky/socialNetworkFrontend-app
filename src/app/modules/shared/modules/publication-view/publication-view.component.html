@@ -218,7 +218,7 @@
       <div class="publication-footer-actions-item" *ngIf="actionsLoading">
         <worky-button-skeleton width="60px" height="30px"></worky-button-skeleton>
       </div>
-            <div class="publication-footer-actions-item no-select-text" *ngIf="!actionsLoading">
+            <div class="publication-footer-actions-item no-select-text" *ngIf="!actionsLoading && publication.privacy === 'public'">
         <worky-dropdown
           icon="share"
           [badge]=false

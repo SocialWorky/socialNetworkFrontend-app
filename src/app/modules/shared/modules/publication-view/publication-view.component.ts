@@ -646,31 +646,88 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     ];
   }
 
+  get isNativeShareSupported(): boolean {
+    return typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  }
+
+  private getPublicShareUrl(): string {
+    // The share page (/p/:id) is server-rendered by the backend, so the canonical link uses the
+    // backend origin — derived from API_URL by stripping a trailing /api or /api/v1.
+    const base = (environment.API_URL || environment.BASE_URL || '')
+      .replace(/\/api(\/v\d+)?\/?$/, '')
+      .replace(/\/+$/, '');
+    return `${base}/p/${this.publication._id}`;
+  }
+
   menuShareActions() {
-    const url = environment.BASE_URL;
-    this.dataShareActions = [
+    const publicUrl = this.getPublicShareUrl();
+    const enc = encodeURIComponent(publicUrl);
+
+    const actions: DropdownDataLink<any>[] = [
       {
         img: 'assets/img/logos/svg-facebook.svg',
-        linkUrl: `https://web.facebook.com/sharer.php?u=${url}`,
-        title: translations['social.facebook']
+        linkUrl: `https://www.facebook.com/sharer/sharer.php?u=${enc}`,
+        title: translations['social.facebook'],
       },
       {
         img: 'assets/img/logos/twitter-x.svg',
-        linkUrl: `https://twitter.com/intent/tweet?url=${url}`,
-        title: translations['social.twitter']
+        linkUrl: `https://twitter.com/intent/tweet?url=${enc}`,
+        title: translations['social.twitter'],
       },
-      // TODO: Uncomment when the linkedin share is ready
-      // {
-      //   img: 'assets/img/logos/linkedin.svg',
-      //   linkUrl: `https://www.linkedin.com/shareArticle?url=${url}`,
-      //   title: translations['social.linkedin']
-      // },
       {
         img: 'assets/img/logos/svg-whatsapp.svg',
-        linkUrl: `whatsapp://send?text=${url}`,
-        title: translations['social.whatsapp']
+        linkUrl: `https://wa.me/?text=${enc}`,
+        title: translations['social.whatsapp'],
+      },
+      {
+        img: 'assets/img/logos/svg-telegram.svg',
+        linkUrl: `https://t.me/share/url?url=${enc}`,
+        title: translations['social.telegram'],
+      },
+      {
+        img: 'assets/img/logos/svg-copy-link.svg',
+        function: () => this.copyPublicLink(publicUrl),
+        title: translations['share.copyLink'],
       },
     ];
+
+    if (this.isNativeShareSupported) {
+      actions.push({
+        img: 'assets/img/logos/svg-share.svg',
+        function: () => this.nativeShare(publicUrl),
+        title: translations['share.nativeShare'],
+      });
+    }
+
+    this.dataShareActions = actions;
+  }
+
+  async copyPublicLink(publicUrl: string) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(publicUrl);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = publicUrl;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      this._alertService.showToast(translations['share.copied'], Alerts.SUCCESS);
+    } catch {
+      this._alertService.showToast(translations['share.copyError'], Alerts.ERROR);
+    }
+  }
+
+  async nativeShare(publicUrl: string) {
+    try {
+      await navigator.share({ url: publicUrl });
+    } catch {
+      // User cancelled or sharing failed — no action needed.
+    }
   }
 
   async deletePublications(publication: PublicationView) {
@@ -741,8 +798,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     } else if (data.link) {
       this._router.navigate([data.link]);
     } else if (data.linkUrl) {
-      const newLink = data.linkUrl + '/publication/' + publication._id + '/';
-      window.open(newLink, '_blank');
+      window.open(data.linkUrl, '_blank');
     }
   }
 
