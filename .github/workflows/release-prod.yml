@@ -1,0 +1,88 @@
+name: Release - Build & Push to Docker Hub (production)
+
+# Fires when a GitHub Release is published (on master). The release tag (e.g. v3.2.0)
+# becomes the image version. Pushes socialworky/worky-frontend:{version}, :{major.minor}, :latest.
+#
+# IMPORTANT: the Angular bundle is built at image-build time from the NG_APP_* repo secrets.
+# For a correct PRODUCTION image, those secrets (especially NG_APP_API_URL / NG_APP_BASE_URL)
+# MUST hold the production values. Use a GitHub "production" Environment if dev and prod differ.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: socialworky/worky-frontend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+
+      - name: Create .env from secrets
+        run: |
+          echo "NG_APP_BASE_URL=${{ secrets.NG_APP_BASE_URL }}" > .env
+          echo "NG_APP_API_URL=${{ secrets.NG_APP_API_URL }}" >> .env
+          echo "NG_APP_CLIEN_ID_GOOGLE=${{ secrets.NG_APP_CLIEN_ID_GOOGLE }}" >> .env
+          echo "NG_APP_WSURL=${{ secrets.NG_APP_WSURL }}" >> .env
+          echo "NG_APP_OPENCAGEAPIKEY=${{ secrets.NG_APP_OPENCAGEAPIKEY }}" >> .env
+          echo "NG_APP_APIGEOLOCATIONS=${{ secrets.NG_APP_APIGEOLOCATIONS }}" >> .env
+          echo "NG_APP_APIWEATHERURL=${{ secrets.NG_APP_APIWEATHERURL }}" >> .env
+          echo "NG_APP_APIWEATHERTOKEN=${{ secrets.NG_APP_APIWEATHERTOKEN }}" >> .env
+          echo "NG_APP_APIFILESERVICE=${{ secrets.NG_APP_APIFILESERVICE }}" >> .env
+          echo "NG_APP_MINIO_BUCKET_URL=${{ secrets.NG_APP_MINIO_BUCKET_URL }}" >> .env
+          echo "NG_APP_APIMESSAGESERVICE=${{ secrets.NG_APP_APIMESSAGESERVICE }}" >> .env
+          echo "NG_APP_APINOTIFICATIONCENTER=${{ secrets.NG_APP_APINOTIFICATIONCENTER }}" >> .env
+          echo "NG_APP_GIPHYAPIKEY=${{ secrets.NG_APP_GIPHYAPIKEY }}" >> .env
+          echo "NG_APP_TEMPLATE_EMAIL_LOGO=${{ secrets.NG_APP_TEMPLATE_EMAIL_LOGO }}" >> .env
+          echo "NG_APP_META_TITLE=${{ secrets.NG_APP_META_TITLE }}" >> .env
+          echo "NG_APP_META_DESCRIPTION=${{ secrets.NG_APP_META_DESCRIPTION }}" >> .env
+          echo "NG_APP_META_KEYWORDS=${{ secrets.NG_APP_META_KEYWORDS }}" >> .env
+          echo "NG_APP_META_IMAGE=${{ secrets.NG_APP_META_IMAGE }}" >> .env
+          echo "NG_APP_META_URL=${{ secrets.NG_APP_META_URL }}" >> .env
+          echo "NG_APP_META_OG_SITE_NAME=${{ secrets.NG_APP_META_OG_SITE_NAME }}" >> .env
+          echo "NG_APP_META_OG_TITLE=${{ secrets.NG_APP_META_OG_TITLE }}" >> .env
+          echo "NG_APP_META_OG_DESCRIPTION=${{ secrets.NG_APP_META_OG_DESCRIPTION }}" >> .env
+          echo "NG_APP_META_OG_IMAGE=${{ secrets.NG_APP_META_OG_IMAGE }}" >> .env
+          echo "NG_APP_META_OG_URL=${{ secrets.NG_APP_META_OG_URL }}" >> .env
+          echo "NG_APP_META_TWITTER_CARD=${{ secrets.NG_APP_META_TWITTER_CARD }}" >> .env
+          echo "NG_APP_META_TWITTER_TITLE=${{ secrets.NG_APP_META_TWITTER_TITLE }}" >> .env
+          echo "NG_APP_META_TWITTER_DESCRIPTION=${{ secrets.NG_APP_META_TWITTER_DESCRIPTION }}" >> .env
+          echo "NG_APP_META_TWITTER_IMAGE=${{ secrets.NG_APP_META_TWITTER_IMAGE }}" >> .env
+          echo "NG_APP_META_TWITTER_URL=${{ secrets.NG_APP_META_TWITTER_URL }}" >> .env
+          echo "NG_APP_PWA_NAME=${{ secrets.NG_APP_PWA_NAME }}" >> .env
+          echo "NG_APP_PWA_SHORT_NAME=${{ secrets.NG_APP_PWA_SHORT_NAME }}" >> .env
+          echo "NG_APP_PWA_THEME_COLOR=${{ secrets.NG_APP_PWA_THEME_COLOR }}" >> .env
+          echo "NG_APP_PWA_BACKGROUND_COLOR=${{ secrets.NG_APP_PWA_BACKGROUND_COLOR }}" >> .env
+          echo "NG_APP_CACHE_ENABLED=true" >> .env
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker metadata (tags & labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
