@@ -1,0 +1,47 @@
+<div class="events-page">
+  <div class="events-header">
+    <h1>{{ 'events.title' | workyTranslations }}</h1>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <select [(ngModel)]="filterType" (change)="loadEvents()">
+        <option value="">{{ 'events.upcoming' | workyTranslations }}</option>
+        <option value="physical">{{ 'events.physical' | workyTranslations }}</option>
+        <option value="virtual">{{ 'events.virtual' | workyTranslations }}</option>
+      </select>
+      <button *ngIf="isAdmin" class="btn-primary" (click)="showCreateForm = !showCreateForm">
+        {{ 'events.create' | workyTranslations }}
+      </button>
+    </div>
+  </div>
+
+  <worky-event-create *ngIf="isAdmin && showCreateForm" (created)="onEventCreated()"></worky-event-create>
+
+  <div *ngIf="isLoading" class="loading">{{ 'analytics.loading' | workyTranslations }}</div>
+
+  <div *ngIf="!isLoading && events.length === 0" class="empty">
+    {{ 'events.noEvents' | workyTranslations }}
+  </div>
+
+  <div class="events-grid" *ngIf="!isLoading && events.length > 0">
+    <div class="event-card" *ngFor="let event of events" (click)="openEvent(event._id)">
+      <div class="event-cover" [style.backgroundImage]="event.coverImage ? 'url(' + event.coverImage + ')' : ''">
+        <span class="type-badge" [class.virtual]="event.locationType === 'virtual'">
+          {{ event.locationType === 'physical' ? ('events.physical' | workyTranslations) : ('events.virtual' | workyTranslations) }}
+        </span>
+        <span class="price-badge">{{ formatPrice(event.price) }}</span>
+      </div>
+      <div class="event-info">
+        <h3>{{ event.title }}</h3>
+        <div class="event-date">📅 {{ formatDate(event.date) }}</div>
+        <div *ngIf="event.location" class="event-location">📍 {{ event.location }}</div>
+        <div class="event-capacity" *ngIf="event.maxTickets > 0">
+          <span *ngIf="event.ticketsAvailable != null && event.ticketsAvailable > 0">
+            {{ event.ticketsAvailable }} {{ 'events.ticketsLeft' | workyTranslations }}
+          </span>
+          <span *ngIf="event.ticketsAvailable === 0" class="sold-out">
+            {{ 'events.soldOut' | workyTranslations }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

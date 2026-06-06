@@ -174,8 +174,9 @@
           <div class="flex gap-8 items-start lg:flex-row flex-col lg:items-start items-center">
             <div class="relative w-36 h-36 border-2 border-slate-600 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center group cursor-pointer">
               <img
-                [src]="imagePreview || configForm.get('logoUrl')?.value || defaultLogo"
+                [src]="imagePreview || getNormalizedImageUrl(configForm.get('logoUrl')?.value)"
                 [alt]="'admin.siteConfig.logoPreview' | workyTranslations"
+                (error)="onImageError($event)"
                 class="w-full h-full object-contain p-4"
               />
               <div class="absolute inset-0 bg-slate-800/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -226,6 +227,160 @@
                     </button>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verified Badge Section -->
+      <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+        <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-white/10">
+          <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl">
+            <i class="material-icons">verified_user</i>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.siteConfig.verifiedBadge.title' | workyTranslations }}</h3>
+            <p class="text-sm text-slate-400">{{ 'admin.siteConfig.verifiedBadge.subtitle' | workyTranslations }}</p>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <div class="flex gap-8 items-start lg:flex-row flex-col lg:items-start items-center">
+
+            <!-- Preview -->
+            <div class="relative w-24 h-24 border-2 border-slate-600 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center group">
+              <ng-container *ngIf="badgePreview || configForm.get('verifiedBadgeUrl')?.value; else badgePlaceholder">
+                <img
+                  [src]="badgePreview || getNormalizedImageUrl(configForm.get('verifiedBadgeUrl')?.value)"
+                  alt="Badge preview"
+                  class="w-full h-full object-contain p-3"
+                />
+              </ng-container>
+              <ng-template #badgePlaceholder>
+                <span style="color:#1DA1F2;font-size:2rem;font-weight:bold;">✓</span>
+              </ng-template>
+            </div>
+
+            <div class="flex-1 space-y-4 w-full">
+              <!-- Upload button -->
+              <div class="space-y-2">
+                <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                  <i class="material-icons text-blue-500 text-base">upload</i>
+                  {{ 'admin.siteConfig.verifiedBadge.upload' | workyTranslations }}
+                </label>
+                <div class="relative">
+                  <input
+                    #badgeFileInput
+                    type="file"
+                    (change)="onBadgeFileChange($event)"
+                    accept="image/*"
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  >
+                  <div class="w-full px-4 py-3 border-2 border-dashed border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5 cursor-pointer flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <i class="material-icons text-blue-500">upload_file</i>
+                      <span class="text-slate-400">{{ badgeSelectedFileName || ('admin.siteConfig.fileInput.noFileSelected' | workyTranslations) }}</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="px-4 py-2 bg-blue-500 text-white text-sm font-semibold rounded-lg hover:bg-blue-600 transition-colors duration-200"
+                      (click)="badgeFileInput.click()"
+                    >
+                      {{ 'admin.siteConfig.fileInput.selectFile' | workyTranslations }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Remove badge -->
+              <div class="flex items-center gap-3" *ngIf="configForm.get('verifiedBadgeUrl')?.value || badgePreview">
+                <button
+                  type="button"
+                  class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-red-400 border border-red-500/40 hover:bg-red-500/10 transition-colors duration-200"
+                  (click)="removeBadge()"
+                >
+                  <i class="material-icons text-base">delete</i>
+                  {{ 'admin.siteConfig.verifiedBadge.remove' | workyTranslations }}
+                </button>
+                <span class="text-xs text-slate-500">{{ 'admin.siteConfig.verifiedBadge.removeHint' | workyTranslations }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premium Badge Section -->
+      <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+        <div class="flex items-center gap-4 p-6 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-b border-white/10">
+          <div class="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center text-white text-xl">
+            <i class="material-icons">workspace_premium</i>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.siteConfig.premiumBadge.title' | workyTranslations }}</h3>
+            <p class="text-sm text-slate-400">{{ 'admin.siteConfig.premiumBadge.subtitle' | workyTranslations }}</p>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <div class="flex gap-8 items-start lg:flex-row flex-col lg:items-start items-center">
+
+            <!-- Preview -->
+            <div class="relative w-24 h-24 border-2 border-slate-600 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center group">
+              <ng-container *ngIf="premiumBadgePreview || configForm.get('premiumBadgeUrl')?.value; else premiumPlaceholder">
+                <img
+                  [src]="premiumBadgePreview || getNormalizedImageUrl(configForm.get('premiumBadgeUrl')?.value)"
+                  alt="Premium badge preview"
+                  class="w-full h-full object-contain p-3"
+                />
+              </ng-container>
+              <ng-template #premiumPlaceholder>
+                <span style="font-size:2rem;">⭐</span>
+              </ng-template>
+            </div>
+
+            <div class="flex-1 space-y-4 w-full">
+              <!-- Upload button -->
+              <div class="space-y-2">
+                <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                  <i class="material-icons text-amber-500 text-base">upload</i>
+                  {{ 'admin.siteConfig.premiumBadge.upload' | workyTranslations }}
+                </label>
+                <div class="relative">
+                  <input
+                    #premiumBadgeFileInput
+                    type="file"
+                    (change)="onPremiumBadgeFileChange($event)"
+                    accept="image/*"
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  >
+                  <div class="w-full px-4 py-3 border-2 border-dashed border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 hover:border-amber-500 hover:bg-amber-500/5 cursor-pointer flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <i class="material-icons text-amber-500">upload_file</i>
+                      <span class="text-slate-400">{{ premiumBadgeSelectedFileName || ('admin.siteConfig.fileInput.noFileSelected' | workyTranslations) }}</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="px-4 py-2 bg-amber-500 text-white text-sm font-semibold rounded-lg hover:bg-amber-600 transition-colors duration-200"
+                      (click)="premiumBadgeFileInput.click()"
+                    >
+                      {{ 'admin.siteConfig.fileInput.selectFile' | workyTranslations }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Remove badge -->
+              <div class="flex items-center gap-3" *ngIf="configForm.get('premiumBadgeUrl')?.value || premiumBadgePreview">
+                <button
+                  type="button"
+                  class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-red-400 border border-red-500/40 hover:bg-red-500/10 transition-colors duration-200"
+                  (click)="removePremiumBadge()"
+                >
+                  <i class="material-icons text-base">delete</i>
+                  {{ 'admin.siteConfig.premiumBadge.remove' | workyTranslations }}
+                </button>
+                <span class="text-xs text-slate-500">{{ 'admin.siteConfig.premiumBadge.removeHint' | workyTranslations }}</span>
               </div>
             </div>
           </div>
@@ -316,7 +471,7 @@
               
               <div class="flex items-center gap-4 p-4 bg-slate-800 rounded-lg border border-slate-600 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5">
                 <label class="relative inline-flex items-center cursor-pointer">
-                  <input 
+                  <input
                     type="checkbox"
                     formControlName="invitationCode"
                     class="absolute opacity-0 w-0 h-0 peer"
@@ -328,12 +483,153 @@
                   <span class="block text-xs text-slate-400">{{ 'admin.siteConfig.registration.invitationCode.subtitle' | workyTranslations }}</span>
                 </div>
               </div>
+
+              <div class="flex items-center gap-4 p-4 bg-slate-800 rounded-lg border border-slate-600 transition-all duration-200 hover:border-blue-500 hover:bg-blue-500/5">
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    formControlName="requirePrivacyPolicy"
+                    class="absolute opacity-0 w-0 h-0 peer"
+                  >
+                  <div class="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                </label>
+                <div class="flex-1">
+                  <span class="block text-sm font-semibold text-slate-100">{{ 'admin.siteConfig.registration.requirePrivacyPolicy.title' | workyTranslations }}</span>
+                  <span class="block text-xs text-slate-400">{{ 'admin.siteConfig.registration.requirePrivacyPolicy.subtitle' | workyTranslations }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- Age Verification -->
+      <div class="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden">
+        <div class="bg-gradient-to-r from-slate-800/80 to-slate-700/80 border-b border-slate-600/50 px-6 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-orange-500/10 rounded-lg flex items-center justify-center">
+              <i class="material-icons text-orange-400 text-base">verified_user</i>
+            </div>
+            <h2 class="text-lg font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
+              {{ 'admin.ageVerification.sectionTitle' | workyTranslations }}
+            </h2>
+          </div>
+        </div>
+        <div class="p-6 space-y-4">
+          <!-- Toggle -->
+          <div class="flex items-center gap-4 p-4 bg-slate-700/30 rounded-xl border border-slate-600/30">
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                formControlName="ageVerificationEnabled"
+                class="absolute opacity-0 w-0 h-0 peer"
+              >
+              <div class="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+            </label>
+            <div class="flex-1">
+              <span class="block text-sm font-semibold text-slate-100">{{ 'admin.ageVerification.toggle.title' | workyTranslations }}</span>
+              <span class="block text-xs text-slate-400">{{ 'admin.ageVerification.toggle.subtitle' | workyTranslations }}</span>
+            </div>
+          </div>
+
+          <!-- Text inputs — shown only when toggle is ON -->
+          <ng-container *ngIf="configForm.get('ageVerificationEnabled')?.value">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">
+                {{ 'admin.ageVerification.modalText.es.label' | workyTranslations }}
+              </label>
+              <textarea
+                formControlName="ageVerificationTextEs"
+                rows="3"
+                class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-orange-500 resize-none"
+              ></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">
+                {{ 'admin.ageVerification.modalText.en.label' | workyTranslations }}
+              </label>
+              <textarea
+                formControlName="ageVerificationTextEn"
+                rows="3"
+                class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-orange-500 resize-none"
+              ></textarea>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
     </form>
+  </div>
+
+  <!-- Payku Payment Configuration — only relevant when subscription mode is enabled -->
+  <div class="bg-slate-900 rounded-2xl border border-slate-700 p-6 mt-6" [formGroup]="paykuForm" *ngIf="subscriptionMode$ | async">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
+        <i class="material-icons text-blue-400">payment</i>
+      </div>
+      <div>
+        <h2 class="text-lg font-bold text-slate-100">{{ 'admin.paykuConfig' | workyTranslations }}</h2>
+        <p class="text-xs text-slate-400">{{ 'admin.paykuProvider' | workyTranslations }}</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4">
+      <!-- Enable toggle -->
+      <div class="flex items-center gap-4 p-4 bg-slate-800 rounded-lg border border-slate-600">
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" formControlName="enabled" class="absolute opacity-0 w-0 h-0 peer">
+          <div class="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+        </label>
+        <span class="text-sm font-semibold text-slate-100">{{ 'admin.paykuEnabled' | workyTranslations }}</span>
+      </div>
+
+      <!-- Mode select -->
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">{{ 'admin.paykuMode' | workyTranslations }}</label>
+        <select formControlName="mode"
+          class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-blue-500">
+          <option value="sandbox">{{ 'admin.paykuSandbox' | workyTranslations }}</option>
+          <option value="production">{{ 'admin.paykuProduction' | workyTranslations }}</option>
+        </select>
+      </div>
+
+      <!-- Public Token -->
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">{{ 'admin.paykuPublicToken' | workyTranslations }}</label>
+        <input type="text" formControlName="publicToken"
+          class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-blue-500"
+          placeholder="pk_live_...">
+      </div>
+
+      <!-- Private Token -->
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">{{ 'admin.paykuPrivateToken' | workyTranslations }}</label>
+        <input type="password" formControlName="privateToken"
+          class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-blue-500"
+          [placeholder]="paykuHasExistingPrivateToken ? ('admin.paykuTokenHidden' | workyTranslations) : 'sk_live_...'">
+        <p *ngIf="paykuHasExistingPrivateToken" class="text-xs text-slate-500 mt-1">
+          <i class="material-icons text-xs align-middle">lock</i>
+          {{ 'admin.paykuTokenHidden' | workyTranslations }}
+        </p>
+      </div>
+
+      <!-- Webhook Secret -->
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">{{ 'admin.paykuWebhookSecret' | workyTranslations }}</label>
+        <input type="password" formControlName="webhookSecret"
+          class="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-slate-100 text-sm focus:outline-none focus:border-blue-500"
+          [placeholder]="paykuHasExistingWebhookSecret ? ('admin.paykuTokenHidden' | workyTranslations) : 'whsec_...'">
+      </div>
+
+      <!-- Save button -->
+      <div class="flex justify-end pt-2">
+        <button type="button" (click)="savePaykuConfig()" [disabled]="loadingPayku"
+          class="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+          <i class="material-icons text-base">{{ loadingPayku ? 'hourglass_empty' : 'save' }}</i>
+          <span>{{ (loadingPayku ? 'common.loading' : 'button.save') | workyTranslations }}</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Error State -->

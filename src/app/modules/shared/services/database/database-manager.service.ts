@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
-import { MessageDatabaseService } from './message-database.service';
 import { PublicationDatabaseService } from './publication-database.service';
+import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 import { UtilityService } from '@shared/services/utility.service';
 
 export interface DatabaseConfig {
@@ -16,14 +16,14 @@ export interface DatabaseConfig {
 export class DatabaseManagerService {
   private readonly DATABASES: DatabaseConfig[] = [
     {
-      name: 'WorkyMessagesDB',
-      version: 2,
-      stores: ['messages']
-    },
-    {
       name: 'WorkyPublicationsDB',
       version: 1,
       stores: ['publications']
+    },
+    {
+      name: 'MobileImageCacheDB',
+      version: 1,
+      stores: ['images']
     }
   ];
 
@@ -31,8 +31,8 @@ export class DatabaseManagerService {
   private isInitialized = false;
 
   constructor(
-    private messageDatabase: MessageDatabaseService,
     private publicationDatabase: PublicationDatabaseService,
+    private mobileImageCacheService: MobileImageCacheService,
     private logService: LogService,
     private utilityService: UtilityService
   ) {
@@ -66,8 +66,8 @@ export class DatabaseManagerService {
 
       // Define the "allow-list" of databases that should be kept for the current user.
       const databasesToKeep = [
-        `WorkyMessagesDB_${userId}`,
-        `WorkyPublicationsDB_${userId}`
+        `WorkyPublicationsDB_${userId}`,
+        `MobileImageCacheDB_${userId}`
       ];
 
       this.logService.log(
@@ -79,8 +79,8 @@ export class DatabaseManagerService {
 
       // Step 1: Close all existing connections to prevent locking issues.
       // Step 1: Closing all existing connections - no need to log every step
-      if (this.messageDatabase) await this.messageDatabase.closeConnection();
       if (this.publicationDatabase) await this.publicationDatabase.closeConnection();
+      if (this.mobileImageCacheService) await this.mobileImageCacheService.closeConnection();
 
       // Step 2: Get all existing Worky-related databases directly from the browser.
       // Step 2: Detecting all existing Worky databases - no need to log every step
@@ -144,7 +144,9 @@ export class DatabaseManagerService {
         
         // Successfully fetched database list via modern API - no need to log every fetch
         
-        const workyDbs = dbNames.filter(name => name.startsWith('Worky'));
+        const workyDbs = dbNames.filter(name => 
+          name.startsWith('Worky') || name.startsWith('MobileImageCacheDB')
+        );
           
         // Filtered for Worky-specific databases - no need to log every filter
         return workyDbs;
@@ -160,8 +162,11 @@ export class DatabaseManagerService {
     // Fallback for older browsers or environments where indexedDB.databases() is not available.
     this.logService.log(LevelLogEnum.WARN, 'DatabaseManagerService', 'Using legacy fallback method to find databases by guessing names.');
     const knownUserIds = this.getKnownUserIds();
-    const legacyDbNames = ['WorkyMessagesDB', 'WorkyPublicationsDB'];
-    const userDbNames = knownUserIds.flatMap(id => [`WorkyMessagesDB_${id}`, `WorkyPublicationsDB_${id}`]);
+    const legacyDbNames = ['WorkyPublicationsDB', 'MobileImageCacheDB'];
+    const userDbNames = knownUserIds.flatMap(id => [
+      `WorkyPublicationsDB_${id}`,
+      `MobileImageCacheDB_${id}`
+    ]);
     const allPossibleDbNames = [...new Set([...legacyDbNames, ...userDbNames])];
     
     const existingDatabases: string[] = [];
@@ -194,7 +199,7 @@ export class DatabaseManagerService {
    * Delete databases for a specific user ID
    */
   private async deleteUserDatabases(userId: string): Promise<void> {
-    const baseNames = ['WorkyMessagesDB', 'WorkyPublicationsDB'];
+    const baseNames = ['WorkyPublicationsDB', 'MobileImageCacheDB'];
     
     for (const baseName of baseNames) {
       const dbName = `${baseName}_${userId}`;
@@ -335,8 +340,7 @@ export class DatabaseManagerService {
     ];
     
     for (const testUUID of testUUIDs) {
-      if (await this.databaseExists(`WorkyMessagesDB_${testUUID}`) || 
-          await this.databaseExists(`WorkyPublicationsDB_${testUUID}`)) {
+      if (await this.databaseExists(`WorkyPublicationsDB_${testUUID}`)) {
         discoveredUUIDs.push(testUUID);
       }
     }
@@ -427,22 +431,12 @@ export class DatabaseManagerService {
    */
   private async deleteDatabaseByName(dbName: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'DatabaseManagerService',
-        'Attempting to delete database.',
-        { dbName }
-      );
+      // Attempting to delete database - no need to log every deletion attempt
 
       const deleteRequest = indexedDB.deleteDatabase(dbName);
       
       deleteRequest.onsuccess = (event) => {
-        this.logService.log(
-          LevelLogEnum.INFO,
-          'DatabaseManagerService',
-          'Database deletion request successful.',
-          { dbName, event }
-        );
+        // Database deletion request successful - no need to log every successful deletion
         resolve();
       };
       
@@ -505,25 +499,19 @@ export class DatabaseManagerService {
    */
   private async initializeUserDatabases(userId: string): Promise<void> {
     try {
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'DatabaseManagerService',
-        'Initializing databases for user',
-        { userId }
-      );
+      // Initializing databases for user - no need to log every initialization
 
       // Initialize each database service
-      await this.messageDatabase.initDatabase();
       await this.publicationDatabase.initDatabase();
+      
+      // Initialize MobileImageCacheService database
+      if (this.mobileImageCacheService) {
+        await this.mobileImageCacheService.initDatabase();
+      }
 
       this.isInitialized = true;
 
-      this.logService.log(
-        LevelLogEnum.INFO,
-        'DatabaseManagerService',
-        'Databases initialized successfully',
-        { userId }
-      );
+      // Databases initialized successfully - no need to log every successful initialization
     } catch (error) {
       this.logService.log(
         LevelLogEnum.ERROR,
@@ -547,7 +535,6 @@ export class DatabaseManagerService {
       );
 
       // Clear each database
-      await this.messageDatabase.clearAllMessages();
       await this.publicationDatabase.clearAllPublications();
 
       this.logService.log(
@@ -641,7 +628,6 @@ export class DatabaseManagerService {
       );
 
       // Delete each database completely
-      await this.messageDatabase.deleteDatabase();
       await this.publicationDatabase.deleteDatabase();
 
       this.logService.log(
@@ -672,16 +658,13 @@ export class DatabaseManagerService {
    * Get database statistics for current user
    */
   async getDatabaseStats(): Promise<{
-    messages: number;
     publications: number;
     userId: string | null;
   }> {
     try {
-      const messageCount = await this.messageDatabase.getMessageCount();
       const publicationCount = await this.publicationDatabase.getPublicationCount();
 
       return {
-        messages: messageCount,
         publications: publicationCount,
         userId: this.currentUserId
       };
@@ -693,7 +676,6 @@ export class DatabaseManagerService {
         { error: error instanceof Error ? error.message : String(error) }
       );
       return {
-        messages: 0,
         publications: 0,
         userId: this.currentUserId
       };

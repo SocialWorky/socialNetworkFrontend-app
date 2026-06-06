@@ -2,7 +2,7 @@
     (mouseenter)="checkDropdownDirection()"
     (click)="isMobile && isMenu && showMobileMenu()">
   <div *ngIf="img && img !== 'avatar'">
-    <img [src]="img" class="img-dropdown rounded-circle" loading="lazy" />
+    <img [src]="getNormalizedImageUrl(img)" class="img-dropdown rounded-circle" loading="lazy" />
   </div>
   <div *ngIf="img === 'avatar'">
     <div *ngIf="loaderAvatar" class="loader"></div>
@@ -38,7 +38,7 @@
       {{ data.icon }}
     </span>
     <span *ngIf="data.img" class="icon-img-dropdown">
-      <img [src]="data.img" loading="lazy" />
+      <img [src]="getNormalizedImageUrl(data.img)" loading="lazy" />
     </span>
     <span>{{ data.title }}</span>
   </div>

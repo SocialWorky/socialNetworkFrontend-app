@@ -116,7 +116,7 @@ interface ConfirmDialogConfig {
 
 **Ejemplos:**
 ```typescript
-// Confirmación de eliminación
+// Deletion confirmation
 dialogConfig = {
   title: 'Eliminar Usuario',
   message: '¿Estás seguro de que deseas eliminar este usuario?',
@@ -125,7 +125,7 @@ dialogConfig = {
   type: 'danger'
 };
 
-// Información
+// Information
 dialogConfig = {
   title: 'Información',
   message: 'Los cambios se han guardado correctamente.',

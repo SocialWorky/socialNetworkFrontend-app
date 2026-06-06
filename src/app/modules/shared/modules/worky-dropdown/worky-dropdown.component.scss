@@ -14,6 +14,7 @@
   position: absolute;
   margin-top: 10px;
   left: 0;
+  min-width: 190px;
   background-color: color-mix(in srgb, var(--worky-color-light), transparent 20%);
   border-radius: var.$worky-border-radius-medium;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -41,6 +42,7 @@
   cursor: pointer;
   transition: 0.3s;
   gap: 10px;
+  white-space: nowrap;
   color: colors.$worky-color-text;
   background-color: color-mix(in srgb, var(--worky-color-light), transparent 20%);
 

@@ -1,0 +1,27 @@
+<div class="message-bubble" [class.own]="isOwn" [class.deleted]="message.isDeleted">
+  <div *ngIf="message.isDeleted" class="deleted-message">
+    <i class="material-icons">delete</i>
+    <span>{{ 'messages.deleted' | workyTranslations }}</span>
+  </div>
+
+  <div *ngIf="!message.isDeleted" class="message-content">
+    <div class="message-text">
+      {{ message.content }}
+      <span *ngIf="message.isEdited" class="edited-indicator">({{ 'messages.edited' | workyTranslations }})</span>
+    </div>
+
+    <div *ngIf="message.urlFile" class="message-file">
+      <a [href]="message.urlFile" target="_blank" rel="noopener noreferrer">
+        <i class="material-icons">attachment</i>
+        {{ 'messages.viewFile' | workyTranslations }}
+      </a>
+    </div>
+
+    <div class="message-meta">
+      <span class="time">{{ message.timestamp | messageTime:'short' }}</span>
+      <span *ngIf="isOwn" class="status">
+        <i class="material-icons">{{ getStatusIcon() }}</i>
+      </span>
+    </div>
+  </div>
+</div>

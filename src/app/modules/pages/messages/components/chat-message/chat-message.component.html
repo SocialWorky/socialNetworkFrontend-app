@@ -1,0 +1,187 @@
+<div *ngIf="shouldShowDateDivider()" class="date-divider">
+  <span>{{ formatDate(message.timestamp) }}</span>
+</div>
+
+<div 
+  [attr.data-message-id]="message._id"
+  [ngClass]="{
+    'message-sent': isOwnMessage(message),
+    'message-received': !isOwnMessage(message),
+    'grouped': isGroupedMessage(),
+    'no-avatar': isGroupedMessage(),
+    'first-group': isFirstInGroup(),
+    'last-group': isLastInGroup()
+  }">
+
+  <!-- Mensajes recibidos: avatar, triángulo, mensaje -->
+  <ng-container *ngIf="!isOwnMessage(message)">
+    <worky-avatar
+      *ngIf="isFirstInGroup()"
+      [size]="40"
+      [name]="otherUserName"
+      [img]="otherUserAvatar">
+    </worky-avatar>
+
+    <div *ngIf="isFirstInGroup() && message.content !== MediaType.PROCESSING" class="message-triangle"></div>
+
+    <div *ngIf="message.content !== MediaType.PROCESSING" class="content-message">
+      <div class="received-content" [class.deleted]="message.isDeleted">
+        
+        <div *ngIf="message.isDeleted" class="deleted-message-indicator">
+          <i class="material-icons">delete</i>
+          <span>{{ 'messages.deleted' | workyTranslations }}</span>
+        </div>
+
+        <div *ngIf="!message.isDeleted">
+          <div *ngIf="message.replyTo && message.replyMessage" class="reply-preview">
+            <div class="reply-preview-content">
+              <div class="reply-preview-line"></div>
+              <div class="reply-preview-text">
+                <span class="reply-preview-author">{{ isOwnMessage(message.replyMessage!) ? (decodedToken.name || decodedToken.username) : otherUserName }}</span>
+                <span class="reply-preview-message" *ngIf="message.replyMessage?.type === MessageType.TEXT || message.replyMessage?.type === MessageType.FILE">{{ getReplyMessagePreview(message.replyMessage!) }}</span>
+                <span class="reply-preview-message" *ngIf="message.replyMessage?.type === MessageType.IMAGE">📷 {{ 'messages.image' | workyTranslations }}</span>
+                <span class="reply-preview-message" *ngIf="message.replyMessage?.type === MessageType.VIDEO">📷 {{ 'messages.video' | workyTranslations }}</span>
+                <span class="reply-preview-message" *ngIf="message.replyMessage?.isDeleted">{{ 'messages.deleted' | workyTranslations }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="message.type === MessageType.IMAGE || message.type === MessageType.VIDEO" class="media-wrapper" (click)="openUrl(getNormalizedUrl(message.urlFile) || getThumbnail(message.content))">
+            <img 
+              [src]="getImageSrc(message)" 
+              class="thumbnail" 
+              [alt]="'message.thumbnail' | workyTranslations"
+              loading="lazy"
+              decoding="async"
+              (error)="onImageError($event)" />
+            <div class="play-button" *ngIf="message.type === MessageType.VIDEO">▶</div>
+          </div>
+
+          <markdown *ngIf="message.type !== MessageType.IMAGE && message.type !== MessageType.VIDEO"
+            class="message-text"
+            (click)="openUrl(message.urlFile || '')">
+            {{ message.content }}
+          </markdown>
+
+          <div class="content-footer">
+            <small>{{ formatTime(message.timestamp) }}</small>
+            <span *ngIf="message.isEdited" class="edited-badge">{{ 'messages.edited' | workyTranslations }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!message.isDeleted" class="message-actions">
+        <button 
+          class="message-action-btn reply-btn" 
+          (click)="startReplyToMessage(message)" 
+          type="button">
+          <i class="material-icons">reply</i>
+        </button>
+      </div>
+    </div>
+
+    <worky-processing-media *ngIf="message.content === MediaType.PROCESSING"></worky-processing-media>
+  </ng-container>
+
+  <!-- Mensajes enviados: mensaje, triángulo, avatar -->
+  <ng-container *ngIf="isOwnMessage(message)">
+    <div *ngIf="message.content !== MediaType.PROCESSING" class="content-message" 
+         [class.editing]="editingMessageId === message._id">
+      <div class="sent-content" [class.deleted]="message.isDeleted">
+        
+        <div *ngIf="message.isDeleted" class="deleted-message-indicator">
+          <i class="material-icons">delete</i>
+          <span>{{ 'messages.deleted' | workyTranslations }}</span>
+        </div>
+
+        <div *ngIf="!message.isDeleted">
+          <div *ngIf="editingMessageId === message._id" class="edit-message-container">
+            <textarea 
+              [attr.data-edit-input]="message._id"
+              class="edit-message-input"
+              [ngModel]="editingMessageContent"
+              (ngModelChange)="onContentChange($event)"
+              (keydown.enter)="saveEditedMessage(message._id, $event)"
+              (keydown.escape)="cancelEdit()"
+              [placeholder]="'messages.editPlaceholder' | workyTranslations">
+            </textarea>
+            <div class="edit-actions">
+              <button class="edit-save-btn" (click)="saveEditedMessage(message._id)">
+                <i class="material-icons">check</i>
+              </button>
+              <button class="edit-cancel-btn" (click)="cancelEdit()">
+                <i class="material-icons">close</i>
+              </button>
+            </div>
+          </div>
+
+          <div *ngIf="editingMessageId !== message._id">
+            <div *ngIf="message.replyTo && message.replyMessage" class="reply-preview">
+              <div class="reply-preview-content">
+                <div class="reply-preview-line"></div>
+                <div class="reply-preview-text">
+                  <span class="reply-preview-author">{{ isOwnMessage(message.replyMessage!) ? (decodedToken.name || decodedToken.username) : otherUserName }}</span>
+                  <span class="reply-preview-message" *ngIf="message.replyMessage?.type === MessageType.TEXT || message.replyMessage?.type === MessageType.FILE">{{ getReplyMessagePreview(message.replyMessage!) }}</span>
+                  <span class="reply-preview-message" *ngIf="message.replyMessage?.type === MessageType.IMAGE">📷 {{ 'messages.image' | workyTranslations }}</span>
+                  <span class="reply-preview-message" *ngIf="message.replyMessage?.type === MessageType.VIDEO">📷 {{ 'messages.video' | workyTranslations }}</span>
+                  <span class="reply-preview-message" *ngIf="message.replyMessage?.isDeleted">{{ 'messages.deleted' | workyTranslations }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="message.type === MessageType.IMAGE || message.type === MessageType.VIDEO" class="media-wrapper" (click)="openUrl(getNormalizedUrl(message.urlFile) || getThumbnail(message.content))">
+              <img 
+                [src]="getImageSrc(message)" 
+                class="thumbnail" 
+                [alt]="'message.thumbnail' | workyTranslations"
+                loading="lazy"
+                decoding="async"
+                (error)="onImageError($event)" />
+              <div class="play-button" *ngIf="message.type === MessageType.VIDEO">▶</div>
+            </div>
+
+            <markdown *ngIf="message.type !== MessageType.IMAGE && message.type !== MessageType.VIDEO"
+              class="message-text"
+              (click)="openUrl(message.urlFile || '')">
+              {{ message.content }}
+            </markdown>
+          </div>
+
+          <div class="content-footer">
+            <small>{{ formatTime(message.timestamp) }}</small>
+            <span *ngIf="message.isEdited" class="edited-badge">{{ 'messages.edited' | workyTranslations }}</span>
+            <i *ngIf="!message.isRead" class="material-icons tick-sent">done</i>
+            <i *ngIf="message.isRead" class="material-icons tick-read">done_all</i>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!message.isDeleted && editingMessageId !== message._id" class="message-actions">
+        <button 
+          class="message-action-btn reply-btn" 
+          (click)="startReplyToMessage(message)" 
+          type="button">
+          <i class="material-icons">reply</i>
+        </button>
+        <worky-dropdown
+          [isMenu]="true"
+          [isFilled]="true"
+          icon="more_vert"
+          [dataLink]="messageOptions"
+          (linkClicked)="handleMessageAction($event, message)">
+        </worky-dropdown>
+      </div>
+    </div>
+
+    <worky-processing-media *ngIf="message.content === MediaType.PROCESSING"></worky-processing-media>
+
+    <div *ngIf="isFirstInGroup() && message.content !== MediaType.PROCESSING" class="message-triangle"></div>
+
+    <worky-avatar
+      *ngIf="isFirstInGroup()"
+      [size]="40"
+      [name]="decodedToken.name"
+      [img]="decodedToken.avatar">
+    </worky-avatar>
+  </ng-container>
+</div>

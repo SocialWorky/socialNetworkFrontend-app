@@ -1,7 +1,7 @@
 <div class="side-left-container">
-  <worky-sidebar-menu></worky-sidebar-menu>
+  <worky-nearby-users *ngIf="locationDiscoveryEnabled$ | async"></worky-nearby-users>
 
   <worky-user-online></worky-user-online>
-  
+
   <worky-widget-container [position]="WidgetPosition.LEFT"></worky-widget-container>
 </div>

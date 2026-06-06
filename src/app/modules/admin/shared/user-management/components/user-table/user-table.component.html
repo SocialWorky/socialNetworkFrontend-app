@@ -77,13 +77,23 @@
             <!-- Contact Info -->
             <div class="col-span-3 flex items-center gap-3">
               <div class="flex-1">
-                <div class="text-slate-100 text-sm font-medium">{{ user.email }}</div>
-                <div class="flex items-center gap-2 mt-1">
-                  <i class="material-icons text-emerald-500 text-sm" *ngIf="user.isVerified" title="Email verificado">
-                    verified
+                <div class="flex items-center gap-2">
+                  <div class="text-slate-100 text-sm font-medium">{{ user.email }}</div>
+                  <!-- Account verified badge -->
+                  <span *ngIf="user.isAccountVerified"
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                    title="Cuenta verificada">
+                    <i class="material-icons text-xs">verified_user</i> Verificado
+                  </span>
+                </div>
+                <!-- Email verification status -->
+                <div class="flex items-center gap-1.5 mt-1">
+                  <i class="material-icons text-xs" [ngClass]="user.isVerified ? 'text-emerald-500' : 'text-amber-500'">
+                    {{ user.isVerified ? 'mark_email_read' : 'mark_email_unread' }}
                   </i>
-                  <span class="text-xs text-slate-500" *ngIf="user.isVerified">{{ 'admin.userManagement.table.verified' | workyTranslations }}</span>
-                  <span class="text-xs text-amber-500" *ngIf="!user.isVerified">{{ 'admin.userManagement.table.pending' | workyTranslations }}</span>
+                  <span class="text-xs" [ngClass]="user.isVerified ? 'text-slate-500' : 'text-amber-500'">
+                    {{ user.isVerified ? 'Email verificado' : 'Email pendiente' }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -146,8 +156,19 @@
                   <span>{{ user.isActive ? ('admin.userManagement.table.actions.deactivate' | workyTranslations) : ('admin.userManagement.table.actions.activate' | workyTranslations) }}</span>
                 </button>
                 <button mat-menu-item *ngIf="!user.isVerified" (click)="sendVerificationEmail.emit(user)" [disabled]="isSendingVerification(user._id)" class="text-slate-100 hover:bg-slate-700">
-                  <mat-icon class="text-cyan-400">email</mat-icon>
+                  <mat-icon class="text-cyan-400">mark_email_read</mat-icon>
                   <span>{{ 'admin.userManagement.table.resendVerification' | workyTranslations }}</span>
+                </button>
+                <mat-divider class="border-slate-600 my-1"></mat-divider>
+                <button mat-menu-item (click)="toggleVerification.emit(user)"
+                  [class]="user.isAccountVerified ? 'text-yellow-300 hover:bg-yellow-500/10' : 'text-blue-300 hover:bg-blue-500/10'">
+                  <mat-icon [class]="user.isAccountVerified ? 'text-yellow-400' : 'text-blue-400'">{{ user.isAccountVerified ? 'verified_user' : 'verified_user' }}</mat-icon>
+                  <span class="font-semibold">{{ user.isAccountVerified ? 'Quitar insignia verificada' : 'Dar insignia verificada' }}</span>
+                </button>
+                <mat-divider class="border-slate-600 my-1"></mat-divider>
+                <button mat-menu-item *ngIf="subscriptionModeEnabled" (click)="assignPlan.emit(user)" class="text-slate-100 hover:bg-slate-700">
+                  <mat-icon class="text-purple-400">card_membership</mat-icon>
+                  <span>{{ 'admin.userManagement.table.actions.assignPlan' | workyTranslations }}</span>
                 </button>
               </mat-menu>
             </div>
@@ -189,22 +210,41 @@
                 <span>{{ user.isActive ? ('admin.userManagement.table.actions.deactivate' | workyTranslations) : ('admin.userManagement.table.actions.activate' | workyTranslations) }}</span>
               </button>
               <button mat-menu-item *ngIf="!user.isVerified" (click)="sendVerificationEmail.emit(user)" [disabled]="isSendingVerification(user._id)" class="text-slate-100 hover:bg-slate-700">
-                <mat-icon class="text-cyan-400">email</mat-icon>
+                <mat-icon class="text-cyan-400">mark_email_read</mat-icon>
                 <span>{{ 'admin.userManagement.table.resendVerification' | workyTranslations }}</span>
+              </button>
+              <mat-divider class="border-slate-600 my-1"></mat-divider>
+              <button mat-menu-item (click)="toggleVerification.emit(user)"
+                [class]="user.isAccountVerified ? 'text-yellow-300 hover:bg-yellow-500/10' : 'text-blue-300 hover:bg-blue-500/10'">
+                <mat-icon [class]="user.isAccountVerified ? 'text-yellow-400' : 'text-blue-400'">verified_user</mat-icon>
+                <span class="font-semibold">{{ user.isAccountVerified ? 'Quitar insignia verificada' : 'Dar insignia verificada' }}</span>
+              </button>
+              <mat-divider class="border-slate-600 my-1"></mat-divider>
+              <button mat-menu-item *ngIf="subscriptionModeEnabled" (click)="assignPlan.emit(user)" class="text-slate-100 hover:bg-slate-700">
+                <mat-icon class="text-purple-400">card_membership</mat-icon>
+                <span>{{ 'admin.userManagement.table.actions.assignPlan' | workyTranslations }}</span>
               </button>
             </mat-menu>
           </div>
-          
+
           <!-- User Details -->
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-3">
               <div>
                 <div class="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">{{ 'admin.userManagement.table.mobile.email' | workyTranslations }}</div>
-                <div class="text-slate-100 text-sm font-medium">{{ user.email }}</div>
+                <div class="flex items-center gap-2">
+                  <div class="text-slate-100 text-sm font-medium">{{ user.email }}</div>
+                  <span *ngIf="user.isAccountVerified"
+                    class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/30">
+                    <i class="material-icons text-xs">verified_user</i> Verificado
+                  </span>
+                </div>
                 <div class="flex items-center gap-1 mt-1">
-                  <i class="material-icons text-emerald-500 text-xs" *ngIf="user.isVerified">verified</i>
+                  <i class="material-icons text-xs" [ngClass]="user.isVerified ? 'text-emerald-500' : 'text-amber-500'">
+                    {{ user.isVerified ? 'mark_email_read' : 'mark_email_unread' }}
+                  </i>
                   <span class="text-xs" [ngClass]="user.isVerified ? 'text-emerald-400' : 'text-amber-400'">
-                    {{ user.isVerified ? ('admin.userManagement.table.verified' | workyTranslations) : ('admin.userManagement.table.pending' | workyTranslations) }}
+                    {{ user.isVerified ? 'Email verificado' : 'Email pendiente' }}
                   </span>
                 </div>
               </div>

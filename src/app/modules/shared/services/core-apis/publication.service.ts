@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, OnDestroy } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { catchError, map, Observable, Subject, throwError, from, of, switchMap, tap, forkJoin, firstValueFrom, filter, shareReplay } from 'rxjs';
 
@@ -8,12 +8,13 @@ import { CreatePost } from '@shared/modules/addPublication/interfaces/createPost
 import { EditPublication, Publication, PublicationView } from '@shared/interfaces/publicationView.interface';
 import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
 import { PublicationDatabaseService } from '@shared/services/database/publication-database.service';
+import { UnifiedCacheService } from '@shared/services/unified-cache.service';
 import { LogService, LevelLogEnum } from './log.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PublicationService {
+export class PublicationService implements OnDestroy {
   private baseUrl: string = environment.API_URL;
 
   private publications = signal<PublicationView[]>([]);
@@ -29,6 +30,12 @@ export class PublicationService {
   private publicationListCache = new Map<string, { publications: PublicationView[]; timestamp: number }>();
   private readonly LIST_CACHE_DURATION = 1 * 60 * 1000; // 1 minute
 
+  private _cleanupTimer: ReturnType<typeof setInterval> | undefined;
+
+  ngOnDestroy(): void {
+    clearInterval(this._cleanupTimer);
+  }
+
   getPublications() {
     return this.publications;
   }
@@ -41,11 +48,12 @@ export class PublicationService {
     private http: HttpClient,
     private _notificationPublicationService: NotificationPublicationService,
     private _publicationDatabase: PublicationDatabaseService,
+    private _unifiedCache: UnifiedCacheService,
     private logService: LogService,
   ) {
     this._publicationDatabase.initDatabase();
     // Clean expired cache every 5 minutes
-    setInterval(() => this.cleanExpiredCache(), 5 * 60 * 1000);
+    this._cleanupTimer = setInterval(() => this.cleanExpiredCache(), 5 * 60 * 1000);
   }
 
   /**
@@ -71,7 +79,6 @@ export class PublicationService {
   }
 
   private handleError(error: any) {
-    console.error('An error occurred', error);
     return throwError(() => new Error('Something went wrong; please try again later.'));
   }
 
@@ -156,22 +163,32 @@ export class PublicationService {
   /**
    * Get publication by ID with optimized cache
    */
-  getPublicationId(id: string): Observable<PublicationView[]> {
-    // Check cache first
-    const cached = this.publicationCache.get(id);
-    if (cached && this.isCacheValid(cached.timestamp, this.PUBLICATION_CACHE_DURATION)) {
-      return of([cached.publication]);
+  getPublicationId(id: string, forceRefresh: boolean = false): Observable<PublicationView[]> {
+    if (forceRefresh) {
+      this.publicationCache.delete(id);
+    } else {
+      const cached = this.publicationCache.get(id);
+      if (cached && this.isCacheValid(cached.timestamp, this.PUBLICATION_CACHE_DURATION)) {
+        return of([cached.publication]);
+      }
     }
 
     const url = `${this.baseUrl}/publications/${id}`;
-    return this.http.get<PublicationView[]>(url).pipe(
+
+    // When forceRefresh is true, bypass the CacheInterceptor via Cache-Control: no-cache
+    // so the request always reaches the backend and returns fresh DB data.
+    const headers = new HttpHeaders(
+      forceRefresh ? { 'Cache-Control': 'no-cache' } : {}
+    );
+
+    return this.http.get<PublicationView[]>(url, { headers }).pipe(
       tap((publications) => {
         publications.forEach(pub => {
           this._publicationDatabase.addPublication(pub);
           this.addToPublicationCache(pub._id, pub);
         });
       }),
-      shareReplay(1) // Share response between multiple subscribers
+      shareReplay(1)
     );
   }
 
@@ -192,6 +209,74 @@ export class PublicationService {
   }
 
   /**
+   * Remove a media file from a publication
+   * Used when media file is missing (404) and needs to be removed
+   */
+  removeMediaFromPublication(publicationId: string, mediaId: string): Observable<{ message: string; remainingMedia: number }> {
+    const url = `${this.baseUrl}/publications/${publicationId}/media/${mediaId}`;
+    return this.http.delete<{ message: string; remainingMedia: number }>(url).pipe(
+      catchError(this.handleError),
+      switchMap((response) => {
+        // Clear memory cache for this publication
+        this.publicationCache.delete(publicationId);
+
+        // Clear list cache as well since the publication changed
+        this.publicationListCache.clear();
+
+        // Update IndexedDB to remove the media from the local publication
+        return from(this.updateIndexedDBAfterMediaRemoval(publicationId, mediaId)).pipe(
+          map(() => response),
+          catchError(() => of(response)) // Don't fail if IndexedDB update fails
+        );
+      }),
+      tap((response) => {
+        // Log the action
+        this.logService.log(
+          LevelLogEnum.INFO,
+          'PublicationService',
+          'Media removed from publication',
+          {
+            publicationId,
+            mediaId,
+            remainingMedia: response.remainingMedia
+          }
+        );
+      })
+    );
+  }
+
+  /**
+   * Update IndexedDB after media removal
+   */
+  private async updateIndexedDBAfterMediaRemoval(publicationId: string, mediaId: string): Promise<void> {
+    try {
+      const localPublication = await this._publicationDatabase.getPublication(publicationId);
+      if (localPublication && localPublication.media) {
+        const updatedMedia = localPublication.media.filter((m: any) => m._id !== mediaId);
+        await this._publicationDatabase.updatePublicationMedia(
+          publicationId,
+          updatedMedia,
+          updatedMedia.length > 0
+        );
+        this.logService.log(
+          LevelLogEnum.INFO,
+          'PublicationService',
+          'IndexedDB updated after media removal',
+          { publicationId, mediaId, remainingMedia: updatedMedia.length }
+        );
+      }
+    } catch (error) {
+      this.logService.log(
+        LevelLogEnum.WARN,
+        'PublicationService',
+        'Failed to update IndexedDB after media removal',
+        { publicationId, mediaId, error }
+      );
+      throw error;
+    }
+  }
+
+  /**
    * Update publication in local cache
    */
   private updateLocalPublication(id: string, data: EditPublication): void {
@@ -209,7 +294,6 @@ export class PublicationService {
       catchError(this.handleError),
       map((data: any) => {
         this._notificationPublicationService.sendNotificationNewPublication(data);
-        // Verificar si data tiene la estructura correcta antes de guardar
         if (data && data.publications && data.publications._id) {
           this._publicationDatabase.addPublication(data.publications as PublicationView);
           this.addToPublicationCache(data.publications._id, data.publications as PublicationView);
@@ -230,7 +314,7 @@ export class PublicationService {
       map((data) => {
         this._notificationPublicationService.sendNotificationDeletePublication({ _id: id });
         this._publicationDatabase.deletePublication(id);
-        this.publicationCache.delete(id); // Limpiar cache
+        this.publicationCache.delete(id);
         return data;
       })
     );
@@ -247,7 +331,7 @@ export class PublicationService {
     return from(this._publicationDatabase.getAllPublications());
   }
 
-  // Métodos legacy mantenidos para compatibilidad
+  // Legacy methods maintained for compatibility
   getAllPublicationsWithCache(page: number, size: number, type: string = 'all', consultId: string = ''): Observable<Publication> {
     return this.getAllPublications(page, size, type, consultId, true);
   }
@@ -265,8 +349,32 @@ export class PublicationService {
   }
 
   updatePublications(newPublications: PublicationView[]): void {
-    this._notificationPublicationService.sendNotificationUpdatePublication(newPublications);  
+    this._notificationPublicationService.sendNotificationUpdatePublication(newPublications);
     this._publicationDatabase.addPublications(newPublications);
+    this.invalidatePublicationFeedCache();
+  }
+
+  /**
+   * Reconcile every cache layer once a publication's media has finished processing.
+   * The async media-processed socket event is not an HTTP mutation, so the persisted
+   * feed cache (and the in-memory caches) keep the stale "processing" state and the
+   * "Procesando medios" overlay reappears on the next feed load until the TTL expires.
+   */
+  onMediaProcessed(publication: PublicationView): void {
+    this._publicationDatabase.addPublication(publication);
+    this.addToPublicationCache(publication._id, publication);
+    this.invalidatePublicationFeedCache();
+  }
+
+  /**
+   * Drop the stale in-memory list cache and the persisted HTTP feed cache so the next
+   * feed load fetches the publication with its resolved media instead of a cached
+   * response still flagged as "processing".
+   */
+  private invalidatePublicationFeedCache(): void {
+    this.publicationListCache.clear();
+    this._unifiedCache.clearByPattern(/publication/);
+    this._unifiedCache.clearByPattern(/feed/);
   }
 
   updatePublicationsDeleted(newPublications: PublicationView[]): void {
@@ -366,10 +474,7 @@ export class PublicationService {
     const url = `${this.baseUrl}/publications/${publicationId}`;
     
     return this.http.get<PublicationView[]>(url).pipe(
-      catchError((error) => {
-        console.error('Error sincronizando publicación específica:', error);
-        return of([]);
-      }),
+      catchError(() => of([])),
       map((publications) => {
         if (publications.length > 0) {
           const publication = publications[0];

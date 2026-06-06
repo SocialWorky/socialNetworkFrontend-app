@@ -3,7 +3,8 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 
 .content-app {
-  width: 100vw;
+  width: 100%;
+  box-sizing: border-box;
   min-height: 100dvh;
   display: flex;
   align-items: center;
@@ -20,15 +21,18 @@
     
   @include breakpoints.below-sm {
     grid-template:
-    "header" 120px
+    "header" 60px
     "main" 1fr;
+    // On mobile, use nav bar color as app background so the area between
+    // the last post and the bottom nav bar is visually seamless
+    background-color: color.$worky-color-content-navbar;
   }
 
   .navbar-content {
     display: flex;
     flex-direction: column;
     grid-area: header;
-    width: 100vw;
+    width: 100%;
     -ms-overflow-style: none;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
@@ -42,13 +46,10 @@
     }
   }
 
-  &.navbar-hidden .navbar-content {
-    @include breakpoints.below-sm {
-      transform: translateY(-100%);
-      height: 0;
-      overflow: hidden;
-    }
-  }
+  // Do NOT apply transform/height/overflow here — the inner .content-navbar.sticky-content
+  // already hides the top bar via its own transform. Applying transform on this wrapper
+  // creates a CSS containing block for all position:fixed descendants (bottom nav,
+  // notifications panel), and overflow:hidden then clips them off-screen.
 }
 
 .content-social-app {
@@ -61,15 +62,16 @@
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
   @include breakpoints.below-sm {
-    width: 100vw;
+    width: 100%;
     margin: inherit;
     padding-top: 0px;
     flex-direction: column;
     align-items: center;
-    margin-top: 120px;
+    margin-top: calc(60px + env(safe-area-inset-top));
     position: relative;
     z-index: 1;
     transition: margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
   }
 
   &.navbar-hidden {
@@ -89,14 +91,34 @@
 ::ng-deep worky-content-right-side {
   width: variables.$worky-container-width-sidebar;
   height: 94dvh;
-  padding: 5px;
-  display: block;
-  justify-content: space-around;
-  overflow-y: scroll;
-  scrollbar-width: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+  
   @include breakpoints.below-sm {
     display: none;
   }
@@ -106,20 +128,39 @@
   width: variables.$worky-container-width-content;
   grid-area: main;
   height: 94dvh;
+  margin: 5px;
   min-width: variables.$worky-app-min-width;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   @include breakpoints.below-sm {
-    height: calc(100dvh - 120px);
-    width: 100vw;
-    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: fixed;
+    top: calc(50px + env(safe-area-inset-top));
+    bottom: 0px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    overflow: hidden;
+    // White background so empty feed area matches post card color instead of dark navy
+    background-color: color.$worky-color-light;
+    transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
 .navbar-hidden .social-content-center {
   @include breakpoints.below-sm {
-    height: 100dvh;
+    top: 0;
+    bottom: 0;
+  }
+}
+
+// When the top navbar is hidden the messages view starts at top:0, so its explicit
+// mobile height (set in messages.component.scss) must span the full viewport.
+.navbar-hidden .messages-view {
+  @include breakpoints.below-sm {
+    height: 100dvh !important;
   }
 }
 
@@ -133,17 +174,20 @@
   max-width: 100%;
   width: 100%;
   height: 94dvh;
-  padding: 10px;
+  padding: 0;
   overflow: hidden;
   @include breakpoints.below-sm {
-    padding: 0px;
-    height: 87dvh;
+    padding: 0;
   }
 }
 
 .messages-view {
   position: relative;
   height: 100%;
+  overflow: hidden;
+  @include breakpoints.below-sm {
+    top: 0px;
+  }
 }
 
 .content-profile-app {
@@ -152,7 +196,7 @@
   grid-area: main;
   flex-direction: column;
   justify-content: flex-start;
-  width: 100vw;
+  width: 100%;
   flex-grow: 1;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
@@ -167,4 +211,30 @@
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// Tablet layout: left sidebar + expanded content, no right sidebar
+@include breakpoints.tablet-only {
+  .social-content-center {
+    width: 75%;
+  }
+}
+
+// Landscape phones: reduce navbar-reserved height to avoid crushing content
+@media (orientation: landscape) and (max-height: 500px) {
+  .content-social-app {
+    @include breakpoints.below-sm {
+      margin-top: calc(56px + env(safe-area-inset-top));
+    }
+  }
+
+  .social-content-center {
+    @include breakpoints.below-sm {
+      top: calc(56px + env(safe-area-inset-top));
+    }
+  }
 }

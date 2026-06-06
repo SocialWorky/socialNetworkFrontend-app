@@ -30,7 +30,6 @@ export class Translations {
     translationsDictionary = { ...translationsModule.translations };
     dynamicTranslationsDictionary = { ...dynamicTranslationsModule.dynamicTranslations };
   } catch (e) {
-    console.error('Error initializing translations:', e);
     translationsLanguage = Translations.DEFAULT_LANGUAGE;
   }
   }
@@ -49,3 +48,4 @@ export const getDynamicTranslation = (text: string): string => {
 };
 
 export const getTranslationsLanguage = () => translationsLanguage;
+

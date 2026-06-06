@@ -3,6 +3,7 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from '@auth/auth.guard';
 import { RoleUser } from '@auth/models/roleUser.enum';
 import { RoleGuard } from '@admin/guards/role.guard';
+import { subscriptionModeGuard } from './guards/subscription-mode.guard';
 
 const routes: Routes = [
   {
@@ -18,7 +19,7 @@ const routes: Routes = [
   {
     path: '',
     loadChildren: () => import('./modules/pages/pages.module').then( m => m.PagesModule),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, subscriptionModeGuard],
   },
   {
     path: '**',
@@ -29,7 +30,7 @@ const routes: Routes = [
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(routes)
+    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
   ],
   exports: [RouterModule]
 })

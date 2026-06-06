@@ -54,7 +54,8 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
       order: [0, Validators.required],
       status: [WidgetStatus.ENABLED, Validators.required],
       allowedPositions: [[]],
-      icon: ['']
+      icon: [''],
+      showTitle: [true]
     });
   }
 
@@ -125,10 +126,15 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
       const existingConfig = this.widgetConfigService.getWidgetBySelectorFromCache(selectedWidget.selector);
       
       if (existingConfig) {
+        const showTitle = existingConfig.config && existingConfig.config.hasOwnProperty('showTitle')
+          ? existingConfig.config['showTitle']
+          : true;
+        
         this.widgetForm.patchValue({
           ...existingConfig,
           selector: selectedWidget.selector,
-          allowedPositions: selectedWidget.allowedPositions
+          allowedPositions: selectedWidget.allowedPositions,
+          showTitle: showTitle
         });
       } else {
         this.widgetForm.patchValue({
@@ -139,7 +145,8 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
           order: 0,
           status: WidgetStatus.DISABLED,
           allowedPositions: selectedWidget.allowedPositions,
-          icon: selectedWidget.icon
+          icon: selectedWidget.icon,
+          showTitle: true
         });
       }
       
@@ -155,7 +162,26 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
       this.isSaving = true;
       this._cdr.markForCheck();
       
-      const widgetConfig: WidgetConfig = this.widgetForm.value;
+      const formValue = this.widgetForm.value;
+      
+      // Get existing widget config to preserve existing configuration
+      const existingWidget = this.widgetConfigService.getWidgetBySelectorFromCache(formValue.selector);
+      const existingConfig = existingWidget?.config || {};
+      
+      // Merge showTitle into existing config, preserving all other config values
+      const mergedConfig = {
+        ...existingConfig,
+        showTitle: formValue.showTitle !== undefined ? formValue.showTitle : true
+      };
+      
+      // Prepare widget config preserving existing config values
+      const widgetConfig: WidgetConfig = {
+        ...formValue,
+        config: mergedConfig
+      };
+      
+      // Remove showTitle from top level as it should be in config
+      delete (widgetConfig as any).showTitle;
       
       if (!this.validateWidgetConstraints(widgetConfig)) {
         this.isSaving = false;
@@ -195,9 +221,15 @@ export class WidgetManagementComponent implements OnInit, OnDestroy {
       this.allowedPositionsForSelectedWidget = originalWidget.allowedPositions;
     }
     
+    // Extract showTitle from config if it exists
+    const showTitle = widget.config && widget.config.hasOwnProperty('showTitle') 
+      ? widget.config['showTitle'] 
+      : true;
+    
     this.widgetForm.patchValue({
       ...widget,
-      allowedPositions: originalWidget?.allowedPositions || widget.allowedPositions
+      allowedPositions: originalWidget?.allowedPositions || widget.allowedPositions,
+      showTitle: showTitle
     });
     
     this._cdr.markForCheck();

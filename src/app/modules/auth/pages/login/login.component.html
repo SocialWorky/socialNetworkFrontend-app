@@ -1,4 +1,13 @@
-<div class="content" *ngIf="!token">
+<worky-age-verification-modal
+  [visible]="showAgeGate"
+  [blocked]="ageGateBlocked"
+  [modalText]="ageVerificationText"
+  (accepted)="onAgeGateAccepted()"
+  (rejected)="onAgeGateRejected()"
+  (reloadRequested)="onAgeGateReload()">
+</worky-age-verification-modal>
+
+<div class="content" *ngIf="!token && !ageGateBlocked">
 
   <div class="content-login-header movil">
     <h1 class="title-login">{{ 'login.title' | workyTranslations }}</h1>

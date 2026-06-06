@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { LoyautComponent } from './templates/loyaut/loyaut.component';
+import { featureEnabledGuard } from '../../guards/feature-enabled.guard';
+import { FeatureUnavailableComponent } from './components/feature-unavailable/feature-unavailable.component';
 
 const routes: Routes = [
   {
@@ -22,9 +24,27 @@ const routes: Routes = [
         path: 'messages', 
         loadChildren: () => import('./messages/messages.module').then(m => m.MessagesModule)
       },
-      { 
-        path: 'messages/:userIdMessages', 
+      {
+        path: 'messages/:userIdMessages',
         loadChildren: () => import('./messages/messages.module').then(m => m.MessagesModule)
+      },
+      {
+        path: 'subscribe',
+        loadChildren: () => import('./subscribe/subscribe.module').then(m => m.SubscribeModule)
+      },
+      {
+        path: 'groups',
+        canActivate: [featureEnabledGuard('groups')],
+        loadChildren: () => import('./groups/groups.module').then(m => m.GroupsModule)
+      },
+      {
+        path: 'events',
+        canActivate: [featureEnabledGuard('events')],
+        loadChildren: () => import('./events/events.module').then(m => m.EventsModule)
+      },
+      {
+        path: 'feature-unavailable',
+        component: FeatureUnavailableComponent,
       },
 
       { path: '**', redirectTo: '', pathMatch: 'full' }

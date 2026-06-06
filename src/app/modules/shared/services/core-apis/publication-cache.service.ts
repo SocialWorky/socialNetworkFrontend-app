@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { LogService, LevelLogEnum } from './log.service';
@@ -6,7 +6,7 @@ import { LogService, LevelLogEnum } from './log.service';
 @Injectable({
   providedIn: 'root'
 })
-export class PublicationCacheService {
+export class PublicationCacheService implements OnDestroy {
   // Cache para publicaciones individuales
   private publicationCache = new Map<string, { publication: PublicationView; timestamp: number }>();
   private readonly PUBLICATION_CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
@@ -16,9 +16,15 @@ export class PublicationCacheService {
   private publicationListCache = new Map<string, { publications: PublicationView[]; timestamp: number }>();
   private readonly LIST_CACHE_DURATION = 1 * 60 * 1000; // 1 minute
 
+  private _cleanupTimer: ReturnType<typeof setInterval> | undefined;
+
   constructor(private logService: LogService) {
     // Clean expired cache every 5 minutes
-    setInterval(() => this.cleanExpiredCache(), 5 * 60 * 1000);
+    this._cleanupTimer = setInterval(() => this.cleanExpiredCache(), 5 * 60 * 1000);
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this._cleanupTimer);
   }
 
   /**
@@ -27,7 +33,7 @@ export class PublicationCacheService {
   getPublicationFromCache(id: string): PublicationView | null {
     const cached = this.publicationCache.get(id);
     if (cached && this.isCacheValid(cached.timestamp, this.PUBLICATION_CACHE_DURATION)) {
-      this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Publication retrieved from cache', { id });
+
       return cached.publication;
     }
     return null;
@@ -39,10 +45,7 @@ export class PublicationCacheService {
   getPublicationListFromCache(cacheKey: string): PublicationView[] | null {
     const cached = this.publicationListCache.get(cacheKey);
     if (cached && this.isCacheValid(cached.timestamp, this.LIST_CACHE_DURATION)) {
-      this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Publication list retrieved from cache', { 
-        cacheKey, 
-        count: cached.publications.length 
-      });
+
       return cached.publications;
     }
     return null;
@@ -63,7 +66,7 @@ export class PublicationCacheService {
       timestamp: Date.now()
     });
 
-    this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Publication added to cache', { id });
+
   }
 
   /**
@@ -81,10 +84,7 @@ export class PublicationCacheService {
       timestamp: Date.now()
     });
 
-    this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Publication list added to cache', { 
-      cacheKey, 
-      count: publications.length 
-    });
+
   }
 
   /**
@@ -97,7 +97,7 @@ export class PublicationCacheService {
         publication,
         timestamp: Date.now()
       });
-      this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Publication updated in cache', { id });
+
     }
   }
 
@@ -106,7 +106,7 @@ export class PublicationCacheService {
    */
   removePublicationFromCache(id: string): void {
     this.publicationCache.delete(id);
-    this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Publication removed from cache', { id });
+
   }
 
   /**
@@ -115,7 +115,7 @@ export class PublicationCacheService {
   clearAllCache(): void {
     this.publicationCache.clear();
     this.publicationListCache.clear();
-    this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'All cache cleared');
+
   }
 
   /**
@@ -149,7 +149,7 @@ export class PublicationCacheService {
     }
 
     if (cleanedCount > 0) {
-      this.logService.log(LevelLogEnum.INFO, 'PublicationCacheService', 'Expired cache entries cleaned', { cleanedCount });
+  
     }
   }
 

@@ -1,0 +1,105 @@
+<div class="container-nearby-users">
+  <h3 class="nearby-title">
+    <i class="material-icons">place</i>
+    {{ 'explore.nearbyUsers' | workyTranslations }}
+  </h3>
+
+  @if (discoveryEnabled()) {
+    <div class="nearby-controls">
+      <div class="nearby-radius">
+        <span class="nearby-radius-label">{{ 'explore.nearbyRadius' | workyTranslations }}</span>
+        <div class="nearby-chips">
+          @for (r of radiusOptions; track r) {
+            <button class="nearby-chip"
+                    [class.active]="radiusKm() === r"
+                    (click)="setRadius(r)">
+              {{ r }}km
+            </button>
+          }
+        </div>
+      </div>
+
+      <button class="nearby-online-toggle"
+              [class.active]="onlineOnly()"
+              (click)="toggleOnlineOnly()">
+        <span class="nearby-online-dot"></span>
+        {{ 'explore.nearbyOnlineOnly' | workyTranslations }}
+      </button>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="nearby-loading">
+      <div class="loading-spinner"></div>
+      <span>{{ 'explore.loadingNearby' | workyTranslations }}</span>
+    </div>
+  }
+
+  @if (!isLoading() && !discoveryEnabled()) {
+    <div class="nearby-activate">
+      <i class="material-icons">location_off</i>
+      <span>{{ 'explore.nearbyActivatePrompt' | workyTranslations }}</span>
+      <button class="nearby-activate-btn" (click)="goToMyProfile()">
+        {{ 'explore.nearbyGoToProfile' | workyTranslations }}
+      </button>
+    </div>
+  }
+
+  @if (!isLoading() && discoveryEnabled() && displayedUsers().length > 0) {
+    <div class="nearby-content">
+      @for (user of displayedUsers(); track user._id) {
+        <div class="nearby-item"
+             (click)="goToProfile(user._id)"
+             [title]="user.name + ' ' + user.lastName">
+          <div class="nearby-avatar-wrap">
+            <worky-avatar
+              [size]="40"
+              [name]="user.name + ' ' + user.lastName"
+              [img]="user.avatar">
+            </worky-avatar>
+            @if (isOnline(user._id)) {
+              <span class="nearby-status-dot online"></span>
+            } @else if (isInactive(user._id)) {
+              <span class="nearby-status-dot inactive"></span>
+            }
+          </div>
+
+          <div class="nearby-item-info">
+            <span class="nearby-item-name">
+              {{ user.name }} {{ user.lastName }}
+              <i *ngIf="user.isVerified" class="material-icons nearby-badge-verified" title="Verificado">verified</i>
+              <i *ngIf="user.isPremium" class="material-icons nearby-badge-premium" title="Premium">star</i>
+            </span>
+            <span class="nearby-item-meta">
+              <span class="nearby-item-distance">
+                {{ 'explore.nearbyKmAway' | workyTranslations: 'arguments': user.distanceKm }}
+              </span>
+              <span *ngIf="user.discoveryCity" class="nearby-item-city">· {{ user.discoveryCity }}</span>
+            </span>
+          </div>
+        </div>
+      }
+
+      @if (canLoadMore()) {
+        <button class="nearby-load-more" (click)="loadMore()" [disabled]="isLoadingMore()">
+          @if (isLoadingMore()) {
+            <span class="loading-spinner small"></span>
+          } @else {
+            {{ 'explore.nearbyLoadMore' | workyTranslations }}
+          }
+        </button>
+      }
+    </div>
+  }
+
+  @if (!isLoading() && discoveryEnabled() && displayedUsers().length === 0) {
+    <div class="nearby-empty">
+      <i class="material-icons">person_search</i>
+      <span>
+        {{ (onlineOnly() && total() > 0)
+            ? ('explore.nearbyNoActive' | workyTranslations)
+            : ('explore.noNearbyUsers' | workyTranslations) }}
+      </span>
+    </div>
+  }
+</div>

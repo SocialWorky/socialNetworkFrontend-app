@@ -5,7 +5,7 @@ export interface ExternalMessage {
     data:        Data;
     idReference: string;
     type:        string;
-    response:    { content: string, typeFile: string, urlFile: string }
+    response:    { content: string, typeFile: string, urlFile: string, replyTo?: string }
 }
 
 export interface Data {

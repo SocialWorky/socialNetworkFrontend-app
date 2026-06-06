@@ -1,0 +1,169 @@
+@use "src/assets/styles/worky-variables" as variables;
+@use "src/assets/styles/worky-palettes" as colors;
+@use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
+@use "sass:map";
+
+.groups-list-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+
+  @include breakpoints.below-sm {
+    padding: 16px 12px;
+  }
+}
+
+.groups-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  h1 {
+    color: colors.$worky-color-text;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+}
+
+.search-bar {
+  margin-bottom: 20px;
+
+  input {
+    width: 100%;
+    padding: 10px 18px;
+    border-radius: 24px;
+    border: 1px solid colors.$worky-color-greyLight;
+    background: colors.$worky-color-input-background;
+    color: colors.$worky-color-text;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+
+    &:focus {
+      outline: none;
+      border-color: colors.$worky-color-navy;
+    }
+
+    &::placeholder {
+      color: colors.$worky-color-icon;
+      opacity: 0.6;
+    }
+  }
+}
+
+.groups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.group-card {
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background: colors.$worky-color-module-container;
+  border: 1px solid colors.$worky-color-greyLight;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  }
+}
+
+.group-cover {
+  height: 120px;
+  background: colors.$worky-color-grey;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.privacy-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.group-info {
+  padding: 14px;
+
+  h3 {
+    color: colors.$worky-color-text;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  p {
+    color: colors.$worky-color-icon;
+    font-size: 13px;
+    margin: 0 0 8px;
+    line-height: 1.4;
+  }
+}
+
+.group-meta {
+  font-size: 12px;
+  color: colors.$worky-color-icon;
+  margin: 0 0 10px;
+  display: flex;
+  gap: 10px;
+
+  .category {
+    background: map.get(colors.$worky-navy, 87);
+    color: colors.$worky-color-navy;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+  }
+}
+
+.btn-primary,
+.btn-join {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  background: colors.$worky-color-navy;
+  color: colors.$worky-color-light;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.joined-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: colors.$worky-color-icon;
+  font-size: 15px;
+}

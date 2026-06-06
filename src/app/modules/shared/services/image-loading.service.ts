@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError, from } from 'rxjs';
-import { catchError, map, switchMap, timeout, retryWhen, delay } from 'rxjs/operators';
+import { catchError, map, switchMap, timeout, retry } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { ImageService, ImageLoadOptions } from './image.service';
@@ -57,23 +57,13 @@ export class ImageLoadingService {
 
     // iOS-specific URL validation
     if (isIOS && !imageUrl.startsWith('http')) {
-      this.logService.log(LevelLogEnum.WARN, 'ImageLoadingService', 'Invalid image URL for iOS', { url: imageUrl });
+      // Invalid image URL for iOS - no need to log every URL validation
       return throwError(() => new Error('Invalid image URL'));
     }
 
     return this.loadFromNetwork(imageUrl, imageType, options).pipe(
       timeout(timeoutValue),
-      retryWhen(errors => 
-        errors.pipe(
-          delay(retryConfig.retryDelay),
-          map((error, index) => {
-            if (index >= retryConfig.maxRetries) {
-              throw error;
-            }
-            return error;
-          })
-        )
-      ),
+      retry({ count: retryConfig.maxRetries, delay: retryConfig.retryDelay }),
       map(result => {
         const loadTime = performance.now() - startTime;
         this.trackLoadTime(loadTime);
@@ -88,11 +78,7 @@ export class ImageLoadingService {
         };
       }),
       catchError(error => {
-        this.logService.log(LevelLogEnum.ERROR, 'ImageLoadingService', 'Image loading failed', {
-          url: imageUrl,
-          type: imageType,
-          error: error.message
-        });
+        // Network loading failed - no need to log every network failure
         return throwError(() => error);
       })
     );
@@ -102,18 +88,28 @@ export class ImageLoadingService {
    * Load image from network
    */
   private loadFromNetwork(
-    imageUrl: string, 
-    imageType: 'profile' | 'publication' | 'media', 
+    imageUrl: string,
+    imageType: 'profile' | 'publication' | 'media',
     options: ImageLoadOptions
   ): Observable<{ blob: Blob; size: number }> {
+    // Cross-origin images (e.g. MinIO) cannot be blob-fetched via XHR without CORS headers, and
+    // a failed request surfaces as a misleading CORS error. Warm the cache with a native Image()
+    // preload (no CORS requirement); the consumer renders the URL via <img src>, not the blob.
+    if (this.isCrossOriginUrl(imageUrl)) {
+      return from(
+        new Promise<{ blob: Blob; size: number }>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve({ blob: new Blob(), size: 0 });
+          img.onerror = () => reject(new Error('Native image preload failed'));
+          img.src = imageUrl;
+        }),
+      );
+    }
+
     return this.http.get(imageUrl, { responseType: 'blob' }).pipe(
       map(blob => {
         const size = blob.size;
-        this.logService.log(LevelLogEnum.INFO, 'ImageLoadingService', 'Image loaded from network', {
-          url: imageUrl,
-          type: imageType,
-          size
-        });
+
         return { blob, size };
       }),
       catchError(error => {
@@ -151,6 +147,14 @@ export class ImageLoadingService {
       }),
       switchMap(observable => observable)
     );
+  }
+
+  private isCrossOriginUrl(url: string): boolean {
+    try {
+      return new URL(url, window.location.href).origin !== window.location.origin;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -202,6 +206,6 @@ export class ImageLoadingService {
    */
   private trackLoadTime(loadTime: number): void {
     // This would be implemented to track performance metrics
-    this.logService.log(LevelLogEnum.INFO, 'ImageLoadingService', 'Image load time tracked', { loadTime });
+
   }
 } 

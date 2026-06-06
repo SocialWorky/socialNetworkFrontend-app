@@ -1,0 +1,40 @@
+<div class="groups-list-page">
+  <div class="groups-header">
+    <h1>{{ 'groups.title' | workyTranslations }}</h1>
+    <button *ngIf="isAdmin" class="btn-primary" (click)="showCreateForm = !showCreateForm">
+      {{ 'groups.create' | workyTranslations }}
+    </button>
+  </div>
+
+  <div class="search-bar">
+    <input [formControl]="searchControl" [placeholder]="'groups.searchGroups' | workyTranslations" />
+  </div>
+
+  <worky-group-create *ngIf="isAdmin && showCreateForm" (created)="onGroupCreated()" (cancelled)="showCreateForm = false"></worky-group-create>
+
+  <div *ngIf="isLoading" class="loading">{{ 'analytics.loading' | workyTranslations }}</div>
+
+  <div *ngIf="!isLoading && groups.length === 0" class="empty">
+    {{ 'groups.noGroups' | workyTranslations }}
+  </div>
+
+  <div class="groups-grid" *ngIf="!isLoading && groups.length > 0">
+    <div class="group-card" *ngFor="let group of groups" (click)="openGroup(group._id)">
+      <div class="group-cover" [style.backgroundImage]="getCoverUrl(group.coverImage) ? 'url(' + getCoverUrl(group.coverImage) + ')' : ''">
+        <span class="privacy-badge">{{ ('groups.' + group.privacy) | workyTranslations }}</span>
+      </div>
+      <div class="group-info">
+        <h3>{{ group.name }}</h3>
+        <p *ngIf="group.description">{{ group.description | slice:0:100 }}</p>
+        <div class="group-meta">
+          <span>{{ group.memberCount }} {{ 'groups.members' | workyTranslations }}</span>
+          <span *ngIf="group.category" class="category">{{ group.category }}</span>
+        </div>
+        <button *ngIf="!group.isMember" class="btn-join" (click)="joinGroup($event, group)">
+          {{ 'groups.join' | workyTranslations }}
+        </button>
+        <span *ngIf="group.isMember" class="joined-badge">{{ 'groups.joined' | workyTranslations }}</span>
+      </div>
+    </div>
+  </div>
+</div>

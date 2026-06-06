@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
+import { environment } from '@env/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -117,7 +118,7 @@ export class UtilityService {
     const storageConfig = {
       frequent: { type: 'memory' as const, duration: 5 * 60 * 1000 }, // 5 min
       occasional: { type: 'localStorage' as const },
-      rare: { type: 'cookie' as const, duration: 24 * 60 * 60 * 1000 } // 24 horas
+      rare: { type: 'cookie' as const, duration: 24 * 60 * 60 * 1000 } // 24 hours
     };
 
     const config = storageConfig[type];
@@ -190,12 +191,7 @@ export class UtilityService {
 
       // Cleaned up orphaned databases - no need to log every cleanup
     } catch (error) {
-      this.logService.log(
-        LevelLogEnum.ERROR,
-        'UtilityService',
-        'Error cleaning up orphaned databases',
-        { error: error instanceof Error ? error.message : String(error) }
-      );
+      // Error cleaning up orphaned databases - no need to log every cleanup error
     }
   }
 
@@ -243,12 +239,7 @@ export class UtilityService {
             localStorage.removeItem(key);
           }
         } catch (error) {
-          this.logService.log(
-            LevelLogEnum.ERROR,
-            'UtilityService',
-            'Failed to parse cache item during cleanup',
-            { key, error: error instanceof Error ? error.message : String(error) }
-          );
+          // Failed to parse cache item during cleanup - no need to log every parse failure
           localStorage.removeItem(key);
         }
       }
@@ -264,23 +255,140 @@ export class UtilityService {
   normalizeImageUrl(url: string, baseUrl: string): string {
     if (!url) return '';
     
-    // If URL already starts with http/https, return as is
+    // If URL already starts with blob/data, return as is
+    if (url.startsWith('blob:') || url.startsWith('data:')) {
+      return url;
+    }
+
+    // Heal paths corrupted by a stringified base URL (e.g. an unset env var
+    // produced "${undefined}/emojis/..."). Strip a stray "undefined/"/"null/"
+    // segment, whether it sits at the start or right after the domain.
+    url = url
+      .replace(/^(undefined|null)\//, '')
+      .replace(/(https?:\/\/[^\/]+)\/(?:undefined|null)\//, '$1/');
+
+    // Store original URL for logging if needed
+    const originalUrl = url;
+    
+    // Handle URLs that start with /uploads/, /publications/, /profileImg/, etc. (old format)
+    // These are being interpreted as relative paths by the browser
+    // Convert them to relative paths without leading slash
+    if (url.startsWith('/uploads/') || url.startsWith('/publications/') || 
+        url.startsWith('/config/') || url.startsWith('/users/') ||
+        url.startsWith('/comments/') || url.startsWith('/thematic-images/') ||
+        url.startsWith('/widgets/') || url.startsWith('/profile/') ||
+        url.startsWith('/profileImg/')) {
+      // Remove leading slash to make it a proper relative path
+      url = url.slice(1);
+    }
+    
+    
+    // Detect and convert old file-service URLs to relative paths
+    // This handles URLs that were saved before the MinIO migration
     if (url.startsWith('http://') || url.startsWith('https://')) {
+      // Check if it's an old file-service URL
+      const oldFileServicePatterns = [
+        /https?:\/\/file-service[^\/]*\.worky\.cl\//,
+        /https?:\/\/file-service[^\/]*\.myb-side\.cl\//,
+        /https?:\/\/localhost:3005\//,
+        /https?:\/\/localhost\/(?!.*:)/  // localhost without port
+      ];
+      
+      for (const pattern of oldFileServicePatterns) {
+        if (pattern.test(url)) {
+          // Extract the relative path (everything after the domain)
+          const match = url.match(/https?:\/\/[^\/]+(\/.+)/);
+          if (match && match[1]) {
+            // Remove leading slash to get relative path
+            url = match[1].startsWith('/') ? match[1].slice(1) : match[1];
+            break; // Exit loop once we've converted the URL
+          }
+        }
+      }
+      
+      // If it's still an absolute URL but not an old file-service URL, return as is
+      // (might be an external URL like Google Images, etc.)
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
+    }
+    
+    // If baseUrl is not provided or is undefined, try to get it from environment.
+    // Prefer the MinIO bucket URL when configured; otherwise fall back to the
+    // file-service URL, which serves files directly from local storage at its
+    // root (GET :type/:filename) when no object store is configured.
+    let finalBaseUrl = baseUrl;
+    if (!finalBaseUrl || finalBaseUrl.trim() === '') {
+      finalBaseUrl = environment.MINIO_BUCKET_URL || environment.APIFILESERVICE || '';
+    }
+    
+    // If still no baseUrl and URL looks like a relative path, this is a problem
+    if (!finalBaseUrl || finalBaseUrl.trim() === '') {
+      // If URL looks like a relative path (starts with publications/, users/, profileImg/, etc.)
+      // and we don't have a baseUrl, this is a critical error
+      // Check if it's a known MinIO path pattern
+      const knownMinIOPatterns = ['profileImg/', 'publications/', 'uploads/', 'config/', 'users/', 'comments/', 'thematic-images/', 'widgets/', 'profile/'];
+      const isKnownMinIOPath = knownMinIOPatterns.some(pattern => url.startsWith(pattern) || url.startsWith('/' + pattern));
+      
+      if (isKnownMinIOPath) {
+        // Neither MINIO_BUCKET_URL nor APIFILESERVICE is configured - we cannot build
+        // an absolute URL. Return empty string to prevent 404 errors - components
+        // should handle empty URLs gracefully.
+        console.error('[UtilityService] No storage base URL configured. Cannot normalize URL:', url);
+        console.error('[UtilityService] Set NG_APP_MINIO_BUCKET_URL (MinIO) or NG_APP_APIFILESERVICE (local storage) in your environment variables.');
+        return ''; // Return empty string instead of relative URL to prevent 404
+      }
+      
+      // Not a known MinIO path, return as is (might be an asset path or something else)
       return url;
     }
     
     // If URL already contains the base URL, return as is
-    if (url.includes(baseUrl)) {
+    if (url.includes(finalBaseUrl)) {
       return url;
     }
     
     // Clean base URL (remove trailing slash)
-    const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    const cleanBaseUrl = finalBaseUrl.endsWith('/') ? finalBaseUrl.slice(0, -1) : finalBaseUrl;
     
-    // Add leading slash to URL if not present
-    const cleanUrl = url.startsWith('/') ? url : '/' + url;
+    // Clean the URL - remove leading slash if present, we'll add it
+    let cleanUrl = url.startsWith('/') ? url.slice(1) : url;
     
-    return cleanBaseUrl + cleanUrl;
+    // If it's already a full URL (http/https/blob/data) or an asset path, return as is
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || 
+        cleanUrl.startsWith('blob:') || cleanUrl.startsWith('data:') || 
+        cleanUrl.startsWith('assets/')) {
+      return cleanUrl;
+    }
+    
+    // At this point, cleanUrl is a relative path that needs to be normalized
+    // Examples: "profileImg/compressed|...", "publications/...", "config/...", etc.
+    
+    // For MinIO, handle special characters properly
+    // New files use / (forward slash) instead of | (pipe) for better compatibility
+    // Old files may still have | which needs proper encoding
+    // MinIO requires proper URL encoding for special characters in object names
+    if (cleanUrl.includes('|') || cleanUrl.includes(' ') || cleanUrl.includes('%') || cleanUrl.includes('&')) {
+      // Split by / to preserve path structure, then encode each segment separately
+      const urlParts = cleanUrl.split('/');
+      cleanUrl = urlParts.map(part => {
+        // If the part is already encoded, decode it first to avoid double encoding
+        try {
+          const decoded = decodeURIComponent(part);
+          // Re-encode to ensure proper encoding for MinIO
+          // This handles |, spaces, and other special characters
+          return encodeURIComponent(decoded);
+        } catch {
+          // If decoding fails, encode as is
+          return encodeURIComponent(part);
+        }
+      }).join('/');
+    }
+    
+    // Construct final URL
+    const finalUrl = `${cleanBaseUrl}/${cleanUrl}`;
+    
+    return finalUrl;
   }
 
 }

@@ -78,6 +78,16 @@
             color: colors.$worky-color-blue;
             font-size: variables.$worky-font-size-3;
             font-weight: 500;
+
+            &.disabled {
+              pointer-events: none;
+              opacity: 0.6;
+            }
+
+            &.reject-friend {
+              color: colors.$worky-color-magenta;
+              margin-left: 8px;
+            }
           }
 
           @include breakpoints.below-md {
@@ -131,7 +141,7 @@
         }
       }
       
-      // Estilos para skeleton de ubicación
+      // Styles for location skeleton
       .location-skeleton {
         display: flex;
         align-items: center;
@@ -161,6 +171,7 @@
     margin-top: 1rem;
     margin-bottom: 1rem;
     overflow: auto;
+
     .publication-content {
       padding: 16px;
       color: colors.$worky-color-text;
@@ -287,6 +298,12 @@
           background-color: color-mix(in srgb, var(--worky-color-text), transparent 90%);
         }
 
+        .action-count {
+          font-size: 13px;
+          font-weight: 600;
+          line-height: 1;
+        }
+
       }
       @include breakpoints.below-sm {
         .publication-footer-actions-item {
@@ -354,5 +371,121 @@
     .nav-link span {
       color: colors.$worky-color-navy;
     }
+  }
+}
+
+// Boost badge
+.boost-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+  margin-right: 6px;
+}
+
+// Boost modal
+.boost-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.boost-modal {
+  background: #1e293b;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  h4 {
+    color: #f1f5f9;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+  }
+}
+
+.boost-package-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: #0f172a;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid #334155;
+  transition: border-color 0.2s;
+
+  &:hover { border-color: #f59e0b; }
+}
+
+.boost-package-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.boost-package-name {
+  color: #f1f5f9;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.boost-package-duration {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.boost-package-price {
+  color: #f59e0b;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.boost-no-packages {
+  color: #64748b;
+  text-align: center;
+  font-size: 14px;
+  padding: 12px 0;
+}
+
+.boost-cancel-btn {
+  background: #334155;
+  color: #f1f5f9;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 4px;
+
+  &:hover { background: #475569; }
+}
+
+.group-link {
+  cursor: pointer;
+  color: var(--worky-color-text);
+  font-weight: 600;
+  font-size: 14px;
+  transition: color 0.15s;
+
+  &:hover {
+    color: var(--worky-color-navy);
+    text-decoration: underline;
   }
 }

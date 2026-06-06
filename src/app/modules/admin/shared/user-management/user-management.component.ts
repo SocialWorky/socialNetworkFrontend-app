@@ -2,13 +2,16 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { UserManagementService } from '@admin/services/user-management.service';
+import { SubscriptionsAdminService } from '@admin/services/subscriptions-admin.service';
+import { SubscriptionPlansAdminService, SubscriptionPlan } from '@admin/services/subscription-plans-admin.service';
+import { ConfigService } from '@services/core-apis/config.service';
 import { AlertService } from '@shared/services/alert.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { UtilityService } from '@shared/services/utility.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { User } from '@shared/interfaces/user.interface';
-import { 
-  UserFilters, 
+import {
+  UserFilters,
   UserUpdateRequest,
   UserRole,
   UserStatus,
@@ -52,15 +55,27 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     toggleStatus: new Set<string>(),
     sendVerification: new Set<string>()
   };
-  
+
   // Enums for template
   UserRole = UserRole;
   UserStatus = UserStatus;
-  
+
+  // Subscription plan assignment
+  subscriptionModeEnabled = false;
+  assignPlanUser: User | null = null;
+  assignPlanModalOpen = false;
+  availablePlans: SubscriptionPlan[] = [];
+  selectedPlanId = '';
+  assignLoading = false;
+  assignError = '';
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private userService: UserManagementService,
+    private _subscriptionsAdminService: SubscriptionsAdminService,
+    private _subscriptionPlansAdminService: SubscriptionPlansAdminService,
+    private _configService: ConfigService,
     private alertService: AlertService,
     private _cdr: ChangeDetectorRef,
     private _logService: LogService,
@@ -70,20 +85,24 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadUsers();
     this.loadUserStats();
-    
-    // Subscribe to service observables
+
     this.userService.users$.pipe(takeUntil(this.destroy$)).subscribe(users => {
       this.users = users;
       this._cdr.markForCheck();
     });
-    
+
     this.userService.loading$.pipe(takeUntil(this.destroy$)).subscribe(loading => {
       this.loading = loading;
       this._cdr.markForCheck();
     });
-    
+
     this.userService.totalUsers$.pipe(takeUntil(this.destroy$)).subscribe(total => {
       this.totalUsers = total;
+      this._cdr.markForCheck();
+    });
+
+    this._configService.subscriptionMode$.pipe(takeUntil(this.destroy$)).subscribe(enabled => {
+      this.subscriptionModeEnabled = enabled;
       this._cdr.markForCheck();
     });
   }
@@ -346,6 +365,107 @@ export class UserManagementComponent implements OnInit, OnDestroy {
             true,
             'Aceptar'
           );
+        }
+      });
+  }
+
+  toggleVerification(user: User): void {
+    this.userService.toggleVerification(user._id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result) => {
+          const idx = this.users.findIndex(u => u._id === user._id);
+          if (idx !== -1) {
+            this.users = [
+              ...this.users.slice(0, idx),
+              { ...this.users[idx], isAccountVerified: result.isAccountVerified },
+              ...this.users.slice(idx + 1),
+            ];
+          }
+          this.alertService.showAlert(
+            result.isAccountVerified ? 'Usuario Verificado' : 'Verificación Eliminada',
+            result.isAccountVerified ? `${user.name} ahora tiene el badge de verificación.` : `Se eliminó la verificación de ${user.name}.`,
+            result.isAccountVerified ? Alerts.SUCCESS : Alerts.WARNING,
+            Position.CENTER,
+            true,
+            'Aceptar',
+          );
+          this._cdr.markForCheck();
+        },
+      });
+  }
+
+  openAssignPlanModal(user: User): void {
+    this.assignPlanUser = user;
+    this.selectedPlanId = '';
+    this.assignError = '';
+    this.assignLoading = false;
+    this.assignPlanModalOpen = true;
+    this.loadAvailablePlans();
+    this._cdr.markForCheck();
+  }
+
+  closeAssignPlanModal(): void {
+    this.assignPlanModalOpen = false;
+    this.assignPlanUser = null;
+    this.selectedPlanId = '';
+    this.assignError = '';
+    this._cdr.markForCheck();
+  }
+
+  loadAvailablePlans(): void {
+    this._subscriptionPlansAdminService.loadAll()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (plans) => {
+          this.availablePlans = plans.filter(p => p.isActive);
+          this._cdr.markForCheck();
+        },
+        error: () => {
+          this.availablePlans = [];
+          this._cdr.markForCheck();
+        }
+      });
+  }
+
+  submitAssignPlan(): void {
+    if (!this.assignPlanUser || !this.selectedPlanId) return;
+
+    this.assignLoading = true;
+    this.assignError = '';
+    this._cdr.markForCheck();
+
+    this._subscriptionsAdminService.assign(this.assignPlanUser._id, this.selectedPlanId)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.assignLoading = false;
+          this._cdr.markForCheck();
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.alertService.showAlert(
+            'Éxito',
+            'Plan asignado exitosamente',
+            Alerts.SUCCESS,
+            Position.CENTER,
+            true,
+            'Aceptar'
+          );
+          this.closeAssignPlanModal();
+        },
+        error: (error) => {
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'UserManagementComponent',
+            'Error assigning subscription plan',
+            { error: String(error), userId: this.assignPlanUser?._id, planId: this.selectedPlanId }
+          );
+          this.assignError = error?.error?.message === 'subscriptions_disabled'
+            ? 'Las suscripciones están deshabilitadas.'
+            : 'No se pudo asignar el plan. El usuario puede tener una suscripción activa.';
+          this._cdr.markForCheck();
         }
       });
   }

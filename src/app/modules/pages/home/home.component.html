@@ -5,6 +5,35 @@
   [class.refreshing]="isRefreshing"
   [class.navbar-visible]="navbarVisible">
   
+  <div class="top-widget-wrapper">
+    <worky-widget-container [position]="WidgetPosition.TOP"></worky-widget-container>
+  </div>
+  
+  <!-- Stories carousel -->
+  <div class="worky-module-container stories-container">
+    <worky-stories-carousel
+      [groups]="feedStories()"
+      [currentUserId]="currentUserId"
+      (storySelected)="openStoryViewer($event.groupIndex)"
+      (addStoryClicked)="openStoryCreate()">
+    </worky-stories-carousel>
+  </div>
+
+  <!-- Story viewer overlay -->
+  <worky-story-viewer
+    [groups]="feedStories()"
+    [initialGroupIndex]="viewerGroupIndex"
+    [visible]="viewerOpen"
+    (closed)="closeStoryViewer()">
+  </worky-story-viewer>
+
+  <!-- Story create modal -->
+  <worky-story-create
+    *ngIf="storyCreateOpen"
+    (closed)="storyCreateOpen = false"
+    (published)="onStoryPublished()">
+  </worky-story-create>
+
   <div id="container-add-publications" class="worky-module-container" *ngIf="shouldShowAddPublication">
     <worky-add-publication [type]="typePublishing.POST"></worky-add-publication>
   </div>

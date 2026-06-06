@@ -55,20 +55,59 @@
                     </mat-form-field>
                 </div>
 
+                <div *ngIf="requirePrivacyPolicy" class="privacy-policy-check">
+                    <label class="privacy-policy-label">
+                        <input type="checkbox" formControlName="acceptedPrivacyPolicy" id="acceptedPrivacyPolicy">
+                        <span>
+                            {{ 'register.privacyPolicyAccept' | workyTranslations }}
+                            <button type="button" class="privacy-policy-link" (click)="openPrivacyModal()">
+                                {{ 'register.privacyPolicyLink' | workyTranslations }}
+                            </button>
+                        </span>
+                    </label>
+                    <div *ngIf="registerForm.get('acceptedPrivacyPolicy')?.invalid && registerForm.get('acceptedPrivacyPolicy')?.touched" class="privacy-policy-error">
+                        {{ 'register.privacyPolicyRequired' | workyTranslations }}
+                    </div>
+                </div>
+
                 <div class="have-account">
                     <span routerLink="auth/login">{{ 'register.haveAccountLogIn' | workyTranslations }}</span>
                 </div>
 
                 <div class="form-register-buttons">
-                    <worky-buttons *ngIf="!registerLoading"
+                    <worky-buttons
                         [workyButtonType]="WorkyButtonType.Flat"
-                        [theme]="WorkyButtonTheme.Basic"
+                        [theme]="WorkyButtonTheme.Accent"
                         [disabled]="!registerForm.valid"
+                        [loading]="registerLoading"
                         [width]="'100%'">
                         <span basic-button-text>{{ 'button.register' | workyTranslations }}</span>
                     </worky-buttons>
                 </div>
             </div>
         </form>
+    </div>
+</div>
+
+<div *ngIf="showPrivacyModal" class="privacy-modal-overlay" (click)="closePrivacyModal()">
+    <div class="privacy-modal" (click)="$event.stopPropagation()">
+        <div class="privacy-modal-header">
+            <h2>{{ 'register.privacyPolicyModalTitle' | workyTranslations }}</h2>
+            <button type="button" class="privacy-modal-close" (click)="closePrivacyModal()">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        <div class="privacy-modal-body">
+            <pre class="privacy-modal-content">{{ privacyPolicyContent }}</pre>
+        </div>
+        <div class="privacy-modal-footer">
+            <worky-buttons
+                [workyButtonType]="WorkyButtonType.Flat"
+                [theme]="WorkyButtonTheme.Basic"
+                (click)="closePrivacyModal()"
+                [width]="'100%'">
+                <span basic-button-text>{{ 'button.close' | workyTranslations }}</span>
+            </worky-buttons>
+        </div>
     </div>
 </div>

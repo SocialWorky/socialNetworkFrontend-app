@@ -2,7 +2,7 @@ import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { LoadingController } from '@ionic/angular';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Subscription } from 'rxjs';
+import { Subscription, finalize } from 'rxjs';
 
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { AuthApiService } from '@auth/services/apiLogin.service';
@@ -25,6 +25,8 @@ export class ResetPasswordModalComponent implements OnInit, OnDestroy {
   WorkyButtonType = WorkyButtonType;
 
   WorkyButtonTheme = WorkyButtonTheme;
+
+  resetLoading = false;
 
   private subscription: Subscription = new Subscription();
 
@@ -52,18 +54,28 @@ export class ResetPasswordModalComponent implements OnInit, OnDestroy {
   }
 
   async sendReset() {
+    if (this.resetLoading) return;
+
     const password = this.resetPasswordForm.get('password')?.value;
+    if (!password) return;
+
+    this.resetLoading = true;
+
     const emailUser = this._authService.getUseFromToken(this.data.token).email;
 
-    const emailResponse = await this._emailNotificationService.sendEmailToResetPassword(emailUser, this.data.token, password);
+    try {
+      const emailResponse = await this._emailNotificationService.sendEmailToResetPassword(emailUser, this.data.token, password);
 
-    if (password) {
       const loading = await this._loadingCtrl.create({
         message: translations['resetPassword.messageLoading'],
       });
       await loading.present();
 
-      this.subscription = this._authApiService.resetPassword(emailResponse).subscribe({
+      this.subscription = this._authApiService.resetPassword(emailResponse).pipe(
+        finalize(() => {
+          this.resetLoading = false;
+        }),
+      ).subscribe({
         next: (response) => {
           if (response) {
             this._alertService.showAlert(
@@ -91,6 +103,9 @@ export class ResetPasswordModalComponent implements OnInit, OnDestroy {
           loading.dismiss();
         },
       });
+    } catch (error) {
+      this.resetLoading = false;
+      throw error;
     }
   }
 

@@ -40,9 +40,16 @@ export interface NotificationUpdatePublication {
 }
 
 export interface Media {
-    _id:           string;
-    url:           string;
-    urlThumbnail:  string;
-    urlCompressed: string;
-    comments:      any[];
+    _id:               string;
+    url:               string;
+    urlThumbnail:      string;
+    urlThumbnailWebP?: string;
+    urlPreview?:       string;
+    urlPreviewWebP?:   string;
+    urlCompressed:     string;
+    urlCompressedWebP?: string;
+    urlFull?:          string;
+    urlFullWebP?:      string;
+    blurHash?:         string;
+    comments:          any[];
 }

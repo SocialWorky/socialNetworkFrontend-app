@@ -23,9 +23,20 @@ export class CustomReactionsService {
     return this.http.post<CreateCustomReaction>(url, data);
   }
 
-  getCustomReactionsAll(): Observable<CustomReactionList[]> {
+  getCustomReactionsAll(forceRefresh: boolean = false): Observable<CustomReactionList[]> {
     const url = `${this.baseUrl}/custom-reactions`;
+    
+    if (forceRefresh) {
+      const timestamp = new Date().getTime();
+      return this.http.get<CustomReactionList[]>(`${url}?t=${timestamp}`);
+    }
+    
     return this.http.get<CustomReactionList[]>(url);
+  }
+
+  updateCustomReaction(id: string, data: Partial<CreateCustomReaction>): Observable<CustomReactionList> {
+    const url = `${this.baseUrl}/custom-reactions/update/${id}`;
+    return this.http.put<CustomReactionList>(url, data);
   }
 
   deleteCustomReaction(id: string): Observable<CustomReactionList> {

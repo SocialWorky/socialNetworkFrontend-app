@@ -8,6 +8,7 @@ export interface User {
   email: string;
   role: string;
   isVerified: boolean;
+  isAccountVerified: boolean;
   isActive: boolean;
   avatar: string;
   createdAt: string;
@@ -15,4 +16,5 @@ export interface User {
   profile: ProfileData;
   isDarkMode: boolean;
   lastConnection: string;
+  isPremium?: boolean;
 }

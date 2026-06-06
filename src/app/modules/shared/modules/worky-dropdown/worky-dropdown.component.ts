@@ -11,6 +11,9 @@ import { User } from '@shared/interfaces/user.interface';
 import { Token } from '@shared/interfaces/token.interface';
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
+import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 
 @Component({
     selector: 'worky-dropdown',
@@ -59,7 +62,7 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
 
   isMobile: boolean = this._deviceDetectionService.isMobile();
 
-  private unsubscribe$ = new Subject<void>();
+  private _unsubscribe$ = new Subject<void>();
 
   constructor(
     private _authService: AuthService,
@@ -69,7 +72,9 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
     private _elementRef: ElementRef,
     private _renderer: Renderer2,
     private _deviceDetectionService: DeviceDetectionService,
-    private _actionSheetController: ActionSheetController
+    private _actionSheetController: ActionSheetController,
+    private _mobileImageCacheService: MobileImageCacheService,
+    private _utilityService: UtilityService
   ) {
     this.decodedToken = this._authService.getDecodedToken()!;
   }
@@ -77,17 +82,27 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (this.img === 'avatar') this.getUser();
     this._globalEventService.profileImage$
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe(newImageUrl => {
-        this.profileImageUrl = newImageUrl;
+      .pipe(takeUntil(this._unsubscribe$))
+      .subscribe(async newImageUrl => {
+        // Clear profile images from cache to ensure fresh load
+        if (this._mobileImageCacheService.isMobile()) {
+          await this._mobileImageCacheService.clearProfileImagesFromCache();
+        }
+
+        // Normalize URL before using it
+        this.profileImageUrl = newImageUrl ? this._utilityService.normalizeImageUrl(newImageUrl, environment.MINIO_BUCKET_URL || '') : null;
+        // Force refresh user data to get updated avatar
+        if (this.img === 'avatar') {
+          this.getUser();
+        }
         this._cdr.markForCheck();
       });
     this.checkDropdownDirection();
   }
 
   ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
+    this._unsubscribe$.next();
+    this._unsubscribe$.complete();
   }
 
   handleMenuItemClick(data: DropdownDataLink<any>) {
@@ -97,20 +112,26 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   async getUser() {
     try {
       this.loaderAvatar = true;
-      const response = await firstValueFrom(this._userService.getUserById(this.decodedToken.id).pipe(takeUntil(this.unsubscribe$)));
+      const response = await firstValueFrom(this._userService.getUserById(this.decodedToken.id).pipe(takeUntil(this._unsubscribe$)));
       if (response) {
         this.user = response;
-        this.profileImageUrl = response.avatar;
+        // Normalize avatar URL before using it
+        this.profileImageUrl = response.avatar ? this._utilityService.normalizeImageUrl(response.avatar, environment.MINIO_BUCKET_URL || '') : null;
         this.loaderAvatar = false;
         this._cdr.markForCheck();
       } else {
         this.loaderAvatar = false;
-        console.error('User not found');
       }
     } catch (error) {
       this.loaderAvatar = false;
-      console.error(error);
     }
+  }
+
+  getNormalizedImageUrl(url: string | boolean | undefined): string {
+    if (!url || typeof url !== 'string' || url === 'avatar') {
+      return '';
+    }
+    return this._utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
   }
 
   checkDropdownDirection() {
@@ -211,3 +232,4 @@ export class WorkyDropdownComponent implements OnInit, OnDestroy {
   }
 
 }
+

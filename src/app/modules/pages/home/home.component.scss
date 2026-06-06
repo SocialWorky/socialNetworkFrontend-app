@@ -2,6 +2,11 @@
 @use 'src/assets/styles/worky-palettes.scss' as color;
 @use "sass:map";
 
+:host {
+  display: block;
+  height: 100%;
+}
+
 .content-publications {
   height: 94dvh;
   -webkit-overflow-scrolling: touch;
@@ -15,14 +20,35 @@
   }
 
   @include breakpoints.below-md {
-    height: 100dvh;
-    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: calc(100dvh - 60px);
+    box-sizing: border-box;
+  }
+  @include breakpoints.below-sm {
+    height: 100%;
+    box-sizing: border-box;
+    // Reserve the fixed bottom nav (.bottom-nav-mobile, 56px) so the last publication's
+    // action bar (comment / share / reaction) is not hidden behind it when scrolled to the end.
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+}
+
+.top-widget-wrapper {
+  width: 100%;
+  box-sizing: border-box;
+  
+  // Match worky-module-container spacing
+  ::ng-deep .widget-container.top {
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
   }
   
-  &.navbar-visible {
-    @include breakpoints.below-md {
-      height: calc(100dvh - 120px);
-    }
+  ::ng-deep .widget-wrapper {
+    margin-bottom: 0;
+  }
+  
+  @include breakpoints.below-sm {
+    margin: 3px -1px 0px -1px;
   }
 }
 
@@ -37,29 +63,32 @@
   display: none;
 }
 
+
 .last-publication {
   margin-bottom: 20px;
+
+  @include breakpoints.below-sm {
+    margin-bottom: 8px;
+  }
 }
 
 .connection-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.5rem;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
   z-index: 1000;
+  color: white;
+  font-size: 0.95rem;
 }
 
 .connection-overlay-message {
-  background: rgba(0, 0, 0, 0.7);
-  padding: 1rem 2rem;
-  border-radius: 0.5rem;
+  background: rgba(30, 30, 30, 0.9);
+  padding: 0.6rem 1.4rem;
+  border-radius: 2rem;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .material-icons {

@@ -1,0 +1,466 @@
+@use "src/assets/styles/worky-variables" as variables;
+@use "src/assets/styles/worky-palettes" as colors;
+@use "sass:map";
+
+// ─── Date Divider ─────────────────────────────────────────────────────────────
+
+.date-divider {
+  text-align: center;
+  margin: 1rem 0;
+
+  span {
+    background: colors.$worky-color-module-container;
+    border: 1px solid colors.$worky-color-grey;
+    padding: 0.3rem 1rem;
+    color: colors.$worky-color-text;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 20px;
+    opacity: 0.8;
+  }
+}
+
+// ─── Triangle — side-pointing arrow connecting avatar to bubble ───────────────
+
+.message-triangle {
+  width: 0;
+  height: 0;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 14px;
+}
+
+// ─── Message rows ─────────────────────────────────────────────────────────────
+
+.message-sent,
+.message-received {
+  display: flex;
+  margin-bottom: 0.1rem;
+  align-items: flex-start;
+
+  &.grouped { margin-top: 0; }
+
+  &.no-avatar {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+}
+
+.message-sent     { justify-content: flex-end; }
+.message-received { justify-content: flex-start; }
+
+// Triangle directions per message side — only visible on first-group
+
+.message-received .message-triangle {
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid colors.$worky-color-module-container;
+  margin-left: -1px;
+}
+
+.message-sent .message-triangle {
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 8px solid #1a5fa8;
+  margin-right: -1px;
+}
+
+.content-message {
+  word-break: break-word;
+  max-width: 75%;
+  flex-shrink: 0;
+  position: relative;
+}
+
+// ─── Message In Animation ─────────────────────────────────────────────────────
+
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.message-sent .content-message,
+.message-received .content-message {
+  animation: messageIn 0.2s ease-out both;
+}
+
+// ─── Bubble base ─────────────────────────────────────────────────────────────
+
+.sent-content,
+.received-content {
+  line-height: 1.45;
+  border-radius: 18px;
+  padding: 0.6rem 1rem;
+  display: inline-block;
+  max-width: 100%;
+  word-break: break-word;
+
+  ::ng-deep markdown {
+    display: flex;
+    flex-direction: column;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+
+    img, video {
+      max-width: 200px;
+      border-radius: 8px;
+    }
+  }
+
+  .media-wrapper {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    max-width: 100%;
+
+    img, video {
+      max-width: 200px;
+      border-radius: 8px;
+    }
+  }
+
+  .thumbnail {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    transition: transform 0.2s;
+
+    &:hover { transform: scale(1.02); }
+  }
+
+  .play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.85);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: colors.$worky-color-primary;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+}
+
+// ─── Sent — bright blue ───────────────────────────────────────────────────────
+
+.message-sent {
+  .sent-content {
+    background: #1a5fa8;
+    color: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  }
+
+  // TR near avatar (slightly less), BR flat for continuity with next
+  &.first-group.last-group .sent-content { border-radius: 18px 14px 18px 18px; }
+  &.first-group:not(.last-group) .sent-content { border-radius: 18px 14px 4px 18px; }
+  &.grouped:not(.first-group):not(.last-group) .sent-content { border-radius: 18px 4px 4px 18px; }
+  &.last-group:not(.first-group) .sent-content {
+    border-radius: 18px 4px 18px 18px;
+    margin-bottom: 14px;
+  }
+}
+
+// ─── Received — theme-aware ───────────────────────────────────────────────────
+
+.message-received {
+  .received-content {
+    background: colors.$worky-color-module-container;
+    color: colors.$worky-color-text;
+    border: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 0, 0, 0.06);
+  }
+
+  // TL near avatar (slightly less), BL flat for continuity with next
+  &.first-group.last-group .received-content { border-radius: 14px 18px 18px 18px; }
+  &.first-group:not(.last-group) .received-content { border-radius: 14px 18px 18px 4px; }
+  &.grouped:not(.first-group):not(.last-group) .received-content { border-radius: 4px 18px 18px 4px; }
+  &.last-group:not(.first-group) .received-content {
+    border-radius: 4px 18px 18px 18px;
+    margin-bottom: 14px;
+  }
+}
+
+// ─── Timestamp / footer ───────────────────────────────────────────────────────
+
+.content-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+  font-size: 10.5px;
+  opacity: 0.65;
+  padding-right: 2px;
+
+  small { font-size: 10.5px; }
+
+  .tick-sent {
+    font-size: 14px;
+    opacity: 0.65;
+  }
+
+  .tick-read {
+    font-size: 14px;
+    color: #64b5f6;
+
+    .sent-content & {
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+}
+
+.edited-badge {
+  font-size: 10px;
+  font-style: italic;
+  opacity: 0.75;
+}
+
+.deleted-message-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-style: italic;
+  opacity: 0.65;
+  padding: 8px 0;
+
+  i { font-size: 16px; }
+}
+
+// ─── Editing state ────────────────────────────────────────────────────────────
+
+.content-message {
+  position: relative;
+
+  &.editing {
+    position: relative;
+    z-index: 10000;
+
+    .sent-content {
+      border: 2px solid colors.$worky-color-primary;
+      position: relative;
+      z-index: 10000;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    }
+  }
+}
+
+// ─── Hover action buttons ─────────────────────────────────────────────────────
+
+.message-actions {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.message-received .message-actions {
+  left: 100%;
+  margin-left: 8px;
+}
+
+.message-sent .message-actions {
+  right: 100%;
+  margin-right: 8px;
+  flex-direction: row-reverse;
+}
+
+.content-message:hover .message-actions {
+  opacity: 1;
+}
+
+.reply-btn {
+  .message-actions & {
+    position: relative;
+    right: auto;
+  }
+}
+
+.message-action-btn {
+  background: colors.$worky-color-module-container;
+  border: 1px solid colors.$worky-color-grey;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.12);
+  padding: 0;
+
+  &:hover {
+    background: colors.$worky-color-greyLight;
+    transform: scale(1.1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16);
+  }
+
+  &:active { transform: scale(0.95); }
+
+  i {
+    font-size: 20px;
+    color: colors.$worky-color-text;
+  }
+}
+
+// ─── Inline edit form ─────────────────────────────────────────────────────────
+
+.edit-message-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+  position: relative;
+  z-index: 10000;
+}
+
+.edit-message-input {
+  width: 100%;
+  min-height: 60px;
+  padding: 8px 12px;
+  border: 1px solid colors.$worky-color-grey;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  background: colors.$worky-color-module-container;
+  color: colors.$worky-color-text;
+  position: relative;
+  z-index: 10001;
+
+  &:focus {
+    outline: none;
+    border-color: colors.$worky-color-primary;
+    box-shadow: 0 0 0 3px rgba(17, 51, 85, 0.1);
+  }
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.edit-save-btn,
+.edit-cancel-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-save-btn {
+  background: colors.$worky-color-primary;
+  color: colors.$worky-color-light;
+
+  &:hover {
+    background: map.get(colors.$worky-navy, 72);
+    transform: scale(1.1);
+  }
+}
+
+.edit-cancel-btn {
+  background: colors.$worky-color-greyLight;
+  color: colors.$worky-color-text;
+
+  &:hover { background: colors.$worky-color-grey; }
+}
+
+// ─── Deleted bubble ───────────────────────────────────────────────────────────
+
+.sent-content.deleted,
+.received-content.deleted {
+  opacity: 0.55;
+  background: colors.$worky-color-greyLight !important;
+  color: colors.$worky-color-text !important;
+  box-shadow: none !important;
+}
+
+// ─── Reply preview inside bubble ──────────────────────────────────────────────
+
+.reply-preview {
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.04);
+  border-left: 3px solid colors.$worky-color-primary;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .sent-content & {
+    background: rgba(255, 255, 255, 0.18);
+    border-left-color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+.reply-preview-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reply-preview-line {
+  width: 3px;
+  height: 100%;
+  background: colors.$worky-color-primary;
+  border-radius: 2px;
+  flex-shrink: 0;
+
+  .sent-content & { background: rgba(255, 255, 255, 0.5); }
+}
+
+.reply-preview-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.reply-preview-author {
+  font-size: 11px;
+  font-weight: 600;
+  color: colors.$worky-color-primary;
+
+  .sent-content & { color: rgba(255, 255, 255, 0.9); }
+}
+
+.reply-preview-message {
+  font-size: 12px;
+  color: colors.$worky-color-text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  .sent-content & { color: rgba(255, 255, 255, 0.8); }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .message-actions { right: -25px; }
+}

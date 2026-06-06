@@ -1,11 +1,16 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, signal, computed, effect } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { Token } from '@shared/interfaces/token.interface';
-import { Subject, interval } from 'rxjs';
-import { takeUntil, catchError, switchMap, startWith, distinctUntilChanged, debounceTime } from 'rxjs/operators';
+import { Subject, interval, BehaviorSubject } from 'rxjs';
+import { takeUntil, catchError, startWith, distinctUntilChanged, debounceTime, filter } from 'rxjs/operators';
 
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { AuthService } from '@auth/services/auth.service';
+import { GlobalEventService } from '@shared/services/globalEventService.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
+
 @Component({
     selector: 'worky-user-online',
     templateUrl: './user-online.component.html',
@@ -17,41 +22,42 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
   private readonly _destroy$ = new Subject<void>();
 
   private readonly REFRESH_INTERVAL = 30000;
+  private readonly LOADING_TIMEOUT = 10000; // 10 seconds timeout for loading
 
   usersOnline = signal<Token[]>([]);
 
   isLoading = signal<boolean>(false);
 
-  error = signal<string | null>(null);
-
   currentUser: Token | null = null;
 
   filteredUsers = computed(() => {
-    return this.usersOnline().filter(user => user.status !== 'offLine');
+    const users = this.usersOnline();
+    
+    const filtered = users.filter(user => user.status !== 'offLine');
+    
+    return filtered;
   });
 
   onlineCount = computed(() => {
     return this.filteredUsers().length;
   });
 
+  private _updateTrigger$ = new BehaviorSubject<void>(undefined);
+  private _loadingTimeout: any = null;
+
   constructor(
     private _cdr: ChangeDetectorRef,
     private _notificationUsersService: NotificationUsersService,
     private _router: Router,
     private _authService: AuthService,
+    private _globalEventService: GlobalEventService,
+    private _logService: LogService,
+    private _utilityService: UtilityService
   ) {
     this.checkAndInitializeUser();
-
-    effect(() => {
-      const users = this.filteredUsers();
-      if (users.length > 0) {
-        this._cdr.detectChanges();
-      }
-    });
   }
 
   private checkAndInitializeUser(): void {
-
     try {
       const decodedToken = this._authService.getDecodedToken();
       if (decodedToken && typeof decodedToken === 'object' && 'id' in decodedToken) {
@@ -60,55 +66,228 @@ export class UserOnlineComponent implements OnInit, OnDestroy {
         throw new Error('Invalid token format');
       }
     } catch (error) {
-      console.error('Error initializing user:', error);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'UserOnlineComponent',
+        'Error initializing user',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
       this._authService.logout();
       this._router.navigate(['/login']);
     }
   }
 
-  ngOnInit() {
+  private setLoadingWithTimeout(): void {
     this.isLoading.set(true);
-    if (!this.currentUser) return;
-    interval(this.REFRESH_INTERVAL).pipe(
-      startWith(0),
-      switchMap(() => this._notificationUsersService.userStatuses$),
-      distinctUntilChanged((prev: Token[], curr: Token[]) =>
-        JSON.stringify(prev) === JSON.stringify(curr)
-      ),
-      debounceTime(300),
-      catchError((error) => {
-        this.error.set('Failed to fetch online users');
-        console.error('Error fetching user statuses:', error);
-        return [];
-      }),
-      takeUntil(this._destroy$)
-    ).subscribe((userStatuses: Token[]) => {
-      this.usersOnline.set(userStatuses);
+    
+    // Clear existing timeout
+    if (this._loadingTimeout) {
+      clearTimeout(this._loadingTimeout);
+    }
+    
+    // Set timeout to ensure loading doesn't stay forever
+    this._loadingTimeout = setTimeout(() => {
       this.isLoading.set(false);
-      this.error.set(null);
-    });
-
-    this.getUserOnline();
+      this._cdr.markForCheck();
+    }, this.LOADING_TIMEOUT);
   }
 
-  private getUserOnline(): void {
+  private clearLoadingTimeout(): void {
+    if (this._loadingTimeout) {
+      clearTimeout(this._loadingTimeout);
+      this._loadingTimeout = null;
+    }
+  }
+
+  ngOnInit() {
+    if (!this.currentUser) return;
+
+    this.setLoadingWithTimeout();
+    
+    // Activate inactivity detection
+    this._notificationUsersService.setupInactivityListeners();
+    
+    this._globalEventService.profileImage$
+      .pipe(
+        takeUntil(this._destroy$),
+        filter(newImageUrl => !!newImageUrl && !!this.currentUser)
+      )
+      .subscribe(newImageUrl => {
+        this.updateCurrentUserAvatar(newImageUrl!);
+      });
+    
+    this._notificationUsersService.userStatuses$
+      .pipe(
+        takeUntil(this._destroy$),
+        distinctUntilChanged((prev: Token[], curr: Token[]) => {
+          if (prev.length !== curr.length) return false;
+          return prev.every((user, index) => user.id === curr[index]?.id && user.status === curr[index]?.status);
+        }),
+        debounceTime(500),
+        catchError((error) => {
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'UserOnlineComponent',
+            'Error fetching user statuses',
+            { error: error instanceof Error ? error.message : String(error) }
+          );
+          // Ensure loading is cleared on error
+          this.clearLoadingTimeout();
+          this.isLoading.set(false);
+          this._cdr.markForCheck();
+          return [];
+        })
+      )
+      .subscribe((userStatuses: Token[]) => {
+        this.updateUsersList(userStatuses);
+      });
+
+    interval(this.REFRESH_INTERVAL)
+      .pipe(
+        takeUntil(this._destroy$),
+        startWith(0)
+      )
+      .subscribe(() => {
+        this._updateTrigger$.next();
+      });
+
+    this.initializeCurrentUserStatus();
+  }
+
+  private updateCurrentUserAvatar(newImageUrl: string): void {
+    if (!this.currentUser) return;
+
+    // Normalize URL before updating
+    const normalizedUrl = this._utilityService.normalizeImageUrl(newImageUrl, environment.MINIO_BUCKET_URL || '');
+
+    const updatedUsers = this.usersOnline().map(user => {
+      if (user.id === this.currentUser?.id) {
+        return { ...user, avatar: normalizedUrl };
+      }
+      return user;
+    });
+
+    this.usersOnline.set(updatedUsers);
+    this._cdr.markForCheck();
+  }
+
+  private updateUsersList(userStatuses: Token[]): void {
+    try {
+      const currentUsers = this.usersOnline();
+      
+      const hasChanges = this.hasSignificantChanges(currentUsers, userStatuses);
+
+      if (hasChanges) {
+        let updatedUserStatuses = [...userStatuses];
+        
+        if (this.currentUser) {
+          const currentUserExists = updatedUserStatuses.some(user => user.id === this.currentUser?.id);
+          
+          if (!currentUserExists) {
+            const currentUserWithStatus = {
+              ...this.currentUser,
+              status: 'online' as const
+            };
+            updatedUserStatuses.unshift(currentUserWithStatus);
+          }
+        }
+        
+        this.usersOnline.set(updatedUserStatuses);
+        this.clearLoadingTimeout();
+        this.isLoading.set(false);
+        this._cdr.markForCheck();
+      } else {
+        // Even if no changes, clear loading after first data received
+        if (this.isLoading()) {
+          this.clearLoadingTimeout();
+          this.isLoading.set(false);
+          this._cdr.markForCheck();
+        }
+      }
+    } catch (error) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'UserOnlineComponent',
+        'Error updating users list',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
+      this.clearLoadingTimeout();
+      this.isLoading.set(false);
+      this._cdr.markForCheck();
+    }
+  }
+
+  private hasSignificantChanges(current: Token[], incoming: Token[]): boolean {
+    
+    if (current.length !== incoming.length) {
+      return true;
+    }
+
+    const hasChanges = incoming.some((user, index) => {
+      const currentUser = current[index];
+      const changed = !currentUser || 
+             currentUser.status !== user.status ||
+             currentUser.id !== user.id;
+      
+      return changed;
+    });
+
+    return hasChanges;
+  }
+
+  private initializeCurrentUserStatus(): void {
     if (!this.currentUser) return;
 
     try {
+      const currentUserWithStatus = {
+        ...this.currentUser,
+        status: 'online' as const
+      };
+      
+      this.usersOnline.set([currentUserWithStatus]);
+      
       this._notificationUsersService.addCurrentUserStatus(this.currentUser);
+      
+      // Clear loading after initializing user status
+      this.clearLoadingTimeout();
+      this.isLoading.set(false);
+      this._cdr.markForCheck();
     } catch (error) {
-      console.error('Error adding user status:', error);
-      this.error.set('Failed to update user status');
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'UserOnlineComponent',
+        'Error adding user status',
+        { error: error instanceof Error ? error.message : String(error) }
+      );
+      this.clearLoadingTimeout();
+      this.isLoading.set(false);
+      this._cdr.markForCheck();
     }
   }
 
   ngOnDestroy(): void {
+    this.clearLoadingTimeout();
     this._destroy$.next();
     this._destroy$.complete();
   }
 
-  goToProfile(_id: string) {
-    if (!_id) return
-    this._router.navigate(['/profile/', _id]);
+  goToProfile(userId: string): void {
+    if (!userId) return;
+    this._router.navigate(['/profile/', userId]);
+  }
+
+  // Method for testing - force inactivity of current user
+  forceUserInactive(): void {
+    // Simulate tab change to activate inactivity
+    Object.defineProperty(document, 'hidden', {
+      writable: true,
+      value: true
+    });
+    document.dispatchEvent(new Event('visibilitychange'));
+  }
+
+  // Method for testing - force activity of current user
+  forceUserActive(): void {
+    this._notificationUsersService.userActive();
   }
 }

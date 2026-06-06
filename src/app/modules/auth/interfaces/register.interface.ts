@@ -10,4 +10,5 @@ export interface RegisterData {
   role: RoleUser;
   mailDataValidate?: MailSendValidateData;
   invitationCode?: string;
+  acceptedPrivacyPolicy?: boolean;
 }

@@ -1,6 +1,7 @@
 @use "src/assets/styles/worky-variables" as variables;
 @use "src/assets/styles/worky-palettes" as colors;
 @use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
+@use "src/assets/styles/worky-scrollbar" as scrollbar;
 @use "sass:map";
 
 .content-news {
@@ -8,8 +9,7 @@
   flex-direction: column;
   overflow-y: hidden;
   color: colors.$worky-color-text;
-  scrollbar-width: thin;
-  scrollbar-color: #ffffff #f0f0f0;
+  @include scrollbar.thin-scrollbar;
 
   .news-article {
     margin-bottom: 20px;
@@ -23,6 +23,9 @@
   .news-image {
     width: 100%;
     height: auto;
+    max-height: 300px;
+    object-fit: cover;
+    display: block;
   }
 
   .news-card-content {
@@ -35,7 +38,8 @@
   }
 
   .news-date {
-    color: #888;
+    color: colors.$worky-color-text;
+    opacity: 0.7;
     margin-bottom: 10px;
   }
 

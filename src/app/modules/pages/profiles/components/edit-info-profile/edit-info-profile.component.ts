@@ -1,9 +1,9 @@
 import { Component, Inject, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-import { LoadingController } from '@ionic/angular';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { map, Subject, takeUntil } from 'rxjs';
 import { translations } from '@translations/translations';
+import { LoadingService } from '@shared/services/loading.service';
 
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { ProfileService } from '../../services/profile.service';
@@ -51,7 +51,7 @@ export class EditInfoProfileDetailComponent implements OnInit {
     private _cdr: ChangeDetectorRef,
     private _dialogRef: MatDialogRef<EditInfoProfileDetailComponent>,
     private _userService: UserService,
-    private _loadingCtrl: LoadingController,
+    private _loadingService: LoadingService,
     private _customFieldService: CustomFieldService,
     private _logService: LogService,
   ) {
@@ -154,11 +154,14 @@ export class EditInfoProfileDetailComponent implements OnInit {
       return;
     }
 
+    // Use accessible loading for better UX consistency
+    const accessibleLoading = this._loadingService.createAccessibleLoading(
+      translations['pages.editInfoProfile.loading'],
+      translations['pages.editInfoProfile.loading.subMessage']
+    );
+    const loadingElement = accessibleLoading.show();
+
     try {
-      const loadingProfile = await this._loadingCtrl.create({
-        message: translations['pages.editInfoProfile.loading'],
-      });
-      await loadingProfile.present();
       const dataBasicProfile = this.prepareBasicProfileData();
       const dataProfile = this.prepareDetailedProfileData();
 
@@ -170,13 +173,17 @@ export class EditInfoProfileDetailComponent implements OnInit {
       await this.updateUserProfile(dataProfile);
 
       this._dialogRef.close('saved');
+      
+      // Hide loading on success
+      accessibleLoading.hide(loadingElement);
     } catch (error) {
-      console.error('Error al guardar los cambios:', error);
-
+      // Hide loading on error
+      accessibleLoading.hide(loadingElement);
+      
       this._logService.log(
         LevelLogEnum.ERROR,
         'EditInfoProfileDetailComponent',
-        'Error guardando los cambios en el perfil.',
+        'Error saving profile changes.',
         {
           user: this.userData,
           message: error,
@@ -185,8 +192,6 @@ export class EditInfoProfileDetailComponent implements OnInit {
           dynamicFields: this.dynamicFieldsForm.value,
         },
       );
-    } finally {
-      await this.dismissLoading();
     }
   }
 
@@ -227,12 +232,7 @@ export class EditInfoProfileDetailComponent implements OnInit {
     await this._profileService.updateProfile(this.userData._id, data).pipe(takeUntil(this.unsubscribe$)).toPromise();
   }
 
-  private async dismissLoading(): Promise<void> {
-    const loadingProfile = await this._loadingCtrl.getTop();
-    if (loadingProfile) {
-      await loadingProfile.dismiss();
-    }
-  }
+
 
   loadBasicDetail() {
     if (!this.userData) return;

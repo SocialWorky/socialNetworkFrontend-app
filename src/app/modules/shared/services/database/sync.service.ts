@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, interval, merge, firstValueFrom } from 'rxjs';
 import { switchMap, catchError, tap, startWith } from 'rxjs/operators';
 import { DatabaseManagerService } from './database-manager.service';
-import { MessageDatabaseService } from './message-database.service';
 import { PublicationDatabaseService } from './publication-database.service';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { AuthService } from '@auth/services/auth.service';
@@ -47,7 +46,6 @@ export class SyncService {
 
   constructor(
     private databaseManager: DatabaseManagerService,
-    private messageDatabase: MessageDatabaseService,
     private publicationDatabase: PublicationDatabaseService,
     private publicationService: PublicationService,
     private authService: AuthService,
@@ -122,10 +120,6 @@ export class SyncService {
     try {
       // Starting database sync - no need to log every sync
 
-      // Sync messages
-      await this.syncMessages();
-      this.updateSyncStatus({ progress: 50 });
-
       // Sync publications
       await this.syncPublications();
       this.updateSyncStatus({ progress: 100 });
@@ -157,29 +151,6 @@ export class SyncService {
       );
     } finally {
       this.syncInProgress = false;
-    }
-  }
-
-  /**
-   * Sync messages with backend
-   */
-  private async syncMessages(): Promise<void> {
-    try {
-      // Get local messages
-      const localMessages = await this.messageDatabase.getAllMessages();
-      
-      // For now, we'll skip server message sync until MessageService is properly implemented
-      // TODO: Implement server message sync when MessageService is available
-      
-      // Messages sync skipped - MessageService not available - no need to log every skip
-    } catch (error) {
-      this.logService.log(
-        LevelLogEnum.ERROR,
-        'SyncService',
-        'Error syncing messages',
-        { error: error instanceof Error ? error.message : String(error) }
-      );
-      throw error;
     }
   }
 

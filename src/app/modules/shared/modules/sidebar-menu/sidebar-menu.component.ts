@@ -1,13 +1,15 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { Subject, takeUntil, filter } from 'rxjs';
+import { Subject, skip, takeUntil } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
-import { MessageService } from 'src/app/modules/pages/messages/services/message.service';
 import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service';
-import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { GlobalEventService } from '@shared/services/globalEventService.service';
+import { UserService } from '@shared/services/core-apis/users.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 
 @Component({
   selector: 'worky-sidebar-menu',
@@ -28,46 +30,48 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
 
   notifications: number = 0;
 
-  messages: number = 0;
-
   constructor(
     private _authService: AuthService,
     private _cdr: ChangeDetectorRef,
     private _notificationCenterService: NotificationCenterService,
     private _notificationService: NotificationService,
-    private _messageService: MessageService,
     private _notificationPanelService: NotificationPanelService,
-    private _notificationMessageChatService: NotificationMessageChatService,
-    private _logService: LogService
+    private _logService: LogService,
+    private _globalEventService: GlobalEventService,
+    private _userService: UserService,
+    private _utilityService: UtilityService
   ) { }
 
   ngOnInit() {
     this.decodedToken = this._authService.getDecodedToken()!;
     this.userName = this.decodedToken.username;
-    this.userAvatar = this.decodedToken.avatar || '';
+    // Normalize avatar URL from token
+    this.userAvatar = this.decodedToken.avatar ? this._utilityService.normalizeImageUrl(this.decodedToken.avatar, environment.MINIO_BUCKET_URL || '') : '';
     this.userFullName = this.decodedToken.name || '';
     
-    this._authService.isAuthenticated().then(isAuth => {
-      this.isAuthenticated = isAuth;
-    });
-
-    this._notificationMessageChatService.notificationMessageChat$
-      .pipe(
-        takeUntil(this.unsubscribe$),
-        filter((message: any) => message && message._id && message._id !== 'undefined')
-      )
-      .subscribe({
-        next: (message: any) => {
-          // New message notification received - no need to log every notification
-          this.updateUnreadCountForNewMessage(message);
-        },
-        error: (error) => {
-          console.error('Error en notificación de mensaje:', error);
+    // Subscribe to profile image updates - normalize URL
+    this._globalEventService.profileImage$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(newImageUrl => {
+        if (newImageUrl) {
+          this.userAvatar = this._utilityService.normalizeImageUrl(newImageUrl, environment.MINIO_BUCKET_URL || '');
+          this._cdr.markForCheck();
         }
       });
+    
+    // Get fresh user data
+    this.getFreshUserData();
+    
+    this.isAuthenticated = this._authService.isAuthenticated();
 
     this.getNotification();
-    this.getUnreadMessagesCount();
+
+    // Re-fetch count whenever the notification panel marks/deletes notifications.
+    // skip(1) avoids the BehaviorSubject's immediate emission (already called above).
+    // bypassCache: true forces a fresh HTTP call, skipping the 1-min cache TTL.
+    this._notificationService.notification$
+      .pipe(skip(1), takeUntil(this.unsubscribe$))
+      .subscribe(() => this.getNotification(true));
   }
 
   ngOnDestroy() {
@@ -75,87 +79,42 @@ export class SideBarMenuComponent implements OnInit, OnDestroy{
     this.unsubscribe$.complete();
   }
 
+  private async getFreshUserData(): Promise<void> {
+    try {
+      if (this.decodedToken?.id) {
+        const freshUserData = await this._userService.getUserById(this.decodedToken.id).toPromise();
+        if (freshUserData) {
+          // Normalize avatar URL from fresh user data
+          this.userAvatar = freshUserData.avatar ? this._utilityService.normalizeImageUrl(freshUserData.avatar, environment.MINIO_BUCKET_URL || '') : '';
+          this.userFullName = freshUserData.name + ' ' + freshUserData.lastName || '';
+          this.userName = freshUserData.username || '';
+          this._cdr.markForCheck();
+        }
+      }
+    } catch (error) {
+      this._logService.log(LevelLogEnum.ERROR, 'SideBarMenuComponent', 'Error getting fresh user data', { error });
+    }
+  }
+
   toggleNotificationsPanel() {
     this._notificationPanelService.togglePanel();
   }
 
-  getNotification() {
+  getNotification(bypassCache = false) {
     const userId = this._authService.getDecodedToken()?.id!;
-    this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._notificationCenterService.getNotifications(userId, bypassCache).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {
         this.notifications = data.filter((notification: any) => !notification.read).length;
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error getting notifications', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'SideBarMenuComponent',
+          'Error getting notifications',
+          { error: String(error) }
+        );
       }
     });
-  }
-
-  getUnreadMessagesCount() {
-    this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (count: number) => {
-        this.messages = count;
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Error getting unread messages count', error);
-        this.messages = 0;
-        this._cdr.markForCheck();
-      }
-    });
-  }
-
-  forceSyncMessageCount() {
-    this._messageService.syncReadStatusFromServer().pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (count: number) => {
-        this.messages = count;
-        this._cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Error forzando sincronización:', error);
-      }
-    });
-  }
-
-  forceRefreshCounts() {
-    this.getNotification();
-    this.getUnreadMessagesCount();
-  }
-
-  private updateUnreadCountForNewMessage(message: any) {
-    const currentUserId = this._authService.getDecodedToken()?.id;
-    
-    if (!message || !message._id) {
-      return;
-    }
-    
-    if (message.senderId !== currentUserId) {
-      this.messages++;
-      this._cdr.markForCheck();
-      this._messageService.syncSpecificMessage(message._id)
-        .pipe(takeUntil(this.unsubscribe$))
-        .subscribe({
-          next: (syncedMessage) => {
-            if (syncedMessage) {
-              this.getUnreadMessagesCount();
-            }
-          },
-          error: (error) => {
-            console.error('Error sincronizando mensaje específico:', error);
-          }
-        });
-    } else {
-      this._logService.log(
-        LevelLogEnum.DEBUG,
-        'SideBarMenuComponent',
-        'Message from current user, not updating count',
-        { messageId: message._id, senderId: message.senderId }
-      );
-    }
-  }
-
-  updateUnreadCountWhenMessagesRead() {
-    this.getUnreadMessagesCount();
   }
 }

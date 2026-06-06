@@ -7,23 +7,24 @@ import hljs from 'highlight.js';
 
 import { environment } from '@env/environment';
 import { LazyCssService } from './core-apis/lazy-css.service';
+import { UtilityService } from './utility.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ContentService {
 
-  private highlightJsLoaded = false;
+  private _highlightJsLoaded = false;
 
   constructor(
     private http: HttpClient,
-    private lazyCssService: LazyCssService
+    private lazyCssService: LazyCssService,
+    private utilityService: UtilityService
   ) {
     this.initializeMarked();
   }
 
   private async initializeMarked() {
-    // Cargar CSS de highlight.js de forma lazy
     await this.loadHighlightJsCss();
     
     const renderer = new marked.Renderer();
@@ -34,6 +35,17 @@ export class ContentService {
     };
     renderer.codespan = ({ text }: { text: string }) => {
       return `<code class="inline-code">${text}</code>`;
+    };
+    // Normalize image URLs in markdown to ensure MinIO URLs are properly formatted
+    renderer.image = (token: any) => {
+      const href = token.href || '';
+      const title = token.title || null;
+      const text = token.text || null;
+      // Normalize the image URL to handle MinIO relative paths
+      const normalizedHref = this.utilityService.normalizeImageUrl(href, environment.MINIO_BUCKET_URL || '');
+      const titleAttr = title ? ` title="${title}"` : '';
+      const altAttr = text ? ` alt="${text}"` : '';
+      return `<img src="${normalizedHref}"${altAttr}${titleAttr} />`;
     };
     marked.setOptions({
       renderer: renderer,
@@ -51,12 +63,12 @@ export class ContentService {
    * Carga CSS de highlight.js solo cuando se necesite
    */
   private async loadHighlightJsCss() {
-    if (!this.highlightJsLoaded) {
+    if (!this._highlightJsLoaded) {
       try {
         await this.lazyCssService.loadHighlightJs();
-        this.highlightJsLoaded = true;
+        this._highlightJsLoaded = true;
       } catch (error) {
-        console.warn('Error cargando CSS de highlight.js:', error);
+        // CSS loading error handled
       }
     }
   }
@@ -137,36 +149,62 @@ export class ContentService {
     return nonImageAndNonCodeBlockUrls;
   }
 
+  private extractDomain(url: string): string {
+    try {
+      return new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+      return url;
+    }
+  }
+
+  private escapeAttr(str: string): string {
+    return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
   private generatePreviewHTML(url: string, metadata: any): { previewHtml: string, isYouTube: boolean } {
-    // Detectar si es un enlace de YouTube
     const youTubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i;
     const youTubeMatch = url.match(youTubeRegex);
 
     if (youTubeMatch) {
       const videoId = youTubeMatch[1];
-      const youTubeHtml = `
-        <div class="link-preview-youtube">
-          <iframe width="100%" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-        </div>
-      `;
-      return { previewHtml: youTubeHtml, isYouTube: true };
+      return {
+        previewHtml: `<div class="link-preview-youtube"><iframe width="100%" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe></div>`,
+        isYouTube: true,
+      };
     }
 
     if (!metadata || !metadata.ogTitle) return { previewHtml: '', isYouTube: false };
 
-    const displayTitle = metadata.ogTitle || metadata.twitterTitle || metadata.linkedinTitle;
-    const displayDescription = metadata.ogDescription || metadata.twitterDescription || metadata.linkedinDescription;
-    const displayImage = metadata.ogImage?.url || metadata.twitterImage?.url || metadata.linkedinImage;
+    const title = metadata.ogTitle || metadata.twitterTitle || metadata.linkedinTitle || '';
+    const description = metadata.ogDescription || metadata.twitterDescription || metadata.linkedinDescription || '';
+    const rawImage = metadata.ogImage?.url || metadata.twitterImage?.url || metadata.linkedinImage || '';
+    const image = rawImage.startsWith('http://') || rawImage.startsWith('https://') ? rawImage : '';
+
+    const domain = this.extractDomain(url);
+    const faviconSrc = `https://www.google.com/s2/favicons?domain=${domain}&amp;sz=16`;
+
+    const imageBlock = image
+      ? `<div class="lp-image"><img src="${this.escapeAttr(image)}" alt="${this.escapeAttr(title)}" /></div>`
+      : '';
+
+    const descBlock = description
+      ? `<div class="lp-desc">${this.escapeAttr(description)}</div>`
+      : '';
 
     const previewHtml = `
-      <div class="link-preview-content" style="border: 1px solid #ddd; padding: 10px; border-radius: 5px; margin-bottom: 10px; display: flex; align-items: center;">
-        ${displayImage ? `<div style="flex-shrink: 0; width: 100px; height: 100px; overflow: hidden; margin-right: 10px;"><img src="${displayImage}" alt="Preview Image" style="width: 100%; height: auto;"></div>` : ''}
-        <div class="link-preview-info" style="flex-grow: 1; text-align: left;">
-          <h3 style="margin: 0; font-size: 1.2em; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${displayTitle}</h3>
-          <p style="margin: 5px 0; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${displayDescription}</p>
+      <a href="${this.escapeAttr(url)}" target="_blank" rel="noopener noreferrer" class="lp-card">
+        ${imageBlock}
+        <div class="lp-body">
+          <div class="lp-domain">
+            <img class="lp-favicon" src="${faviconSrc}" alt="" />
+            <span>${this.escapeAttr(domain)}</span>
+          </div>
+          <div class="lp-title">${this.escapeAttr(title)}</div>
+          ${descBlock}
         </div>
-      </div>
-    `;
+      </a>`;
+
     return { previewHtml, isYouTube: false };
   }
 }
+

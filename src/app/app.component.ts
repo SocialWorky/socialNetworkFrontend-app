@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { DOCUMENT } from '@angular/common'
 import { Title } from '@angular/platform-browser';
-import { filter, map, Subject, switchMap, takeUntil, timer, of, catchError, retryWhen, delay, tap } from 'rxjs';
+import { filter, map, Subject, switchMap, takeUntil, timer, of, catchError, take, groupBy, mergeMap, debounceTime, retry } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 
 import { getTranslationsLanguage } from '../translations/translations';
@@ -18,13 +18,17 @@ import { AuthService } from '@auth/services/auth.service';
 
 import { EmojiEventsService } from '@shared/services/emoji-events.service';
 import { MediaEventsService } from '@shared/services/media-events.service';
+import { IOSViewportService } from '@shared/services/ios-viewport.service';
 import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget-config.service';
 import { environment } from '@env/environment';
 import { DevCacheService } from '@shared/services/dev-cache.service';
-import { CacheService } from '@shared/services/cache.service';
+
 import { CacheOptimizationService } from '@shared/services/cache-optimization.service';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { AppUpdateManagerService } from '@shared/services/app-update-manager.service';
+import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
+import { ImageOrganizer, MediaType } from '@shared/modules/image-organizer/interfaces/image-organizer.interface';
+import { UtilityService } from '@shared/services/utility.service';
 
 @Component({
     selector: 'worky-root',
@@ -43,6 +47,8 @@ export class AppComponent implements OnInit, OnDestroy {
   environment = environment;
 
   private destroy$ = new Subject<void>();
+  private mediaReadyNotification$ = new Subject<any>();
+  private mediaCollector = new Map<string, any[]>();
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -61,16 +67,19 @@ export class AppComponent implements OnInit, OnDestroy {
     private _mediaEventsService: MediaEventsService,
     private _widgetConfigService: WidgetConfigService,
     private devCacheService: DevCacheService,
-    private cacheService: CacheService,
     private _cacheOptimizationService: CacheOptimizationService,
     private _logService: LogService,
-    private _appUpdateManagerService: AppUpdateManagerService
+    private _appUpdateManagerService: AppUpdateManagerService,
+    private _notificationPublicationService: NotificationPublicationService,
+    private _utilityService: UtilityService,
+    private _iosViewportService: IOSViewportService
   ) {
     this._notificationUsersService.setupInactivityListeners();
     if (Capacitor.isNativePlatform()) this._pushNotificationService.initPush();
   }
 
   async ngOnInit(): Promise<void> {
+    this.setupMediaReadyDebouncer();
     // Clear invalid tokens first
     this.cleanInvalidTokens();
     
@@ -90,8 +99,15 @@ export class AppComponent implements OnInit, OnDestroy {
     );
     this.applyCustomConfig();
 
+    // Schedule loading screen removal before any async operations
+    // so it always fires regardless of downstream await durations
+    setTimeout(() => {
+      this._loadingService.setLoading(false);
+      document.getElementById('loading-screen')?.remove();
+    }, 2000);
+
     // Only initialize widget data if user is authenticated
-    await this.checkAuthenticationAndInitializeWidgets();
+    this.checkAuthenticationAndInitializeWidgets();
 
     // Initialize app update checks
     this.initializeAppUpdates();
@@ -103,17 +119,45 @@ export class AppComponent implements OnInit, OnDestroy {
         }
         switch (message.type) {
           case TypePublishing.POST:
-            this.handlePostUpdate(message.idReference);
             if (this.isMediaProcessingNotification(message)) {
-              this.handleMediaProcessingNotification(message.idReference);
-            } else if (message.containsMedia) {
-              this._mediaEventsService.notifyMediaProcessed(message);
+              // Collect media data from the socket message
+              const pubId = message.idReference;
+              if (!this.mediaCollector.has(pubId)) {
+                this.mediaCollector.set(pubId, []);
+              }
+              // The 'data' field contains the info for one processed file
+              if (message.data) {
+                this.mediaCollector.get(pubId)!.push(message);
+              }
+
+              // Push the full message to the debouncer to act as a trigger
+              this.mediaReadyNotification$.next(message);
+            } else {
+              this.handlePostUpdate(message.idReference);
+              if (message.containsMedia) {
+                this._mediaEventsService.notifyMediaProcessed(message);
+              }
             }
             break;
           case TypePublishing.COMMENT:
-            this.handleCommentUpdate(message.idReference);
-            if (message.containsMedia) {
-              this._mediaEventsService.notifyMediaProcessed(message);
+            if (this.isMediaProcessingNotification(message)) {
+              // Collect media data from the socket message for comments
+              // For comments, idReference is the comment ID, but we need to track by comment ID
+              const commentId = message.idReference;
+              if (!this.mediaCollector.has(commentId)) {
+                this.mediaCollector.set(commentId, []);
+              }
+              // The 'data' field contains the info for one processed file
+              if (message.data) {
+                this.mediaCollector.get(commentId)!.push(message);
+              }
+              // Push the full message to the debouncer to act as a trigger
+              this.mediaReadyNotification$.next(message);
+            } else {
+              this.handleCommentUpdate(message.idReference);
+              if (message.containsMedia) {
+                this._mediaEventsService.notifyMediaProcessed(message);
+              }
             }
             break;
           case TypePublishing.EMOJI:
@@ -121,17 +165,20 @@ export class AppComponent implements OnInit, OnDestroy {
             break;
           default:
             if (this.isMediaProcessingNotification(message)) {
-              this.handleMediaProcessingNotification(message.idReference);
+              // Same logic for other types if needed in the future
+              const pubId = message.idReference;
+              if (!this.mediaCollector.has(pubId)) {
+                this.mediaCollector.set(pubId, []);
+              }
+              if (message.data) {
+                this.mediaCollector.get(pubId)!.push(message);
+              }
+              this.mediaReadyNotification$.next(message);
             }
             break;
         }
       });
     }, 500);
-
-    setTimeout(() => {
-      this._loadingService.setLoading(false);
-      document.getElementById('loading-screen')?.remove();
-    }, 2000);
 
     if(localStorage.getItem('token')) this.currentUserId = this._authService.getDecodedToken()!.id;
 
@@ -152,12 +199,14 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-
+    this.accessibilityObserver?.disconnect();
   }
+
+  private accessibilityObserver: MutationObserver | null = null;
 
   private setupAccessibilityFix(): void {
     // Create a MutationObserver to watch for aria-hidden changes on the root element
-    const observer = new MutationObserver((mutations) => {
+    this.accessibilityObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'aria-hidden') {
           const target = mutation.target as HTMLElement;
@@ -176,15 +225,25 @@ export class AppComponent implements OnInit, OnDestroy {
     // Start observing the root element
     const rootElement = this.document.querySelector('worky-root');
     if (rootElement) {
-      observer.observe(rootElement, {
+      this.accessibilityObserver.observe(rootElement, {
         attributes: true,
         attributeFilter: ['aria-hidden']
       });
     }
+  }
 
-    // Clean up observer on destroy
-    this.destroy$.subscribe(() => {
-      observer.disconnect();
+  private setupMediaReadyDebouncer(): void {
+    this.mediaReadyNotification$.pipe(
+      groupBy(message => message.idReference),
+      mergeMap(group$ => group$.pipe(debounceTime(2500))), // Wait for 2.5s of silence for a given ID
+      takeUntil(this.destroy$)
+    ).subscribe(lastMessage => {
+      // Check if it's a comment or publication based on the type
+      if (lastMessage.type === TypePublishing.COMMENT) {
+        this.buildCommentWithCollectedMedia(lastMessage.idReference);
+      } else {
+        this.buildPublicationWithCollectedMedia(lastMessage.idReference);
+      }
     });
   }
 
@@ -197,18 +256,196 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private handleCommentUpdate(commentId: string): void {
-    this._commentService.getCommentsById(commentId)
-      .pipe(
-        takeUntil(this.destroy$),
-        filter(Boolean),
-        switchMap((comment: any) =>
-          this._publicationService.getPublicationId(comment.publicationId)
-            .pipe(map((publication: PublicationView[]) => ({ comment, publication })))
-        )
-      )
-      .subscribe(({ publication }) => {
-        this._socketService.emitEvent('updatePublication', publication);
+    // Delay to ensure database has completed media linking
+    // Increased delay to ensure media is fully processed and linked
+    timer(1000).pipe(
+      takeUntil(this.destroy$),
+      switchMap(() => this._commentService.getCommentsById(commentId)),
+      filter(Boolean),
+      switchMap((comment: any) => {
+        if (!comment.publicationId) {
+          // Comment might be on a media item, not directly on a publication
+          return of(null);
+        }
+        // Force refresh by bypassing cache (second parameter = true)
+        return this._publicationService.getPublicationId(comment.publicationId, true);
+      }),
+      filter((publication): publication is PublicationView[] => !!publication && publication.length > 0),
+      // Retry if media is still processing (up to 2 retries with 1 second delay)
+      retry({
+        count: 2,
+        delay: 1000
+      })
+    ).subscribe({
+      next: (publication) => {
+        // Use updatePublications which handles both socket notification and local database
+        // This will trigger the update in publication-view component
+        this._publicationService.updatePublications(publication);
+      },
+      error: (error) => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'AppComponent',
+          'Error updating comment after media processing',
+          { commentId, error: error instanceof Error ? error.message : String(error) }
+        );
+      }
+    });
+  }
+
+  /**
+   * Builds the final publication object by fetching the base and injecting all collected media.
+   */
+  private buildPublicationWithCollectedMedia(publicationId: string): void {
+    const collectedMessages = this.mediaCollector.get(publicationId);
+
+    if (!collectedMessages || collectedMessages.length === 0) {
+      return;
+    }
+
+    // The backend now debounces per idReference: by the time this fires, all files for
+    // this publication have been processed and their /media/create records persisted.
+    // Re-fetching bypasses the cache so we get the complete media array from the DB.
+    this._publicationService.getPublicationId(publicationId, true).pipe(
+      take(1),
+      catchError(err => {
+        this._logService.log(LevelLogEnum.ERROR, 'AppComponent', `Failed to fetch base publication ${publicationId}`, { error: err });
+        return of(null);
+      })
+    ).subscribe(publications => {
+      if (publications && publications.length > 0) {
+        const basePublication = publications[0];
+
+        // Prefer the media array already persisted in the DB — it contains ALL files for
+        // this publication. Only fall back to constructing from socket data when the DB
+        // has no media (e.g. /media/create failed for all files).
+        if (!basePublication.media || basePublication.media.length === 0) {
+          const baseUrl = environment.MINIO_BUCKET_URL || '';
+          const getFullPath = (relativePath: string) => {
+            if (!relativePath) return '';
+            if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+              return relativePath;
+            }
+            return this._utilityService.normalizeImageUrl(relativePath, baseUrl);
+          };
+
+          basePublication.media = collectedMessages.map(msg => ({
+            _id: '',
+            url: msg.data?.url ? getFullPath(msg.data.url) : '',
+            urlThumbnail: msg.data?.urlThumbnail
+              ? getFullPath(msg.data.urlThumbnail)
+              : msg.data?.thumbnail ? getFullPath(`${msg.urlMedia || 'publications/'}${msg.data.thumbnail}`) : '',
+            urlCompressed: msg.data?.urlCompressed
+              ? getFullPath(msg.data.urlCompressed)
+              : msg.data?.compressed ? getFullPath(`${msg.urlMedia || 'publications/'}${msg.data.compressed}`) : (msg.data?.url ? getFullPath(msg.data.url) : ''),
+            comments: [],
+            type: MediaType.IMAGE,
+          }));
+        }
+
+        basePublication.containsMedia = false;
+        this.updatePublicationView(basePublication);
+      }
+
+      this.mediaCollector.delete(publicationId);
+    });
+  }
+
+  /**
+   * Builds the final comment object by fetching the comment and publication, then injecting all collected media.
+   */
+  private buildCommentWithCollectedMedia(commentId: string): void {
+    const collectedMessages = this.mediaCollector.get(commentId);
+
+    if (!collectedMessages || collectedMessages.length === 0) {
+      return;
+    }
+
+    // First, get the comment to find its publicationId
+    this._commentService.getCommentsById(commentId).pipe(
+      take(1),
+      filter(Boolean),
+      switchMap((comment: any) => {
+        if (!comment.publicationId) {
+          // Comment might be on a media item, not directly on a publication
+          this._logService.log(LevelLogEnum.WARN, 'AppComponent', `Comment ${commentId} has no publicationId`, {});
+          return of(null);
+        }
+        // Get the publication with the comment
+        return this._publicationService.getPublicationId(comment.publicationId, true).pipe(
+          map((publications: PublicationView[]) => {
+            if (!publications || publications.length === 0) {
+              return null;
+            }
+            return { publication: publications[0], comment };
+          })
+        );
+      }),
+      catchError(err => {
+        this._logService.log(LevelLogEnum.ERROR, 'AppComponent', `Failed to fetch comment and publication for ${commentId}`, { error: err });
+        return of(null);
+      })
+    ).subscribe(result => {
+      if (!result) {
+        // Clean up collector even if we couldn't process
+        this.mediaCollector.delete(commentId);
+        return;
+      }
+
+      const { publication } = result;
+
+      // Manually construct the full media array from all collected messages
+      const constructedMedia: ImageOrganizer[] = collectedMessages.map(msg => {
+        // Normalize URLs for MinIO
+        // The msg.data object contains the result from uploadService.processFile
+        // which includes url, urlThumbnail, urlCompressed as relative MinIO paths
+        const baseUrl = environment.MINIO_BUCKET_URL || '';
+        
+        // Use the MinIO URLs directly from the data object
+        // These are already relative paths like "comments/filename.jpg" or "comments/compressed|filename.jpg"
+        const getFullPath = (relativePath: string) => {
+          if (!relativePath) return '';
+          // If already a full URL, return as is
+          if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+            return relativePath;
+          }
+          // Normalize the relative path with the base URL
+          return this._utilityService.normalizeImageUrl(relativePath, baseUrl);
+        };
+        
+        // Prefer urlCompressed/urlThumbnail from data, fallback to constructing from filename/thumbnail if needed
+        const url = msg.data.url ? getFullPath(msg.data.url) : '';
+        const urlThumbnail = msg.data.urlThumbnail ? getFullPath(msg.data.urlThumbnail) : 
+          (msg.data.thumbnail ? getFullPath(`${msg.urlMedia || 'comments/'}${msg.data.thumbnail}`) : '');
+        const urlCompressed = msg.data.urlCompressed ? getFullPath(msg.data.urlCompressed) :
+          (msg.data.compressed ? getFullPath(`${msg.urlMedia || 'comments/'}${msg.data.compressed}`) : url);
+        
+        return {
+          _id: '', // Not critical for the view
+          url: url,
+          urlThumbnail: urlThumbnail,
+          urlCompressed: urlCompressed || url, // Fallback to url if urlCompressed is not available
+          comments: [],
+          type: MediaType.IMAGE // This can be enhanced to detect video/image from file extension
+        };
       });
+
+      // Find the comment in the publication and update it with the media
+      const commentIndex = publication.comment?.findIndex((c: any) => c._id === commentId);
+      if (commentIndex !== undefined && commentIndex >= 0) {
+        // Update the comment with the constructed media
+        publication.comment[commentIndex].media = constructedMedia;
+        publication.comment[commentIndex].containsMedia = false; // The media is now present
+        
+        // Update the publication with the updated comment
+        this._publicationService.updatePublications([publication]);
+      } else {
+        this._logService.log(LevelLogEnum.WARN, 'AppComponent', `Comment ${commentId} not found in publication ${publication._id}`, {});
+      }
+
+      // Clean up collector for this comment ID
+      this.mediaCollector.delete(commentId);
+    });
   }
 
   applyCustomConfig() {
@@ -224,10 +461,14 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   applyConfig(configData: any) {
+    if (!configData || !configData.settings) {
+      return;
+    }
+
     if (configData.customCss) {
       const styleElement = this._renderer.createElement('style');
       styleElement.id = 'custom-css';
-      styleElement.innerHTML = String(configData.customCss);
+      this._renderer.setProperty(styleElement, 'textContent', String(configData.customCss));
       this._renderer.appendChild(this.document.head, styleElement);
     }
 
@@ -239,30 +480,79 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   updateFavicon(logoUrl: string) {
-    const link: HTMLLinkElement =
-      document.querySelector("link[rel*='icon']") || document.createElement('link');
-    link.type = 'image/png';
-    link.rel = 'icon';
-    link.href = logoUrl;
-    document.getElementsByTagName('head')[0].appendChild(link);
+    if (!logoUrl) {
+      return;
+    }
+
+    // Normalize the URL - handle MinIO relative paths
+    let normalizedUrl = logoUrl;
+    
+    // If it's a relative MinIO path, normalize it
+    if (logoUrl && !logoUrl.startsWith('http://') && !logoUrl.startsWith('https://') && !logoUrl.startsWith('data:') && !logoUrl.startsWith('blob:') && !logoUrl.startsWith('assets/')) {
+      // It's likely a MinIO path, normalize it
+      normalizedUrl = this._utilityService.normalizeImageUrl(logoUrl, environment.MINIO_BUCKET_URL || '');
+    }
+
+    // Detect image type from URL extension
+    const getImageType = (url: string): string => {
+      const lowerUrl = url.toLowerCase();
+      if (lowerUrl.includes('.jpg') || lowerUrl.includes('.jpeg')) return 'image/jpeg';
+      if (lowerUrl.includes('.png')) return 'image/png';
+      if (lowerUrl.includes('.svg')) return 'image/svg+xml';
+      if (lowerUrl.includes('.gif')) return 'image/gif';
+      if (lowerUrl.includes('.webp')) return 'image/webp';
+      if (lowerUrl.includes('.ico')) return 'image/x-icon';
+      // Default to PNG if cannot determine
+      return 'image/png';
+    };
+
+    // Find and remove all existing favicon links (including shortcut icon, apple-touch-icon, etc.)
+    const existingLinks = document.querySelectorAll("link[rel*='icon'], link[rel='shortcut icon'], link[rel='apple-touch-icon']");
+    existingLinks.forEach(link => link.remove());
+
+    // Add timestamp to force browser refresh
+    const timestamp = new Date().getTime();
+    const separator = normalizedUrl.includes('?') ? '&' : '?';
+    const faviconUrl = normalizedUrl + separator + 'v=' + timestamp;
+    const imageType = getImageType(normalizedUrl);
+
+    // Create standard favicon
+    const faviconLink = document.createElement('link');
+    faviconLink.rel = 'icon';
+    faviconLink.type = imageType;
+    faviconLink.href = faviconUrl;
+    document.head.appendChild(faviconLink);
+
+    // Also create shortcut icon for better browser compatibility
+    const shortcutLink = document.createElement('link');
+    shortcutLink.rel = 'shortcut icon';
+    shortcutLink.type = imageType;
+    shortcutLink.href = faviconUrl;
+    document.head.appendChild(shortcutLink);
+
+    // Create apple-touch-icon for iOS devices
+    const appleTouchLink = document.createElement('link');
+    appleTouchLink.rel = 'apple-touch-icon';
+    appleTouchLink.href = faviconUrl;
+    document.head.appendChild(appleTouchLink);
+    
+    this._logService.log(
+      LevelLogEnum.INFO,
+      'AppComponent',
+      'Favicon updated',
+      { originalUrl: logoUrl, normalizedUrl: faviconUrl, imageType }
+    );
   }
 
-  private async checkAuthenticationAndInitializeWidgets(): Promise<void> {
-    try {
-      const isAuthenticated = await this._authService.isAuthenticated();
-      if (isAuthenticated) {
-        this._widgetConfigService.initializeData();
-      }
-    } catch (error) {
-      // User is not authenticated, widgets won't be initialized
-      // This is expected behavior for non-authenticated users
+  private checkAuthenticationAndInitializeWidgets(): void {
+    if (this._authService.isAuthenticated()) {
+      this._widgetConfigService.initializeData();
     }
   }
 
 
 
   private setupDevMode(): void {
-    // Generar datos mock para desarrollo
     this.devCacheService.generateMockData();
     
     // Cache operations log disabled to avoid spam
@@ -291,125 +581,35 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private initializeAppUpdates(): void {
-    // App update manager is automatically initialized in its constructor
-    // This method can be used for additional app update initialization if needed
+    void this._appUpdateManagerService;
   }
 
   /**
    * Check if the message is a media processing notification
    */
   private isMediaProcessingNotification(message: any): boolean {
-    return message.title && message.title.includes('Archivo procesado');
+    const title = message.title?.toLowerCase() || '';
+    const isProcessing = title.includes('archivo procesado') || title.includes('file processed') || title.includes('files processed');
+    return isProcessing;
   }
 
   /**
-   * Handle media processing notification with RxJS operators for better control flow
+   * Update publication view with new data from backend
    */
-  private handleMediaProcessingNotification(publicationId: string): void {
-    if (!publicationId) {
-      return;
-    }
+  private updatePublicationView(publication: PublicationView): void {
+    // Reconcile every cache layer (IndexedDB, in-memory and persisted HTTP feed cache)
+    // so the resolved media survives a feed reload and the "Procesando medios" overlay
+    // does not reappear from a stale cached response.
+    this._publicationService.onMediaProcessed(publication);
 
-    // Create a polling mechanism with RxJS operators
-    timer(2000) // Initial delay of 2 seconds
-      .pipe(
-        switchMap(() => this._publicationService.getPublicationId(publicationId)),
-        switchMap((publications: PublicationView[]) => {
-          if (publications && publications.length > 0) {
-            const publication = publications[0];
-            
-            if (publication.media && publication.media.length > 0) {
-              // Media found, notify and complete
-              this._mediaEventsService.notifyMediaProcessed({
-                idReference: publicationId,
-                media: publication.media,
-                containsMedia: true
-              });
-              return of(null); // Complete the stream
-            } else {
-              // No media found, try force sync
-              return this._publicationService.syncSpecificPublication(publicationId)
-                .pipe(
-                  switchMap((syncedPublication) => {
-                    if (syncedPublication && syncedPublication.media && syncedPublication.media.length > 0) {
-                      this._mediaEventsService.notifyMediaProcessed({
-                        idReference: publicationId,
-                        media: syncedPublication.media,
-                        containsMedia: true
-                      });
-                      return of(null); // Complete the stream
-                    } else {
-                      // Still no media, retry after 2 more seconds
-                      return timer(2000).pipe(
-                        switchMap(() => this._publicationService.getPublicationId(publicationId)),
-                        map((retryPublications: PublicationView[]) => {
-                          if (retryPublications && retryPublications.length > 0) {
-                            const retryPublication = retryPublications[0];
-                            
-                            if (retryPublication.media && retryPublication.media.length > 0) {
-                              this._mediaEventsService.notifyMediaProcessed({
-                                idReference: publicationId,
-                                media: retryPublication.media,
-                                containsMedia: true
-                              });
-                            } else {
-                              this._mediaEventsService.notifyMediaProcessed({
-                                idReference: publicationId,
-                                media: [],
-                                containsMedia: false
-                              });
-                            }
-                          } else {
-                            this._mediaEventsService.notifyMediaProcessed({
-                              idReference: publicationId,
-                              media: [],
-                              containsMedia: false
-                            });
-                          }
-                          return null;
-                        }),
-                        catchError(() => {
-                          this._mediaEventsService.notifyMediaProcessed({
-                            idReference: publicationId,
-                            media: [],
-                            containsMedia: false
-                          });
-                          return of(null);
-                        })
-                      );
-                    }
-                  }),
-                  catchError(() => {
-                    this._mediaEventsService.notifyMediaProcessed({
-                      idReference: publicationId,
-                      media: [],
-                      containsMedia: false
-                    });
-                    return of(null);
-                  })
-                );
-            }
-          } else {
-            // No publication found, notify to clear processing state
-            this._mediaEventsService.notifyMediaProcessed({
-              idReference: publicationId,
-              media: [],
-              containsMedia: false
-            });
-            return of(null);
-          }
-        }),
-        catchError(() => {
-          // Even if error, notify to clear processing state
-          this._mediaEventsService.notifyMediaProcessed({
-            idReference: publicationId,
-            media: [],
-            containsMedia: false
-          });
-          return of(null);
-        }),
-        takeUntil(this.destroy$)
-      )
-      .subscribe();
+    // Notify MediaEventsService for PublicationViewComponent to update individual publication
+    this._mediaEventsService.notifyMediaProcessed({
+      idReference: publication._id,
+      media: publication.media,
+      containsMedia: false
+    });
+
+    // Notify NotificationPublicationService to update publication in lists (HomeComponent, etc)
+    this._notificationPublicationService.sendNotificationUpdatePublication([publication]);
   }
 }

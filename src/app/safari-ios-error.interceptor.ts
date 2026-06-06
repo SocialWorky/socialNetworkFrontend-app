@@ -23,10 +23,7 @@ export class SafariIOSErrorInterceptor implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
         // Check if this is an IndexedDB related error
         if (this.isIndexedDBError(error)) {
-          this.logService.log(LevelLogEnum.WARN, 'SafariIOSErrorInterceptor', 'IndexedDB error intercepted', {
-            url: request.url,
-            error: error.message
-          });
+          // IndexedDB error intercepted - no need to log every IndexedDB error
           
           // For IndexedDB errors, we don't want to propagate them
           // Instead, we'll return a controlled error that won't break the app
@@ -35,9 +32,7 @@ export class SafariIOSErrorInterceptor implements HttpInterceptor {
 
         // Check for 404 errors on images
         if (error.status === 404 && this.isImageRequest(request)) {
-          this.logService.log(LevelLogEnum.WARN, 'SafariIOSErrorInterceptor', '404 error on image request', {
-            url: request.url
-          });
+          // 404 error on image request - no need to log every 404 error
           
           // For 404 errors on images, we can provide a fallback
           return throwError(() => new Error('Image not found - using fallback'));
@@ -49,19 +44,19 @@ export class SafariIOSErrorInterceptor implements HttpInterceptor {
     );
   }
 
-  private isIndexedDBError(error: any): boolean {
+  private isIndexedDBError(error: unknown): boolean {
     if (!error) return false;
     
-    const errorMessage = error.message || error.toString();
+    const errorMessage = (error instanceof Error) ? error.message : String(error);
     return errorMessage.includes('IndexedDB') || 
            errorMessage.includes('Blob') || 
            errorMessage.includes('File') ||
            errorMessage.includes('object store') ||
-           error.name === 'UnknownError' ||
+           (error instanceof Error && error.name === 'UnknownError') ||
            (errorMessage.includes('UnknownError') && errorMessage.includes('Blob'));
   }
 
-  private isImageRequest(request: HttpRequest<any>): boolean {
+  private isImageRequest(request: HttpRequest<unknown>): boolean {
     const url = request.url.toLowerCase();
     return url.includes('.jpg') || 
            url.includes('.jpeg') || 

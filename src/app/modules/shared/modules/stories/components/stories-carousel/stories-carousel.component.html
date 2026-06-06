@@ -1,0 +1,44 @@
+<div class="stories-carousel" *ngIf="groups.length > 0">
+  <div class="stories-scroll">
+
+    <!-- Add story button (always first if current user has no stories) -->
+    <div class="story-item"
+         *ngIf="!groups[0]?.isOwnStories"
+         (click)="addStoryClicked.emit()"
+         role="button"
+         [attr.aria-label]="'story.addStory' | workyTranslations">
+      <div class="avatar-ring avatar-ring--add">
+        <div class="avatar-placeholder">
+          <span class="add-icon">+</span>
+        </div>
+      </div>
+      <span class="story-label">{{ 'story.addStory' | workyTranslations }}</span>
+    </div>
+
+    <!-- Story groups -->
+    <div
+      *ngFor="let group of groups; let i = index"
+      class="story-item"
+      (click)="selectGroup(i)"
+      role="button"
+      [attr.aria-label]="getUserDisplayName(group)">
+
+      <div class="avatar-ring"
+           [style.border]="getAvatarBorderStyle(group)">
+        <worky-avatar
+          [size]="52"
+          [img]="group.user.avatar"
+          [name]="group.user.name + ' ' + group.user.lastName">
+        </worky-avatar>
+
+        <!-- Add icon overlay for own stories -->
+        <div *ngIf="group.isOwnStories" class="own-story-add" (click)="$event.stopPropagation(); addStoryClicked.emit()">
+          <span>+</span>
+        </div>
+      </div>
+
+      <span class="story-label">{{ getUserDisplayName(group) }}</span>
+    </div>
+
+  </div>
+</div>

@@ -2,6 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
 import { Subject, takeUntil } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
 
 export enum LevelLogEnum {
   ERROR = 'error',
@@ -15,56 +16,65 @@ export enum LevelLogEnum {
 })
 export class LogService {
   private _url: string;
-  private _apiUrl: string;
-  private _logs: any[] = [];
-  private _timer: NodeJS.Timeout | null = null;
-  private destroy$ = new Subject<void>();
 
-  // Configuración para evitar errores 413
-  private readonly MAX_BATCH_SIZE = 50; // Máximo 50 logs por batch
-  private readonly MAX_LOG_SIZE = 1000; // Máximo 1000 caracteres por log
-  private readonly BATCH_TIMEOUT = 15000; // 15 segundos en lugar de 30
+  private _apiUrl: string;
+
+  private _logs: any[] = [];
+
+  private _timer: NodeJS.Timeout | null = null;
+
+  private _destroy$ = new Subject<void>();
+
+  // Configuration to avoid 413 errors
+  private readonly MAX_BATCH_SIZE = 50;
+  private readonly MAX_LOG_SIZE = 1000;
+  private readonly BATCH_TIMEOUT = 15000;
 
   constructor(private http: HttpClient) {
     this._url = environment.API_URL;
     this._apiUrl = `${this._url}/records-logs/batch`;
   }
 
-  log(level: LevelLogEnum, context: string, message: string, metadata?: Record<string, any>) {
+  log(level: LevelLogEnum, context: string, message: string, metadata?: Record<string, any>, forceImmediate: boolean = false) {
     try {
-      // Truncar mensaje si es muy largo
-      const truncatedMessage = message.length > this.MAX_LOG_SIZE 
-        ? message.substring(0, this.MAX_LOG_SIZE) + '...' 
+      const truncatedMessage = message.length > this.MAX_LOG_SIZE
+        ? message.substring(0, this.MAX_LOG_SIZE) + '...'
         : message;
 
-      // Limpiar metadata si es muy grande
       const cleanMetadata = this.cleanMetadata(metadata);
+      const userId = this.getCurrentUserId();
+      const currentUrl = typeof window !== 'undefined' ? window.location.pathname : undefined;
+      const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent.substring(0, 200) : undefined;
 
-      const logEntry = {
+      const logEntry: Record<string, any> = {
         level,
-        context: context.substring(0, 100), // Limitar contexto a 100 caracteres
-        message: `FRONT: ${truncatedMessage}`,
-        metadata: cleanMetadata,
+        context: context.substring(0, 100),
+        message: truncatedMessage,
+        source: 'frontend',
         timestamp: new Date().toISOString(),
       };
 
+      if (userId) logEntry['userId'] = userId;
+      if (currentUrl) logEntry['path'] = currentUrl;
+      if (cleanMetadata && Object.keys(cleanMetadata).length > 0) logEntry['metadata'] = cleanMetadata;
+      if (metadata?.['event']) logEntry['event'] = metadata['event'];
+      if (metadata?.['statusCode']) logEntry['statusCode'] = metadata['statusCode'];
+      if (metadata?.['durationMs']) logEntry['durationMs'] = metadata['durationMs'];
+      if (metadata?.['errorStack'] || metadata?.['stack']) {
+        logEntry['errorStack'] = (metadata['errorStack'] ?? metadata['stack'] ?? '').substring(0, 3000);
+      }
+
       this._logs.push(logEntry);
 
-      // Enviar logs inmediatamente si alcanzamos el límite
-      if (this._logs.length >= this.MAX_BATCH_SIZE) {
+      // Send logs immediately if limit reached or if forceImmediate is true (for critical errors)
+      if (this._logs.length >= this.MAX_BATCH_SIZE || forceImmediate) {
         this.sendLogs();
       } else if (!this._timer) {
-        // Enviar logs después del timeout
+        // Send logs after timeout
         this._timer = setTimeout(() => this.sendLogs(), this.BATCH_TIMEOUT);
       }
     } catch (error) {
-      // Si hay error al procesar el log, lo registramos en consola para debugging
-      console.error('Error processing log entry:', {
-        level,
-        context,
-        message: message.substring(0, 200),
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+      // Log processing error - handled by global error handler
     }
   }
 
@@ -72,17 +82,16 @@ export class LogService {
     if (!metadata) return undefined;
 
     const clean: Record<string, any> = {};
-    const maxValueLength = 500; // Máximo 500 caracteres por valor
+    const maxValueLength = 500;
 
     for (const [key, value] of Object.entries(metadata)) {
       try {
         if (typeof value === 'string' && value.length > maxValueLength) {
           clean[key] = value.substring(0, maxValueLength) + '...';
         } else if (typeof value === 'object' && value !== null) {
-          // Para objetos, convertir a string y truncar de forma segura
+          // For objects, convert to string and truncate safely
           const stringValue = JSON.stringify(value);
           if (stringValue.length > maxValueLength) {
-            // En lugar de intentar parsear un JSON truncado, guardamos el string truncado
             clean[key] = stringValue.substring(0, maxValueLength) + '...';
           } else {
             clean[key] = value;
@@ -91,7 +100,7 @@ export class LogService {
           clean[key] = value;
         }
       } catch (error) {
-        // Si hay error al procesar un valor, lo reemplazamos con un mensaje de error
+        // Replace with error message if processing fails
         clean[key] = `[Error processing value: ${error instanceof Error ? error.message : 'Unknown error'}]`;
       }
     }
@@ -99,53 +108,170 @@ export class LogService {
     return clean;
   }
 
+  private getCurrentUserId(): string | undefined {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token || token === 'undefined' || token === 'null') return undefined;
+      const decoded: any = jwtDecode(token);
+      return decoded?.id ?? decoded?.sub ?? undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private isUserAuthenticated(): boolean {
+    const token = localStorage.getItem('token');
+
+    if (!token || token === 'undefined' || token === 'null') {
+      return false;
+    }
+
+    try {
+      const decodedToken: any = jwtDecode(token);
+      const currentTime = Math.floor(Date.now() / 1000);
+
+      if (!decodedToken || !decodedToken.exp || decodedToken.exp <= currentTime) {
+        return false;
+      }
+    } catch (error) {
+      return false;
+    }
+
+    return true;
+  }
+
   private sendLogs() {
-    if (this._logs.length === 0) return;
+    if (this._logs.length === 0) {
+      return;
+    }
+
+    const isAuthenticated = this.isUserAuthenticated();
+    
+    // Separate critical logs (errors) from regular logs
+    const criticalLogs: any[] = [];
+    const regularLogs: any[] = [];
+    
+    this._logs.forEach(log => {
+      if (log.level === LevelLogEnum.ERROR) {
+        criticalLogs.push(log);
+      } else {
+        regularLogs.push(log);
+      }
+    });
+
+    // If not authenticated, keep critical logs for retry, discard regular logs
+    if (!isAuthenticated) {
+      // Keep critical logs for retry when user authenticates
+      this._logs = criticalLogs;
+      // Log to console for debugging (only in development)
+      if (!environment.PRODUCTION && criticalLogs.length > 0) {
+        console.warn('[LogService] User not authenticated. Critical logs queued for retry:', criticalLogs.length);
+      }
+      if (this._timer) {
+        clearTimeout(this._timer);
+        this._timer = null;
+      }
+      // Retry sending critical logs after a delay
+      if (criticalLogs.length > 0) {
+        this._timer = setTimeout(() => this.sendLogs(), 5000);
+      }
+      return;
+    }
 
     const logsToSend = [...this._logs];
     this._logs = [];
 
     try {
-      // Dividir en batches más pequeños si es necesario
+      // Split into smaller batches if needed
       const batches = this.chunkArray(logsToSend, this.MAX_BATCH_SIZE);
       
-      batches.forEach(batch => {
+      batches.forEach((batch, batchIndex) => {
         this.http.post(this._apiUrl, { logs: batch })
-          .pipe(takeUntil(this.destroy$))
+          .pipe(takeUntil(this._destroy$))
           .subscribe({
             next: () => {
-              // Log exitoso
+              // Log successful - only log in development for debugging
+              if (!environment.PRODUCTION) {
+                console.debug(`[LogService] Successfully sent batch ${batchIndex + 1}/${batches.length} with ${batch.length} logs`);
+              }
             },
             error: (error) => {
-              // Si hay error 413, intentar con batch más pequeño
+              // Log error details for debugging
+              console.error('[LogService] Error sending logs to backend:', {
+                status: error.status,
+                statusText: error.statusText,
+                message: error.message,
+                url: error.url || this._apiUrl,
+                batchSize: batch.length,
+                batchIndex: batchIndex + 1,
+                totalBatches: batches.length
+              });
+
+              // If 413 error, try with smaller batch
               if (error.status === 413 && batch.length > 1) {
                 const smallerBatches = this.chunkArray(batch, Math.floor(batch.length / 2));
                 smallerBatches.forEach(smallBatch => {
                   this.http.post(this._apiUrl, { logs: smallBatch })
-                    .pipe(takeUntil(this.destroy$))
-                    .subscribe();
+                    .pipe(takeUntil(this._destroy$))
+                    .subscribe({
+                      next: () => {
+                        if (!environment.PRODUCTION) {
+                          console.debug('[LogService] Successfully sent smaller batch after 413 error');
+                        }
+                      },
+                      error: (retryError) => {
+                        console.error('[LogService] Error sending smaller batch:', retryError);
+                        // Re-queue critical logs for retry
+                        const criticalInBatch = smallBatch.filter((log: any) => log.level === LevelLogEnum.ERROR);
+                        if (criticalInBatch.length > 0) {
+                          this._logs.push(...criticalInBatch);
+                          // Retry after delay
+                          if (!this._timer) {
+                            this._timer = setTimeout(() => this.sendLogs(), 10000);
+                          }
+                        }
+                      }
+                    });
                 });
               } else {
-                console.warn('Error sending logs:', error);
+                // For other errors, re-queue critical logs for retry
+                const criticalInBatch = batch.filter((log: any) => log.level === LevelLogEnum.ERROR);
+                if (criticalInBatch.length > 0) {
+                  this._logs.push(...criticalInBatch);
+                  // Retry after delay
+                  if (!this._timer) {
+                    this._timer = setTimeout(() => this.sendLogs(), 10000);
+                  }
+                  if (!environment.PRODUCTION) {
+                    console.warn(`[LogService] Re-queued ${criticalInBatch.length} critical logs for retry`);
+                  }
+                }
               }
             }
           });
       });
 
     } catch (error) {
-      console.error('Error al enviar logs:', error);
-      // Reintentar con logs más pequeños
+      console.error('[LogService] Exception while sending logs:', error);
+      // Retry with smaller batches
       if (logsToSend.length > 1) {
-        const smallerBatches = this.chunkArray(logsToSend, Math.floor(logsToSend.length / 2));
-        smallerBatches.forEach(batch => {
-          this._logs.push(...batch);
-        });
-      } else {
-        this._logs.push(...logsToSend);
+      const smallerBatches = this.chunkArray(logsToSend, Math.floor(logsToSend.length / 2));
+      smallerBatches.forEach(batch => {
+        this._logs.push(...batch);
+      });
+    } else {
+      // Re-queue critical logs
+      const criticalInSend = logsToSend.filter((log: any) => log.level === LevelLogEnum.ERROR);
+      if (criticalInSend.length > 0) {
+        this._logs.push(...criticalInSend);
       }
+    }
     } finally {
-      // Reset the timer
-      this._timer = null;
+      // Reset timer only if no logs are queued for retry
+      if (this._logs.length === 0 && this._timer) {
+        clearTimeout(this._timer);
+        this._timer = null;
+      }
     }
   }
 
@@ -157,12 +283,35 @@ export class LogService {
     return chunks;
   }
 
+  /**
+   * Clear all pending logs from the queue
+   * Useful when logs are deleted from backend and we want to prevent them from being sent
+   */
+  clearPendingLogs(): void {
+    this._logs = [];
+    if (this._timer) {
+      clearTimeout(this._timer);
+      this._timer = null;
+    }
+    if (!environment.PRODUCTION) {
+      console.debug('[LogService] Cleared all pending logs from queue');
+    }
+  }
+
+  /**
+   * Get the number of pending logs in the queue
+   */
+  getPendingLogsCount(): number {
+    return this._logs.length;
+  }
+
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this._destroy$.next();
+    this._destroy$.complete();
     
     if (this._timer) {
       clearTimeout(this._timer);
     }
   }
 }
+

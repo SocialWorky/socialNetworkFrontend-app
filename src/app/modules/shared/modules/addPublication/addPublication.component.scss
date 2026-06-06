@@ -204,7 +204,7 @@
         gap: 10px;
       }
 
-              .extra-content-item {
+        .extra-content-item {
           display: flex;
           border-radius: 50%;
           padding: 2px;
@@ -338,6 +338,14 @@
             z-index: 9999 !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
           }
+        }
+
+        // Emoji icon active state (picker open). The picker itself is rendered in a
+        // MatDialog (portaled to <body>), so it has no positioning concerns here.
+        .emoji-icon.active {
+          background-color: color-mix(in srgb, color.$worky-color-input-background, transparent 20%);
+
+          i { color: color-mix(in srgb, var(--worky-color-text), transparent 10%); }
         }
       }
     }

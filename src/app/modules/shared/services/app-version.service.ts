@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { BehaviorSubject, Observable, of, EMPTY } from 'rxjs';
 import { catchError, tap, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
@@ -21,7 +21,7 @@ export interface AppVersion {
 
 export interface VersionCheckResult {
   currentVersion: string;
-  serverVersion: AppVersion;
+  serverVersion: AppVersion | null;
   needsUpdate: boolean;
   forceUpdate: boolean;
   isMaintenanceMode: boolean;
@@ -64,20 +64,39 @@ export class AppVersionService {
       tap(() => {
         this.lastCheckTime = now;
       }),
+      catchError((error: HttpErrorResponse) => {
+        if (error?.status === 404) {
+          return of({
+            success: false,
+            data: null
+          });
+        }
+        throw error;
+      }),
       switchMap(response => {
-                // Extract server version from response (handle different response formats)
+        if (!response || !response.success || !response.data) {
+          return of({
+            needsUpdate: false,
+            forceUpdate: false,
+            serverVersion: null,
+            currentVersion: this.currentVersion,
+            isMaintenanceMode: false
+          } as VersionCheckResult);
+        }
+        
         let serverVersion: AppVersion;
         if (response.success && response.data) {
-          // Backend returns {success: true, data: {...}}
           serverVersion = response.data;
         } else if (response.version) {
-          // Backend returns version data directly
           serverVersion = response;
         } else {
-          if (this.ENABLE_VERSION_LOGS) {
-            this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Unexpected backend response format', { response });
-          }
-          throw new Error('Invalid backend response format');
+          return of({
+            needsUpdate: false,
+            forceUpdate: false,
+            serverVersion: null,
+            currentVersion: this.currentVersion,
+            isMaintenanceMode: false
+          } as VersionCheckResult);
         }
         
         const result = this.compareVersions(serverVersion);
@@ -87,8 +106,8 @@ export class AppVersionService {
       }),
       catchError(error => {
         // Only log critical errors, not 404s or network issues
-        if (error?.status !== 404 && this.ENABLE_VERSION_LOGS) {
-          this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Error checking for app updates', error);
+        if (error?.status !== 404) {
+          // Error checking for app updates - no need to log every update check error
         }
         // Return cached result or default
         const cachedResult = this.getCachedVersionCheck();
@@ -186,7 +205,8 @@ export class AppVersionService {
       };
       localStorage.setItem(this.VERSION_KEY, JSON.stringify(cacheData));
     } catch (error) {
-      this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Error caching version check', { error: error instanceof Error ? error.message : String(error) });
+      // Error caching version check - no need to log every cache operation error
+      // Cache operations can fail silently without affecting functionality
     }
   }
 
@@ -206,7 +226,8 @@ export class AppVersionService {
         }
       }
     } catch (error) {
-      this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Error reading cached version check', { error: error instanceof Error ? error.message : String(error) });
+      // Error reading cached version check - no need to log every cache read error
+      // Cache read failures can happen normally and don't need logging
     }
     return null;
   }
@@ -236,7 +257,8 @@ export class AppVersionService {
     try {
       localStorage.removeItem(this.VERSION_KEY);
     } catch (error) {
-      this.logService.log(LevelLogEnum.ERROR, 'AppVersionService', 'Error clearing version cache', { error: error instanceof Error ? error.message : String(error) });
+      // Error clearing version cache - no need to log every cache clear error
+      // Cache clear failures can happen normally and don't need logging
     }
   }
 
@@ -253,6 +275,6 @@ export class AppVersionService {
    */
   getMaintenanceMessage(): string {
     const cachedResult = this.getCachedVersionCheck();
-    return cachedResult?.serverVersion.maintenanceMessage || 'App is currently under maintenance. Please try again later.';
+    return cachedResult?.serverVersion?.maintenanceMessage || 'App is currently under maintenance. Please try again later.';
   }
 } 

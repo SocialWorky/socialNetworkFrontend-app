@@ -1,0 +1,18 @@
+<div class="widget-container" [class]="position">
+  <ng-container *ngFor="let widget of enabledWidgets; trackBy: trackByWidget">
+    <div class="widget-wrapper" 
+         [attr.data-widget-selector]="widget.selector"
+         [class.has-title]="shouldShowTitle(widget)">
+      <div *ngIf="shouldShowTitle(widget)" class="widget-title">
+        <i *ngIf="widget.icon" class="material-icons widget-title-icon">{{ widget.icon }}</i>
+        <span>{{ widget.name }}</span>
+      </div>
+      <ng-container [ngSwitch]="widget.selector">
+        <worky-weather *ngSwitchCase="'worky-weather'"></worky-weather>
+        <worky-news *ngSwitchCase="'worky-news'"></worky-news>
+        <worky-thematic-image *ngSwitchCase="'worky-thematic-image'"></worky-thematic-image>
+        <worky-dynamic-widget *ngSwitchDefault [widget]="widget"></worky-dynamic-widget>
+      </ng-container>
+    </div>
+  </ng-container>
+</div>

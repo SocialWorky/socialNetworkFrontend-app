@@ -2,27 +2,22 @@ import { Component, Input, OnInit, OnDestroy, ChangeDetectorRef, Output, EventEm
 import { Subject, takeUntil } from 'rxjs';
 import { UtilityService } from '@shared/services/utility.service';
 import { ImageService, ImageLoadOptions } from '@shared/services/image.service';
-import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 import { CommonModule } from '@angular/common';
+import { environment } from '@env/environment';
+import { ImageSkeletonComponent } from '@shared/components/skeleton/image-skeleton.component';
 
 @Component({
   selector: 'worky-image',
   template: `
     <div class="worky-image-container" [class.loading]="isLoading" [class.error]="hasError">
       <!-- Skeleton while loading -->
-      <div *ngIf="isLoading && !hasError" class="image-skeleton">
-        <div 
-          class="skeleton-placeholder animate-pulse"
-          [style.width]="skeletonWidth"
-          [style.height]="skeletonHeight"
-          [class.rounded-lg]="skeletonRounded">
-          <div class="w-full h-full bg-gray-200 rounded-lg dark:bg-gray-700 flex items-center justify-center">
-            <svg class="w-8 h-8 text-gray-300 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
-              <path d="M18 0H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm4.376 10.481A1 1 0 0 1 16 15H4a1 1 0 0 1-.895-1.447l3.5-7A1 1 0 0 1 7.468 6a.965.965 0 0 1 .9.5l2.775 4.757 1.546-1.887a1 1 0 0 1 1.618.1l2.541 4a1 1 0 0 1 .028 1.011Z"/>
-            </svg>
-          </div>
-        </div>
-      </div>
+      <worky-image-skeleton
+        *ngIf="isLoading && !hasError"
+        [width]="skeletonWidth"
+        [height]="skeletonHeight"
+        [rounded]="skeletonRounded"
+        [mediaType]="mediaType">
+      </worky-image-skeleton>
       
       <!-- Real image - hidden until fully loaded -->
       <img 
@@ -59,7 +54,7 @@ import { CommonModule } from '@angular/common';
   `,
   styleUrls: ['./worky-image.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, ImageSkeletonComponent]
 })
 export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
   @Input() src: string = '';
@@ -72,6 +67,11 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
   @Input() loadingTimeout: number = 10000; // 10 seconds timeout
   @Input() maxRetries: number = 2;
   @Input() priority: 'high' | 'medium' | 'low' = 'medium';
+  @Input() publicationId?: string | null; // Context for error logging
+  @Input() commentId?: string | null; // Context for error logging
+  @Input() mediaId?: string | null; // Context for error logging
+  @Input() imageType: 'profile' | 'publication' | 'media' = 'media';
+  @Input() mediaType: 'image' | 'video' = 'image';
   @Output() imageClick = new EventEmitter<MouseEvent>();
 
   currentSrc: string = '';
@@ -86,7 +86,6 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
   constructor(
     private _utilityService: UtilityService,
     private _imageService: ImageService,
-    private _mobileCacheService: MobileImageCacheService,
     private _cdr: ChangeDetectorRef
   ) {}
 
@@ -114,11 +113,15 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
     this.isLoading = true;
     this.hasError = false;
     this.canRetry = false;
-    this.imageFullyLoaded = false; // Reset fully loaded flag
+    this.imageFullyLoaded = false;
+    this.currentSrc = ''; // Clear stale blob URL before async reload to prevent ERR_FILE_NOT_FOUND
     this._cdr.markForCheck();
 
-    // Use mobile-optimized cache service if available
-    const imageService = this._mobileCacheService.isMobile() ? this._mobileCacheService : this._imageService;
+    // Normalize image URL if it's a relative path (not starting with http/https)
+    const normalizedSrc = this._utilityService.normalizeImageUrl(
+      this.src,
+      environment.MINIO_BUCKET_URL || ''
+    );
 
     const options: ImageLoadOptions = {
       maxRetries: this.maxRetries,
@@ -130,10 +133,11 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
       priority: this.priority
     };
 
-    // Use the appropriate service for loading
-    const imageObservable = this._mobileCacheService.isMobile() 
-      ? this._mobileCacheService.loadImage(this.src, 'media', options)
-      : this._imageService.loadImage(this.src, options);
+    // Always use ImageService: it returns the URL directly and lets the browser
+    // fetch the image natively via <img src>. This avoids XHR blob-fetching which
+    // requires CORS headers on the image server (MinIO) and causes load failures
+    // on mobile where the server may not have CORS configured for XHR requests.
+    const imageObservable = this._imageService.loadImage(normalizedSrc, options);
 
     imageObservable
       .pipe(takeUntil(this.destroy$))
@@ -146,6 +150,18 @@ export class WorkyImageComponent implements OnInit, OnDestroy, OnChanges {
           this._cdr.markForCheck();
         },
         error: (error: any) => {
+          // Log 404 errors with detailed information
+          if (error?.status === 404 || error?.message?.includes('404') || error?.message?.includes('Not Found')) {
+            // Try to get LogService if available (inject it if not already)
+            // For now, we'll log to console as fallback
+            console.error('[WorkyImageComponent] Image not found (404):', {
+              originalSrc: this.src,
+              normalizedSrc: normalizedSrc,
+              errorStatus: error?.status,
+              errorMessage: error?.message,
+              timestamp: new Date().toISOString()
+            });
+          }
           this.setError();
         }
       });

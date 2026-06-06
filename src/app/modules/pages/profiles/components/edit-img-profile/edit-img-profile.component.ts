@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, AfterViewChecked, Input, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef, AfterViewChecked, Input, AfterViewInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, lastValueFrom, takeUntil } from 'rxjs';
 import Cropper from 'cropperjs';
@@ -12,6 +12,8 @@ import { DeviceDetectionService } from '@shared/services/device-detection.servic
 import { UtilityService } from '@shared/services/utility.service';
 import { LazyCssService } from '@shared/services/core-apis/lazy-css.service';
 import { FontLoaderService } from '@shared/services/core-apis/font-loader.service';
+import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
     selector: 'worky-edit-img-profile',
@@ -19,7 +21,7 @@ import { FontLoaderService } from '@shared/services/core-apis/font-loader.servic
     styleUrls: ['./edit-img-profile.component.scss'],
     standalone: false
 })
-export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDestroy, AfterViewInit {
+export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDestroy, AfterViewInit, OnChanges {
   private unsubscribe$ = new Subject<void>();
 
   imageSrc: string = '';
@@ -59,13 +61,14 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     private _deviceDetectionService: DeviceDetectionService,
     private _utilityService: UtilityService,
     private _lazyCssService: LazyCssService,
-    private _fontLoaderService: FontLoaderService
+    private _fontLoaderService: FontLoaderService,
+    private _logService: LogService
   ) {}
 
   ngAfterViewInit(): void {
-    if (this.profileImage) {
-      this.previews[0].url = this.profileImage;
-    }
+    // Preview URL is already set in updatePreviewUrl()
+    // Load Cropper.js CSS from CDN
+    this._lazyCssService.loadCss('https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css', 'cropper');
   }
 
   ngOnDestroy(): void {
@@ -75,7 +78,27 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
 
   ngOnInit(): void {
     this._authService.getDecodedToken();
-    this.previews[0].url = this.profileImage || this.imgCoverDefault;
+    this.updatePreviewUrl();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Update preview URL when profileImage input changes
+    if (changes['profileImage'] && !changes['profileImage'].firstChange) {
+      this.updatePreviewUrl();
+    }
+  }
+
+  private updatePreviewUrl(): void {
+    // Normalize the profile image URL to ensure it uses MinIO bucket URL
+    if (this.profileImage) {
+      this.previews[0].url = this._utilityService.normalizeImageUrl(
+        this.profileImage,
+        environment.MINIO_BUCKET_URL || ''
+      );
+    } else {
+      this.previews[0].url = this.imgCoverDefault;
+    }
+    this._cdr.markForCheck();
   }
 
   ngAfterViewChecked() {
@@ -89,6 +112,21 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
       if (this.cropper) {
         this.cropper.destroy();
       }
+      
+      // Ensure the image is loaded before initializing cropper
+      const img = this.cropperImage.nativeElement;
+      if (img.complete) {
+        this.createCropper();
+      } else {
+        img.onload = () => {
+          this.createCropper();
+        };
+      }
+    }
+  }
+
+  createCropper() {
+    if (this.cropperImage && this.selectedImage) {
       this.cropper = new Cropper(this.cropperImage.nativeElement, {
         aspectRatio: 1200 / 250,
         viewMode: 1,
@@ -96,6 +134,10 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
         zoomable: true,
         responsive: true,
         background: false,
+        dragMode: 'move',
+        cropBoxResizable: true,
+        cropBoxMovable: true,
+        toggleDragModeOnDblclick: false,
       });
     }
   }
@@ -143,8 +185,15 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
         const reader = new FileReader();
         reader.onload = (e: any) => {
           this.selectedImage = e.target.result;
-          if (!this.isMobile) this.cropping = true;
-          this._cdr.markForCheck();
+          if (!this.isMobile) {
+            this.cropping = true;
+            // Small delay to ensure DOM is ready
+            setTimeout(() => {
+              this._cdr.markForCheck();
+            }, 100);
+          } else {
+            this._cdr.markForCheck();
+          }
         };
         reader.readAsDataURL(file);
 
@@ -177,47 +226,87 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
     });
 
     if (this.selectedImage && this.cropper) {
-      const responseDesktop = await lastValueFrom(
-        this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation).pipe(takeUntil(this.unsubscribe$))
-      );
-      const croppedCanvasMobile = this.cropper.getCroppedCanvas({
-        width: 620,
-        height: 190,
-      });
+      try {
+        const responseDesktop = await lastValueFrom(
+          this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation, null, null, TypePublishing.PROFILE_IMG).pipe(takeUntil(this.unsubscribe$))
+        );
 
-      this.cropper.destroy();
-
-      const croppedImageUrlMobile = croppedCanvasMobile.toDataURL(this.originalMimeType);
-      const fileMobile = this.dataURLtoFile(croppedImageUrlMobile, `${userId}-mobile`, this.originalMimeType!);
-
-      const responseMobile = await lastValueFrom(
-        this._fileUploadService.uploadFile([fileMobile], uploadLocation).pipe(takeUntil(this.unsubscribe$))
-      );
-
-      const coverMobile = environment.APIFILESERVICE + uploadLocation + '/' + responseMobile[0].filename;
-      const coverDesktop = environment.APIFILESERVICE + uploadLocation + '/' + responseDesktop[0].filename;
-
-      await this._profileService.updateProfile(userId, {
-        coverImage: coverDesktop,
-        coverImageMobile: !this.isMobile ? coverMobile : coverDesktop,
-      }).pipe(takeUntil(this.unsubscribe$)).subscribe({
-        next: (data) => {
-          this.isUploading = false;
-          this._cdr.markForCheck();
-        },
-        error: (error) => {
-          console.error('Error updating profile', error);
-          this.isUploading = false;
-          this._cdr.markForCheck();
+        // Handle the actual response structure: {message: string, files: Array}
+        let coverDesktop: string;
+        if (responseDesktop && typeof responseDesktop === 'object' && responseDesktop.files && Array.isArray(responseDesktop.files) && responseDesktop.files.length > 0) {
+          const file = responseDesktop.files[0];
+          // Get the URL from the response
+          const rawUrl = file.url || `${uploadLocation}/${file.filename}`;
+          // Extract relative path: remove any absolute URL prefix (old file-service URLs)
+          coverDesktop = this.extractRelativePath(rawUrl) || `${uploadLocation}/${file.filename}`;
+        } else {
+          throw new Error('Invalid response structure from desktop upload - expected {message, files}');
         }
-      });
 
-      this.previews[0].url = environment.APIFILESERVICE + uploadLocation + '/' + responseDesktop[0].filename;
+        if (!coverDesktop) {
+          throw new Error('No URL found in desktop upload response');
+        }
 
-      this.selectedFiles = [];
-      this.isUploading = false;
-      this.selectedImage = undefined;
-      this._cdr.markForCheck();
+        const croppedCanvasMobile = this.cropper.getCroppedCanvas({
+          width: 620,
+          height: 190,
+        });
+
+        this.cropper.destroy();
+
+        const croppedImageUrlMobile = croppedCanvasMobile.toDataURL(this.originalMimeType);
+        const fileMobile = this.dataURLtoFile(croppedImageUrlMobile, `${userId}-mobile`, this.originalMimeType!);
+
+        const responseMobile = await lastValueFrom(
+          this._fileUploadService.uploadFile([fileMobile], uploadLocation, null, null, TypePublishing.PROFILE_IMG).pipe(takeUntil(this.unsubscribe$))
+        );
+
+        // Handle the actual response structure: {message: string, files: Array}
+        let coverMobile: string;
+        if (responseMobile && typeof responseMobile === 'object' && responseMobile.files && Array.isArray(responseMobile.files) && responseMobile.files.length > 0) {
+          const file = responseMobile.files[0];
+          // Get the URL from the response
+          const rawUrl = file.url || `${uploadLocation}/${file.filename}`;
+          // Extract relative path: remove any absolute URL prefix (old file-service URLs)
+          coverMobile = this.extractRelativePath(rawUrl) || `${uploadLocation}/${file.filename}`;
+        } else {
+          throw new Error('Invalid response structure from mobile upload - expected {message, files}');
+        }
+
+        if (!coverMobile) {
+          throw new Error('No URL found in mobile upload response');
+        }
+
+        await this._profileService.updateProfile(userId, {
+          coverImage: coverDesktop,
+          coverImageMobile: !this.isMobile ? coverMobile : coverDesktop,
+        }).pipe(takeUntil(this.unsubscribe$)).subscribe({
+          next: (data) => {
+            this.isUploading = false;
+            this._cdr.markForCheck();
+          },
+          error: (error) => {
+            this._logService.log(LevelLogEnum.ERROR, 'EditImgProfileComponent', 'Error updating profile', { error });
+            this.isUploading = false;
+            this._cdr.markForCheck();
+          }
+        });
+
+        // For preview, normalize the URL using MINIO_BUCKET_URL
+        this.previews[0].url = this._utilityService.normalizeImageUrl(coverDesktop, environment.MINIO_BUCKET_URL || '');
+
+        this.selectedFiles = [];
+        this.isUploading = false;
+        this.selectedImage = undefined;
+        this._cdr.markForCheck();
+      } catch (error) {
+        this._logService.log(LevelLogEnum.ERROR, 'EditImgProfileComponent', 'Error uploading image', { error });
+        this.isUploading = false;
+        this._cdr.markForCheck();
+        // Reset state on error
+        this.selectedFiles = [];
+        this.selectedImage = undefined;
+      }
     }
   }
 
@@ -256,5 +345,36 @@ export class EditImgProfileComponent implements OnInit, AfterViewChecked, OnDest
 
   onImageError(event: Event): void {
     this._utilityService.handleImageError(event, this.imgCoverDefault);
+  }
+
+  /**
+   * Extract relative path from URL (removes absolute URL prefixes from old file-service)
+   * @param url The URL to extract relative path from
+   * @returns Relative path (e.g., "profile/filename.jpg")
+   */
+  private extractRelativePath(url: string): string {
+    if (!url) return '';
+    
+    // If it's already a relative path (doesn't start with http/https), return as is
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      // Remove leading slash if present
+      return url.startsWith('/') ? url.slice(1) : url;
+    }
+    
+    // Extract path from absolute URL
+    try {
+      const urlObj = new URL(url);
+      // Get the pathname and remove leading slash
+      const path = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+      return path;
+    } catch (e) {
+      // If URL parsing fails, try regex extraction
+      const match = url.match(/https?:\/\/[^\/]+(\/.+)/);
+      if (match && match[1]) {
+        return match[1].startsWith('/') ? match[1].slice(1) : match[1];
+      }
+      // Fallback: return as is if we can't parse it
+      return url;
+    }
   }
 }

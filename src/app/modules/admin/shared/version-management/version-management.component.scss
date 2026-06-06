@@ -11,6 +11,23 @@
   @apply bg-red-900 text-red-300;
 }
 
+// Connection status indicators
+.connected {
+  @apply bg-green-500;
+}
+
+.warning {
+  @apply bg-yellow-500;
+}
+
+.disconnected {
+  @apply bg-red-500;
+}
+
+.loading {
+  @apply bg-blue-500 animate-pulse;
+}
+
 // Fix for content overflow and background
 :host {
   display: block;

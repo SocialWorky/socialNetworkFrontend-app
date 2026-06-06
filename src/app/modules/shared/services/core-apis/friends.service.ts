@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '@env/environment';
-import { AuthService } from '@auth/services/auth.service';
 import { FriendsStatus } from '@shared/interfaces/friend.interface';
 
 @Injectable({
@@ -13,19 +12,22 @@ export class FriendsService {
 
   private baseUrl: string | undefined;
 
-  constructor(private http: HttpClient, private _authService: AuthService) {
+  constructor(private http: HttpClient) {
     this.baseUrl = environment.API_URL;
   }
 
-  getIsMyFriend(_id: string, friendId: string): Observable<FriendsStatus> {
+  getIsMyFriend(_id: string, friendId: string, bypassCache = false): Observable<FriendsStatus> {
     const url = `${this.baseUrl}/friends/isfriend/${_id}/${friendId}`;
+    if (bypassCache) {
+      // Unique URL per call → CacheInterceptor miss + DeduplicationInterceptor no-merge.
+      // Needed for real-time refresh: a user who didn't mutate has a stale 5min friends cache.
+      return this.http.get<FriendsStatus>(`${url}?_t=${Date.now()}`);
+    }
     return this.http.get<FriendsStatus>(url);
   }
 
   requestFriend(friendId: string): Observable<any> {
-    const _id = this._authService.getDecodedToken()?.id;
     const body = {
-      senderId: _id,
       receiverId: friendId
     };
     const url = `${this.baseUrl}/friends/request`;

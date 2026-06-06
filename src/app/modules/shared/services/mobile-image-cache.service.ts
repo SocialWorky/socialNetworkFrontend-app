@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, from, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap, timeout, retryWhen, delay } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of, from, throwError, firstValueFrom } from 'rxjs';
+import { catchError, map, switchMap, tap, timeout } from 'rxjs/operators';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { ImageService, ImageLoadOptions } from './image.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ConnectionQualityService } from './connection-quality.service';
 import { DeviceDetectionService } from './device-detection.service';
-import { AuthService } from '../../auth/services/auth.service';
 import { EnhancedLoggingService } from './enhanced-logging.service';
+import { UtilityService } from './utility.service';
+import { environment } from '@env/environment';
 
 // iOS-specific optimizations
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
@@ -15,16 +16,18 @@ const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
               (navigator.userAgent.includes('Safari') && navigator.userAgent.includes('Mac') && 'ontouchend' in document);
 
 const iOS_CONFIG: MobileCacheConfig = {
-  maxCacheSize: 50 * 1024 * 1024, // 50MB for iOS (more conservative)
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (shorter for iOS)
-  preloadThreshold: 2, // Less aggressive preloading
+  maxCacheSize: 10 * 1024 * 1024, // 10MB for iOS (very conservative)
+  maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day (very short for iOS)
+  preloadThreshold: 0, // No preloading for iOS
   compressionEnabled: true, // Always enable compression for iOS
   offlineMode: false,
-  persistentCache: true,
+  persistentCache: false, // Disable persistent cache for iOS
+  maxMemoryCacheSize: 3, // Very limited memory cache
+  maxConcurrentLoads: 1, // Only one load at a time
   imageTypes: {
-    profile: { maxAge: 3 * 24 * 60 * 60 * 1000, priority: 'high' as const }, // 3 days
-    publication: { maxAge: 7 * 24 * 60 * 60 * 1000, priority: 'medium' as const }, // 7 days
-    media: { maxAge: 3 * 24 * 60 * 60 * 1000, priority: 'low' as const } // 3 days
+    profile: { maxAge: 12 * 60 * 60 * 1000, priority: 'high' as const }, // 12 hours
+    publication: { maxAge: 1 * 24 * 60 * 60 * 1000, priority: 'medium' as const }, // 1 day
+    media: { maxAge: 6 * 60 * 60 * 1000, priority: 'low' as const } // 6 hours
   }
 };
 
@@ -35,6 +38,8 @@ export interface MobileCacheConfig {
   compressionEnabled: boolean;
   offlineMode: boolean;
   persistentCache: boolean;
+  maxMemoryCacheSize: number;
+  maxConcurrentLoads: number; // NEW: Limit concurrent loads
   imageTypes: {
     profile: { maxAge: number; priority: 'high' | 'medium' | 'low' };
     publication: { maxAge: number; priority: 'high' | 'medium' | 'low' };
@@ -68,38 +73,43 @@ export interface CachedImage {
 })
 export class MobileImageCacheService {
   private readonly MOBILE_CONFIG: MobileCacheConfig = {
-    maxCacheSize: 100 * 1024 * 1024, // 100MB for mobile
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    preloadThreshold: 3,
+    maxCacheSize: 20 * 1024 * 1024, // 20MB for mobile (very conservative)
+    maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days (reduced from 7)
+    preloadThreshold: 1, // Minimal preloading
     compressionEnabled: true,
     offlineMode: false,
     persistentCache: true,
+    maxMemoryCacheSize: 5, // Very limited memory cache
+    maxConcurrentLoads: 2, // Only 2 loads at a time
     imageTypes: {
-      profile: { maxAge: 7 * 24 * 60 * 60 * 1000, priority: 'high' }, // 7 days for profile images
-      publication: { maxAge: 14 * 24 * 60 * 60 * 1000, priority: 'medium' }, // 14 days for publication images
-      media: { maxAge: 7 * 24 * 60 * 60 * 1000, priority: 'low' } // 7 days for media
+      profile: { maxAge: 1 * 24 * 60 * 60 * 1000, priority: 'high' }, // 1 day
+      publication: { maxAge: 3 * 24 * 60 * 60 * 1000, priority: 'medium' }, // 3 days
+      media: { maxAge: 1 * 24 * 60 * 60 * 1000, priority: 'low' } // 1 day
     }
   };
 
   private readonly DESKTOP_CONFIG: MobileCacheConfig = {
-    maxCacheSize: 200 * 1024 * 1024, // 200MB for desktop
-    maxAge: 60 * 24 * 60 * 60 * 1000, // 60 days
-    preloadThreshold: 5,
+    maxCacheSize: 50 * 1024 * 1024, // 50MB for desktop (reduced from 100MB)
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (reduced from 14)
+    preloadThreshold: 2, // Minimal preloading
     compressionEnabled: false,
     offlineMode: false,
     persistentCache: true,
+    maxMemoryCacheSize: 8, // Limited memory cache
+    maxConcurrentLoads: 3, // Only 3 loads at a time
     imageTypes: {
-      profile: { maxAge: 14 * 24 * 60 * 60 * 1000, priority: 'high' },
-      publication: { maxAge: 30 * 24 * 60 * 60 * 1000, priority: 'medium' },
-      media: { maxAge: 14 * 24 * 60 * 60 * 1000, priority: 'low' }
+      profile: { maxAge: 3 * 24 * 60 * 60 * 1000, priority: 'high' }, // 3 days
+      publication: { maxAge: 7 * 24 * 60 * 60 * 1000, priority: 'medium' }, // 7 days
+      media: { maxAge: 3 * 24 * 60 * 60 * 1000, priority: 'low' } // 3 days
     }
   };
 
   private isMobileDevice = false;
   private db: IDBDatabase | null = null;
-  private readonly DB_NAME = 'MobileImageCacheDB';
+  private readonly DB_BASE_NAME = 'MobileImageCacheDB';
   private readonly DB_VERSION = 1;
   private readonly STORE_NAME = 'images';
+  private currentUserId: string | null = null;
   
   private cacheMetrics = new BehaviorSubject<CacheMetrics>({
     totalImages: 0,
@@ -115,7 +125,16 @@ export class MobileImageCacheService {
   private cacheMisses = 0;
   private loadTimes: number[] = [];
   private memoryCache = new Map<string, CachedImage>();
-  private cacheSize = 0; // Track total cache size in bytes
+  private cacheSize = 0;
+  
+  // Track created object URLs to prevent memory leaks
+  private createdObjectUrls = new Set<string>();
+  private maxObjectUrls = 100; // High enough to cover a full feed page without premature revocation
+  
+  // NEW: Load control to prevent infinite loading
+  private currentLoads = 0;
+  private loadQueue: Array<{ url: string; resolve: (url: string) => void; reject: (error: any) => void; options?: ImageLoadOptions }> = [];
+  private isProcessingQueue = false;
 
   constructor(
     private imageService: ImageService,
@@ -123,8 +142,8 @@ export class MobileImageCacheService {
     private http: HttpClient,
     private connectionQualityService: ConnectionQualityService,
     private deviceDetectionService: DeviceDetectionService,
-    private authService: AuthService,
-    private enhancedLoggingService: EnhancedLoggingService
+    private enhancedLoggingService: EnhancedLoggingService,
+    private _utilityService: UtilityService
   ) {
     this.initializeService();
   }
@@ -143,42 +162,114 @@ export class MobileImageCacheService {
         { error: error?.message || error?.toString() }
       );
     });
+    
+    // NEW: Start automatic cleanup every 2 minutes (reduced from 5)
+    this.startAutomaticCleanup();
   }
 
   private detectMobileDevice(): boolean {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    return this.deviceDetectionService.isMobile();
   }
 
   private getCurrentConfig(): MobileCacheConfig {
     if (isIOS) {
       return iOS_CONFIG;
-    } else if (this.isMobileDevice) {
-      return this.MOBILE_CONFIG;
-    } else {
-      return this.DESKTOP_CONFIG;
+    }
+    return this.isMobileDevice ? this.MOBILE_CONFIG : this.DESKTOP_CONFIG;
+  }
+
+  /**
+   * Get database name with user ID
+   */
+  private getDatabaseName(): string {
+    // Get user ID from localStorage to avoid circular dependency
+    const token = localStorage.getItem('token');
+    if (token && token !== 'undefined' && token !== 'null') {
+      try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        const userId = decodedToken.id;
+        return userId ? `${this.DB_BASE_NAME}_${userId}` : this.DB_BASE_NAME;
+      } catch (error) {
+        return this.DB_BASE_NAME;
+      }
+    }
+    return this.DB_BASE_NAME;
+  }
+
+  /**
+   * Get decoded token from localStorage (to avoid circular dependency)
+   */
+  private getDecodedTokenFromLocalStorage(): any {
+    const token = localStorage.getItem('token');
+    if (token && token !== 'undefined' && token !== 'null') {
+      try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        return decodedToken;
+      } catch (error) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Check if user has changed and close current database
+   */
+  private checkUserChange(): void {
+    // Get user ID from localStorage to avoid circular dependency
+    const token = localStorage.getItem('token');
+    let userId = null;
+    
+    if (token && token !== 'undefined' && token !== 'null') {
+      try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        userId = decodedToken.id;
+      } catch (error) {
+        userId = null;
+      }
+    }
+    
+    if (userId !== this.currentUserId) {
+      this.currentUserId = userId;
+      this.db = null; // Force re-initialization
+      
+      // NEW: Clean up object URLs when user changes
+      this.cleanupObjectUrls();
     }
   }
 
+  /**
+   * Initialize database (public method for DatabaseManagerService)
+   */
+  async initDatabase(): Promise<void> {
+    return this.initializeDatabase();
+  }
+
   private async initializeDatabase(): Promise<void> {
+    this.checkUserChange();
+    
     return new Promise((resolve, reject) => {
       this.openDatabase(resolve, reject);
     });
   }
 
   private openDatabase(resolve: () => void, reject: (error: any) => void): void {
-    const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+    const request = indexedDB.open(this.getDatabaseName(), this.DB_VERSION);
 
     request.onerror = (event) => {
       const error = (event.target as IDBOpenDBRequest).error;
       this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'IndexedDB open error', { error: error?.message });
-      
-      // For iOS Safari, don't fail completely, just use memory cache
+
       if (isIOS) {
-        this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS IndexedDB failed, falling back to memory cache');
         resolve();
       } else {
         reject(error);
       }
+    };
+
+    request.onblocked = () => {
+      this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'IndexedDB open blocked by another connection, resolving without db');
+      resolve();
     };
 
     request.onsuccess = () => {
@@ -212,238 +303,311 @@ export class MobileImageCacheService {
   }
 
   /**
-   * Get enhanced device and user information for logging
+   * NEW: Start automatic cleanup every 2 minutes (reduced from 5)
    */
-  private getEnhancedLogMetadata(imageUrl: string, imageType: string, options: ImageLoadOptions = {}): Record<string, any> {
-    const connectionInfo = this.connectionQualityService.getConnectionInfo();
-    const userInfo = this.authService.getDecodedToken();
-    const deviceInfo = this.getDeviceInfo();
-    
-    return {
-      url: imageUrl,
-      imageType,
-      isIOS,
-      isMobile: this.isMobileDevice,
-      connectionQuality: connectionInfo.quality,
-      connectionType: connectionInfo.effectiveType,
-      downlink: connectionInfo.downlink,
-      rtt: connectionInfo.rtt,
-      saveData: connectionInfo.saveData,
-      userId: userInfo?.id || 'anonymous',
-      userEmail: userInfo?.email || 'anonymous',
-      userRole: userInfo?.role || 'user',
-      deviceInfo,
-      timeout: options.timeout,
-      priority: options.priority,
-      userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      language: navigator.language,
-      onLine: navigator.onLine,
-      cookieEnabled: navigator.cookieEnabled,
-      hardwareConcurrency: navigator.hardwareConcurrency,
-      deviceMemory: (navigator as any).deviceMemory,
-      maxTouchPoints: navigator.maxTouchPoints
-    };
+  private startAutomaticCleanup(): void {
+    setInterval(() => {
+      this.cleanupObjectUrls();
+      this.cleanupOldCache();
+    }, 2 * 60 * 1000); // 2 minutes
   }
 
   /**
-   * Get detailed device information
+   * NEW: Clean up object URLs to prevent memory leaks
    */
-  private getDeviceInfo(): Record<string, any> {
-    const isTablet = this.deviceDetectionService.isTablet();
-    const isNative = this.deviceDetectionService.isNative();
-    const isIphone = this.deviceDetectionService.isIphone();
-    
-    return {
-      isTablet,
-      isNative,
-      isIphone,
-      width: this.deviceDetectionService.width(),
-      height: this.deviceDetectionService.height(),
-      screenWidth: window.screen.width,
-      screenHeight: window.screen.height,
-      viewportWidth: window.innerWidth,
-      viewportHeight: window.innerHeight,
-      pixelRatio: window.devicePixelRatio,
-      colorDepth: window.screen.colorDepth,
-      orientation: window.screen.orientation?.type || 'unknown'
-    };
-  }
+  private cleanupObjectUrls(): void {
+    if (this.createdObjectUrls.size > this.maxObjectUrls) {
+      const urlsToRemove = Array.from(this.createdObjectUrls).slice(0, this.createdObjectUrls.size - this.maxObjectUrls);
 
-  /**
-   * Get optimized timeout based on connection quality and device type
-   */
-  private getOptimizedTimeout(options: ImageLoadOptions = {}): number {
-    const connectionInfo = this.connectionQualityService.getConnectionInfo();
-    const baseTimeout = options.timeout || 30000;
-    
-    // Adjust timeout based on connection quality
-    switch (connectionInfo.quality) {
-      case 'slow':
-        return Math.max(baseTimeout * 2, 60000); // At least 60 seconds for slow connections
-      case 'medium':
-        return Math.max(baseTimeout * 1.5, 45000); // At least 45 seconds for medium connections
-      case 'fast':
-      default:
-        return baseTimeout;
+      urlsToRemove.forEach(url => {
+        this.createdObjectUrls.delete(url);
+        // Grace period: components still rendering this URL get time to unmount before revocation
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      });
     }
   }
 
   /**
-   * Get retry configuration based on connection quality
+   * NEW: Create object URL with tracking
    */
-  private getRetryConfig(): { maxRetries: number; retryDelay: number } {
-    const connectionInfo = this.connectionQualityService.getConnectionInfo();
+  private createObjectURL(blob: Blob): string {
+    const url = URL.createObjectURL(blob);
+    this.createdObjectUrls.add(url);
     
-    switch (connectionInfo.quality) {
-      case 'slow':
-        return { maxRetries: 3, retryDelay: 5000 }; // More retries, longer delays for slow connections
-      case 'medium':
-        return { maxRetries: 2, retryDelay: 3000 };
-      case 'fast':
-      default:
-        return { maxRetries: 1, retryDelay: 1000 };
+    // Clean up if we have too many
+    if (this.createdObjectUrls.size > this.maxObjectUrls) {
+      this.cleanupObjectUrls();
     }
+    
+    return url;
   }
 
   /**
-   * Load image with mobile optimizations and persistent cache
+   * NEW: Load control to prevent infinite loading
    */
-  loadImage(imageUrl: string, imageType: 'profile' | 'publication' | 'media' = 'media', options: ImageLoadOptions = {}): Observable<string> {
-    const startTime = performance.now();
+  private async processLoadQueue(): Promise<void> {
+    if (this.isProcessingQueue || this.loadQueue.length === 0) {
+      return;
+    }
+
+    this.isProcessingQueue = true;
     const config = this.getCurrentConfig();
-    const optimizedTimeout = this.getOptimizedTimeout(options);
-    const retryConfig = this.getRetryConfig();
-    
-    // iOS-specific timeout adjustment
-    const timeoutValue = isIOS ? Math.min(optimizedTimeout, 15000) : optimizedTimeout;
-    
-    // Handle Google Images with special service
-    if (this.isGoogleImage(imageUrl)) {
-      return this.handleGoogleImage(imageUrl, imageType, options);
+
+    while (this.loadQueue.length > 0 && this.currentLoads < config.maxConcurrentLoads) {
+      const item = this.loadQueue.shift();
+      if (item) {
+        this.currentLoads++;
+        
+        try {
+          // Pass options if available in queue item
+          const url = await this.loadImageInternal(item.url, item.options || {});
+          item.resolve(url);
+        } catch (error) {
+          item.reject(error);
+        } finally {
+          this.currentLoads--;
+        }
+      }
     }
+
+    this.isProcessingQueue = false;
     
-    // iOS-specific URL validation
-    if (isIOS && !imageUrl.startsWith('http')) {
-      this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Invalid image URL for iOS', { url: imageUrl });
-      return throwError(() => new Error('Invalid image URL'));
+    // Process remaining items if any
+    if (this.loadQueue.length > 0) {
+      setTimeout(() => this.processLoadQueue(), 100);
     }
+  }
+
+  /**
+   * NEW: Internal load method with strict limits
+   * Note: URL should already be normalized when passed to this method
+   */
+  private async loadImageInternal(imageUrl: string, options: ImageLoadOptions & { imageType?: 'profile' | 'publication' | 'media' } = {}): Promise<string> {
+    // Ensure URL is normalized (should already be normalized, but double-check)
+    const normalizedUrl = this._utilityService.normalizeImageUrl(imageUrl, environment.MINIO_BUCKET_URL || '');
+    const config = this.getCurrentConfig();
     
-    // Check memory cache first
-    if (this.memoryCache.has(imageUrl)) {
-      const cached = this.memoryCache.get(imageUrl)!;
-      if (this.isCacheValid(cached)) {
+    // Check if we're at the limit
+    if (this.currentLoads >= config.maxConcurrentLoads) {
+      throw new Error('Too many concurrent loads');
+    }
+
+    // Determine imageType from options or default to 'media'
+    const imageType = options.imageType || 'media';
+
+    // Check memory cache first with size limit (use normalized URL for cache key)
+    if (this.memoryCache.has(normalizedUrl)) {
+      const cached = this.memoryCache.get(normalizedUrl)!;
+      if (this.isCacheValid(cached) && this.isBlobValid(cached.blob)) {
         this.updateAccessMetrics(cached);
         this.cacheHits++;
         this.updateMetrics();
-        // Image loaded from memory cache - no need to log every cache hit
-        return of(URL.createObjectURL(cached.blob));
+        return this.createObjectURL(cached.blob);
       } else {
-        this.memoryCache.delete(imageUrl);
+        // Cache entry is invalid or blob is corrupted - remove it
+        this.memoryCache.delete(normalizedUrl);
+        // Also clear from persistent cache if blob is invalid
+        if (!this.isBlobValid(cached.blob)) {
+          await this.clearImageFromCache(normalizedUrl);
+        }
       }
     }
 
     // For Safari iOS, skip persistent cache entirely
     if (isIOS) {
-      // Safari iOS: loading from network only - no need to log every network request
-      return this.loadFromNetwork(imageUrl, imageType, { ...options, timeout: timeoutValue }).pipe(
-        tap(cachedImage => {
-          if (cachedImage) {
-            // Store in memory cache only for iOS
-            this.memoryCache.set(imageUrl, cachedImage);
-            this.cacheMisses++;
-            this.updateMetrics();
-          }
-        }),
-        map(cachedImage => URL.createObjectURL(cachedImage.blob)),
-        catchError(error => {
-          this.cacheMisses++;
-          this.updateMetrics();
-          this.enhancedLoggingService.logImageError(
-            'MobileImageCacheService',
-            'Error loading image on iOS',
-            imageUrl,
-            imageType,
-            error,
-            performance.now() - startTime,
-            options
-          );
-          return throwError(() => error);
-        })
-      );
+      return this.loadFromNetworkInternal(normalizedUrl, imageType, { ...options, timeout: options.timeout || 10000 });
     }
 
-    // For non-iOS browsers, use persistent cache
-    return from(this.getFromPersistentCache(imageUrl)).pipe(
-      switchMap(cachedImage => {
-        if (cachedImage && this.isCacheValid(cachedImage)) {
-          // Store in memory cache
-          if (this.memoryCache.size < 15) {
-            this.memoryCache.set(imageUrl, cachedImage);
+    // For non-iOS browsers, use persistent cache (use normalized URL for cache key)
+    const cachedImage = await this.getFromPersistentCache(normalizedUrl);
+    if (cachedImage && this.isCacheValid(cachedImage)) {
+      // Validate blob before using it - corrupted blobs can cause 404-like errors
+      if (this.isBlobValid(cachedImage.blob)) {
+        // Store in memory cache with size limit
+        if (this.memoryCache.size < config.maxMemoryCacheSize) {
+          this.memoryCache.set(normalizedUrl, cachedImage);
+        } else {
+          // Remove oldest entry if cache is full
+          const oldestKey = this.memoryCache.keys().next().value;
+          if (oldestKey) {
+            this.memoryCache.delete(oldestKey);
+            this.memoryCache.set(normalizedUrl, cachedImage);
           }
-          this.updateAccessMetrics(cachedImage);
-          this.cacheHits++;
-          this.updateMetrics();
-          // Image loaded from persistent cache - no need to log every cache hit
-          return of(URL.createObjectURL(cachedImage.blob));
         }
-
-        // Load from network and cache with retry logic
-        return this.loadFromNetwork(imageUrl, imageType, { ...options, timeout: timeoutValue }).pipe(
-          retryWhen(errors => 
-            errors.pipe(
-              switchMap((error, index) => {
-                if (index >= retryConfig.maxRetries) {
-                  return throwError(() => error);
-                }
-                return of(error).pipe(delay(retryConfig.retryDelay));
-              })
-            )
-          ),
-          tap(cachedImage => {
-            if (cachedImage) {
-              // Store in memory cache
-              if (this.memoryCache.size < 15) {
-                this.memoryCache.set(imageUrl, cachedImage);
-              }
-              this.cacheMisses++;
-              this.updateMetrics();
-            }
-          }),
-          map(cachedImage => URL.createObjectURL(cachedImage.blob))
-        );
-      }),
-      catchError(error => {
-        this.cacheMisses++;
+        this.updateAccessMetrics(cachedImage);
+        this.cacheHits++;
         this.updateMetrics();
-        this.enhancedLoggingService.logImageError(
+        return this.createObjectURL(cachedImage.blob);
+      } else {
+        // Blob is invalid - clear from cache and load from network
+        this.logService.log(
+          LevelLogEnum.WARN,
           'MobileImageCacheService',
-          'Failed to load image from network',
-          imageUrl,
-          imageType,
-          error,
-          performance.now() - startTime,
-          options
+          'Invalid blob found in cache - clearing and reloading from network',
+          { imageUrl: normalizedUrl, blobSize: cachedImage.blob?.size, blobType: cachedImage.blob?.type }
         );
-        return throwError(() => error);
-      })
-    );
+        await this.clearImageFromCache(normalizedUrl);
+        // Fall through to load from network
+      }
+    }
+
+    // Load from network (URL already normalized) - pass options for context in error logs
+    return this.loadFromNetworkInternal(normalizedUrl, imageType, { ...options, timeout: options.timeout || 15000 });
+  }
+
+  /**
+   * Load image with strict load control
+   */
+  loadImage(imageUrl: string, imageType: 'profile' | 'publication' | 'media' = 'media', options: ImageLoadOptions = {}): Observable<string> {
+    // Normalize URL before using it
+    const normalizedUrl = this._utilityService.normalizeImageUrl(imageUrl, environment.MINIO_BUCKET_URL || '');
+    
+    // Validate that normalized URL is absolute (http/https/blob/data)
+    // If URL is still relative, it means MINIO_BUCKET_URL is not configured
+    const isValidUrl = normalizedUrl.startsWith('http://') ||
+                       normalizedUrl.startsWith('https://') ||
+                       normalizedUrl.startsWith('blob:') ||
+                       normalizedUrl.startsWith('data:');
+    
+    if (!isValidUrl) {
+      // URL is still relative - cannot load
+      this.logService.log(
+        LevelLogEnum.WARN,
+        'MobileImageCacheService',
+        'Cannot load image - URL is relative and MINIO_BUCKET_URL may not be configured',
+        { originalUrl: imageUrl, normalizedUrl, imageType, minioBucketUrl: environment.MINIO_BUCKET_URL }
+      );
+      return new Observable(observer => {
+        observer.error(new Error('Invalid image URL - URL is relative and MINIO_BUCKET_URL is not configured'));
+        observer.complete();
+      });
+    }
+    
+    // Add imageType to options for context in error logs
+    // Preserve all original options including publicationId, commentId, etc.
+    const optionsWithType = { ...options, imageType } as any;
+    
+    // Debug: Log if publicationId is being passed (temporary)
+    if ((options as any)?.publicationId) {
+      // Publication ID is being passed - this is good
+    }
+    
+    const config = this.getCurrentConfig();
+    
+    // Check if we're at the limit
+    if (this.currentLoads >= config.maxConcurrentLoads) {
+      // Queue the load request with options for context
+      return new Observable(observer => {
+        this.loadQueue.push({
+          url: normalizedUrl,
+          resolve: (url: string) => observer.next(url),
+          reject: (error: any) => {
+            // Mirror ImageService behavior: use fallbackUrl on error
+            if (options.fallbackUrl) {
+              observer.next(options.fallbackUrl);
+            } else {
+              observer.error(error);
+            }
+          },
+          options: optionsWithType
+        });
+        
+        this.processLoadQueue();
+      });
+    }
+
+    // Try to load immediately
+    return new Observable(observer => {
+      // Pass options with imageType to loadImageInternal for context in error logs
+      this.loadImageInternal(normalizedUrl, optionsWithType)
+        .then(url => observer.next(url))
+        .catch(error => {
+          // Log error here as well in case it's not caught in loadFromNetworkInternal
+          // Extract error status - handle both HttpErrorResponse and plain errors
+          let errorStatus: number | null = null;
+          let errorMessage = '';
+          
+          if (error instanceof HttpErrorResponse) {
+            errorStatus = error.status;
+            errorMessage = error.message || error.error?.message || String(error);
+          } else if (error?.status) {
+            errorStatus = error.status;
+            errorMessage = error.message || String(error);
+          } else if (error?.message) {
+            errorMessage = error.message;
+            if (errorMessage.includes('404') || errorMessage.includes('Not Found')) {
+              errorStatus = 404;
+            }
+          }
+          
+          const is404 = errorStatus === 404 || 
+                       errorMessage?.includes('404') || 
+                       errorMessage?.includes('Not Found') ||
+                       (error instanceof HttpErrorResponse && error.status === 404);
+          
+          // Log 404 errors with detailed information (fallback logging)
+          if (is404) {
+            this.logService.log(
+              LevelLogEnum.ERROR,
+              'MobileImageCacheService',
+              'Image not found (404) - Image may have been deleted from storage (caught in Observable)',
+              {
+                imageUrl: normalizedUrl,
+                imageType,
+                errorStatus: errorStatus || 'unknown',
+                errorMessage: errorMessage || String(error),
+                errorName: error?.name,
+                errorType: error?.constructor?.name,
+                isHttpErrorResponse: error instanceof HttpErrorResponse,
+                httpErrorUrl: error instanceof HttpErrorResponse ? error.url : null,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                // Include context if available in options
+                publicationId: (options as any)?.publicationId,
+                commentId: (options as any)?.commentId,
+                mediaId: (options as any)?.mediaId
+              }
+            );
+          }
+          // Mirror ImageService behavior: use fallbackUrl on error instead of propagating
+          if (options.fallbackUrl) {
+            observer.next(options.fallbackUrl);
+          } else {
+            observer.error(error);
+          }
+        })
+        .finally(() => observer.complete());
+    });
   }
 
   private async getFromPersistentCache(imageUrl: string): Promise<CachedImage | null> {
     if (!this.db) return null;
 
+    // Normalize URL before looking it up in cache
+    const normalizedUrl = this._utilityService.normalizeImageUrl(imageUrl, environment.MINIO_BUCKET_URL || '');
+
     return new Promise((resolve, reject) => {
       try {
         const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
         const store = transaction.objectStore(this.STORE_NAME);
-        const request = store.get(imageUrl);
+        // Try to get with normalized URL first
+        const request = store.get(normalizedUrl);
 
-        request.onsuccess = () => resolve(request.result || null);
+        request.onsuccess = () => {
+          const result = request.result;
+          if (result) {
+            // If found with normalized URL, return it
+            resolve(result);
+          } else {
+            // If not found, try with original URL (for backward compatibility with old cache entries)
+            const fallbackRequest = store.get(imageUrl);
+            fallbackRequest.onsuccess = () => resolve(fallbackRequest.result || null);
+            fallbackRequest.onerror = () => resolve(null);
+          }
+        };
         request.onerror = () => {
           // iOS Safari specific error handling
           if (isIOS) {
-            this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS IndexedDB read failed, falling back to network', { url: imageUrl });
             resolve(null); // Don't fail completely, fall back to network
           } else {
             reject(request.error);
@@ -452,7 +616,6 @@ export class MobileImageCacheService {
       } catch (error) {
         // iOS Safari sometimes throws errors during IndexedDB operations
         if (isIOS) {
-          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'iOS IndexedDB operation failed, falling back to network', { error, url: imageUrl });
           resolve(null); // Don't fail completely, fall back to network
         } else {
           reject(error);
@@ -461,101 +624,259 @@ export class MobileImageCacheService {
     });
   }
 
-  private loadFromNetwork(imageUrl: string, imageType: 'profile' | 'publication' | 'media', options: ImageLoadOptions): Observable<CachedImage> {
-    const startTime = performance.now();
+  private isCrossOriginUrl(url: string): boolean {
+    try {
+      return new URL(url, window.location.href).origin !== window.location.origin;
+    } catch {
+      return false;
+    }
+  }
+
+  private preloadViaNativeImage(url: string, timeoutMs: number): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      const img = new Image();
+      const timer = setTimeout(() => {
+        img.onload = img.onerror = null;
+        reject(new Error('Native image preload timed out'));
+      }, timeoutMs);
+
+      img.onload = () => {
+        clearTimeout(timer);
+        resolve(url);
+      };
+      img.onerror = () => {
+        clearTimeout(timer);
+        reject(new Error('Native image preload failed'));
+      };
+      img.src = url;
+    });
+  }
+
+  private async loadFromNetworkInternal(imageUrl: string, imageType: 'profile' | 'publication' | 'media', options: ImageLoadOptions): Promise<string> {
+    // Validate URL - must be absolute (http/https/blob/data)
+    // If URL is relative, it means MINIO_BUCKET_URL is not configured
+    const isValidUrl = imageUrl && (
+      imageUrl.startsWith('http://') ||
+      imageUrl.startsWith('https://') ||
+      imageUrl.startsWith('blob:') ||
+      imageUrl.startsWith('data:')
+    );
     
+    if (!isValidUrl) {
+      // URL is still relative - cannot load
+      this.logService.log(
+        LevelLogEnum.WARN,
+        'MobileImageCacheService',
+        'Cannot load image - URL is relative and MINIO_BUCKET_URL may not be configured',
+        { imageUrl, imageType }
+      );
+      throw new Error('Invalid image URL - URL is relative and MINIO_BUCKET_URL is not configured');
+    }
+
+    // Cross-origin images (e.g. MinIO at api-minio.compuelec.cl) cannot be fetched as a blob
+    // via XHR unless the storage server returns CORS headers — and when the server is down the
+    // browser reports the failure as a misleading CORS error. Warm the cache with a native
+    // Image() preload instead (no CORS requirement) and let <img src> render the URL directly.
+    if (this.isCrossOriginUrl(imageUrl)) {
+      return this.preloadViaNativeImage(imageUrl, options.timeout || 15000);
+    }
+
     // Validate URL for iOS Safari
     if (isIOS) {
       if (!imageUrl || !imageUrl.startsWith('http')) {
-        this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Invalid image URL for iOS', { url: imageUrl });
-        return throwError(() => new Error('Invalid image URL for iOS Safari'));
+        throw new Error('Invalid image URL for iOS Safari');
       }
     }
 
-    return this.http.get(imageUrl, { 
-      responseType: 'blob',
-      headers: {
-        'Cache-Control': 'max-age=3600' // 1 hour cache
-      }
-    }).pipe(
-      timeout(options.timeout || 30000),
-      map(blob => {
-        // Validate downloaded blob
-        if (!blob || blob.size === 0) {
-          throw new Error('Invalid blob received from network');
-        }
-
-        // For iOS Safari, validate blob type
-        if (isIOS && !blob.type.startsWith('image/')) {
-          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Invalid blob type for iOS', { 
-            url: imageUrl, 
-            type: blob.type 
-          });
-          throw new Error('Invalid image type for iOS Safari');
-        }
-
-        const config = this.getCurrentConfig();
-        const imageTypeConfig = config.imageTypes[imageType];
-        
-        const cachedImage: CachedImage = {
-          url: imageUrl,
-          blob: blob,
-          type: imageType,
-          size: blob.size,
-          timestamp: Date.now(),
-          lastAccessed: Date.now(),
-          accessCount: 1,
-          expiresAt: Date.now() + imageTypeConfig.maxAge
-        };
-
-        // Check cache size and cleanup if needed
-        if (this.cacheSize + blob.size > config.maxCacheSize) {
-          this.cleanupOldCache();
-        }
-
-        this.cacheSize += blob.size;
-
-        // Store in persistent cache asynchronously (don't wait for it) - ONLY for non-iOS
-        if (!isIOS && this.db && config.persistentCache) {
-          this.storeInPersistentCache(cachedImage).catch(error => {
-            this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Failed to store in persistent cache', { error });
-          });
-        }
-
-        const loadTime = performance.now() - startTime;
-        this.loadTimes.push(loadTime);
-        this.updateMetrics();
-
-        // Image loaded from network and cached - no need to log every successful load
-
-        return cachedImage;
-      }),
-      catchError(error => {
-        const loadTime = performance.now() - startTime;
-        
-        // Don't log as ERROR for Google Images since they have known CORS issues
-        if (this.isGoogleImage(imageUrl)) {
-          // No need to log every Google Image CORS error - this is expected behavior
-        } else {
-                  this.enhancedLoggingService.logImageError(
-          'MobileImageCacheService',
-          'Failed to load image from network',
-          imageUrl,
-          imageType,
-          error,
-          loadTime,
-          options
-        );
-        }
-        return throwError(() => error);
-      })
+    const response = await firstValueFrom(
+      this.http.get(imageUrl, {
+        responseType: 'blob'
+      }).pipe(
+        timeout(options.timeout || 15000),
+        catchError((error: any) => {
+          // Handle HttpErrorResponse from Angular HttpClient
+          let errorStatus: number | null = null;
+          let errorMessage = '';
+          
+          if (error instanceof HttpErrorResponse) {
+            errorStatus = error.status;
+            errorMessage = error.message || error.error?.message || String(error);
+          } else if (error?.status) {
+            // Plain error object with status
+            errorStatus = error.status;
+            errorMessage = error.message || String(error);
+          } else if (error?.message) {
+            // Check if message contains 404
+            errorMessage = error.message;
+            if (errorMessage.includes('404') || errorMessage.includes('Not Found')) {
+              errorStatus = 404;
+            }
+          }
+          
+          // Also check the URL itself for 404 patterns
+          const urlContains404 = imageUrl.includes('404') || imageUrl.includes('not-found');
+          
+          const is404 = errorStatus === 404 || 
+                       errorMessage?.includes('404') || 
+                       errorMessage?.includes('Not Found') ||
+                       urlContains404 ||
+                       (error instanceof HttpErrorResponse && error.status === 404);
+          
+          // Log 404 errors with detailed information
+          if (is404) {
+            // Extract context from options
+            const publicationId = (options as any)?.publicationId;
+            const commentId = (options as any)?.commentId;
+            const mediaId = (options as any)?.mediaId;
+            
+            // Try to extract userId from URL if publicationId is not available
+            let userIdFromUrl: string | null = null;
+            let fullUrlPath: string | null = null;
+            if (!publicationId && imageUrl.includes('/publications/')) {
+              const urlMatch = imageUrl.match(/publications\/([^\/\?]+)/);
+              if (urlMatch && urlMatch[1]) {
+                // Extract userId from URL pattern: userId|timestamp-filename
+                const urlPart = urlMatch[1];
+                fullUrlPath = urlPart;
+                const userIdMatch = urlPart.match(/^([^|]+)/);
+                if (userIdMatch && userIdMatch[1]) {
+                  userIdFromUrl = userIdMatch[1];
+                }
+              }
+            }
+            
+            // Clear invalid image from cache when 404 is detected
+            // This prevents stale cache entries from causing repeated 404 errors
+            this.clearImageFromCache(imageUrl).catch(clearError => {
+              // Log cache clear error but don't block the main error logging
+              this.logService.log(
+                LevelLogEnum.WARN,
+                'MobileImageCacheService',
+                'Failed to clear invalid image from cache',
+                { imageUrl, clearError: String(clearError) }
+              );
+            });
+            
+            const logData: any = {
+              imageUrl,
+              imageType,
+              errorStatus: errorStatus || 'unknown',
+              errorMessage: errorMessage || String(error),
+              errorName: error?.name,
+              errorType: error?.constructor?.name,
+              isHttpErrorResponse: error instanceof HttpErrorResponse,
+              httpErrorUrl: error instanceof HttpErrorResponse ? error.url : null,
+              normalizedUrl: imageUrl,
+              timestamp: new Date().toISOString(),
+              userAgent: navigator.userAgent,
+              // Include context if available in options
+              publicationId: publicationId || null,
+              commentId: commentId || null,
+              mediaId: mediaId || null,
+              // Additional debugging info
+              errorKeys: error ? Object.keys(error) : [],
+              errorString: String(error),
+              // Debug: show all options keys to see what's being passed
+              optionsKeys: options ? Object.keys(options) : [],
+              fullOptions: options,
+              // Cache cleanup info
+              cacheCleared: true,
+              // URL extraction info (if publicationId not available)
+              userIdFromUrl: userIdFromUrl,
+              fullUrlPath: fullUrlPath
+            };
+            
+            // Log to service (will be sent in batch to backend)
+            // This log will appear in the system logs database
+            // Use a more specific message that includes the image URL for easier searching
+            const imageFileName = imageUrl.split('/').pop() || imageUrl;
+            const shortUrl = imageFileName.length > 50 ? imageFileName.substring(0, 50) + '...' : imageFileName;
+            const publicationContext = publicationId || userIdFromUrl || 'unknown';
+            
+            // Create a searchable message that includes key terms for easy filtering in admin panel
+            // Terms: "404", "Image", "Missing", "PublicationId", filename
+            
+            // Force immediate send for critical 404 errors to ensure they appear in logs quickly
+            // Message includes key searchable terms: "404", "Missing Image", "PublicationId", filename
+            // This makes it easy to find in the admin logs panel by searching for "404", "Missing", "Image", or the filename
+            const logMessage = `[404 Missing Image] File: ${shortUrl} | PublicationId: ${publicationContext} | Image deleted from storage or cache invalid. Cache cleared automatically.`;
+            
+            this.logService.log(
+              LevelLogEnum.ERROR,
+              'MobileImageCacheService',
+              logMessage,
+              logData,
+              true // forceImmediate = true for critical errors
+            );
+          }
+          throw error;
+        })
+      )
     );
+
+    const blob = response as Blob;
+    
+    // Validate downloaded blob
+    if (!blob || blob.size === 0) {
+      throw new Error('Invalid blob received from network');
+    }
+
+    // For iOS Safari, validate blob type
+    if (isIOS && !blob.type.startsWith('image/')) {
+      
+      throw new Error('Invalid image type for iOS Safari');
+    }
+
+    const config = this.getCurrentConfig();
+    const imageTypeConfig = config.imageTypes[imageType];
+    
+    const cachedImage: CachedImage = {
+      url: imageUrl,
+      blob: blob,
+      type: imageType,
+      size: blob.size,
+      timestamp: Date.now(),
+      lastAccessed: Date.now(),
+      accessCount: 1,
+      expiresAt: Date.now() + imageTypeConfig.maxAge
+    };
+
+    // Check cache size and cleanup if needed
+    if (this.cacheSize + blob.size > config.maxCacheSize) {
+      this.cleanupOldCache();
+    }
+
+    this.cacheSize += blob.size;
+
+    // Store in persistent cache (except for iOS Safari)
+    if (!isIOS && config.persistentCache) {
+      this.storeInPersistentCache(cachedImage).catch(error => {
+        this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Failed to store in persistent cache', { error });
+      });
+    }
+
+    // Store in memory cache with size limit (use normalized URL as key)
+    // imageUrl is already normalized at this point (from loadImageInternal)
+    if (this.memoryCache.size < config.maxMemoryCacheSize) {
+      this.memoryCache.set(imageUrl, cachedImage);
+    } else {
+      // Remove oldest entry if cache is full
+      const oldestKey = this.memoryCache.keys().next().value;
+      if (oldestKey) {
+        this.memoryCache.delete(oldestKey);
+        this.memoryCache.set(imageUrl, cachedImage);
+      }
+    }
+
+    this.cacheMisses++;
+    this.updateMetrics();
+
+    return this.createObjectURL(cachedImage.blob);
   }
 
   private async storeInPersistentCache(cachedImage: CachedImage): Promise<void> {
     // Early return for iOS Safari - completely avoid IndexedDB operations
     if (isIOS) {
-      this.logService.log(LevelLogEnum.DEBUG, 'MobileImageCacheService', 'Skipping persistent cache for iOS Safari', { url: cachedImage.url });
       return;
     }
 
@@ -565,17 +886,14 @@ export class MobileImageCacheService {
       try {
         // Validate blob before storing
         if (!cachedImage.blob || cachedImage.blob.size === 0) {
-          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Invalid blob, skipping persistent cache', { url: cachedImage.url });
+  
           resolve();
           return;
         }
 
         // Additional validation for blob type
         if (!cachedImage.blob.type.startsWith('image/')) {
-          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Invalid blob type, skipping persistent cache', { 
-            url: cachedImage.url, 
-            type: cachedImage.blob.type 
-          });
+          
           resolve();
           return;
         }
@@ -602,106 +920,21 @@ export class MobileImageCacheService {
           resolve();
         };
 
-        request.onerror = (event) => {
-          const error = (event.target as IDBRequest).error;
-          
-          // Check for specific Safari iOS IndexedDB errors
-          const isBlobError = error?.message?.includes('Blob') || 
-                             error?.message?.includes('File') || 
-                             error?.message?.includes('object store') ||
-                             error?.message?.includes('preparing');
-          
-          if (isBlobError) {
-            this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Blob storage error detected, using memory cache only', { 
-              url: cachedImage.url, 
-              error: error?.message,
-              errorName: error?.name
-            });
-            resolve(); // Don't fail completely, just use memory cache
-            return;
-          }
-
-          this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Error storing in persistent cache', { 
+        request.onerror = () => {
+          const error = request.error;
+          this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Failed to store in persistent cache', { 
             url: cachedImage.url, 
-            error: error?.message,
-            errorName: error?.name
+            error: error?.message 
           });
-
-          // Handle quota exceeded errors
-          if (error?.name === 'QuotaExceededError') {
-            this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Storage quota exceeded, cleaning up cache');
-            this.cleanupOldCache().then(() => {
-              // Retry after cleanup
-              const retryRequest = store.put(storageObject);
-              retryRequest.onsuccess = () => resolve();
-              retryRequest.onerror = () => {
-                this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Retry failed, using memory cache only');
-                resolve(); // Don't fail completely
-              };
-            }).catch(() => {
-              this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Cleanup failed, using memory cache only');
-              resolve(); // Don't fail completely
-            });
-          } else {
-            // For other errors, just resolve to avoid breaking the app
-            this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'IndexedDB error, using memory cache only', { error: error?.message });
-            resolve(); // Don't fail completely
-          }
+          reject(error);
         };
+      } catch (error) {
+        // iOS Safari sometimes throws errors during IndexedDB operations
+        if (isIOS) {
 
-        transaction.onerror = (event) => {
-          const error = (event.target as IDBTransaction).error;
-          
-          // Check for specific Safari iOS transaction errors
-          const isBlobError = error?.message?.includes('Blob') || 
-                             error?.message?.includes('File') || 
-                             error?.message?.includes('object store') ||
-                             error?.message?.includes('preparing');
-          
-          if (isBlobError) {
-            this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Blob transaction error detected, using memory cache only', { 
-              url: cachedImage.url, 
-              error: error?.message,
-              errorName: error?.name
-            });
-            resolve(); // Don't fail completely, just use memory cache
-            return;
-          }
-
-          this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Transaction error', { 
-            url: cachedImage.url,
-            error: error?.message,
-            errorName: error?.name
-          });
-          
-          // For all transaction errors, just resolve to avoid breaking the app
-          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Transaction error, using memory cache only');
           resolve(); // Don't fail completely
-        };
-
-      } catch (error: any) {
-        // Check for specific Safari iOS IndexedDB errors
-        const errorMessage = error?.message || error?.toString() || '';
-        const isBlobError = errorMessage.includes('Blob') || 
-                           errorMessage.includes('File') || 
-                           errorMessage.includes('object store') ||
-                           errorMessage.includes('preparing') ||
-                           errorMessage.includes('IndexedDB');
-        
-        if (isBlobError) {
-          this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Blob/IndexedDB operation failed, falling back to memory cache', { 
-            url: cachedImage.url,
-            error: errorMessage,
-            errorType: typeof error
-          });
-          resolve(); // Don't fail completely, just use memory cache
         } else {
-          this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Unexpected error in persistent cache operation', { 
-            url: cachedImage.url,
-            error: errorMessage,
-            errorType: typeof error
-          });
-          resolve(); // Don't fail completely, just use memory cache
+          reject(error);
         }
       }
     });
@@ -711,146 +944,295 @@ export class MobileImageCacheService {
     return Date.now() < cachedImage.expiresAt;
   }
 
+  /**
+   * Validate that a blob is actually a valid image blob
+   * Checks for size, type, and basic integrity
+   */
+  private isBlobValid(blob: Blob | null | undefined): boolean {
+    if (!blob) {
+      return false;
+    }
+
+    // Check blob size - must be greater than 0
+    if (blob.size === 0) {
+      return false;
+    }
+
+    // Check blob type - must be an image type
+    if (!blob.type || !blob.type.startsWith('image/')) {
+      return false;
+    }
+
+    // Additional validation: check if blob is not too small (likely corrupted)
+    // Minimum size for a valid image is typically around 100 bytes
+    if (blob.size < 100) {
+      return false;
+    }
+
+    return true;
+  }
+
   private isGoogleImage(url: string): boolean {
-    return url.includes('lh3.googleusercontent.com') || 
-           url.includes('lh4.googleusercontent.com') || 
-           url.includes('lh5.googleusercontent.com') || 
-           url.includes('lh6.googleusercontent.com');
+    return url.includes('googleusercontent.com') || url.includes('google.com');
   }
 
   private handleGoogleImage(imageUrl: string, imageType: 'profile' | 'publication' | 'media', options: ImageLoadOptions): Observable<string> {
-    // For Google Images, we need to handle CORS issues
-    // Return a fallback or use a proxy approach
-    // No need to log every Google Image detection - this is expected behavior
-    
-    // Return default avatar image
-    return of('/assets/img/shared/handleImageError.png');
+    // Use Google Image Service for Google Images
+    return this.imageService.loadImage(imageUrl, options);
   }
 
   private updateAccessMetrics(cachedImage: CachedImage): void {
     cachedImage.lastAccessed = Date.now();
     cachedImage.accessCount++;
+  }
+
+  private getOptimizedTimeout(options: ImageLoadOptions = {}): number {
+    const config = this.getCurrentConfig();
+    const baseTimeout = options.timeout || 30000;
     
-    // Update in persistent cache - ONLY for non-iOS browsers
-    if (!isIOS && this.db) {
-      this.storeInPersistentCache(cachedImage).catch(error => {
-        this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Failed to update access metrics in persistent cache', { error });
-      });
+    // Reduce timeout for mobile devices
+    if (this.isMobileDevice) {
+      return Math.min(baseTimeout, 15000);
     }
+    
+    return baseTimeout;
+  }
+
+  private getRetryConfig(): { maxRetries: number; retryDelay: number } {
+    return {
+      maxRetries: this.isMobileDevice ? 1 : 2, // Reduced retries
+      retryDelay: this.isMobileDevice ? 3000 : 2000
+    };
   }
 
   /**
-   * Preload images for better mobile experience
+   * Preload images with strict limits
    */
-  preloadImages(imageUrls: string[], imageType: 'profile' | 'publication' | 'media' = 'media', priority: 'high' | 'medium' | 'low' = 'medium'): void {
+  preloadImages(
+    imageUrls: string[], 
+    imageType: 'profile' | 'publication' | 'media' = 'media', 
+    priority: 'high' | 'medium' | 'low' = 'medium',
+    options?: ImageLoadOptions
+  ): void {
     const config = this.getCurrentConfig();
-    const urlsToPreload = imageUrls.slice(0, config.preloadThreshold);
     
-    // Preloading images - no need to log every preload operation
-
+    // Limit preload based on device type - very conservative
+    const maxPreload = Math.min(config.preloadThreshold, 2); // Maximum 2 images
+    const urlsToPreload = imageUrls.slice(0, maxPreload);
+    
     urlsToPreload.forEach(url => {
-      this.loadImage(url, imageType, { priority }).subscribe({
+      // Merge priority with any additional options (like publicationId, commentId, etc.)
+      const loadOptions = {
+        priority,
+        ...options
+      } as any;
+      
+      this.loadImage(url, imageType, loadOptions).subscribe({
         next: () => {
-          // Image preloaded - no need to log every preload
+          // Image preloaded successfully - no need to log
         },
-        error: (error) => this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Image preload failed', { url, error })
+        error: (error) => {
+          // Error handled by loadImage with context logging if options provided
+        }
       });
     });
   }
 
-  /**
-   * Get cache metrics
-   */
   getCacheMetrics(): Observable<CacheMetrics> {
     return this.cacheMetrics.asObservable();
   }
 
-  /**
-   * Clear cache
-   */
   async clearCache(): Promise<void> {
+    // Clear memory cache
     this.memoryCache.clear();
-    this.cacheHits = 0;
-    this.cacheMisses = 0;
-    this.loadTimes = [];
-    
+    this.cacheSize = 0;
+
+    // Clear persistent cache
     if (this.db) {
       const transaction = this.db.transaction([this.STORE_NAME], 'readwrite');
       const store = transaction.objectStore(this.STORE_NAME);
       await store.clear();
     }
-    
-    await this.updateMetrics();
-    // Cache cleared - no need to log every cache clear
+
+    // Clear object URLs
+    this.createdObjectUrls.forEach(url => {
+      URL.revokeObjectURL(url);
+    });
+    this.createdObjectUrls.clear();
+
+    // Clear load queue
+    this.loadQueue = [];
+    this.currentLoads = 0;
+
+    // Reset metrics
+    this.cacheHits = 0;
+    this.cacheMisses = 0;
+    this.loadTimes = [];
+    this.updateMetrics();
   }
 
   /**
-   * Get cache statistics
+   * Clear a specific image from cache (memory and persistent)
+   * Useful when an image is updated and needs to be refreshed
    */
+  async clearImageFromCache(imageUrl: string): Promise<void> {
+    // Normalize URL before clearing from cache
+    const normalizedUrl = this._utilityService.normalizeImageUrl(imageUrl, environment.MINIO_BUCKET_URL || '');
+    
+    // Clear from memory cache (try both normalized and original URL for backward compatibility)
+    if (this.memoryCache.has(normalizedUrl)) {
+      const cached = this.memoryCache.get(normalizedUrl);
+      if (cached) {
+        this.cacheSize -= cached.size;
+      }
+      this.memoryCache.delete(normalizedUrl);
+    }
+    // Also try with original URL in case it was cached with the original URL
+    if (imageUrl !== normalizedUrl && this.memoryCache.has(imageUrl)) {
+      const cached = this.memoryCache.get(imageUrl);
+      if (cached) {
+        this.cacheSize -= cached.size;
+      }
+      this.memoryCache.delete(imageUrl);
+    }
+
+    // Clear from persistent cache (try both normalized and original URL)
+    if (this.db && !isIOS) {
+      try {
+        const transaction = this.db.transaction([this.STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(this.STORE_NAME);
+        store.delete(normalizedUrl);
+        // Also try with original URL for backward compatibility
+        if (imageUrl !== normalizedUrl) {
+          store.delete(imageUrl);
+        }
+      } catch (error) {
+        // Ignore errors when clearing specific image
+      }
+    }
+  }
+
+  /**
+   * Clear all profile images from cache
+   * Useful when user changes their avatar
+   */
+  async clearProfileImagesFromCache(): Promise<void> {
+    // Clear profile images from memory cache
+    const keysToDelete: string[] = [];
+    this.memoryCache.forEach((value, key) => {
+      if (value.type === 'profile' || key.includes('profile-avatar') || key.includes('profile/')) {
+        keysToDelete.push(key);
+        this.cacheSize -= value.size;
+      }
+    });
+    keysToDelete.forEach(key => this.memoryCache.delete(key));
+
+    // Clear profile images from persistent cache
+    if (this.db && !isIOS) {
+      try {
+        const transaction = this.db.transaction([this.STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(this.STORE_NAME);
+        const index = store.index('type');
+        const request = index.openCursor(IDBKeyRange.only('profile'));
+
+        request.onsuccess = (event) => {
+          const cursor = (event.target as IDBRequest).result;
+          if (cursor) {
+            store.delete(cursor.primaryKey);
+            cursor.continue();
+          }
+        };
+      } catch (error) {
+        // Ignore errors when clearing profile images
+      }
+    }
+  }
+
   async getCacheStats(): Promise<any> {
-    const stats = await this.getPersistentCacheStats();
+    const persistentStats = await this.getPersistentCacheStats();
     const config = this.getCurrentConfig();
     
     return {
-      ...stats,
-      mobileOptimized: this.isMobileDevice,
-      config,
-      metrics: this.cacheMetrics.value
+      memoryCacheSize: this.memoryCache.size,
+      memoryCacheLimit: config.maxMemoryCacheSize,
+      persistentCacheSize: persistentStats.size,
+      persistentCacheLimit: config.maxCacheSize,
+      objectUrlsCount: this.createdObjectUrls.size,
+      objectUrlsLimit: this.maxObjectUrls,
+      currentLoads: this.currentLoads,
+      maxConcurrentLoads: config.maxConcurrentLoads,
+      loadQueueLength: this.loadQueue.length,
+      cacheHits: this.cacheHits,
+      cacheMisses: this.cacheMisses,
+      hitRate: this.cacheHits / (this.cacheHits + this.cacheMisses) || 0,
+      averageLoadTime: this.loadTimes.length > 0 ? this.loadTimes.reduce((a, b) => a + b, 0) / this.loadTimes.length : 0
     };
   }
 
   private async getPersistentCacheStats(): Promise<any> {
-    if (!this.db) return { size: 0, items: 0 };
+    if (!this.db) {
+      return { size: 0, count: 0 };
+    }
 
     return new Promise((resolve, reject) => {
-      const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
-      const store = transaction.objectStore(this.STORE_NAME);
-      const request = store.getAll();
+      try {
+        const transaction = this.db!.transaction([this.STORE_NAME], 'readonly');
+        const store = transaction.objectStore(this.STORE_NAME);
+        const request = store.getAll();
 
-      request.onsuccess = () => {
-        const items = request.result as CachedImage[];
-        const totalSize = items.reduce((sum, item) => sum + item.size, 0);
-        resolve({
-          size: totalSize,
-          items: items.length,
-          byType: {
-            profile: items.filter(item => item.type === 'profile').length,
-            publication: items.filter(item => item.type === 'publication').length,
-            media: items.filter(item => item.type === 'media').length
-          }
-        });
-      };
-      request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const items = request.result || [];
+          const totalSize = items.reduce((sum, item) => sum + (item.size || 0), 0);
+          
+          resolve({
+            size: totalSize,
+            count: items.length
+          });
+        };
+
+        request.onerror = () => {
+          reject(request.error);
+        };
+      } catch (error) {
+        resolve({ size: 0, count: 0 });
+      }
     });
   }
 
-  /**
-   * Optimize cache for mobile
-   */
   async optimizeForMobile(): Promise<void> {
-    if (!this.isMobileDevice) return;
+    const config = this.getCurrentConfig();
     
-    // Cleanup old cache entries
-    await this.cleanupOldCache();
-    
-    // Compress cached images if enabled
-    if (this.getCurrentConfig().compressionEnabled) {
-      await this.compressCachedImages();
+    // Reduce memory cache size for mobile
+    if (this.memoryCache.size > config.maxMemoryCacheSize) {
+      const entriesToRemove = Array.from(this.memoryCache.entries())
+        .sort((a, b) => a[1].lastAccessed - b[1].lastAccessed)
+        .slice(0, this.memoryCache.size - config.maxMemoryCacheSize);
+      
+      entriesToRemove.forEach(([key]) => {
+        this.memoryCache.delete(key);
+      });
     }
     
-    // Mobile optimization completed - no need to log every optimization
+    // Clean up old cache
+    await this.cleanupOldCache();
+    
+    // Clear load queue
+    this.loadQueue = [];
+    this.currentLoads = 0;
+    
+
   }
 
-  /**
-   * Start cache monitoring
-   */
   private cacheMonitoringInterval: any;
 
   private startCacheMonitoring(): void {
-    // Monitor cache size every 5 minutes
+    if (this.cacheMonitoringInterval) {
+      clearInterval(this.cacheMonitoringInterval);
+    }
+    
     this.cacheMonitoringInterval = setInterval(() => {
       this.monitorCacheSize();
-    }, 5 * 60 * 1000);
+    }, 30000); // Check every 30 seconds (reduced from 60)
   }
 
   private stopCacheMonitoring(): void {
@@ -868,106 +1250,88 @@ export class MobileImageCacheService {
     const config = this.getCurrentConfig();
     
     if (stats.size > config.maxCacheSize) {
-      this.logService.log(LevelLogEnum.WARN, 'MobileImageCacheService', 'Cache size limit reached', {
-        currentSize: stats.size,
-        maxSize: config.maxCacheSize
-      });
+
       
       // Trigger cleanup
       await this.cleanupOldCache();
     }
   }
 
-  /**
-   * Cleanup old cache entries
-   */
   private async cleanupOldCache(): Promise<void> {
     if (!this.db) return;
 
-    const transaction = this.db.transaction([this.STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(this.STORE_NAME);
-    const index = store.index('expiresAt');
-    
-    const request = index.openCursor();
-    
-    request.onsuccess = () => {
-      const cursor = request.result;
-      if (cursor) {
-        const cachedImage = cursor.value as CachedImage;
-        if (Date.now() > cachedImage.expiresAt) {
-          cursor.delete();
+    try {
+      const transaction = this.db.transaction([this.STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        const items = request.result || [];
+        const now = Date.now();
+        const config = this.getCurrentConfig();
+        
+        // Remove expired items
+        items.forEach(item => {
+          if (item.expiresAt && now > item.expiresAt) {
+            store.delete(item.url);
+          }
+        });
+        
+        // If still too large, remove oldest items
+        if (items.length > config.maxCacheSize / (1024 * 1024)) {
+          const sortedItems = items
+            .filter(item => !item.expiresAt || now <= item.expiresAt)
+            .sort((a, b) => a.lastAccessed - b.lastAccessed);
+          
+          const itemsToRemove = sortedItems.slice(0, Math.floor(sortedItems.length / 2));
+          itemsToRemove.forEach(item => {
+            store.delete(item.url);
+          });
         }
-        cursor.continue();
-      }
-    };
-
-    // Cache cleanup completed - no need to log every cleanup
+      };
+    } catch (error) {
+      this.logService.log(LevelLogEnum.ERROR, 'MobileImageCacheService', 'Error cleaning up old cache', { error });
+    }
   }
 
-  /**
-   * Compress cached images
-   */
-  private async compressCachedImages(): Promise<void> {
-    // This would be implemented based on your image compression strategy
-    // Image compression triggered - no need to log every compression
-  }
-
-  /**
-   * Track load time
-   */
   private trackLoadTime(loadTime: number): void {
     this.loadTimes.push(loadTime);
     
-    // Keep only last 100 measurements
-    if (this.loadTimes.length > 100) {
+    // Keep only last 50 load times (reduced from 100)
+    if (this.loadTimes.length > 50) {
       this.loadTimes.shift();
     }
   }
 
-  /**
-   * Update metrics
-   */
   private async updateMetrics(): Promise<void> {
-    const totalRequests = this.cacheHits + this.cacheMisses;
-    const hitRate = totalRequests > 0 ? this.cacheHits / totalRequests : 0;
-    const missRate = totalRequests > 0 ? this.cacheMisses / totalRequests : 0;
-    const averageLoadTime = this.loadTimes.length > 0 
-      ? this.loadTimes.reduce((a, b) => a + b, 0) / this.loadTimes.length 
-      : 0;
-
     const stats = await this.getPersistentCacheStats();
+    const totalRequests = this.cacheHits + this.cacheMisses;
     
     this.cacheMetrics.next({
-      totalImages: stats.items,
-      cacheSize: stats.size,
-      hitRate,
-      missRate,
-      averageLoadTime,
+      totalImages: this.memoryCache.size + stats.count,
+      cacheSize: this.cacheSize + stats.size,
+      hitRate: totalRequests > 0 ? this.cacheHits / totalRequests : 0,
+      missRate: totalRequests > 0 ? this.cacheMisses / totalRequests : 0,
+      averageLoadTime: this.loadTimes.length > 0 ? this.loadTimes.reduce((a, b) => a + b, 0) / this.loadTimes.length : 0,
       mobileOptimized: this.isMobileDevice,
       persistentCacheSize: stats.size
     });
   }
 
-  /**
-   * Check if device is mobile
-   */
   isMobile(): boolean {
     return this.isMobileDevice;
   }
 
-  /**
-   * Get current configuration
-   */
   getConfig(): MobileCacheConfig {
     return this.getCurrentConfig();
   }
 
-  /**
-   * Force cache optimization
-   */
   async forceOptimization(): Promise<void> {
     await this.optimizeForMobile();
-    // Forced optimization completed - no need to log every optimization
+    this.cleanupObjectUrls();
+    this.loadQueue = [];
+    this.currentLoads = 0;
+
   }
 
   /**
@@ -1001,8 +1365,18 @@ export class MobileImageCacheService {
     }
     
     // Check memory cache size
-    if (this.memoryCache.size > 20) {
+    if (this.memoryCache.size > config.maxMemoryCacheSize) {
       issues.push('Memory cache size too large');
+    }
+    
+    // Check object URLs
+    if (this.createdObjectUrls.size > this.maxObjectUrls * 0.9) {
+      issues.push('Too many object URLs');
+    }
+    
+    // Check load queue
+    if (this.loadQueue.length > 10) {
+      issues.push('Load queue too large');
     }
     
     const healthy = issues.length === 0;
@@ -1026,22 +1400,51 @@ export class MobileImageCacheService {
     // Cleanup persistent cache
     await this.cleanupOldCache();
     
+    // Cleanup object URLs
+    this.cleanupObjectUrls();
+    
+    // Clear load queue
+    this.loadQueue = [];
+    this.currentLoads = 0;
+    
     // Reinitialize database if needed
     if (!this.db) {
-              await this.initializeDatabase();
+      await this.initializeDatabase();
     }
     
     // iOS cache recovery completed - no need to log every recovery
   }
 
-  /**
-   * Cleanup service resources
-   */
   cleanup(): void {
     this.stopCacheMonitoring();
+    
+    // Clean up object URLs
+    this.createdObjectUrls.forEach(url => {
+      URL.revokeObjectURL(url);
+    });
+    this.createdObjectUrls.clear();
+    
+    // Clear load queue
+    this.loadQueue = [];
+    this.currentLoads = 0;
+  }
+
+  async closeConnection(): Promise<void> {
+    if (this.db) {
+      this.db.close();
+      this.db = null;
+    }
     this.memoryCache.clear();
-    this.loadTimes = [];
-    this.cacheHits = 0;
-    this.cacheMisses = 0;
+    this.stopCacheMonitoring();
+    
+    // Clean up object URLs
+    this.createdObjectUrls.forEach(url => {
+      URL.revokeObjectURL(url);
+    });
+    this.createdObjectUrls.clear();
+    
+    // Clear load queue
+    this.loadQueue = [];
+    this.currentLoads = 0;
   }
 }

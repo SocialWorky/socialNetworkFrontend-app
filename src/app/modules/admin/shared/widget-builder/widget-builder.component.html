@@ -1,0 +1,608 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-inter">
+  <!-- Header -->
+  <div class="bg-slate-700/95 backdrop-blur-lg border border-slate-600 rounded-xl p-6 mb-8 shadow-lg">
+    <div class="flex justify-between items-center gap-8 lg:flex-row flex-col lg:items-center lg:text-left text-center">
+      <div class="flex-1">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent mb-2">
+          {{ 'admin.widgetBuilder.title' | workyTranslations }}
+        </h1>
+        <p class="text-slate-300 text-lg">{{ 'admin.widgetBuilder.subtitle' | workyTranslations }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="bg-slate-700/95 border border-slate-600 rounded-xl p-2 mb-8 flex gap-2">
+    <button
+      (click)="setActiveTab('create')"
+      [class.bg-blue-500]="activeTab === 'create'"
+      [class.text-white]="activeTab === 'create'"
+      [class.bg-slate-600]="activeTab !== 'create'"
+      [class.text-slate-300]="activeTab !== 'create'"
+      class="flex-1 px-6 py-3 rounded-lg font-semibold transition-all">
+      <i class="material-icons mr-2 align-middle">add_circle</i>
+      {{ 'admin.widgetBuilder.tabs.create' | workyTranslations }}
+    </button>
+    <button
+      (click)="setActiveTab('manage')"
+      [class.bg-blue-500]="activeTab === 'manage'"
+      [class.text-white]="activeTab === 'manage'"
+      [class.bg-slate-600]="activeTab !== 'manage'"
+      [class.text-slate-300]="activeTab !== 'manage'"
+      class="flex-1 px-6 py-3 rounded-lg font-semibold transition-all">
+      <i class="material-icons mr-2 align-middle">settings</i>
+      {{ 'admin.widgetBuilder.tabs.manage' | workyTranslations }}
+    </button>
+  </div>
+
+  <!-- Create Widget Tab -->
+  <div *ngIf="isCreateTab()" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Widget Type Selection -->
+    <div class="lg:col-span-1 bg-white/5 border border-white/10 rounded-xl shadow-lg overflow-hidden min-w-0 lg:min-w-[320px]">
+      <div class="p-6 border-b border-white/10">
+        <h2 class="text-xl font-semibold text-slate-100 mb-2">
+          {{ 'admin.widgetBuilder.selectType.title' | workyTranslations }}
+        </h2>
+        <p class="text-sm text-slate-400">{{ 'admin.widgetBuilder.selectType.subtitle' | workyTranslations }}</p>
+      </div>
+      <div class="p-6 space-y-3 max-h-[600px] overflow-y-auto">
+        <ng-container *ngFor="let type of widgetTypes">
+          <div
+            (click)="selectWidgetType(type)"
+            [ngClass]="{
+              'bg-blue-500 bg-opacity-20': selectedWidgetType?.id === type.id,
+              'border-blue-500': selectedWidgetType?.id === type.id
+            }"
+            class="p-4 border border-slate-600 rounded-lg cursor-pointer transition-all hover:border-blue-500 hover:bg-blue-500 hover:bg-opacity-10 overflow-hidden">
+            <div class="flex items-start gap-3 min-w-0">
+              <i *ngIf="type.icon" class="material-icons text-blue-400 flex-shrink-0 text-xl">{{ type.icon }}</i>
+              <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-slate-100 mb-1 break-words">{{ type.name }}</h3>
+                <p class="text-sm text-slate-400 break-words leading-relaxed">{{ type.description }}</p>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <div *ngIf="widgetTypes.length === 0" class="text-center py-8 text-slate-400">
+          <i class="material-icons text-4xl mb-2">widgets</i>
+          <p>{{ 'admin.widgetBuilder.selectType.empty' | workyTranslations }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Widget Configuration Form -->
+    <div class="lg:col-span-2 bg-white/5 border border-white/10 rounded-xl shadow-lg">
+      <div class="p-6 border-b border-white/10">
+        <h2 class="text-xl font-semibold text-slate-100 mb-2">
+          {{ 'admin.widgetBuilder.config.title' | workyTranslations }}
+        </h2>
+        <p class="text-sm text-slate-400">{{ 'admin.widgetBuilder.config.subtitle' | workyTranslations }}</p>
+      </div>
+
+      <div class="p-6">
+        <form [formGroup]="widgetForm" (ngSubmit)="saveWidget()" class="space-y-6">
+          <!-- Basic Info -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-slate-200 mb-4">
+              {{ 'admin.widgetBuilder.config.basicInfo' | workyTranslations }}
+            </h3>
+
+            <!-- Name -->
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">title</i>
+                {{ 'admin.widgetBuilder.config.name' | workyTranslations }} *
+              </label>
+              <input
+                formControlName="name"
+                (blur)="generateSelector()"
+                type="text"
+                [placeholder]="'admin.widgetBuilder.config.name.placeholder' | workyTranslations"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
+            </div>
+
+            <!-- Selector -->
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">code</i>
+                {{ 'admin.widgetBuilder.config.selector' | workyTranslations }} *
+              </label>
+              <input
+                formControlName="selector"
+                type="text"
+                [placeholder]="'admin.widgetBuilder.config.selector.placeholder' | workyTranslations"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
+              <p class="text-xs text-slate-500">{{ 'admin.widgetBuilder.config.selector.help' | workyTranslations }}</p>
+            </div>
+
+            <!-- Description -->
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">description</i>
+                {{ 'admin.widgetBuilder.config.description' | workyTranslations }}
+              </label>
+              <textarea
+                formControlName="description"
+                rows="3"
+                [placeholder]="'admin.widgetBuilder.config.description.placeholder' | workyTranslations"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500"></textarea>
+            </div>
+
+            <!-- Icon -->
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">image</i>
+                {{ 'admin.widgetBuilder.config.icon' | workyTranslations }}
+              </label>
+              <input
+                formControlName="icon"
+                type="text"
+                [placeholder]="'admin.widgetBuilder.config.icon.placeholder' | workyTranslations"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
+            </div>
+
+            <!-- Show Title -->
+            <div class="space-y-2">
+              <div class="flex items-center gap-3">
+                <input
+                  formControlName="showTitle"
+                  type="checkbox"
+                  id="showTitle"
+                  class="w-5 h-5 rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-2 focus:ring-blue-500">
+                <label for="showTitle" class="flex items-center gap-2 text-sm font-semibold text-slate-400 cursor-pointer">
+                  <i class="material-icons text-blue-500 text-base">title</i>
+                  {{ 'admin.widgetBuilder.config.showTitle' | workyTranslations }}
+                </label>
+              </div>
+              <p class="text-xs text-slate-500">{{ 'admin.widgetBuilder.config.showTitle.help' | workyTranslations }}</p>
+            </div>
+          </div>
+
+          <!-- Position & Order -->
+          <div class="space-y-4">
+            <h3 class="text-lg font-semibold text-slate-200 mb-4">
+              {{ 'admin.widgetBuilder.config.position.title' | workyTranslations }}
+            </h3>
+
+            <!-- Allowed Positions -->
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">place</i>
+                {{ 'admin.widgetBuilder.config.position.allowed' | workyTranslations }} *
+              </label>
+              <div class="flex gap-2 flex-wrap">
+                <button
+                  *ngFor="let position of availablePositions"
+                  type="button"
+                  (click)="togglePosition(position)"
+                  [class.bg-blue-500]="isPositionAllowed(position)"
+                  [class.text-white]="isPositionAllowed(position)"
+                  [class.bg-slate-700]="!isPositionAllowed(position)"
+                  [class.text-slate-300]="!isPositionAllowed(position)"
+                  class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-blue-600 capitalize">
+                  {{ position }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Current Position -->
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">location_on</i>
+                {{ 'admin.widgetBuilder.config.position.current' | workyTranslations }} *
+              </label>
+              <select
+                formControlName="position"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                <option *ngFor="let position of availablePositions" [value]="position" class="capitalize">
+                  {{ position }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Order -->
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">sort</i>
+                {{ 'admin.widgetBuilder.config.order' | workyTranslations }} *
+              </label>
+              <input
+                formControlName="order"
+                type="number"
+                min="0"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+            </div>
+
+            <!-- Status -->
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">toggle_on</i>
+                {{ 'admin.widgetBuilder.config.status' | workyTranslations }} *
+              </label>
+              <select
+                formControlName="status"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                <option *ngFor="let status of availableStatuses" [value]="status" class="capitalize">
+                  {{ status }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Widget Type Specific Configuration -->
+          <div *ngIf="selectedWidgetType && selectedWidgetType.fields && selectedWidgetType.fields.length > 0" class="space-y-4">
+            <h3 class="text-lg font-semibold text-slate-200 mb-4">
+              {{ 'admin.widgetBuilder.config.fields.title' | workyTranslations }}
+            </h3>
+
+            <form [formGroup]="widgetConfigForm" class="space-y-4">
+              <div *ngFor="let field of selectedWidgetType.fields" class="space-y-2">
+                <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                  <i class="material-icons text-blue-500 text-base">settings</i>
+                  {{ field.label }} <span *ngIf="field.required" class="text-red-400">*</span>
+                </label>
+
+                <!-- Image Upload -->
+                <div *ngIf="isImageField(field)" class="space-y-3">
+                  <div class="flex items-center gap-3">
+                    <button
+                      type="button"
+                      (click)="openImageUpload(field.key)"
+                      [disabled]="isUploadingImage(field.key)"
+                      class="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg font-medium transition-all duration-200 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                      <i class="material-icons text-sm">{{ isUploadingImage(field.key) ? 'hourglass_empty' : 'cloud_upload' }}</i>
+                      <span>{{ isUploadingImage(field.key) ? ('admin.widgetBuilder.config.image.uploading' | workyTranslations) : ('admin.widgetBuilder.config.image.upload' | workyTranslations) }}</span>
+                    </button>
+                    <input
+                      [formControlName]="field.key"
+                      type="text"
+                      [placeholder]="getImagePlaceholder(field)"
+                      class="flex-1 px-4 py-2 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
+                  </div>
+                  <div *ngIf="getImageUrl(field.key)" class="relative">
+                    <img 
+                      [src]="getImageUrl(field.key)" 
+                      [alt]="field.label"
+                      class="w-full max-w-md h-auto rounded-lg border border-slate-600 object-cover">
+                    <button
+                      type="button"
+                      (click)="clearImageUrl(field.key)"
+                      class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all">
+                      <i class="material-icons text-sm">close</i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Text Input -->
+                <input
+                  *ngIf="(field.fieldType === 'text' || field.fieldType === 'url' || field.fieldType === 'color') && !isImageField(field)"
+                  [formControlName]="field.key"
+                  [type]="field.fieldType === 'color' ? 'color' : field.fieldType === 'url' ? 'url' : 'text'"
+                  [placeholder]="field.placeholder || ''"
+                  class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
+
+                <!-- Textarea -->
+                <textarea
+                  *ngIf="field.fieldType === 'textarea' || field.fieldType === 'html'"
+                  [formControlName]="field.key"
+                  [rows]="field.fieldType === 'html' ? 8 : 4"
+                  [placeholder]="field.placeholder || ''"
+                  class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500 font-mono"></textarea>
+
+                <!-- Number -->
+                <input
+                  *ngIf="field.fieldType === 'number'"
+                  [formControlName]="field.key"
+                  type="number"
+                  [min]="field.validation?.min ?? null"
+                  [max]="field.validation?.max ?? null"
+                  [placeholder]="field.placeholder || ''"
+                  class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
+
+                <!-- Select -->
+                <select
+                  *ngIf="field.fieldType === 'select' && field.options"
+                  [formControlName]="field.key"
+                  class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                  <option value="">{{ 'admin.widgetBuilder.config.selectOption' | workyTranslations }}</option>
+                  <option *ngFor="let option of field.options" [value]="option">{{ option }}</option>
+                </select>
+
+                <!-- Checkbox -->
+                <div *ngIf="field.fieldType === 'checkbox'" class="flex items-center gap-3">
+                  <input
+                    [formControlName]="field.key"
+                    type="checkbox"
+                    [id]="'checkbox-' + field.key"
+                    class="w-5 h-5 rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-2 focus:ring-blue-500">
+                  <label [for]="'checkbox-' + field.key" class="text-sm text-slate-300 cursor-pointer">
+                    {{ field.label }}
+                  </label>
+                </div>
+
+                <!-- Date -->
+                <input
+                  *ngIf="field.fieldType === 'date'"
+                  [formControlName]="field.key"
+                  type="date"
+                  class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+              </div>
+            </form>
+          </div>
+
+          <!-- No Type Selected Message -->
+          <div *ngIf="!selectedWidgetType" class="text-center py-12 text-slate-400">
+            <i class="material-icons text-6xl mb-4">widgets</i>
+            <p class="text-lg">{{ 'admin.widgetBuilder.config.noTypeSelected' | workyTranslations }}</p>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-3 pt-6 border-t border-slate-600">
+            <button
+              type="submit"
+              [disabled]="isSaving || widgetForm.invalid || !selectedWidgetType"
+              class="flex-1 px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold transition-all duration-200 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+              <i class="material-icons mr-2 align-middle">save</i>
+              {{ isSaving ? ('admin.widgetBuilder.config.button.saving' | workyTranslations) : ('admin.widgetBuilder.config.button.create' | workyTranslations) }}
+            </button>
+            <button
+              type="button"
+              (click)="resetForm()"
+              [disabled]="isSaving"
+              class="px-6 py-3 bg-slate-700 text-slate-300 rounded-lg font-semibold transition-all duration-200 hover:bg-slate-600 disabled:opacity-50">
+              {{ 'admin.widgetBuilder.config.button.reset' | workyTranslations }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Types Tab -->
+  <div *ngIf="isManageTab()" class="space-y-8">
+    <!-- Types List -->
+    <div class="bg-white/5 border border-white/10 rounded-xl shadow-lg">
+      <div class="p-6 border-b border-white/10 flex justify-between items-center">
+        <div>
+          <h2 class="text-xl font-semibold text-slate-100 mb-2">
+            {{ 'admin.widgetBuilder.manageTypes.title' | workyTranslations }}
+          </h2>
+          <p class="text-sm text-slate-400">{{ 'admin.widgetBuilder.manageTypes.subtitle' | workyTranslations }}</p>
+        </div>
+        <button
+          (click)="openTypeForm()"
+          class="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold transition-all hover:bg-blue-600">
+          <i class="material-icons mr-2 align-middle">add</i>
+          {{ 'admin.widgetBuilder.manageTypes.button.create' | workyTranslations }}
+        </button>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            *ngFor="let type of widgetTypes"
+            class="p-4 border border-slate-600 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-all">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <i *ngIf="type.icon" class="material-icons text-blue-400">{{ type.icon }}</i>
+                <div>
+                  <h3 class="font-semibold text-slate-100">{{ type.name }}</h3>
+                  <p class="text-xs text-slate-400 capitalize">{{ type.type }}</p>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button
+                  (click)="editWidgetType(type)"
+                  class="p-2 text-blue-400 hover:bg-blue-500/20 rounded transition-all">
+                  <i class="material-icons text-sm">edit</i>
+                </button>
+                <button
+                  (click)="deleteWidgetType(type)"
+                  class="p-2 text-red-400 hover:bg-red-500/20 rounded transition-all">
+                  <i class="material-icons text-sm">delete</i>
+                </button>
+              </div>
+            </div>
+            <p class="text-sm text-slate-300 mb-3">{{ type.description }}</p>
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+              <i class="material-icons text-sm">settings</i>
+              <span>{{ (type.fields || []).length }} {{ 'admin.widgetBuilder.manageTypes.fields' | workyTranslations }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Type Form Modal -->
+    <div *ngIf="showTypeForm" class="bg-white/5 border border-white/10 rounded-xl shadow-lg p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-semibold text-slate-100">
+          {{ editingWidgetType ? ('admin.widgetBuilder.typeForm.title.edit' | workyTranslations) : ('admin.widgetBuilder.typeForm.title.create' | workyTranslations) }}
+        </h2>
+        <button
+          (click)="closeTypeForm()"
+          class="p-2 text-slate-400 hover:text-slate-200 rounded transition-all">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
+
+      <form [formGroup]="widgetTypeForm" (ngSubmit)="saveWidgetType()" class="space-y-6">
+        <!-- Basic Info -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold text-slate-200 mb-4">
+            {{ 'admin.widgetBuilder.typeForm.basicInfo' | workyTranslations }}
+          </h3>
+
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+              <i class="material-icons text-blue-500 text-base">title</i>
+              {{ 'admin.widgetBuilder.typeForm.name' | workyTranslations }} *
+            </label>
+            <input
+              formControlName="name"
+              type="text"
+              class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm">
+          </div>
+
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+              <i class="material-icons text-blue-500 text-base">description</i>
+              {{ 'admin.widgetBuilder.typeForm.description' | workyTranslations }} *
+            </label>
+            <textarea
+              formControlName="description"
+              rows="3"
+              class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm"></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">category</i>
+                {{ 'admin.widgetBuilder.typeForm.type' | workyTranslations }} *
+              </label>
+              <select formControlName="type" class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm">
+                <option *ngFor="let t of widgetTypeEnum" [value]="t" class="capitalize">{{ t }}</option>
+              </select>
+            </div>
+
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-semibold text-slate-400">
+                <i class="material-icons text-blue-500 text-base">image</i>
+                {{ 'admin.widgetBuilder.typeForm.icon' | workyTranslations }}
+              </label>
+              <input
+                formControlName="icon"
+                type="text"
+                placeholder="widgets, code, image"
+                class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm">
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <input
+              formControlName="isActive"
+              type="checkbox"
+              id="isActive"
+              class="w-5 h-5 rounded border-slate-600 bg-slate-800 text-blue-500">
+            <label for="isActive" class="text-sm text-slate-300 cursor-pointer">
+              {{ 'admin.widgetBuilder.typeForm.isActive' | workyTranslations }}
+            </label>
+          </div>
+        </div>
+
+        <!-- Fields -->
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-slate-200">
+              {{ 'admin.widgetBuilder.typeForm.fields.title' | workyTranslations }}
+            </h3>
+            <button
+              type="button"
+              (click)="addFieldToType(editingWidgetType?.id)"
+              class="px-4 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold hover:bg-green-600 transition-all">
+              <i class="material-icons mr-1 align-middle text-sm">add</i>
+              {{ 'admin.widgetBuilder.typeForm.fields.add' | workyTranslations }}
+            </button>
+          </div>
+
+          <div *ngIf="editingWidgetType && editingFields[editingWidgetType.id!]?.length === 0" class="text-center py-8 text-slate-400">
+            <p>{{ 'admin.widgetBuilder.typeForm.fields.empty' | workyTranslations }}</p>
+          </div>
+
+          <div *ngFor="let field of getEditingFields(); let i = index" class="p-4 border border-slate-600 rounded-lg bg-slate-800/50 space-y-3">
+            <div class="flex justify-between items-center">
+              <h4 class="font-semibold text-slate-200">{{ 'admin.widgetBuilder.typeForm.fields.field' | workyTranslations }} {{ i + 1 }}</h4>
+              <button
+                type="button"
+                (click)="removeFieldFromType(editingWidgetType?.id || 0, i)"
+                class="p-2 text-red-400 hover:bg-red-500/20 rounded transition-all">
+                <i class="material-icons text-sm">delete</i>
+              </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-400">{{ 'admin.widgetBuilder.typeForm.fields.key' | workyTranslations }} *</label>
+                <input
+                  [(ngModel)]="field.key"
+                  [ngModelOptions]="{standalone: true}"
+                  type="text"
+                  placeholder="imageUrl"
+                  class="w-full px-3 py-2 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm">
+              </div>
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-400">{{ 'admin.widgetBuilder.typeForm.fields.label' | workyTranslations }} *</label>
+                <input
+                  [(ngModel)]="field.label"
+                  [ngModelOptions]="{standalone: true}"
+                  type="text"
+                  placeholder="Image URL"
+                  class="w-full px-3 py-2 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-400">{{ 'admin.widgetBuilder.typeForm.fields.fieldType' | workyTranslations }} *</label>
+                <select
+                  [(ngModel)]="field.fieldType"
+                  [ngModelOptions]="{standalone: true}"
+                  class="w-full px-3 py-2 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm">
+                  <option *ngFor="let ft of fieldTypes" [value]="ft">{{ ft }}</option>
+                </select>
+              </div>
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-400">{{ 'admin.widgetBuilder.typeForm.fields.placeholder' | workyTranslations }}</label>
+                <input
+                  [(ngModel)]="field.placeholder"
+                  [ngModelOptions]="{standalone: true}"
+                  type="text"
+                  class="w-full px-3 py-2 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm">
+              </div>
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-400">{{ 'admin.widgetBuilder.typeForm.fields.defaultValue' | workyTranslations }}</label>
+                <input
+                  [(ngModel)]="field.defaultValue"
+                  [ngModelOptions]="{standalone: true}"
+                  type="text"
+                  class="w-full px-3 py-2 border border-slate-600 rounded-lg bg-slate-800 text-slate-100 text-sm">
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <div class="flex items-center gap-2">
+                <input
+                  [(ngModel)]="field.required"
+                  [ngModelOptions]="{standalone: true}"
+                  type="checkbox"
+                  [id]="'required-' + i"
+                  class="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-500">
+                <label [for]="'required-' + i" class="text-xs text-slate-300 cursor-pointer">
+                  {{ 'admin.widgetBuilder.typeForm.fields.required' | workyTranslations }}
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-3 pt-6 border-t border-slate-600">
+          <button
+            type="submit"
+            [disabled]="isSavingType || widgetTypeForm.invalid"
+            class="flex-1 px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold transition-all hover:bg-blue-600 disabled:opacity-50">
+            <i class="material-icons mr-2 align-middle">save</i>
+            {{ isSavingType ? ('admin.widgetBuilder.typeForm.button.saving' | workyTranslations) : ('admin.widgetBuilder.typeForm.button.save' | workyTranslations) }}
+          </button>
+          <button
+            type="button"
+            (click)="closeTypeForm()"
+            [disabled]="isSavingType"
+            class="px-6 py-3 bg-slate-700 text-slate-300 rounded-lg font-semibold transition-all hover:bg-slate-600">
+            {{ 'admin.widgetBuilder.typeForm.button.cancel' | workyTranslations }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

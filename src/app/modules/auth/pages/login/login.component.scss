@@ -8,7 +8,8 @@
   justify-content: center;
   align-items: center;
   min-height: 100dvh;
-  padding-top: 20px;
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-bottom: env(safe-area-inset-bottom);
   @include breakpoints.below-sm {
     height: auto;
   }
@@ -69,11 +70,9 @@
           .line {
             flex: 1;
             height: 1px;
-            background-color: map.get(color.$worky-navy, 24);
           }
 
           .text {
-            color: map.get(color.$worky-navy, 24);
             margin: 0 10px;
             position: relative;
             z-index: 1;
@@ -121,7 +120,8 @@
           @include Fonts.worky-text;
           margin-block-end: 20px;
           margin-block-start: 5px;
-          color: map.get(color.$worky-navy, 24)
+          color: color.$worky-color-text;
+          opacity: 0.7;
         }
         @include breakpoints.below-sm {
           display: none;

@@ -13,7 +13,6 @@
     <div class="content-text-reaction no-select-text"
         *ngIf="!reactionUserInPublication">
       <i class="material-icons">mood</i>
-      <span>{{ 'publicationsView.spanReaction' | workyTranslations }}</span>
     </div>
 
     <div *ngIf="reactionUserInPublication"
@@ -24,7 +23,7 @@
         (touchend)="onTouchEnd()">
       <div class="reaction-icon-container">
         <img 
-          [src]="reactionUserInPublication.customReaction.emoji" 
+          [src]="getNormalizedEmojiUrl(reactionUserInPublication.customReaction.emoji)" 
           [alt]="reactionUserInPublication.customReaction.name"
           class="reaction-emoji-img"
           onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"
@@ -34,7 +33,6 @@
           mood
         </i>
       </div>
-      <div>{{ reactionUserInPublication.customReaction.name }}</div>
     </div>
 
     <div #reactionPopup
@@ -51,7 +49,7 @@
           (click)="addReaction(reaction)">
         <worky-image 
           class="reaction-image" 
-          [src]="reaction.emoji" 
+          [src]="getNormalizedEmojiUrl(reaction.emoji)" 
           [alt]="reaction.name"
           [skeletonWidth]="'40px'"
           [skeletonHeight]="'40px'"

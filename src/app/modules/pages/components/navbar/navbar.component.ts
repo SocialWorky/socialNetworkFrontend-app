@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, ChangeDetectorRef, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 
@@ -7,23 +7,29 @@ import { DeviceDetectionService } from '@shared/services/device-detection.servic
 import { DropdownDataLink } from '@shared/modules/worky-dropdown/interfaces/dataLink.interface';
 import { AuthService } from '@auth/services/auth.service';
 import { UserService } from '@shared/services/core-apis/users.service';
+import { ExploreService, ExploreUser } from '@shared/services/core-apis/explore.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service'
-import { MessageService } from '../../messages/services/message.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { environment } from '@env/environment';
 
 import { ScrollService } from '@shared/services/scroll.service';
 import { Token } from '@shared/interfaces/token.interface';
 import { AppUpdateManagerService } from '@shared/services/app-update-manager.service';
 import { APP_VERSION_CONFIG } from '../../../../../app-version.config';
+import { MessageService } from '../../messages/services/message.service';
+import { NotificationMessageChatService } from '@shared/services/notifications/notificationMessageChat.service';
+import { Conversation, PaginatedResponse } from '../../messages/interfaces/conversation.interface';
 
 @Component({
     selector: 'worky-navbar',
     templateUrl: './navbar.component.html',
     styleUrls: ['./navbar.component.scss'],
-    standalone: false
+    standalone: false,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   private unsubscribe$ = new Subject<void>();
@@ -32,7 +38,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   notifications: number = 0;
 
-  messages: number = 0;
+  unreadMessages: number = 0;
 
   searchTerm: string = '';
 
@@ -43,6 +49,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   resizeSubscription: Subscription | undefined;
 
   users: any[] = [];
+  nearbyUsers: ExploreUser[] = [];
 
   token: Token | null = null;
 
@@ -56,6 +63,9 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   isDarkMode = true;
 
+  groupsEnabled = true;
+  eventsEnabled = true;
+
   @Input() isMessages: boolean = false;
   @Output() navbarStateChange = new EventEmitter<boolean>();
 
@@ -68,12 +78,16 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     private _notificationUsersService: NotificationUsersService,
     private _notificationService: NotificationService,
     private _notificationCenterService: NotificationCenterService,
-    private _messageService: MessageService,
     private _notificationPanelService: NotificationPanelService,
     private _configService: ConfigService,
     private _scrollService: ScrollService,
-    private _appUpdateManagerService: AppUpdateManagerService
+    private _appUpdateManagerService: AppUpdateManagerService,
+    private _messageService: MessageService,
+    private _notificationMessageChatService: NotificationMessageChatService,
+    private _utilityService: UtilityService,
+    private readonly _exploreService: ExploreService,
   ) {
+    this.isMobile = this._deviceDetectionService.isMobile();
     this.menuProfile();
   }
 
@@ -92,15 +106,20 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     this._notificationService.notification$.pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: () => {
-        setTimeout(() => {
-          this.getNotification();
-          this.getUnreadMessagesCount();
-        }, 1000)
+        // bypassCache=true: skip the 1-min cache so the badge reflects the real count
+        setTimeout(() => this.getNotification(true), 800);
       },
       error: (error) => {
-        console.error('Error getting notifications', error);
+        // Error getting notifications - no need to log every notification fetch error
       }
     });
+    
+    this._notificationMessageChatService.notificationMessageChat$
+    .pipe(takeUntil(this.unsubscribe$))
+    .subscribe(() => {
+      this.getUnreadMessagesCount();
+    });
+
     this.subscribeToConfig();
     this.getConfig();
     this.checkAdminDataLink();
@@ -129,11 +148,12 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   getConfig() {
     this._configService.getConfig().pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {
-        this.applyConfig(data);
-        this._cdr.markForCheck();
+        if (data) {
+          this.applyConfig(data);
+        }
       },
       error: (error) => {
-        console.error('Error getting config', error);
+        // Error getting config - no need to log every config fetch error
       }
     });
   }
@@ -144,14 +164,47 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
         this.applyConfig(configData);
       }
     });
+
+    this._configService.groupsEnabled$.pipe(takeUntil(this.unsubscribe$)).subscribe((enabled) => {
+      this.groupsEnabled = enabled;
+      this._cdr.markForCheck();
+    });
+
+    this._configService.eventsEnabled$.pipe(takeUntil(this.unsubscribe$)).subscribe((enabled) => {
+      this.eventsEnabled = enabled;
+      this._cdr.markForCheck();
+    });
   }
 
   private applyConfig(configData: any) {
-    if (configData) {
-      this.title = configData.settings.title;
-      this.logoUrl = configData.settings.logoUrl;
+    if (configData && configData.settings) {
+      this.title = configData.settings.title || 'Social Network App';
+      // Normalize logo URL for MinIO paths - store the raw URL, normalization happens in template
+      this.logoUrl = configData.settings.logoUrl || '';
+      // Force change detection to update the view
       this._cdr.markForCheck();
     }
+  }
+
+  /**
+   * Get normalized logo URL for display
+   */
+  getNormalizedLogoUrl(url: string | null | undefined): string {
+    if (!url) return '';
+    // If it's already a full URL (http/https), return as is
+    if (typeof url === 'string' && (url.startsWith('http://') || url.startsWith('https://'))) {
+      return url;
+    }
+    // If it's a blob URL (preview) or data URL, return as is
+    if (typeof url === 'string' && (url.startsWith('blob:') || url.startsWith('data:'))) {
+      return url;
+    }
+    // If it's an asset path, return as is
+    if (typeof url === 'string' && url.startsWith('assets/')) {
+      return url;
+    }
+    // Normalize MinIO URLs
+    return this._utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
   }
 
   ngOnDestroy() {
@@ -181,9 +234,19 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.searchTerm.trim().length >= 3) {
       this._userService.getUserByName(this.searchTerm).pipe(takeUntil(this.unsubscribe$)).subscribe((data: any) => {
         this.users = data;
+        this._cdr.markForCheck();
+      });
+      // Load nearby users alongside text search results
+      this._exploreService.getNearbyUsers().pipe(takeUntil(this.unsubscribe$)).subscribe({
+        next: (res) => {
+          this.nearbyUsers = res.users;
+          this._cdr.markForCheck();
+        },
+        error: () => {},
       });
     } else {
       this.users = [];
+      this.nearbyUsers = [];
       this._cdr.markForCheck();
     }
   }
@@ -239,31 +302,24 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     this.searchTerm = '';
   }
 
-  async getNotification() {
+  async getNotification(bypassCache = false) {
     const userId = this._authService.getDecodedToken()?.id!;
-    this._notificationCenterService.getNotifications(userId).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    this._notificationCenterService.getNotifications(userId, bypassCache).pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (data: any) => {
         this.notifications = data.filter((notification: any) => !notification.read).length;
         this._cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error getting notifications', error);
+        // Error getting notifications - no need to log every notification fetch error
       }
     });
   }
 
-  messagesUrl() {
-    this._router.navigate(['/messages']);
-  }
-
   getUnreadMessagesCount() {
-    this._messageService.getUnreadAllMessagesCount().pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: (data: any) => {
-        this.messages = data;
+    this._messageService.getConversations(1, 100).pipe(takeUntil(this.unsubscribe$)).subscribe((response: PaginatedResponse<Conversation>) => {
+      if (response && response.conversations) {
+        this.unreadMessages = response.conversations.reduce((acc: number, conv: Conversation) => acc + (conv.unreadCount || 0), 0);
         this._cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Error getting messages', error);
       }
     });
   }

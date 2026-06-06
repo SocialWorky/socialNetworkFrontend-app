@@ -1,15 +1,25 @@
-name: Update Container on Portainer
+name: Build and Update K8s Manifest (GitOps)
+
 on:
   push:
     branches:
       - development
+    paths-ignore:
+      - 'k8s/**'
+
+permissions:
+  contents: write
 
 jobs:
-  update-container:
+  build-and-update:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_PAT }}
+          fetch-depth: 0
 
       - name: Crear archivo .env desde secretos
         run: |
@@ -22,6 +32,7 @@ jobs:
           echo "NG_APP_APIWEATHERURL=${{ secrets.NG_APP_APIWEATHERURL }}" >> .env
           echo "NG_APP_APIWEATHERTOKEN=${{ secrets.NG_APP_APIWEATHERTOKEN }}" >> .env
           echo "NG_APP_APIFILESERVICE=${{ secrets.NG_APP_APIFILESERVICE }}" >> .env
+          echo "NG_APP_MINIO_BUCKET_URL=${{ secrets.NG_APP_MINIO_BUCKET_URL }}" >> .env
           echo "NG_APP_APIMESSAGESERVICE=${{ secrets.NG_APP_APIMESSAGESERVICE }}" >> .env
           echo "NG_APP_APINOTIFICATIONCENTER=${{ secrets.NG_APP_APINOTIFICATIONCENTER }}" >> .env
           echo "NG_APP_GIPHYAPIKEY=${{ secrets.NG_APP_GIPHYAPIKEY }}" >> .env
@@ -62,21 +73,24 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          echo "Iniciando la construcción y el empuje de la imagen Docker..."
+          echo "Iniciando build..."
           docker build --no-cache -t socialworky/worky-frontend-dev:${{ github.sha }} .
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           docker push socialworky/worky-frontend-dev:${{ github.sha }}
-          echo "Construcción y empuje de la imagen Docker completados."
 
-      - name: Deploy stack to Portainer
-        uses: carlrygart/portainer-stack-deploy@v1
-        with:
-          portainer-host: https://portainer-dev.worky.cl
-          username: ${{ secrets.PORTAINER_USERNAME }}
-          password: ${{ secrets.PORTAINER_PASSWORD }}
-          stack-name: 'worky-frontend-dev'
-          stack-definition: 'docker-compose-worky.dev.yml'
-          image: socialworky/worky-frontend-dev:${{ github.sha }}
+      - name: Update Kubernetes resources
         env:
-          GIT_SHA: ${{ github.sha }}
+          IMAGE_TAG: ${{ github.sha }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          cd k8s
+          # Actualizamos el tag de la imagen
+          sed -i "s|image: socialworky/worky-frontend-dev:.*|image: socialworky/worky-frontend-dev:$IMAGE_TAG|g" deployment.yaml
           
+          # Config Git
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          
+          # Commit & Push Directo con Token
+          git commit -am "update frontend image to $IMAGE_TAG"
+          git push "https://x-access-token:$GITHUB_TOKEN@github.com/${{ github.repository }}.git" HEAD:development

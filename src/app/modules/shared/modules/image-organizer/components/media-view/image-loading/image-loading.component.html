@@ -9,8 +9,8 @@
       [attr.data-image-id]="currentImage?._id">
     </worky-image>
 
-    <div class="main-video-container" (click)="$event.stopPropagation()">
-      <video *ngIf="isVideo()"
+    <div *ngIf="isVideo()" class="main-video-container" (click)="$event.stopPropagation()">
+      <video
         class="main-video"
         [src]="getVideoUrl(currentImage)"
         controls

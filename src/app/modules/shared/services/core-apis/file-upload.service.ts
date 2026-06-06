@@ -3,6 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '@auth/services/auth.service';
 import { environment } from '@env/environment';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
+import { catchError, retry, timeout } from 'rxjs/operators';
+import { throwError, timer } from 'rxjs';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +14,8 @@ export class FileUploadService {
 
   constructor(
     private http: HttpClient,
-    private _authService: AuthService
+    private _authService: AuthService,
+    private _logService: LogService
   ) { }
 
   uploadFile(
@@ -25,7 +29,7 @@ export class FileUploadService {
     const id = this._authService.getDecodedToken()?.id;
     const formData = new FormData();
 
-    formData.append('userId', `${id}|`);
+    formData.append('userId', `${id}`);
     formData.append('destination', destination);
 
     if (idReference) {
@@ -44,7 +48,27 @@ export class FileUploadService {
       formData.append('files', file);
     });
 
-    return this.http.post<any>(url, formData);
+    return this.http.post<any>(url, formData).pipe(
+      timeout(60000),
+      retry({
+        count: 2,
+        delay: (error, attempt) => {
+          if (error?.status >= 400 && error?.status < 500) {
+            return throwError(() => error);
+          }
+          return timer(attempt * 1000);
+        },
+      }),
+      catchError(error => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'FileUploadService',
+          'File upload failed after retries',
+          { error }
+        );
+        return throwError(() => new Error('File upload failed after retries.'));
+      })
+    );
   }
 
   private getUniqueFiles(files: File[]): File[] {
@@ -65,17 +89,27 @@ export class FileUploadService {
     urlThumbnail: string,
     urlCompressed: string,
     _idPublications: string,
-    type: TypePublishing
+    type: TypePublishing,
+    extras?: {
+      urlThumbnailWebP?: string;
+      urlPreview?: string;
+      urlPreviewWebP?: string;
+      urlCompressedWebP?: string;
+      urlFull?: string;
+      urlFullWebP?: string;
+      blurHash?: string;
+    }
   ) {
     const urlApi = environment.API_URL;
 
     const body = {
-      url: url,
-      urlThumbnail: urlThumbnail,
-      urlCompressed: urlCompressed,
+      url,
+      urlThumbnail,
+      urlCompressed,
       _idPublication: _idPublications,
-      isPublications: type === TypePublishing.POST ? true : false,
-      isComment: type === TypePublishing.COMMENT ? true : false
+      isPublications: type === TypePublishing.POST,
+      isComment: type === TypePublishing.COMMENT,
+      ...extras,
     };
 
     return this.http.post<any>(`${urlApi}/media/create`, body);

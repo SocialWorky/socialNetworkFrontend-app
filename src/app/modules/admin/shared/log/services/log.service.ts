@@ -1,16 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { Observable } from 'rxjs';
-import { Logs } from '../interface/log.interface';
-
-export interface LogStats {
-  total: number;
-  error: number;
-  warn: number;
-  info: number;
-  debug: number;
-}
+import { LogStats, Logs } from '../interface/log.interface';
 
 export interface LogsResponse {
   logs: any[];
@@ -23,6 +15,23 @@ export interface LogsResponse {
   hasPrevPage: boolean;
 }
 
+export interface LogFilters {
+  page?: number;
+  limit?: number;
+  level?: string;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  source?: string;
+  userId?: string;
+  event?: string;
+  method?: string;
+  statusCode?: number;
+  context?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -30,37 +39,48 @@ export class LogService {
 
   urlApi = `${environment.API_URL}/records-logs`;
 
-  constructor(
-    private _http: HttpClient,
-  ) { }
+  private readonly noCache = new HttpHeaders({
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+  });
 
-  getLogs(
-    page: number = 1, 
-    limit: number = 10, 
-    level?: string, 
-    search?: string,
-    startDate?: string,
-    endDate?: string,
-    sortBy: string = 'timestamp',
-    sortOrder: 'asc' | 'desc' = 'desc'
-  ): Observable<LogsResponse> {
-    
-    let params: any = {
-      page: page.toString(),
-      limit: limit.toString(),
-      sortBy,
-      sortOrder
+  constructor(private _http: HttpClient) {}
+
+  getLogs(filters: LogFilters = {}): Observable<LogsResponse> {
+    const params: Record<string, string> = {
+      page: String(filters.page ?? 1),
+      limit: String(filters.limit ?? 10),
+      sortBy: filters.sortBy ?? 'timestamp',
+      sortOrder: filters.sortOrder ?? 'desc',
     };
 
-    if (level) params.level = level;
-    if (search) params.search = search;
-    if (startDate) params.startDate = startDate;
-    if (endDate) params.endDate = endDate;
-    
-    return this._http.get<LogsResponse>(this.urlApi, { params });
+    if (filters.level) params['level'] = filters.level;
+    if (filters.search) params['search'] = filters.search;
+    if (filters.startDate) params['startDate'] = filters.startDate;
+    if (filters.endDate) params['endDate'] = filters.endDate;
+    if (filters.source) params['source'] = filters.source;
+    if (filters.userId) params['userId'] = filters.userId;
+    if (filters.event) params['event'] = filters.event;
+    if (filters.method) params['method'] = filters.method;
+    if (filters.statusCode) params['statusCode'] = String(filters.statusCode);
+    if (filters.context) params['context'] = filters.context;
+
+    return this._http.get<LogsResponse>(this.urlApi, {
+      params,
+      headers: this.noCache,
+    });
   }
 
   getLogStats(): Observable<LogStats> {
-    return this._http.get<LogStats>(`${this.urlApi}/stats`);
+    return this._http.get<LogStats>(`${this.urlApi}/stats`, { headers: this.noCache });
+  }
+
+  markAsResolved(logId: string): Observable<{ message: string }> {
+    return this._http.patch<{ message: string }>(
+      `${this.urlApi}/${logId}/resolve`,
+      {},
+      { headers: this.noCache },
+    );
   }
 }

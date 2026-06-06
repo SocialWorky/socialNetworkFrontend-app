@@ -39,7 +39,6 @@ export class AdminCustomFieldsComponent implements OnInit, OnDestroy, AfterViewI
     this.error = null;
 
     try {
-      // Simular carga inicial
       await new Promise(resolve => setTimeout(resolve, 500));
       this.isLoading = false;
       this._cdr.markForCheck();
@@ -109,7 +108,6 @@ export class AdminCustomFieldsComponent implements OnInit, OnDestroy, AfterViewI
     this.error = null;
     this._cdr.markForCheck();
 
-    // Simular recarga
     setTimeout(() => {
       this.isLoading = false;
       this._cdr.markForCheck();

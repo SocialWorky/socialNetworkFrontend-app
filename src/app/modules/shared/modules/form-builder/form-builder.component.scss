@@ -15,9 +15,25 @@
   ::ng-deep .input-destino .mat-mdc-text-field-wrapper {
     .mat-mdc-floating-label {
       background-color: transparent!important;
-      color: #000;
+      color: colors.$worky-color-text;
     }
-    background-color: #FFF;
+    background-color: map.get(colors.$worky-navy, 72);
+    border: 1px solid colors.$worky-color-navy;
+    border-radius: 4px;
+  }
+
+  ::ng-deep .input-destino .mat-mdc-form-field {
+    .mat-mdc-select {
+      color: colors.$worky-color-text;
+    }
+    
+    .mat-mdc-select-value {
+      color: colors.$worky-color-text;
+    }
+    
+    .mat-mdc-select-arrow {
+      color: colors.$worky-color-text;
+    }
   }
 
 }
@@ -136,6 +152,25 @@
 
 ::ng-deep .mat-mdc-floating-label, .mdc-floating-label {
   color: colors.$worky-color-text!important;
+}
+
+// Estilos para el panel de opciones del dropdown
+::ng-deep .mat-mdc-select-panel {
+  background-color: map.get(colors.$worky-navy, 72) !important;
+  border: 1px solid colors.$worky-color-navy;
+  border-radius: 4px;
+}
+
+::ng-deep .mat-mdc-option {
+  color: colors.$worky-color-text !important;
+  
+  &:hover {
+    background-color: map.get(colors.$worky-navy, 56) !important;
+  }
+  
+  &.mdc-list-item--selected {
+    background-color: map.get(colors.$worky-navy, 48) !important;
+  }
 }
 
 

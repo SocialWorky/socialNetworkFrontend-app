@@ -1,0 +1,208 @@
+@use "src/assets/styles/worky-variables" as variables;
+@use "src/assets/styles/worky-palettes" as colors;
+@use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
+@use "sass:map";
+
+.thematic-image-widget {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: transparent;
+  margin: 0;
+  padding: 0;
+  
+  // Remove any extra spacing
+  &:empty {
+    display: none;
+  }
+
+  .image-container {
+    position: relative;
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+    min-height: 0;
+
+    &.single-image {
+      .image-slide {
+        &.active {
+          position: relative;
+        }
+      }
+    }
+  }
+
+  .slider-wrapper {
+    position: relative;
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .image-slide {
+    width: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1;
+    display: none;
+
+    &.active {
+      position: relative;
+      opacity: 1;
+      z-index: 3;
+      display: block;
+    }
+
+    // Use absolute positioning only for non-active slides when there are multiple images
+    &:not(.active) {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    &.previous,
+    &.next {
+      opacity: 0;
+      z-index: 1;
+      display: none;
+    }
+  }
+
+  .image-link {
+    display: block;
+    width: 100%;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .thematic-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+    margin: 0;
+    padding: 0;
+
+    &:hover {
+      transform: scale(1.02);
+    }
+  }
+
+  .slider-controls {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    z-index: 10;
+    pointer-events: none;
+
+    .nav-button {
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      transition: all 0.3s ease;
+      pointer-events: all;
+      z-index: 11;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.8);
+        transform: scale(1.1);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      i {
+        font-size: 24px;
+      }
+
+      &.prev {
+        left: 10px;
+      }
+
+      &.next {
+        right: 10px;
+      }
+    }
+  }
+
+
+  .pause-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    color: white;
+
+    i {
+      font-size: 20px;
+    }
+  }
+
+  .no-images-message {
+    padding: 20px;
+    text-align: center;
+    color: map.get(colors.$worky-navy, 60);
+    font-size: 14px;
+    min-height: 0;
+  }
+
+  .loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    min-height: 200px;
+  }
+
+  .loader {
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid map.get(colors.$worky-navy, 87);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  // Responsive
+  @include breakpoints.below-sm {
+    .slider-controls {
+      .nav-button {
+        width: 35px;
+        height: 35px;
+
+        i {
+          font-size: 20px;
+        }
+      }
+    }
+
+  }
+}

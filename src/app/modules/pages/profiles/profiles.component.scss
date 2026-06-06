@@ -3,6 +3,63 @@
 @use 'src/assets/styles/worky-breakpoints.scss' as breakpoints;
 @use 'sass:map';
 
+:host {
+  display: block;
+  height: 100%;
+}
+
+// Discovery (location) toggle: stack on mobile so the title/badge/button don't crowd.
+.discovery-toggle-row {
+  @include breakpoints.below-sm {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  .discovery-toggle-titlerow {
+    @include breakpoints.below-sm {
+      flex-wrap: wrap;
+    }
+  }
+
+  .discovery-toggle-btn {
+    @include breakpoints.below-sm {
+      width: 100%;
+      margin-top: 10px;
+    }
+  }
+}
+
+// Smooth transitions to avoid flickering
+.profile-container {
+  transition: opacity 0.2s ease-in-out;
+  
+  .content-header-profile,
+  .content-body-profile {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  // Update state
+  &.updating {
+    opacity: 0.8;
+    pointer-events: none;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      z-index: 1000;
+    }
+  }
+}
+
 .content-header-profile {
   -webkit-overflow-scrolling: touch;
   .image-container {
@@ -86,7 +143,8 @@
       .btn-container-header {
         width: 150px;
         display: flex;
-        justify-content: flex-end;
+        flex-direction: column;
+        gap: 8px;
       }
     }
 
@@ -111,12 +169,24 @@
              height: 35px;
              cursor: pointer;
             }
+
+           .message-icon {
+              font-size: 35px;
+              cursor: pointer;
+              color: color.$worky-color-accent;
+              transition: color 0.3s ease;
+              &:hover {
+                color: map.get(color.$worky-blue, 72);
+              }
+            }
           }
            @include breakpoints.below-sm {
-            flex-direction: column;
-            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 8px;
             .send-message-button {
-              margin: 5px 0px 5px 0px
+              margin: 0;
+              .whatsapp-icon { width: 28px; height: 28px; }
+              .message-icon { font-size: 28px; }
             }
           }
 
@@ -124,6 +194,11 @@
               @include Fonts.worky-h3;
               font-weight: bold;
               color: color.$worky-color-navy;
+              margin: 0;
+              @include breakpoints.below-sm {
+                font-size: 20px;
+                line-height: 1.2;
+              }
           }
         }
 
@@ -131,6 +206,21 @@
             font-size: 14px;
             font-weight: medium;
             color: color.$worky-color-navy;
+        }
+
+        @include breakpoints.below-sm {
+          margin-top: 6px;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          span {
+            display: block;
+            line-height: 1.35;
+          }
+          p {
+            font-size: 13px;
+            opacity: 0.6;
+          }
         }
       }
     }
@@ -174,6 +264,10 @@
 
     .last-publication {
       margin-bottom: 20px;
+      
+      @include breakpoints.below-sm {
+        margin-bottom: 40px; // Extra margin for mobile to prevent cutoff
+      }
     }
 
   }
@@ -196,21 +290,43 @@
   }
   
   &.mobile-container {
-    height: 100dvh;
-    max-height: 100vh;
+    height: 100%;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    &.navbar-visible {
-      height: calc(100dvh - 120px);
-    }
   }
   
   &:not(.mobile-container) {
     height: auto;
     overflow: visible;
+  }
+}
+
+// Estilos para el skeleton durante actualizaciones
+.profile-skeleton {
+  padding: 20px;
+  margin: 20px;
+  
+  worky-skeleton {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  // Smooth animation for transition
+  animation: fadeInOut 0.3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

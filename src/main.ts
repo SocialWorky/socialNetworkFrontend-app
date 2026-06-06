@@ -8,10 +8,58 @@ import { Translations } from './translations/translations';
 import { environment } from './environments/environment';
 import { ConfigService } from '@shared/services/core-apis/config.service';
 
+/**
+ * Normalize image URL for MinIO paths (standalone function for use before Angular is initialized)
+ */
+function normalizeImageUrl(url: string, baseUrl: string): string {
+  if (!url) return '';
+  
+  // If URL already starts with blob/data/http/https, return as is
+  if (url.startsWith('blob:') || url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  
+  // If it's an asset path, return as is
+  if (url.startsWith('assets/')) {
+    return url;
+  }
+  
+  // Handle URLs that start with /profileImg/, /publications/, etc. (remove leading slash)
+  if (url.startsWith('/profileImg/') || url.startsWith('/publications/') || 
+      url.startsWith('/config/') || url.startsWith('/uploads/')) {
+    url = url.slice(1);
+  }
+  
+  // When MinIO is not configured, fall back to the file-service URL, which serves
+  // files directly from local storage at its root (GET :type/:filename).
+  if (!baseUrl || baseUrl.trim() === '') {
+    baseUrl = environment.APIFILESERVICE || '';
+  }
+
+  // If still no baseUrl, return empty string for known MinIO paths to prevent 404
+  if (!baseUrl || baseUrl.trim() === '') {
+    const knownMinIOPatterns = ['profileImg/', 'publications/', 'uploads/', 'config/', 'users/', 'comments/'];
+    const isKnownMinIOPath = knownMinIOPatterns.some(pattern => url.startsWith(pattern));
+    if (isKnownMinIOPath) {
+      console.error('[main.ts] No storage base URL configured (NG_APP_MINIO_BUCKET_URL / NG_APP_APIFILESERVICE). Cannot normalize URL:', url);
+      return ''; // Return empty string to prevent 404
+    }
+    return url;
+  }
+  
+  // Clean base URL (remove trailing slash)
+  const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  
+  // Clean the URL - remove leading slash if present
+  const cleanUrl = url.startsWith('/') ? url.slice(1) : url;
+  
+  // Construct final URL
+  return `${cleanBaseUrl}/${cleanUrl}`;
+}
+
 const destroy$ = new Subject<void>();
 
 if (!navigator.geolocation) {
-  console.error('Geolocation is not available');
   throw new Error('Geolocation not supported in this browser');
 }
 
@@ -47,7 +95,6 @@ async function initializeApp() {
     const _configService = injector.get(ConfigService);
 
     const configTimeout = setTimeout(() => {
-      console.warn('ConfigService timeout, using default configuration');
       const loadingScreen = document.getElementById('loading-screen');
       if (loadingScreen) {
         loadingScreen.style.opacity = '0';
@@ -74,7 +121,11 @@ async function initializeApp() {
           const loadingScreen = document.getElementById('loading-screen');
           if (loadingScreen) {
             const imgElement = document.createElement('img');
-            imgElement.src = configData.settings.logoUrl;
+            // Normalize logo URL before setting src
+            const normalizedLogoUrl = normalizeImageUrl(configData.settings.logoUrl, environment.MINIO_BUCKET_URL || '');
+            if (normalizedLogoUrl) {
+              imgElement.src = normalizedLogoUrl;
+            }
             imgElement.alt = 'Loading...';
             loadingScreen.innerHTML = '';
             loadingScreen.appendChild(imgElement);
@@ -91,7 +142,6 @@ async function initializeApp() {
       },
       error: (error) => {
         clearTimeout(configTimeout);
-        console.error('Error loading configuration:', error);
         
         const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen) {
@@ -101,7 +151,7 @@ async function initializeApp() {
       }
     });
   } catch (error) {
-    console.error('Error initializing the application:', error);
+    // Application initialization error
   }
 }
 
@@ -112,8 +162,16 @@ function updateMetaTags(configData: any) {
   updateMetaTag('property', 'og:site_name', configData.settings.title);
   updateMetaTag('property', 'og:url', configData.settings.urlSite);
   updateMetaTag('property', 'og:description', configData.settings.description);
-  updateMetaTag('property', 'og:image', configData.settings.logoUrl);
-  updateFavicon(configData.settings.logoUrl);
+  // Normalize logo URL before using for og:image
+  const normalizedLogoUrl = normalizeImageUrl(configData.settings.logoUrl || '', environment.MINIO_BUCKET_URL || '');
+  if (normalizedLogoUrl) {
+    updateMetaTag('property', 'og:image', normalizedLogoUrl);
+  }
+  // Normalize logo URL before using for favicon
+  const normalizedFaviconUrl = normalizeImageUrl(configData.settings.logoUrl || '', environment.MINIO_BUCKET_URL || '');
+  if (normalizedFaviconUrl) {
+    updateFavicon(normalizedFaviconUrl);
+  }
 }
 
 function updateMetaTag(attrName: string, attrValue: string, content: string) {
@@ -142,3 +200,4 @@ function updateFavicon(iconUrl: string) {
 }
 
 initializeApp();
+

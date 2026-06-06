@@ -28,7 +28,8 @@ export class ReportResponseComponent  implements OnInit {
 
   ngOnInit() {}
 
-  closeReport() {
+  cancelReport() {
+    this._dialogRef.close(null);
   }
 
   createReport() {

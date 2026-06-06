@@ -1,14 +1,16 @@
 @use 'src/assets/styles/worky-variables' as variables;
 @use 'src/assets/styles/worky-palettes' as colors;
+@use "sass:map";
 
 .tab-menu {
-    color: colors.$worky-color-icon;
+    color: rgba(255, 255, 255, 0.75);
     font-size: variables.$worky-font-size-9;
     padding: 10px;
-    &:hover {
-    background-color: colors.$worky-color-light;
-    color: colors.$worky-color-navy;
+    transition: color 0.15s ease, background-color 0.15s ease;
     border-radius: variables.$worky-border-radius-medium;
+    &:hover {
+      background-color: map.get(colors.$worky-navy, 72);
+      color: #fff;
     }
 }
 
@@ -19,9 +21,9 @@
 }
 
 .nav-item.active .tab-menu {
-  color: colors.$worky-color-icon;
+  color: #fff;
   &:hover {
-    color: colors.$worky-color-navy;
+    color: #fff;
   }
 }
 
@@ -31,6 +33,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 3px;
   background-color: colors.$worky-color-icon;
+  border-radius: 2px 2px 0 0;
 }

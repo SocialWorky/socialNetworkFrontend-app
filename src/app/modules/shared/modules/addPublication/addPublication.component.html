@@ -32,9 +32,12 @@
             <worky-button-skeleton width="100px" height="35px"></worky-button-skeleton>
           </div>
           <div class="dropdown-privacy" *ngIf="!privacyLoading && (!typePublishing.POST_PROFILE || (idUserProfile === userToken && typePublishing.POST_PROFILE) || (typePublishing.POST && !idUserProfile))">
-            <div class="form-select" [innerHTML]="privacyFront"
+            <div class="form-select"
               data-bs-toggle="dropdown"
               aria-expanded="false">
+              <i class="material-icons">{{ privacyFront.icon }}</i>
+              {{ privacyFront.label }}
+              <i class="material-icons">arrow_drop_down</i>
             </div>
             <ul
               class="dropdown-menu "
@@ -208,20 +211,12 @@
             </div>
 
             <div class="extra-content-item emoji-icon"
+                [class.active]="showEmojiMenu"
                 matTooltip="{{ 'addPublication.tooltip.emoji' | workyTranslations }}"
                 matTooltipPosition="above"
-                matTooltipClass="extra-mat-tooltip">
-              <i class="material-icons" (click)="toggleEmojiMenu()">mood</i>
-              <div *ngIf="showEmojiMenu" class="emoji-menu" (click)="preventClose($event)">
-                <emoji-mart
-                  [darkMode]="false"
-                  [showPreview]="true"
-                  [enableSearch]="true"
-                  [perLine]="7"
-                  [emojiSize]="24"
-                  (emojiSelect)="onEmojiClick($event)">
-                </emoji-mart>
-              </div>
+                matTooltipClass="extra-mat-tooltip"
+                (click)="toggleEmojiMenu()">
+              <i class="material-icons">mood</i>
             </div>
           </div>
         </div>
@@ -234,17 +229,29 @@
         <div *ngIf="publishButtonLoading" class="publish-skeleton">
           <worky-button-skeleton width="100%" height="40px"></worky-button-skeleton>
         </div>
-        <worky-buttons *ngIf="!publishButtonLoading && !loaderSavePublication && myForm.valid || previews.length && !loaderSavePublication"
+        <worky-buttons *ngIf="(!publishButtonLoading && myForm.valid) || previews.length"
           type="submit"
           [workyButtonType]="WorkyButtonType.Flat"
           [theme]="WorkyButtonTheme.Accent"
+          [loading]="loaderSavePublication"
           [height]="'40px'"
           [width]="'100%'">
-          <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POST_PROFILE ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
+          <span basic-button-text>{{ type === typePublishing.POST || type === typePublishing.POST_PROFILE || type === typePublishing.GROUP_POST ? ('publishing.publish' | workyTranslations) : ('publishing.comment' | workyTranslations) }}</span>
         </worky-buttons>
-        <div *ngIf="loaderSavePublication" class="loader"></div>
       </div>
     </div>
 
   </form>
 </div>
+
+<ng-template #emojiPickerTpl>
+  <emoji-mart
+    class="worky-emoji-mart"
+    [darkMode]="isDarkMode"
+    [showPreview]="true"
+    [enableSearch]="true"
+    [perLine]="7"
+    [emojiSize]="24"
+    (emojiSelect)="onEmojiClick($event)">
+  </emoji-mart>
+</ng-template>

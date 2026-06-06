@@ -1,79 +1,233 @@
-@use "src/assets/styles/worky-typography.scss" as Fonts;
-@use "src/assets/styles/worky-palettes.scss" as color;
 @use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
-@use "sass:map";
 
-.content-search-gif {
+:host {
+  display: block;
+  height: 100%;
+}
+
+.gif-search {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  height: 100%;
   width: 100%;
-  flex: 1 auto;
-  background-color: color-mix(
-    in srgb,
-    var(--worky-color-light),
-    transparent 30%
-  );
-  color: color.$worky-color-text;
+  background-color: var(--worky-color-module-container);
+  color: var(--worky-color-text);
 
-  .search-term {
+  // ── Header ──────────────────────────────────────────────────────────────────
+  &__header {
+    flex-shrink: 0;
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid color-mix(in srgb, var(--worky-color-text) 10%, transparent);
+  }
+
+  &__input-wrap {
+    position: relative;
     display: flex;
-    justify-content: center;
     align-items: center;
-    flex-direction: column;
-    width: 100%;
-    padding: 10px;
-
-    input[type="text"] {
-      width: 90%;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0px 0px 5px -1px rgba(0, 0, 0, 0.1);
-    }
-
-    input[type="text"]:focus {
-      border-color: color.$worky-color-navy;
-      outline: none;
-    }
-
-    .content-options {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: row;
-      gap: 10px;
-    }
-
   }
 
-  .gif-results {
+  &__search-icon {
+    position: absolute;
+    left: 12px;
+    font-size: 20px;
+    color: color-mix(in srgb, var(--worky-color-text) 55%, transparent);
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    height: 44px;
+    padding: 0 40px 0 40px;
+    font-size: 15px;
+    color: var(--worky-color-text);
+    background-color: color-mix(in srgb, var(--worky-color-text) 6%, transparent);
+    border: 1.5px solid transparent;
+    border-radius: 12px;
+    outline: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+
+    &::placeholder {
+      color: color-mix(in srgb, var(--worky-color-text) 45%, transparent);
+    }
+
+    &:focus {
+      border-color: var(--worky-color-navy);
+      background-color: color-mix(in srgb, var(--worky-color-text) 9%, transparent);
+    }
+  }
+
+  &__clear {
+    position: absolute;
+    right: 8px;
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .gif-results div {
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: color-mix(in srgb, var(--worky-color-text) 55%, transparent);
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: background-color 0.2s ease;
+
+    i { font-size: 18px; }
+    &:hover { background-color: color-mix(in srgb, var(--worky-color-text) 12%, transparent); }
   }
 
-  .gif-results div:hover {
-    transform: scale(1.05);
+  &__sizes {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
   }
 
-  .gif-results img {
-    width: 150px;
-    height: auto;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  &__size-pill {
+    flex: 1;
+    padding: 7px 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--worky-color-text) 65%, transparent);
+    background-color: color-mix(in srgb, var(--worky-color-text) 6%, transparent);
+    border: 1.5px solid transparent;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--worky-color-text) 11%, transparent);
+    }
+
+    &.active {
+      color: #fff;
+      background: var(--worky-color-navy);
+      border-color: var(--worky-color-navy);
+    }
   }
 
-  .gif-results img.large {
+  // ── Body (scrollable results) ────────────────────────────────────────────────
+  &__body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 14px 16px;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--worky-color-text) 25%, transparent) transparent;
+
+    &::-webkit-scrollbar { width: 8px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb {
+      background-color: color-mix(in srgb, var(--worky-color-text) 25%, transparent);
+      border-radius: 8px;
+    }
+  }
+
+  &__grid {
+    column-count: 3;
+    column-gap: 10px;
+
+    @include breakpoints.below-sm {
+      column-count: 2;
+    }
+  }
+
+  &__card {
+    position: relative;
+    display: block;
     width: 100%;
-    height: auto;
+    margin: 0 0 10px;
+    padding: 0;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--worky-color-text) 6%, transparent);
+    cursor: pointer;
+    break-inside: avoid;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+    img {
+      width: 100%;
+      display: block;
+      border-radius: 12px;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+
+      .gif-search__card-overlay { opacity: 1; }
+    }
   }
+
+  &__card-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--worky-color-navy) 55%, transparent);
+    opacity: 0;
+    transition: opacity 0.18s ease;
+
+    i { color: #fff; font-size: 30px; }
+  }
+
+  // ── Loading ──────────────────────────────────────────────────────────────────
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 180px;
+  }
+
+  &__spinner {
+    width: 38px;
+    height: 38px;
+    border: 3px solid color-mix(in srgb, var(--worky-color-text) 15%, transparent);
+    border-top-color: var(--worky-color-navy);
+    border-radius: 50%;
+    animation: gif-spin 0.8s linear infinite;
+  }
+
+  // ── Empty ────────────────────────────────────────────────────────────────────
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 180px;
+    gap: 10px;
+    color: color-mix(in srgb, var(--worky-color-text) 50%, transparent);
+
+    i { font-size: 48px; opacity: 0.7; }
+    p { margin: 0; font-size: 14px; }
+  }
+
+  // ── Footer (GIPHY attribution) ───────────────────────────────────────────────
+  &__footer {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px;
+    font-size: 11px;
+    border-top: 1px solid color-mix(in srgb, var(--worky-color-text) 10%, transparent);
+    color: color-mix(in srgb, var(--worky-color-text) 50%, transparent);
+  }
+
+  &__brand {
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    background: linear-gradient(90deg, #00ff99, #00ccff, #9933ff, #ff6666);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+@keyframes gif-spin {
+  to { transform: rotate(360deg); }
 }

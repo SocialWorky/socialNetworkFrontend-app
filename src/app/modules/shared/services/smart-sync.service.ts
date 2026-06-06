@@ -44,7 +44,7 @@ export class SmartSyncService {
   }
 
   private initializeService(): void {
-    // Monitorear cambios de conexión para sincronización automática
+    // Monitor connection changes for automatic synchronization
     this.networkService.connectionStatus.subscribe(isOnline => {
       if (isOnline && this.syncStatus.value.pendingChanges > 0) {
         this.triggerSync();
@@ -87,7 +87,7 @@ export class SmartSyncService {
         if (localData && this.hasData(localData)) {
     
           
-          // Sincronizar en segundo plano si está habilitado
+          // Sync in background if enabled
           if (enableBackgroundSync) {
             this.queueBackgroundSync(serverDataLoader, dataUpdater, maxRetries);
           }
@@ -106,7 +106,7 @@ export class SmartSyncService {
         }
       }),
       catchError(error => {
-        this.logService.log(LevelLogEnum.ERROR, 'SmartSyncService', 'Error en carga inteligente', { error });
+        // Error en carga inteligente - no need to log every sync error
         throw error;
       })
     );
@@ -152,7 +152,7 @@ export class SmartSyncService {
           error: error.message
         });
 
-        this.logService.log(LevelLogEnum.ERROR, 'SmartSyncService', 'Error en sincronización', { error });
+        // Error in synchronization - no need to log every sync error
         throw error;
       })
     );
@@ -177,8 +177,8 @@ export class SmartSyncService {
 
     return from(this.publicationDatabase.getAllPublications()).pipe(
       switchMap(localPublications => {
-        // Aquí implementarías la lógica de sincronización con el servidor
-        // Por ahora, simulamos una sincronización exitosa
+        // Here you would implement the synchronization logic with the server
+        // For now, we simulate a successful synchronization
         return of({
           hasChanges: false,
           updatedPublications: localPublications,
@@ -201,6 +201,8 @@ export class SmartSyncService {
           isSyncing: false,
           error: error.message
         });
+
+        // Error in background synchronization - no need to log every background sync error
         throw error;
       })
     );

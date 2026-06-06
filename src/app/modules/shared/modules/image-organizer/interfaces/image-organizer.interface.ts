@@ -1,12 +1,19 @@
 import { Comment } from '@shared/interfaces/publicationView.interface';
 
 export interface ImageOrganizer {
-  _id : string;
-  url: string;
-  urlThumbnail: string;
-  urlCompressed: string;
-  comments: Comment[];
-  type: MediaType;
+  _id:              string;
+  url:              string;
+  urlThumbnail:     string;
+  urlThumbnailWebP?: string;
+  urlPreview?:      string;
+  urlPreviewWebP?:  string;
+  urlCompressed:    string;
+  urlCompressedWebP?: string;
+  urlFull?:         string;
+  urlFullWebP?:     string;
+  blurHash?:        string;
+  comments:         Comment[];
+  type:             MediaType;
 }
 
 export enum MediaType {

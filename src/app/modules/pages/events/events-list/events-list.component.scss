@@ -1,0 +1,174 @@
+@use "src/assets/styles/worky-variables" as variables;
+@use "src/assets/styles/worky-palettes" as colors;
+@use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
+@use "sass:map";
+
+.events-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+
+  @include breakpoints.below-sm {
+    padding: 16px 12px;
+  }
+}
+
+.events-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 12px;
+
+  h1 {
+    color: colors.$worky-color-text;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+
+  > div {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  select {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid colors.$worky-color-greyLight;
+    background: colors.$worky-color-input-background;
+    color: colors.$worky-color-text;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+
+    &:focus {
+      outline: none;
+      border-color: colors.$worky-color-navy;
+    }
+  }
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.event-card {
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background: colors.$worky-color-module-container;
+  border: 1px solid colors.$worky-color-greyLight;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  }
+}
+
+.event-cover {
+  height: 140px;
+  background: colors.$worky-color-grey;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.type-badge {
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+
+  &.virtual {
+    background: rgba(59, 130, 246, 0.75);
+  }
+}
+
+.price-badge {
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.event-info {
+  padding: 14px;
+
+  h3 {
+    color: colors.$worky-color-text;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.event-date {
+  font-size: 12px;
+  color: colors.$worky-color-icon;
+  margin: 4px 0;
+}
+
+.event-location {
+  font-size: 12px;
+  color: colors.$worky-color-icon;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-capacity {
+  font-size: 12px;
+  color: #22c55e;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.sold-out {
+  color: #ef4444 !important;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  background: colors.$worky-color-navy;
+  color: colors.$worky-color-light;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: colors.$worky-color-icon;
+  font-size: 15px;
+}

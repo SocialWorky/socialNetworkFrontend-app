@@ -5,36 +5,8 @@ import { WidgetConfigService } from '@shared/modules/worky-widget/service/widget
 
 @Component({
   selector: 'worky-widget-container',
-  template: `
-    <div class="widget-container" [class]="position">
-      <ng-container *ngFor="let widget of enabledWidgets; trackBy: trackByWidget">
-        <div class="widget-wrapper" [attr.data-widget-selector]="widget.selector">
-          <ng-container [ngSwitch]="widget.selector">
-            <worky-weather *ngSwitchCase="'worky-weather'"></worky-weather>
-            <worky-news *ngSwitchCase="'worky-news'"></worky-news>
-            <!-- Agregar más widgets aquí según se vayan creando -->
-          </ng-container>
-        </div>
-      </ng-container>
-    </div>
-  `,
-  styles: [`
-    .widget-container {
-      width: 100%;
-    }
-    .widget-wrapper {
-      margin-bottom: 10px;
-    }
-    .no-widgets {
-      padding: 10px;
-      background-color: #f5f5f5;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      text-align: center;
-      color: #666;
-      font-size: 14px;
-    }
-  `],
+  templateUrl: './widget-container.component.html',
+  styleUrls: ['./widget-container.component.scss'],
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -88,5 +60,14 @@ export class WidgetContainerComponent implements OnInit, OnDestroy {
 
   trackByWidget(index: number, widget: WidgetConfig): string {
     return widget.selector;
+  }
+
+  shouldShowTitle(widget: WidgetConfig): boolean {
+    // Check if showTitle is explicitly set in config, default to true
+    if (widget.config && widget.config.hasOwnProperty('showTitle')) {
+      return widget.config['showTitle'] !== false;
+    }
+    // Default to showing title if not specified
+    return true;
   }
 }

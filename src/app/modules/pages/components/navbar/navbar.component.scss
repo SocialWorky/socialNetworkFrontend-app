@@ -8,7 +8,8 @@
   justify-content: center;
   width: 100%;
   background: colors.$worky-color-content-navbar;
-  z-index: 10;
+  z-index: 20;
+  padding-top: env(safe-area-inset-top);
   @include breakpoints.below-sm {
     flex-direction: column;
     height: auto;
@@ -19,6 +20,9 @@
     display: flex;
     padding: 2px;
     align-items: center;
+    @include breakpoints.tablet-only {
+      width: 100%;
+    }
     @include breakpoints.below-sm {
       width: 100%;
       flex-direction: column;
@@ -93,6 +97,10 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
       overflow-y: auto;
       z-index: 9999;
+      @include breakpoints.tablet-only {
+        width: min(400px, 90vw);
+        margin-left: 0;
+      }
       @include breakpoints.below-sm {
         width: 98%;
         margin-left: 0;
@@ -141,17 +149,28 @@
 
     .item-navbar-actions {
       width: 40px;
+      min-width: 40px;
       height: 40px;
+      flex-shrink: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: color-mix(in srgb, var(--worky-color-light), transparent 70%);
       border-radius: 50%;
       margin: 4px;
+      transition: background-color 0.15s ease;
 
-      &:focus,
+      .navbar-action-icon {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 22px;
+        transition: color 0.15s ease;
+      }
+
       &:hover {
         background: map.get(colors.$worky-navy, 72);
+
+        .navbar-action-icon {
+          color: #fff;
+        }
       }
     }
 
@@ -231,6 +250,32 @@
     width: 100%;
     padding: 8px 15px;
     gap: 10px;
+
+    a.item-navbar-actions {
+      width: 35px;
+      min-width: 35px;
+      height: 35px;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      transition: background-color 0.15s ease;
+
+      .navbar-action-icon {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 22px;
+        transition: color 0.15s ease;
+      }
+
+      &:hover {
+        background: map.get(colors.$worky-navy, 72);
+
+        .navbar-action-icon {
+          color: #fff;
+        }
+      }
+    }
 
     ::ng-deep worky-dropdown {
       .item-navbar-actions {
@@ -319,7 +364,7 @@
       background: colors.$worky-color-content-navbar;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       pointer-events: auto;
-      height: 120px;
+      //height: calc(60px + env(safe-area-inset-top));
     }
   }
 
@@ -336,3 +381,94 @@
       pointer-events: none;
     }
   }
+
+.bottom-nav-mobile {
+  display: none;
+
+  @include breakpoints.below-sm {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    //padding-bottom: env(safe-area-inset-bottom);
+    background: colors.$worky-color-content-navbar;
+    z-index: 1000;
+    align-items: center;
+    justify-content: space-around;
+    box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.08);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
+  }
+}
+
+.bottom-nav-mobile:not(.scrolledTop) {
+  @include breakpoints.below-sm {
+    transform: translateY(100%);
+    pointer-events: none;
+  }
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 56px;
+  color: rgba(255, 255, 255, 0.65);
+  position: relative;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease;
+
+  &.active {
+    color: #fff;
+
+    .bottom-nav-icon {
+      font-variation-settings: 'FILL' 1;
+    }
+  }
+
+  &:hover {
+    color: #fff;
+  }
+}
+
+.bottom-nav-icon {
+  font-size: 26px;
+}
+
+.bottom-nav-badge {
+  position: absolute;
+  top: 7px;
+  right: calc(50% - 22px);
+  background: colors.$worky-color-red;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+::ng-deep .bottom-nav-item worky-dropdown {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+}

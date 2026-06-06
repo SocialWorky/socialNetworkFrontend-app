@@ -171,7 +171,7 @@ export class CacheOptimizationService implements OnDestroy {
           error: (error) => {
             this.preloadQueue.delete(url);
             this.updatePreloadStats(false);
-            this.logService.log(LevelLogEnum.WARN, 'CacheOptimizationService', 'Image preload failed', { url, error });
+    
           }
         });
       }

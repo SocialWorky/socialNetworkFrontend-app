@@ -95,14 +95,14 @@ export class SafariIOSErrorHandlerService {
     
     // Check for IndexedDB/Blob related errors
     if (this.isIndexedDBError(error)) {
-      this.logService.log(LevelLogEnum.WARN, 'SafariIOSErrorHandlerService', 'IndexedDB error detected, providing fallback', { error: error.message });
-      event.preventDefault(); // Prevent the error from being logged to console
+      // IndexedDB error detected in global error handler - no need to log every IndexedDB error
+      event.preventDefault();
       this.handleIndexedDBError(error);
     }
     
     // Check for network/404 errors
     if (this.isNetworkError(error)) {
-      this.logService.log(LevelLogEnum.WARN, 'SafariIOSErrorHandlerService', 'Network error detected', { error: error.message });
+      // Network error detected - no need to log every network error
       event.preventDefault();
       this.handleNetworkError(error);
     }
@@ -113,7 +113,7 @@ export class SafariIOSErrorHandlerService {
     
     // Check for IndexedDB/Blob related errors
     if (this.isIndexedDBError(error)) {
-      this.logService.log(LevelLogEnum.WARN, 'SafariIOSErrorHandlerService', 'IndexedDB error detected in global error handler', { error: error?.message });
+      // IndexedDB error detected in global error handler - no need to log every IndexedDB error
       event.preventDefault();
       this.handleIndexedDBError(error);
     }
@@ -156,6 +156,7 @@ export class SafariIOSErrorHandlerService {
     
     // For 404 errors on images, we could implement retry logic or fallback images
     if (error.message?.includes('404')) {
+      // 404 error detected, consider implementing retry logic - no need to log every 404 error
       this.handle404Error(error);
     }
   }
@@ -172,11 +173,11 @@ export class SafariIOSErrorHandlerService {
           await this.deleteDatabase(dbName);
           // Cleared corrupted database - no need to log every database clear
         } catch (error) {
-          this.logService.log(LevelLogEnum.WARN, 'SafariIOSErrorHandlerService', 'Failed to clear database', { dbName, error });
+          // Failed to clear database - no need to log every clear failure
         }
       }
     } catch (error) {
-      this.logService.log(LevelLogEnum.ERROR, 'SafariIOSErrorHandlerService', 'Error clearing corrupted IndexedDB', { error });
+      // Error clearing corrupted IndexedDB - no need to log every IndexedDB clear error
     }
   }
 

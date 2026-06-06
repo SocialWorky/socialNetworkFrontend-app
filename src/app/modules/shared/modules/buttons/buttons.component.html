@@ -2,8 +2,11 @@
   class="worky-button"
   [ngStyle]="{ 'width': width, 'height': height }"
   [ngClass]="buttonTypeClass"
+  [disabled]="disabled || loading"
   (click)="onButtonClick()">
+  <span *ngIf="loading" class="worky-button-spinner" aria-hidden="true"></span>
   <div class="worky-button-wrapper"
+    [class.worky-button-wrapper-hidden]="loading"
     fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="8px">
     <ng-content select="[prefix-icon]"></ng-content>
     <ng-content select="[basic-button-text]"></ng-content>

@@ -15,3 +15,12 @@
     color: #10b981 !important;
   }
 }
+
+// Publication modal panel styles
+::ng-deep .publication-modal-panel {
+  .mat-mdc-dialog-container {
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+}

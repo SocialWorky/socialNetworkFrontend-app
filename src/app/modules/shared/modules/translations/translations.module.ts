@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { TranslationsPipe } from './pipes/translations.pipe';
 
 @NgModule({
-  declarations: [
+  imports: [
     TranslationsPipe
   ],
   exports: [

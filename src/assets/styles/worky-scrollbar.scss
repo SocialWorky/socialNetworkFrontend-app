@@ -1,0 +1,37 @@
+// Cross-browser scrollbar helpers.
+//
+// The standard properties (scrollbar-width / scrollbar-color) are honored by
+// Firefox and Chromium >= 121. Safari and older Chromium/Edge ignore them and
+// fall back to the default thick scrollbar, so the ::-webkit-scrollbar block is
+// required for parity on those engines. A container that only declares one of
+// the two syntaxes shows the default scrollbar on the other family of browsers.
+
+// Thin, subtle scrollbar that looks identical across engines.
+@mixin thin-scrollbar($thumb: #ffffff, $track: #f0f0f0, $size: 8px) {
+  scrollbar-width: thin;
+  scrollbar-color: $thumb $track;
+
+  &::-webkit-scrollbar {
+    width: $size;
+    height: $size;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $track;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $thumb;
+    border-radius: $size;
+  }
+}
+
+// Fully hidden scrollbar (still scrollable) across engines.
+@mixin hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

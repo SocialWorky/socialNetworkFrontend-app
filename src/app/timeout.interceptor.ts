@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, timer } from 'rxjs';
-import { retryWhen, delayWhen, take, catchError } from 'rxjs/operators';
+import { retry, catchError, timeout } from 'rxjs/operators';
 import { LogService, LevelLogEnum } from './modules/shared/services/core-apis/log.service';
 
 @Injectable()
@@ -26,24 +26,14 @@ export class TimeoutInterceptor implements HttpInterceptor {
     }
 
     return next.handle(processedRequest).pipe(
-      retryWhen(errors => 
-        errors.pipe(
-          delayWhen((error, index) => {
-            if (index >= this.MAX_RETRIES) {
-              return throwError(() => error);
-            }
-            
-            // Only retry on specific errors
-            if (this.shouldRetry(error)) {
-              // Retrying request - no need to log every retry attempt
-              return timer(this.RETRY_DELAY * (index + 1));
-            }
-            
-            return throwError(() => error);
-          }),
-          take(this.MAX_RETRIES)
-        )
-      ),
+      timeout(this.DEFAULT_TIMEOUT),
+      retry({
+        count: this.MAX_RETRIES,
+        delay: (error, retryCount) => {
+          if (!this.shouldRetry(error)) throw error;
+          return timer(this.RETRY_DELAY * retryCount);
+        },
+      }),
       catchError((error: HttpErrorResponse) => {
         this.handleError(error, request);
         return throwError(() => error);
@@ -118,11 +108,11 @@ export class TimeoutInterceptor implements HttpInterceptor {
     };
 
     if (error.status === 504) {
-      this.logService.log(LevelLogEnum.ERROR, 'TimeoutInterceptor', 'Gateway timeout detected', errorInfo);
+      // Gateway timeout detected - no need to log every timeout
     } else if (error.status === 0) {
-      this.logService.log(LevelLogEnum.ERROR, 'TimeoutInterceptor', 'Network error - possible connectivity issue', errorInfo);
+      // Network error - possible connectivity issue - no need to log every network error
     } else if (error.status >= 500) {
-      this.logService.log(LevelLogEnum.ERROR, 'TimeoutInterceptor', 'Server error detected', errorInfo);
+      // Server error detected - no need to log every server error
     } else if (error.status >= 400 && error.status < 500) {
       // Only log client errors (4xx) as WARN, not all failed requests
       this.logService.log(LevelLogEnum.WARN, 'TimeoutInterceptor', 'HTTP request failed', errorInfo);

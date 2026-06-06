@@ -1,13 +1,19 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal, ViewChild, ElementRef, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom, lastValueFrom, of, Subject, takeUntil } from 'rxjs';
-import { catchError, filter, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { catchError, filter, switchMap, debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import * as _ from 'lodash';
+import { translations } from '@translations/translations';
 
 import { Token } from '@shared/interfaces/token.interface';
 import { AuthService } from '@auth/services/auth.service';
+import { AnalyticsService, ProfileStats } from '@shared/services/core-apis/analytics.service';
+import { SubscriptionService } from '@shared/services/subscription.service';
+import { FeatureWallService } from '@shared/services/feature-wall.service';
+import { ExploreService, LocationStatus } from '@shared/services/core-apis/explore.service';
+import { CreatorProfileService, CreatorProfile, CreatorStats } from '@shared/services/core-apis/creator-profile.service';
 import { UserService } from '@shared/services/core-apis/users.service';
 import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
@@ -15,6 +21,8 @@ import { PublicationView } from '@shared/interfaces/publicationView.interface';
 import { TypePublishing } from '@shared/modules/addPublication/enum/addPublication.enum';
 import { PublicationService } from '@shared/services/core-apis/publication.service';
 import { NotificationCommentService } from '@shared/services/notifications/notificationComment.service';
+import { CenterSocketNotificationsService } from '@shared/services/notifications/centerSocketNotifications.service';
+import { NotificationService } from '@shared/services/notifications/notification.service';
 import { FriendsService } from '@shared/services/core-apis/friends.service';
 import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
 import { ImageUploadModalComponent } from '@shared/modules/image-upload-modal/image-upload-modal.component';
@@ -23,7 +31,6 @@ import { environment } from '@env/environment';
 import { GlobalEventService } from '@shared/services/globalEventService.service';
 import { ProfileService } from './services/profile.service';
 import { ProfileNotificationService } from '@shared/services/notifications/profile-notification.service';
-import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { DeviceDetectionService } from '@shared/services/device-detection.service';
 import { ScrollService } from '@shared/services/scroll.service';
 import { ConfigService } from '@shared/services/core-apis/config.service';
@@ -34,12 +41,14 @@ import { PullToRefreshService } from '@shared/services/pull-to-refresh.service';
 import { UtilityService } from '@shared/services/utility.service';
 import { ImageLoadOptions } from '@shared/services/image.service';
 import { PreloadService } from '@shared/services/preload.service';
+import { MobileImageCacheService } from '@shared/services/mobile-image-cache.service';
 
 @Component({
     selector: 'worky-profiles',
     templateUrl: './profiles.component.html',
     styleUrls: ['./profiles.component.scss'],
-    standalone: false
+    standalone: false,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   typePublishing = TypePublishing;
@@ -65,6 +74,8 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   loaderPublications: boolean = false;
 
+  friendActionLoading: boolean = false;
+
   userData: User | undefined;
   isLoadingUserData: boolean = true;
 
@@ -75,6 +86,22 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   isAuthenticated: boolean = false;
 
   isCurrentUser: boolean = false;
+
+  profileStats: ProfileStats | null = null;
+
+  locationStatus: LocationStatus = { discoveryEnabled: false, city: null, country: null };
+  isTogglingDiscovery = false;
+  locationDiscoveryEnabled = true;
+
+  // Creator profile
+  myCreatorProfile: CreatorProfile | null = null;
+  myCreatorStats: CreatorStats | null = null;
+  showCreatorConfig = false;
+  creatorMonthlyPrice = 3000;
+  creatorDescription = '';
+  isSavingCreator = false;
+  viewedCreatorProfile: CreatorProfile | null = null;
+  isSubscribingToCreator = false;
 
   dataUser: Token | null = null;
 
@@ -111,6 +138,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('contentContainer', { static: false }) contentContainer!: ElementRef;
   
   isRefreshing = false;
+  isUpdatingProfile = false;
 
   constructor(
     public _dialog: MatDialog,
@@ -125,7 +153,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     private _globalEventService: GlobalEventService,
     private _profileService: ProfileService,
     private _profileNotificationService: ProfileNotificationService,
-    private _emailNotificationService: EmailNotificationService,
     private _router: Router,
     private _deviceDetectionService: DeviceDetectionService,
     private _scrollService: ScrollService,
@@ -135,11 +162,25 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     private _logService: LogService,
     private _pullToRefreshService: PullToRefreshService,
     private _utilityService: UtilityService,
-    private _preloadService: PreloadService
+    private _preloadService: PreloadService,
+    private _mobileImageCacheService: MobileImageCacheService,
+    private readonly _analyticsService: AnalyticsService,
+    private readonly _subscriptionService: SubscriptionService,
+    private readonly _exploreService: ExploreService,
+    private readonly _creatorProfileService: CreatorProfileService,
+    private readonly _featureWallService: FeatureWallService,
+    private _centerSocketNotificationsService: CenterSocketNotificationsService,
+    private _notificationService: NotificationService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
       this._titleService.setTitle(configData.settings.title + ' - Profile');
     });
+    this._configService.locationDiscoveryEnabled$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((enabled) => {
+        this.locationDiscoveryEnabled = enabled;
+        this._cdr.markForCheck();
+      });
     this.idUserProfile = this._activatedRoute.snapshot.paramMap.get('profileId') || '';
   }
 
@@ -152,6 +193,30 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     await this.getDataProfile();
 
     this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe();
+
+    // Fire-and-forget: register profile visit (self-visits are ignored by the backend)
+    this._analyticsService.registerProfileVisit(this.idUserProfile).subscribe({ error: () => {} });
+
+    // Load analytics if viewing own profile and premium
+    this.isCurrentUser = this.idUserProfile === (this._authService.getDecodedToken()?.id ?? '');
+
+    // Load discovery status for own profile
+    if (this.isCurrentUser) {
+      this._exploreService.getLocationStatus().pipe(takeUntil(this.destroy$)).subscribe({
+        next: (status) => { this.locationStatus = status; this._cdr.markForCheck(); },
+        error: () => {},
+      });
+    }
+
+    if (this.isCurrentUser && this._subscriptionService.isPremiumSnapshot()) {
+      this._analyticsService.getProfileStats().pipe(takeUntil(this.destroy$)).subscribe({
+        next: (stats) => {
+          this.profileStats = stats;
+          this._cdr.markForCheck();
+        },
+        error: () => {},
+      });
+    }
 
     this.getUserFriend();
 
@@ -173,6 +238,12 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       this._cdr.markForCheck();
     });
 
+    this._notificationService.notification$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (!this.isCurrentUser && this.idUserProfile) {
+        this.getUserFriendPending(true);
+      }
+    });
+
     this._pullToRefreshService.refresh$.pipe(
       takeUntil(this.destroy$)
     ).subscribe(() => {
@@ -188,7 +259,6 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
         );
         
         const container = this.contentContainer.nativeElement;
-        container.style.height = '86dvh';
         container.style.overflowY = 'auto';
         container.style.webkitOverflowScrolling = 'touch';
         container.style.overscrollBehavior = 'contain';
@@ -200,7 +270,12 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     this._scrollService.scrollEnd$.pipe(
       takeUntil(this.destroy$)
     ).subscribe((data) => {
-      if(data === 'scrollEnd') this.loadPublications();
+      if(data === 'scrollEnd') {
+        // Add delay to prevent rapid loading
+        setTimeout(() => {
+          this.loadPublications();
+        }, 500);
+      }
 
       if(data === 'showNavbar') {
         this.navbarVisible = true;
@@ -268,7 +343,8 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       this.loaderPublications = false;
       this._cdr.markForCheck();
 
-      this.preloadProfileMedia();
+      // Optimize preload to prevent excessive image loading
+      this.preloadProfileMediaOptimized();
 
     } catch (error) {
       this._logService.log(
@@ -284,17 +360,84 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private preloadProfileMedia(): void {
-    const publications = this.publicationsProfile();
-    if (publications.length === 0) return;
-
-    this._preloadService.preloadForPage('profile', { 
-      publications,
-      profile: this.userData 
+  // NEW: Optimized preload method to prevent excessive image loading
+  private preloadProfileMediaOptimized() {
+    const currentPublications = this.publicationsProfile();
+    const config = this._mobileImageCacheService.getConfig();
+    
+    // Only preload images for visible publications
+    const visiblePublications = currentPublications.slice(-config.preloadThreshold);
+    
+    visiblePublications.forEach(publication => {
+      if (publication.media && publication.media.length > 0) {
+        // Only preload first image to reduce load
+        const firstMedia = publication.media[0];
+        if (firstMedia && firstMedia.url) {
+          // Normalize URL before preloading
+          const normalizedUrl = this._utilityService.normalizeImageUrl(firstMedia.url, environment.MINIO_BUCKET_URL || '');
+          
+          // Only preload if URL is absolute (http/https/blob/data)
+          // Skip if URL is still relative (MINIO_BUCKET_URL may not be configured)
+          const isValidUrl = normalizedUrl.startsWith('http://') ||
+                             normalizedUrl.startsWith('https://') ||
+                             normalizedUrl.startsWith('blob:') ||
+                             normalizedUrl.startsWith('data:');
+          
+          if (isValidUrl) {
+            this._mobileImageCacheService.loadImage(normalizedUrl, 'publication', {
+              priority: 'low',
+              timeout: 15000,
+              publicationId: publication._id // Pass publication ID for context in logs
+            } as any).subscribe({
+              next: () => {
+                // Image preloaded successfully - no need to log
+              },
+              error: (error: any) => {
+                // Log 404 errors with publication context
+                const errorStatus = error?.status || error?.error?.status || (error?.message?.includes('404') ? 404 : null);
+                const is404 = errorStatus === 404 || error?.message?.includes('404') || error?.message?.includes('Not Found');
+                
+                if (is404) {
+                  this._logService.log(
+                    LevelLogEnum.ERROR,
+                    'ProfilesComponent',
+                    'Image not found (404) during preload - Image may have been deleted from storage',
+                    {
+                      imageUrl: normalizedUrl,
+                      originalUrl: firstMedia.url,
+                      publicationId: publication._id,
+                      publicationAuthor: publication.author ? `${publication.author.name} ${publication.author.lastName}` : null,
+                      mediaIndex: 0,
+                      mediaCount: publication.media.length,
+                      timestamp: new Date().toISOString(),
+                      userAgent: navigator.userAgent,
+                      errorStatus: errorStatus || 'unknown',
+                      errorMessage: error?.message || String(error)
+                    }
+                  );
+                }
+              }
+            });
+          }
+        }
+      }
     });
   }
 
   private async getDataProfile(): Promise<void> {
+    if (!this.idUserProfile) {
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'ProfilesComponent',
+        'idUserProfile is undefined or empty',
+        {
+          idUserProfile: this.idUserProfile,
+          user: this._authService.getDecodedToken(),
+        },
+      );
+      return;
+    }
+
     this.isLoadingUserData = true;
     this._cdr.markForCheck();
     
@@ -336,19 +479,18 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
           const notification = notifications[0];
           const publicationsCurrent = this.publicationsProfile();
 
-          this._publicationService.getPublicationId(notification.publications._id)
+          this._publicationService.syncSpecificPublication(notification.publications._id)
             .pipe(
               takeUntil(this.destroy$),
-              filter((publication: PublicationView[]) => {
+              filter((publication: PublicationView | null) => {
                 return !!publication &&
-                       publication.length > 0 &&
-                       (publication[0].author._id === this.idUserProfile ||
-                        publication[0].userReceiving?._id === this.idUserProfile);
+                       (publication.author._id === this.idUserProfile ||
+                        publication.userReceiving?._id === this.idUserProfile);
               })
             )
             .subscribe({
-              next: (publication: PublicationView[]) => {
-                const newPublication = publication[0];
+              next: (newPublication: PublicationView | null) => {
+                if (!newPublication) return;
                 
                 const existingPublication = publicationsCurrent.find(pub => pub._id === newPublication._id);
                 if (existingPublication) {
@@ -586,8 +728,8 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  private getUserFriendPending(): void {
-    this._friendsService.getIsMyFriend(this._authService.getDecodedToken()?.id!, this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe({
+  private getUserFriendPending(bypassCache = false): void {
+    this._friendsService.getIsMyFriend(this._authService.getDecodedToken()?.id!, this.idUserProfile, bypassCache).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: FriendsStatus) => {
         this.isFriendPending.status = response?.status === 'pending';
         this.idPendingFriend = response?.id;
@@ -619,11 +761,26 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   followMyFriend(_id: string) {
-    this._friendsService.requestFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
+    if (this.friendActionLoading) return;
+    if (this._configService.subscriptionModeSnapshot() && this._subscriptionService.isPremiumSnapshot() && !this._subscriptionService.hasFeature('friends')) {
+      this._featureWallService.show('friends', this._subscriptionService.getPlanFeatures());
+      return;
+    }
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.requestFriend(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: async () => {
+        if (this.userData) {
+          this._centerSocketNotificationsService.senFriendRequestNotification(this.userData);
+        }
         this.loadPublications();
         this.getUserFriendPending();
-        this._emailNotificationService.sendFriendRequestNotification(_id);
         this._cdr.markForCheck();
       },
       error: (error) => {
@@ -641,21 +798,78 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   cancelFriendship(_id: string) {
-    this._friendsService.deleteFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.deleteFriend(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: async () => {
         this.loadPublications();
+        this.getUserFriend();
+        this._notificationService.sendNotification();
+        this._cdr.markForCheck();
+      },
+      error: () => {
+        // Resync status — the friendship may already be gone (e.g. rejected by the other user)
         this.getUserFriend();
         this._cdr.markForCheck();
       }
     });
   }
 
-  async acceptFriendship(_id: string) {
-    this._friendsService.acceptFriendship(_id).pipe(takeUntil(this.destroy$)).subscribe({
+  rejectFriendship(_id: string) {
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.deleteFriend(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: async () => {
+        this.loadPublications();
+        this.getUserFriend();
+        this._notificationService.sendNotification();
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'ProfilesComponent',
+          'Error al rechazar la solicitud de amistad',
+          {
+            user: this._authService.getDecodedToken(),
+            message: error,
+          },
+        );
+      }
+    });
+  }
+
+  async acceptFriendship(_id: string) {
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.acceptFriendship(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
+      next: async () => {
+        if (this.userData) {
+          this._centerSocketNotificationsService.acceptFriendRequestNotification(this.userData);
+        }
         this.getUserFriendPending();
         this.loadPublications();
-        this._emailNotificationService.acceptFriendRequestNotification(this.idUserProfile);
         this._cdr.markForCheck();
       },
       error: (error) => {
@@ -702,38 +916,62 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     const uploadLocation = 'profile-avatar';
     if (this.selectedImage) {
       const response = await lastValueFrom(
-        this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation).pipe(takeUntil(this.destroy$))
+        this._fileUploadService.uploadFile(this.selectedFiles, uploadLocation, null, null, TypePublishing.PROFILE_IMG).pipe(takeUntil(this.destroy$))
       );
 
-      const urlImgUpload = environment.APIFILESERVICE + uploadLocation + '/' + response[0].filename;
+      // Handle the actual response structure: {message: string, files: Array}
+      let urlImgUpload: string;
+      if (response && typeof response === 'object' && response.files && Array.isArray(response.files) && response.files.length > 0) {
+        const file = response.files[0];
+        // Use the relative path returned by the file service (e.g., 'profile-avatar/filename.jpg')
+        urlImgUpload = file.url || `${uploadLocation}/${file.filename}`;
+      } else {
+        this._logService.log(LevelLogEnum.ERROR, 'ProfilesComponent', 'Invalid response structure from avatar upload', { response });
+        return;
+      }
 
-      this._userService.userEdit(userId, { avatar: urlImgUpload }).pipe(takeUntil(this.destroy$)).subscribe({
-        next: () => {
-          this._globalEventService.updateProfileImage(urlImgUpload);
-          if (this.userData) {
-            this.userData.avatar = urlImgUpload;
-          }
-          setTimeout(() => {
+              this._userService.userEdit(userId, { avatar: urlImgUpload }).pipe(takeUntil(this.destroy$)).subscribe({
+          next: async () => {
+            // Clear old avatar from image cache to force fresh load
+            if (this.userData?.avatar) {
+              await this._mobileImageCacheService.clearImageFromCache(this.userData.avatar);
+            }
+            // Clear all profile images from cache to ensure fresh load everywhere
+            await this._mobileImageCacheService.clearProfileImagesFromCache();
+
+            // Invalidate user cache to force refresh in other components
+            this._userService.invalidateUserCache(userId);
+
+            // Update global event service with cache-busting URL
+            const cacheBustUrl = urlImgUpload + '?t=' + Date.now();
+            this._globalEventService.updateProfileImage(cacheBustUrl);
+
+            // Update local user data - normalize URL
+            if (this.userData) {
+              this.userData.avatar = this._utilityService.normalizeImageUrl(cacheBustUrl, environment.MINIO_BUCKET_URL || '');
+            }
+
+            setTimeout(() => {
+              this.isUploading = false;
+              this._cdr.markForCheck();
+            }, 1200);
+          },
+          error: (error) => {
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'ProfilesComponent',
+              'Error al actualizar la imagen de perfil',
+              {
+                user: this._authService.getDecodedToken(),
+                message: error,
+              },
+            );
             this.isUploading = false;
             this._cdr.markForCheck();
-          }, 1200);
-        },
-        error: (error) => {
-          this._logService.log(
-            LevelLogEnum.ERROR,
-            'ProfilesComponent',
-            'Error al actualizar la imagen de perfil',
-            {
-              user: this._authService.getDecodedToken(),
-              message: error,
-            },
-          );
-          this.isUploading = false;
-          this._cdr.markForCheck();
-        }
-      });
+          }
+        });
 
-      await Promise.all(response);
+      // No need to await Promise.all since response is not an array of promises
 
       this.selectedFiles = [];
       this._cdr.markForCheck();
@@ -744,14 +982,8 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     window.open('https://wa.me/' + this.userData?.profile?.whatsapp?.number, '_blank');
   }
 
-  sendMessage(_id: string) {
-    this._router.navigate(['/messages/', _id]);
-  }
-
-  sendMessageToUser() {
-    if (this.userData?._id) {
-      this.sendMessage(this.userData._id);
-    }
+  openMessage() {
+    this._router.navigate(['/messages', this.idUserProfile]);
   }
 
   onScroll(event: any) {
@@ -766,19 +998,25 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       const clientHeight = container.clientHeight;
       const scrollHeight = container.scrollHeight;
       
-      const publicationHeight = 300;
+      const publicationHeight = 400; // Increased from 300
       const currentPublicationIndex = Math.floor(scrollTop / publicationHeight);
       const visiblePublications = Math.ceil(clientHeight / publicationHeight);
       const remainingPublications = currentPublications.length - currentPublicationIndex - visiblePublications;
       
-      if (remainingPublications <= 5 && remainingPublications > 0) {
-        setTimeout(() => this.loadPublications(), 0);
+      if (remainingPublications <= 10 && remainingPublications > 0) { // Increased from 5 to 10
+        // Add delay to prevent rapid loading
+        setTimeout(() => {
+          this.loadPublications();
+        }, 300);
       }
       
-      const threshold = 200;
+      const threshold = 500; // Increased from 200 to 500
       const position = scrollTop + clientHeight;
       if (position >= scrollHeight - threshold) {
-        setTimeout(() => this.loadPublications(), 0);
+        // Add delay to prevent rapid loading
+        setTimeout(() => {
+          this.loadPublications();
+        }, 300);
       }
     }
   }
@@ -808,7 +1046,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
       }, 1000);
       
     } catch (error) {
-      console.error('Error in pull-to-refresh:', error);
+      // Error in pull-to-refresh - no need to log every refresh error
       this.hideModernRefreshIndicator();
       this.isRefreshing = false;
       this._cdr.markForCheck();
@@ -922,5 +1160,157 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   trackByIndex(index: number): number {
     return index;
+  }
+
+  // Getters para manejar validaciones de forma elegante
+  get profileCoverImage(): string {
+    const coverImage = this.userData?.profile?.coverImage || '';
+    if (!coverImage) return '';
+    // Normalize the URL to ensure it uses MinIO bucket URL
+    return this._utilityService.normalizeImageUrl(coverImage, environment.MINIO_BUCKET_URL || '');
+  }
+
+  get profileCoverImageMobile(): string {
+    const coverImageMobile = this.userData?.profile?.coverImageMobile || '';
+    if (!coverImageMobile) return '';
+    // Normalize the URL to ensure it uses MinIO bucket URL
+    return this._utilityService.normalizeImageUrl(coverImageMobile, environment.MINIO_BUCKET_URL || '');
+  }
+
+  get profileLegend(): string {
+    return this.userData?.profile?.legend || '';
+  }
+
+  get profileWhatsappViewable(): boolean {
+    return this.userData?.profile?.whatsapp?.isViewable === true;
+  }
+
+  onUserDataUpdated(updatedUserData: User): void {
+    // Show skeleton during update
+    this.isUpdatingProfile = true;
+    this._cdr.markForCheck();
+    
+    // Small delay to ensure the skeleton is rendered before updating
+    setTimeout(() => {
+      // Use Object.assign for a more subtle update
+      if (this.userData && updatedUserData) {
+        // Update basic properties immutably - normalize avatar URL
+        Object.assign(this.userData, {
+          name: updatedUserData.name,
+          lastName: updatedUserData.lastName,
+          username: updatedUserData.username,
+          avatar: updatedUserData.avatar ? this._utilityService.normalizeImageUrl(updatedUserData.avatar, environment.MINIO_BUCKET_URL || '') : updatedUserData.avatar
+        });
+        
+        // Actualizar propiedades del perfil de forma inmutable
+        if (updatedUserData.profile) {
+          if (!this.userData.profile) {
+            this.userData.profile = {};
+          }
+          Object.assign(this.userData.profile, updatedUserData.profile);
+        }
+      } else {
+        // Fallback: reemplazar todo si no hay datos existentes
+        this.userData = updatedUserData;
+      }
+      
+      // Hide update skeleton
+      this.isUpdatingProfile = false;
+      this._cdr.markForCheck();
+    }, 300); // Aumentado a 300ms para mejor experiencia visual
+  }
+
+  // --- Creator profile ---
+  saveCreatorConfig(): void {
+    if (this.isSavingCreator) return;
+    this.isSavingCreator = true;
+    this._creatorProfileService.upsertProfile({
+      monthlyPrice: this.creatorMonthlyPrice,
+      description: this.creatorDescription,
+      isActive: true,
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (p) => {
+        this.myCreatorProfile = p;
+        this.showCreatorConfig = false;
+        this.isSavingCreator = false;
+        this._cdr.markForCheck();
+      },
+      error: () => { this.isSavingCreator = false; this._cdr.markForCheck(); },
+    });
+  }
+
+  deactivateCreatorPage(): void {
+    this._creatorProfileService.upsertProfile({ monthlyPrice: this.creatorMonthlyPrice, isActive: false })
+      .pipe(takeUntil(this.destroy$)).subscribe({
+        next: (p) => { this.myCreatorProfile = p; this._cdr.markForCheck(); },
+      });
+  }
+
+  subscribeToCreator(): void {
+    if (this.isSubscribingToCreator || !this.idUserProfile) return;
+    this.isSubscribingToCreator = true;
+    this._creatorProfileService.initiateSubscription(this.idUserProfile)
+      .pipe(takeUntil(this.destroy$)).subscribe({
+        next: ({ checkoutUrl }) => {
+          this.isSubscribingToCreator = false;
+          window.location.href = checkoutUrl;
+        },
+        error: () => { this.isSubscribingToCreator = false; this._cdr.markForCheck(); },
+      });
+  }
+
+  formatCreatorPrice(price: number): string {
+    return this._creatorProfileService.formatPrice(price);
+  }
+
+  toggleDiscovery(): void {
+    if (this.isTogglingDiscovery) return;
+
+    if (this.locationStatus.discoveryEnabled) {
+      this.isTogglingDiscovery = true;
+      this._exploreService.disableDiscovery()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (status) => {
+            this.locationStatus = status;
+            this.isTogglingDiscovery = false;
+            this._cdr.markForCheck();
+          },
+          error: () => {
+            this.isTogglingDiscovery = false;
+            this._cdr.markForCheck();
+          },
+        });
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      alert(translations['explore.geoUnavailable']);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        this.isTogglingDiscovery = true;
+        this._cdr.markForCheck();
+        this._exploreService
+          .updateLocation(position.coords.latitude, position.coords.longitude, true)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (status) => {
+              this.locationStatus = status;
+              this.isTogglingDiscovery = false;
+              this._cdr.markForCheck();
+            },
+            error: () => {
+              this.isTogglingDiscovery = false;
+              this._cdr.markForCheck();
+            },
+          });
+      },
+      () => {
+        alert(translations['explore.locationPermissionDenied']);
+      },
+    );
   }
 }

@@ -1,0 +1,295 @@
+@use 'src/assets/styles/worky-palettes.scss' as color;
+@use 'src/assets/styles/worky-breakpoints.scss' as bp;
+
+// --worky-color-grey is a border color (#2C2C2C dark / #E4E6EB light) — never use as text.
+// Secondary text uses --worky-color-text at reduced opacity instead.
+
+.subscribe-page {
+  padding: 40px 16px 60px;
+  min-height: 100%;
+}
+
+// ── Loading ──────────────────────────────────────────────────────────────────
+
+.subscribe-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 96px 0;
+}
+
+.subscribe-spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-bottom-color: var(--worky-color-blue);
+  animation: spin 0.8s linear infinite;
+}
+
+// ── Active subscription banner ───────────────────────────────────────────────
+
+.subscribe-active-banner {
+  max-width: 720px;
+  margin: 0 auto 32px;
+  padding: 20px 24px;
+  background-color: var(--worky-color-module-container);
+  border: 1px solid var(--worky-color-yellow);
+  border-radius: 16px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  &__icon {
+    color: var(--worky-color-yellow);
+    font-size: 22px;
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--worky-color-text);
+    margin: 0;
+  }
+
+  &__expiry {
+    font-size: 0.85rem;
+    color: var(--worky-color-text);
+    opacity: 0.6;
+    margin: 0 0 12px;
+  }
+
+  &__cancel {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.85rem;
+    color: var(--worky-color-red);
+    cursor: pointer;
+    text-decoration: underline;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.75;
+    }
+  }
+}
+
+// ── Page header ───────────────────────────────────────────────────────────────
+
+.subscribe-header {
+  text-align: center;
+  margin-bottom: 40px;
+
+  &__title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--worky-color-text);
+    margin: 0 0 8px;
+
+    @include bp.below-sm {
+      font-size: 1.4rem;
+    }
+  }
+
+  &__subtitle {
+    font-size: 0.95rem;
+    color: var(--worky-color-text);
+    opacity: 0.6;
+    margin: 0;
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+.subscribe-empty {
+  text-align: center;
+  color: var(--worky-color-text);
+  opacity: 0.55;
+  padding: 64px 0;
+
+  &__icon {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 12px;
+  }
+}
+
+// ── Plans grid ────────────────────────────────────────────────────────────────
+
+.plans-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+  max-width: 840px;
+  margin: 0 auto;
+}
+
+// ── Plan card ─────────────────────────────────────────────────────────────────
+
+.plan-card {
+  flex: 0 1 380px;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--worky-color-module-container);
+  border: 1px solid var(--worky-color-grey);
+  border-radius: 16px;
+  padding: 24px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+
+  &:hover {
+    border-color: var(--worky-color-blue);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  @include bp.below-sm {
+    flex: 0 1 100%;
+    min-width: unset;
+  }
+
+  // ── Header ─────────────────────────────────────────────────────────────────
+
+  &__header {
+    margin-bottom: 16px;
+  }
+
+  &__name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  &__star {
+    color: var(--worky-color-yellow);
+    font-size: 20px;
+  }
+
+  &__name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--worky-color-text);
+    margin: 0;
+  }
+
+  &__description {
+    font-size: 0.85rem;
+    color: var(--worky-color-text);
+    opacity: 0.6;
+    margin: 0;
+  }
+
+  // ── Price ───────────────────────────────────────────────────────────────────
+
+  &__price {
+    margin-bottom: 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  &__price-amount {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--worky-color-text);
+  }
+
+  &__price-period {
+    font-size: 0.85rem;
+    color: var(--worky-color-text);
+    opacity: 0.55;
+  }
+
+  // ── Features ────────────────────────────────────────────────────────────────
+
+  &__features {
+    flex: 1;
+    margin-bottom: 24px;
+  }
+
+  &__features-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--worky-color-text);
+    opacity: 0.5;
+    margin: 0 0 10px;
+  }
+
+  &__features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__feature-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: var(--worky-color-text);
+  }
+
+  &__feature-icon {
+    color: var(--worky-color-teal);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  // ── CTA button ──────────────────────────────────────────────────────────────
+
+  &__cta {
+    width: 100%;
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    background-color: var(--worky-color-blue);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.2s, transform 0.15s;
+
+    &:hover:not(:disabled) {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+
+  &__cta-icon {
+    font-size: 18px;
+  }
+
+  &__cta-spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-bottom-color: #fff;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

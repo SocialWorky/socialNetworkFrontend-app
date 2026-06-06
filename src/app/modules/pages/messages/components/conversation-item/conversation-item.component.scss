@@ -1,0 +1,177 @@
+@use "src/assets/styles/worky-palettes" as colors;
+@use "sass:map";
+
+.conversation-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  transition: background 0.15s ease;
+  background: colors.$worky-color-module-container;
+  position: relative;
+
+  &:hover {
+    background: rgba(17, 51, 85, 0.04);
+  }
+
+  &.selected {
+    border-left: 3px solid #1a5fa8;
+    padding-left: 13px;
+    background: rgba(26, 95, 168, 0.1);
+
+    @media (prefers-color-scheme: dark) {
+      background: rgba(255, 255, 255, 0.07);
+    }
+  }
+}
+
+// ─── Avatar ───────────────────────────────────────────────────────────────────
+
+.avatar-wrapper {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.avatar-skeleton {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    colors.$worky-color-greyLight 25%,
+    colors.$worky-color-grey 50%,
+    colors.$worky-color-greyLight 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+// ─── Conversation Content ─────────────────────────────────────────────────────
+
+.conversation-content {
+  flex: 1;
+  margin-left: 14px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.conversation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-name {
+  font-weight: 700;
+  font-size: 14.5px;
+  color: colors.$worky-color-text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  letter-spacing: -0.1px;
+}
+
+.user-name-skeleton {
+  width: 140px;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    colors.$worky-color-greyLight 25%,
+    colors.$worky-color-grey 50%,
+    colors.$worky-color-greyLight 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+// ─── Timestamp ────────────────────────────────────────────────────────────────
+
+.time {
+  font-size: 11px;
+  color: colors.$worky-color-text;
+  opacity: 0.45;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.1px;
+}
+
+.time-unread {
+  color: #113355;
+  font-weight: 700;
+  opacity: 1;
+}
+
+// ─── Preview row ──────────────────────────────────────────────────────────────
+
+.conversation-preview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.last-message {
+  font-size: 13px;
+  color: colors.$worky-color-text;
+  opacity: 0.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  line-height: 1.35;
+
+  .has-unread & {
+    opacity: 0.85;
+    font-weight: 600;
+    color: colors.$worky-color-text;
+  }
+}
+
+.message-skeleton {
+  width: 180px;
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    colors.$worky-color-greyLight 25%,
+    colors.$worky-color-grey 50%,
+    colors.$worky-color-greyLight 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.message-type-icon {
+  font-size: 14px;
+  margin-right: 2px;
+  vertical-align: middle;
+}
+
+// ─── Unread Badge ─────────────────────────────────────────────────────────────
+
+.badge {
+  background: #113355;
+  color: #ffffff;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1.7;
+  box-shadow: 0 2px 6px rgba(17, 51, 85, 0.3);
+}
+
+// ─── Skeleton animation ───────────────────────────────────────────────────────
+
+@keyframes loading {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, OnDestroy } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
 
@@ -6,13 +6,15 @@ import { DeviceDetectionService } from '@shared/services/device-detection.servic
 import { AuthService } from '@auth/services/auth.service';
 import { NotificationUsersService } from '@shared/services/notifications/notificationUsers.service';
 import { ScrollService } from '@shared/services/scroll.service';
+import { ModuleAvailabilityService } from '@shared/services/module-availability.service';
 import { WidgetPosition } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
 
 @Component({
     selector: 'worky-loyaut',
     templateUrl: './loyaut.component.html',
     styleUrls: ['./loyaut.component.scss'],
-    standalone: false
+    standalone: false,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoyautComponent implements OnInit, OnDestroy {
 
@@ -20,17 +22,21 @@ export class LoyautComponent implements OnInit, OnDestroy {
 
   isProfile: boolean = false;
 
+  isGroupDetail: boolean = false;
+
   isMessages: boolean = false;
 
   navbarVisible: boolean = true;
+
+  isMobile: boolean = false;
+
+  isTabletView: boolean = false;
 
   WidgetPosition = WidgetPosition;
 
   private routeSub: Subscription | undefined;
 
-  get isMobile(): boolean {
-    return this._deviceDetectionService.isMobile();
-  }
+  private resizeSub: Subscription | undefined;
 
   get isIOS(): boolean {
     return /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -41,7 +47,6 @@ export class LoyautComponent implements OnInit, OnDestroy {
   }
 
   get token() {
-    this._authService.getDecodedToken();
     return this._authService.getDecodedToken();
   }
 
@@ -55,18 +60,26 @@ export class LoyautComponent implements OnInit, OnDestroy {
     private _cdr: ChangeDetectorRef,
     private _authService: AuthService,
     private _notificationUsersService: NotificationUsersService,
-    private _scrollService: ScrollService
-  ) {}
+    private _scrollService: ScrollService,
+    private _moduleAvailabilityService: ModuleAvailabilityService
+  ) {
+    this.updateViewState();
+  }
 
   ngOnInit(): void {
     this._authService.getDecodedToken();
     this._notificationUsersService.refreshUserStatuses();
-    
-    // Apply specific class for iPhone with notch
+    this._moduleAvailabilityService.init();
+
     if (this.isIPhoneWithNotch) {
       document.body.classList.add('iphone-with-notch');
     }
-    
+
+    this.resizeSub = this._deviceDetectionService.getResizeEvent().subscribe(() => {
+      this.updateViewState();
+      this._cdr.markForCheck();
+    });
+
     this.routeSub = this._router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd)
@@ -74,25 +87,31 @@ export class LoyautComponent implements OnInit, OnDestroy {
       .subscribe((event: NavigationEnd) => {
         this.routeUrl = event.url;
         this.isProfile = this.routeUrl.includes('profile');
+        this.isGroupDetail = /\/groups\/[^/]/.test(this.routeUrl);
         this.isMessages = this.routeUrl.includes('messages');
         this._cdr.markForCheck();
       });
 
     this.routeUrl = this._router.url;
     this.isProfile = this.routeUrl.includes('profile');
+    this.isGroupDetail = /\/groups\/[^/]/.test(this.routeUrl);
     this.isMessages = this.routeUrl.includes('messages');
     this._cdr.markForCheck();
   }
 
+  private updateViewState(): void {
+    this.isMobile = this._deviceDetectionService.isMobile();
+    this.isTabletView = !this.isMobile && window.innerWidth < 1060;
+  }
+
   ngOnDestroy(): void {
-    if (this.routeSub) {
-      this.routeSub.unsubscribe();
-    }
+    if (this.routeSub) this.routeSub.unsubscribe();
+    if (this.resizeSub) this.resizeSub.unsubscribe();
   }
 
   onScroll(event: any) {
     this._scrollService.onScroll(event);
-    if(!this.isMobile) return;
+    if (!this.isMobile) return;
     const threshold = 100;
     const position = event.target.scrollTop + event.target.clientHeight;
     const height = event.target.scrollHeight;

@@ -9,9 +9,19 @@ import { AdminCustomFieldsComponent } from './shared/admin-custom-fields/admin-c
 import { InvitationsCodeComponent } from './shared/invitations-code/invitations-code.component';
 import { LogComponent } from './shared/log/log.component';
 import { WidgetManagementComponent } from './shared/widget-management/widget-management.component';
+import { ThematicImageManagementComponent } from './shared/thematic-image-management/thematic-image-management.component';
+import { WidgetBuilderComponent } from './shared/widget-builder/widget-builder.component';
 import { WebhooksComponent } from './shared/webhooks/webhooks.component';
 import { VersionManagementComponent } from './shared/version-management/version-management.component';
+import { SubscriptionPlansComponent } from './shared/subscription-plans/subscription-plans.component';
+import { BoostPackagesComponent } from './shared/boost-packages/boost-packages.component';
+import { ManageSubscriptionsComponent } from './shared/manage-subscriptions/manage-subscriptions.component';
+import { EmailTemplateManagementComponent } from './shared/email-template-management/email-template-management.component';
+import { ReportsManagementComponent } from './shared/reports-management/reports-management.component';
+import { FeatureFlagsComponent } from './shared/feature-flags/feature-flags.component';
+import { CacheManagementComponent } from './shared/cache-management/cache-management.component';
 import { translations } from '@translations/translations';
+import { adminSubscriptionEnabledGuard } from './guards/admin-subscription-enabled.guard';
 
 
 export const routes: Routes = [
@@ -30,10 +40,17 @@ export const routes: Routes = [
           { title: translations['admin.sideMenu.items.reactions'], path: 'manage-reactions', component: ManageReactionsComponent },
           { title: translations['admin.sideMenu.items.customFields'], path: 'custom-fields', component: AdminCustomFieldsComponent },
           { title: translations['admin.sideMenu.items.widgetManagement'], path: 'widget-management', component: WidgetManagementComponent },
+          { title: translations['admin.sideMenu.items.widgetBuilder'], path: 'widget-builder', component: WidgetBuilderComponent },
+          { title: 'Imágenes Temáticas', path: 'thematic-images', component: ThematicImageManagementComponent },
           { title: translations['admin.sideMenu.items.css'], path: 'custom-css', component: CustomCssComponent },
           { title: translations['admin.sideMenu.items.invitations'], path: 'invitations-code', component: InvitationsCodeComponent },
           { title: translations['admin.sideMenu.items.webhooks'], path: 'webhooks', component: WebhooksComponent },
-        
+          { title: translations['admin.sideMenu.items.subscriptionPlans'], path: 'subscription-plans', component: SubscriptionPlansComponent, canActivate: [adminSubscriptionEnabledGuard] },
+          { title: translations['admin.sideMenu.items.manageSubscriptions'], path: 'manage-subscriptions', component: ManageSubscriptionsComponent, canActivate: [adminSubscriptionEnabledGuard] },
+          { title: translations['admin.sideMenu.items.boostPackages'], path: 'boost-packages', component: BoostPackagesComponent },
+          { title: translations['admin.emailTemplates.menuTitle'], path: 'email-templates', component: EmailTemplateManagementComponent },
+          { title: translations['admin.featureFlags.menuTitle'], path: 'feature-flags', component: FeatureFlagsComponent },
+          { title: translations['admin.sideMenu.items.cacheManagement'], path: 'cache-management', component: CacheManagementComponent },
         ],
       },
       { 
@@ -41,6 +58,7 @@ export const routes: Routes = [
         path: 'user-management', 
         loadChildren: () => import('./shared/user-management/user-management.module').then(m => m.UserManagementModule)
       },
+      { title: translations['admin.sideMenu.items.reportsManagement'], path: 'reports-management', component: ReportsManagementComponent },
       { title: translations['admin.sideMenu.items.versionManagement'], path: 'version-management', component: VersionManagementComponent },
       { title: translations['admin.sideMenu.items.logs'], path: 'logs', component: LogComponent },
     ],

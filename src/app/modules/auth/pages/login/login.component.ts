@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { async, last, Subject, takeUntil } from 'rxjs';
+import { Subject, firstValueFrom, takeUntil } from 'rxjs';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -45,13 +45,15 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
   loginMethods: LoginMethods | undefined;
 
+  showAgeGate = false;
+  ageGateBlocked = false;
+  ageVerificationText = '';
+
   private readonly storageThreshold = 24 * 60 * 60 * 1000; // 24 hours
 
   private destroy$ = new Subject<void>();
 
   @ViewChild('emailInput') emailInput!: ElementRef;
-
-  private unsubscribe$ = new Subject<void>();
 
   constructor(
     private _authApiService: AuthApiService,
@@ -74,17 +76,38 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     private _logService: LogService,
     private _loadingService: LoadingService,
   ) {
-    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe((configData) => {
-      const title = configData.settings.title + ' - Login';
-      const description = configData.settings.description;
-      const imageUrl = configData.settings.logoUrl;
-      const urlSite = configData.settings.urlSite;
-      this.loginMethods = JSON.parse(configData.settings.loginMethods);
-      this._metaTagService.updateMetaTags(title, description, imageUrl, urlSite );
-      this._cdr.markForCheck();
+    this._configService.getConfig().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (configData) => {
+        const title = configData.settings.title + ' - Login';
+        const description = configData.settings.description;
+        const imageUrl = configData.settings.logoUrl;
+        const urlSite = configData.settings.urlSite;
+        this.loginMethods = JSON.parse(configData.settings.loginMethods);
+        this._metaTagService.updateMetaTags(title, description, imageUrl, urlSite);
+
+        const ageVerification = configData.settings.ageVerification;
+        if (ageVerification?.enabled && sessionStorage.getItem('ageVerified') !== 'true') {
+          const lang = navigator.language?.startsWith('en') ? 'en' : 'es';
+          const text = lang === 'en'
+            ? ageVerification.modalText?.en || ageVerification.modalText?.es || ''
+            : ageVerification.modalText?.es || ageVerification.modalText?.en || '';
+          this.ageVerificationText = text;
+          this.showAgeGate = true;
+        }
+
+        this._cdr.markForCheck();
+      },
+      error: () => {
+        // Fail-open: show login form even if config fetch fails
+        this._cdr.markForCheck();
+      },
     });
     if (this.token) {
-      this._router.navigate(['/home']);
+      const decoded = this._authService.getDecodedToken();
+      const target = decoded?.role === 'admin' && !this._deviceDetectionService.isMobile()
+        ? '/admin'
+        : '/home';
+      this._router.navigate([target]);
     }
   }
 
@@ -98,6 +121,22 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
   get isIPhoneWithNotch(): boolean {
     return this.isIOS && window.screen.height >= 812;
+  }
+
+  onAgeGateAccepted(): void {
+    sessionStorage.setItem('ageVerified', 'true');
+    this.showAgeGate = false;
+    this._cdr.markForCheck();
+  }
+
+  onAgeGateRejected(): void {
+    this.showAgeGate = false;
+    this.ageGateBlocked = true;
+    this._cdr.markForCheck();
+  }
+
+  onAgeGateReload(): void {
+    window.location.reload();
   }
 
   ngOnInit() {
@@ -121,8 +160,8 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private checkLastLogin() {
@@ -142,7 +181,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
   async checkSessionGoogle() {
     setTimeout(() => {
       if (sessionStorage.getItem('id_token')) {
-        if (!this.token) {
+        if (!localStorage.getItem('token')) {
           this.loginGoogle();
         }
       }
@@ -171,119 +210,119 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       password: password,
     };
 
-    // Usar el nuevo sistema de loading accesible
     const accessibleLoading = this._loadingService.createAccessibleLoading(
       translations['login.messageLoading'],
       'Verificando credenciales...'
     );
     const loadingElement = accessibleLoading.show();
 
-    await this._authApiService.loginUser(credentials).pipe(takeUntil(this.unsubscribe$)).subscribe({
-      next: async (response: any) => {
-        if (response && response.token) {
-          localStorage.setItem('token', response.token);
+    try {
+      const response: any = await firstValueFrom(
+        this._authApiService.loginUser(credentials).pipe(takeUntil(this.destroy$))
+      );
 
-          localStorage.setItem('lastLogin', new Date().toISOString());
+      if (response && (response.token || response.accessToken)) {
+        const accessToken = response.accessToken || response.token;
+        localStorage.setItem('token', accessToken);
 
-          localStorage.setItem('isDarkMode', response.user.isDarkMode.toString());
-
-          const body = document.body;
-          if (response.user.isDarkMode) {
-            body.classList.add('dark-mode');
-          } else {
-            body.classList.remove('dark-mode');
-          }
-
-          const tokenResponse = await this._authService.getDecodedToken()!;
-
-          localStorage.setItem('isTooltipActive', tokenResponse.isTooltipActive.toString());
-
-          this._socketService.updateToken(localStorage.getItem('token')!);
-          this._socketService.emitEvent('loginUser', localStorage.getItem('token'));
-
-          this._notificationUsersService.loginUser();
-
-          // Initialize user databases after successful login
-          await this._databaseManager.initializeForUser(tokenResponse.id);
-
-          this._logService.log(
-            LevelLogEnum.INFO,
-            'LoginComponent',
-            'User login successful',
-            { 
-              userId: tokenResponse.id, 
-              email: tokenResponse.email, 
-              role: tokenResponse.role,
-              isDarkMode: response.user.isDarkMode 
-            }
-          );
-
-          this._cdr.markForCheck();
-
-          if (tokenResponse?.role === 'admin' && !this._deviceDetectionService.isMobile()) {
-            this._router.navigate(['/admin']);
-          } else {
-            this._router.navigate(['/home']);
-          }
-          
-          // Hide loading on success
-          accessibleLoading.hide(loadingElement);
+        if (response.refreshToken) {
+          localStorage.setItem('refreshToken', response.refreshToken);
         }
-      },
-      error: (e: any) => {
-        this._logService.log(
-          LevelLogEnum.WARN,
-          'LoginComponent',
-          'User login failed',
-          { 
-            email: credentials.email, 
-            error: e.error?.message || e.message,
-            status: e.status 
-          }
-        );
 
-        if (e.error.message === 'User is not verified') {
-          this._alertService.showAlert(
-            translations['alert.title_emailValidated_error'],
-            translations['alert.message_emailValidated_error'],
-            Alerts.ERROR,
-            Position.CENTER,
-            true,
-            translations['button.ok'],
-          );
-          accessibleLoading.hide(loadingElement);
+        if (response.expiresIn) {
+          const expiresAt = Date.now() + (response.expiresIn * 1000);
+          localStorage.setItem('tokenExpiresAt', String(expiresAt));
         }
-        if (e.error.message === 'Unauthorized access. Please provide valid credentials to access this resource') {
-          this._alertService.showAlert(
-            translations['alert.title_error_credentials'],
-            translations['alert.message_error_credentials'],
-            Alerts.ERROR,
-            Position.CENTER,
-            true,
-            translations['button.ok'],
-          );
-          accessibleLoading.hide(loadingElement);
+
+        localStorage.setItem('lastLogin', new Date().toISOString());
+        localStorage.setItem('isDarkMode', response.user.isDarkMode.toString());
+
+        const body = document.body;
+        if (response.user.isDarkMode) {
+          body.classList.add('dark-mode');
+        } else {
+          body.classList.remove('dark-mode');
         }
-        if (e.status === 500) {
-          this._alertService.showAlert(
-            translations['alert.title_error_server'],
-            translations['alert.message_error_server'],
-            Alerts.ERROR,
-            Position.CENTER,
-            true,
-            translations['button.ok'],
-          );
-          accessibleLoading.hide(loadingElement);
+
+        const tokenResponse = this._authService.getDecodedToken();
+        if (!tokenResponse) {
+          throw new Error('Failed to decode token after login');
         }
-      },
-      complete: () => {
+        localStorage.setItem('isTooltipActive', tokenResponse.isTooltipActive.toString());
+
+        this._socketService.updateToken(localStorage.getItem('token')!);
+        this._socketService.emitEvent('loginUser', localStorage.getItem('token'));
+        this._notificationUsersService.loginUser();
+
+        this._databaseManager.initializeForUser(tokenResponse.id).catch(err => {
+          this._logService.log(LevelLogEnum.WARN, 'LoginComponent', 'Database init failed, proceeding with navigation', { error: err?.message });
+        });
+
+        this._cdr.markForCheck();
         accessibleLoading.hide(loadingElement);
+
+        const target = tokenResponse?.role === 'admin' && !this._deviceDetectionService.isMobile() ? '/admin' : '/home';
+        const navigated = await this._router.navigate([target]);
+        if (!navigated) {
+          window.location.replace(target === '/admin' ? '/admin' : '/');
+        }
+        return;
       }
-    });
+    } catch (e: any) {
+      this._logService.log(
+        LevelLogEnum.WARN,
+        'LoginComponent',
+        'User login failed',
+        {
+          email: credentials.email,
+          error: e.error?.message || e.message,
+          status: e.status
+        }
+      );
+
+      if (e.error?.message === 'User is not verified') {
+        this._alertService.showAlert(
+          translations['alert.title_emailValidated_error'],
+          translations['alert.message_emailValidated_error'],
+          Alerts.ERROR,
+          Position.CENTER,
+          true,
+          translations['button.ok'],
+        );
+      } else if (e.error?.message === 'Unauthorized access. Please provide valid credentials to access this resource') {
+        this._alertService.showAlert(
+          translations['alert.title_error_credentials'],
+          translations['alert.message_error_credentials'],
+          Alerts.ERROR,
+          Position.CENTER,
+          true,
+          translations['button.ok'],
+        );
+      } else if (e.status === 500) {
+        this._alertService.showAlert(
+          translations['alert.title_error_server'],
+          translations['alert.message_error_server'],
+          Alerts.ERROR,
+          Position.CENTER,
+          true,
+          translations['button.ok'],
+        );
+      } else if (!e.status) {
+        this._alertService.showAlert(
+          translations['alert.title_error_server'],
+          translations['alert.message_error_server'],
+          Alerts.ERROR,
+          Position.CENTER,
+          true,
+          translations['button.ok'],
+        );
+      }
+    } finally {
+      accessibleLoading.hide(loadingElement);
+    }
   }
 
   async loginGoogle() {
-    // Usar el nuevo sistema de loading accesible
     const accessibleLoading = this._loadingService.createAccessibleLoading(
       translations['login.messageLoading'],
       translations['login.signInWithGoogle']
@@ -313,8 +352,22 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
         password: await this._authService.generatePassword(),
       };
 
-      const response = await this._authApiService.loginGoogle(dataGoogle).toPromise() as { token: string, user: User };
-      localStorage.setItem('token', response?.token);
+      const response = await this._authApiService.loginGoogle(dataGoogle).toPromise() as { token: string, accessToken?: string, refreshToken?: string, expiresIn?: number, user: User };
+
+      // Store access token (use accessToken if available, fallback to token for backwards compatibility)
+      const accessToken = response?.accessToken || response?.token;
+      localStorage.setItem('token', accessToken);
+
+      // Store refresh token if available
+      if (response?.refreshToken) {
+        localStorage.setItem('refreshToken', response.refreshToken);
+      }
+
+      // Store token expiration time if available
+      if (response?.expiresIn) {
+        const expiresAt = Date.now() + (response.expiresIn * 1000);
+        localStorage.setItem('tokenExpiresAt', String(expiresAt));
+      }
 
       const body = document.body;
       if (response.user.isDarkMode) {
@@ -340,8 +393,9 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       this._socketService.emitEvent('loginUser', localStorage.getItem('token'));
       this._notificationUsersService.loginUser();
 
-      // Initialize user databases after successful Google login
-      await this._databaseManager.initializeForUser(tokenResponse.id);
+      this._databaseManager.initializeForUser(tokenResponse.id).catch(err => {
+        this._logService.log(LevelLogEnum.WARN, 'LoginComponent', 'Database init failed on Google login, proceeding with navigation', { error: err?.message });
+      });
 
       this._logService.log(
         LevelLogEnum.INFO,
@@ -357,27 +411,31 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
       );
 
       this._cdr.markForCheck();
-      this._router.navigate(['/home']);
+      accessibleLoading.hide(loadingElement);
+
+      const navigated = await this._router.navigate(['/home']);
+      if (!navigated) {
+        window.location.replace('/');
+      }
+      return;
     } catch (error) {
       this._logService.log(
         LevelLogEnum.ERROR,
         'LoginComponent',
         'Google login failed',
-        { 
+        {
           error: error instanceof Error ? error.message : String(error)
         }
       );
-      console.error('Error during Google login:', error);
     } finally {
       accessibleLoading.hide(loadingElement);
     }
   }
 
   async validateEmailWithToken(tokenValidate: string) {
-    // Usar el nuevo sistema de loading accesible
     const loading = await this._loadingService.showLoading(translations['login.messageValidationEmailLoading']);
 
-    await this._authApiService.validateEmailWithToken(tokenValidate).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._authApiService.validateEmailWithToken(tokenValidate).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
         if (response && response.message) {
           this._alertService.showAlert(
@@ -427,10 +485,9 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const emailResponse = await this._emailNotificationService.sendEmailToRecoverPassword(email);
 
-    // Usar el nuevo sistema de loading accesible
     const loading = await this._loadingService.showLoading(translations['login.messageResetPasswordLoading']);
 
-    await this._authApiService.forgotPassword(emailResponse).pipe(takeUntil(this.unsubscribe$)).subscribe({
+    await this._authApiService.forgotPassword(emailResponse).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
         if (response && response.message) {
           this._alertService.showAlert(
@@ -482,7 +539,7 @@ export class LoginComponent implements OnInit, OnDestroy, AfterViewInit {
     });
     this._cdr.markForCheck();
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.closeResetPasswordModal();
     });
   }

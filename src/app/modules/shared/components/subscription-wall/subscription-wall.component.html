@@ -1,0 +1,43 @@
+<div *ngIf="isVisible" class="wall-overlay" (click)="onOverlayClick($event)" role="dialog" aria-modal="true">
+
+  <div class="wall-card">
+
+    <!-- Glow halo -->
+    <div class="glow-halo"></div>
+
+    <!-- Icon -->
+    <div class="icon-ring">
+      <div class="icon-ring-pulse"></div>
+      <i class="material-icons icon-star">star</i>
+    </div>
+
+    <!-- Header -->
+    <div class="wall-header">
+      <h2 class="wall-title">{{ title }}</h2>
+      <p class="wall-desc">{{ description }}</p>
+    </div>
+
+    <!-- Features grid -->
+    <div class="features-section">
+      <p class="features-label">{{ featuresLabel }}</p>
+      <div class="features-grid">
+        <div *ngFor="let feature of features; let i = index"
+             class="feature-chip"
+             [style.animation-delay]="(i * 30 + 80) + 'ms'">
+          <i class="material-icons feature-icon">{{ feature.icon }}</i>
+          <span class="feature-label">{{ feature.label }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="wall-actions">
+      <button class="btn-plans" (click)="goToPlans()">
+        <i class="material-icons">star</i>
+        {{ viewPlansLabel }}
+      </button>
+      <button class="btn-dismiss" (click)="dismiss()">{{ notNowLabel }}</button>
+    </div>
+
+  </div>
+</div>

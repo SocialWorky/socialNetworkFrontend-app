@@ -38,14 +38,14 @@ export class DeviceDetectionService implements OnDestroy {
   }
 
   isMobile(): boolean {
-    if(this._platform.is('tablet') || this._platform.is('ipad') || !this.isScreenSmallerThan700px()) return false;
-    return (
-      this.isNative()
-      || this.isScreenSmallerThan700px()
-      || this._platform.is('ios')
-      || this._platform.is('iphone')
-      || this._platform.is('android')
-    );
+    // Tablets always get non-mobile layout regardless of platform
+    if (this._platform.is('tablet') || this._platform.is('ipad')) return false;
+    // Native app: use device type (not viewport width)
+    if (this.isNative()) {
+      return this._platform.is('iphone') || this._platform.is('android');
+    }
+    // Web browser: viewport width is the only reliable signal
+    return this.isScreenSmallerThan700px();
   }
 
   isTablet(): boolean {

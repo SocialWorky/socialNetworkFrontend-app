@@ -36,7 +36,7 @@ export class GoogleImageErrorInterceptor implements HttpInterceptor {
   }
 
   private isGoogleImageError(error: HttpErrorResponse): boolean {
-    // Errores específicos de Google Images
+    // Specific Google Images errors
     return (
       error.status === 429 || // Too Many Requests
       error.status === 403 || // Forbidden (CORS)
@@ -56,39 +56,19 @@ export class GoogleImageErrorInterceptor implements HttpInterceptor {
 
     switch (error.status) {
       case 429:
-        this.logService.log(
-          LevelLogEnum.WARN,
-          'GoogleImageErrorInterceptor',
-          'Rate limit exceeded for Google Images',
-          errorInfo
-        );
+        // Rate limit exceeded for Google Images - no need to log every rate limit
         break;
       
       case 403:
-        this.logService.log(
-          LevelLogEnum.WARN,
-          'GoogleImageErrorInterceptor',
-          'CORS error accessing Google Images',
-          errorInfo
-        );
+        // CORS error accessing Google Images - no need to log every CORS error
         break;
       
       case 0:
-        this.logService.log(
-          LevelLogEnum.WARN,
-          'GoogleImageErrorInterceptor',
-          'Network error accessing Google Images',
-          errorInfo
-        );
+        // Network error accessing Google Images - no need to log every network error
         break;
       
       default:
-        this.logService.log(
-          LevelLogEnum.WARN,
-          'GoogleImageErrorInterceptor',
-          'Google Images server error',
-          errorInfo
-        );
+        // Google Images server error - no need to log every server error
         break;
     }
   }

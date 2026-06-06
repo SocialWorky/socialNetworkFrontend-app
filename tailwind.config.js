@@ -5,6 +5,15 @@ module.exports = {
     "./src/**/*.component.{html,ts,scss}",
   ],
   theme: {
+    // Override screens to match worky-breakpoints.scss exactly
+    // sm=700px (mobile/tablet edge), md=900px (mid-tablet), lg=1060px (desktop), xl=1400px
+    screens: {
+      'sm':  '700px',
+      'md':  '900px',
+      'lg':  '1060px',
+      'xl':  '1400px',
+      '2xl': '2100px',
+    },
     extend: {
       animation: {
         'shimmer': 'shimmer 2s infinite',

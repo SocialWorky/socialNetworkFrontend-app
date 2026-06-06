@@ -8,25 +8,24 @@
     (navbarStateChange)="onNavbarStateChange($event)">
   </worky-navbar>
 
-  <worky-widget-container [position]="WidgetPosition.TOP"></worky-widget-container>
-
   <worky-network-status></worky-network-status>
 
-  <div class="content-social-app" 
+  <div class="content-social-app"
     [class.content-messages-app]="isMessages"
-    [class.content-profile-app]="isProfile"
+    [class.content-profile-app]="isProfile || isGroupDetail"
     *ngIf="token">
-    
-      <worky-content-left-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-left-side>
-      
-      <div class="social-content-center" 
-        [class.profile-view]="isProfile && !isMobile"
+
+      <worky-content-left-side *ngIf="!isMobile && !isProfile && !isGroupDetail && !isMessages"></worky-content-left-side>
+
+      <div class="social-content-center"
+        [class.profile-view]="(isProfile || isGroupDetail) && !isMobile"
         [class.messages-view]="isMessages"
         (scroll)="onScroll($event)">
         <router-outlet/>
       </div>
-        
-      <worky-content-right-side *ngIf="!isMobile && !isProfile && !isMessages"></worky-content-right-side>
+
+      <worky-content-right-side *ngIf="!isMobile && !isTabletView && !isProfile && !isGroupDetail && !isMessages"></worky-content-right-side>
 
   </div>
+
 </div>

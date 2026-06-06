@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError, of } from 'rxjs';
 import { catchError, tap, map } from 'rxjs/operators';
@@ -15,7 +15,7 @@ interface CachedUser {
 @Injectable({
   providedIn: 'root'
 })
-export class UserService {
+export class UserService implements OnDestroy {
   private baseUrl = environment.API_URL;
   
   // Intelligent cache for users
@@ -23,12 +23,18 @@ export class UserService {
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
   private readonly MAX_CACHE_SIZE = 100; // Maximum 100 users in cache
 
+  private _cleanupTimer: ReturnType<typeof setInterval> | undefined;
+
   constructor(
     private http: HttpClient,
     private logService: LogService
   ) {
     // Clean expired cache every 10 minutes
-    setInterval(() => this.cleanExpiredCache(), 10 * 60 * 1000);
+    this._cleanupTimer = setInterval(() => this.cleanExpiredCache(), 10 * 60 * 1000);
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this._cleanupTimer);
   }
 
   private handleError(error: any) {
@@ -109,14 +115,16 @@ export class UserService {
   }
 
   /**
-   * Get user by username
+   * Search users by name/lastName. The backend performs a partial ILIKE match and
+   * returns an array of matching users (not a single user).
    */
-  getUserByName(name: string): Observable<User> {
-    const url = `${this.baseUrl}/user/username/${name}`;
-    return this.http.get<User>(url).pipe(
-      tap(user => {
-        // Cache by found user ID
-        this.addToCache(user._id, user);
+  getUserByName(name: string): Observable<User[]> {
+    const url = `${this.baseUrl}/user/username/${encodeURIComponent(name)}`;
+    return this.http.get<User[]>(url).pipe(
+      tap(users => {
+        (users ?? []).forEach(user => {
+          if (user?._id) this.addToCache(user._id, user);
+        });
       }),
       catchError(this.handleError)
     );

@@ -1,7 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { MediaCacheService } from './media-cache.service';
 import { ConnectionQualityService } from './connection-quality.service';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
+import { UtilityService } from './utility.service';
+import { environment } from '@env/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +17,8 @@ export class PreloadService {
   constructor(
     private mediaCacheService: MediaCacheService,
     private connectionQualityService: ConnectionQualityService,
-    private logService: LogService
+    private logService: LogService,
+    private injector: Injector
   ) {}
 
   addToPreloadQueue(urls: string[]): void {
@@ -63,7 +66,8 @@ export class PreloadService {
         preload: true,
         maxRetries: 1, // Reduce retries to prevent cascading errors
         retryDelay: 1000, // Shorter delay
-        timeout: 5000 // Shorter timeout
+        timeout: 5000, // Shorter timeout
+        persistent: false // Disable persistent cache for preload
       }).subscribe({
         next: () => {
           // Success - no logging needed for preload
@@ -71,10 +75,7 @@ export class PreloadService {
         error: (error) => {
           // Only log critical errors, not network issues
           if (error.status !== 0 && error.status !== 404) {
-            this.logService.log(LevelLogEnum.WARN, 'PreloadService', 'Preload failed', { 
-              url, 
-              error: error.message 
-            });
+            
           }
         }
       });
@@ -110,12 +111,18 @@ export class PreloadService {
 
   private extractMediaUrlsFromPublications(publications: any[]): string[] {
     const urls: string[] = [];
+    const utilityService = this.injector.get(UtilityService);
+    const baseUrl = environment.MINIO_BUCKET_URL || '';
     
     publications.forEach(publication => {
       if (publication.media && Array.isArray(publication.media)) {
         publication.media.forEach((media: any) => {
-          if (media.urlCompressed) urls.push(media.urlCompressed);
-          if (media.urlThumbnail) urls.push(media.urlThumbnail);
+          if (media.urlCompressed) {
+            urls.push(utilityService.normalizeImageUrl(media.urlCompressed, baseUrl));
+          }
+          if (media.urlThumbnail) {
+            urls.push(utilityService.normalizeImageUrl(media.urlThumbnail, baseUrl));
+          }
         });
       }
     });
@@ -125,9 +132,15 @@ export class PreloadService {
 
   private extractMediaUrlsFromProfile(profile: any): string[] {
     const urls: string[] = [];
+    const utilityService = this.injector.get(UtilityService);
+    const baseUrl = environment.MINIO_BUCKET_URL || '';
     
-    if (profile.profileImage) urls.push(profile.profileImage);
-    if (profile.coverImage) urls.push(profile.coverImage);
+    if (profile.profileImage) {
+      urls.push(utilityService.normalizeImageUrl(profile.profileImage, baseUrl));
+    }
+    if (profile.coverImage) {
+      urls.push(utilityService.normalizeImageUrl(profile.coverImage, baseUrl));
+    }
     
     if (profile.publications) {
       urls.push(...this.extractMediaUrlsFromPublications(profile.publications));
@@ -138,12 +151,20 @@ export class PreloadService {
 
   private extractMediaUrlsFromPublication(publication: any): string[] {
     const urls: string[] = [];
+    const utilityService = this.injector.get(UtilityService);
+    const baseUrl = environment.MINIO_BUCKET_URL || '';
     
     if (publication.media && Array.isArray(publication.media)) {
       publication.media.forEach((media: any) => {
-        if (media.urlCompressed) urls.push(media.urlCompressed);
-        if (media.urlThumbnail) urls.push(media.urlThumbnail);
-        if (media.url) urls.push(media.url);
+        if (media.urlCompressed) {
+          urls.push(utilityService.normalizeImageUrl(media.urlCompressed, baseUrl));
+        }
+        if (media.urlThumbnail) {
+          urls.push(utilityService.normalizeImageUrl(media.urlThumbnail, baseUrl));
+        }
+        if (media.url) {
+          urls.push(utilityService.normalizeImageUrl(media.url, baseUrl));
+        }
       });
     }
 
@@ -152,10 +173,16 @@ export class PreloadService {
 
   private extractMediaUrlsFromMessages(messages: any[]): string[] {
     const urls: string[] = [];
+    const utilityService = this.injector.get(UtilityService);
+    const baseUrl = environment.MINIO_BUCKET_URL || '';
     
     messages.forEach(message => {
-      if (message.urlFile) urls.push(message.urlFile);
-      if (message.thumbnail) urls.push(message.thumbnail);
+      if (message.urlFile) {
+        urls.push(utilityService.normalizeImageUrl(message.urlFile, baseUrl));
+      }
+      if (message.thumbnail) {
+        urls.push(utilityService.normalizeImageUrl(message.thumbnail, baseUrl));
+      }
     });
 
     return urls;

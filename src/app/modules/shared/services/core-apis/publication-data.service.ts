@@ -34,13 +34,7 @@ export class PublicationDataService {
 
     return this.http.get<Publication>(url).pipe(
       map(response => {
-        this.logService.log(LevelLogEnum.INFO, 'PublicationDataService', 'Publications fetched from server', {
-          page,
-          size,
-          type,
-          consultId,
-          count: response.publications?.length || 0
-        });
+
         return response;
       }),
       catchError(this.handleError)
@@ -55,7 +49,7 @@ export class PublicationDataService {
     
     return this.http.get<PublicationView[]>(url).pipe(
       map(response => {
-        this.logService.log(LevelLogEnum.INFO, 'PublicationDataService', 'Publication fetched by ID', { id });
+
         return response;
       }),
       catchError(this.handleError)
@@ -70,9 +64,7 @@ export class PublicationDataService {
     
     return this.networkOptimizationService.post(url, post).pipe(
       map(response => {
-        this.logService.log(LevelLogEnum.INFO, 'PublicationDataService', 'Publication created successfully', {
-          publicationId: (response as any)._id
-        });
+
         return response;
       }),
       catchError(this.handleError)
@@ -87,7 +79,7 @@ export class PublicationDataService {
     
     return this.networkOptimizationService.put(url, data).pipe(
       map(response => {
-        this.logService.log(LevelLogEnum.INFO, 'PublicationDataService', 'Publication updated successfully', { id });
+
         return response;
       }),
       catchError(this.handleError)
@@ -102,7 +94,7 @@ export class PublicationDataService {
     
     return this.networkOptimizationService.delete(url).pipe(
       map(response => {
-        this.logService.log(LevelLogEnum.INFO, 'PublicationDataService', 'Publication deleted successfully', { id });
+
         return response;
       }),
       catchError(this.handleError)
@@ -117,7 +109,7 @@ export class PublicationDataService {
     
     return this.http.get<{ count: number }>(url).pipe(
       map(response => {
-        this.logService.log(LevelLogEnum.INFO, 'PublicationDataService', 'Publication count fetched', { count: response.count });
+
         return response.count;
       }),
       catchError(this.handleError)
@@ -135,7 +127,7 @@ export class PublicationDataService {
       const response = await this.http.get<{ count: number }>(url, { params }).toPromise();
       return response?.count || 0;
     } catch (error) {
-      this.logService.log(LevelLogEnum.ERROR, 'PublicationDataService', 'Error getting total from server', { error });
+      // Error getting total from server - no need to log every count fetch error
       return 0;
     }
   }
@@ -144,7 +136,7 @@ export class PublicationDataService {
    * Handle errors
    */
   private handleError(error: any) {
-    console.error('PublicationDataService error:', error);
+    // PublicationDataService error - no need to log every service error
     return throwError(() => new Error('Something went wrong; please try again later.'));
   }
 } 

@@ -2,7 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, interval, Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 import { LogService } from './core-apis/log.service';
-import { LevelLogEnum } from '../enums/levelLog.enum';
+import { LevelLogEnum } from './core-apis/log.service';
 
 export interface MemoryMetrics {
   usedJSHeapSize: number;
@@ -79,12 +79,7 @@ export class MemoryAuditService implements OnDestroy {
   private handleHighMemoryUsage(metrics: MemoryMetrics): void {
     const severity = metrics.memoryUsagePercentage > this.CRITICAL_MEMORY_THRESHOLD ? 'high' : 'medium';
     
-    this.logService.log(LevelLogEnum.WARN, 'MemoryAuditService', 'High memory usage detected', {
-      usagePercentage: metrics.memoryUsagePercentage,
-      usedHeap: metrics.usedJSHeapSize,
-      heapLimit: metrics.jsHeapSizeLimit,
-      severity
-    });
+    // High memory usage detected - no need to log every memory check
 
     // Trigger cleanup if critical
     if (severity === 'high') {
@@ -111,7 +106,7 @@ export class MemoryAuditService implements OnDestroy {
       this.memoryLeaks$.next([...this.memoryLeaks$.value, ...leaks]);
       
       leaks.forEach(leak => {
-        this.logService.log(LevelLogEnum.WARN, 'MemoryAuditService', 'Memory leak detected', leak);
+        // Memory leak detected - no need to log every memory leak
       });
     }
   }
@@ -196,7 +191,7 @@ export class MemoryAuditService implements OnDestroy {
       window.gc();
     }
 
-    this.logService.log(LevelLogEnum.INFO, 'MemoryAuditService', 'Memory cleanup triggered');
+
   }
 
   /**

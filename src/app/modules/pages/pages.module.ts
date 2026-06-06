@@ -27,11 +27,14 @@ import { PublicationViewModule } from '@shared/modules/publication-view/publicat
 import { ContactsModule } from '@shared/modules/contacts/contacts.module';
 import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
 import { UserOnlineModule } from '@shared/modules/user-online/user-online.module';
+import { NearbyUsersModule } from '@shared/modules/nearby-users/nearby-users.module';
 import { NotificationsPanelModule } from '@shared/modules/notifications-panel/notifications-panel.module';
 import { ProcessingMediaModule } from '@shared/modules/processing-media/processing-media.module';
 import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.module';
 import { SharedModule } from '@shared/shared.module';
 import { SyncIndicatorComponent } from '@shared/components/sync-indicator/sync-indicator.component';
+import { MessagesModule } from './messages/messages.module';
+import { StoriesModule } from '@shared/modules/stories/stories.module';
 
 
 @NgModule({
@@ -63,6 +66,7 @@ import { SyncIndicatorComponent } from '@shared/components/sync-indicator/sync-i
     ContactsModule,
     WorkyButtonsModule,
     UserOnlineModule,
+    NearbyUsersModule,
     NotificationsPanelModule,
     MarkdownModule.forRoot(),
     PipesSharedModule,
@@ -70,6 +74,8 @@ import { SyncIndicatorComponent } from '@shared/components/sync-indicator/sync-i
     FormBuilderModule,
     SharedModule,
     SyncIndicatorComponent,
+    MessagesModule,
+    StoriesModule,
   ]
 })
 export class PagesModule { }

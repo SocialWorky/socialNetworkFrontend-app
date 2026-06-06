@@ -26,24 +26,41 @@ export class IOSViewportService implements OnDestroy {
   }
 
   private setupViewportHeightFix(): void {
-    // Fix for iOS Safari 100vh issue
+    // visualViewport.height is the most reliable source on iOS standalone PWA —
+    // it reflects the actual rendered viewport height after safe-area layout,
+    // whereas window.innerHeight and dvh can be stale on first paint.
+    const getHeight = (): number =>
+      window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
     const setVH = () => {
-      const vh = window.innerHeight * 0.01;
+      const vh = getHeight() * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
     };
 
     setVH();
-    
-    // Listen for resize events
+
+    // Re-run after two paint cycles — iOS standalone sometimes under-reports
+    // visualViewport.height on the very first render before layout stabilises.
+    setTimeout(() => setVH(), 50);
+    setTimeout(() => setVH(), 300);
+
     fromEvent(window, 'resize')
       .pipe(
         takeUntil(this.destroy$),
         debounceTime(100)
       )
-      .subscribe(() => {
-        setVH();
-        // Viewport height updated - no need to log every viewport update
-      });
+      .subscribe(() => setVH());
+
+    // visualViewport fires its own resize event (e.g. on keyboard open/close
+    // and after iOS finishes safe-area layout) — subscribe for faster response.
+    if (window.visualViewport) {
+      fromEvent(window.visualViewport, 'resize')
+        .pipe(
+          takeUntil(this.destroy$),
+          debounceTime(50)
+        )
+        .subscribe(() => setVH());
+    }
   }
 
   private setupOrientationChangeHandler(): void {

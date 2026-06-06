@@ -23,7 +23,7 @@
         <!-- Hero Section with Cover and Avatar -->
         <div class="relative h-56 overflow-hidden rounded-2xl border border-slate-700/50">
           <worky-image 
-            [src]="user.profile.coverImage ? user.profile.coverImage : 'assets/img/shared/drag-drop-upload-add-file.webp'" 
+            [src]="getNormalizedCoverImage(user.profile.coverImage)" 
             [fallbackSrc]="'assets/img/shared/drag-drop-upload-add-file.webp'"
             alt="Portada"
             class="w-full h-full object-cover">

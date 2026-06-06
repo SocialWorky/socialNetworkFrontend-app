@@ -1,129 +1,295 @@
 <div *ngIf="isLoadingUserData" class="loader"></div>
 
 <div *ngIf="!isLoadingUserData && !userData" class="error-message">
-  <p>No se pudo cargar el perfil del usuario.</p>
+  <p>{{ 'profile.error.loadUser' | workyTranslations }}</p>
 </div>
 
-<div *ngIf="!isLoadingUserData && userData" #contentContainer 
-    class="profile-container"
-    [class.refreshing]="isRefreshing"
-    [class.mobile-container]="isMobile"
-    [class.navbar-visible]="navbarVisible"
-    (scroll)="onScroll($event)">
+<div *ngIf="!isLoadingUserData && userData" 
+     #contentContainer 
+     class="profile-container"
+     [class.refreshing]="isRefreshing" 
+     [class.updating]="isUpdatingProfile" 
+     [class.mobile-container]="isMobile"
+     [class.navbar-visible]="navbarVisible" 
+     (scroll)="onScroll($event)">
 
-  <div class="content-header-profile">
-      <div class="image-container">
-          <worky-edit-img-profile
-            [isCurrentUser]="isCurrentUser"
-            [profileImage]="isMobile ? (userData.profile.coverImageMobile || '') : (userData.profile.coverImage || '')">
-          </worky-edit-img-profile>
-      </div>
-      <div class="content">
+  <!-- Skeleton during update -->
+  <div *ngIf="isUpdatingProfile" class="profile-skeleton">
+    <worky-skeleton type="profile"></worky-skeleton>
+  </div>
 
-          <div class="header">
-              <div class="avatar-container">
-                  <div class="avatar">
+  <!-- Real content when not updating -->
+  <div *ngIf="!isUpdatingProfile" class="content-header-profile">
+    <div class="image-container">
+      <worky-edit-img-profile 
+        [isCurrentUser]="isCurrentUser"
+        [profileImage]="isMobile ? profileCoverImageMobile : profileCoverImage">
+      </worky-edit-img-profile>
+    </div>
+    <div class="content">
 
-                    <div class="overlay" [class.show]="isUploading">
-                      <div class="loading-spinner"></div>
-                    </div>
+      <div class="header">
+        <div class="avatar-container">
+          <div class="avatar">
 
-                    <worky-avatar
-                      [size]="100"
-                      [img]="userData.avatar || ''"
-                      [name]="(userData.name || '') + ' ' + (userData.lastName || '')">
-                    </worky-avatar>
+            <div class="overlay" [class.show]="isUploading">
+              <div class="loading-spinner"></div>
+            </div>
 
-                    <div class="edit-icon-avatar" *ngIf="isCurrentUser">
-                      <i class="material-icons" (click)="openUploadModalAvatar()">photo_camera</i>
-                    </div>
+            <worky-avatar 
+              [size]="100" 
+              [img]="userData.avatar || ''"
+              [name]="(userData.name || '') + ' ' + (userData.lastName || '')">
+            </worky-avatar>
 
-                  </div>
-              </div>
-
-              <div class="btn-container-header">
-
-                <worky-buttons *ngIf="!isFriend && !isFriendPending.status && !isCurrentUser"
-                    [workyButtonType]="WorkyButtonType.Outline"
-                    [theme]="WorkyButtonTheme.Accent"
-                    [width]="'100%'"
-                    (click)="followMyFriend(idUserProfile)">
-                    <span basic-button-text>{{ 'publicationsView.follow' | workyTranslations }}</span>
-                </worky-buttons>
-
-                <worky-buttons *ngIf="isFriendPending.status && userReceives._id === idUserProfile"
-                    [workyButtonType]="WorkyButtonType.Outline"
-                    [theme]="WorkyButtonTheme.Warn"
-                    [width]="'100%'"
-                    (click)="cancelFriendship(idPendingFriend)">
-                    <span basic-button-text>{{ 'publicationsView.cancelRequest' | workyTranslations }}</span>
-                </worky-buttons>
-
-                <worky-buttons *ngIf="isFriendPending.status && userRequest._id === idUserProfile"
-                    [workyButtonType]="WorkyButtonType.Outline"
-                    [theme]="WorkyButtonTheme.Accent"
-                    [width]="'100%'"
-                    (click)="acceptFriendship(idPendingFriend)">
-                    <span basic-button-text>{{ 'profiles.acceptFriendship' | workyTranslations }}</span>
-                </worky-buttons>
-
-                <worky-buttons *ngIf="isFriend && !isCurrentUser"
-                    [workyButtonType]="WorkyButtonType.Outline"
-                    [theme]="WorkyButtonTheme.Basic"
-                    [width]="'100%'"
-                    (click)="cancelFriendship(idPendingFriend)">
-                    <span basic-button-text>{{ 'profiles.unfollow' | workyTranslations }}</span>
-                </worky-buttons>
-
-              </div>
-          </div>
-
-          <div class="profile-info">
-
-              <div class="user-basic">
-                <div class="content-name-action">
-                  <h2>{{ userData.name || '' }} {{ userData.lastName || '' }}</h2>
-
-                  <div class="send-message-button">
-                    <worky-buttons *ngIf="idUserProfile !== dataUser?.id"
-                      [workyButtonType]="WorkyButtonType.Outline"
-                      [theme]="WorkyButtonTheme.Basic"
-                      [width]="'100%'"
-                      (click)="sendMessageToUser()">
-                      <span prefix-icon><i class="material-icons">chat</i></span>
-                      <span basic-button-text>{{ 'profiles.sendMessage' | workyTranslations }}</span>
-                    </worky-buttons>
-
-                  <img
-                    src="/assets/img/logos/svg-whatsapp.svg"
-                    alt="WhatsApp"
-                    class="whatsapp-icon"
-                    (click)="openWhatsApp()">
-
-                  </div>
-                </div>
-                <span> {{ userData.profile.legend || '' }}</span>
-                 <p>({{ userData.username || '' }})</p>
-              </div>
+            <div class="edit-icon-avatar" *ngIf="isCurrentUser">
+              <i class="material-icons" (click)="openUploadModalAvatar()">photo_camera</i>
+            </div>
 
           </div>
+        </div>
+
+        <div class="btn-container-header">
+
+          <worky-buttons *ngIf="!isFriend && !isFriendPending.status && !isCurrentUser"
+            [workyButtonType]="WorkyButtonType.Outline"
+            [theme]="WorkyButtonTheme.Accent"
+            [loading]="friendActionLoading"
+            [disabled]="friendActionLoading"
+            [width]="'100%'"
+            (click)="followMyFriend(idUserProfile)">
+            <span basic-button-text>{{ 'publicationsView.follow' | workyTranslations }}</span>
+          </worky-buttons>
+
+          <worky-buttons *ngIf="isFriendPending.status && userReceives._id === idUserProfile"
+            [workyButtonType]="WorkyButtonType.Outline"
+            [theme]="WorkyButtonTheme.Warn"
+            [loading]="friendActionLoading"
+            [disabled]="friendActionLoading"
+            [width]="'100%'"
+            (click)="cancelFriendship(idPendingFriend)">
+            <span basic-button-text>{{ 'publicationsView.cancelRequest' | workyTranslations }}</span>
+          </worky-buttons>
+
+          <worky-buttons *ngIf="isFriendPending.status && userRequest._id === idUserProfile"
+            [workyButtonType]="WorkyButtonType.Outline"
+            [theme]="WorkyButtonTheme.Accent"
+            [loading]="friendActionLoading"
+            [disabled]="friendActionLoading"
+            [width]="'100%'"
+            (click)="acceptFriendship(idPendingFriend)">
+            <span basic-button-text>{{ 'profiles.acceptFriendship' | workyTranslations }}</span>
+          </worky-buttons>
+
+          <worky-buttons *ngIf="isFriendPending.status && userRequest._id === idUserProfile"
+            [workyButtonType]="WorkyButtonType.Outline"
+            [theme]="WorkyButtonTheme.Warn"
+            [loading]="friendActionLoading"
+            [disabled]="friendActionLoading"
+            [width]="'100%'"
+            (click)="rejectFriendship(idPendingFriend)">
+            <span basic-button-text>{{ 'profiles.rejectFriendship' | workyTranslations }}</span>
+          </worky-buttons>
+
+          <worky-buttons *ngIf="isFriend && !isCurrentUser"
+            [workyButtonType]="WorkyButtonType.Outline"
+            [theme]="WorkyButtonTheme.Basic"
+            [loading]="friendActionLoading"
+            [disabled]="friendActionLoading"
+            [width]="'100%'"
+            (click)="cancelFriendship(idPendingFriend)">
+            <span basic-button-text>{{ 'profiles.unfollow' | workyTranslations }}</span>
+          </worky-buttons>
+
+        </div>
       </div>
+
+      <div class="profile-info">
+
+        <div class="user-basic">
+          <div class="content-name-action">
+            <h2>
+              {{ userData.name || '' }} {{ userData.lastName || '' }}
+              <app-verified-badge [isAccountVerified]="userData.isAccountVerified"></app-verified-badge>
+              <app-premium-badge [isPremium]="userData.isPremium"></app-premium-badge>
+            </h2>
+
+            <div class="send-message-button">
+              <i *ngIf="!isCurrentUser" 
+                class="material-icons message-icon" 
+                (click)="openMessage()">
+                message
+              </i>
+              
+              <img *ngIf="profileWhatsappViewable" 
+                src="/assets/img/logos/svg-whatsapp.svg" 
+                alt="WhatsApp"
+                class="whatsapp-icon" 
+                (click)="openWhatsApp()">
+
+            </div>
+          </div>
+          <span> {{ profileLegend }}</span>
+          <p>({{ userData.username || '' }})</p>
+        </div>
+
+      </div>
+    </div>
   </div>
 
   <div class="content-body-profile">
     <div class="content-left-profile">
-      <worky-profile-detail *ngIf="userData"
-        [isCurrentUser]="isCurrentUser"
-        [userData]="userData">
+      <worky-profile-detail *ngIf="userData" 
+        [isCurrentUser]="isCurrentUser" 
+        [userData]="userData"
+        (userDataUpdated)="onUserDataUpdated($event)">
       </worky-profile-detail>
     </div>
 
     <div class="content-section-wall">
 
+      <!-- Discovery toggle: own profile only, gated by the location-discovery feature flag -->
+      <div *ngIf="isCurrentUser && locationDiscoveryEnabled" class="worky-module-container" style="margin-bottom:8px;">
+        <div style="padding:16px 18px;">
+
+          <!-- Header row -->
+          <div class="discovery-toggle-row" style="display:flex;align-items:center;gap:14px;">
+
+            <!-- Icon bubble -->
+            <div [style.background]="locationStatus.discoveryEnabled ? 'rgba(34,197,94,0.12)' : 'rgba(var(--worky-color-navy-rgb, 17,51,85), 0.08)'"
+                 style="width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.3s;">
+              <span class="material-symbols-rounded"
+                    [style.color]="locationStatus.discoveryEnabled ? '#22c55e' : 'var(--worky-color-icon)'"
+                    style="font-size:24px;transition:color 0.3s;">
+                {{ locationStatus.discoveryEnabled ? 'location_on' : 'location_off' }}
+              </span>
+            </div>
+
+            <!-- Text block -->
+            <div class="discovery-toggle-text" style="flex:1;min-width:0;">
+              <div class="discovery-toggle-titlerow" style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+                <span style="font-weight:700;font-size:14px;color:var(--worky-color-text);">
+                  {{ 'explore.enableDiscovery' | workyTranslations }}
+                </span>
+                <!-- Active badge -->
+                <span *ngIf="locationStatus.discoveryEnabled"
+                      style="display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,0.12);color:#22c55e;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;letter-spacing:0.02em;">
+                  <span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>
+                  {{ locationStatus.city ? ('explore.discoveryEnabled' | workyTranslations:'arguments':locationStatus.city) : ('explore.discoveryEnabledNoCity' | workyTranslations) }}
+                </span>
+              </div>
+              <div style="font-size:12px;color:var(--worky-color-icon);line-height:1.4;">
+                {{ locationStatus.discoveryEnabled
+                  ? ('explore.discoveryDescriptionActive' | workyTranslations)
+                  : ('explore.discoveryDescription' | workyTranslations) }}
+              </div>
+            </div>
+
+            <!-- Action button -->
+            <button
+              class="discovery-toggle-btn"
+              (click)="toggleDiscovery()"
+              [disabled]="isTogglingDiscovery"
+              style="flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:10px;border:none;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.2s ease;outline:none;"
+              [style.background]="locationStatus.discoveryEnabled ? 'rgba(239,68,68,0.1)' : 'var(--worky-color-navy)'"
+              [style.color]="locationStatus.discoveryEnabled ? '#ef4444' : 'var(--worky-color-light)'"
+              [style.opacity]="isTogglingDiscovery ? '0.6' : '1'"
+              [style.cursor]="isTogglingDiscovery ? 'not-allowed' : 'pointer'">
+              <span *ngIf="isTogglingDiscovery" class="material-symbols-rounded" style="font-size:15px;animation:spin 0.8s linear infinite;">autorenew</span>
+              <span *ngIf="!isTogglingDiscovery" class="material-symbols-rounded" style="font-size:15px;">
+                {{ locationStatus.discoveryEnabled ? 'location_off' : 'near_me' }}
+              </span>
+              <span *ngIf="!isTogglingDiscovery">
+                {{ (locationStatus.discoveryEnabled ? 'explore.disableDiscovery' : 'explore.enableDiscovery') | workyTranslations }}
+              </span>
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Creator profile config (own profile) -->
+      <div *ngIf="false" class="worky-module-container" style="margin-bottom:8px;">
+        <div style="padding:16px;border-radius:12px;background:var(--worky-surface);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <h4 style="margin:0;font-weight:600;">{{ 'creator.title' | workyTranslations }}</h4>
+            <button (click)="showCreatorConfig = !showCreatorConfig" style="background:none;border:none;cursor:pointer;color:var(--worky-primary);font-size:13px;font-weight:600;">
+              {{ (myCreatorProfile?.isActive ? 'creator.configPanel' : 'creator.activate') | workyTranslations }}
+            </button>
+          </div>
+          <div *ngIf="myCreatorProfile?.isActive && myCreatorStats" style="display:flex;gap:16px;">
+            <div><div style="font-weight:700;font-size:18px;">{{ myCreatorStats?.subscriberCount }}</div><div style="font-size:11px;color:var(--worky-text-secondary);">{{ 'creator.subscribers' | workyTranslations }}</div></div>
+            <div><div style="font-weight:700;font-size:18px;">CLP {{ myCreatorStats?.monthlyRevenue | number:'1.0-0' }}</div><div style="font-size:11px;color:var(--worky-text-secondary);">{{ 'creator.monthlyRevenue' | workyTranslations }}</div></div>
+          </div>
+          <div *ngIf="showCreatorConfig" style="margin-top:12px;">
+            <div style="margin-bottom:8px;">
+              <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">{{ 'creator.monthlyPrice' | workyTranslations }} (CLP)</label>
+              <input type="number" [(ngModel)]="creatorMonthlyPrice" min="1000" max="50000" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--worky-border);" />
+            </div>
+            <div style="margin-bottom:8px;">
+              <label style="font-size:12px;font-weight:600;display:block;margin-bottom:4px;">{{ 'creator.description' | workyTranslations }}</label>
+              <textarea [(ngModel)]="creatorDescription" rows="2" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--worky-border);resize:none;"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button (click)="saveCreatorConfig()" [disabled]="isSavingCreator" style="flex:1;padding:8px;border-radius:8px;border:none;background:var(--worky-primary);color:#fff;font-weight:600;cursor:pointer;">
+                {{ 'creator.save' | workyTranslations }}
+              </button>
+              <button *ngIf="myCreatorProfile?.isActive" (click)="deactivateCreatorPage()" style="padding:8px 16px;border-radius:8px;border:1px solid #e53935;background:transparent;color:#e53935;font-weight:600;cursor:pointer;">
+                {{ 'creator.deactivate' | workyTranslations }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscribe to creator CTA (other user's profile) -->
+      <div *ngIf="!isCurrentUser && viewedCreatorProfile?.isActive" class="worky-module-container" style="margin-bottom:8px;">
+        <div style="padding:16px;border-radius:12px;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.2);">
+          <h4 style="margin:0 0 4px;font-weight:600;">{{ 'creator.exclusiveContent' | workyTranslations }} ⭐</h4>
+          <p style="font-size:13px;color:var(--worky-text-secondary);margin:0 0 12px;">{{ 'creator.subscribeToUnlock' | workyTranslations }}</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-weight:700;font-size:16px;">{{ formatCreatorPrice(viewedCreatorProfile?.monthlyPrice ?? 0) }}</span>
+            <button *ngIf="!viewedCreatorProfile?.isSubscribed"
+              (click)="subscribeToCreator()"
+              [disabled]="isSubscribingToCreator"
+              style="padding:8px 20px;border-radius:20px;border:none;background:#7c3aed;color:#fff;font-weight:600;cursor:pointer;">
+              {{ (isSubscribingToCreator ? 'tips.redirecting' : 'creator.subscribe') | workyTranslations }}
+            </button>
+            <span *ngIf="viewedCreatorProfile?.isSubscribed" style="color:#22c55e;font-weight:600;">✓ {{ 'creator.subscribed' | workyTranslations }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics panel: own profile + premium -->
+      <div *ngIf="isCurrentUser && profileStats" class="worky-module-container" style="margin-bottom:16px;">
+        <div style="padding:16px;border-radius:12px;background:var(--worky-surface);">
+          <h4 style="margin:0 0 12px;font-weight:600;">{{ 'analytics.profileStats' | workyTranslations }}</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <div style="font-size:12px;color:var(--worky-text-secondary);">{{ 'analytics.last7Days' | workyTranslations }} · {{ 'analytics.profileVisits' | workyTranslations }}</div>
+              <strong style="font-size:20px;">{{ profileStats.profileVisits.last7Days }}</strong>
+            </div>
+            <div>
+              <div style="font-size:12px;color:var(--worky-text-secondary);">{{ 'analytics.last30Days' | workyTranslations }} · {{ 'analytics.profileVisits' | workyTranslations }}</div>
+              <strong style="font-size:20px;">{{ profileStats.profileVisits.last30Days }}</strong>
+            </div>
+            <div>
+              <div style="font-size:12px;color:var(--worky-text-secondary);">{{ 'analytics.last7Days' | workyTranslations }} · {{ 'analytics.friendsGained' | workyTranslations }}</div>
+              <strong style="font-size:20px;">{{ profileStats.friendsGained.last7Days }}</strong>
+            </div>
+            <div>
+              <div style="font-size:12px;color:var(--worky-text-secondary);">{{ 'analytics.totalPublications' | workyTranslations }}</div>
+              <strong style="font-size:20px;">{{ profileStats.totalPublications }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div *ngIf="(isFriend && !isFriendPending.status) || isCurrentUser" class="worky-module-container">
 
-        <worky-add-publication
-          [type]="typePublishing.POST_PROFILE"
+        <worky-add-publication 
+          [type]="typePublishing.POST_PROFILE" 
           [idUserProfile]="idUserProfile">
         </worky-add-publication>
 
@@ -132,20 +298,17 @@
       @for(publication of publicationsProfile(); track publication; let i = $index ) {
         <div [ngClass]="{'worky-module-container': true, 'last-publication': i === publicationsProfile().length - 1}"
           [attr.id]="i === 0 ? 'first-publication' : null">
-          <worky-publication-view
-          [publication]="publication"
-          [type]="typePublishing.POST_PROFILE"
-          [userProfile]="idUserProfile"
-          [indexPublication]="i">
+          <worky-publication-view 
+            [publication]="publication" 
+            [type]="typePublishing.POST_PROFILE"
+            [userProfile]="idUserProfile" 
+            [indexPublication]="i">
           </worky-publication-view>
         </div>
       } @empty {
-      <span *ngIf="!loaderPublications">{{ 'home.notPublications' | workyTranslations }}</span>
+        <span *ngIf="!loaderPublications">{{ 'home.notPublications' | workyTranslations }}</span>
       }
 
     </div>
   </div>
-
-
-
 </div>

@@ -12,6 +12,11 @@ import { Alerts, Position } from '@shared/enums/alerts.enum';
     standalone: false
 })
 export class ImageUploadModalComponent implements OnInit {
+  private readonly ALLOWED_TYPES = new Set([
+    'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff', 'image/webp',
+    'video/mp4', 'video/mpeg', 'video/quicktime', 'video/avi',
+  ]);
+
   WorkyButtonType = WorkyButtonType;
 
   WorkyButtonTheme = WorkyButtonTheme;
@@ -54,7 +59,7 @@ export class ImageUploadModalComponent implements OnInit {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
 
-      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+      if (this.ALLOWED_TYPES.has(file.type)) {
         const reader = new FileReader();
         reader.onload = (e: any) => {
           validPreviews.push({ url: e.target.result, type: file.type });

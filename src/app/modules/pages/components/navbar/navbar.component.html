@@ -4,7 +4,7 @@
       <div class="worky-brand">
         <!-- Brand Logo-->
         <a [routerLink]="['/']" *ngIf="logoUrl !== ''">
-          <img class="worky-logo" src="{{ logoUrl }}" alt="{{ title }}" style="margin-top: 2px;" loading="lazy">
+          <img class="worky-logo" [src]="getNormalizedLogoUrl(logoUrl)" [alt]="title" style="margin-top: 2px;" loading="lazy" (error)="logoUrl = ''">
         </a>
         <!-- Search -->
         <form
@@ -35,21 +35,44 @@
           </li>
         </ul>
 
+        <!-- Nearby people section -->
+        <div *ngIf="nearbyUsers.length > 0" class="search-results" style="border-top:1px solid var(--worky-border);">
+          <div style="padding:4px 12px;font-size:11px;font-weight:600;color:var(--worky-text-secondary);text-transform:uppercase;letter-spacing:.05em;">
+            {{ 'explore.nearbyUsers' | workyTranslations }}
+          </div>
+          <li *ngFor="let user of nearbyUsers" (click)="viewProfile(user._id)">
+            <worky-avatar
+              [img]="user.avatar"
+              [size]="30"
+              [name]="user.name + ' ' + user.lastName"
+            ></worky-avatar>
+            {{ user.name }} {{ user.lastName }}
+            <span *ngIf="user.isPremium" style="font-size:10px;color:#f59e0b;margin-left:4px;">⭐</span>
+            <span *ngIf="user.discoveryCity" style="font-size:11px;color:var(--worky-text-secondary);margin-left:4px;">({{ user.discoveryCity }})</span>
+          </li>
+        </div>
+
       </div>
       <!-- Center elements -->
       <worky-menu-component *ngIf="!isMobile"></worky-menu-component>
       <!-- Right elements -->
 
       <div class="worky-profile" *ngIf="!isMobile">
-        <!-- Message -->
-        <worky-dropdown class="item-navbar-actions"
-          icon="chat"
-          [badgeValue]="messages > 0 ? messages : null"
-          (click)="messagesUrl()"
-          [isFilled]=true
-          [isMenu]=false
-          [badge]=true>
-        </worky-dropdown>
+        <!-- Messages -->
+        <a *ngIf="eventsEnabled" [routerLink]="['/events']" class="item-navbar-actions" [title]="'events.title' | workyTranslations">
+          <span class="material-symbols-rounded navbar-action-icon">calendar_month</span>
+        </a>
+        <a *ngIf="groupsEnabled" [routerLink]="['/groups']" class="item-navbar-actions" [title]="'groups.title' | workyTranslations">
+          <span class="material-symbols-rounded navbar-action-icon">groups</span>
+        </a>
+        <a [routerLink]="['/messages']" class="item-navbar-actions">
+          <worky-dropdown
+            icon="chat"
+            [badgeValue]="unreadMessages > 0 ? unreadMessages : null"
+            [isMenu]="false"
+            [badge]="true">
+          </worky-dropdown>
+        </a>
         <!-- Notification -->
         <worky-dropdown class="item-navbar-actions"
           icon="notifications"
@@ -79,7 +102,7 @@
       <div class="worky-brand-mobile">
         <!-- Brand Logo -->
         <a [routerLink]="['/']" *ngIf="logoUrl !== ''">
-          <img class="worky-logo-mobile" src="{{ logoUrl }}" alt="{{ title }}" loading="lazy">
+          <img class="worky-logo-mobile" [src]="getNormalizedLogoUrl(logoUrl)" [alt]="title" loading="lazy" (error)="logoUrl = ''">
         </a>
         <!-- Search -->
         <form
@@ -100,36 +123,6 @@
         </form>
       </div>
 
-      <!-- Mobile Navigation -->
-      <div class="worky-profile-mobile">
-        <worky-menu-component></worky-menu-component>
-        <!-- Message -->
-        <worky-dropdown
-          icon="chat"
-          [badgeValue]="messages > 0 ? messages : null"
-          (click)="messagesUrl()"
-          [isFilled]=true
-          [isMenu]=false
-          [badge]=true>
-        </worky-dropdown>
-        <!-- Notification -->
-        <worky-dropdown
-          icon="notifications"
-          [badgeValue]="notifications > 0 ? notifications : null"
-          (click)="toggleNotificationsPanel()"
-          [isMenu]=false
-          [badge]=true>
-        </worky-dropdown>
-        <!-- Profile -->
-        <worky-dropdown
-          [badge]=false
-          img="avatar"
-          [size]="30"
-          [dataLink]="dataLinkProfile"
-          (linkClicked)="handleLinkClicked($event)">
-        </worky-dropdown>
-      </div>
-
       <!-- Mobile Search Results -->
       <ul *ngIf="users.length > 0" class="search-results-mobile">
         <li *ngFor="let user of users" (click)="viewProfile(user._id)">
@@ -143,5 +136,34 @@
       </ul>
   </nav>
 </div>
+
+<!-- Mobile Bottom Navigation Bar -->
+<nav class="bottom-nav-mobile" *ngIf="isMobile" [class.scrolledTop]="scrolledTop">
+  <a class="bottom-nav-item" [routerLink]="['/']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+    <span class="material-symbols-rounded bottom-nav-icon">home</span>
+  </a>
+  <a class="bottom-nav-item" [routerLink]="['/profile']" routerLinkActive="active">
+    <span class="material-symbols-rounded bottom-nav-icon">person</span>
+  </a>
+  <a *ngIf="groupsEnabled" class="bottom-nav-item" [routerLink]="['/groups']" routerLinkActive="active">
+    <span class="material-symbols-rounded bottom-nav-icon">groups</span>
+  </a>
+  <a class="bottom-nav-item" [routerLink]="['/messages']" routerLinkActive="active">
+    <span class="material-symbols-rounded bottom-nav-icon">chat</span>
+    <span class="bottom-nav-badge" *ngIf="unreadMessages > 0">{{ unreadMessages > 99 ? '99+' : unreadMessages }}</span>
+  </a>
+  <div class="bottom-nav-item" (click)="toggleNotificationsPanel()">
+    <span class="material-symbols-rounded bottom-nav-icon">notifications</span>
+    <span class="bottom-nav-badge" *ngIf="notifications > 0">{{ notifications > 99 ? '99+' : notifications }}</span>
+  </div>
+  <worky-dropdown
+    class="bottom-nav-item"
+    [badge]=false
+    img="avatar"
+    [size]="28"
+    [dataLink]="dataLinkProfile"
+    (linkClicked)="handleLinkClicked($event)">
+  </worky-dropdown>
+</nav>
 
 <worky-notifications-panel></worky-notifications-panel>

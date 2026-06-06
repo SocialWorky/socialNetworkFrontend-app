@@ -69,9 +69,7 @@ export class UIPerformanceService implements OnDestroy {
     this.setupEventOptimization();
     this.setupAccessibilityMonitoring();
     
-    this.logService.log(LevelLogEnum.INFO, 'UIPerformanceService', 'Service initialized', {
-      config: this.currentConfig
-    });
+
   }
 
   /**
@@ -285,10 +283,7 @@ export class UIPerformanceService implements OnDestroy {
     const scrollHandler = () => {
       scrollCount++;
       if (scrollCount % 10 === 0) { // Log every 10th scroll
-        this.logService.log(LevelLogEnum.INFO, 'UIPerformanceService', 'Scroll performance monitored', {
-          scrollCount,
-          container: container.tagName
-        });
+
       }
     };
     
@@ -314,7 +309,7 @@ export class UIPerformanceService implements OnDestroy {
    */
   updateConfig(newConfig: Partial<UIPerformanceConfig>): void {
     this.currentConfig = { ...this.currentConfig, ...newConfig };
-    this.logService.log(LevelLogEnum.INFO, 'UIPerformanceService', 'Configuration updated', this.currentConfig);
+
   }
 
   /**

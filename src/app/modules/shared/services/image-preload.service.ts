@@ -4,6 +4,8 @@ import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { LogService, LevelLogEnum } from './core-apis/log.service';
 import { MobileImageCacheService } from './mobile-image-cache.service';
 import { PublicationDatabaseService } from './database/publication-database.service';
+import { UtilityService } from './utility.service';
+import { environment } from '@env/environment';
 
 export interface PreloadStrategy {
   profileImages: boolean;
@@ -44,7 +46,8 @@ export class ImagePreloadService {
   constructor(
     private mobileImageCache: MobileImageCacheService,
     private publicationDatabase: PublicationDatabaseService,
-    private logService: LogService
+    private logService: LogService,
+    private utilityService: UtilityService
   ) {}
 
   /**
@@ -55,7 +58,7 @@ export class ImagePreloadService {
     const startTime = Date.now();
 
     if (this.isPreloading) {
-      this.logService.log(LevelLogEnum.WARN, 'ImagePreloadService', 'Preload already in progress');
+
       return this.preloadResults.value;
     }
 
@@ -127,17 +130,19 @@ export class ImagePreloadService {
     // Preloading specific images - no need to log every preload operation
 
     imageUrls.forEach(url => {
-      if (!this.preloadQueue.has(url)) {
-        this.preloadQueue.add(url);
+      // Normalize URL before using it
+      const normalizedUrl = this.utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
+      if (!this.preloadQueue.has(normalizedUrl)) {
+        this.preloadQueue.add(normalizedUrl);
         
-        this.mobileImageCache.loadImage(url, imageType, { priority: 'low' }).subscribe({
+        this.mobileImageCache.loadImage(normalizedUrl, imageType, { priority: 'low' }).subscribe({
           next: () => {
-            this.preloadQueue.delete(url);
+            this.preloadQueue.delete(normalizedUrl);
             // Image preloaded - no need to log every preload
           },
           error: (error) => {
-            this.preloadQueue.delete(url);
-            this.logService.log(LevelLogEnum.WARN, 'ImagePreloadService', 'Image preload failed', { url, error });
+            this.preloadQueue.delete(normalizedUrl);
+
           }
         });
       }
@@ -168,7 +173,9 @@ export class ImagePreloadService {
 
       publications.forEach(pub => {
         if (pub.author?.avatar) {
-          profileImages.add(pub.author.avatar);
+          // Normalize URL before adding
+          const normalizedUrl = this.utilityService.normalizeImageUrl(pub.author.avatar, environment.MINIO_BUCKET_URL || '');
+          profileImages.add(normalizedUrl);
         }
       });
 
@@ -191,7 +198,9 @@ export class ImagePreloadService {
         if (pub.media && pub.media.length > 0) {
           pub.media.forEach(media => {
             if (media.type === 'image' && media.url) {
-              publicationImages.push(media.url);
+              // Normalize URL before adding
+              const normalizedUrl = this.utilityService.normalizeImageUrl(media.url, environment.MINIO_BUCKET_URL || '');
+              publicationImages.push(normalizedUrl);
             }
           });
         }
@@ -217,7 +226,9 @@ export class ImagePreloadService {
         if (pub.media && pub.media.length > 0) {
           pub.media.forEach(media => {
             if (media.type === 'image' && media.url) {
-              mediaImages.push(media.url);
+              // Normalize URL before adding
+              const normalizedUrl = this.utilityService.normalizeImageUrl(media.url, environment.MINIO_BUCKET_URL || '');
+              mediaImages.push(normalizedUrl);
             }
           });
         }
@@ -239,12 +250,14 @@ export class ImagePreloadService {
 
     const promises = imageUrls.map(async url => {
       try {
-        await firstValueFrom(this.mobileImageCache.loadImage(url, 'media', { priority }));
+        // URL should already be normalized, but ensure it is
+        const normalizedUrl = this.utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
+        await firstValueFrom(this.mobileImageCache.loadImage(normalizedUrl, 'media', { priority }));
         success++;
         // Image preloaded successfully - no need to log every preload
       } catch (error) {
         failed++;
-        this.logService.log(LevelLogEnum.WARN, 'ImagePreloadService', 'Image preload failed', { url, error });
+
       }
     });
 
@@ -260,7 +273,9 @@ export class ImagePreloadService {
     const imagesToPreload: string[] = [];
 
     if (avatar) {
-      imagesToPreload.push(avatar);
+      // Normalize URL before adding
+      const normalizedUrl = this.utilityService.normalizeImageUrl(avatar, environment.MINIO_BUCKET_URL || '');
+      imagesToPreload.push(normalizedUrl);
     }
 
     if (imagesToPreload.length > 0) {
@@ -277,7 +292,9 @@ export class ImagePreloadService {
     if (publication.media && publication.media.length > 0) {
       publication.media.forEach((media: any) => {
         if (media.type === 'image' && media.url) {
-          imagesToPreload.push(media.url);
+          // Normalize URL before adding
+          const normalizedUrl = this.utilityService.normalizeImageUrl(media.url, environment.MINIO_BUCKET_URL || '');
+          imagesToPreload.push(normalizedUrl);
         }
       });
     }

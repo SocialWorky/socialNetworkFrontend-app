@@ -1,7 +1,7 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { distinctUntilChanged, takeUntil, debounceTime } from 'rxjs/operators';
+import { distinctUntilChanged, takeUntil, debounceTime, filter, finalize } from 'rxjs/operators';
 import { LoadingController } from '@ionic/angular';
 import { MatDialog } from '@angular/material/dialog';
 import * as _ from 'lodash';
@@ -19,10 +19,14 @@ import { FriendsStatus, UserData } from '@shared/interfaces/friend.interface';
 import { ReportsService } from '@shared/services/core-apis/reports.service';
 import { ReportCreate } from '@shared/interfaces/report.interface';
 import { ReportType, ReportStatus } from '@shared/enums/report.enum';
+import { BoostService, BoostPackage } from '@shared/services/core-apis/boost.service';
+import { AnalyticsService, PublicationStats } from '@shared/services/core-apis/analytics.service';
+import { SubscriptionService } from '@shared/services/subscription.service';
 import { ReportResponseComponent } from '../publication-view/report-response/report-response.component';
 import { EmailNotificationService } from '@shared/services/notifications/email-notification.service';
 import { CommentService } from '@shared/services/core-apis/comment.service';
 import { NotificationService } from '@shared/services/notifications/notification.service';
+import { CenterSocketNotificationsService } from '@shared/services/notifications/centerSocketNotifications.service';
 import { Reactions } from './interfaces/reactions.interface';
 import { Colors } from '@shared/interfaces/colors.enum';
 import { ScrollService } from '@shared/services/scroll.service';
@@ -32,6 +36,14 @@ import { ImageLoadOptions } from '../../services/image.service';
 import { MediaEventsService } from '@shared/services/media-events.service';
 import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
+import { GlobalEventService } from '@shared/services/globalEventService.service';
+import { NotificationPublicationService } from '@shared/services/notifications/notificationPublication.service';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
+import { UtilityService } from '@shared/services/utility.service';
+import { ConfigService } from '@services/core-apis/config.service';
+import { FeatureWallService } from '@shared/services/feature-wall.service';
+import { DeviceDetectionService } from '@shared/services/device-detection.service';
+import { CommentsModalComponent } from '../comments-modal/comments-modal.component';
 
 
 @Component({
@@ -41,8 +53,31 @@ import { Alerts, Position } from '@shared/enums/alerts.enum';
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
 })
-export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit {
-  @Input() publication!: PublicationView;
+export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewInit, OnChanges {
+  private _publication!: PublicationView;
+  
+  @Input() 
+  set publication(value: PublicationView) {
+    const previousValue = this._publication;
+    this._publication = value;
+    
+    if (previousValue && previousValue._id === value._id) {
+      const reactionsChanged = 
+        !previousValue.reaction || 
+        !value.reaction || 
+        previousValue.reaction.length !== value.reaction.length ||
+        JSON.stringify(previousValue.reaction.map(r => r._id)) !== JSON.stringify(value.reaction.map(r => r._id));
+      
+      if (reactionsChanged) {
+        this.loadReactionsImg(value);
+        this._cdr.markForCheck();
+      }
+    }
+  }
+  
+  get publication(): PublicationView {
+    return this._publication;
+  }
 
   @Input() indexPublication?: number;
 
@@ -64,10 +99,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   dataLinkActions: DropdownDataLink<any>[] = [];
 
   dataShareActions: DropdownDataLink<any>[] = [];
-
-  viewCommentSection: number | null = null;
-
-  viewComments: number | null = null;
 
   nameGeoLocation = '';
 
@@ -91,7 +122,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     return content.trim().startsWith('```');
   }
 
-  // Estados de carga individuales para skeletons
+  // Individual loading states for skeletons
   avatarLoading: boolean = true;
   nameLoading: boolean = true;
   contentLoading: boolean = true;
@@ -101,12 +132,15 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   actionsLoading: boolean = true;
   isDeletingPublication: boolean = false;
   isDeletingComment: boolean = false;
+  friendActionLoading: boolean = false;
   translations = translations;
 
   private destroy$ = new Subject<void>();
   private mediaTimeout?: any;
   private mediaState: 'loading' | 'loaded' | 'error' = 'loading';
-  private readonly MEDIA_TIMEOUT: number = 3000; // 3 segundos
+  private readonly MEDIA_TIMEOUT: number = 3000; // 3 seconds
+  private pollingInterval: any;
+  private pollingTimeout: any;
 
   constructor(
     private _router: Router,
@@ -119,15 +153,59 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     private _reportsService: ReportsService,
     public _dialog: MatDialog,
     private _emailNotificationService: EmailNotificationService,
+    private _logService: LogService,
     private _notificationService: NotificationService,
     private _scrollService: ScrollService,
     private _loadingService: LoadingService,
+    private _utilityService: UtilityService,
     private _mediaEventsService: MediaEventsService,
-    private _alertService: AlertService
+    private _alertService: AlertService,
+    private _globalEventService: GlobalEventService,
+    private _notificationPublicationService: NotificationPublicationService,
+    private readonly _boostService: BoostService,
+    private readonly _analyticsService: AnalyticsService,
+    private readonly _subscriptionService: SubscriptionService,
+    private readonly _configService: ConfigService,
+    private readonly _featureWallService: FeatureWallService,
+    private _centerSocketNotificationsService: CenterSocketNotificationsService,
+    private _deviceDetectionService: DeviceDetectionService,
   ) {}
 
   async ngAfterViewInit() {
     this.getUserFriendPending();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['publication'] && changes['publication'].currentValue) {
+      const currentPublication = changes['publication'].currentValue;
+      const previousPublication = changes['publication'].previousValue;
+
+      if (!previousPublication || currentPublication._id !== previousPublication._id) {
+        this.loadReactionsImg(currentPublication);
+      } else if (previousPublication && currentPublication._id === previousPublication._id) {
+        const reactionsChanged =
+          !previousPublication.reaction ||
+          !currentPublication.reaction ||
+          previousPublication.reaction.length !== currentPublication.reaction.length ||
+          JSON.stringify(previousPublication.reaction.map((r: any) => r._id)) !==
+          JSON.stringify(currentPublication.reaction.map((r: any) => r._id));
+
+        if (reactionsChanged) {
+          this.loadReactionsImg(currentPublication);
+        }
+
+        // Check if new comments with pending media were added
+        const prevCommentCount = previousPublication.comment?.length || 0;
+        const currCommentCount = currentPublication.comment?.length || 0;
+
+        if (currCommentCount > prevCommentCount) {
+          // New comments added, check if any have pending media
+          if (this.hasAnyPendingMedia()) {
+            this.startPolling();
+          }
+        }
+      }
+    }
   }
 
   ngOnInit() {
@@ -138,11 +216,22 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this.routeUrl = this._router.url;
     this.isProfile = this.routeUrl.includes('profile');
 
-          this._notificationService.notification$
-        .pipe(
-          distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
-          takeUntil(this.destroy$)
-        )
+    // Subscribe to profile image updates - normalize URL
+    this._globalEventService.profileImage$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(newImageUrl => {
+        if (newImageUrl && this.publication.author._id === this.dataUser?.id) {
+          // Normalize URL before assigning
+          this.publication.author.avatar = this._utilityService.normalizeImageUrl(newImageUrl, environment.MINIO_BUCKET_URL || '');
+          this._cdr.markForCheck();
+        }
+      });
+
+    this._notificationService.notification$
+      .pipe(
+        distinctUntilChanged((prev, curr) => _.isEqual(prev, curr)),
+        takeUntil(this.destroy$)
+      )
       .subscribe({
         next: (data: any) => {
           if (data?._id === this.publication._id) {
@@ -151,10 +240,52 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         }
       });
 
-      this._mediaEventsService.mediaProcessed$
-        .pipe(
-          takeUntil(this.destroy$)
-        )
+    this._notificationService.notification$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Only refresh posts with an active pending relationship — avoids one
+        // uncached friends request per visible post on every app-wide ping.
+        const hasPendingRelation =
+          !!this.publication?.isFriendshipPending ||
+          !!this.userRequest?._id ||
+          !!this.userReceive?._id;
+        if (
+          hasPendingRelation &&
+          this.dataUser?.id &&
+          this.publication?.author?._id &&
+          this.dataUser.id !== this.publication.author._id
+        ) {
+          this.getUserFriendPending(true);
+        }
+      });
+
+    this._notificationPublicationService.notificationUpdatePublication$
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((data: PublicationView[]) => !!data?.[0]?._id && data[0]._id === this.publication._id)
+      )
+      .subscribe({
+        next: (data: PublicationView[]) => {
+          const updatedPublication = data[0];
+          if (updatedPublication) {
+            this.publication = { ...updatedPublication };
+            this.loadReactionsImg(updatedPublication);
+            this._cdr.markForCheck();
+
+            // Check if we still have pending media and need to continue/start polling
+            if (this.hasAnyPendingMedia()) {
+              this.startPolling();
+            } else {
+              this.stopPolling();
+            }
+          }
+        }
+      });
+
+    this._mediaEventsService.mediaProcessed$
+      .pipe(
+        takeUntil(this.destroy$)
+      )
       .subscribe({
         next: (data: any) => {
           if (data?.idReference === this.publication._id) {
@@ -164,11 +295,61 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       });
     this.loadReactionsImg();
     this._cdr.markForCheck();
-    
+
     this.simulateProgressiveLoading();
+
+    // Start polling if publication or any comment has pending media
+    if (this.hasAnyPendingMedia()) {
+      this.startPolling();
+    }
   }
 
-  // Métodos para manejar la carga de elementos individuales
+  /**
+   * Check if publication or any of its comments have pending media
+   */
+  private hasAnyPendingMedia(): boolean {
+    // Check publication media
+    if (this.publication.containsMedia && !this.publication.media?.length) {
+      return true;
+    }
+
+    // Check comments media
+    if (this.publication.comment?.length) {
+      return this.publication.comment.some(
+        comment => comment.containsMedia && (!comment.media || comment.media.length === 0)
+      );
+    }
+
+    return false;
+  }
+
+  private startPolling() {
+    this.stopPolling();
+
+    // Poll every 3 seconds for faster updates
+    this.pollingInterval = setInterval(() => {
+      this.refreshPublications(this.publication._id);
+    }, 3000);
+
+    // Extended timeout of 2 minutes for heavy images/videos
+    this.pollingTimeout = setTimeout(() => {
+      this.stopPolling();
+    }, 120000);
+  }
+
+  private stopPolling() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+
+    if (this.pollingTimeout) {
+      clearTimeout(this.pollingTimeout);
+      this.pollingTimeout = null;
+    }
+  }
+
+  // Methods to handle individual element loading
   onAvatarLoad() {
     this.avatarLoading = false;
     this._cdr.markForCheck();
@@ -176,7 +357,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   onAvatarError() {
     this.avatarLoading = false;
-    // Force the avatar component to show initials when image fails
+    // Force avatar component to show initials when image fails
     this._cdr.markForCheck();
   }
 
@@ -197,7 +378,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._cdr.markForCheck();
   }
 
-  // Force media loading state reset - used when skeleton gets stuck
+  // Force media loading state reset when skeleton gets stuck
   forceMediaLoadComplete() {
     this.mediaLoading = false;
     this.mediaState = 'loaded';
@@ -205,7 +386,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._cdr.markForCheck();
   }
 
-  // Force processing media state reset - used when processing gets stuck
+  // Force processing media state reset when processing gets stuck
   forceProcessingMediaComplete() {
     this.publication.containsMedia = false;
     this.mediaLoading = false;
@@ -225,14 +406,17 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   // Force immediate update when media processing completes
   private forceImmediateMediaUpdate(mediaData: any[]) {
     if (mediaData && mediaData.length > 0) {
-      this.publication.media = mediaData;
-      this.publication.containsMedia = false;
+      this.publication = {
+        ...this.publication,
+        media: mediaData,
+        containsMedia: false,
+      };
       this.mediaLoading = true;
       this.mediaState = 'loading';
       
       this._cdr.markForCheck();
       
-      // Setup media timeout to prevent it from getting stuck
+      // Setup media timeout to prevent getting stuck
       this.setupMediaTimeout();
     }
   }
@@ -264,15 +448,15 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
 
   private updateLocalPublication(publicationId: string, mediaData: any[]) {
-    // Update the current publication object
+    // Update current publication object
     this.publication.media = mediaData;
     this.publication.containsMedia = false;
     
-    // Force change detection to update the UI immediately
+    // Force change detection to update UI immediately
     this._cdr.markForCheck();
     
-    // Update the local database (IndexedDB) with the new media data
-    // This ensures consistency between the UI and local storage
+    // Update local database (IndexedDB) with new media data
+    // This ensures consistency between UI and local storage
     this._publicationService.updatePublicationInLocalDatabase(publicationId, {
       media: mediaData,
       containsMedia: false
@@ -328,7 +512,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       this.mediaState = 'loading';
       this.setupMediaTimeout();
       
-      // Simulate media loading with a small delay
+      // Simulate media loading with small delay
       setTimeout(() => {
         this.onMediaLoad();
       }, 100);
@@ -341,6 +525,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.stopPolling();
     
     // Clear media timeout to prevent memory leaks
     this.clearMediaTimeout();
@@ -348,12 +533,20 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
 
   loadReactionsImg(publication: PublicationView = this.publication){
     this.listReaction = [];
-    if (publication) {
+    if (publication && publication.reaction) {
       publication.reaction.forEach((element: Reactions) => {
-        if(this.listReaction.includes(element.customReaction.emoji)) return;
-        this.listReaction.push(element.customReaction.emoji);
-        this._cdr.markForCheck();
+        if (element.customReaction && element.customReaction.emoji) {
+          // Normalize emoji URL for MinIO
+          const normalizedEmoji = this._utilityService.normalizeImageUrl(
+            element.customReaction.emoji,
+            environment.MINIO_BUCKET_URL || ''
+          );
+          if(!this.listReaction.includes(normalizedEmoji)) {
+            this.listReaction.push(normalizedEmoji);
+          }
+        }
       });
+      this._cdr.markForCheck();
     }
   }
 
@@ -365,23 +558,44 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         this.urrMap = extraData.locations?.urlMap || '';
       }
     } catch (e) {
-      console.error('Error in file JSON: ', e);
+      this._logService.log(
+        LevelLogEnum.ERROR,
+        'PublicationViewComponent',
+        'Error parsing file JSON',
+        { error: e }
+      );
       this.nameGeoLocation = '';
       this.urrMap = '';
     }
   }
 
-  commentOn(index: number) {
-    this.viewCommentSection = this.viewCommentSection === index ? -1 : index;
-  }
+  openCommentsModal(idMedia?: string) {
+    if (this._configService.subscriptionModeSnapshot() && this._subscriptionService.isPremiumSnapshot() && !this._subscriptionService.hasFeature('comments')) {
+      this._featureWallService.show('comments', this._subscriptionService.getPlanFeatures());
+      return;
+    }
 
-  viewCommentsOn(index: number) {
-    this.viewComments = this.viewComments === index ? -1 : index;
+    const isMobile = this._deviceDetectionService.isMobile();
+
+    this._dialog.open(CommentsModalComponent, {
+      width: isMobile ? '100dvw' : '600px',
+      maxWidth: isMobile ? '100dvw' : '95vw',
+      height: isMobile ? '100dvh' : '80vh',
+      maxHeight: isMobile ? '100dvh' : '90vh',
+      panelClass: 'comments-modal-container',
+      autoFocus: false,
+      data: {
+        publication: this.publication,
+        idMedia,
+      },
+    });
   }
 
   checkDataLink(userId: string) {
     this.dataLinkActions = [];
-    this.menuActions();
+    if (userId !== this.dataUser?.id) {
+      this.menuActions();
+    }
     const menuDeletePublications = {
       icon: 'delete',
       function: this.deletePublications.bind(this),
@@ -393,8 +607,20 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
       title: !this.publication.fixed ? translations['publicationsView.fixedPublication'] : translations['publicationsView.unfixedPublication']
     };
 
-    if (userId === this.dataUser?.id || this.dataUser?.role === RoleUser.ADMIN) {
+    if (userId === this.dataUser?.id) {
+      if (this._subscriptionService.isPremiumSnapshot()) {
+        const menuViewStats = {
+          icon: 'bar_chart',
+          function: this.openAnalyticsPanel.bind(this),
+          title: translations['analytics.viewStats'],
+        };
+        if (!this.dataLinkActions.find(e => e.title === translations['analytics.viewStats'])) {
+          this.dataLinkActions.push(menuViewStats);
+        }
+      }
+    }
 
+    if (this.dataUser?.role === RoleUser.ADMIN) {
       if (this.publication.fixed) {
         if (!this.dataLinkActions.find((element) => element.title === translations['publicationsView.unfixedPublication'])) {
           this.dataLinkActions.push(menuFixedPublications);
@@ -404,7 +630,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           this.dataLinkActions.push(menuFixedPublications);
         }
       }
+    }
 
+    if (userId === this.dataUser?.id || this.dataUser?.role === RoleUser.ADMIN) {
       if (!this.dataLinkActions.find((element) => element.title === translations['publicationsView.deletePublication'])) {
         this.dataLinkActions.push(menuDeletePublications);
       }
@@ -418,31 +646,88 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     ];
   }
 
+  get isNativeShareSupported(): boolean {
+    return typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  }
+
+  private getPublicShareUrl(): string {
+    // The share page (/p/:id) is server-rendered by the backend, so the canonical link uses the
+    // backend origin — derived from API_URL by stripping a trailing /api or /api/v1.
+    const base = (environment.API_URL || environment.BASE_URL || '')
+      .replace(/\/api(\/v\d+)?\/?$/, '')
+      .replace(/\/+$/, '');
+    return `${base}/p/${this.publication._id}`;
+  }
+
   menuShareActions() {
-    const url = environment.BASE_URL;
-    this.dataShareActions = [
+    const publicUrl = this.getPublicShareUrl();
+    const enc = encodeURIComponent(publicUrl);
+
+    const actions: DropdownDataLink<any>[] = [
       {
         img: 'assets/img/logos/svg-facebook.svg',
-        linkUrl: `https://web.facebook.com/sharer.php?u=${url}`,
-        title: translations['social.facebook']
+        linkUrl: `https://www.facebook.com/sharer/sharer.php?u=${enc}`,
+        title: translations['social.facebook'],
       },
       {
         img: 'assets/img/logos/twitter-x.svg',
-        linkUrl: `https://twitter.com/intent/tweet?url=${url}`,
-        title: translations['social.twitter']
+        linkUrl: `https://twitter.com/intent/tweet?url=${enc}`,
+        title: translations['social.twitter'],
       },
-      // TODO: Uncomment when the linkedin share is ready
-      // {
-      //   img: 'assets/img/logos/linkedin.svg',
-      //   linkUrl: `https://www.linkedin.com/shareArticle?url=${url}`,
-      //   title: translations['social.linkedin']
-      // },
       {
         img: 'assets/img/logos/svg-whatsapp.svg',
-        linkUrl: `whatsapp://send?text=${url}`,
-        title: translations['social.whatsapp']
+        linkUrl: `https://wa.me/?text=${enc}`,
+        title: translations['social.whatsapp'],
+      },
+      {
+        img: 'assets/img/logos/svg-telegram.svg',
+        linkUrl: `https://t.me/share/url?url=${enc}`,
+        title: translations['social.telegram'],
+      },
+      {
+        img: 'assets/img/logos/svg-copy-link.svg',
+        function: () => this.copyPublicLink(publicUrl),
+        title: translations['share.copyLink'],
       },
     ];
+
+    if (this.isNativeShareSupported) {
+      actions.push({
+        img: 'assets/img/logos/svg-share.svg',
+        function: () => this.nativeShare(publicUrl),
+        title: translations['share.nativeShare'],
+      });
+    }
+
+    this.dataShareActions = actions;
+  }
+
+  async copyPublicLink(publicUrl: string) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(publicUrl);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = publicUrl;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      this._alertService.showToast(translations['share.copied'], Alerts.SUCCESS);
+    } catch {
+      this._alertService.showToast(translations['share.copyError'], Alerts.ERROR);
+    }
+  }
+
+  async nativeShare(publicUrl: string) {
+    try {
+      await navigator.share({ url: publicUrl });
+    } catch {
+      // User cancelled or sharing failed — no action needed.
+    }
   }
 
   async deletePublications(publication: PublicationView) {
@@ -471,7 +756,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
             this._cdr.markForCheck();
           },
           error: (error) => {
-            console.error(error);
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'PublicationViewComponent',
+              'Error deleting publication',
+              { error, publicationId: publication._id }
+            );
             this.isDeletingPublication = false;
             this._cdr.markForCheck();
           },
@@ -481,7 +771,6 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async fixedPublications(publication: PublicationView) {
-    // Usar el nuevo sistema de loading accesible
     const loading = await this._loadingService.showLoading(
       !publication.fixed ? translations['publicationsView.loadingFixedPublication'] : translations['publicationsView.loadingUnfixedPublication']
     );
@@ -492,7 +781,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
         this._loadingService.hideLoading();
       },
       error: (error) => {
-        console.error(error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'PublicationViewComponent',
+          'Error updating publication fixed status',
+          { error, publicationId: publication._id }
+        );
         this._loadingService.hideLoading();
       },
     });
@@ -504,50 +798,117 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     } else if (data.link) {
       this._router.navigate([data.link]);
     } else if (data.linkUrl) {
-      const newLink = data.linkUrl + '/publication/' + publication._id + '/';
-      window.open(newLink, '_blank');
+      window.open(data.linkUrl, '_blank');
     }
   }
 
   async followMyFriend(_idUser: string) {
-    this._friendsService.requestFriend(_idUser).pipe(takeUntil(this.destroy$)).subscribe({
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.requestFriend(_idUser).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: () => {
-        this._emailNotificationService.sendFriendRequestNotification(_idUser);
+        this._centerSocketNotificationsService.senFriendRequestNotification(this.publication.author);
         this.viewProfile(_idUser);
       },
       error: (error) => {
-        console.error('Error the send request', error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'PublicationViewComponent',
+          'Error sending friend request',
+          { error, userId: _idUser }
+        );
       }
     });
   }
 
   cancelFriendship(_id: string, authorId: string) {
-    this._friendsService.deleteFriend(_id).pipe(takeUntil(this.destroy$)).subscribe({
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.deleteFriend(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: () => {
+        this._notificationService.sendNotification();
         this.viewProfile(authorId);
       }
     });
   }
 
-  getUserFriendPending() {
-    this._friendsService.getIsMyFriend(this.dataUser?.id!, this.publication?.author?._id || '').pipe(takeUntil(this.destroy$)).subscribe({
+  getUserFriendPending(bypassCache = false) {
+    this._friendsService.getIsMyFriend(this.dataUser?.id!, this.publication?.author?._id || '', bypassCache).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: FriendsStatus) => {
         this.userRequest = response?.requester;
         this.userReceive = response?.receiver;
+        this.publication.isMyFriend = response?.status === 'accepted';
+        this.publication.isFriendshipPending = response?.status === 'pending' ? response?.id : undefined;
         this._cdr.markForCheck();
       },
       error: (error: any) => {
-        console.error(error);
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'PublicationViewComponent',
+          'Error checking friendship status',
+          { error, userId: this.publication?.author?._id }
+        );
       },
     });
   }
 
   acceptFriendship(_id: string, idUser: string) {
-    this._friendsService.acceptFriendship(_id).pipe(takeUntil(this.destroy$)).subscribe({
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.acceptFriendship(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
       next: () => {
+        this._centerSocketNotificationsService.acceptFriendRequestNotification(this.publication.author);
         this.getUserFriendPending();
-        this._emailNotificationService.acceptFriendRequestNotification(idUser);
         this.viewProfile(idUser);
+      }
+    });
+  }
+
+  rejectFriendship(_id: string) {
+    if (this.friendActionLoading) return;
+    this.friendActionLoading = true;
+    this._cdr.markForCheck();
+    this._friendsService.deleteFriend(_id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.friendActionLoading = false;
+        this._cdr.markForCheck();
+      }),
+    ).subscribe({
+      next: () => {
+        this.publication.isFriendshipPending = undefined;
+        this.getUserFriendPending();
+        this._notificationService.sendNotification();
+        this._cdr.markForCheck();
+      },
+      error: (error) => {
+        this._logService.log(
+          LevelLogEnum.ERROR,
+          'PublicationViewComponent',
+          'Error rejecting friend request',
+          { error, userId: this.publication?.author?._id }
+        );
       }
     });
   }
@@ -556,9 +917,14 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     this._router.navigate(['/profile', _id]);
   }
 
+  viewGroup(groupId: string): void {
+    this._router.navigate(['/groups', groupId]);
+  }
+
   refreshPublications(_id?: string) {
     if (_id) {
-      this._publicationService.getPublicationId(_id).pipe(
+      // Force refresh to bypass cache when polling for media updates
+      this._publicationService.getPublicationId(_id, true).pipe(
         takeUntil(this.destroy$)
       ).subscribe({
         next: (publication: PublicationView[]) => {
@@ -567,33 +933,72 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
           }
           
           const updatedPublication = publication[0];
-          
-          const hasMediaChanges = 
+
+          const hasPendingPublicationMedia = updatedPublication.containsMedia && !updatedPublication.media?.length;
+          const hasPendingCommentMedia = updatedPublication.comment?.some(
+            (c: any) => c.containsMedia && (!c.media || c.media.length === 0)
+          );
+
+          if (!hasPendingPublicationMedia && !hasPendingCommentMedia) {
+            this.stopPolling();
+          }
+
+          // Block ALL poll-based UI updates while containsMedia = true.
+          // The backend's count-based batching sends ONE socket notification only after
+          // ALL files finish. That socket drives buildPublicationWithCollectedMedia which
+          // fetches the complete media set and clears containsMedia locally.
+          // Allowing partial DB updates here (e.g. 1 of 5 photos) would show the overlay
+          // disappearing prematurely before all files are ready.
+          if (updatedPublication.containsMedia) {
+            return;
+          }
+
+          if (this.publication.media.length > updatedPublication.media.length) {
+            return;
+          }
+
+          const hasMediaChanges =
             this.publication.media.length !== updatedPublication.media.length ||
             this.publication.containsMedia !== updatedPublication.containsMedia ||
             JSON.stringify(this.publication.media) !== JSON.stringify(updatedPublication.media);
-          
-          const hasOtherChanges = 
+
+          const hasCommentMediaChanges = updatedPublication.comment?.some((updatedComment: any) => {
+            const currentComment = this.publication.comment?.find((c: any) => c._id === updatedComment._id);
+            if (!currentComment) return true;
+            const currentMediaLength = currentComment.media?.length || 0;
+            const updatedMediaLength = updatedComment.media?.length || 0;
+            return currentMediaLength !== updatedMediaLength;
+          }) || false;
+
+          const hasOtherChanges =
             this.publication.reaction.length !== updatedPublication.reaction.length ||
             this.publication.comment.length !== updatedPublication.comment.length ||
             this.publication.fixed !== updatedPublication.fixed ||
             JSON.stringify(this.publication.reaction) !== JSON.stringify(updatedPublication.reaction);
-          
-          if (hasMediaChanges || hasOtherChanges) {
+
+          const pendingMediaNowReady = !hasPendingPublicationMedia && !hasPendingCommentMedia &&
+            (this.publication.containsMedia || this.publication.comment?.some((c: any) => c.containsMedia));
+
+          if (hasMediaChanges || hasCommentMediaChanges || hasOtherChanges || pendingMediaNowReady) {
             this._publicationService.updatePublicationsLocal(publication);
-            this.publication = updatedPublication;
+            this.publication = { ...updatedPublication };
             this.loadReactionsImg(updatedPublication);
             this.checkDataLink(updatedPublication._id);
-            
+
             if (hasMediaChanges) {
               this.mediaLoading = false;
             }
-            
+
             this._cdr.markForCheck();
           }
         },
         error: (error) => {
-          console.error('Failed to refresh publications', error);
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'PublicationViewComponent',
+            'Failed to refresh publications',
+            { error, publicationId: _id }
+          );
         }
       });
     }
@@ -604,7 +1009,11 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   async openUploadModal(publication: PublicationView) {
-    const dialogRef = this._dialog.open(ReportResponseComponent, {});
+    const dialogRef = this._dialog.open(ReportResponseComponent, {
+      panelClass: 'worky-report-dialog',
+      maxWidth: '480px',
+      width: '100%',
+    });
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(async (result: any) => {
       if (result) {
         const loading = await this._loadingService.showLoading(translations['shared.reportResponse.title']);
@@ -623,7 +1032,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
             this._cdr.markForCheck();
           },
           error: (error) => {
-            console.error('Error creating report:', error);
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'PublicationViewComponent',
+              'Error creating report',
+              { error, publicationId: publication._id }
+            );
             this._loadingService.hideLoading();
           }
         });
@@ -656,7 +1070,12 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
             this._cdr.markForCheck();
           },
           error: (error) => {
-            console.error('Error deleting comment:', error);
+            this._logService.log(
+              LevelLogEnum.ERROR,
+              'PublicationViewComponent',
+              'Error deleting comment',
+              { error, commentId: _id, publicationId: id_publication }
+            );
             this.isDeletingComment = false;
             this._cdr.markForCheck();
           }
@@ -702,38 +1121,55 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   private updatePublicationIfNeeded(updatedData: any) {
+    if (this.publication.containsMedia && !updatedData.media?.length) {
+      return;
+    }
+
     const hasMediaChanges = 
       this.publication.media.length !== updatedData.media?.length ||
       this.publication.containsMedia !== updatedData.containsMedia ||
       JSON.stringify(this.publication.media) !== JSON.stringify(updatedData.media);
     
-    const hasOtherChanges = 
+    const currentReactionIds = this.publication.reaction?.map((r: any) => r._id).sort() || [];
+    const updatedReactionIds = updatedData.reaction?.map((r: any) => r._id).sort() || [];
+    const reactionsChanged = 
       this.publication.reaction.length !== updatedData.reaction?.length ||
+      JSON.stringify(currentReactionIds) !== JSON.stringify(updatedReactionIds);
+    
+    const hasOtherChanges = 
+      reactionsChanged ||
       this.publication.comment.length !== updatedData.comment?.length ||
-      this.publication.fixed !== updatedData.fixed ||
-      JSON.stringify(this.publication.reaction) !== JSON.stringify(updatedData.reaction);
+      this.publication.fixed !== updatedData.fixed;
 
     if (hasMediaChanges || hasOtherChanges) {
       if (hasMediaChanges) {
         this.handleMediaUpdate(updatedData);
         
-        // If media was added, setup media timeout
         if (updatedData.media && updatedData.media.length > 0) {
           this.setupMediaTimeout();
         }
       }
       
-      // Add small delay to ensure UI updates properly
-      setTimeout(() => {
-        this.refreshPublications(updatedData._id);
+      if (hasOtherChanges) {
+        this.publication = { ...updatedData };
         this.loadReactionsImg(updatedData);
-      }, 100);
+        this._cdr.markForCheck();
+        
+        if (reactionsChanged) {
+          setTimeout(() => {
+            this.refreshPublications(updatedData._id);
+          }, 50);
+        }
+      }
     }
   }
 
   private handleMediaUpdate(updatedData: any) {
-    this.publication.media = updatedData.media || [];
-    this.publication.containsMedia = updatedData.containsMedia || false;
+    this.publication = {
+      ...this.publication,
+      media: updatedData.media || [],
+      containsMedia: updatedData.containsMedia || false,
+    };
     
     // Ensure media loading state is properly updated
     if (this.publication.media.length > 0) {
@@ -748,6 +1184,7 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   private handleMediaProcessed(data: any) {
     this.clearMediaTimeout();
     this.publication.containsMedia = false;
+    this.stopPolling();
     
     // Update the publication with the processed media data
     if (data.media && data.media.length > 0) {
@@ -790,7 +1227,9 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   get shouldShowAcceptButton(): boolean {
-    return this.userReceive?._id === this.dataUser?.id;
+    return !this.publication.isMyFriend &&
+           !!this.publication.isFriendshipPending &&
+           this.userReceive?._id === this.dataUser?.id;
   }
 
   get shouldShowPendingIndicator(): boolean {
@@ -814,4 +1253,80 @@ export class PublicationViewComponent implements OnInit, OnDestroy, AfterViewIni
     return this.nameGeoLocation !== '' && !this.locationLoading;
   }
 
+  // --- Boost ---
+  showBoostModal = false;
+  boostPackages: BoostPackage[] = [];
+  isBoostingPublication = false;
+
+  isBoostActive(): boolean {
+    return !!(this.publication?.isBoosted && this.publication?.boostedUntil && new Date(this.publication.boostedUntil) > new Date());
+  }
+
+  openBoostModal(): void {
+    this._boostService.getActivePackages().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (pkgs) => {
+        this.boostPackages = pkgs;
+        this.showBoostModal = true;
+        this._cdr.markForCheck();
+      },
+    });
+  }
+
+  boostPublication(packageId: string): void {
+    this.showBoostModal = false;
+    this.isBoostingPublication = true;
+    this._boostService.initiateBoost(this.publication._id, packageId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: ({ checkoutUrl }) => {
+        this.isBoostingPublication = false;
+        window.location.href = checkoutUrl;
+      },
+      error: () => {
+        this.isBoostingPublication = false;
+        this._cdr.markForCheck();
+      },
+    });
+  }
+
+  formatBoostPrice(priceClp: number): string {
+    return this._boostService.formatPrice(priceClp);
+  }
+
+  // --- Analytics panel ---
+  showAnalyticsPanel = false;
+  publicationStats: PublicationStats | null = null;
+  isLoadingStats = false;
+  statsError = false;
+
+  get isOwnPublication(): boolean {
+    return this.dataUser?.id === this.publication?.author?._id;
+  }
+
+  get isCurrentUserPremium(): boolean {
+    return this._subscriptionService.isPremiumSnapshot();
+  }
+
+  openAnalyticsPanel(): void {
+    this.showAnalyticsPanel = true;
+    this.isLoadingStats = true;
+    this.statsError = false;
+    this._analyticsService.getPublicationStats(this.publication._id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (stats) => {
+          this.publicationStats = stats;
+          this.isLoadingStats = false;
+          this._cdr.markForCheck();
+        },
+        error: () => {
+          this.isLoadingStats = false;
+          this.statsError = true;
+          this._cdr.markForCheck();
+        },
+      });
+  }
+
+  closeAnalyticsPanel(): void {
+    this.showAnalyticsPanel = false;
+    this.publicationStats = null;
+  }
 }

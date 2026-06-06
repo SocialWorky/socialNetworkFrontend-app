@@ -231,7 +231,6 @@ export class NetworkStatusComponent implements OnInit, OnDestroy {
   }
 
   private showNetworkToast(): void {
-    // Verificar si ya se han aplicado optimizaciones
     const optimizationApplied = localStorage.getItem('networkOptimization') === 'enabled';
     
     if (optimizationApplied) {
@@ -243,7 +242,7 @@ export class NetworkStatusComponent implements OnInit, OnDestroy {
     this.progressPercentage = 100;
     this.cdr.markForCheck();
 
-    // Aplicar optimizaciones automáticamente después de 1 segundo
+    // Apply optimizations automatically after 1 second
     timer(1000).pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.applyAutomaticOptimizations();
     });
@@ -251,7 +250,7 @@ export class NetworkStatusComponent implements OnInit, OnDestroy {
     // Iniciar barra de progreso
     this.startProgressBar();
 
-    // Ocultar toast después del tiempo especificado
+    // Hide toast after specified time
     timer(this.toastDuration).pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.hideToast();
     });
@@ -281,7 +280,7 @@ export class NetworkStatusComponent implements OnInit, OnDestroy {
       if (remaining <= 0) {
         this.clearProgressInterval();
       }
-    }, 50); // Actualizar cada 50ms para una animación suave
+    }, 50); // Update every 50ms for smooth animation
   }
 
   private clearProgressInterval(): void {
@@ -298,7 +297,7 @@ export class NetworkStatusComponent implements OnInit, OnDestroy {
   }
 
   private applyAutomaticOptimizations(): void {
-    // Aplicar optimizaciones automáticamente
+    // Apply optimizations automatically
     localStorage.setItem('networkOptimization', 'enabled');
     localStorage.setItem('imageQuality', 'low');
     localStorage.setItem('progressiveLoading', 'enabled');

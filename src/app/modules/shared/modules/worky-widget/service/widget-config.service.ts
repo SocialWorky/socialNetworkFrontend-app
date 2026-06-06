@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription, forkJoin, of } from 'rxjs';
 import { tap, catchError, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
 import { environment } from '@env/environment';
 import { WidgetConfig, WidgetLayout, WidgetPosition, WidgetStatus } from '@shared/modules/worky-widget/worky-news/interface/widget.interface';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
@@ -15,6 +14,8 @@ export class WidgetConfigService {
   private widgetLayoutSubject = new BehaviorSubject<WidgetLayout | null>(null);
   private widgetsSubject = new BehaviorSubject<WidgetConfig[]>([]);
   private isLoading = false;
+  private refreshTrigger$ = new Subject<void>();
+  private refreshPipelineSubscription: Subscription;
   
   public widgetLayout$ = this.widgetLayoutSubject.asObservable();
   public widgets$ = this.widgetsSubject.asObservable();
@@ -45,18 +46,35 @@ export class WidgetConfigService {
       status: WidgetStatus.ENABLED,
       allowedPositions: [WidgetPosition.LEFT, WidgetPosition.RIGHT],
       icon: 'article'
+    },
+    {
+      selector: 'worky-thematic-image',
+      name: 'Imágenes Temáticas',
+      description: 'Muestra imágenes temáticas con slider automático',
+      position: WidgetPosition.TOP,
+      order: 0,
+      status: WidgetStatus.DISABLED,
+      allowedPositions: [WidgetPosition.TOP],
+      icon: 'collections'
     }
   ];
 
   constructor(
     private http: HttpClient,
     private logService: LogService
-  ) {}
+  ) {
+    this.refreshPipelineSubscription = this.refreshTrigger$.pipe(
+      switchMap(() => forkJoin([
+        this.getAllWidgets(),
+        this.getWidgetLayout()
+      ]))
+    ).subscribe();
+  }
 
   getAllWidgets(): Observable<WidgetConfig[]> {
     return this.http.get<WidgetConfig[]>(`${this.apiUrl}`).pipe(
       tap(widgets => {
-        if (!widgets || widgets.length === 0) {
+        if (!Array.isArray(widgets) || widgets.length === 0) {
           this.widgetsSubject.next(this.defaultWidgets);
         } else {
           this.widgetsSubject.next(widgets);
@@ -64,9 +82,8 @@ export class WidgetConfigService {
         this.isLoading = false;
       }),
       catchError((error) => {
-        // Only log error if it's not an authentication error
-        if (error.status !== 401) {
-          this.logService.log(LevelLogEnum.ERROR, 'WidgetConfigService', 'Error obteniendo widgets', { error: error.message, status: error.status });
+        if (error.status !== 401 && error.status !== 403) {
+          this.logService.log(LevelLogEnum.ERROR, 'WidgetConfigService', 'Error getting widgets', { error: error.message, status: error.status });
         }
         this.widgetsSubject.next(this.defaultWidgets);
         this.isLoading = false;
@@ -84,7 +101,7 @@ export class WidgetConfigService {
       catchError((error) => {
         // Only log error if it's not an authentication error
         if (error.status !== 401) {
-          this.logService.log(LevelLogEnum.ERROR, 'WidgetConfigService', 'Error obteniendo layout', { error: error.message, status: error.status });
+          this.logService.log(LevelLogEnum.ERROR, 'WidgetConfigService', 'Error getting layout', { error: error.message, status: error.status });
         }
         const defaultLayout: WidgetLayout = {
           top: [],
@@ -126,31 +143,56 @@ export class WidgetConfigService {
 
   createWidget(widget: WidgetConfig): Observable<WidgetConfig> {
     return this.http.post<WidgetConfig>(`${this.apiUrl}`, widget).pipe(
-      tap(() => this.refreshData())
+      tap((createdWidget) => {
+        // Update cache immediately
+        this.addWidgetToCache(createdWidget);
+        // Then refresh from server
+        this.refreshData();
+      })
     );
   }
 
   updateWidget(selector: string, widget: Partial<WidgetConfig>): Observable<WidgetConfig> {
     return this.http.patch<WidgetConfig>(`${this.apiUrl}/${selector}`, widget).pipe(
-      tap(() => this.refreshData())
+      tap((updatedWidget) => {
+        // Update cache immediately
+        this.updateWidgetInCache(updatedWidget);
+        // Then refresh from server
+        this.refreshData();
+      })
     );
   }
 
   updateWidgetOrder(selector: string, order: number): Observable<WidgetConfig> {
     return this.http.patch<WidgetConfig>(`${this.apiUrl}/${selector}/order`, { order }).pipe(
-      tap(() => this.refreshData())
+      tap((updatedWidget) => {
+        // Update cache immediately
+        this.updateWidgetInCache(updatedWidget);
+        // Then refresh from server
+        this.refreshData();
+      })
     );
   }
 
   toggleWidgetStatus(selector: string): Observable<WidgetConfig> {
     return this.http.patch<WidgetConfig>(`${this.apiUrl}/${selector}/toggle`, {}).pipe(
-      tap(() => this.refreshData())
+      tap((updatedWidget) => {
+        // Update cache immediately
+        this.updateWidgetInCache(updatedWidget);
+        // Then refresh from server
+        this.refreshData();
+      })
     );
   }
 
   deleteWidget(selector: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${selector}`).pipe(
-      tap(() => this.refreshData())
+      tap(() => {
+        // Remove from cache immediately
+        this.removeWidgetFromCache(selector);
+        // Then refresh from server
+        this.refreshData();
+      })
     );
   }
 
@@ -214,12 +256,93 @@ export class WidgetConfigService {
   }
 
   private refreshData(): void {
-    // Only refresh if not already loading
-    if (!this.isLoading) {
-      this.isLoading = true;
-      this.getAllWidgets().subscribe();
-      this.getWidgetLayout().subscribe();
+    this.isLoading = true;
+    this.refreshTrigger$.next();
+  }
+
+  private updateWidgetInCache(updatedWidget: WidgetConfig): void {
+    const currentWidgets = this.widgetsSubject.value;
+    const index = currentWidgets.findIndex(w => w.selector === updatedWidget.selector);
+    
+    if (index !== -1) {
+      // Update existing widget
+      const updatedWidgets = [...currentWidgets];
+      updatedWidgets[index] = updatedWidget;
+      this.widgetsSubject.next(updatedWidgets);
+    } else {
+      // Add new widget
+      this.addWidgetToCache(updatedWidget);
     }
+    
+    // Update layout cache
+    this.updateLayoutCache(updatedWidget);
+  }
+
+  private addWidgetToCache(widget: WidgetConfig): void {
+    const currentWidgets = this.widgetsSubject.value;
+    const exists = currentWidgets.some(w => w.selector === widget.selector);
+    
+    if (!exists) {
+      this.widgetsSubject.next([...currentWidgets, widget]);
+    } else {
+      this.updateWidgetInCache(widget);
+    }
+    
+    // Update layout cache
+    this.updateLayoutCache(widget);
+  }
+
+  private removeWidgetFromCache(selector: string): void {
+    const currentWidgets = this.widgetsSubject.value;
+    const updatedWidgets = currentWidgets.filter(w => w.selector !== selector);
+    this.widgetsSubject.next(updatedWidgets);
+    
+    // Update layout cache
+    const currentLayout = this.widgetLayoutSubject.value;
+    if (currentLayout) {
+      const updatedLayout: WidgetLayout = {
+        top: currentLayout.top.filter(w => w.selector !== selector),
+        left: currentLayout.left.filter(w => w.selector !== selector),
+        right: currentLayout.right.filter(w => w.selector !== selector)
+      };
+      this.widgetLayoutSubject.next(updatedLayout);
+    }
+  }
+
+  private updateLayoutCache(widget: WidgetConfig): void {
+    const currentLayout = this.widgetLayoutSubject.value;
+    if (!currentLayout) return;
+    
+    const updatedLayout: WidgetLayout = { ...currentLayout };
+    const position = widget.position;
+    
+    if (updatedLayout[position]) {
+      const index = updatedLayout[position].findIndex(w => w.selector === widget.selector);
+      
+      if (index !== -1) {
+        // Update existing widget in layout
+        updatedLayout[position][index] = widget;
+      } else {
+        // Add new widget to layout
+        updatedLayout[position] = [...updatedLayout[position], widget];
+      }
+      
+      // Sort by order
+      updatedLayout[position].sort((a, b) => a.order - b.order);
+    } else {
+      updatedLayout[position] = [widget];
+    }
+    
+    // Remove widget from other positions if it changed position
+    Object.keys(updatedLayout).forEach(pos => {
+      if (pos !== position) {
+        updatedLayout[pos as WidgetPosition] = updatedLayout[pos as WidgetPosition].filter(
+          w => w.selector !== widget.selector
+        );
+      }
+    });
+    
+    this.widgetLayoutSubject.next(updatedLayout);
   }
 
   initializeData(): void {
@@ -251,10 +374,9 @@ export class WidgetConfigService {
       }),
       catchError((error) => {
         if (error.status === 404) {
-          // El widget no existe, crearlo
           return this.createWidget(widget);
         }
-        // Re-lanzar otros errores
+        // Re-throw other errors
         throw error;
       })
     );

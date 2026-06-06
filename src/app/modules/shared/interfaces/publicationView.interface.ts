@@ -7,22 +7,28 @@ export interface Publication {
 }
 
 export interface PublicationView {
-    _id:         string;
-    content:     string;
-    privacy:     string;
-    fixed:       boolean;
-    containsMedia: boolean;
-    extraData:   ExtraData;
-    createdAt:   Date;
-    updatedAt:   Date;
-    author:      User;
-    userReceiving?: User;
-    media:       ImageOrganizer[];
-    reaction:    any[];
-    taggedUsers: any[];
-    comment:     Comment[];
-    isMyFriend?: boolean;
+    _id:              string;
+    content:          string;
+    privacy:          string;
+    fixed:            boolean;
+    containsMedia:    boolean;
+    extraData:        ExtraData;
+    createdAt:        Date;
+    updatedAt:        Date;
+    author:           User;
+    userReceiving?:   User;
+    media:            ImageOrganizer[];
+    reaction:         any[];
+    taggedUsers:      any[];
+    comment:          Comment[];
+    isMyFriend?:      boolean;
     isFriendshipPending?: string;
+    isPremiumContent?: boolean;
+    isPremiumBlocked?: boolean;
+    isBoosted?: boolean;
+    boostedUntil?: string;
+    groupId?: string | null;
+    group?: { _id: string; name: string } | null;
 }
 
 export interface EditPublication {
@@ -33,20 +39,36 @@ export interface EditPublication {
 }
 
 export interface User {
-    _id:      string;
-    username: string;
-    name:     string;
-    lastName: string;
-    avatar:   string;
-    email:    string;
+    _id:          string;
+    username:     string;
+    name:         string;
+    lastName:     string;
+    avatar:       string;
+    email:        string;
+    isPremium?:          boolean;
+    isVerified?:         boolean;
+    isAccountVerified?:  boolean;
 }
 
 export interface MediaFileUpload {
-  filename: string;
-  thumbnail: string;
-  optimized?: string;
-  compressed?: string;
-  originalname?: string;
+  filename:          string;
+  thumbnail:         string;
+  optimized?:        string;
+  compressed?:       string;
+  originalname?:     string;
+  url?:              string;
+  urlThumbnail?:     string;
+  urlThumbnailWebP?: string;
+  urlPreview?:       string;
+  urlPreviewWebP?:   string;
+  urlCompressed?:    string;
+  urlCompressedWebP?: string;
+  urlFull?:          string;
+  urlFullWebP?:      string;
+  urlOptimized?:     string;
+  blurHash?:         string;
+  deduplicated?:     boolean;
+  name?:             string;
 }
 
 export interface Comment {

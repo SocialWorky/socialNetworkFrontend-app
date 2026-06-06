@@ -1,0 +1,36 @@
+<div class="age-gate-overlay" *ngIf="visible || blocked">
+  <div class="age-gate-card">
+
+    <!-- Gate: confirm age -->
+    <ng-container *ngIf="visible && !blocked">
+      <div class="age-gate-icon">
+        <i class="material-icons">verified_user</i>
+      </div>
+      <h2 class="age-gate-title">{{ 'ageVerification.modal.title' | workyTranslations }}</h2>
+      <p class="age-gate-body">
+        {{ modalText || ('ageVerification.modal.body' | workyTranslations) }}
+      </p>
+      <div class="age-gate-actions">
+        <button class="age-gate-btn age-gate-btn--accept" (click)="accepted.emit()">
+          {{ 'ageVerification.modal.accept' | workyTranslations }}
+        </button>
+        <button class="age-gate-btn age-gate-btn--reject" (click)="rejected.emit()">
+          {{ 'ageVerification.modal.reject' | workyTranslations }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- Blocked state -->
+    <ng-container *ngIf="blocked">
+      <div class="age-gate-icon age-gate-icon--blocked">
+        <i class="material-icons">block</i>
+      </div>
+      <h2 class="age-gate-title">{{ 'ageVerification.modal.blocked.title' | workyTranslations }}</h2>
+      <p class="age-gate-body">{{ 'ageVerification.modal.blocked.message' | workyTranslations }}</p>
+      <button class="age-gate-btn age-gate-btn--reload" (click)="reloadRequested.emit()">
+        {{ 'ageVerification.modal.blocked.reload' | workyTranslations }}
+      </button>
+    </ng-container>
+
+  </div>
+</div>

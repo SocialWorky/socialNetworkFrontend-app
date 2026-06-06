@@ -1,22 +1,48 @@
-<div class="min-h-full bg-gray-900 text-gray-100 p-6">
+<div class="min-h-full bg-gray-900 text-gray-100 p-6 flex flex-col" [ngClass]="{'h-screen': !isInitializationComplete}">
   <!-- Header Section -->
-  <div class="mb-8">
+  <div class="mb-8 flex-shrink-0">
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold text-gray-100 mb-2">{{ 'admin.versionManagement.title' | workyTranslations }}</h1>
         <p class="text-gray-400">{{ 'admin.versionManagement.subtitle' | workyTranslations }}</p>
       </div>
-      <div class="flex items-center gap-2">
-        <div class="w-3 h-3 rounded-full" [ngClass]="backendConnected ? 'bg-green-500' : 'bg-red-500'"></div>
-        <span class="text-sm" [ngClass]="backendConnected ? 'text-green-400' : 'text-red-400'">
-          {{ getConnectionStatusText() }}
-        </span>
+      <div class="flex items-center gap-4">
+        <!-- Estado de Conexión -->
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full" [ngClass]="getConnectionStatusClass() === 'connected' ? 'bg-green-500' : getConnectionStatusClass() === 'warning' ? 'bg-yellow-500' : 'bg-red-500'"></div>
+          <span class="text-sm" [ngClass]="getConnectionStatusClass() === 'connected' ? 'text-green-400' : getConnectionStatusClass() === 'warning' ? 'text-yellow-400' : 'text-red-400'">
+            {{ getConnectionStatusText() }}
+          </span>
+        </div>
+        
+        <!-- Botón de Refrescar Autenticación -->
+        <button 
+          *ngIf="isInitializationComplete && backendConnected && !canShowManagementFeatures()"
+          class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors duration-200"
+          (click)="refreshAuthentication()"
+          [disabled]="isLoading">
+          <span *ngIf="isLoading" class="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
+          Refrescar
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Current Version Card -->
-  <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 mb-6" *ngIf="currentVersion">
+  <!-- Loading State - Solo mostrar cuando no está inicializado -->
+  <div class="bg-gray-900 border border-gray-700 rounded-lg p-6 flex-1 flex items-center justify-center" *ngIf="!isInitializationComplete">
+    <div class="text-center">
+      <svg class="w-16 h-16 text-blue-400 mx-auto mb-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+      <h3 class="text-blue-400 font-medium text-xl mb-2">Inicializando Componente</h3>
+      <p class="text-blue-300 text-sm">
+        Verificando conectividad y permisos. Por favor espera...
+      </p>
+    </div>
+  </div>
+
+  <!-- Current Version Card - Solo mostrar cuando esté inicializado -->
+  <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 mb-6" *ngIf="isInitializationComplete && currentVersion">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-lg font-semibold text-gray-100">{{ 'admin.versionManagement.currentVersion' | workyTranslations }}</h2>
       <span class="px-3 py-1 rounded-full text-xs font-medium" [ngClass]="getVersionTypeClass(currentVersion)">
@@ -39,7 +65,8 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+  <!-- Funcionalidades de Gestión - Solo mostrar cuando esté inicializado y tenga permisos -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6" *ngIf="isInitializationComplete && canShowManagementFeatures()">
     <!-- Maintenance Mode Section -->
     <div class="bg-gray-800 border border-gray-700 rounded-lg p-6">
       <div class="flex items-center justify-between mb-4">
@@ -60,8 +87,7 @@
           <textarea 
             formControlName="message" 
             rows="3"
-            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            [disabled]="isMaintenanceMode || !backendConnected">
+            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
           </textarea>
         </div>
         <button 
@@ -69,7 +95,7 @@
           class="w-full px-4 py-2 rounded-lg font-medium transition-colors duration-200"
           [ngClass]="isMaintenanceMode ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-yellow-600 hover:bg-yellow-700 text-white'"
           (click)="toggleMaintenanceMode()"
-          [disabled]="isLoading || !backendConnected">
+          [disabled]="isLoading">
           <span *ngIf="isLoading" class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
           {{ isMaintenanceMode ? ('admin.versionManagement.disableMaintenance' | workyTranslations) : ('admin.versionManagement.enableMaintenance' | workyTranslations) }}
         </button>
@@ -108,9 +134,12 @@
                 formControlName="buildNumber"
                 class="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
               <button type="button" 
-                      class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors duration-200"
-                      (click)="generateBuildNumber()">
-                {{ 'admin.versionManagement.generate' | workyTranslations }}
+                      class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors duration-200 flex items-center justify-center"
+                      (click)="generateBuildNumber()"
+                      title="{{ 'admin.versionManagement.generate' | workyTranslations }}">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
               </button>
             </div>
           </div>
@@ -192,13 +221,13 @@
           <button 
             type="submit" 
             class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            [disabled]="versionForm.invalid || isLoading || !backendConnected">
+            [disabled]="versionForm.invalid || isLoading">
             <span *ngIf="isLoading" class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
             {{ isLoading ? ('common.loading' | workyTranslations) : ('admin.versionManagement.createVersion' | workyTranslations) }}
           </button>
           <button 
             type="button" 
-            class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
+            class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors duration-200"
             (click)="versionForm.reset()">
             {{ 'common.reset' | workyTranslations }}
           </button>
@@ -207,8 +236,25 @@
     </div>
   </div>
 
-  <!-- Versions History Section -->
-  <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 mt-6" *ngIf="backendConnected">
+  <!-- Mensaje cuando no hay permisos - Solo mostrar cuando esté inicializado -->
+  <div class="bg-yellow-900/20 border border-yellow-700 rounded-lg p-6 mt-6" *ngIf="isInitializationComplete && backendConnected && !canShowManagementFeatures()">
+    <div class="flex items-center">
+      <svg class="w-5 h-5 text-yellow-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+      </svg>
+      <div>
+        <h3 class="text-yellow-400 font-medium">Permisos Insuficientes</h3>
+        <p class="text-yellow-300 text-sm mt-1">
+          <span *ngIf="!adminAuthenticated">No estás autenticado como administrador.</span>
+          <span *ngIf="adminAuthenticated && !canManageVersions">No tienes permisos para gestionar versiones.</span>
+          Usa el botón "Refrescar" para intentar autenticarte nuevamente.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Versions History Section - Solo mostrar cuando esté inicializado y tenga permisos -->
+  <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 mt-6" *ngIf="isInitializationComplete && canShowManagementFeatures()">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-lg font-semibold text-gray-100">{{ 'admin.versionManagement.versionHistory' | workyTranslations }}</h2>
       <button class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" 
@@ -227,6 +273,7 @@
             <th class="text-left py-3 px-4 font-medium text-gray-300">{{ 'admin.versionManagement.type' | workyTranslations }}</th>
             <th class="text-left py-3 px-4 font-medium text-gray-300">{{ 'admin.versionManagement.releaseDate' | workyTranslations }}</th>
             <th class="text-left py-3 px-4 font-medium text-gray-300">{{ 'admin.versionManagement.status' | workyTranslations }}</th>
+            <th class="text-left py-3 px-4 font-medium text-gray-300">{{ 'admin.versionManagement.changes' | workyTranslations }}</th>
             <th class="text-left py-3 px-4 font-medium text-gray-300">{{ 'common.actions' | workyTranslations }}</th>
           </tr>
         </thead>
@@ -244,6 +291,17 @@
                     [ngClass]="version.isActive ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400'">
                 {{ version.isActive ? ('admin.versionManagement.active' | workyTranslations) : ('admin.versionManagement.inactive' | workyTranslations) }}
               </span>
+            </td>
+            <td class="py-3 px-4">
+              <button class="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm font-medium transition-colors duration-200"
+                      (click)="viewVersionChanges(version)"
+                      title="{{ 'admin.versionManagement.viewChanges' | workyTranslations }}">
+                <svg class="w-4 h-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                {{ 'admin.versionManagement.viewChanges' | workyTranslations }}
+              </button>
             </td>
             <td class="py-3 px-4">
               <button *ngIf="!version.isActive" 
@@ -273,8 +331,8 @@
     </ng-template>
   </div>
 
-  <!-- Backend Not Connected Notice -->
-  <div class="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4 mt-6" *ngIf="!backendConnected">
+  <!-- Backend Not Connected Notice - Solo mostrar cuando esté inicializado -->
+  <div class="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4 mt-6" *ngIf="isInitializationComplete && !backendConnected">
     <div class="flex items-center">
       <svg class="w-5 h-5 text-yellow-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -284,6 +342,99 @@
         <p class="text-yellow-300 text-sm mt-1">
           Mostrando configuración local. Para gestionar versiones, asegúrate de que el backend esté funcionando.
         </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para ver cambios de versión -->
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" 
+       *ngIf="showVersionChangesModal" 
+       (click)="closeVersionChangesModal()">
+    <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto" 
+         (click)="$event.stopPropagation()">
+      
+      <!-- Header del modal -->
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-100">
+            {{ 'admin.versionManagement.versionChanges' | workyTranslations }} {{ selectedVersion?.version }}
+          </h2>
+          <p class="text-gray-400 text-sm mt-1">
+            {{ 'admin.versionManagement.buildNumber' | workyTranslations }}: {{ selectedVersion?.buildNumber }} | 
+            {{ 'admin.versionManagement.releaseDate' | workyTranslations }}: {{ selectedVersion?.releaseDate | date:'medium' }}
+          </p>
+        </div>
+        <button class="text-gray-400 hover:text-white transition-colors duration-200" 
+                (click)="closeVersionChangesModal()">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Contenido del modal -->
+      <div class="space-y-6">
+        <!-- Información de la versión -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-gray-700 rounded-lg p-4">
+            <h3 class="text-gray-300 font-medium mb-2">{{ 'admin.versionManagement.versionDetails' | workyTranslations }}</h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-gray-400">{{ 'admin.versionManagement.version' | workyTranslations }}:</span>
+                <span class="text-blue-400 font-medium">{{ selectedVersion?.version }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-400">{{ 'admin.versionManagement.buildNumber' | workyTranslations }}:</span>
+                <span class="text-gray-300">{{ selectedVersion?.buildNumber }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-400">{{ 'admin.versionManagement.releaseDate' | workyTranslations }}:</span>
+                <span class="text-gray-300">{{ selectedVersion?.releaseDate | date:'short' }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-400">{{ 'admin.versionManagement.forceUpdate' | workyTranslations }}:</span>
+                <span class="text-gray-300">{{ selectedVersion?.forceUpdate ? 'Sí' : 'No' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-700 rounded-lg p-4">
+            <h3 class="text-gray-300 font-medium mb-2">{{ 'admin.versionManagement.requirements' | workyTranslations }}</h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-gray-400">{{ 'admin.versionManagement.minRequiredVersion' | workyTranslations }}:</span>
+                <span class="text-gray-300">{{ selectedVersion?.minRequiredVersion || 'No especificada' }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-400">{{ 'admin.versionManagement.downloadUrl' | workyTranslations }}:</span>
+                <span class="text-gray-300">{{ selectedVersion?.downloadUrl || 'No especificada' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Changelog -->
+        <div class="bg-gray-700 rounded-lg p-4">
+          <h3 class="text-gray-300 font-medium mb-3">{{ 'admin.versionManagement.changelog' | workyTranslations }}</h3>
+          <div class="bg-gray-800 rounded-lg p-4">
+            <pre class="text-gray-300 text-sm whitespace-pre-wrap font-mono">{{ selectedVersion?.changelog || 'No hay changelog disponible para esta versión.' }}</pre>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-700">
+          <button class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
+                  (click)="closeVersionChangesModal()">
+            {{ 'common.close' | workyTranslations }}
+          </button>
+          <button *ngIf="!selectedVersion?.isActive" 
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200"
+                  (click)="activateVersionFromModal(selectedVersion?.id)"
+                  [disabled]="isLoading">
+            <span *ngIf="isLoading" class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+            {{ 'admin.versionManagement.activate' | workyTranslations }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
