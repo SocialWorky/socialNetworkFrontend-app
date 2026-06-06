@@ -8,34 +8,34 @@
         <i class="material-icons text-blue-400">subscriptions</i>
       </div>
       <div>
-        <h2 class="text-lg font-bold text-slate-100">Gestión de Suscripciones</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Administra y asigna planes de suscripción</p>
+        <h2 class="text-lg font-bold text-slate-100">{{ 'admin.subscriptions.title' | workyTranslations }}</h2>
+        <p class="text-xs text-slate-500 mt-0.5">{{ 'admin.subscriptions.subtitle' | workyTranslations }}</p>
       </div>
     </div>
     <button
       (click)="openAssignModal()"
       class="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200">
       <i class="material-icons text-base">add</i>
-      <span>Asignar Plan</span>
+      <span>{{ 'admin.subscriptions.assignPlan' | workyTranslations }}</span>
     </button>
   </div>
 
   <!-- Stats Cards -->
   <div class="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-4">
     <div class="bg-slate-800 rounded-xl p-4 border border-slate-700/50">
-      <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Total</p>
+      <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">{{ 'admin.subscriptions.total' | workyTranslations }}</p>
       <p class="text-2xl font-bold text-slate-100">{{ total }}</p>
     </div>
     <div class="bg-slate-800 rounded-xl p-4 border border-green-500/20">
-      <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Activas</p>
+      <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">{{ 'admin.subscriptions.statusActive' | workyTranslations }}</p>
       <p class="text-2xl font-bold text-green-400">{{ countByStatus('active') }}</p>
     </div>
     <div class="bg-slate-800 rounded-xl p-4 border border-yellow-500/20">
-      <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Pendientes</p>
+      <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">{{ 'admin.subscriptions.statusPending' | workyTranslations }}</p>
       <p class="text-2xl font-bold text-yellow-400">{{ countByStatus('pending') }}</p>
     </div>
     <div class="bg-slate-800 rounded-xl p-4 border border-slate-700/50">
-      <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Expiradas</p>
+      <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">{{ 'admin.subscriptions.statusExpired' | workyTranslations }}</p>
       <p class="text-2xl font-bold text-slate-400">{{ countByStatus('expired') }}</p>
     </div>
   </div>
@@ -47,7 +47,7 @@
       <input
         type="text"
         class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
-        placeholder="Buscar por username o email..."
+        [placeholder]="'admin.subscriptions.searchPlaceholder' | workyTranslations"
         [value]="searchQuery"
         (input)="onSearchChange($any($event.target).value)" />
     </div>
@@ -55,12 +55,12 @@
       class="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
       [value]="selectedStatus"
       (change)="onStatusChange($any($event.target).value)">
-      <option value="">Todos los estados</option>
-      <option value="active">Activas</option>
-      <option value="pending">Pendientes</option>
-      <option value="expired">Expiradas</option>
-      <option value="cancelled">Canceladas</option>
-      <option value="failed">Fallidas</option>
+      <option value="">{{ 'admin.subscriptions.allStatuses' | workyTranslations }}</option>
+      <option value="active">{{ 'admin.subscriptions.statusActive' | workyTranslations }}</option>
+      <option value="pending">{{ 'admin.subscriptions.statusPending' | workyTranslations }}</option>
+      <option value="expired">{{ 'admin.subscriptions.statusExpired' | workyTranslations }}</option>
+      <option value="cancelled">{{ 'admin.subscriptions.statusCancelled' | workyTranslations }}</option>
+      <option value="failed">{{ 'admin.subscriptions.statusFailed' | workyTranslations }}</option>
     </select>
   </div>
 
@@ -73,18 +73,18 @@
   <ng-container *ngIf="!isLoading">
     <div *ngIf="subscriptions.length === 0" class="text-center py-12 text-slate-400">
       <i class="material-icons text-5xl mb-3 block">subscriptions</i>
-      <p class="text-sm">No hay suscripciones que coincidan</p>
+      <p class="text-sm">{{ 'admin.subscriptions.noResults' | workyTranslations }}</p>
     </div>
 
     <div *ngIf="subscriptions.length > 0" class="overflow-x-auto -mx-6 px-6">
       <table class="w-full text-sm">
         <thead>
           <tr class="text-left border-b border-slate-700">
-            <th class="pb-3 pr-4 text-xs font-semibold text-slate-400 uppercase tracking-wide">Usuario</th>
-            <th class="pb-3 pr-4 text-xs font-semibold text-slate-400 uppercase tracking-wide">Plan</th>
-            <th class="pb-3 pr-4 text-xs font-semibold text-slate-400 uppercase tracking-wide">Estado</th>
-            <th class="pb-3 pr-4 text-xs font-semibold text-slate-400 uppercase tracking-wide">Expira</th>
-            <th class="pb-3 text-xs font-semibold text-slate-400 uppercase tracking-wide text-right">Acciones</th>
+            <th class="pb-3 pr-4 text-xs font-semibold text-slate-400 uppercase tracking-wide">{{ 'admin.subscriptions.colUser' | workyTranslations }}</th>
+            <th class="pb-3 pr-4 text-xs font-semibold text-slate-400 uppercase tracking-wide">{{ 'admin.subscriptions.colPlan' | workyTranslations }}</th>
+            <th class="pb-3 pr-4 text-xs font-semibold text-slate-400 uppercase tracking-wide">{{ 'admin.subscriptions.colStatus' | workyTranslations }}</th>
+            <th class="pb-3 pr-4 text-xs font-semibold text-slate-400 uppercase tracking-wide">{{ 'admin.subscriptions.colExpires' | workyTranslations }}</th>
+            <th class="pb-3 text-xs font-semibold text-slate-400 uppercase tracking-wide text-right">{{ 'admin.subscriptions.colActions' | workyTranslations }}</th>
           </tr>
         </thead>
         <tbody>
@@ -145,21 +145,21 @@
                   *ngIf="canActivate(sub)"
                   (click)="activate(sub)"
                   class="w-7 h-7 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 flex items-center justify-center transition-colors"
-                  title="Activar">
+                  [title]="'admin.subscriptions.activate' | workyTranslations">
                   <i class="material-icons" style="font-size:16px">check_circle</i>
                 </button>
                 <button
                   *ngIf="canCancel(sub)"
                   (click)="cancel(sub)"
                   class="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 flex items-center justify-center transition-colors"
-                  title="Cancelar">
+                  [title]="'admin.subscriptions.cancel' | workyTranslations">
                   <i class="material-icons" style="font-size:16px">pause_circle</i>
                 </button>
                 <button
                   *ngIf="deletableStatuses.includes(sub.status)"
                   (click)="deleteSubscription(sub)"
                   class="w-7 h-7 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 flex items-center justify-center transition-colors"
-                  title="Eliminar registro">
+                  [title]="'admin.subscriptions.deleteRecord' | workyTranslations">
                   <i class="material-icons" style="font-size:16px">delete_forever</i>
                 </button>
                 <span *ngIf="!canActivate(sub) && !canCancel(sub) && !deletableStatuses.includes(sub.status)"
@@ -173,7 +173,7 @@
       <!-- Pagination -->
       <div *ngIf="totalPages > 1" class="flex items-center justify-between mt-5 pt-4 border-t border-slate-800">
         <p class="text-xs text-slate-500">
-          Mostrando {{ (page - 1) * limit + 1 }}–{{ page * limit > total ? total : page * limit }} de {{ total }}
+          {{ 'admin.subscriptions.paginationShowing' | workyTranslations:'arguments':((page - 1) * limit + 1):(page * limit > total ? total : page * limit):total }}
         </p>
         <div class="flex items-center gap-2">
           <button
@@ -209,7 +209,7 @@
 
     <!-- Header -->
     <div class="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-      <h3 class="font-bold text-slate-100">Detalle de Suscripción</h3>
+      <h3 class="font-bold text-slate-100">{{ 'admin.subscriptions.detailTitle' | workyTranslations }}</h3>
       <button
         (click)="closeDetail()"
         class="w-8 h-8 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-slate-800 flex items-center justify-center transition-colors">
@@ -250,31 +250,31 @@
 
       <!-- Plan Details -->
       <div>
-        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Plan</p>
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">{{ 'admin.subscriptions.colPlan' | workyTranslations }}</p>
         <div class="bg-slate-800 rounded-xl p-4 border border-slate-700/50">
           <div class="flex items-center justify-between mb-2">
             <p class="font-bold text-slate-100">{{ selectedSubscription.plan.name }}</p>
             <span class="text-green-400 font-bold text-sm">{{ formatPrice(selectedSubscription.plan.priceClp) }}</span>
           </div>
-          <p class="text-xs text-slate-500">Duración: {{ selectedSubscription.plan.durationDays }} días</p>
+          <p class="text-xs text-slate-500">{{ 'admin.subscriptions.duration' | workyTranslations:'arguments':selectedSubscription.plan.durationDays }}</p>
         </div>
       </div>
 
       <!-- Subscription Timeline -->
       <div>
-        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Período</p>
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">{{ 'admin.subscriptions.period' | workyTranslations }}</p>
         <div class="grid grid-cols-2 gap-3">
           <div class="bg-slate-800 rounded-xl p-3 border border-slate-700/50">
-            <p class="text-xs text-slate-500 mb-1">Creada</p>
+            <p class="text-xs text-slate-500 mb-1">{{ 'admin.subscriptions.createdAt' | workyTranslations }}</p>
             <p class="text-sm text-slate-300 font-medium">{{ formatDate(selectedSubscription.createdAt) }}</p>
           </div>
           <div class="bg-slate-800 rounded-xl p-3 border border-slate-700/50">
-            <p class="text-xs text-slate-500 mb-1">Inicio</p>
+            <p class="text-xs text-slate-500 mb-1">{{ 'admin.subscriptions.startedAt' | workyTranslations }}</p>
             <p class="text-sm text-slate-300 font-medium">{{ formatDate(selectedSubscription.startedAt) }}</p>
           </div>
           <div class="bg-slate-800 rounded-xl p-3"
                [ngClass]="selectedSubscription.status === 'expired' ? 'border border-red-500/30' : 'border border-slate-700/50'">
-            <p class="text-xs text-slate-500 mb-1">Expiración</p>
+            <p class="text-xs text-slate-500 mb-1">{{ 'admin.subscriptions.expiration' | workyTranslations }}</p>
             <p class="text-sm font-medium"
                [class.text-red-400]="selectedSubscription.status === 'expired'"
                [class.text-slate-300]="selectedSubscription.status !== 'expired'">
@@ -282,7 +282,7 @@
             </p>
           </div>
           <div class="bg-slate-800 rounded-xl p-3 border border-slate-700/50">
-            <p class="text-xs text-slate-500 mb-1">Precio pagado</p>
+            <p class="text-xs text-slate-500 mb-1">{{ 'admin.subscriptions.pricePaid' | workyTranslations }}</p>
             <p class="text-sm text-green-400 font-medium">{{ formatPrice(selectedSubscription.priceAtSubscription) }}</p>
           </div>
         </div>
@@ -290,16 +290,16 @@
 
       <!-- Payment Info -->
       <div>
-        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Pago</p>
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">{{ 'admin.subscriptions.payment' | workyTranslations }}</p>
         <div class="bg-slate-800 rounded-xl p-4 border border-slate-700/50 space-y-3">
 
           <ng-container *ngIf="selectedSubscription.latestPayment; else noPaymentDetail">
             <div class="flex items-center justify-between">
-              <span class="text-xs text-slate-500">Monto</span>
+              <span class="text-xs text-slate-500">{{ 'admin.subscriptions.amount' | workyTranslations }}</span>
               <ng-container *ngIf="selectedSubscription.latestPayment.paykuPayload?.['source'] === 'admin_assigned'; else showAmount">
                 <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded text-xs font-semibold border border-blue-500/20">
                   <i class="material-icons" style="font-size:11px">admin_panel_settings</i>
-                  Asignado por admin
+                  {{ 'admin.subscriptions.assignedByAdmin' | workyTranslations }}
                 </span>
               </ng-container>
               <ng-template #showAmount>
@@ -308,28 +308,28 @@
             </div>
 
             <div class="flex items-center justify-between">
-              <span class="text-xs text-slate-500">Estado del pago</span>
+              <span class="text-xs text-slate-500">{{ 'admin.subscriptions.paymentStatus' | workyTranslations }}</span>
               <span class="text-xs font-semibold text-slate-300">{{ selectedSubscription.latestPayment.status }}</span>
             </div>
 
             <div *ngIf="selectedSubscription.latestPayment.paykuPayload?.['note']" class="flex items-start justify-between gap-4">
-              <span class="text-xs text-slate-500 flex-shrink-0">Nota</span>
+              <span class="text-xs text-slate-500 flex-shrink-0">{{ 'admin.subscriptions.note' | workyTranslations }}</span>
               <span class="text-xs text-slate-400 text-right">{{ selectedSubscription.latestPayment.paykuPayload['note'] }}</span>
             </div>
 
             <div class="flex items-center justify-between">
-              <span class="text-xs text-slate-500">Fecha</span>
+              <span class="text-xs text-slate-500">{{ 'admin.subscriptions.date' | workyTranslations }}</span>
               <span class="text-xs text-slate-400">{{ formatDate(selectedSubscription.latestPayment.createdAt) }}</span>
             </div>
           </ng-container>
 
           <ng-template #noPaymentDetail>
-            <p class="text-xs text-slate-500 text-center py-1">Sin registro de pago</p>
+            <p class="text-xs text-slate-500 text-center py-1">{{ 'admin.subscriptions.noPaymentRecord' | workyTranslations }}</p>
           </ng-template>
 
           <!-- Payku transaction ID -->
           <div *ngIf="selectedSubscription.paykuTransactionId" class="pt-3 border-t border-slate-700">
-            <p class="text-xs text-slate-500 mb-1.5">ID Transacción Payku</p>
+            <p class="text-xs text-slate-500 mb-1.5">{{ 'admin.subscriptions.paykuTransactionId' | workyTranslations }}</p>
             <code class="block text-xs text-slate-400 bg-slate-900 rounded-lg px-3 py-2 font-mono break-all border border-slate-700">
               {{ selectedSubscription.paykuTransactionId }}
             </code>
@@ -339,7 +339,7 @@
 
       <!-- ID Técnico -->
       <div>
-        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">ID Suscripción</p>
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">{{ 'admin.subscriptions.subscriptionId' | workyTranslations }}</p>
         <code class="block text-xs text-slate-500 bg-slate-800 rounded-lg px-3 py-2 font-mono break-all border border-slate-700/50">
           {{ selectedSubscription._id }}
         </code>
@@ -352,19 +352,19 @@
           (click)="showChangePlanPanel = true"
           class="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 text-sm font-semibold transition-colors">
           <i class="material-icons text-base">swap_horiz</i>
-          Cambiar plan
+          {{ 'admin.subscriptions.changePlan' | workyTranslations }}
         </button>
 
         <div *ngIf="showChangePlanPanel" class="space-y-3">
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Cambiar a otro plan</p>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide">{{ 'admin.subscriptions.changeToAnotherPlan' | workyTranslations }}</p>
           <select
             [(ngModel)]="changePlanId"
             class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
-            <option value="">Selecciona el nuevo plan...</option>
+            <option value="">{{ 'admin.subscriptions.selectNewPlan' | workyTranslations }}</option>
             <option *ngFor="let plan of plans" [value]="plan._id"
                     [disabled]="plan._id === selectedSubscription.plan._id">
               {{ plan.name }} — {{ formatPrice(plan.priceClp) }} / {{ plan.durationDays }}d
-              {{ plan._id === selectedSubscription.plan._id ? '(actual)' : '' }}
+              {{ plan._id === selectedSubscription.plan._id ? ('admin.subscriptions.currentSuffix' | workyTranslations) : '' }}
             </option>
           </select>
           <div class="flex gap-2">
@@ -372,7 +372,7 @@
               type="button"
               (click)="showChangePlanPanel = false; changePlanId = ''"
               class="flex-1 py-2 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 border border-slate-700 text-sm font-semibold transition-colors">
-              Cancelar
+              {{ 'admin.subscriptions.cancel' | workyTranslations }}
             </button>
             <button
               type="button"
@@ -381,11 +381,11 @@
               class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
               <div *ngIf="isChangingPlan" class="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white"></div>
               <i *ngIf="!isChangingPlan" class="material-icons text-base">check</i>
-              {{ isChangingPlan ? 'Cambiando...' : 'Confirmar cambio' }}
+              {{ isChangingPlan ? ('admin.subscriptions.changingPlan' | workyTranslations) : ('admin.subscriptions.confirmChangePlan' | workyTranslations) }}
             </button>
           </div>
           <p class="text-xs text-slate-500">
-            Se cancelará la suscripción actual y se creará una nueva con el plan seleccionado.
+            {{ 'admin.subscriptions.changePlanWarning' | workyTranslations }}
           </p>
         </div>
       </div>
@@ -397,22 +397,22 @@
           (click)="activate(selectedSubscription); closeDetail()"
           class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/20 text-sm font-semibold transition-colors">
           <i class="material-icons text-base">check_circle</i>
-          Activar
+          {{ 'admin.subscriptions.activate' | workyTranslations }}
         </button>
         <button
           *ngIf="canCancel(selectedSubscription)"
           (click)="cancel(selectedSubscription); closeDetail()"
           class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 border border-orange-500/20 text-sm font-semibold transition-colors">
           <i class="material-icons text-base">pause_circle</i>
-          Cancelar suscripción
+          {{ 'admin.subscriptions.cancelSubscription' | workyTranslations }}
         </button>
         <button
           *ngIf="deletableStatuses.includes(selectedSubscription.status)"
           (click)="deleteSubscription(selectedSubscription)"
           class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 text-sm font-semibold transition-colors"
-          title="Eliminar registro permanentemente">
+          [title]="'admin.subscriptions.deleteRecordPermanently' | workyTranslations">
           <i class="material-icons text-base">delete_forever</i>
-          Eliminar
+          {{ 'admin.subscriptions.delete' | workyTranslations }}
         </button>
       </div>
 
@@ -436,7 +436,7 @@
         <div class="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center">
           <i class="material-icons text-blue-400 text-base">add_card</i>
         </div>
-        <h3 class="font-bold text-slate-100">Asignar Plan de Suscripción</h3>
+        <h3 class="font-bold text-slate-100">{{ 'admin.subscriptions.assignModalTitle' | workyTranslations }}</h3>
       </div>
       <button
         (click)="closeAssignModal()"
@@ -451,7 +451,7 @@
       <!-- User search -->
       <div>
         <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
-          Usuario *
+          {{ 'admin.subscriptions.userLabel' | workyTranslations }}
         </label>
         <div class="relative">
           <i class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-base">person_search</i>
@@ -459,7 +459,7 @@
             type="text"
             formControlName="userQuery"
             autocomplete="off"
-            placeholder="Buscar por username o email..."
+            [placeholder]="'admin.subscriptions.searchPlaceholder' | workyTranslations"
             (input)="onUserQueryChange($any($event.target).value)"
             class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors" />
           <div *ngIf="isSearchingUsers" class="absolute right-3 top-1/2 -translate-y-1/2">
@@ -508,14 +508,14 @@
       <!-- Plan selector -->
       <div>
         <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
-          Plan *
+          {{ 'admin.subscriptions.planLabel' | workyTranslations }}
         </label>
         <select
           formControlName="planId"
           class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer">
-          <option value="">Selecciona un plan...</option>
+          <option value="">{{ 'admin.subscriptions.selectPlan' | workyTranslations }}</option>
           <option *ngFor="let plan of plans" [value]="plan._id">
-            {{ plan.name }} — {{ formatPrice(plan.priceClp) }} / {{ plan.durationDays }} días
+            {{ plan.name }} — {{ formatPrice(plan.priceClp) }} / {{ 'admin.subscriptions.daysShort' | workyTranslations:'arguments':plan.durationDays }}
           </option>
         </select>
       </div>
@@ -523,12 +523,12 @@
       <!-- Note -->
       <div>
         <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
-          Nota (opcional)
+          {{ 'admin.subscriptions.noteOptional' | workyTranslations }}
         </label>
         <input
           type="text"
           formControlName="note"
-          placeholder="Motivo de la asignación manual..."
+          [placeholder]="'admin.subscriptions.notePlaceholder' | workyTranslations"
           class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors" />
       </div>
 
@@ -536,7 +536,7 @@
       <div class="flex items-start gap-2.5 px-3 py-2.5 bg-blue-500/5 border border-blue-500/20 rounded-lg">
         <i class="material-icons text-blue-400 mt-0.5" style="font-size:14px">info</i>
         <p class="text-xs text-slate-400">
-          La suscripción se activará inmediatamente sin cobrar a Payku. Se registrará como asignación administrativa.
+          {{ 'admin.subscriptions.assignInfo' | workyTranslations }}
         </p>
       </div>
 
@@ -546,7 +546,7 @@
           type="button"
           (click)="closeAssignModal()"
           class="px-4 py-2 text-sm font-semibold text-slate-400 hover:text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition-colors">
-          Cancelar
+          {{ 'admin.subscriptions.cancel' | workyTranslations }}
         </button>
         <button
           type="submit"
@@ -554,7 +554,7 @@
           class="flex items-center gap-2 px-5 py-2 text-sm font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
           <div *ngIf="isAssigning" class="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white"></div>
           <i *ngIf="!isAssigning" class="material-icons text-base">check</i>
-          {{ isAssigning ? 'Asignando...' : 'Asignar y Activar' }}
+          {{ isAssigning ? ('admin.subscriptions.assigning' | workyTranslations) : ('admin.subscriptions.assignAndActivate' | workyTranslations) }}
         </button>
       </div>
     </form>

@@ -15,6 +15,7 @@ export class FeatureFlagsComponent implements OnInit {
   groupsEnabled = true;
   eventsEnabled = true;
   locationDiscoveryEnabled = true;
+  subscriptionModeEnabled = false;
   isSaving = false;
   savedMessage = false;
 
@@ -29,6 +30,7 @@ export class FeatureFlagsComponent implements OnInit {
       this.groupsEnabled = snapshot.settings.groupsEnabled ?? true;
       this.eventsEnabled = snapshot.settings.eventsEnabled ?? true;
       this.locationDiscoveryEnabled = snapshot.settings.locationDiscoveryEnabled ?? true;
+      this.subscriptionModeEnabled = snapshot.settings.subscriptionMode ?? false;
     }
   }
 
@@ -47,6 +49,11 @@ export class FeatureFlagsComponent implements OnInit {
     this.save();
   }
 
+  toggleSubscriptionMode(): void {
+    this.subscriptionModeEnabled = !this.subscriptionModeEnabled;
+    this.save();
+  }
+
   private save(): void {
     this.isSaving = true;
     this.savedMessage = false;
@@ -54,6 +61,7 @@ export class FeatureFlagsComponent implements OnInit {
       groupsEnabled: this.groupsEnabled,
       eventsEnabled: this.eventsEnabled,
       locationDiscoveryEnabled: this.locationDiscoveryEnabled,
+      subscriptionMode: this.subscriptionModeEnabled,
     } as any).subscribe({
       next: () => {
         this.isSaving = false;

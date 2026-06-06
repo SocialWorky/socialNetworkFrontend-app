@@ -140,7 +140,7 @@ export class ReportsManagementComponent implements OnInit, OnDestroy {
           this.loadReports();
         },
         error: () => {
-          this.actionError = 'Error al procesar el reporte. Inténtalo de nuevo.';
+          this.actionError = translations['admin.reports.error.process'];
           this.isSubmitting = false;
           this._cdr.markForCheck();
         },
@@ -168,7 +168,7 @@ export class ReportsManagementComponent implements OnInit, OnDestroy {
             this.loadReports();
           },
           error: () => {
-            this.actionError = 'Error al eliminar el reporte.';
+            this.actionError = translations['admin.reports.error.delete'];
             this._cdr.markForCheck();
           },
         });

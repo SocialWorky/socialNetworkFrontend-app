@@ -48,6 +48,10 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
 
   error: string | null = null;
 
+  get subscriptionMode$() {
+    return this._configService.subscriptionMode$;
+  }
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -70,7 +74,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       description: [''],
       invitationCode: [false],
       requirePrivacyPolicy: [false],
-      subscriptionMode: [false],
       verifiedBadgeUrl: [''],
       premiumBadgeUrl: [''],
       loginMethods: this._fb.group({
@@ -157,7 +160,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
           description: configData.settings.description || '',
           invitationCode: configData.settings.invitationCode ?? false,
           requirePrivacyPolicy: configData.settings.requirePrivacyPolicy ?? false,
-          subscriptionMode: configData.settings.subscriptionMode ?? false,
           verifiedBadgeUrl: configData.settings.verifiedBadgeUrl || '',
           premiumBadgeUrl: configData.settings.premiumBadgeUrl || '',
           loginMethods: {
@@ -314,7 +316,6 @@ export class SiteConfigComponent implements OnInit, OnDestroy {
       description: this.configForm.get('description')?.value || '',
       invitationCode: Boolean(this.configForm.get('invitationCode')?.value),
       requirePrivacyPolicy: Boolean(this.configForm.get('requirePrivacyPolicy')?.value),
-      subscriptionMode: Boolean(this.configForm.get('subscriptionMode')?.value),
       verifiedBadgeUrl: this.configForm.get('verifiedBadgeUrl')?.value || '',
       premiumBadgeUrl: this.configForm.get('premiumBadgeUrl')?.value || '',
       loginMethods: JSON.stringify(this.configForm.get('loginMethods')?.value || { email: false, google: false }),

@@ -40,9 +40,9 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 class="text-xl font-bold bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent">
-            Listado de reportes
+            {{ 'admin.reports.listTitle' | workyTranslations }}
           </h2>
-          <p class="text-slate-400 text-sm mt-1">{{ allReports.length }} reportes en total · Haz clic en una fila para ver el detalle</p>
+          <p class="text-slate-400 text-sm mt-1">{{ allReports.length }} {{ 'admin.reports.listCountSuffix' | workyTranslations }}</p>
         </div>
         <div class="flex gap-2 flex-wrap">
           <button
@@ -66,7 +66,7 @@
       <i class="material-icons text-red-400 text-5xl mb-4">error_outline</i>
       <p class="text-red-400 text-lg font-medium">{{ errorMessage }}</p>
       <button (click)="loadReports()" class="mt-4 px-5 py-2 rounded-lg border border-slate-600 bg-slate-700 text-slate-300 hover:bg-slate-600 transition-all duration-200 text-sm font-medium">
-        Reintentar
+        {{ 'admin.reports.retry' | workyTranslations }}
       </button>
     </div>
 
@@ -77,12 +77,12 @@
 
     <div *ngIf="!isLoading && filteredReports.length > 0">
       <div class="grid grid-cols-12 gap-4 bg-gradient-to-r from-slate-900/80 to-slate-800/80 border-b border-slate-600/50 px-6 py-3">
-        <div class="col-span-1"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">Tipo</span></div>
-        <div class="col-span-3"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">Reportado por</span></div>
-        <div class="col-span-4"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">Motivo</span></div>
-        <div class="col-span-2"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">Estado</span></div>
-        <div class="col-span-1"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">Fecha</span></div>
-        <div class="col-span-1 text-center"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">Ver</span></div>
+        <div class="col-span-1"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">{{ 'admin.reports.column.type' | workyTranslations }}</span></div>
+        <div class="col-span-3"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">{{ 'admin.reports.column.reportedBy' | workyTranslations }}</span></div>
+        <div class="col-span-4"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">{{ 'admin.reports.column.reason' | workyTranslations }}</span></div>
+        <div class="col-span-2"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">{{ 'admin.reports.column.status' | workyTranslations }}</span></div>
+        <div class="col-span-1"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">{{ 'admin.reports.column.date' | workyTranslations }}</span></div>
+        <div class="col-span-1 text-center"><span class="text-slate-300 font-semibold text-xs uppercase tracking-wider">{{ 'admin.reports.column.view' | workyTranslations }}</span></div>
       </div>
 
       <div class="divide-y divide-slate-700/50">
@@ -157,7 +157,7 @@
     <div class="flex-1 min-h-0 overflow-y-auto p-6" *ngIf="selectedReport">
 
       <div class="flex items-center justify-between">
-        <span class="text-slate-400 text-sm font-semibold uppercase tracking-wider">Estado actual</span>
+        <span class="text-slate-400 text-sm font-semibold uppercase tracking-wider">{{ 'admin.reports.detail.currentStatus' | workyTranslations }}</span>
         <span class="px-3 py-1.5 rounded-full text-sm font-semibold"
           [ngClass]="{
             'bg-yellow-500/15 text-yellow-400 border border-yellow-500/30': selectedReport.status === ReportStatus.PENDING,
@@ -169,7 +169,7 @@
       </div>
 
       <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
-        <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-3">Reportado por</p>
+        <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-3">{{ 'admin.reports.column.reportedBy' | workyTranslations }}</p>
         <div class="flex items-center gap-3">
           <worky-avatar [size]="48" [img]="selectedReport.reporter?.avatar" [name]="reporterName(selectedReport)"></worky-avatar>
           <div>
@@ -181,17 +181,17 @@
       </div>
 
       <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 space-y-3">
-        <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Detalle del reporte</p>
+        <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">{{ 'admin.reports.detail.reportDetail' | workyTranslations }}</p>
         <div class="flex gap-3 text-sm">
-          <span class="text-slate-500 w-24 flex-shrink-0">Tipo</span>
+          <span class="text-slate-500 w-24 flex-shrink-0">{{ 'admin.reports.column.type' | workyTranslations }}</span>
           <span class="text-slate-200 font-medium">{{ getTypeLabel(selectedReport.type) }}</span>
         </div>
         <div class="flex gap-3 text-sm">
-          <span class="text-slate-500 w-24 flex-shrink-0">ID reportado</span>
+          <span class="text-slate-500 w-24 flex-shrink-0">{{ 'admin.reports.detail.reportedId' | workyTranslations }}</span>
           <span class="font-mono text-slate-300 text-xs break-all">{{ selectedReport._idReported }}</span>
         </div>
         <div class="flex gap-3 text-sm">
-          <span class="text-slate-500 w-24 flex-shrink-0 pt-0.5">Motivo</span>
+          <span class="text-slate-500 w-24 flex-shrink-0 pt-0.5">{{ 'admin.reports.column.reason' | workyTranslations }}</span>
           <span class="text-slate-100 leading-relaxed">{{ selectedReport.detail_report || '—' }}</span>
         </div>
       </div>
@@ -199,7 +199,7 @@
       <div *ngIf="selectedReport.detail_resolution" class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
         <div class="flex items-center gap-2 mb-2">
           <i class="material-icons text-emerald-400 text-sm">check_circle</i>
-          <p class="text-emerald-400 text-xs font-semibold uppercase tracking-wider">Respuesta del administrador</p>
+          <p class="text-emerald-400 text-xs font-semibold uppercase tracking-wider">{{ 'admin.reports.detail.adminResponse' | workyTranslations }}</p>
         </div>
         <p class="text-slate-200 text-sm leading-relaxed">{{ selectedReport.detail_resolution }}</p>
       </div>
@@ -218,18 +218,18 @@
       <div *ngIf="selectedReport.status === ReportStatus.PENDING" class="space-y-4">
         <form [formGroup]="resolutionForm">
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-            Respuesta del administrador
+            {{ 'admin.reports.detail.adminResponse' | workyTranslations }}
           </label>
           <textarea
             formControlName="detail_resolution"
             rows="4"
-            placeholder="Escribe la resolución o motivo que recibirá el usuario..."
+            [placeholder]="'admin.reports.resolution.placeholder' | workyTranslations"
             class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-800/60 text-slate-100 text-sm resize-none transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500">
           </textarea>
           <p *ngIf="resolutionForm.get('detail_resolution')?.invalid && resolutionForm.get('detail_resolution')?.touched"
              class="text-red-400 text-xs mt-1 flex items-center gap-1">
             <i class="material-icons text-sm">error</i>
-            Mínimo 10 caracteres.
+            {{ 'admin.reports.resolution.minLength' | workyTranslations }}
           </p>
         </form>
 
@@ -240,14 +240,14 @@
             class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm border border-emerald-500 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
             <div *ngIf="isSubmitting" class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
             <i *ngIf="!isSubmitting" class="material-icons text-base">check_circle</i>
-            Resolver
+            {{ 'admin.reports.action.resolve' | workyTranslations }}
           </button>
           <button
             (click)="reject()"
             [disabled]="resolutionForm.invalid || isSubmitting"
             class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm border border-orange-500/50 bg-orange-500/10 text-orange-400 hover:bg-orange-500 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
             <i class="material-icons text-base">cancel</i>
-            Rechazar
+            {{ 'admin.reports.action.reject' | workyTranslations }}
           </button>
         </div>
       </div>

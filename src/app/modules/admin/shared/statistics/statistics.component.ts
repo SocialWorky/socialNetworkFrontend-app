@@ -2,6 +2,8 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 import { AnalyticsService, AdminOverview } from '@shared/services/core-apis/analytics.service';
+import { ConfigService } from '@shared/services/core-apis/config.service';
+import { translations } from '@translations/translations';
 
 @Component({
     selector: 'worky-admin-statistics',
@@ -18,6 +20,10 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   lastUpdated = new Date();
 
   adminOverview: AdminOverview | null = null;
+
+  get subscriptionMode$() {
+    return this._configService.subscriptionMode$;
+  }
 
   get interactionsPerActiveUser(): number {
     if (!this.adminOverview || this.adminOverview.activeUsersToday === 0) return 0;
@@ -42,6 +48,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     private readonly _analyticsService: AnalyticsService,
     private readonly _cdr: ChangeDetectorRef,
     private readonly _logService: LogService,
+    private readonly _configService: ConfigService,
   ) {}
 
   ngOnInit(): void {
@@ -62,7 +69,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
           this._cdr.markForCheck();
         },
         error: (err) => {
-          this.error = 'Error al cargar las estadísticas. Por favor, inténtalo de nuevo.';
+          this.error = translations['admin.statistics.error.load'];
           this.isLoading = false;
           this._logService.log(
             LevelLogEnum.ERROR,

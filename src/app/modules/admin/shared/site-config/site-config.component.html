@@ -498,21 +498,6 @@
                   <span class="block text-xs text-slate-400">{{ 'admin.siteConfig.registration.requirePrivacyPolicy.subtitle' | workyTranslations }}</span>
                 </div>
               </div>
-
-              <div class="flex items-center gap-4 p-4 bg-slate-800 rounded-lg border border-slate-600 transition-all duration-200 hover:border-amber-500 hover:bg-amber-500/5">
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    formControlName="subscriptionMode"
-                    class="absolute opacity-0 w-0 h-0 peer"
-                  >
-                  <div class="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
-                </label>
-                <div class="flex-1">
-                  <span class="block text-sm font-semibold text-slate-100">{{ 'admin.subscriptionMode.label' | workyTranslations }}</span>
-                  <span class="block text-xs text-slate-400">{{ 'admin.subscriptionMode.description' | workyTranslations }}</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -576,15 +561,15 @@
     </form>
   </div>
 
-  <!-- Payku Payment Configuration -->
-  <div class="bg-slate-900 rounded-2xl border border-slate-700 p-6 mt-6" [formGroup]="paykuForm">
+  <!-- Payku Payment Configuration — only relevant when subscription mode is enabled -->
+  <div class="bg-slate-900 rounded-2xl border border-slate-700 p-6 mt-6" [formGroup]="paykuForm" *ngIf="subscriptionMode$ | async">
     <div class="flex items-center gap-3 mb-6">
       <div class="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
         <i class="material-icons text-blue-400">payment</i>
       </div>
       <div>
         <h2 class="text-lg font-bold text-slate-100">{{ 'admin.paykuConfig' | workyTranslations }}</h2>
-        <p class="text-xs text-slate-400">Payku Chile</p>
+        <p class="text-xs text-slate-400">{{ 'admin.paykuProvider' | workyTranslations }}</p>
       </div>
     </div>
 

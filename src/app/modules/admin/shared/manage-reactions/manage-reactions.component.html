@@ -236,7 +236,7 @@
                     <button 
                       class="flex items-center gap-2 px-4 py-2 border border-blue-500 rounded-lg bg-blue-500/10 text-blue-400 text-xs font-semibold hover:bg-blue-500 hover:text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/30"
                       (click)="editReaction(reaction)"
-                      [title]="'Editar ' + reaction.name"
+                      [title]="('admin.reactions.editTooltip' | workyTranslations) + ' ' + reaction.name"
                     >
                       <i class="material-icons text-sm">edit</i>
                       <span class="hidden sm:inline">{{ getEditButtonText() }}</span>

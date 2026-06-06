@@ -25,7 +25,10 @@
   }
   @include breakpoints.below-sm {
     height: 100%;
-    padding-bottom: 0;
+    box-sizing: border-box;
+    // Reserve the fixed bottom nav (.bottom-nav-mobile, 56px) so the last publication's
+    // action bar (comment / share / reaction) is not hidden behind it when scrolled to the end.
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
   }
 }
 

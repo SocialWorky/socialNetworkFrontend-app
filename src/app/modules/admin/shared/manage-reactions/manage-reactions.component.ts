@@ -154,7 +154,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
               'Failed to load reactions',
               { error: String(err) }
             );
-            this.error = 'Error loading reactions. Please try again.';
+            this.error = translations['admin.reactions.errorLoad'];
             this.isLoading = false;
             this._cdr.detectChanges();
             resolve();
@@ -278,7 +278,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
     
     if (reaction.emoji && reaction.emoji.startsWith('http')) {
       this.imagePreview = reaction.emoji;
-      this.selectedFileName = reaction.name + ' (current image)';
+      this.selectedFileName = reaction.name + translations['admin.reactions.currentImageSuffix'];
       this.reactionForm.get('emoji')?.clearValidators();
       this.reactionForm.get('emoji')?.updateValueAndValidity();
     }
@@ -430,7 +430,7 @@ export class ManageReactionsComponent implements OnInit, OnDestroy {
             'Failed to delete reaction',
             { error: String(err), reactionId: id }
           );
-          this.error = 'Error deleting reaction. Please try again.';
+          this.error = translations['admin.reactions.errorDelete'];
           this._cdr.markForCheck();
         }
       });

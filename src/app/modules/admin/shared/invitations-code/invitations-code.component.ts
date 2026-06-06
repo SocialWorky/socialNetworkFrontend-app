@@ -164,10 +164,10 @@ export class InvitationsCodeComponent implements OnInit, OnDestroy {
   // Delete invitation
   deleteInvitation(id: number) {
     this._alertService.showConfirmation(
-      'Eliminar Invitación',
-      '¿Estás seguro de que quieres eliminar esta invitación? Esta acción no se puede deshacer.',
-      'Sí, eliminar',
-      'Cancelar',
+      translations['admin.invitations.delete.title'],
+      translations['admin.invitations.delete.message'],
+      translations['admin.invitations.delete.confirm'],
+      translations['admin.invitations.delete.cancel'],
       Alerts.WARNING,
       Position.CENTER
     ).pipe(
@@ -202,7 +202,7 @@ export class InvitationsCodeComponent implements OnInit, OnDestroy {
             this._cdr.markForCheck();
           }, 3000);
         } else if (response) {
-          this.error = 'Error al eliminar la invitación.';
+          this.error = translations['admin.invitations.errors.deleteFailed'];
           this.successMessage = null;
         }
         this.loadInvitationsButtons = false;
@@ -217,11 +217,11 @@ export class InvitationsCodeComponent implements OnInit, OnDestroy {
         );
         this.successMessage = null;
         if (error.status === 404) {
-          this.error = 'Invitación no encontrada.';
+          this.error = translations['admin.invitations.errors.notFound'];
         } else if (error.status === 400) {
-          this.error = 'ID de invitación requerido.';
+          this.error = translations['admin.invitations.errors.idRequired'];
         } else {
-          this.error = 'Error al eliminar la invitación. Por favor, intenta de nuevo.';
+          this.error = translations['admin.invitations.errors.deleteRetry'];
         }
         this.loadInvitationsButtons = false;
         this._cdr.markForCheck();

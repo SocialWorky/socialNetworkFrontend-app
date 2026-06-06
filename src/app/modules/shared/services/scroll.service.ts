@@ -17,6 +17,14 @@ export class ScrollService {
   private lastScrollTop = 0;
   private scrollDirection = 'up';
   private isMobile = false;
+
+  // Near the bottom, hiding the navbar resizes the scroll area (top 50px -> 0), which
+  // re-fires scroll and makes the top/bottom navbar flicker. Latch it visible there with
+  // hysteresis: lock within bottomLockZone of the end, release only past bottomReleaseZone.
+  private navbarLockedAtBottom = false;
+  private lastNavbarEvent: string | null = null;
+  private readonly bottomLockZone = 120;
+  private readonly bottomReleaseZone = 240;
   
   // Device-specific configurations
   private mobileConfig: ScrollConfig = {
@@ -64,32 +72,55 @@ export class ScrollService {
       this.lastScrollTop = scrollTop;
     }
 
-
+    const distanceFromBottom = scrollHeight - (scrollTop + offsetHeight);
 
     // Device-specific navbar behavior
-    this.handleNavbarBehavior(scrollTop, navbarShowThreshold, navbarHideThreshold);
+    this.handleNavbarBehavior(scrollTop, navbarShowThreshold, navbarHideThreshold, distanceFromBottom);
 
     // Detect end of scroll for loading more content
-    if (scrollTop + offsetHeight >= scrollHeight - scrollThreshold) {
+    if (distanceFromBottom <= scrollThreshold) {
       this.scrollEndSource.next('scrollEnd');
     }
   }
 
-  private handleNavbarBehavior(scrollTop: number, showThreshold: number, hideThreshold: number) {
+  private handleNavbarBehavior(scrollTop: number, showThreshold: number, hideThreshold: number, distanceFromBottom: number) {
     if (!this.isMobile) {
       return; // Only apply navbar behavior on mobile
     }
 
+    // Hysteresis latch: keep the navbar shown near the bottom so toggling it (which resizes
+    // the scroll area and re-fires scroll) cannot oscillate the top/bottom navbar.
+    if (distanceFromBottom <= this.bottomLockZone) {
+      this.navbarLockedAtBottom = true;
+    } else if (distanceFromBottom > this.bottomReleaseZone) {
+      this.navbarLockedAtBottom = false;
+    }
+
+    if (this.navbarLockedAtBottom) {
+      this.emitNavbar('showNavbar');
+      return;
+    }
+
     if (scrollTop < showThreshold) {
       // At the top - always show navbar
-      this.scrollEndSource.next('showNavbar');
+      this.emitNavbar('showNavbar');
     } else if (this.scrollDirection === 'up') {
       // Scrolling up - show navbar
-      this.scrollEndSource.next('showNavbar');
+      this.emitNavbar('showNavbar');
     } else if (this.scrollDirection === 'down' && scrollTop > hideThreshold) {
       // Scrolling down and past threshold - hide navbar
-      this.scrollEndSource.next('hideNavbar');
+      this.emitNavbar('hideNavbar');
     }
+  }
+
+  // Emit a navbar event only when it changes, so a steady scroll does not spam identical
+  // show/hide events (which add change-detection churn and can amplify flicker).
+  private emitNavbar(event: 'showNavbar' | 'hideNavbar') {
+    if (this.lastNavbarEvent === event) {
+      return;
+    }
+    this.lastNavbarEvent = event;
+    this.scrollEndSource.next(event);
   }
 
 
