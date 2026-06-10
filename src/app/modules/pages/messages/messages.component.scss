@@ -441,7 +441,9 @@
   // chat input is not hidden behind it.
   @include breakpoints.below-sm {
     height: auto;
-    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+    // Reserve the fixed bottom nav (56px + home-indicator inset) plus a small gap
+    // so the message input clears it instead of tucking under its top edge.
+    padding-bottom: calc(56px + env(safe-area-inset-bottom) + 8px);
   }
 
   &.hidden {

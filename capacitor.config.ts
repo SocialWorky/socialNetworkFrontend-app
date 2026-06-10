@@ -11,7 +11,11 @@ const config: CapacitorConfig = {
   },
   ios: {
     scheme: 'https',
-    contentInset: 'always',
+    // 'never' makes the WKWebView render edge-to-edge (full screen) so CSS
+    // env(safe-area-inset-*) drives the insets. With 'always' the webview is
+    // inset below the safe areas and cannot fill the screen. Required for the
+    // @capacitor-community/safe-area edge-to-edge model.
+    contentInset: 'never',
     limitsNavigationsToAppBoundDomains: false,
     // iOS-specific optimizations for Safari
     webContentsDebuggingEnabled: false,

@@ -72,7 +72,14 @@ export const translations = {
   'navbar.installApp': 'Instalar Aplicación',
   'navbar.show_install_app': '🎉 ¡Bienvenido!',
   'navbar.show_install_app_message': 'Instala nuestra app para una mejor experiencia.',
-  
+  'pwaInstall.title': 'Instala {0}',
+  'pwaInstall.subtitle': 'Accede más rápido desde tu pantalla de inicio, sin abrir el navegador.',
+  'pwaInstall.install': 'Instalar',
+  'pwaInstall.iosBefore': 'Para instalar, toca',
+  'pwaInstall.iosAfter': 'y luego «Agregar a inicio».',
+  'pwaInstall.alreadyInstalled': 'Ya la instalé',
+  'pwaInstall.dismiss': 'Cerrar',
+
   // ===== MAIN PAGES =====
   // HOME COMPONENT
   'home.errorGetPublications': 'Error al obtener las publicaciones: ',

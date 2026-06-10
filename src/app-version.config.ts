@@ -21,10 +21,41 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '3.2.0',
+  version: '3.3.0',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🚀 NOVEDADES (v3.3.0 — 2026-06-10):
+
+    📲 Instalación como app (PWA):
+    - Added: Banner de instalación — invita a instalar la app desde el navegador, con el
+      logo y el nombre tomados de las variables de entorno (multi-tenant)
+    - Added: Detección de "ya instalada" en iOS y Android — el banner no aparece dentro de
+      la app ya instalada
+    - Added: En Android, botón "Instalar" que lanza el prompt nativo; en iOS Safari,
+      instrucciones (Compartir → Agregar a inicio), ya que iOS no permite instalación automática
+    - Added: Descarte flexible — "Ya la instalé" lo oculta de forma permanente y la X lo
+      pospone por 7 días
+
+    🐛 CORRECCIONES (v3.3.0 — 2026-06-10):
+
+    📱 PWA / Pantalla completa (iOS):
+    - Fixed: Eliminado el espacio sin ocupar arriba y abajo en la PWA instalada — el contenido
+      ahora llega a los bordes (status bar y home indicator) sin franjas muertas
+    - Fixed: El modal de comentarios ya no queda bajo el status bar (el botón cerrar es
+      accesible) y su caja de escribir respeta el área del home indicator
+    - Fixed: Al abrir una imagen, el panel de comentarios ya no se despliega tapándola y su
+      footer respeta el safe-area
+    - Fixed: La barra para escribir mensajes en el chat ya no queda tapada por el navbar inferior
+
+    👥 Grupos:
+    - Fixed: En móvil ya se puede hacer scroll y ver las publicaciones dentro de un grupo
+    - Fixed: Al scrollear en un grupo, los navbars superior e inferior se ocultan/muestran
+      igual que en el muro y el perfil
+    - Fixed: En modo claro, las tarjetas, textos y badges de grupos ahora se distinguen (antes
+      quedaban invisibles por usar colores pensados para modo oscuro); se corrigió además el
+      contraste del amarillo de los badges de administración
+
     🚀 NOVEDADES (v3.2.0 — 2026-06-06):
 
     🔗 Compartir publicaciones públicas:

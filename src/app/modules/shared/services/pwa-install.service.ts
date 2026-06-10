@@ -1,10 +1,12 @@
 import { Injectable, NgZone } from '@angular/core';
 import { AlertController } from '@ionic/angular';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 
 import { AlertService } from './alert.service';
 import { Alerts, Position } from './../enums/alerts.enum';
+
+export type PwaBannerMode = 'ios' | 'android';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +18,16 @@ export class PwaInstallService {
   private installStatusSubject = new Subject<'installed' | 'dismissed'>();
   installStatus$ = this.installStatusSubject.asObservable();
 
+  // Reactive flag the install banner subscribes to.
+  private showBannerSubject = new BehaviorSubject<boolean>(false);
+  showBanner$ = this.showBannerSubject.asObservable();
+
+  private readonly DISMISS_KEY = 'pwaInstallBannerDismissedAt';
+  private readonly DISMISS_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+  // iOS cannot detect from Safari that the PWA is already installed (isolated
+  // storage, no appinstalled event), so the user acknowledges it manually.
+  private readonly INSTALLED_ACK_KEY = 'pwaInstallAcknowledged';
+
   constructor(
     private ngZone: NgZone,
     private alertController: AlertController,
@@ -24,6 +36,84 @@ export class PwaInstallService {
     this.setupInstallPrompt();
     this.setupDisplayModeListener();
     this.checkInitialInstallState();
+    this.recomputeBanner();
+    // beforeinstallprompt can fire shortly after load on Android — re-evaluate.
+    setTimeout(() => this.recomputeBanner(), 1500);
+  }
+
+  // ── Platform / standalone detection (web PWA, not Capacitor) ──────────────────
+
+  private get ua(): string {
+    return navigator.userAgent || '';
+  }
+
+  isIos(): boolean {
+    return /iphone|ipad|ipod/i.test(this.ua) ||
+      // iPadOS 13+ reports as Mac; disambiguate via touch points.
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  /** iOS add-to-home-screen only exists in Safari (not Chrome/Firefox on iOS). */
+  isIosSafari(): boolean {
+    return this.isIos() && !/crios|fxios|edgios|opios|brave/i.test(this.ua);
+  }
+
+  isAndroid(): boolean {
+    return /android/i.test(this.ua);
+  }
+
+  /** True when already running as an installed PWA (covers iOS + Android). */
+  isStandalone(): boolean {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      ('standalone' in navigator && (navigator as any).standalone === true);
+  }
+
+  // ── Install banner state ──────────────────────────────────────────────────────
+
+  private isBannerDismissed(): boolean {
+    // User confirmed it is already installed → never show again.
+    if (localStorage.getItem(this.INSTALLED_ACK_KEY) === 'true') return true;
+
+    const raw = localStorage.getItem(this.DISMISS_KEY);
+    if (!raw) return false;
+    const at = Number(raw);
+    if (!at || Number.isNaN(at)) return false;
+    return (Date.now() - at) < this.DISMISS_TTL_MS;
+  }
+
+  /** Banner is shown only when NOT installed, NOT dismissed, and installable. */
+  canShowInstallBanner(): boolean {
+    if (this.isStandalone()) return false;
+    if (this.isBannerDismissed()) return false;
+    if (this.isIosSafari()) return true;          // iOS: manual instructions
+    return !!this.deferredPrompt;                 // Android/desktop: native prompt ready
+  }
+
+  getBannerMode(): PwaBannerMode {
+    return this.isIosSafari() ? 'ios' : 'android';
+  }
+
+  private recomputeBanner(): void {
+    this.showBannerSubject.next(this.canShowInstallBanner());
+  }
+
+  /** Hide the banner and remember the dismissal for the TTL window. */
+  dismissBanner(): void {
+    localStorage.setItem(this.DISMISS_KEY, String(Date.now()));
+    this.showBannerSubject.next(false);
+  }
+
+  /** User says the app is already installed (iOS escape hatch) — never show again. */
+  acknowledgeInstalled(): void {
+    localStorage.setItem(this.INSTALLED_ACK_KEY, 'true');
+    this.showBannerSubject.next(false);
+  }
+
+  /** Trigger the native Android/desktop install prompt from the banner. */
+  promptInstallFromBanner(): void {
+    this.installPWA();
+    this.showBannerSubject.next(false);
   }
 
   isPwaSupported(): boolean {
@@ -42,7 +132,10 @@ export class PwaInstallService {
   private setupInstallPrompt() {
     window.addEventListener('beforeinstallprompt', (event) => {
       event.preventDefault();
-      this.deferredPrompt = event;
+      this.ngZone.run(() => {
+        this.deferredPrompt = event;
+        this.recomputeBanner();
+      });
     });
 
     window.addEventListener('appinstalled', () => {
@@ -52,6 +145,11 @@ export class PwaInstallService {
         this.installStatusSubject.next('installed');
 
         localStorage.setItem('isAppInstalled', 'true');
+        // Durable flag (not cleared by checkInitialInstallState when browsing in a
+        // tab) so the banner stays hidden after install, across reloads — even on
+        // localhost where Chrome keeps re-firing beforeinstallprompt.
+        localStorage.setItem(this.INSTALLED_ACK_KEY, 'true');
+        this.recomputeBanner();
       });
     });
   }
@@ -66,6 +164,7 @@ export class PwaInstallService {
         } else {
           this.installStatusSubject.next('dismissed');
         }
+        this.recomputeBanner();
       });
     };
 

@@ -1121,7 +1121,8 @@
 
   .message-footer-container {
     padding: 0.2rem;
-    margin-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    // Safe-area inset is reserved by .chat-container's padding-bottom; don't double it.
+    margin-bottom: 0.5rem;
   }
 
   .message-actions { right: -25px; }

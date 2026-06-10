@@ -72,7 +72,14 @@ export const translations = {
   'navbar.installApp': 'Install App',
   'navbar.show_install_app': '🎉 Welcome!',
   'navbar.show_install_app_message': 'Install our app for a better experience.',
-  
+  'pwaInstall.title': 'Install {0}',
+  'pwaInstall.subtitle': 'Get faster access from your home screen — no browser needed.',
+  'pwaInstall.install': 'Install',
+  'pwaInstall.iosBefore': 'To install, tap',
+  'pwaInstall.iosAfter': 'then “Add to Home Screen”.',
+  'pwaInstall.alreadyInstalled': 'I already installed it',
+  'pwaInstall.dismiss': 'Close',
+
   // ===== MAIN PAGES =====
   // HOME COMPONENT
   'home.errorGetPublications': 'Error getting publications: ',

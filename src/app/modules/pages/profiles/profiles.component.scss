@@ -264,10 +264,8 @@
 
     .last-publication {
       margin-bottom: 20px;
-      
-      @include breakpoints.below-sm {
-        margin-bottom: 40px; // Extra margin for mobile to prevent cutoff
-      }
+      // Mobile clearance for the bottom nav is handled by .profile-container's
+      // padding-bottom, so no extra margin band-aid is needed here.
     }
 
   }
@@ -294,6 +292,11 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    box-sizing: border-box;
+    // Reserve the fixed bottom nav (.bottom-nav-mobile, 56px + home-indicator inset)
+    // so the last publication's action bar (react / comment / share) is not hidden
+    // behind it when scrolled to the end — same pattern as home's .content-publications.
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
   }
   
   &:not(.mobile-container) {

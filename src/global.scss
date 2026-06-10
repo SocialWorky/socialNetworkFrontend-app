@@ -817,9 +817,13 @@ img, video {
   /* In standalone PWA mode, 100dvh under-reports true screen height because iOS
      excludes the status bar zone from dvh. body uses top:0+bottom:0 instead so it
      always stretches to the true screen edges. fixed+inset:0 on ion-app then anchors
-     all fixed children to the real screen bottom. */
+     all fixed children to the real screen bottom.
+     Under black-translucent + viewport-fit=cover, iOS computes the document height
+     short by env(safe-area-inset-top), which would leave a dead strip at the bottom.
+     min-height: calc(100% + safe-area-inset-top) is the documented compensation. */
   html {
     height: 100%;
+    min-height: calc(100% + env(safe-area-inset-top));
     overflow-x: hidden;
   }
   body {

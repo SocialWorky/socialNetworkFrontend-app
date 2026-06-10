@@ -37,6 +37,11 @@
   
   <!-- iOS-specific optimizations -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <!-- 'black-translucent' makes the standalone webview span the full screen, so
+       content scrolls under both the status bar (top) and home indicator (bottom).
+       The top navbar pads itself with env(safe-area-inset-top) and the bottom nav
+       with env(safe-area-inset-bottom); the JS-measured --vh (IOSViewportService)
+       fills the full height so no dead strip is left at the bottom. -->
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="__PWA_NAME__" />
   <meta name="mobile-web-app-capable" content="yes" />

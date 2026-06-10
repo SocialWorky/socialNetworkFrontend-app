@@ -10,7 +10,7 @@
   <p>{{ 'groups.bannedDescription' | workyTranslations }}</p>
 </div>
 
-<div *ngIf="!isLoading && group" class="gd-page">
+<div *ngIf="!isLoading && group" class="gd-page" (scroll)="onScroll($event)">
 
   <!-- ── Cover ────────────────────────────────────────────────────── -->
   <div class="gd-cover"

@@ -4,7 +4,7 @@ android {
     namespace "app.worky.cl"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "app.worky.cl"
+        applicationId "com.worky.dev"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -33,6 +33,9 @@ repositories {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    // Explicit so androidx.activity.EdgeToEdge (added in 1.8.0) resolves on the app
+    // classpath for MainActivity (required by @capacitor-community/safe-area).
+    implementation "androidx.activity:activity:$androidxActivityVersion"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
