@@ -145,6 +145,10 @@ export class PwaInstallService {
         this.installStatusSubject.next('installed');
 
         localStorage.setItem('isAppInstalled', 'true');
+        // Durable flag (not cleared by checkInitialInstallState when browsing in a
+        // tab) so the banner stays hidden after install, across reloads — even on
+        // localhost where Chrome keeps re-firing beforeinstallprompt.
+        localStorage.setItem(this.INSTALLED_ACK_KEY, 'true');
         this.recomputeBanner();
       });
     });

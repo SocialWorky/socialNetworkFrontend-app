@@ -9,16 +9,15 @@
       {{ 'pwaInstall.subtitle' | workyTranslations }}
     </span>
 
-    <ng-container *ngIf="mode === 'ios'">
-      <span class="pwa-banner__text pwa-banner__text--ios">
-        {{ 'pwaInstall.iosBefore' | workyTranslations }}
-        <i class="material-icons pwa-banner__share-icon">ios_share</i>
-        {{ 'pwaInstall.iosAfter' | workyTranslations }}
-      </span>
-      <button type="button" class="pwa-banner__ack" (click)="markInstalled()">
-        {{ 'pwaInstall.alreadyInstalled' | workyTranslations }}
-      </button>
-    </ng-container>
+    <span class="pwa-banner__text pwa-banner__text--ios" *ngIf="mode === 'ios'">
+      {{ 'pwaInstall.iosBefore' | workyTranslations }}
+      <i class="material-icons pwa-banner__share-icon">ios_share</i>
+      {{ 'pwaInstall.iosAfter' | workyTranslations }}
+    </span>
+
+    <button type="button" class="pwa-banner__ack" (click)="markInstalled()">
+      {{ 'pwaInstall.alreadyInstalled' | workyTranslations }}
+    </button>
   </div>
 
   <button
