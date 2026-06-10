@@ -194,63 +194,31 @@ export class ChatListComponent implements AfterViewChecked, AfterViewInit, OnDes
     if (!this.messagesContainer) return;
 
     const element = this.messagesContainer.nativeElement;
-    
-    // Find the first visible message before loading (our anchor)
-    const scrollTop = element.scrollTop;
-    const containerRect = element.getBoundingClientRect();
-    
-    // Find anchor message - the first message that was visible before loading
-    let anchorMessage: Message | null = null;
-    if (previousMessages.length > 0) {
-      // Use the first message from the previous list as anchor
-      anchorMessage = previousMessages[0];
-      this.anchorMessageId = anchorMessage._id;
-    }
 
-    if (!this.anchorMessageId) return;
+    // Captured BEFORE the prepended (older) messages render. The standard, reliable
+    // way to keep the viewport anchored when content is added on top: offset scrollTop
+    // by exactly how much the scroll height grew, so the same messages stay in view.
+    const oldScrollHeight = element.scrollHeight;
+    const oldScrollTop = element.scrollTop;
 
-    // Set flag to prevent interference
     this.isRestoringScroll = true;
-
-    // Disable smooth scrolling temporarily
     element.style.scrollBehavior = 'auto';
 
-    // Wait for DOM to update with multiple frames to ensure rendering is complete
+    // Two frames: let Angular render the new messages, then compensate the scroll.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (!this.messagesContainer || !this.anchorMessageId) {
-            this.isRestoringScroll = false;
-            return;
-          }
-
-          // Find the anchor message element in the DOM
-          const anchorElement = element.querySelector(`[data-message-id="${this.anchorMessageId}"]`);
-          
-          if (anchorElement) {
-            // Scroll to keep the anchor message in the same position
-            const anchorRect = anchorElement.getBoundingClientRect();
-            const offsetFromTop = anchorRect.top - containerRect.top;
-            
-            // Adjust scroll to maintain the anchor's position
-            anchorElement.scrollIntoView({ block: 'start', behavior: 'auto' });
-          } else {
-            // Fallback: use height difference method
-            const newScrollHeight = element.scrollHeight;
-            const oldScrollHeight = scrollTop + element.clientHeight;
-            const heightDifference = newScrollHeight - oldScrollHeight;
-            element.scrollTop = scrollTop + heightDifference;
-          }
-
-          // Re-enable smooth scrolling
-          setTimeout(() => {
-            if (this.messagesContainer) {
-              this.messagesContainer.nativeElement.style.scrollBehavior = '';
-            }
-            this.isRestoringScroll = false;
-            this.anchorMessageId = null;
-          }, 100);
-        });
+        if (!this.messagesContainer) {
+          this.isRestoringScroll = false;
+          return;
+        }
+        const el = this.messagesContainer.nativeElement;
+        const heightGrowth = el.scrollHeight - oldScrollHeight;
+        if (heightGrowth > 0) {
+          el.scrollTop = oldScrollTop + heightGrowth;
+        }
+        el.style.scrollBehavior = '';
+        this.isRestoringScroll = false;
+        this.anchorMessageId = null;
       });
     });
   }

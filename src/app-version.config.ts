@@ -21,10 +21,18 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '3.3.0',
+  version: '3.3.1',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🐛 CORRECCIONES (v3.3.1 — 2026-06-10):
+
+    💬 Chat:
+    - Fixed: Al cargar mensajes antiguos (scroll hacia arriba) ya no se pierde la posición
+      ni "salta" el cuerpo del chat — el viewport queda anclado al mismo mensaje. Se corrigió
+      el método de preservación de scroll (diferencia de altura en vez de scrollIntoView),
+      lo que además evita la carga repetida/errática que se gatillaba al quedar pegado arriba
+
     🚀 NOVEDADES (v3.3.0 — 2026-06-10):
 
     📲 Instalación como app (PWA):
