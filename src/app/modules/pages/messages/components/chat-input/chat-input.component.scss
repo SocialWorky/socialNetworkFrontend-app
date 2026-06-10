@@ -330,7 +330,8 @@
   .message-footer-container {
     margin: 4px 6px;
     padding: 4px 6px;
-    padding-bottom: max(4px, env(safe-area-inset-bottom));
+    // Safe-area inset is reserved once by .chat-container's padding-bottom; the
+    // input sits above the bottom nav, so it must NOT add the inset again here.
     border-radius: 12px;
   }
 
