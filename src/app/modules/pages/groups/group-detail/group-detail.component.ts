@@ -19,6 +19,7 @@ import { AlertService } from '@shared/services/alert.service';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { UnifiedCacheService } from '@shared/services/unified-cache.service';
 import { UtilityService } from '@shared/services/utility.service';
+import { ScrollService } from '@shared/services/scroll.service';
 
 @Component({
   selector: 'worky-group-detail',
@@ -57,7 +58,15 @@ export class GroupDetailComponent implements OnInit, OnDestroy {
     private readonly alertService: AlertService,
     private readonly cacheService: UnifiedCacheService,
     private readonly utilityService: UtilityService,
+    private readonly scrollService: ScrollService,
   ) {}
+
+  // Feed scroll events to the shared ScrollService so the top/bottom navbars
+  // auto-hide on scroll down and reappear on scroll up — same behavior as home
+  // and profile (the navbar component reacts to ScrollService.scrollEnd$).
+  onScroll(event: any): void {
+    this.scrollService.onScroll(event);
+  }
 
   ngOnInit(): void {
     this.currentUserId = this.authService.getDecodedToken()?.id ?? '';
