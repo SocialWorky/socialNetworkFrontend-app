@@ -15,7 +15,17 @@
 
   &.mobil {
     flex-direction: column;
-    position: relative;
+    // Anchor the viewer to the full viewport so the absolutely-positioned
+    // children (comment sheet, backdrop, close button) anchor to the real
+    // screen edges. Inside the MatDialog surface, position:relative + height:100dvh
+    // was collapsing, leaving the sheet's bottom:0 misplaced and the translateY(101%)
+    // hide ineffective (the sheet stayed on screen).
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: auto;
   }
 
   worky-image-loading {
@@ -50,7 +60,9 @@
       width: 100%;
       height: 82dvh;
       max-height: 82dvh;
-      padding: 16px 10px 10px;
+      // Reserve the home-indicator inset so the comment composer/toolbar stays
+      // tappable above the safe area when the sheet is open on mobile.
+      padding: 16px 10px calc(10px + env(safe-area-inset-bottom));
       border-radius: 16px 16px 0 0;
       background-color: var(--worky-color-module-container);
       box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
