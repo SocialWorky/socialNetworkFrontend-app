@@ -1,6 +1,6 @@
 require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
 
-platform :ios, '14.0'
+platform :ios, '16.0'
 use_frameworks!
 
 # workaround to avoid Xcode caching of Pods that requires
@@ -11,13 +11,13 @@ install! 'cocoapods', :disable_input_output_paths => true
 def capacitor_pods
   pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
   pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
+  pod 'CapacitorCommunitySafeArea', :path => '../../node_modules/@capacitor-community/safe-area'
   pod 'CapacitorApp', :path => '../../node_modules/@capacitor/app'
   pod 'CapacitorDevice', :path => '../../node_modules/@capacitor/device'
   pod 'CapacitorGeolocation', :path => '../../node_modules/@capacitor/geolocation'
   pod 'CapacitorHaptics', :path => '../../node_modules/@capacitor/haptics'
   pod 'CapacitorKeyboard', :path => '../../node_modules/@capacitor/keyboard'
   pod 'CapacitorPushNotifications', :path => '../../node_modules/@capacitor/push-notifications'
-  pod 'CapacitorStatusBar', :path => '../../node_modules/@capacitor/status-bar'
 end
 
 target 'App' do
@@ -33,8 +33,8 @@ post_install do |installer|
     target.build_configurations.each do |config|
       # Build for all architectures
       config.build_settings['ONLY_ACTIVE_ARCH'] = 'NO'
-      # Exclude arm64 architecture for the iOS simulator
-      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+      # NOTE: removed EXCLUDED_ARCHS arm64-for-simulator exclusion — it was an
+      # Intel-era workaround that breaks simulator builds on Apple Silicon (arm64).
       config.build_settings['ENABLE_BITCODE'] = 'NO'
       xcconfig_path = config.base_configuration_reference.real_path
       xcconfig = File.read(xcconfig_path)

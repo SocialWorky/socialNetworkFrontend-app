@@ -1,21 +1,21 @@
 PODS:
-  - Capacitor (7.2.0):
+  - Capacitor (7.4.4):
     - CapacitorCordova
-  - CapacitorApp (7.0.1):
+  - CapacitorApp (7.1.0):
     - Capacitor
-  - CapacitorCordova (7.2.0)
-  - CapacitorDevice (7.0.1):
+  - CapacitorCommunitySafeArea (7.0.0):
     - Capacitor
-  - CapacitorGeolocation (7.1.2):
+  - CapacitorCordova (7.4.4)
+  - CapacitorDevice (7.0.2):
     - Capacitor
-    - IONGeolocationLib (~> 1.0)
-  - CapacitorHaptics (7.0.1):
+  - CapacitorGeolocation (7.1.5):
     - Capacitor
-  - CapacitorKeyboard (7.0.1):
+    - IONGeolocationLib (= 1.0.1)
+  - CapacitorHaptics (7.0.2):
     - Capacitor
-  - CapacitorPushNotifications (7.0.1):
+  - CapacitorKeyboard (7.0.3):
     - Capacitor
-  - CapacitorStatusBar (7.0.1):
+  - CapacitorPushNotifications (7.0.3):
     - Capacitor
   - Firebase/CoreOnly (11.12.0):
     - FirebaseCore (~> 11.12.0)
@@ -69,7 +69,7 @@ PODS:
   - GoogleUtilities/UserDefaults (8.0.2):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
-  - IONGeolocationLib (1.0.0)
+  - IONGeolocationLib (1.0.1)
   - nanopb (3.30910.0):
     - nanopb/decode (= 3.30910.0)
     - nanopb/encode (= 3.30910.0)
@@ -80,13 +80,13 @@ PODS:
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
+  - "CapacitorCommunitySafeArea (from `../../node_modules/@capacitor-community/safe-area`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
   - "CapacitorGeolocation (from `../../node_modules/@capacitor/geolocation`)"
   - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../node_modules/@capacitor/keyboard`)"
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
-  - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
   - Firebase/Messaging
 
 SPEC REPOS:
@@ -107,6 +107,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorApp:
     :path: "../../node_modules/@capacitor/app"
+  CapacitorCommunitySafeArea:
+    :path: "../../node_modules/@capacitor-community/safe-area"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorDevice:
@@ -119,19 +121,17 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/keyboard"
   CapacitorPushNotifications:
     :path: "../../node_modules/@capacitor/push-notifications"
-  CapacitorStatusBar:
-    :path: "../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
-  Capacitor: 106e7a4205f4618d582b886a975657c61179138d
-  CapacitorApp: d63334c052278caf5d81585d80b21905c6f93f39
-  CapacitorCordova: 5967b9ba03915ef1d585469d6e31f31dc49be96f
-  CapacitorDevice: fe3f190e1d718f4607bdc6b73993433d1c84f409
-  CapacitorGeolocation: 8c86a3afea574c84447c17905da96f2356ad913e
-  CapacitorHaptics: 70e47470fa1a6bd6338cd102552e3846b7f9a1b3
-  CapacitorKeyboard: 969647d0ca2e5c737d7300088e2517aa832434e2
-  CapacitorPushNotifications: 0b653a3264d56daccf0e8769fff15d2f48306de6
-  CapacitorStatusBar: 275cbf2f4dfc00388f519ef80c7ec22edda342c9
+  Capacitor: 09d9ff8e9618e8c4b3cab2bbee34a17215dd2fef
+  CapacitorApp: 846d4b4a1dbb19dd1e9029c08ba6f028aa7be862
+  CapacitorCommunitySafeArea: cea909b52195cf57d08a6b6331288cb43d906196
+  CapacitorCordova: bf648a636f3c153f652d312ae145fb508b6ffced
+  CapacitorDevice: a50a45f0d075e55e2392c7a4be5404d4f69515de
+  CapacitorGeolocation: b96474c3259dd4a294227ea8ec19140b1837cceb
+  CapacitorHaptics: 09d96bcb5a2b74ede8fd039b4cdf58fc43dcacf1
+  CapacitorKeyboard: 3822c3a0c6b58168f96ca562f9534ed095d40860
+  CapacitorPushNotifications: 729ade0d2791ec1969feaf931a15e28d929a6d70
   Firebase: 735108d2d0b67827cd929bfe8254983907c4479f
   FirebaseCore: 9d7a0caf39ec7317fbe13b3c7864c8c2acc60da8
   FirebaseCoreInternal: 480d23e21f699cc7bcbc3d8eaa301f15d1e3ffaf
@@ -139,10 +139,10 @@ SPEC CHECKSUMS:
   FirebaseMessaging: 3a5de79d8dce82b70815123c05dfb8825111f15d
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
-  IONGeolocationLib: 81f33f88d025846946de2cf63b0c7628e7c6bc9d
+  IONGeolocationLib: 20f9d0248a0b5264511fb57a37e25dd2badf797a
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
 
-PODFILE CHECKSUM: f84be25948798efe5d0acb5d16e0dd3dbb3ff467
+PODFILE CHECKSUM: b110d754b301b45a2fe4671f94f63bce68b8b3b7
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.16.2
