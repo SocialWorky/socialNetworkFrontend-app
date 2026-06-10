@@ -1,0 +1,122 @@
+@use 'src/assets/styles/worky-palettes' as colors;
+
+.pwa-banner {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  // Sit above the mobile bottom nav (56px + home-indicator inset) with a small gap.
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  width: min(480px, calc(100% - 24px));
+  z-index: 1100;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+
+  background: colors.$worky-color-module-container;
+  border: 1px solid colors.$worky-color-greyLight;
+  // Default elevation so the card is visible on the (white) page in light mode.
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.1);
+
+  animation: pwa-banner-in 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pwa-banner-in {
+  from { opacity: 0; transform: translate(-50%, 16px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.pwa-banner__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.pwa-banner__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pwa-banner__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: colors.$worky-color-text;
+}
+
+.pwa-banner__text {
+  font-size: 12px;
+  line-height: 1.35;
+  color: color-mix(in srgb, colors.$worky-color-text, transparent 35%);
+}
+
+.pwa-banner__text--ios {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.pwa-banner__share-icon {
+  font-size: 16px;
+  color: colors.$worky-color-navy;
+  vertical-align: middle;
+}
+
+.pwa-banner__ack {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  color: colors.$worky-color-navy;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.pwa-banner__install {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: colors.$worky-color-navy;
+  color: colors.$worky-color-light;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.88;
+  }
+}
+
+.pwa-banner__close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: color-mix(in srgb, colors.$worky-color-text, transparent 40%);
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  i {
+    font-size: 18px;
+  }
+
+  &:hover {
+    background: colors.$worky-color-greyLight;
+  }
+}

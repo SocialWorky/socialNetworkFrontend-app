@@ -1,0 +1,40 @@
+<div class="pwa-banner" *ngIf="show" role="dialog" [attr.aria-label]="'pwaInstall.title' | workyTranslations:'arguments':appName">
+
+  <img class="pwa-banner__icon" [src]="logoUrl" [alt]="appName" (error)="onLogoError()" />
+
+  <div class="pwa-banner__content">
+    <span class="pwa-banner__title">{{ 'pwaInstall.title' | workyTranslations:'arguments':appName }}</span>
+
+    <span class="pwa-banner__text" *ngIf="mode === 'android'">
+      {{ 'pwaInstall.subtitle' | workyTranslations }}
+    </span>
+
+    <ng-container *ngIf="mode === 'ios'">
+      <span class="pwa-banner__text pwa-banner__text--ios">
+        {{ 'pwaInstall.iosBefore' | workyTranslations }}
+        <i class="material-icons pwa-banner__share-icon">ios_share</i>
+        {{ 'pwaInstall.iosAfter' | workyTranslations }}
+      </span>
+      <button type="button" class="pwa-banner__ack" (click)="markInstalled()">
+        {{ 'pwaInstall.alreadyInstalled' | workyTranslations }}
+      </button>
+    </ng-container>
+  </div>
+
+  <button
+    *ngIf="mode === 'android'"
+    type="button"
+    class="pwa-banner__install"
+    (click)="install()">
+    {{ 'pwaInstall.install' | workyTranslations }}
+  </button>
+
+  <button
+    type="button"
+    class="pwa-banner__close"
+    (click)="dismiss()"
+    [attr.aria-label]="'pwaInstall.dismiss' | workyTranslations">
+    <i class="material-icons">close</i>
+  </button>
+
+</div>
