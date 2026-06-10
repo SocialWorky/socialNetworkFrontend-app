@@ -11,6 +11,11 @@
   height: 100%;
 }
 
+// Brand yellow is unreadable as text on the light badges (greyLight) in light mode.
+// Use a darkened gold for legibility in light, and keep the vibrant yellow in dark
+// (via :host-context(.dark-mode)) so dark mode is unchanged.
+$admin-gold: color-mix(in srgb, colors.$worky-color-yellow, colors.$worky-color-black 30%);
+
 // ── Loading ──────────────────────────────────────────────────────────────────
 
 .gd-loading {
@@ -94,7 +99,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  color: colors.$worky-color-icon;
+  color: colors.$worky-color-text;
   pointer-events: none;
 }
 
@@ -119,7 +124,7 @@
   border-radius: 8px;
   border: 1.5px dashed colors.$worky-color-greyLight;
   background: colors.$worky-color-module-container;
-  color: colors.$worky-color-icon;
+  color: colors.$worky-color-text;
   font-size: 13px;
   font-weight: 500;
   opacity: 0;
@@ -296,7 +301,8 @@
 
   &--private {
     background: colors.$worky-color-greyLight;
-    color: colors.$worky-color-yellow-text;
+    color: $admin-gold;
+    :host-context(.dark-mode) & { color: colors.$worky-color-yellow-text; }
   }
 
   &--secret {
@@ -311,7 +317,7 @@
 
   &--category {
     background: colors.$worky-color-greyLight;
-    color: colors.$worky-color-icon;
+    color: colors.$worky-color-text;
   }
 }
 
@@ -362,14 +368,19 @@
   padding: 8px 16px;
   border-radius: 8px;
   background: colors.$worky-color-greyLight;
-  color: colors.$worky-color-yellow-text;
+  color: $admin-gold;
   font-size: 13px;
   font-weight: 600;
 
   svg {
     width: 14px;
     height: 14px;
-    fill: colors.$worky-color-yellow-text;
+    fill: $admin-gold;
+  }
+
+  :host-context(.dark-mode) & {
+    color: colors.$worky-color-yellow-text;
+    svg { fill: colors.$worky-color-yellow-text; }
   }
 }
 
@@ -412,7 +423,7 @@
 .gd-panel-title {
   font-size: 12px;
   font-weight: 700;
-  color: colors.$worky-color-icon;
+  color: colors.$worky-color-text;
   margin: 0 0 12px;
   display: flex;
   align-items: center;
@@ -455,7 +466,7 @@
 .gd-info-label {
   font-size: 11px;
   font-weight: 600;
-  color: colors.$worky-color-icon;
+  color: colors.$worky-color-text;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -467,7 +478,7 @@
 
 .gd-count-badge {
   background: colors.$worky-color-greyLight;
-  color: colors.$worky-color-icon;
+  color: colors.$worky-color-text;
   font-size: 11px;
   font-weight: 700;
   padding: 1px 7px;
@@ -541,7 +552,7 @@
   margin-bottom: -2px;
   font-size: 14px;
   font-weight: 600;
-  color: colors.$worky-color-icon;
+  color: colors.$worky-color-text;
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
 
@@ -582,7 +593,7 @@
 
   p {
     font-size: 15px;
-    color: colors.$worky-color-icon;
+    color: colors.$worky-color-text;
     margin: 0 0 16px;
   }
 }
@@ -603,7 +614,7 @@
 
   p {
     font-size: 14px;
-    color: colors.$worky-color-icon;
+    color: colors.$worky-color-text;
     margin: 0;
   }
 }
@@ -676,7 +687,7 @@
 
 .gd-member-username {
   font-size: 12px;
-  color: colors.$worky-color-icon;
+  color: colors.$worky-color-text;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -688,13 +699,14 @@
   padding: 3px 10px;
   border-radius: 20px;
   background: colors.$worky-color-greyLight;
-  color: colors.$worky-color-icon;
+  color: colors.$worky-color-text;
   flex-shrink: 0;
   white-space: nowrap;
 
-  &--admin    { background: colors.$worky-color-greyLight; color: colors.$worky-color-yellow-text; }
+  &--admin    { background: colors.$worky-color-greyLight; color: $admin-gold;
+    :host-context(.dark-mode) & { color: colors.$worky-color-yellow-text; } }
   &--moderator { background: colors.$worky-color-greyLight; color: colors.$worky-color-blue; }
-  &--member   { background: colors.$worky-color-greyLight; color: colors.$worky-color-icon; }
+  &--member   { background: colors.$worky-color-greyLight; color: colors.$worky-color-text; }
 }
 
 .gd-btn-icon {
@@ -707,7 +719,7 @@
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: colors.$worky-color-icon;
+  color: colors.$worky-color-text;
   cursor: pointer;
   transition: background 0.15s ease;
   margin-left: auto;
@@ -770,7 +782,7 @@
 .gd-panel-title {
   font-size: 13px;
   font-weight: 600;
-  color: colors.$worky-color-icon;
+  color: colors.$worky-color-text;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin: 0 0 12px;
@@ -841,7 +853,7 @@
 
 .gd-banned-username {
   font-size: 11px;
-  color: colors.$worky-color-icon;
+  color: colors.$worky-color-text;
 }
 
 .gd-banned-notice {
@@ -869,7 +881,7 @@
 
   p {
     font-size: 14px;
-    color: colors.$worky-color-icon;
+    color: colors.$worky-color-text;
     margin: 0;
     max-width: 360px;
   }

@@ -48,8 +48,10 @@
     }
 
     &::placeholder {
-      color: colors.$worky-color-icon;
-      opacity: 0.6;
+      // $worky-color-icon is white in light mode (invisible on a light input);
+      // use the text color at low opacity like other search inputs in the app.
+      color: colors.$worky-color-text;
+      opacity: 0.4;
     }
   }
 }
@@ -67,6 +69,9 @@
   cursor: pointer;
   background: colors.$worky-color-module-container;
   border: 1px solid colors.$worky-color-greyLight;
+  // Default elevation (same as .worky-module-container) so the card stays
+  // distinguishable in light mode, where its background matches the page.
+  box-shadow: 1px 2px 8px 1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 
   &:hover {
@@ -109,7 +114,9 @@
   }
 
   p {
-    color: colors.$worky-color-icon;
+    // $worky-color-icon is white in light mode; use muted text so the description
+    // is readable on the (light) card in both themes.
+    color: color-mix(in srgb, colors.$worky-color-text, transparent 35%);
     font-size: 13px;
     margin: 0 0 8px;
     line-height: 1.4;
@@ -118,7 +125,8 @@
 
 .group-meta {
   font-size: 12px;
-  color: colors.$worky-color-icon;
+  // Muted secondary text (was $worky-color-icon = white in light → invisible).
+  color: color-mix(in srgb, colors.$worky-color-text, transparent 40%);
   margin: 0 0 10px;
   display: flex;
   gap: 10px;
@@ -164,6 +172,7 @@
 .empty {
   text-align: center;
   padding: 60px 20px;
-  color: colors.$worky-color-icon;
+  // Muted text (was $worky-color-icon = white in light → invisible).
+  color: color-mix(in srgb, colors.$worky-color-text, transparent 35%);
   font-size: 15px;
 }

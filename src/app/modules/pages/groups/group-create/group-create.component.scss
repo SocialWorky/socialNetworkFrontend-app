@@ -2,6 +2,10 @@
 @use "src/assets/styles/worky-palettes" as colors;
 @use "src/assets/styles/worky-breakpoints.scss" as breakpoints;
 
+// Darkened gold so the yellow privacy option is legible on the light (greyLight)
+// surface in light mode; the vibrant yellow is kept in dark via :host-context.
+$admin-gold: color-mix(in srgb, colors.$worky-color-yellow, colors.$worky-color-black 30%);
+
 .create-panel {
   background: colors.$worky-color-module-container;
   border: 1px solid colors.$worky-color-greyLight;
@@ -43,7 +47,7 @@
   p {
     margin: 0;
     font-size: 13px;
-    color: colors.$worky-color-icon;
+    color: colors.$worky-color-text;
   }
 }
 
@@ -74,7 +78,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: colors.$worky-color-icon;
+  color: colors.$worky-color-text;
   transition: background 0.15s ease, color 0.15s ease;
   flex-shrink: 0;
 
@@ -132,7 +136,7 @@ form {
   right: 10px;
   bottom: 10px;
   font-size: 11px;
-  color: colors.$worky-color-icon;
+  color: colors.$worky-color-text;
   opacity: 0.6;
   pointer-events: none;
 }
@@ -155,7 +159,7 @@ select {
   resize: none;
 
   &::placeholder {
-    color: colors.$worky-color-icon;
+    color: colors.$worky-color-text;
     opacity: 0.5;
   }
 
@@ -232,7 +236,8 @@ textarea { padding-right: 52px; line-height: 1.5; }
   svg { width: 17px; height: 17px; }
 
   &--public  { color: colors.$worky-color-green;       svg { stroke: colors.$worky-color-green; } }
-  &--private { color: colors.$worky-color-yellow-text; svg { stroke: colors.$worky-color-yellow-text; } }
+  &--private { color: $admin-gold; svg { stroke: $admin-gold; }
+    :host-context(.dark-mode) & { color: colors.$worky-color-yellow-text; svg { stroke: colors.$worky-color-yellow-text; } } }
   &--secret  { color: colors.$worky-color-purple;      svg { stroke: colors.$worky-color-purple; } }
 }
 
@@ -251,7 +256,7 @@ textarea { padding-right: 52px; line-height: 1.5; }
 
   span {
     font-size: 11.5px;
-    color: colors.$worky-color-icon;
+    color: colors.$worky-color-text;
     line-height: 1.4;
   }
 }
