@@ -354,6 +354,7 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.revokePreviewUrls();
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
     this.subscription?.unsubscribe();
@@ -821,28 +822,26 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   private async createPreviews() {
-    this.previews = [];
-    let count = 0;
-    this.selectedFiles.forEach(file => {
-      count++;
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        const fileType = file.type.split('/')[0];
-        this.previews.push({
-          type: fileType === 'image' ? 'image' : 'video',
-          url: e.target.result
-        });
-        this._cdr.markForCheck();
-      };
-      reader.readAsDataURL(file);
+    // Use object URLs (blob:) instead of base64 data URLs. Reading a video with
+    // readAsDataURL builds a huge string in memory and renders the <video> poorly;
+    // object URLs are lightweight and let the <video> show a real frame.
+    this.revokePreviewUrls();
+    this.previews = this.selectedFiles.map(file => {
+      const isImage = file.type.startsWith('image');
+      const blobUrl = URL.createObjectURL(file);
+      // For videos, seek to 0.1s (#t=0.1) so the <video> paints a real frame instead of a
+      // black first frame. The fragment is display-only; we strip it when revoking.
+      return { type: isImage ? 'image' : 'video', url: isImage ? blobUrl : `${blobUrl}#t=0.1` };
     });
-    if (count >= this.selectedFiles.length){
-      setTimeout(() => {
-        this.loaderPreviews = false;
-        this._cdr.markForCheck();
-      }, 500);
-    }
+    this.loaderPreviews = false;
     this._cdr.markForCheck();
+  }
+
+  private revokePreviewUrls() {
+    this.previews.forEach(p => {
+      const base = p.url?.split('#')[0];
+      if (base?.startsWith('blob:')) URL.revokeObjectURL(base);
+    });
   }
 
   replaceVariables(text: string, variables: { [key: string]: any }): string {
@@ -852,6 +851,8 @@ export class AddPublicationComponent implements OnInit, OnDestroy {
   }
 
   removeFile(index: number) {
+    const base = this.previews[index]?.url?.split('#')[0];
+    if (base?.startsWith('blob:')) URL.revokeObjectURL(base);
     this.selectedFiles.splice(index, 1);
     this.previews.splice(index, 1);
   }

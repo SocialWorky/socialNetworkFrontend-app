@@ -97,6 +97,17 @@ export class ImageOrganizerComponent implements OnInit {
     this.preloadMedia();
   }
 
+  // Index (within the shown media) of the first video — only this one autoplays in the feed.
+  get firstVideoIndex(): number {
+    return this.images.findIndex(img => this.isVideoUrl(img.urlCompressed));
+  }
+
+  // True when the gallery contains at least one video — switches the layout to a
+  // video-friendly grid (uniform 16:9 cells) instead of the photo mosaic.
+  get hasVideo(): boolean {
+    return this.images.some(img => this.isVideoUrl(img.urlCompressed) || this.isVideoUrl(img.url));
+  }
+
   isImageUrl(url: string): boolean {
     return /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
   }

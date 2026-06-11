@@ -3,7 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom, lastValueFrom, of, Subject, takeUntil } from 'rxjs';
-import { catchError, filter, switchMap, debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
+import { catchError, filter, switchMap, debounceTime, distinctUntilChanged, finalize, take, map } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { translations } from '@translations/translations';
 
@@ -91,7 +91,7 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
 
   locationStatus: LocationStatus = { discoveryEnabled: false, city: null, country: null };
   isTogglingDiscovery = false;
-  locationDiscoveryEnabled = true;
+  locationDiscoveryEnabled = false;
 
   // Creator profile
   myCreatorProfile: CreatorProfile | null = null;
@@ -185,53 +185,14 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async ngOnInit(): Promise<void> {
-    if (this.idUserProfile === '') {
-      this.idUserProfile = this._authService.getDecodedToken()?.id!;
-      this._cdr.markForCheck();
-    }
-
-    await this.getDataProfile();
-
-    this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe();
-
-    // Fire-and-forget: register profile visit (self-visits are ignored by the backend)
-    this._analyticsService.registerProfileVisit(this.idUserProfile).subscribe({ error: () => {} });
-
-    // Load analytics if viewing own profile and premium
-    this.isCurrentUser = this.idUserProfile === (this._authService.getDecodedToken()?.id ?? '');
-
-    // Load discovery status for own profile
-    if (this.isCurrentUser) {
-      this._exploreService.getLocationStatus().pipe(takeUntil(this.destroy$)).subscribe({
-        next: (status) => { this.locationStatus = status; this._cdr.markForCheck(); },
-        error: () => {},
-      });
-    }
-
-    if (this.isCurrentUser && this._subscriptionService.isPremiumSnapshot()) {
-      this._analyticsService.getProfileStats().pipe(takeUntil(this.destroy$)).subscribe({
-        next: (stats) => {
-          this.profileStats = stats;
-          this._cdr.markForCheck();
-        },
-        error: () => {},
-      });
-    }
-
-    this.getUserFriend();
-
-    this.decodedToken = this._authService.getDecodedToken()!;
-    this.isCurrentUser = this.idUserProfile === this.decodedToken.id;
-
+    // One-time subscriptions — independent of which profile is shown. They read
+    // this.idUserProfile / this.isCurrentUser at event time, so they stay correct as the
+    // profile changes. Wired once per component instance.
     this.subscribeToNotificationNewPublication();
     this.subscribeToNotificationDeletePublication();
     this.subscribeToNotificationUpdatePublication();
     this.subscribeToNotificationComment();
     this.scrollSubscription();
-
-    this.publicationsProfile.set([]);
-    await this.loadPublications();
-    this.loaderPublications = false;
 
     this._profileNotificationService.profileUpdated$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.getDataProfile();
@@ -249,6 +210,77 @@ export class ProfilesComponent implements OnInit, OnDestroy, AfterViewInit {
     ).subscribe(() => {
       this.handlePullToRefresh();
     });
+
+    // Reload the profile whenever the route param changes. IonicRouteStrategy REUSES this
+    // component when navigating profile→profile, so ngOnInit/constructor do NOT run again —
+    // reacting to paramMap is what reloads the data. Reading it once from the snapshot left the
+    // page showing stale/empty data until a manual refresh (and risked publishing on the wrong
+    // profile context).
+    this._activatedRoute.paramMap
+      .pipe(
+        map((params) => params.get('profileId') || this._authService.getDecodedToken()?.id || ''),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$),
+      )
+      .subscribe((profileId) => {
+        this.idUserProfile = profileId;
+        this.loadProfileFor();
+      });
+  }
+
+  // Loads everything tied to the currently-selected profile. Called on every route param
+  // change so navigating between profiles (with the component reused) always refreshes.
+  private async loadProfileFor(): Promise<void> {
+    // Reset feed + pagination so a reused component (IonicRouteStrategy) reloads from page 1.
+    // NOTE: do NOT set loaderPublications=true here — loadPublications() early-returns when it
+    // is already true, which would skip loading the publications entirely.
+    this.publicationsProfile.set([]);
+    this.page = 1;
+    this.hasMorePublications = true;
+    this.loaderPublications = false;
+    this._cdr.markForCheck();
+
+    await this.getDataProfile();
+
+    this._profileService.validateProfile(this.idUserProfile).pipe(takeUntil(this.destroy$)).subscribe();
+
+    // Fire-and-forget: register profile visit (self-visits are ignored by the backend)
+    this._analyticsService.registerProfileVisit(this.idUserProfile).subscribe({ error: () => {} });
+
+    this.decodedToken = this._authService.getDecodedToken()!;
+    this.isCurrentUser = this.idUserProfile === (this.decodedToken?.id ?? '');
+
+    // Load discovery status for own profile, only once the location-discovery feature is
+    // enabled site-wide — avoids calling /explore/location when the nearby module is disabled.
+    if (this.isCurrentUser) {
+      this._configService.locationDiscoveryEnabled$
+        .pipe(
+          filter((enabled) => enabled),
+          take(1),
+          switchMap(() => this._exploreService.getLocationStatus()),
+          takeUntil(this.destroy$),
+        )
+        .subscribe({
+          next: (status) => { this.locationStatus = status; this._cdr.markForCheck(); },
+          error: () => {},
+        });
+    }
+
+    if (this.isCurrentUser && this._subscriptionService.isPremiumSnapshot()) {
+      this._analyticsService.getProfileStats().pipe(takeUntil(this.destroy$)).subscribe({
+        next: (stats) => {
+          this.profileStats = stats;
+          this._cdr.markForCheck();
+        },
+        error: () => {},
+      });
+    }
+
+    this.getUserFriend();
+
+    await this.loadPublications();
+    this.loaderPublications = false;
+    this._cdr.markForCheck();
   }
 
   ngAfterViewInit(): void {

@@ -81,6 +81,14 @@ export class NotificationPublicationService implements OnDestroy {
     }
 
     sendNotificationNewPublication(payload: any) {
+      // Update the local stream immediately so the author's own feed shows the new
+      // publication right away, without depending on the WebSocket round-trip (which can be
+      // missed during socket reconnects or a token refresh, forcing a manual reload).
+      // The home/profile feed dedupes by _id, so the echoed socket event is a no-op.
+      if (payload?.publications?._id) {
+        this._notificationNewPublication.next([payload]);
+      }
+      // Also broadcast to other clients via socket.
       this.webSocketOptimizationService.emit('newPublication', payload);
     }
 
