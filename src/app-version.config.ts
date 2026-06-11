@@ -21,10 +21,46 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '3.3.1',
+  version: '3.4.0',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🚀 NOVEDADES (v3.4.0 — 2026-06-11):
+
+    📹 Videos en el feed:
+    - Added: Reproducción inline estilo Facebook — el primer video de una publicación se
+      reproduce automáticamente (silenciado) al entrar en pantalla; los demás con play manual.
+      No se agranda hasta que el usuario lo decide (botón expandir / pantalla completa)
+    - Added: Distribución inteligente de videos — grilla 16:9 uniforme para varios videos
+      (el primero destacado); un solo video respeta su proporción natural (vertical/horizontal)
+      con alto acotado, sin recortes ni bandas innecesarias
+
+    🐛 CORRECCIONES (v3.4.0 — 2026-06-11):
+
+    📤 Subida de archivos:
+    - Fixed: Subir varios videos (o uno grande) fallaba — ahora cada archivo se sube en su
+      propio request para no exceder el límite de tamaño del borde (~100MB)
+    - Fixed: Con varios videos solo cargaba el primero ("Video not available") — el media
+      cross-origin (MinIO) ya no consume el límite de cargas concurrentes
+    - Fixed: Previsualización de videos al subir — usa object URLs + frame a 0.1s en vez de
+      base64 (más liviano y muestra un cuadro real)
+
+    👤 Perfil:
+    - Fixed: A veces no cargaban los datos del perfil (había que refrescar) — recarga reactiva
+      al cambiar de ruta (compatible con el reuso de componente de Ionic)
+    - Fixed: No se veían las propias publicaciones al entrar al perfil
+
+    📰 Feed:
+    - Fixed: La publicación recién creada no aparecía hasta refrescar — el feed del autor se
+      actualiza al instante
+
+    📍 Personas cercanas:
+    - Fixed: Con el módulo deshabilitado, el front seguía llamando /explore/location (503 en bucle)
+
+    🛠️ Build:
+    - Changed: El build falla si no puede generar los íconos PWA, para no publicar una imagen
+      sin íconos de forma silenciosa
+
     🐛 CORRECCIONES (v3.3.1 — 2026-06-10):
 
     💬 Chat:
