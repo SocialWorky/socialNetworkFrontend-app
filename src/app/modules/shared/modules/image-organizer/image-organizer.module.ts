@@ -9,6 +9,7 @@ import { HeaderViewContentComponent } from './components/media-view/message-load
 import { BodyViewContentComponent } from './components/media-view/message-loading/body-view-content/body-view-content.component';
 import { ImageSkeletonComponent } from '@shared/components/skeleton/image-skeleton.component';
 import { WorkyImageComponent } from '../worky-image/worky-image.component';
+import { OptimizedVideoComponent } from '@shared/components/optimized-video/optimized-video.component';
 import { WorkyAvatarModule } from '../worky-avatar/worky-avatar.module';
 import { PipesSharedModule } from '@shared/pipes/pipes-shared.module';
 import { ReactionsModule } from '../reactions/reactions.module';
@@ -33,6 +34,7 @@ import { TranslationsModule } from '../translations/translations.module';
     TranslationsModule,
     ImageSkeletonComponent,
     WorkyImageComponent,
+    OptimizedVideoComponent,
   ],
   exports: [ImageOrganizerComponent],
 })

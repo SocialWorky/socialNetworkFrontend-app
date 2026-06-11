@@ -25,7 +25,8 @@
       'three-images': images.length === 3,
       'four-images': images.length === 4,
       'five-images': images.length === 5,
-      'more-five-images': images.length > 5
+      'more-five-images': images.length > 5,
+      'has-video': hasVideo
     }">
     <ng-container *ngFor="let image of images.slice(0, 5); let i = index">
       <div class="gallery-item" (click)="openViewMedia(image)"
@@ -44,27 +45,25 @@
         </ng-container>
 
         <ng-container *ngIf="isVideoUrl(image.urlCompressed)">
-          <div class="video-thumbnail-wrapper">
-            <worky-image
-              [src]="getNormalizedImageUrl(image.urlThumbnail)"
-              alt="Video thumbnail"
-              [publicationId]="publication?._id"
-              [commentId]="comment?._id"
-              [mediaId]="image._id"
-              [imageType]="type === 'publication' ? 'publication' : (type === 'comment' ? 'media' : 'media')"
-              mediaType="video"
-              (load)="onImageLoad()"
-              (error)="onImageError($event)">
-            </worky-image>
-            <div class="video-play-overlay">
-              <div class="play-button-circle">
-                <span class="material-icons">play_arrow</span>
-              </div>
-            </div>
-            <div class="video-badge">
-              <span class="material-icons">videocam</span>
-              <span>VIDEO</span>
-            </div>
+          <!-- Inline (Facebook-style) playback. Clicks stay on the player so the publication
+               does NOT expand; the modal opens only via the explicit expand button. The first
+               video autoplays muted when scrolled into view; the rest play on user action. -->
+          <div class="inline-video-wrapper" (click)="$event.stopPropagation()">
+            <worky-optimized-video
+              [src]="getNormalizedImageUrl(image.urlCompressed)"
+              [poster]="getNormalizedImageUrl(image.urlThumbnail)"
+              [controls]="true"
+              [muted]="i === firstVideoIndex"
+              [autoplayWhenVisible]="i === firstVideoIndex"
+              [loop]="false"
+              preload="metadata"
+              (loaded)="onImageLoad()">
+            </worky-optimized-video>
+            <button class="video-expand-btn" type="button"
+                    (click)="$event.stopPropagation(); openViewMedia(image)"
+                    aria-label="Expandir video">
+              <span class="material-icons">fullscreen</span>
+            </button>
           </div>
         </ng-container>
       </div>

@@ -12,7 +12,7 @@
     <div class="loader" *ngIf="loading"></div>
     <div *ngFor="let preview of previews; let i = index" class="preview">
       <img *ngIf="preview.type.startsWith('image/')" [src]="preview.url" alt="{{ 'imageUpload.imagePreview' | workyTranslations }}">
-      <video *ngIf="preview.type.startsWith('video/')" [src]="preview.url" controls></video>
+      <video *ngIf="preview.type.startsWith('video/')" [src]="preview.url" controls preload="metadata" muted playsinline></video>
 
       <i class="material-icons remove-button" (click)="removeFile(i)">close</i>
     </div>

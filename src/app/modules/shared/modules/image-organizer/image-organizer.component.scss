@@ -101,6 +101,94 @@
 .gallery-item:nth-child(4) { grid-area: image4; }
 .gallery-item:nth-child(5) { grid-area: image5; }
 
+// ── Video-friendly layout: replaces the photo mosaic when the gallery has videos.
+//    Uniform 16:9 cells so videos fit without empty gaps or cropping. ──
+.gallery.has-video {
+  height: auto;
+  grid-template-columns: 1fr;
+  grid-template-areas: none;
+  grid-auto-rows: auto;
+
+  &.two-images,
+  &.three-images,
+  &.four-images,
+  &.five-images,
+  &.more-five-images {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .gallery-item {
+    height: auto !important;
+    aspect-ratio: 16 / 9;
+    grid-area: auto !important;
+    background: #000;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  // With an odd count, the first video takes the full width (big on top, rest below).
+  &.three-images .gallery-item:nth-child(1),
+  &.five-images .gallery-item:nth-child(1),
+  &.more-five-images .gallery-item:nth-child(1) {
+    grid-column: 1 / -1;
+  }
+
+  // Show the whole frame (no crop); the black cell fills any non-16:9 leftover.
+  .gallery-item img,
+  .gallery-item video {
+    object-fit: contain !important;
+  }
+
+  .inline-video-wrapper ::ng-deep .video-container,
+  .inline-video-wrapper ::ng-deep .video-container video {
+    object-fit: contain !important;
+    min-height: 0;
+  }
+}
+
+// A SINGLE video keeps its natural aspect ratio (portrait stays portrait, landscape stays
+// landscape), capped in height and centered on black — no forced 16:9, no crop.
+.gallery.single.has-video {
+  height: auto;
+
+  .gallery-item {
+    aspect-ratio: auto;
+    height: auto !important;
+    max-height: 75vh;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .inline-video-wrapper {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 75vh;
+  }
+
+  .inline-video-wrapper ::ng-deep .video-container,
+  .inline-video-wrapper ::ng-deep .video-container video {
+    width: auto !important;
+    height: auto !important;
+    max-width: 100%;
+    max-height: 75vh;
+    min-height: 0;
+    object-fit: contain !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .gallery.has-video { height: auto; }
+  .gallery.single.has-video .gallery-item,
+  .gallery.single.has-video .inline-video-wrapper,
+  .gallery.single.has-video .inline-video-wrapper ::ng-deep .video-container,
+  .gallery.single.has-video .inline-video-wrapper ::ng-deep .video-container video {
+    max-height: 60vh;
+  }
+}
+
 .gallery.more-five-images .gallery-item:nth-child(5) {
   grid-area: more;
   position: relative;
@@ -193,6 +281,54 @@
   }
 }
 
+
+// Inline (Facebook-style) video inside a feed gallery cell.
+.inline-video-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  worky-optimized-video,
+  ::ng-deep .video-container {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  ::ng-deep .video-container video {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: cover;
+  }
+}
+
+.video-expand-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  .material-icons {
+    font-size: 20px;
+  }
+}
 
 .lightbox {
   position: fixed;

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { MediaCacheService, MediaCacheOptions } from '../../services/media-cache.service';
@@ -60,7 +60,7 @@ import { LogService, LevelLogEnum } from '../../services/core-apis/log.service';
   standalone: true,
   imports: [CommonModule]
 })
-export class OptimizedVideoComponent implements OnInit, OnDestroy {
+export class OptimizedVideoComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() src!: string;
   @Input() poster?: string;
   @Input() controls: boolean = true;
@@ -71,6 +71,10 @@ export class OptimizedVideoComponent implements OnInit, OnDestroy {
   @Input() options: MediaCacheOptions = {};
   @Input() showQualityIndicator: boolean = true;
   @Input() fallbackSrc: string = '/assets/img/shared/video-error.png';
+  // Facebook-style: play (muted) when scrolled into view, pause when out of view.
+  @Input() autoplayWhenVisible: boolean = false;
+
+  @Output() loaded = new EventEmitter<void>();
 
   @ViewChild('videoElement', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
 
@@ -85,6 +89,8 @@ export class OptimizedVideoComponent implements OnInit, OnDestroy {
   private readonly MAX_RETRIES = 3;
 
   private destroy$ = new Subject<void>();
+  private intersectionObserver?: IntersectionObserver;
+  private isVisible = false;
 
   constructor(
     private mediaCacheService: MediaCacheService,
@@ -97,7 +103,34 @@ export class OptimizedVideoComponent implements OnInit, OnDestroy {
     this.loadVideo();
   }
 
+  ngAfterViewInit(): void {
+    if (this.autoplayWhenVisible && typeof IntersectionObserver !== 'undefined' && this.videoElement?.nativeElement) {
+      this.intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          this.isVisible = !!entry && entry.isIntersecting && entry.intersectionRatio >= 0.5;
+          this.updatePlaybackForVisibility();
+        },
+        { threshold: [0, 0.5, 1] },
+      );
+      this.intersectionObserver.observe(this.videoElement.nativeElement);
+    }
+  }
+
+  // Play (always muted, so the browser allows autoplay) while in view; pause when out of view.
+  private updatePlaybackForVisibility(): void {
+    const el = this.videoElement?.nativeElement;
+    if (!el) return;
+    if (this.isVisible) {
+      el.muted = true;
+      el.play().catch(() => { /* autoplay can be blocked; ignore */ });
+    } else if (!el.paused) {
+      el.pause();
+    }
+  }
+
   ngOnDestroy(): void {
+    this.intersectionObserver?.disconnect();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -111,6 +144,11 @@ export class OptimizedVideoComponent implements OnInit, OnDestroy {
     this.isLoading = false;
     this.hasError = false;
     this.cdr.markForCheck();
+    this.loaded.emit();
+    // If it scrolled into view before it could play, start now.
+    if (this.autoplayWhenVisible && this.isVisible) {
+      this.updatePlaybackForVisibility();
+    }
   }
 
   onVideoError(): void {

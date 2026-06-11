@@ -100,7 +100,7 @@
         <div class="loader" *ngIf="loaderPreviews && !previews.length"></div>
         <div *ngFor="let preview of previews; let i = index" class="preview">
           <img *ngIf="preview.type === 'image'" [src]="preview.url" alt="Image Preview" (error)="onImageError($event)">
-          <video *ngIf="preview.type === 'video'" [src]="preview.url" controls></video>
+          <video *ngIf="preview.type === 'video'" [src]="preview.url" controls preload="metadata" muted playsinline></video>
           <i class="material-icons remove-button" (click)="removeFile(i)">close</i>
         </div>
       </div>

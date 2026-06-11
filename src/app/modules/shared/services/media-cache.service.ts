@@ -111,7 +111,15 @@ export class MediaCacheService {
     // Normalize URL before using it
     const utilityService = this.injector.get(UtilityService);
     const normalizedUrl = utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
-    
+
+    // Cross-origin media (MinIO / file-service subdomain) is streamed directly by the native
+    // <video>/<img> via its URL — we never blob-fetch it (CORS would block it anyway). So it
+    // must NOT consume the concurrent-load budget; otherwise a publication with several videos
+    // errors out ("Too many video loads") on all but the first. Short-circuit before the guard.
+    if (this.isCrossOriginUrl(normalizedUrl)) {
+      return of(normalizedUrl);
+    }
+
     const finalOptions = { ...this.DEFAULT_OPTIONS, ...options };
     const cacheKey = this.generateCacheKey(normalizedUrl, finalOptions.quality || 'medium');
 

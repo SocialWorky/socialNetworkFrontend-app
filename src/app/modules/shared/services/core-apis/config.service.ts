@@ -17,7 +17,9 @@ export class ConfigService {
   private subscriptionModeSubject = new BehaviorSubject<boolean>(false);
   private groupsEnabledSubject = new BehaviorSubject<boolean>(true);
   private eventsEnabledSubject = new BehaviorSubject<boolean>(true);
-  private locationDiscoveryEnabledSubject = new BehaviorSubject<boolean>(true);
+  // Opt-in feature gated behind a server config flag; stays off until the config confirms it,
+  // so the UI never mounts the nearby module nor calls /explore/* while it is disabled.
+  private locationDiscoveryEnabledSubject = new BehaviorSubject<boolean>(false);
 
   private _unsubscribeAll = new Subject<void>();
 

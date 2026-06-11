@@ -53,36 +53,33 @@ export class ImageUploadModalComponent implements OnInit {
   }
 
   handleFiles(files: FileList): void {
-    const validFiles: File[] = [];
-    const validPreviews: { url: string, type: string }[] = [];
+    const newFiles: File[] = [];
+    const newPreviews: { url: string, type: string }[] = [];
 
     for (let i = 0; i < files.length; i++) {
+      if (newFiles.length + this.selectedFiles.length >= this.maxFiles) {
+        break;
+      }
       const file = files[i];
 
       if (this.ALLOWED_TYPES.has(file.type)) {
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          validPreviews.push({ url: e.target.result, type: file.type });
-
-          if (validPreviews.length === validFiles.length) {
-            this.selectedFiles = [...this.selectedFiles, ...validFiles];
-            this.previews = [...this.previews, ...validPreviews];
-            this._cdr.markForCheck();
-          }
-        };
-        reader.readAsDataURL(file);
-        validFiles.push(file);
+        newFiles.push(file);
+        // Object URL (blob:) instead of base64: lightweight and renders the video frame.
+        // For videos seek to 0.1s (#t=0.1) so a real frame shows instead of a black one.
+        const blobUrl = URL.createObjectURL(file);
+        const url = file.type.startsWith('video/') ? `${blobUrl}#t=0.1` : blobUrl;
+        newPreviews.push({ url, type: file.type });
       } else {
         this.showAlert('imageUpload.fileTypeNotAllowed' + ': ' + file.name);
-        this.loading = false;
-      }
-
-      if (validFiles.length + this.selectedFiles.length >= this.maxFiles) {
-        this.loading = false;
-        break;
       }
     }
+
+    if (newFiles.length) {
+      this.selectedFiles = [...this.selectedFiles, ...newFiles];
+      this.previews = [...this.previews, ...newPreviews];
+    }
     this.loading = false;
+    this._cdr.markForCheck();
   }
 
   showAlert(message: string) {
@@ -108,6 +105,8 @@ export class ImageUploadModalComponent implements OnInit {
   }
 
   removeFile(index: number) {
+    const base = this.previews[index]?.url?.split('#')[0];
+    if (base?.startsWith('blob:')) URL.revokeObjectURL(base);
     this.selectedFiles.splice(index, 1);
     this.previews.splice(index, 1);
     this._cdr.markForCheck();
