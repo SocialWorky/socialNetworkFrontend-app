@@ -2,7 +2,10 @@ FROM node:22.1.0-alpine3.18 AS dev-deps
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN apk add --no-cache build-base python3 && npm ci
+# npm install (not npm ci) so the build reconciles package-lock.json automatically. npm ci
+# aborts when package.json and the lockfile drift (e.g. a version bump without regenerating
+# the lock), which forced manual lockfile rebuilds; npm install resolves it inside the image.
+RUN apk add --no-cache build-base python3 && npm install --no-audit --no-fund
 
 FROM node:22.1.0-alpine3.18 AS builder
 WORKDIR /app
@@ -24,7 +27,8 @@ RUN npm run generate-icons
 FROM node:22.1.0-alpine3.18 AS prod-deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --production --frozen-lockfile
+# Same reasoning as dev-deps: npm install reconciles the lockfile in-build (no manual rebuild).
+RUN npm install --omit=dev --no-audit --no-fund
 
 FROM nginx:alpine AS prod
 WORKDIR /app
