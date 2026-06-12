@@ -37,8 +37,35 @@ async function downloadImage(url) {
   return buffer;
 }
 
+// Local logos used when the remote brand logo (NG_APP_META_IMAGE) is missing or unreachable
+// (e.g. returns 404). The build then still produces PWA icons from a fallback instead of
+// failing or silently shipping none — fix the URL to get the real branded icons.
+const FALLBACK_LOGOS = [
+  path.join(__dirname, 'src', 'assets', 'icons', 'icon-Worky-512x512.png'),
+  path.join(__dirname, 'src', 'assets', 'icon', 'favicon.png'),
+];
+
+async function getSourceImage(url) {
+  if (url) {
+    try {
+      return await downloadImage(url);
+    } catch (err) {
+      console.warn(`No se pudo descargar el logo de marca (${url}): ${err.message}. Usando un logo local de respaldo.`);
+    }
+  } else {
+    console.warn('NG_APP_META_IMAGE no está definida. Usando un logo local de respaldo.');
+  }
+  for (const fp of FALLBACK_LOGOS) {
+    if (fs.existsSync(fp)) {
+      console.warn(`Logo de respaldo: ${fp}`);
+      return fs.readFileSync(fp);
+    }
+  }
+  throw new Error('No hay logo remoto ni de respaldo local para generar los íconos.');
+}
+
 async function generateIcons(imageUrl, outputDir) {
-  const imageBuffer = await downloadImage(imageUrl);
+  const imageBuffer = await getSourceImage(imageUrl);
 
   // Validate the buffer is a real raster image before generating any size.
   const metadata = await sharp(imageBuffer).metadata();
@@ -91,14 +118,11 @@ async function generateIcons(imageUrl, outputDir) {
 const ICON_URL = process.env.NG_APP_META_IMAGE;
 const OUTPUT_DIR = path.join(__dirname, 'src', 'assets', 'icons');
 
-if (!ICON_URL) {
-  console.error("La variable de entorno NG_APP_META_IMAGE no está definida.");
-  process.exit(1);
-}
-
+// No `exit(1)` when ICON_URL is missing: getSourceImage falls back to a local logo, so the
+// build always produces icons. We only fail if not even the local fallback exists, or if
+// generation/verification itself fails.
 generateIcons(ICON_URL, OUTPUT_DIR)
   .catch((error) => {
-    // Fail the build instead of publishing an image with missing PWA icons.
-    console.error(`Error al generar los íconos desde "${ICON_URL}": ${error.message}`);
+    console.error(`Error al generar los íconos: ${error.message}`);
     process.exit(1);
   });
