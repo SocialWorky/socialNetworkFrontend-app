@@ -37,35 +37,8 @@ async function downloadImage(url) {
   return buffer;
 }
 
-// Local logos used when the remote brand logo (NG_APP_META_IMAGE) is missing or unreachable
-// (e.g. returns 404). The build then still produces PWA icons from a fallback instead of
-// failing or silently shipping none — fix the URL to get the real branded icons.
-const FALLBACK_LOGOS = [
-  path.join(__dirname, 'src', 'assets', 'icons', 'icon-Worky-512x512.png'),
-  path.join(__dirname, 'src', 'assets', 'icon', 'favicon.png'),
-];
-
-async function getSourceImage(url) {
-  if (url) {
-    try {
-      return await downloadImage(url);
-    } catch (err) {
-      console.warn(`No se pudo descargar el logo de marca (${url}): ${err.message}. Usando un logo local de respaldo.`);
-    }
-  } else {
-    console.warn('NG_APP_META_IMAGE no está definida. Usando un logo local de respaldo.');
-  }
-  for (const fp of FALLBACK_LOGOS) {
-    if (fs.existsSync(fp)) {
-      console.warn(`Logo de respaldo: ${fp}`);
-      return fs.readFileSync(fp);
-    }
-  }
-  throw new Error('No hay logo remoto ni de respaldo local para generar los íconos.');
-}
-
 async function generateIcons(imageUrl, outputDir) {
-  const imageBuffer = await getSourceImage(imageUrl);
+  const imageBuffer = await downloadImage(imageUrl);
 
   // Validate the buffer is a real raster image before generating any size.
   const metadata = await sharp(imageBuffer).metadata();
@@ -118,11 +91,17 @@ async function generateIcons(imageUrl, outputDir) {
 const ICON_URL = process.env.NG_APP_META_IMAGE;
 const OUTPUT_DIR = path.join(__dirname, 'src', 'assets', 'icons');
 
-// No `exit(1)` when ICON_URL is missing: getSourceImage falls back to a local logo, so the
-// build always produces icons. We only fail if not even the local fallback exists, or if
-// generation/verification itself fails.
+// The icons MUST come from NG_APP_META_IMAGE (the brand logo URL). If the variable is not
+// set, or the image can't be downloaded/validated, FAIL the build on purpose: it means the
+// variable is misconfigured or the image no longer exists, and that must be fixed — no silent
+// fallback that would publish wrong/missing icons.
+if (!ICON_URL) {
+  console.error('NG_APP_META_IMAGE no está definida — no se pueden generar los íconos. Declárala con la URL del logo.');
+  process.exit(1);
+}
+
 generateIcons(ICON_URL, OUTPUT_DIR)
   .catch((error) => {
-    console.error(`Error al generar los íconos: ${error.message}`);
+    console.error(`Error al generar los íconos desde "${ICON_URL}": ${error.message}. Verifica que la URL sea válida y la imagen exista.`);
     process.exit(1);
   });
