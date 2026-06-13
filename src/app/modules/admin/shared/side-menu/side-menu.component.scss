@@ -1,1 +1,95 @@
+:host {
+  display: block;
+  height: 100%;
+}
 
+.admin-scroll {
+  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.4); border-radius: 3px; }
+  &::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.6); }
+}
+
+// Navigation item — generous, comfortable touch target
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #cbd5e1; // slate-300
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+
+  &:hover {
+    background: rgba(30, 41, 59, 0.7); // slate-800/70
+    color: #f1f5f9; // slate-100
+  }
+
+  &.active {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.35);
+    color: #bfdbfe; // blue-200
+    box-shadow: inset 3px 0 0 0 #3b82f6;
+
+    .nav-icon {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+    }
+  }
+
+  &:hover .nav-icon { color: #60a5fa; } // blue-400
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: 0.5rem;
+  background: rgba(30, 41, 59, 0.8); // slate-800
+  color: #94a3b8; // slate-400
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+// Submenu item
+.nav-subitem {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #94a3b8; // slate-400
+  transition: background-color 0.18s ease, color 0.18s ease;
+
+  &:hover { background: rgba(30, 41, 59, 0.6); color: #e2e8f0; }
+
+  &.active {
+    background: rgba(59, 130, 246, 0.12);
+    color: #93c5fd;
+    .material-icons { color: #60a5fa; }
+  }
+}
+
+// Logout variant
+.nav-item--danger:hover {
+  background: rgba(127, 29, 29, 0.25);
+  color: #fca5a5; // red-300
+
+  .nav-icon--danger { color: #f87171; } // red-400
+}
+
+@keyframes slide-in-from-top {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in { animation: slide-in-from-top 0.2s ease-out; }

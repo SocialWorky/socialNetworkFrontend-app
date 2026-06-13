@@ -94,141 +94,141 @@
   <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mt-8" *ngIf="!isLoading && !error && adminOverview">
 
     <!-- Users Card -->
-    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20 relative overflow-hidden group">
-      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-30"></div>
-      <div class="flex items-center gap-4 mb-6">
-        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white text-2xl">
+    <div class="stat-card group">
+      <span class="stat-accent bg-blue-500"></span>
+      <div class="flex items-center gap-4 mb-5">
+        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
           <i class="material-icons">people</i>
         </div>
-        <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.statistics.users.title' | workyTranslations }}</h3>
-          <p class="text-sm text-slate-400">{{ 'admin.statistics.users.subtitle' | workyTranslations }}</p>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-lg font-semibold text-slate-100 truncate">{{ 'admin.statistics.users.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400 truncate">{{ 'admin.statistics.users.subtitle' | workyTranslations }}</p>
         </div>
       </div>
-      <div class="flex items-baseline gap-2 mb-4">
-        <span class="text-5xl font-bold text-slate-100">{{ adminOverview.totalUsers | number }}</span>
-        <span class="text-lg text-slate-400">{{ 'admin.statistics.users.unit' | workyTranslations }}</span>
+      <div class="flex items-baseline gap-2">
+        <span class="text-5xl font-bold text-slate-50 tracking-tight">{{ adminOverview.totalUsers | number }}</span>
+        <span class="text-base text-slate-400">{{ 'admin.statistics.users.unit' | workyTranslations }}</span>
       </div>
-      <div class="flex flex-col gap-2">
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-slate-400">{{ 'admin.statistics.users.active' | workyTranslations }}:</span>
-          <span class="text-sm font-semibold text-slate-100">{{ adminOverview.activeUsers | number }}</span>
+      <div class="stat-meta">
+        <div class="stat-chip">
+          <span class="stat-chip-label">{{ 'admin.statistics.users.active' | workyTranslations }}</span>
+          <span class="stat-chip-value">{{ adminOverview.activeUsers | number }}</span>
         </div>
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-slate-400">{{ 'admin.statistics.users.pending' | workyTranslations }}:</span>
-          <span class="text-sm font-semibold text-slate-100">{{ adminOverview.pendingVerificationUsers | number }}</span>
+        <div class="stat-chip">
+          <span class="stat-chip-label">{{ 'admin.statistics.users.pending' | workyTranslations }}</span>
+          <span class="stat-chip-value">{{ adminOverview.pendingVerificationUsers | number }}</span>
         </div>
       </div>
     </div>
 
     <!-- Publications Card -->
-    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20 relative overflow-hidden group">
-      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-30"></div>
-      <div class="flex items-center gap-4 mb-6">
-        <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center text-white text-2xl">
+    <div class="stat-card group">
+      <span class="stat-accent bg-emerald-500"></span>
+      <div class="flex items-center gap-4 mb-5">
+        <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
           <i class="material-icons">article</i>
         </div>
-        <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.statistics.publications.title' | workyTranslations }}</h3>
-          <p class="text-sm text-slate-400">{{ 'admin.statistics.publications.subtitle' | workyTranslations }}</p>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-lg font-semibold text-slate-100 truncate">{{ 'admin.statistics.publications.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400 truncate">{{ 'admin.statistics.publications.subtitle' | workyTranslations }}</p>
         </div>
       </div>
-      <div class="flex items-baseline gap-2 mb-4">
-        <span class="text-5xl font-bold text-slate-100">{{ adminOverview.totalPublications | number }}</span>
-        <span class="text-lg text-slate-400">{{ 'admin.statistics.publications.unit' | workyTranslations }}</span>
+      <div class="flex items-baseline gap-2">
+        <span class="text-5xl font-bold text-slate-50 tracking-tight">{{ adminOverview.totalPublications | number }}</span>
+        <span class="text-base text-slate-400">{{ 'admin.statistics.publications.unit' | workyTranslations }}</span>
       </div>
-      <div class="flex flex-col gap-2">
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-slate-400">{{ 'admin.statistics.publications.withMedia' | workyTranslations }}:</span>
-          <span class="text-sm font-semibold text-slate-100">{{ adminOverview.publicationsWithMedia | number }}</span>
+      <div class="stat-meta">
+        <div class="stat-chip">
+          <span class="stat-chip-label">{{ 'admin.statistics.publications.withMedia' | workyTranslations }}</span>
+          <span class="stat-chip-value">{{ adminOverview.publicationsWithMedia | number }}</span>
         </div>
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-slate-400">{{ 'admin.statistics.today' | workyTranslations }}:</span>
-          <span class="text-sm font-semibold text-slate-100">{{ adminOverview.publicationsToday | number }}</span>
+        <div class="stat-chip">
+          <span class="stat-chip-label">{{ 'admin.statistics.today' | workyTranslations }}</span>
+          <span class="stat-chip-value">{{ adminOverview.publicationsToday | number }}</span>
         </div>
       </div>
     </div>
 
     <!-- Comments Card -->
-    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20 relative overflow-hidden group">
-      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-30"></div>
-      <div class="flex items-center gap-4 mb-6">
-        <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center text-white text-2xl">
+    <div class="stat-card group">
+      <span class="stat-accent bg-cyan-500"></span>
+      <div class="flex items-center gap-4 mb-5">
+        <div class="w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
           <i class="material-icons">chat_bubble</i>
         </div>
-        <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.statistics.comments.title' | workyTranslations }}</h3>
-          <p class="text-sm text-slate-400">{{ 'admin.statistics.comments.subtitle' | workyTranslations }}</p>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-lg font-semibold text-slate-100 truncate">{{ 'admin.statistics.comments.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400 truncate">{{ 'admin.statistics.comments.subtitle' | workyTranslations }}</p>
         </div>
       </div>
-      <div class="flex items-baseline gap-2 mb-4">
-        <span class="text-5xl font-bold text-slate-100">{{ adminOverview.totalComments | number }}</span>
-        <span class="text-lg text-slate-400">{{ 'admin.statistics.comments.unit' | workyTranslations }}</span>
+      <div class="flex items-baseline gap-2">
+        <span class="text-5xl font-bold text-slate-50 tracking-tight">{{ adminOverview.totalComments | number }}</span>
+        <span class="text-base text-slate-400">{{ 'admin.statistics.comments.unit' | workyTranslations }}</span>
       </div>
-      <div class="flex flex-col gap-2">
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-slate-400">{{ 'admin.statistics.comments.avgPerPub' | workyTranslations }}:</span>
-          <span class="text-sm font-semibold text-slate-100">{{ (adminOverview.totalPublications > 0 ? adminOverview.totalComments / adminOverview.totalPublications : 0) | number:'1.1-1' }}</span>
+      <div class="stat-meta">
+        <div class="stat-chip">
+          <span class="stat-chip-label">{{ 'admin.statistics.comments.avgPerPub' | workyTranslations }}</span>
+          <span class="stat-chip-value">{{ (adminOverview.totalPublications > 0 ? adminOverview.totalComments / adminOverview.totalPublications : 0) | number:'1.1-1' }}</span>
         </div>
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-slate-400">{{ 'admin.statistics.today' | workyTranslations }}:</span>
-          <span class="text-sm font-semibold text-slate-100">{{ adminOverview.commentsToday | number }}</span>
+        <div class="stat-chip">
+          <span class="stat-chip-label">{{ 'admin.statistics.today' | workyTranslations }}</span>
+          <span class="stat-chip-value">{{ adminOverview.commentsToday | number }}</span>
         </div>
       </div>
     </div>
 
     <!-- Reactions Card -->
-    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20 relative overflow-hidden group">
-      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-30"></div>
-      <div class="flex items-center gap-4 mb-6">
-        <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center text-white text-2xl">
+    <div class="stat-card group">
+      <span class="stat-accent bg-amber-500"></span>
+      <div class="flex items-center gap-4 mb-5">
+        <div class="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
           <i class="material-icons">favorite</i>
         </div>
-        <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.statistics.reactions.title' | workyTranslations }}</h3>
-          <p class="text-sm text-slate-400">{{ 'admin.statistics.reactions.subtitle' | workyTranslations }}</p>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-lg font-semibold text-slate-100 truncate">{{ 'admin.statistics.reactions.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400 truncate">{{ 'admin.statistics.reactions.subtitle' | workyTranslations }}</p>
         </div>
       </div>
-      <div class="flex items-baseline gap-2 mb-4">
-        <span class="text-5xl font-bold text-slate-100">{{ adminOverview.totalReactions | number }}</span>
-        <span class="text-lg text-slate-400">{{ 'admin.statistics.reactions.unit' | workyTranslations }}</span>
+      <div class="flex items-baseline gap-2">
+        <span class="text-5xl font-bold text-slate-50 tracking-tight">{{ adminOverview.totalReactions | number }}</span>
+        <span class="text-base text-slate-400">{{ 'admin.statistics.reactions.unit' | workyTranslations }}</span>
       </div>
-      <div class="flex flex-col gap-2">
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-slate-400">{{ 'admin.statistics.reactions.avgPerPub' | workyTranslations }}:</span>
-          <span class="text-sm font-semibold text-slate-100">{{ (adminOverview.totalPublications > 0 ? adminOverview.totalReactions / adminOverview.totalPublications : 0) | number:'1.1-1' }}</span>
+      <div class="stat-meta">
+        <div class="stat-chip">
+          <span class="stat-chip-label">{{ 'admin.statistics.reactions.avgPerPub' | workyTranslations }}</span>
+          <span class="stat-chip-value">{{ (adminOverview.totalPublications > 0 ? adminOverview.totalReactions / adminOverview.totalPublications : 0) | number:'1.1-1' }}</span>
         </div>
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-slate-400">{{ 'admin.statistics.today' | workyTranslations }}:</span>
-          <span class="text-sm font-semibold text-slate-100">{{ adminOverview.reactionsToday | number }}</span>
+        <div class="stat-chip">
+          <span class="stat-chip-label">{{ 'admin.statistics.today' | workyTranslations }}</span>
+          <span class="stat-chip-value">{{ adminOverview.reactionsToday | number }}</span>
         </div>
       </div>
     </div>
 
     <!-- Reports Card -->
-    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/20 hover:border-white/20 relative overflow-hidden group">
-      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-30"></div>
-      <div class="flex items-center gap-4 mb-6">
-        <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center text-white text-2xl">
+    <div class="stat-card group">
+      <span class="stat-accent bg-red-500"></span>
+      <div class="flex items-center gap-4 mb-5">
+        <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-red-500/20">
           <i class="material-icons">flag</i>
         </div>
-        <div class="flex-1">
-          <h3 class="text-xl font-semibold text-slate-100 mb-1">{{ 'admin.statistics.reports.title' | workyTranslations }}</h3>
-          <p class="text-sm text-slate-400">{{ 'admin.statistics.reports.subtitle' | workyTranslations }}</p>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-lg font-semibold text-slate-100 truncate">{{ 'admin.statistics.reports.title' | workyTranslations }}</h3>
+          <p class="text-sm text-slate-400 truncate">{{ 'admin.statistics.reports.subtitle' | workyTranslations }}</p>
         </div>
       </div>
-      <div class="flex items-baseline gap-2 mb-4">
-        <span class="text-5xl font-bold text-slate-100">{{ adminOverview.pendingReports | number }}</span>
-        <span class="text-lg text-slate-400">{{ 'admin.statistics.reports.pending' | workyTranslations }}</span>
+      <div class="flex items-baseline gap-2">
+        <span class="text-5xl font-bold text-slate-50 tracking-tight">{{ adminOverview.pendingReports | number }}</span>
+        <span class="text-base text-slate-400">{{ 'admin.statistics.reports.pending' | workyTranslations }}</span>
       </div>
-      <div class="flex flex-col gap-2">
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-slate-400">{{ 'admin.statistics.reports.resolved' | workyTranslations }}:</span>
-          <span class="text-sm font-semibold text-slate-100">{{ adminOverview.resolvedReports | number }}</span>
+      <div class="stat-meta">
+        <div class="stat-chip">
+          <span class="stat-chip-label">{{ 'admin.statistics.reports.resolved' | workyTranslations }}</span>
+          <span class="stat-chip-value">{{ adminOverview.resolvedReports | number }}</span>
         </div>
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-slate-400">{{ 'admin.statistics.today' | workyTranslations }}:</span>
-          <span class="text-sm font-semibold text-slate-100">{{ adminOverview.todayReports | number }}</span>
+        <div class="stat-chip">
+          <span class="stat-chip-label">{{ 'admin.statistics.today' | workyTranslations }}</span>
+          <span class="stat-chip-value">{{ adminOverview.todayReports | number }}</span>
         </div>
       </div>
     </div>
@@ -236,73 +236,76 @@
   </div>
 
   <!-- Additional Metrics Section -->
-  <div class="p-6 border-t border-slate-600 mt-8" *ngIf="!isLoading && !error && adminOverview">
-    <h2 class="text-2xl font-semibold text-slate-100 mb-6">{{ 'admin.statistics.additionalMetrics' | workyTranslations }}</h2>
+  <div class="mt-10" *ngIf="!isLoading && !error && adminOverview">
+    <div class="flex items-center gap-3 mb-6">
+      <span class="w-1 h-6 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full"></span>
+      <h2 class="text-xl font-semibold text-slate-100">{{ 'admin.statistics.additionalMetrics' | workyTranslations }}</h2>
+    </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <!-- Interactions per Active User Today -->
-      <div class="bg-white/3 border border-white/5 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/10">
+      <div class="metric-card">
         <div class="flex items-center gap-3 mb-4">
-          <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400">
-            <i class="material-icons">trending_up</i>
+          <div class="w-9 h-9 bg-blue-500/15 rounded-lg flex items-center justify-center text-blue-400">
+            <i class="material-icons text-xl">trending_up</i>
           </div>
-          <h4 class="text-base font-semibold text-slate-100">{{ 'admin.statistics.metrics.engagement.title' | workyTranslations }}</h4>
+          <h4 class="text-sm font-semibold text-slate-200">{{ 'admin.statistics.metrics.engagement.title' | workyTranslations }}</h4>
         </div>
-        <div class="mb-3 flex items-baseline gap-1">
-          <span class="text-3xl font-bold text-emerald-500">{{ interactionsPerActiveUser | number:'1.1-1' }}</span>
+        <div class="mb-2 flex items-baseline gap-1.5">
+          <span class="text-3xl font-bold text-emerald-400">{{ interactionsPerActiveUser | number:'1.1-1' }}</span>
           <span class="text-sm text-slate-400">{{ 'admin.statistics.metrics.engagement.unit' | workyTranslations }}</span>
         </div>
-        <div class="text-sm text-slate-400 leading-relaxed">
+        <div class="text-xs text-slate-400 leading-relaxed">
           {{ 'admin.statistics.metrics.engagement.description' | workyTranslations }}
         </div>
       </div>
 
       <!-- Content Growth WoW -->
-      <div class="bg-white/3 border border-white/5 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/10">
+      <div class="metric-card">
         <div class="flex items-center gap-3 mb-4">
-          <div class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center text-emerald-400">
-            <i class="material-icons" [class.rotate-180]="contentGrowthRate < 0">arrow_upward</i>
+          <div class="w-9 h-9 bg-emerald-500/15 rounded-lg flex items-center justify-center text-emerald-400">
+            <i class="material-icons text-xl" [class.rotate-180]="contentGrowthRate < 0">arrow_upward</i>
           </div>
-          <h4 class="text-base font-semibold text-slate-100">{{ 'admin.statistics.metrics.contentGrowth.title' | workyTranslations }}</h4>
+          <h4 class="text-sm font-semibold text-slate-200">{{ 'admin.statistics.metrics.contentGrowth.title' | workyTranslations }}</h4>
         </div>
-        <div class="mb-3">
-          <span class="text-3xl font-bold" [class.text-emerald-500]="contentGrowthRate >= 0" [class.text-red-400]="contentGrowthRate < 0">
+        <div class="mb-2">
+          <span class="text-3xl font-bold" [class.text-emerald-400]="contentGrowthRate >= 0" [class.text-red-400]="contentGrowthRate < 0">
             {{ contentGrowthRate >= 0 ? '+' : '' }}{{ contentGrowthRate | number:'1.1-1' }}%
           </span>
         </div>
-        <div class="text-sm text-slate-400 leading-relaxed">
+        <div class="text-xs text-slate-400 leading-relaxed">
           {{ 'admin.statistics.metrics.contentGrowth.description' | workyTranslations }}
         </div>
       </div>
 
       <!-- User Activity Rate -->
-      <div class="bg-white/3 border border-white/5 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/10">
+      <div class="metric-card">
         <div class="flex items-center gap-3 mb-4">
-          <div class="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center text-amber-400">
-            <i class="material-icons">access_time</i>
+          <div class="w-9 h-9 bg-amber-500/15 rounded-lg flex items-center justify-center text-amber-400">
+            <i class="material-icons text-xl">access_time</i>
           </div>
-          <h4 class="text-base font-semibold text-slate-100">{{ 'admin.statistics.metrics.userActivity.title' | workyTranslations }}</h4>
+          <h4 class="text-sm font-semibold text-slate-200">{{ 'admin.statistics.metrics.userActivity.title' | workyTranslations }}</h4>
         </div>
-        <div class="mb-3">
-          <span class="text-3xl font-bold text-emerald-500">{{ userActivityRate | number:'1.1-1' }}%</span>
+        <div class="mb-2">
+          <span class="text-3xl font-bold text-amber-400">{{ userActivityRate | number:'1.1-1' }}%</span>
         </div>
-        <div class="text-sm text-slate-400 leading-relaxed">
+        <div class="text-xs text-slate-400 leading-relaxed">
           {{ 'admin.statistics.metrics.userActivity.description' | workyTranslations }}
         </div>
       </div>
 
       <!-- New Users This Week -->
-      <div class="bg-white/3 border border-white/5 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 hover:border-white/10">
+      <div class="metric-card">
         <div class="flex items-center gap-3 mb-4">
-          <div class="w-8 h-8 bg-violet-500/20 rounded-lg flex items-center justify-center text-violet-400">
-            <i class="material-icons">person_add</i>
+          <div class="w-9 h-9 bg-violet-500/15 rounded-lg flex items-center justify-center text-violet-400">
+            <i class="material-icons text-xl">person_add</i>
           </div>
-          <h4 class="text-base font-semibold text-slate-100">{{ 'admin.statistics.metrics.newUsersWeek.title' | workyTranslations }}</h4>
+          <h4 class="text-sm font-semibold text-slate-200">{{ 'admin.statistics.metrics.newUsersWeek.title' | workyTranslations }}</h4>
         </div>
-        <div class="mb-3">
+        <div class="mb-2">
           <span class="text-3xl font-bold text-violet-400">{{ adminOverview.newUsersThisWeek | number }}</span>
         </div>
-        <div class="text-sm text-slate-400 leading-relaxed">
+        <div class="text-xs text-slate-400 leading-relaxed">
           {{ 'admin.statistics.metrics.newUsersWeek.description' | workyTranslations }}
         </div>
       </div>
