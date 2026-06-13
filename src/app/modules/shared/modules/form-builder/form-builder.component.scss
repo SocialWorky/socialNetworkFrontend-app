@@ -44,11 +44,13 @@
   box-shadow: 0 1px 3px #0000001f, 0 1px 1px #00000024, 0 2px 1px #0003;
   border-radius: 4px;
   background: map.get(colors.$worky-navy, 72);
-  height: 40px;
+  min-height: 40px;
   align-items: center;
   margin-bottom: 8px;
+  padding-right: 8px;
   gap: 2px;
   color: colors.$worky-color-text;
+  overflow-wrap: anywhere;
 
 
   .drag-and-drop-zone {
@@ -96,47 +98,88 @@
 .field-wrapper {
   position: relative;
   margin-bottom: 20px;
+  transition: margin-left 0.2s ease;
+
+  // Dependent (cascading) field — show it is related to / nested under its parent.
+  &.dependent-field {
+    border-left: 3px solid #3b82f6;          // blue-500
+    border-radius: 8px;
+    padding-left: 10px;
+
+    &::before {
+      content: 'subdirectory_arrow_right';
+      font-family: 'Material Icons';
+      position: absolute;
+      left: -22px;
+      top: 22px;
+      color: #3b82f6;
+      font-size: 18px;
+      opacity: 0.8;
+    }
+  }
   .content-field {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
 
     .field-item {
-      flex: auto;
+      flex: 1 1 auto;
+      min-width: 0;
     }
     i {
       cursor: pointer;
-      align-items: flex-end;
+      flex: 0 0 auto;
+      margin-top: 14px;
     }
   }
 
 }
 
 .config-panel {
-  position: absolute;
-  top: 100%;
-  left: 0;
+  // Inline flow (not absolute) so it expands within the card and pushes the
+  // following fields down, instead of overlapping them and breaking out.
+  position: static;
   width: 100%;
-  background-color: colors.$worky-color-light;
-  border: 1px solid colors.$worky-color-grey;
-  padding: 10px;
-  z-index: 2;
-}
-
-.config-panel {
+  margin-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
+  background: #1e293b;            // slate-800
+  border: 1px solid #334155;     // slate-700
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+
+  h3 {
+    color: #e2e8f0;              // slate-200
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
 }
 
 .config-panel mat-form-field {
   width: 100%;
-  min-width: 200px;
 }
 
-.config-panel mat-form-field {
-  padding: 5px;
+.cascade-editor {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid #334155;
+
+  .cascade-hint {
+    color: #94a3b8;              // slate-400
+    font-size: 0.8rem;
+    margin: 0 0 10px;
+  }
+}
+
+.cascade-empty-hint {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-style: italic;
+  margin: 4px 0 0;
 }
 
 ::ng-deep .mat-form-field-infix {
@@ -174,6 +217,63 @@
 }
 
 
+
+// Readable input text inside the dark config panel
+.config-panel {
+  ::ng-deep .mat-mdc-input-element,
+  ::ng-deep input.mat-mdc-input-element {
+    color: #f1f5f9 !important;          // slate-100
+    caret-color: #f1f5f9;
+  }
+  ::ng-deep .mat-mdc-input-element::placeholder {
+    color: #64748b !important;          // slate-500
+  }
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    background-color: rgba(15, 23, 42, 0.5) !important; // slate-900/50
+    border-radius: 8px;
+  }
+  ::ng-deep .mat-mdc-select-value,
+  ::ng-deep .mat-mdc-select-min-line {
+    color: #f1f5f9 !important;
+  }
+}
+
+// Save buttons — clearly visible filled buttons
+.builder-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
+
+  i { font-size: 18px; }
+
+  &:hover { transform: translateY(-1px); }
+  &:active { transform: translateY(0); }
+}
+
+.builder-btn--field {
+  margin-top: 8px;
+  align-self: flex-start;
+  background: #10b981;                 // emerald-500
+  box-shadow: 0 4px 12px -4px rgba(16, 185, 129, 0.5);
+
+  &:hover { background: #059669; }     // emerald-600
+}
+
+.builder-btn--form {
+  margin-top: 16px;
+  background: #3b82f6;                 // blue-500
+  box-shadow: 0 6px 16px -4px rgba(59, 130, 246, 0.5);
+
+  &:hover { background: #2563eb; }     // blue-600
+}
 
 .draggable {
   cursor: grab;

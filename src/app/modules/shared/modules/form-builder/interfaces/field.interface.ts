@@ -1,4 +1,4 @@
-import { CustomFieldDestination, CustomFieldType } from './custom-field.interface';
+import { CascadeRule, CustomFieldDestination, CustomFieldType } from './custom-field.interface';
 
 export interface Field {
   id: string;
@@ -19,6 +19,8 @@ export interface Field {
   minLength?: number;
   maxLength?: number;
   visible?: boolean;
+  showInProfileDetail?: boolean;
+  cascade?: CascadeRule;
 }
 
 export interface CustomField {

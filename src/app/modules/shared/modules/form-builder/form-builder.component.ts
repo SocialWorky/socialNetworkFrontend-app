@@ -2,7 +2,7 @@ import { Component, ChangeDetectorRef, OnInit, Renderer2, OnDestroy } from '@ang
 import { CdkDragDrop, CdkDragEnd, CdkDragStart, moveItemInArray } from '@angular/cdk/drag-drop';
 import { FormGroup, FormControl } from '@angular/forms';
 import { MatSelectChange } from '@angular/material/select';
-import { map, Subject, takeUntil } from 'rxjs';
+import { forkJoin, map, Observable, Subject, Subscription, takeUntil } from 'rxjs';
 
 import { Field } from './interfaces/field.interface';
 import { CustomFieldType, CustomFieldDestination, CustomField} from './interfaces/custom-field.interface';
@@ -34,6 +34,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
     { type: CustomFieldType.TEXT, id: this.generateId(), idName: '', label: translations['formBuilder.textField'], destination: CustomFieldDestination.PROFILE },
     { type: CustomFieldType.TEXTAREA, id: this.generateId(), idName: '', label: translations['formBuilder.textArea'], destination: CustomFieldDestination.PROFILE },
     { type: CustomFieldType.SELECT, id: this.generateId(), idName: '', label: translations['formBuilder.selectField'], options: [], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.LOCATION, id: this.generateId(), idName: '', label: translations['formBuilder.locationField'], destination: CustomFieldDestination.PROFILE },
   ];
 
   formFields: Field[] = [];
@@ -46,6 +47,11 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
   };
 
   private destroy$ = new Subject<void>();
+  private cascadeSubs: Subscription[] = [];
+
+  // Persisted fields removed in the UI but not yet deleted on the backend.
+  // Applied atomically when the form is saved.
+  private deletedIds: string[] = [];
 
   constructor(
     private _cdr: ChangeDetectorRef,
@@ -69,6 +75,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
         multiSelect: new FormControl(false),
         visible: new FormControl(true),
         required: new FormControl(false),
+        showInProfileDetail: new FormControl(true),
         minLength: new FormControl(0),
         maxLength: new FormControl(50)
       })
@@ -87,69 +94,93 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
   }
 
   getFields(): void {
-    this.formFields = [];
     this._customFieldService.getCustomFields().pipe(
       takeUntil(this.destroy$),
       map((fields: any) => fields.filter((field: Field) => field.destination === this.formDestination))
-    ).subscribe(filteredFields => {
-      filteredFields.forEach((field: any) => {
-        this.form.addControl(field.id, new FormControl(''));
-
-        this.form.patchValue({
-          id: field.id,
-          index: field.index,
-          idName: field.idName,
-          label: field.label || '',
-          isActive: field.isActive,
-          placeholder: field.options.placeholder,
-          optionsString: field.options.choices ? field.options.choices.map((o: { label: any; }) => o.label).join(', ') : '',
-          destination: field.destination || CustomFieldDestination.PROFILE,
-          additionalOptions: {
-            multiSelect: field.options.multiSelect || false,
-            visible: field.options?.visible || true,
-            required: field.options?.required || false,
-            minLength: field.options?.minLength || 0,
-            maxLength: field.options?.maxLength || 50
-          }
-        });
-
-        const formFieldId = this.form.get('id')?.value
-
-        if (this.formFields.find(f => f.id === formFieldId)) {
-          return;
+    ).subscribe((filteredFields: any[]) => {
+      this.formFields = filteredFields.map((field: any) => {
+        if (!this.form.get(field.id)) {
+          this.form.addControl(field.id, new FormControl(''));
         }
-
-        this.formFields.push({
+        return {
           id: field.id,
           index: field.index,
           idName: field.idName,
           type: field.type,
           label: field.label,
           isActive: field.isActive,
-          options: field.options?.choices,
+          options: field.options?.choices || [],
           required: field.options?.required,
           placeholder: field.options?.placeholder,
           destination: field.destination,
+          cascade: field.options?.cascade,
           additionalOptions: {
             multiSelect: field.options?.multiSelect || false,
-            visible: field.options?.visible || true,
+            visible: field.options?.visible ?? true,
             required: field.options?.required || false,
+            showInProfileDetail: field.options?.showInProfileDetail ?? true,
             minLength: field.options?.minLength || 0,
             maxLength: field.options?.maxLength || 50
           }
-        });
+        };
       });
+      this.setupCascadePreview();
       this._cdr.markForCheck();
     });
   }
 
+  /** Build the persisted payload for a single field. */
+  private buildFieldPayload(field: Field, index: number): any {
+    return {
+      index,
+      idName: field.idName,
+      type: field.type,
+      label: field.label || '',
+      isActive: true,
+      options: {
+        multiSelect: field.additionalOptions?.multiSelect || false,
+        required: field.additionalOptions?.required || false,
+        placeholder: field.placeholder,
+        minLength: field.additionalOptions?.minLength || 0,
+        maxLength: field.additionalOptions?.maxLength || 50,
+        visible: field.additionalOptions?.visible ?? true,
+        showInProfileDetail: field.additionalOptions?.showInProfileDetail ?? true,
+        choices: field.options || [],
+        ...(field.cascade?.dependsOn ? { cascade: field.cascade } : {}),
+      },
+      destination: field.destination,
+    };
+  }
+
+  // Saving a field's config persists ONLY that field — not every field — to avoid a
+  // burst of PATCH requests (which tripped the token-refresh race and 401'd the session).
   updateFieldOptions(field: Field, index: number) {
-    this.selectField(field, index);
-    if(!field.isActive) return;
+    field.index = index;
+    field.destination = this.formDestination;
 
-    this.updateIndexFields();
+    if (this.isIdValidLocalId(field.id)) {
+      // Not yet persisted — it is created on "Guardar Formulario".
+      this.selectField(field, index);
+      return;
+    }
 
-    this._cdr.markForCheck();
+    this._customFieldService
+      .updateCustomField(field.id, this.buildFieldPayload(field, index))
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.selectField(field, index);
+          this._cdr.markForCheck();
+        },
+        error: (error) => {
+          this._logService.log(
+            LevelLogEnum.ERROR,
+            'FormBuilderComponent',
+            'Error al actualizar campo',
+            { message: error },
+          );
+        },
+      });
   }
 
   onDragStart(event: CdkDragStart) {
@@ -173,6 +204,141 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
         optionsControl.setValue(this.selectedField.options.map(opt => opt.label).join(', '));
       }
     }
+  }
+
+  // ----- Cascading (dependent) options -----
+
+  /** Select fields (with an idName) that can act as the parent of a cascade. */
+  get cascadeParents(): Field[] {
+    return this.formFields.filter(
+      (f) =>
+        f.type === CustomFieldType.SELECT &&
+        !!f.idName &&
+        f.id !== this.selectedField?.id,
+    );
+  }
+
+  /** The option values of a parent field, used to build the per-value editor. */
+  parentChoices(parentIdName?: string): { value: string; label: string }[] {
+    if (!parentIdName) return [];
+    const parent = this.formFields.find((f) => f.idName === parentIdName);
+    if (!parent) return [];
+
+    // If the parent is itself a cascading field (e.g. Region depends on Country),
+    // its possible values are the union of every per-parent option set — so the
+    // child (e.g. City) can define options for each one (multi-level cascade).
+    if (parent.cascade?.dependsOn && parent.cascade.optionsByParent) {
+      const seen = new Set<string>();
+      const all: { value: string; label: string }[] = [];
+      Object.values(parent.cascade.optionsByParent).forEach((choices) => {
+        (choices || []).forEach((c) => {
+          if (!seen.has(c.value)) {
+            seen.add(c.value);
+            all.push(c);
+          }
+        });
+      });
+      return all;
+    }
+
+    return (parent.options as { value: string; label: string }[]) || [];
+  }
+
+  setCascadeParent(event: MatSelectChange) {
+    if (!this.selectedField) return;
+    const parentIdName = event.value as string;
+    if (!parentIdName) {
+      this.selectedField.cascade = undefined;
+    } else {
+      this.selectedField.cascade = {
+        dependsOn: parentIdName,
+        optionsByParent:
+          this.selectedField.cascade?.dependsOn === parentIdName
+            ? this.selectedField.cascade.optionsByParent
+            : {},
+      };
+    }
+    this.syncSelectedField();
+  }
+
+  cascadeOptionsString(parentValue: string): string {
+    const opts = this.selectedField?.cascade?.optionsByParent?.[parentValue] || [];
+    return opts.map((o) => o.label).join(', ');
+  }
+
+  setCascadeOptions(parentValue: string, event: Event) {
+    if (!this.selectedField?.cascade) return;
+    const value = (event.target as HTMLInputElement).value;
+    const choices = value
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((s) => ({ value: s, label: s }));
+    this.selectedField.cascade.optionsByParent = {
+      ...(this.selectedField.cascade.optionsByParent || {}),
+      [parentValue]: choices,
+    };
+    this.syncSelectedField();
+  }
+
+  private syncSelectedField() {
+    const idx = this.formFields.findIndex(
+      (f) => f.id === this.selectedField?.id,
+    );
+    if (idx !== -1 && this.selectedField) {
+      this.formFields[idx] = this.selectedField;
+    }
+    this.setupCascadePreview();
+    this._cdr.markForCheck();
+  }
+
+  /** Indentation depth of a field within its cascade chain (0 = no parent). */
+  cascadeDepth(field: Field): number {
+    let depth = 0;
+    let current: Field | undefined = field;
+    const seen = new Set<string>();
+    while (current?.cascade?.dependsOn && !seen.has(current.id)) {
+      seen.add(current.id);
+      const parent = this.formFields.find(
+        (f) => f.idName === current!.cascade!.dependsOn,
+      );
+      if (!parent) break;
+      depth++;
+      current = parent;
+    }
+    return depth;
+  }
+
+  // Live preview of the cascade inside the builder: selecting a parent value
+  // populates its dependent child's options, so the admin can see the behavior.
+  private setupCascadePreview(): void {
+    this.cascadeSubs.forEach((s) => s.unsubscribe());
+    this.cascadeSubs = [];
+
+    this.formFields.forEach((child) => {
+      const dependsOn = child.cascade?.dependsOn;
+      if (!dependsOn) return;
+      const parent = this.formFields.find((f) => f.idName === dependsOn);
+      if (!parent) return;
+      const parentControl = this.form.get(parent.id);
+      if (!parentControl) return;
+
+      this.applyCascadeChild(child, parentControl.value);
+      const sub = parentControl.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((val) => this.applyCascadeChild(child, val));
+      this.cascadeSubs.push(sub);
+    });
+  }
+
+  private applyCascadeChild(child: Field, parentValue: any): void {
+    child.options = child.cascade?.optionsByParent?.[parentValue] || [];
+    // Reset the child's own value (emitting so any grandchild resets too).
+    const ctrl = this.form.get(child.id);
+    if (ctrl && ctrl.value) {
+      ctrl.setValue('', { emitEvent: true });
+    }
+    this._cdr.markForCheck();
   }
 
   updateField(field: Field, property: keyof Field, event: Event | MatSelectChange) {
@@ -201,7 +367,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
     if (index !== -1) {
       const updatedField = { ...field };
 
-      if (property === 'visible' || property === 'required' || property === 'multiSelect') {
+      if (property === 'visible' || property === 'required' || property === 'multiSelect' || property === 'showInProfileDetail') {
         updatedField.additionalOptions = {
           ...updatedField.additionalOptions,
           [property]: value
@@ -225,24 +391,28 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
   drop(event: CdkDragDrop<Field[]>) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-    } else {
-      const copiedItem: Field = {
-        ...event.previousContainer.data[event.previousIndex],
-        id: this.generateId(),
-        isActive: false,
-        additionalOptions: event.previousContainer.data[event.previousIndex].additionalOptions || {
-          multiSelect: false,
-          visible: true,
-          required: false,
-          minLength: 0,
-          maxLength: 50
-        }
-      };
-      this.form.addControl(copiedItem.id, new FormControl(''));
-      event.container.data.splice(event.currentIndex, 0, copiedItem);
       this._cdr.markForCheck();
+      return;
     }
-    this.saveForm();
+
+    const copiedItem: Field = {
+      ...event.previousContainer.data[event.previousIndex],
+      id: this.generateId(),
+      isActive: false,
+      additionalOptions: event.previousContainer.data[event.previousIndex].additionalOptions || {
+        multiSelect: false,
+        visible: true,
+        required: false,
+        minLength: 0,
+        maxLength: 50,
+      },
+    };
+    this.form.addControl(copiedItem.id, new FormControl(''));
+    event.container.data.splice(event.currentIndex, 0, copiedItem);
+    this._cdr.markForCheck();
+    // The field is persisted (created) atomically on "Guardar Formulario", together
+    // with any deletions and edits — see saveForm(). Keeping drop local avoids the
+    // create/delete/reload races that duplicated or resurrected fields.
   }
 
   generateId(): string {
@@ -258,11 +428,19 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
   }
 
   deleteField(field: Field, index: number) {
-    this._customFieldService.deleteCustomField(field.id).pipe(takeUntil(this.destroy$)).subscribe();
+    // Defer the backend delete to saveForm so it is applied atomically with the
+    // reload — deleting fire-and-forget here raced with getFields() and the field
+    // reappeared. Local (never-persisted) fields are simply discarded.
+    if (!this.isIdValidLocalId(field.id)) {
+      this.deletedIds.push(field.id);
+    }
     this.form.removeControl(field.id);
     this.formFields.splice(index, 1);
-    this.selectedField = null;
-    this.selectedFieldIndex = null;
+    if (this.selectedFieldIndex === index) {
+      this.selectedField = null;
+      this.selectedFieldIndex = null;
+    }
+    this._cdr.markForCheck();
   }
 
   selectField(field: Field, index: number) {
@@ -272,6 +450,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
         multiSelect: false,
         visible: true,
         required: false,
+        showInProfileDetail: true,
         minLength: 0,
         maxLength: 50
       };
@@ -297,6 +476,7 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
           multiSelect: field.additionalOptions?.multiSelect || false,
           visible: field.additionalOptions?.visible || true,
           required: field.additionalOptions?.required || false,
+          showInProfileDetail: field.additionalOptions?.showInProfileDetail ?? true,
           minLength: field.additionalOptions?.minLength || 0,
           maxLength: field.additionalOptions?.maxLength || 50
         }
@@ -323,101 +503,47 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.formFields.forEach(field => {
+    this.formFields.forEach((field, index) => {
+      field.index = index;
       field.destination = this.formDestination;
     });
 
-    const formData = this.formFields.map((field, index) => {
-      return {
-        index: index,
-        idName: field.idName,
-        type: field.type,
-        label: field.label,
-        isActive: field.isActive,
-        placeholder: field.placeholder,
-        options: field.options || [],
-        destination: field.destination,
-        additionalOptions: {
-          multiSelect: field.additionalOptions?.multiSelect || false,
-          required: field.additionalOptions?.required || false,
-          visible: field.additionalOptions?.visible || true,
-          minLength: field.additionalOptions?.minLength || 0,
-          maxLength: field.additionalOptions?.maxLength || 50
-        }
-      };
-    });
+    // Apply EVERYTHING atomically: delete removed fields, create new (local) ones,
+    // update existing ones — then reload once. A single forkJoin barrier guarantees
+    // the reload sees the final server state, so nothing reappears or goes missing.
+    const operations: Observable<any>[] = [
+      ...this.deletedIds.map((id) => this._customFieldService.deleteCustomField(id)),
+      ...this.formFields.map((field, index) =>
+        this.isIdValidLocalId(field.id)
+          ? this._customFieldService.createCustomField(this.buildFieldPayload(field, index))
+          : this._customFieldService.updateCustomField(field.id, this.buildFieldPayload(field, index)),
+      ),
+    ];
 
-    const dataFields = formData.map((field, index) => {
-      return {
-        index: index,
-        idName: field.idName,
-        type: field.type,
-        label: field.label || '',
-        isActive: field.isActive,
-        options: {
-          multiSelect: field.additionalOptions.multiSelect,
-          required: field.additionalOptions.required,
-          placeholder: field.placeholder,
-          minLength: field.additionalOptions.minLength,
-          maxLength: field.additionalOptions.maxLength,
-          visible: field.additionalOptions.visible,
-          choices: field.options || [],
-        },
-        destination: field.destination,
-      };
-    });
+    const reload = () => {
+      this.deletedIds = [];
+      this.getFields();
+      this._cdr.markForCheck();
+    };
 
-    dataFields.forEach(async field => {
-      if(field.isActive) {
-        this.updateIndexFields();
-        return
-      }
-      field.isActive = true;
-       await this._customFieldService.createCustomField(field).pipe(takeUntil(this.destroy$)).subscribe({
-        next: () => {
-          this.getFields();
-          this._cdr.markForCheck();
-        },
+    if (operations.length === 0) {
+      reload();
+      return;
+    }
+
+    forkJoin(operations)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: reload,
         error: (error) => {
           this._logService.log(
             LevelLogEnum.ERROR,
             'FormBuilderComponent',
             'Error al guardar formulario',
-            {
-              user: this._authService.getDecodedToken(),
-              message: error,
-            },
+            { message: error },
           );
-        }
-      });
-    });
-  }
-
-  updateIndexFields() {
-    this.formFields.forEach((field, index) => {
-      field.index = index;
-
-      if(this.isIdValidLocalId(field.id)) return;
-
-      const updateField: CustomField = {
-        index: index,
-        idName: this.formFields[index].idName,
-        type: this.formFields[index].type,
-        label: this.formFields[index].label || '',
-        options: {
-          multiSelect: this.formFields[index].additionalOptions?.multiSelect,
-          required: this.formFields[index].additionalOptions?.required,
-          placeholder: this.formFields[index]?.placeholder,
-          minLength: this.formFields[index].additionalOptions?.minLength || 0,
-          maxLength: this.formFields[index].additionalOptions?.maxLength || 50,
-          visible: this.formFields[index].additionalOptions?.visible || true,
-          choices: this.formFields[index]?.options || [],
         },
-        destination: this.formFields[index].destination,
-      };
-
-      this._customFieldService.updateCustomField(field.id, updateField).pipe(takeUntil(this.destroy$)).subscribe();
-    });
+      });
   }
 
   hasValidField(): boolean {

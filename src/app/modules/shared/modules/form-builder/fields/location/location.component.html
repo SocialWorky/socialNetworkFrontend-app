@@ -1,0 +1,29 @@
+<div class="location-field">
+  <p class="location-field__label" *ngIf="field?.label">
+    {{ field.label }}<span *ngIf="isRequired" class="location-field__required"> *</span>
+  </p>
+
+  <mat-form-field appearance="fill" class="worky-input worky-accent worky-100">
+    <mat-label>{{ 'formBuilder.location.country' | workyTranslations }}</mat-label>
+    <mat-select [value]="value.country" [disabled]="disabled"
+      (selectionChange)="onCountryChange($event.value)">
+      <mat-option *ngFor="let country of countries" [value]="country">{{ country }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="worky-input worky-accent worky-100">
+    <mat-label>{{ 'formBuilder.location.region' | workyTranslations }}</mat-label>
+    <mat-select [value]="value.region" [disabled]="disabled || !value.country"
+      (selectionChange)="onRegionChange($event.value)">
+      <mat-option *ngFor="let region of regions" [value]="region">{{ region }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="worky-input worky-accent worky-100">
+    <mat-label>{{ 'formBuilder.location.comuna' | workyTranslations }}</mat-label>
+    <mat-select [value]="value.comuna" [disabled]="disabled || !value.region"
+      (selectionChange)="onComunaChange($event.value)">
+      <mat-option *ngFor="let comuna of comunas" [value]="comuna">{{ comuna }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>

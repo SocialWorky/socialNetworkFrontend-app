@@ -1,0 +1,25 @@
+.location-field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+
+  &__label {
+    margin: 0 0 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  &__required {
+    color: #ef4444;
+  }
+
+  // Full-width stacked selects. No left indentation: the children are width:100%,
+  // so any margin-left would push them past the container and clip (e.g. the
+  // narrow edit-profile dialog). The cascade itself (children disabled until the
+  // parent is chosen) already conveys the hierarchy.
+  mat-form-field {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

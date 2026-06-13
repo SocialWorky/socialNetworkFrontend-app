@@ -56,6 +56,9 @@ const NO_CACHE_PATTERNS = [
   '/websocket',
   '/socket',
   '/records-logs', // Logs should always be read directly from database
+  '/custom-fields', // Field definitions are small and must be fresh everywhere
+                    // (builder, profile detail, edit-profile, register) — caching
+                    // them caused stale reads (e.g. showInProfileDetail not applied).
 ];
 
 @Injectable({
@@ -282,6 +285,7 @@ export class UnifiedCacheService implements OnDestroy {
     }
 
     const resourcePatterns: Record<string, RegExp[]> = {
+      '/custom-fields': [/custom-field/],
       '/publication': [/publication/, /feed/],
       '/user': [/user/],
       '/comment': [/comment/, /publication/],

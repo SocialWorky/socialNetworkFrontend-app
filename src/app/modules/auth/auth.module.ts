@@ -13,6 +13,7 @@ import { AuthRoutingModule } from './auth-routing.module';
 import { MaterialModule } from '@shared/modules/material/material.module';
 import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
+import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.module';
 @NgModule({
   declarations: [LayoutPageComponent, LoginComponent, RegisterComponent, ResetPasswordModalComponent, AgeVerificationModalComponent],
   imports: [
@@ -24,7 +25,8 @@ import { TranslationsModule } from '@shared/modules/translations/translations.mo
     AuthRoutingModule,
     MaterialModule,
     WorkyButtonsModule,
-    TranslationsModule
+    TranslationsModule,
+    FormBuilderModule
   ]
 })
 export class AuthModule { }

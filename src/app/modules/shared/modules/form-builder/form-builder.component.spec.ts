@@ -115,7 +115,7 @@ describe('FormBuilderComponent', () => {
     expect(component.selectedFieldIndex).toBe(-1);
   });
 
-  it('debe eliminar un campo', () => {
+  it('debe eliminar un campo (borrado diferido aplicado al guardar)', fakeAsync(() => {
     const mockField = {
       id: '1',
       type: CustomFieldType.TEXT,
@@ -123,14 +123,23 @@ describe('FormBuilderComponent', () => {
       idName: 'test',
       destination: CustomFieldDestination.PROFILE
     };
-    
+
     component.formFields = [mockField];
+    component.selectedFieldIndex = 0;
     component.deleteField(mockField, 0);
 
-    expect(customFieldService.deleteCustomField).toHaveBeenCalledWith('1');
+    // Removed from the UI immediately, but the backend delete is deferred.
     expect(component.formFields.length).toBe(0);
     expect(component.selectedField).toBeNull();
-  });
+    expect(customFieldService.deleteCustomField).not.toHaveBeenCalled();
+
+    // Applied atomically when the form is saved.
+    component.formFields = [{ ...mockField, id: '2', idName: 'keep' }];
+    component.saveForm();
+    tick(400);
+
+    expect(customFieldService.deleteCustomField).toHaveBeenCalledWith('1');
+  }));
   it('debe actualizar el destino del formulario', () => {
     const event = { value: CustomFieldDestination.REGISTRATION } as any;
     component.updateFormDestination(event);
@@ -323,7 +332,7 @@ describe('Pruebas de actualización de campos', () => {
       expect(customFieldService.getCustomFields).toHaveBeenCalled();
     }));
 
-    it('debe actualizar campos existentes', () => {
+    it('debe actualizar campos existentes', fakeAsync(() => {
       const mockField = {
         id: '1', // ID sin '_' indica campo existente
         type: CustomFieldType.TEXT,
@@ -331,12 +340,13 @@ describe('Pruebas de actualización de campos', () => {
         isActive: true,
         destination: CustomFieldDestination.PROFILE
       };
-      
+
       component.formFields = [{ ...mockField, idName: 'test' }];
-      component.updateIndexFields();
-      
+      component.saveForm();
+      tick(400);
+
       expect(customFieldService.updateCustomField).toHaveBeenCalled();
-    });
+    }));
     it('no debe guardar si no hay campos válidos', () => {
       component.formFields = [{
         id: '1',

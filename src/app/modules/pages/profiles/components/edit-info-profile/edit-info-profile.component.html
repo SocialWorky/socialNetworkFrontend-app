@@ -80,7 +80,9 @@
 
 
     <form [formGroup]="dynamicFieldsForm" *ngIf="dynamicFieldsForm">
-      <div *ngFor="let field of dynamicFields; let i = index" class="form-detail-basic">
+      <div *ngFor="let field of dynamicFields; let i = index" class="form-detail-basic dynamic-field"
+           [class.dependent-field]="field.cascade?.dependsOn"
+           [style.margin-left.px]="cascadeDepth(field) * 24">
           <app-input *ngIf="field.type === enumCustomFieldType.TEXT"
             class="worky-100"
             [field]="field"
@@ -98,6 +100,12 @@
             [field]="field"
             [formControlName]="field.id">
           </app-select>
+
+          <app-location *ngIf="field.type === enumCustomFieldType.LOCATION"
+            class="worky-100"
+            [field]="field"
+            [formControlName]="field.id">
+          </app-location>
       </div>
     </form>
 
@@ -105,7 +113,7 @@
     <worky-buttons
       [workyButtonType]="WorkyButtonType.Flat"
       [theme]="WorkyButtonTheme.Basic"
-      [disabled]="!editProfileBasicDetailForm.valid"
+      [disabled]="!editProfileBasicDetailForm.valid || (dynamicFieldsForm && dynamicFieldsForm.invalid)"
       [width]="'100%'"
       (click)="onSave()">
       <span basic-button-text>{{ 'pages.editInfoProfile.saveChanges' | workyTranslations }}</span>
