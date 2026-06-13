@@ -83,4 +83,11 @@ export class LogService {
       { headers: this.noCache },
     );
   }
+
+  deleteAllLogs(): Observable<{ deleted: number }> {
+    return this._http.delete<{ deleted: number }>(
+      `${this.urlApi}/all`,
+      { headers: this.noCache },
+    );
+  }
 }

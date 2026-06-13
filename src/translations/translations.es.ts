@@ -1581,6 +1581,7 @@ export const translations = {
   'admin.log.stats.frontend': 'Frontend',
   'admin.log.filters.source': 'Fuente',
   'admin.log.buttons.clearQueue': 'Clear Queue',
+  'admin.log.buttons.deleteAll': 'Eliminar todo',
   'admin.boostPackages.description': 'Descripción',
   'admin.reactions.editTooltip': 'Editar',
   'admin.reactions.errorLoad': 'Error al cargar las reacciones. Inténtalo de nuevo.',

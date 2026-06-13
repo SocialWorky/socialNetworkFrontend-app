@@ -106,9 +106,8 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onImageError(): void {
-    this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Image error event triggered', { 
-      url: this.img || 'unknown' 
-    });
+    // Falling back to initials is normal behavior (404, broken URL, deleted media),
+    // not a warning — logging every fallback floods the log system with noise.
     this.imageData = '';
     this.isGeneratedAvatar = true;
     this.isLoading = false;
@@ -244,7 +243,6 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
 
     const timeout = setTimeout(() => {
       if (this.isLoading) {
-        this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Image load timeout, falling back to initials', { url: normalizedUrl });
         this.imageData = '';
         this.isGeneratedAvatar = true;
         this.isLoading = false;
@@ -273,7 +271,6 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
 
       img.onerror = () => {
         clearTimeout(timeout);
-        this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Failed to load image, falling back to initials', { url: normalizedUrl });
         this.imageData = '';
         this.isGeneratedAvatar = true;
         this.isLoading = false;
@@ -296,12 +293,8 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
           this._cdr.markForCheck();
           this.load.emit();
         },
-        error: (error) => {
-          // Mobile cache failed, try direct loading as fallback
-          this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Mobile cache failed, trying direct load', {
-            url: imageUrl,
-            error: error?.message || 'Unknown error'
-          });
+        error: () => {
+          // Mobile cache miss falls back to direct loading — expected, not logged.
           this.loadImageDirectly(imageUrl, timeout);
         }
       });
@@ -350,7 +343,6 @@ export class WorkyAvatarComponent implements OnInit, OnChanges, OnDestroy {
 
     img.onerror = () => {
       clearTimeout(timeout);
-      this._logService.log(LevelLogEnum.WARN, 'WorkyAvatarComponent', 'Direct image load also failed, falling back to initials', { url: normalizedUrl });
       this.imageData = '';
       this.isGeneratedAvatar = true;
       this.isLoading = false;

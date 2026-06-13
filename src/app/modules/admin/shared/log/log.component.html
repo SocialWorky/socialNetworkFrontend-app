@@ -159,6 +159,14 @@
         </button>
 
         <button
+          [disabled]="isClearingAll || totalLogs === 0"
+          class="flex items-center gap-2 px-5 py-2 border border-red-500 rounded-lg bg-slate-700 text-red-400 text-sm font-semibold cursor-pointer transition-all hover:bg-red-500 hover:text-white disabled:opacity-60"
+          (click)="openClearAllDialog()">
+          <i class="material-icons text-base">delete_forever</i>
+          {{ 'admin.log.buttons.deleteAll' | workyTranslations }}
+        </button>
+
+        <button
           *ngIf="hasActiveFilters"
           [disabled]="isLoading"
           class="flex items-center gap-2 px-5 py-2 border border-yellow-500 rounded-lg bg-slate-700 text-yellow-400 text-sm font-semibold cursor-pointer transition-all hover:bg-yellow-500 hover:text-white disabled:opacity-60"
@@ -363,3 +371,11 @@
     </div>
   </div>
 </div>
+
+<worky-confirm-dialog
+  [showDialog]="showClearAllDialog"
+  [config]="clearAllDialogConfig"
+  (confirm)="confirmClearAllLogs()"
+  (cancel)="cancelClearAllDialog()"
+  (close)="cancelClearAllDialog()">
+</worky-confirm-dialog>

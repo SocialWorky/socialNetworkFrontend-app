@@ -49,11 +49,13 @@ export class ConfirmDialogComponent {
   }
 
   get iconClass(): string {
+    // Use 'material-icons' (the filled variant loaded in index.html). The 'outlined'
+    // variant is not loaded, which made the ligature name leak as plain text ("error").
     const iconMap = {
-      danger: 'material-icons-outlined text-danger',
-      warning: 'material-icons-outlined text-warning',
-      info: 'material-icons-outlined text-info',
-      success: 'material-icons-outlined text-success'
+      danger: 'material-icons text-danger',
+      warning: 'material-icons text-warning',
+      info: 'material-icons text-info',
+      success: 'material-icons text-success'
     };
     return iconMap[this.config.type || 'info'];
   }
