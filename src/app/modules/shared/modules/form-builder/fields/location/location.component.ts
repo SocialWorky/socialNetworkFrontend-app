@@ -1,7 +1,13 @@
-import { Component, Input, OnInit, forwardRef } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Field } from '../../interfaces/field.interface';
-import { CHILE_COUNTRY, getChileComunas, getChileRegionNames } from '../../data/geo-chile.data';
+import { translations } from '@translations/translations';
+import {
+  getGeoCities,
+  getGeoCountryMeta,
+  getGeoCountryNames,
+  getGeoRegions,
+} from '../../data/geo-data';
 
 export interface LocationValue {
   country: string;
@@ -25,9 +31,12 @@ export interface LocationValue {
 export class LocationComponent implements ControlValueAccessor, OnInit {
   @Input() field!: Field;
 
-  readonly countries = [CHILE_COUNTRY];
+  readonly countries = getGeoCountryNames();
   regions: string[] = [];
   comunas: string[] = [];
+
+  loadingRegions = false;
+  loadingCities = false;
 
   value: LocationValue = { country: '', region: '', comuna: '' };
 
@@ -36,11 +45,10 @@ export class LocationComponent implements ControlValueAccessor, OnInit {
   private onChange: (value: LocationValue | null) => void = () => {};
   private onTouched: () => void = () => {};
 
+  constructor(private cdr: ChangeDetectorRef) {}
+
   ngOnInit(): void {
-    this.regions = getChileRegionNames();
-    if (this.value.region) {
-      this.comunas = getChileComunas(this.value.region);
-    }
+    this.refreshOptions();
   }
 
   writeValue(value: LocationValue | null): void {
@@ -49,8 +57,7 @@ export class LocationComponent implements ControlValueAccessor, OnInit {
       region: value?.region || '',
       comuna: value?.comuna || '',
     };
-    this.regions = getChileRegionNames();
-    this.comunas = this.value.region ? getChileComunas(this.value.region) : [];
+    this.refreshOptions();
   }
 
   registerOnChange(fn: (value: LocationValue | null) => void): void {
@@ -65,16 +72,17 @@ export class LocationComponent implements ControlValueAccessor, OnInit {
     this.disabled = isDisabled;
   }
 
-  onCountryChange(country: string): void {
+  async onCountryChange(country: string): Promise<void> {
     this.value = { country, region: '', comuna: '' };
     this.comunas = [];
     this.emit();
+    await this.loadRegions();
   }
 
-  onRegionChange(region: string): void {
+  async onRegionChange(region: string): Promise<void> {
     this.value = { ...this.value, region, comuna: '' };
-    this.comunas = getChileComunas(region);
     this.emit();
+    await this.loadCities();
   }
 
   onComunaChange(comuna: string): void {
@@ -84,6 +92,44 @@ export class LocationComponent implements ControlValueAccessor, OnInit {
 
   get isRequired(): boolean {
     return this.field?.additionalOptions?.required === true;
+  }
+
+  /** Region/city labels follow each country's terminology (Provincia, Estado, …). */
+  get regionLabel(): string {
+    return getGeoCountryMeta(this.value.country)?.regionLabel || translations['formBuilder.location.region'];
+  }
+
+  get cityLabel(): string {
+    return getGeoCountryMeta(this.value.country)?.cityLabel || translations['formBuilder.location.comuna'];
+  }
+
+  private async refreshOptions(): Promise<void> {
+    if (this.value.country) await this.loadRegions();
+    if (this.value.country && this.value.region) await this.loadCities();
+  }
+
+  private async loadRegions(): Promise<void> {
+    if (!this.value.country) {
+      this.regions = [];
+      return;
+    }
+    this.loadingRegions = true;
+    this.cdr.markForCheck();
+    this.regions = await getGeoRegions(this.value.country);
+    this.loadingRegions = false;
+    this.cdr.markForCheck();
+  }
+
+  private async loadCities(): Promise<void> {
+    if (!this.value.country || !this.value.region) {
+      this.comunas = [];
+      return;
+    }
+    this.loadingCities = true;
+    this.cdr.markForCheck();
+    this.comunas = await getGeoCities(this.value.country, this.value.region);
+    this.loadingCities = false;
+    this.cdr.markForCheck();
   }
 
   private emit(): void {

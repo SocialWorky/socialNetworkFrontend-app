@@ -85,6 +85,7 @@
     "abab": "2.0.6",
     "angular-oauth2-oidc": "17.0.2",
     "axios": "^1.8.1",
+    "country-state-city": "^3.2.1",
     "cropperjs": "^1.6.2",
     "date-fns": "3.6.0",
     "dotenv": "^16.4.5",

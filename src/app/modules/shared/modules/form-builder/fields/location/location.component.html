@@ -12,16 +12,16 @@
   </mat-form-field>
 
   <mat-form-field appearance="fill" class="worky-input worky-accent worky-100">
-    <mat-label>{{ 'formBuilder.location.region' | workyTranslations }}</mat-label>
-    <mat-select [value]="value.region" [disabled]="disabled || !value.country"
+    <mat-label>{{ loadingRegions ? (regionLabel + '…') : regionLabel }}</mat-label>
+    <mat-select [value]="value.region" [disabled]="disabled || !value.country || loadingRegions"
       (selectionChange)="onRegionChange($event.value)">
       <mat-option *ngFor="let region of regions" [value]="region">{{ region }}</mat-option>
     </mat-select>
   </mat-form-field>
 
   <mat-form-field appearance="fill" class="worky-input worky-accent worky-100">
-    <mat-label>{{ 'formBuilder.location.comuna' | workyTranslations }}</mat-label>
-    <mat-select [value]="value.comuna" [disabled]="disabled || !value.region"
+    <mat-label>{{ loadingCities ? (cityLabel + '…') : cityLabel }}</mat-label>
+    <mat-select [value]="value.comuna" [disabled]="disabled || !value.region || loadingCities"
       (selectionChange)="onComunaChange($event.value)">
       <mat-option *ngFor="let comuna of comunas" [value]="comuna">{{ comuna }}</mat-option>
     </mat-select>

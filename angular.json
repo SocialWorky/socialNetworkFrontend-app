@@ -22,7 +22,8 @@
             "allowedCommonJsDependencies": [
               "sweetalert2",
               "cropperjs",
-              "lodash"
+              "lodash",
+              "country-state-city"
             ],
             "assets": [
               {
