@@ -9,6 +9,7 @@ import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/model
 import { UserService } from '@shared/services/core-apis/users.service';
 import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
 import { CustomFieldType } from '@shared/modules/form-builder/interfaces/custom-field.interface';
+import { translations } from '@translations/translations';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
@@ -108,12 +109,35 @@ export class ProfileDetailComponent  implements OnInit {
       return { label: def.label, type: 'string', value, hasValue: value !== '' };
     }
 
+    // Boolean: only surfaced when affirmative, shown as a localized "Sí".
+    if (def.type === CustomFieldType.BOOLEAN) {
+      const yes = raw === true;
+      return {
+        label: def.label,
+        type: 'string',
+        value: translations['formBuilder.configuration.yes'],
+        hasValue: yes,
+      };
+    }
+
+    if (def.type === CustomFieldType.DATE) {
+      const value = this.formatDate(raw);
+      return { label: def.label, type: 'string', value, hasValue: value !== '' };
+    }
+
     if (isArray(raw)) {
       return { label: def.label, type: 'array', value: raw, hasValue: raw.length > 0 };
     }
 
     const value = raw === null || raw === undefined ? '' : String(raw);
     return { label: def.label, type: 'string', value, hasValue: value.trim() !== '' };
+  }
+
+  /** "2024-11-19" -> "19/11/2024"; other shapes pass through. */
+  private formatDate(raw: any): string {
+    if (typeof raw !== 'string' || raw.trim() === '') return '';
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw);
+    return match ? `${match[3]}/${match[2]}/${match[1]}` : raw;
   }
 
   openEditProfileDetailModal() {

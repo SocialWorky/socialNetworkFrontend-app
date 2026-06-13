@@ -5,7 +5,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 
 import { MaterialModule } from '../material/material.module';
 import { FormBuilderComponent } from './form-builder.component';
-import { InputComponent, TextareaComponent, SelectComponent, LocationComponent } from './fields/index';
+import { InputComponent, TextareaComponent, SelectComponent, LocationComponent, CheckboxComponent, RadioComponent } from './fields/index';
 import { TranslationsModule } from '../translations/translations.module';
 
 @NgModule({
@@ -15,6 +15,8 @@ import { TranslationsModule } from '../translations/translations.module';
     TextareaComponent,
     SelectComponent,
     LocationComponent,
+    CheckboxComponent,
+    RadioComponent,
   ],
   imports: [
     CommonModule,
@@ -24,6 +26,6 @@ import { TranslationsModule } from '../translations/translations.module';
     MaterialModule,
     TranslationsModule
   ],
-  exports: [FormBuilderComponent, InputComponent, TextareaComponent, SelectComponent, LocationComponent]
+  exports: [FormBuilderComponent, InputComponent, TextareaComponent, SelectComponent, LocationComponent, CheckboxComponent, RadioComponent]
 })
 export class FormBuilderModule { }

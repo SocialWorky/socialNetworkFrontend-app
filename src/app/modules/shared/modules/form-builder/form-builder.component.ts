@@ -34,8 +34,42 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
     { type: CustomFieldType.TEXT, id: this.generateId(), idName: '', label: translations['formBuilder.textField'], destination: CustomFieldDestination.PROFILE },
     { type: CustomFieldType.TEXTAREA, id: this.generateId(), idName: '', label: translations['formBuilder.textArea'], destination: CustomFieldDestination.PROFILE },
     { type: CustomFieldType.SELECT, id: this.generateId(), idName: '', label: translations['formBuilder.selectField'], options: [], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.RADIO, id: this.generateId(), idName: '', label: translations['formBuilder.radioField'], options: [], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.NUMBER, id: this.generateId(), idName: '', label: translations['formBuilder.numberField'], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.DATE, id: this.generateId(), idName: '', label: translations['formBuilder.dateField'], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.BOOLEAN, id: this.generateId(), idName: '', label: translations['formBuilder.booleanField'], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.PHONE, id: this.generateId(), idName: '', label: translations['formBuilder.phoneField'], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.EMAIL, id: this.generateId(), idName: '', label: translations['formBuilder.emailField'], destination: CustomFieldDestination.PROFILE },
+    { type: CustomFieldType.URL, id: this.generateId(), idName: '', label: translations['formBuilder.urlField'], destination: CustomFieldDestination.PROFILE },
     { type: CustomFieldType.LOCATION, id: this.generateId(), idName: '', label: translations['formBuilder.locationField'], destination: CustomFieldDestination.PROFILE },
   ];
+
+  // Field-type groups used to decide which config inputs to show in the builder.
+  private readonly inputTypes = ['text', 'number', 'email', 'phone', 'url', 'date'];
+  private readonly placeholderTypes = ['text', 'textarea', 'number', 'email', 'phone', 'url'];
+  private readonly lengthTypes = ['text', 'textarea'];
+  private readonly optionsTypes = ['select', 'radio'];
+
+  /** True for field types rendered by the shared <app-input> (single-line inputs). */
+  isInputFieldType(type?: string): boolean {
+    return !!type && this.inputTypes.includes(type);
+  }
+
+  isPlaceholderType(field?: Field | null): boolean {
+    return !!field && this.placeholderTypes.includes(field.type);
+  }
+
+  isLengthType(field?: Field | null): boolean {
+    return !!field && this.lengthTypes.includes(field.type);
+  }
+
+  isOptionsType(field?: Field | null): boolean {
+    return !!field && this.optionsTypes.includes(field.type);
+  }
+
+  get isNumberSelected(): boolean {
+    return this.selectedField?.type === CustomFieldType.NUMBER;
+  }
 
   formFields: Field[] = [];
 

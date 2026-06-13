@@ -17,6 +17,7 @@ import { ConfigService } from '@shared/services/core-apis/config.service';
 import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
 import { Field } from '@shared/modules/form-builder/interfaces/field.interface';
 import { CustomFieldDestination, CustomFieldType } from '@shared/modules/form-builder/interfaces/custom-field.interface';
+import { buildDynamicFieldValidators } from '@shared/modules/form-builder/data/dynamic-field-validators';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
@@ -139,12 +140,10 @@ export class RegisterComponent implements OnInit, OnDestroy {
         const group: Record<string, FormControl> = {};
 
         fields.forEach((field: any) => {
-          const validators = [];
-          if (field.options?.required) validators.push(Validators.required);
-          if (field.options?.maxLength > 0) validators.push(Validators.maxLength(field.options.maxLength));
-          if (field.options?.minLength > 0) validators.push(Validators.minLength(field.options.minLength));
+          const validators = buildDynamicFieldValidators(field.type, field.options);
+          const initial = field.type === CustomFieldType.BOOLEAN ? false : '';
 
-          group[field.id] = new FormControl('', validators);
+          group[field.id] = new FormControl(initial, validators);
 
           this.dynamicFields.push({
             id: field.id,
@@ -207,6 +206,10 @@ export class RegisterComponent implements OnInit, OnDestroy {
       this.dynamicFieldsForm.get(child.id)?.setValue('', { emitEvent: true });
     }
     this._cdr.markForCheck();
+  }
+
+  isInputFieldType(type?: string): boolean {
+    return !!type && ['text', 'number', 'email', 'phone', 'url', 'date'].includes(type);
   }
 
   cascadeDepth(field: Field): number {

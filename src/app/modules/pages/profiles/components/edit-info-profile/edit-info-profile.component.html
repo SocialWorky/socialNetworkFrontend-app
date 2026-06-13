@@ -83,7 +83,7 @@
       <div *ngFor="let field of dynamicFields; let i = index" class="form-detail-basic dynamic-field"
            [class.dependent-field]="field.cascade?.dependsOn"
            [style.margin-left.px]="cascadeDepth(field) * 24">
-          <app-input *ngIf="field.type === enumCustomFieldType.TEXT"
+          <app-input *ngIf="isInputFieldType(field.type)"
             class="worky-100"
             [field]="field"
             [formControlName]="field.id">
@@ -100,6 +100,18 @@
             [field]="field"
             [formControlName]="field.id">
           </app-select>
+
+          <app-radio *ngIf="field.type === enumCustomFieldType.RADIO"
+            class="worky-100"
+            [field]="field"
+            [formControlName]="field.id">
+          </app-radio>
+
+          <app-checkbox *ngIf="field.type === enumCustomFieldType.BOOLEAN"
+            class="worky-100"
+            [field]="field"
+            [formControlName]="field.id">
+          </app-checkbox>
 
           <app-location *ngIf="field.type === enumCustomFieldType.LOCATION"
             class="worky-100"

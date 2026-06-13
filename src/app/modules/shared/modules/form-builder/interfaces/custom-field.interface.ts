@@ -7,6 +7,12 @@ export enum CustomFieldType {
   IMAGE = 'image',
   SELECT = 'select',
   LOCATION = 'location',
+  NUMBER = 'number',
+  EMAIL = 'email',
+  PHONE = 'phone',
+  URL = 'url',
+  BOOLEAN = 'boolean',
+  RADIO = 'radio',
 }
 
 export enum CustomFieldDestination {

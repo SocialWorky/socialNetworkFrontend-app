@@ -25,6 +25,13 @@
         <i *ngIf="field.type === enumCustomFieldType.TEXT" class="material-icons">format_size</i>
         <i *ngIf="field.type === enumCustomFieldType.TEXTAREA" class="material-icons">format_align_left</i>
         <i *ngIf="field.type === enumCustomFieldType.SELECT" class="material-icons">checklist</i>
+        <i *ngIf="field.type === enumCustomFieldType.RADIO" class="material-icons">radio_button_checked</i>
+        <i *ngIf="field.type === enumCustomFieldType.NUMBER" class="material-icons">pin</i>
+        <i *ngIf="field.type === enumCustomFieldType.DATE" class="material-icons">calendar_today</i>
+        <i *ngIf="field.type === enumCustomFieldType.BOOLEAN" class="material-icons">toggle_on</i>
+        <i *ngIf="field.type === enumCustomFieldType.PHONE" class="material-icons">call</i>
+        <i *ngIf="field.type === enumCustomFieldType.EMAIL" class="material-icons">alternate_email</i>
+        <i *ngIf="field.type === enumCustomFieldType.URL" class="material-icons">link</i>
         <i *ngIf="field.type === enumCustomFieldType.LOCATION" class="material-icons">place</i>
 
         {{ field.label }}
@@ -44,7 +51,7 @@
              [style.margin-left.px]="cascadeDepth(field) * 28">
           <div class="content-field">
 
-            <app-input *ngIf="field.type === enumCustomFieldType.TEXT"
+            <app-input *ngIf="isInputFieldType(field.type)"
               class="field-item"
               [field]="field"
               [formControlName]="field.id">
@@ -61,6 +68,18 @@
               [field]="field"
               [formControlName]="field.id">
             </app-select>
+
+            <app-radio *ngIf="field.type === enumCustomFieldType.RADIO"
+              class="field-item"
+              [field]="field"
+              [formControlName]="field.id">
+            </app-radio>
+
+            <app-checkbox *ngIf="field.type === enumCustomFieldType.BOOLEAN"
+              class="field-item"
+              [field]="field"
+              [formControlName]="field.id">
+            </app-checkbox>
 
             <app-location *ngIf="field.type === enumCustomFieldType.LOCATION"
               class="field-item"
@@ -92,7 +111,7 @@
                     (change)="updateField(selectedField, 'label', $event)">
             </mat-form-field>
 
-            <mat-form-field *ngIf="selectedField?.type === 'text' || selectedField?.type === 'textarea'"
+            <mat-form-field *ngIf="isPlaceholderType(selectedField)"
               class="worky-input worky-accent">
               <mat-label>{{ 'formBuilder.configuration.placeholder' | workyTranslations }}</mat-label>
                               <input matInput type="text" formControlName="placeholder" placeholder="{{ 'formBuilder.configuration.placeholder' | workyTranslations }}"
@@ -125,17 +144,31 @@
                   </mat-select>
                 </mat-form-field>
 
-                <mat-form-field *ngIf="selectedField?.type === 'text' || selectedField?.type === 'textarea'"
+                <mat-form-field *ngIf="isLengthType(selectedField)"
                   class="worky-input worky-accent">
                   <mat-label>{{ 'formBuilder.configuration.minLength' | workyTranslations }}</mat-label>
                   <input matInput type="number" formControlName="minLength" placeholder="{{ 'formBuilder.configuration.minLength' | workyTranslations }}"
                         (change)="updateField(selectedField, 'minLength', $event)">
                 </mat-form-field>
 
-                <mat-form-field *ngIf="selectedField?.type === 'text' || selectedField?.type === 'textarea'"
+                <mat-form-field *ngIf="isLengthType(selectedField)"
                   class="worky-input worky-accent">
                   <mat-label>{{ 'formBuilder.configuration.maxLength' | workyTranslations }}</mat-label>
                   <input matInput type="number" formControlName="maxLength" placeholder="{{ 'formBuilder.configuration.maxLength' | workyTranslations }}"
+                        (change)="updateField(selectedField, 'maxLength', $event)">
+                </mat-form-field>
+
+                <mat-form-field *ngIf="isNumberSelected"
+                  class="worky-input worky-accent">
+                  <mat-label>{{ 'formBuilder.configuration.minValue' | workyTranslations }}</mat-label>
+                  <input matInput type="number" formControlName="minLength" placeholder="{{ 'formBuilder.configuration.minValue' | workyTranslations }}"
+                        (change)="updateField(selectedField, 'minLength', $event)">
+                </mat-form-field>
+
+                <mat-form-field *ngIf="isNumberSelected"
+                  class="worky-input worky-accent">
+                  <mat-label>{{ 'formBuilder.configuration.maxValue' | workyTranslations }}</mat-label>
+                  <input matInput type="number" formControlName="maxLength" placeholder="{{ 'formBuilder.configuration.maxValue' | workyTranslations }}"
                         (change)="updateField(selectedField, 'maxLength', $event)">
                 </mat-form-field>
 
@@ -150,7 +183,7 @@
 
             </div>
 
-            <mat-form-field *ngIf="selectedField?.type === 'select' && !selectedField?.cascade?.dependsOn" class="worky-input worky-accent">
+            <mat-form-field *ngIf="isOptionsType(selectedField) && !selectedField?.cascade?.dependsOn" class="worky-input worky-accent">
               <mat-label>{{ 'formBuilder.configuration.options' | workyTranslations }}</mat-label>
               <input matInput type="text" formControlName="optionsString" (blur)="updateOptions()">
             </mat-form-field>
