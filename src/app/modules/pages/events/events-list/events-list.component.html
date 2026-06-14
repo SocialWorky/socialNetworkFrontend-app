@@ -23,7 +23,9 @@
 
   <div class="events-grid" *ngIf="!isLoading && events.length > 0">
     <div class="event-card" *ngFor="let event of events" (click)="openEvent(event._id)">
-      <div class="event-cover" [style.backgroundImage]="event.coverImage ? 'url(' + event.coverImage + ')' : ''">
+      <div class="event-cover" [class.event-cover--empty]="!event.coverImage"
+        [style.backgroundImage]="event.coverImage ? 'url(' + coverUrl(event.coverImage) + ')' : ''">
+        <i *ngIf="!event.coverImage" class="material-icons cover-placeholder-icon">celebration</i>
         <span class="type-badge" [class.virtual]="event.locationType === 'virtual'">
           {{ event.locationType === 'physical' ? ('events.physical' | workyTranslations) : ('events.virtual' | workyTranslations) }}
         </span>

@@ -1,5 +1,21 @@
 <form [formGroup]="form" (ngSubmit)="submit()" class="create-form">
   <h3>{{ 'events.create' | workyTranslations }}</h3>
+
+  <div class="field">
+    <label>{{ 'events.cover' | workyTranslations }}</label>
+    <label class="cover-upload" [class.cover-upload--has-image]="coverPreview">
+      <input type="file" accept="image/*" hidden (change)="onCoverSelected($event)" />
+      <ng-container *ngIf="!coverPreview">
+        <i class="material-icons">add_photo_alternate</i>
+        <span>{{ 'events.coverHint' | workyTranslations }}</span>
+      </ng-container>
+      <img *ngIf="coverPreview" [src]="coverPreview" alt="cover" />
+    </label>
+    <button *ngIf="coverPreview" type="button" class="cover-remove" (click)="removeCover()">
+      {{ 'events.coverRemove' | workyTranslations }}
+    </button>
+  </div>
+
   <div class="field"><label>{{ 'events.title' | workyTranslations }}</label><input formControlName="title" maxlength="200" /></div>
   <div class="field"><label>{{ 'events.description' | workyTranslations }}</label><textarea formControlName="description" rows="3"></textarea></div>
   <div class="field"><label>{{ 'events.date' | workyTranslations }}</label><input type="datetime-local" formControlName="date" /></div>

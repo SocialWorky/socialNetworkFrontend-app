@@ -286,6 +286,8 @@ export class UnifiedCacheService implements OnDestroy {
 
     const resourcePatterns: Record<string, RegExp[]> = {
       '/custom-fields': [/custom-field/],
+      '/events': [/events/, /tickets/],
+      '/tickets': [/tickets/, /events/],
       '/publication': [/publication/, /feed/],
       '/user': [/user/],
       '/comment': [/comment/, /publication/],
