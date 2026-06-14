@@ -21,10 +21,41 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '3.4.0',
+  version: '3.5.0',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🚀 NOVEDADES (v3.5.0 — 2026-06-14):
+
+    🧩 Campos personalizados (admin/custom-fields):
+    - Added: Campos condicionales/dependientes y selector en cascada (País → Región → Ciudad)
+      configurable, con vista previa en vivo en el constructor
+    - Added: Tipo de campo "Ubicación" geo pre-construido — Chile (16 regiones / 346 comunas)
+      + cobertura de Latinoamérica, España y EE.UU. (carga diferida)
+    - Added: Nuevos tipos de campo — Número (min/máx), Fecha, Teléfono, Email, Enlace/URL,
+      Sí/No (checkbox) y Opción única (radio), con validación de formato
+    - Added: Render y validación de obligatorios en editar perfil y en el registro
+    - Added: Toggle "Mostrar en detalle del perfil" para controlar qué campos se ven en el
+      perfil público; visualización solo-lectura con formato (ubicación, fecha, Sí/No)
+
+    🎉 Eventos:
+    - Added: Imagen de portada al crear evento (con vista previa)
+    - Added: Asistencia sin pasarela de pago — los usuarios se registran y pueden salir;
+      el administrador confirma manualmente a cada asistente; lista de inscritos con nombre/estado
+    - Changed: Botón "Asistir al evento"; estados traducidos (Publicado/Cancelado, etc.)
+
+    👤 Menú de usuario:
+    - Added: El avatar abre un panel lateral (estilo notificaciones) con accesos a Perfil,
+      Mensajes, Grupos y Eventos, acciones y Cerrar sesión/Versión al pie
+
+    🐛 CORRECCIONES (v3.5.0 — 2026-06-14):
+    - Fixed: Caché que impedía ver cambios al instante en campos personalizados y eventos
+      (invalidación correcta en mutaciones)
+    - Fixed: Colores ilegibles en modo claro/oscuro en el formulario y detalle de eventos
+    - Fixed: Diálogos de confirmación ahora usan el sistema de alertas de la app
+
+    ──────────────────────────────────────────────────────────────────────────────
+
     🚀 NOVEDADES (v3.4.0 — 2026-06-11):
 
     📹 Videos en el feed:
