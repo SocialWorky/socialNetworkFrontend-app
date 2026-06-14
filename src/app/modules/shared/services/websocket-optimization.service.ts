@@ -88,11 +88,18 @@ export class WebSocketOptimizationService implements OnDestroy {
     });
 
     this.socket.on('connect_error', (error: any) => {
-      this.updateMetrics({ 
-        connectionStatus: 'connecting', 
-        errorCount: this.metrics$.value.errorCount + 1 
+      this.updateMetrics({
+        connectionStatus: 'connecting',
+        errorCount: this.metrics$.value.errorCount + 1
       });
-      this.logService.log(LevelLogEnum.ERROR, 'WebSocketOptimizationService', 'Connection error', { error });
+      // Transient reconnection errors are expected during network blips — only log
+      // once reconnection is fully exhausted, otherwise this floods the log system.
+      if (this.reconnectAttempts >= this.currentConfig.reconnectAttempts) {
+        this.logService.log(LevelLogEnum.ERROR, 'WebSocketOptimizationService', 'Connection lost after exhausting reconnect attempts', {
+          error: error?.message || String(error),
+          attempts: this.reconnectAttempts,
+        });
+      }
     });
   }
 

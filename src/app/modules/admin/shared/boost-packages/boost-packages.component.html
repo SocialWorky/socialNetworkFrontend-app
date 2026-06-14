@@ -1,5 +1,5 @@
-<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-6">
-<div class="bg-slate-900 rounded-2xl border border-slate-700 p-6">
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-inter">
+<div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-2xl p-6">
   <!-- Header -->
   <div class="flex items-center justify-between mb-6">
     <div class="flex items-center gap-3">
@@ -30,7 +30,7 @@
   <div *ngIf="!isLoading && packages.length > 0" class="overflow-x-auto">
     <table class="w-full text-sm">
       <thead>
-        <tr class="text-left text-slate-400 border-b border-slate-700">
+        <tr class="text-left text-slate-300 border-b border-slate-600/50 uppercase tracking-wider text-xs font-semibold">
           <th class="pb-3 pr-4">{{ 'admin.planName' | workyTranslations }}</th>
           <th class="pb-3 pr-4">{{ 'admin.priceCLP' | workyTranslations }}</th>
           <th class="pb-3 pr-4">{{ 'admin.boostDurationHours' | workyTranslations }}</th>

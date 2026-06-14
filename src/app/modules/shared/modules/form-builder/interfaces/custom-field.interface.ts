@@ -6,11 +6,33 @@ export enum CustomFieldType {
   DATE = 'date',
   IMAGE = 'image',
   SELECT = 'select',
+  LOCATION = 'location',
+  NUMBER = 'number',
+  EMAIL = 'email',
+  PHONE = 'phone',
+  URL = 'url',
+  BOOLEAN = 'boolean',
+  RADIO = 'radio',
 }
 
 export enum CustomFieldDestination {
   PROFILE = 'profile',
   REGISTRATION = 'register',
+}
+
+export interface Choice {
+  value: string;
+  label: string;
+}
+
+export interface ConditionalRule {
+  dependsOn: string;
+  values: string[];
+}
+
+export interface CascadeRule {
+  dependsOn: string;
+  optionsByParent?: Record<string, Choice[]>;
 }
 
 export interface FieldOptions {
@@ -19,6 +41,11 @@ export interface FieldOptions {
   placeholder?: string;
   defaultValue?: any;
   visible?: boolean;
+  showInProfileDetail?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  conditional?: ConditionalRule;
+  cascade?: CascadeRule;
 }
 
 export interface TextOptions extends FieldOptions {

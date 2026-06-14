@@ -64,6 +64,10 @@ export class EventsListComponent implements OnInit, OnDestroy {
     this.loadEvents();
   }
 
+  coverUrl(url: string | null): string {
+    return this.eventsService.coverImageUrl(url);
+  }
+
   formatPrice(price: number): string {
     return this.eventsService.formatPrice(price);
   }

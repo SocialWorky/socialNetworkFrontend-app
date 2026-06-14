@@ -30,7 +30,7 @@ export class TimeoutInterceptor implements HttpInterceptor {
       retry({
         count: this.MAX_RETRIES,
         delay: (error, retryCount) => {
-          if (!this.shouldRetry(error)) throw error;
+          if (!this.shouldRetry(error, request)) throw error;
           return timer(this.RETRY_DELAY * retryCount);
         },
       }),
@@ -41,7 +41,12 @@ export class TimeoutInterceptor implements HttpInterceptor {
     );
   }
 
-  private shouldRetry(error: HttpErrorResponse): boolean {
+  private shouldRetry(error: HttpErrorResponse, request: HttpRequest<any>): boolean {
+    // Only retry idempotent GET requests — retrying POST/PUT/DELETE can duplicate
+    // mutations (e.g. a publication or payment) when the server already processed them.
+    if (request.method !== 'GET') {
+      return false;
+    }
     // Retry on network errors, timeouts, and 5xx server errors
     return (
       error.status === 0 || // Network error

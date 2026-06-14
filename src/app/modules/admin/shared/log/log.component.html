@@ -1,7 +1,7 @@
-<div class="min-h-screen bg-slate-900 p-8 font-sans">
+<div class="min-h-screen bg-gradient-to-br from-slate-800 to-slate-900 p-8 font-sans">
 
   <!-- Header -->
-  <div class="bg-slate-800 rounded-xl p-8 mb-8 shadow-lg border border-slate-700">
+  <div class="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 mb-8 shadow-xl border border-slate-700/50">
     <div class="flex justify-between items-center gap-8 mb-6 flex-wrap">
       <div>
         <h1 class="text-3xl font-bold text-white mb-2">{{ 'admin.log.title' | workyTranslations }}</h1>
@@ -159,6 +159,14 @@
         </button>
 
         <button
+          [disabled]="isClearingAll || totalLogs === 0"
+          class="flex items-center gap-2 px-5 py-2 border border-red-500 rounded-lg bg-slate-700 text-red-400 text-sm font-semibold cursor-pointer transition-all hover:bg-red-500 hover:text-white disabled:opacity-60"
+          (click)="openClearAllDialog()">
+          <i class="material-icons text-base">delete_forever</i>
+          {{ 'admin.log.buttons.deleteAll' | workyTranslations }}
+        </button>
+
+        <button
           *ngIf="hasActiveFilters"
           [disabled]="isLoading"
           class="flex items-center gap-2 px-5 py-2 border border-yellow-500 rounded-lg bg-slate-700 text-yellow-400 text-sm font-semibold cursor-pointer transition-all hover:bg-yellow-500 hover:text-white disabled:opacity-60"
@@ -198,7 +206,7 @@
       <div class="flex flex-col gap-3 mb-4" *ngIf="logs.length > 0">
         <ng-container *ngFor="let log of logs; trackBy: trackByLogId">
           <div *ngIf="log"
-            class="bg-slate-800 border border-slate-700 rounded-xl overflow-visible transition-all duration-300 shadow-md hover:shadow-lg hover:border-slate-600 group"
+            class="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl overflow-visible transition-all duration-300 shadow-md hover:shadow-lg hover:border-slate-600 group"
             [class.border-blue-500]="isExpanded(log._id)">
 
             <!-- Log row -->
@@ -363,3 +371,11 @@
     </div>
   </div>
 </div>
+
+<worky-confirm-dialog
+  [showDialog]="showClearAllDialog"
+  [config]="clearAllDialogConfig"
+  (confirm)="confirmClearAllLogs()"
+  (cancel)="cancelClearAllDialog()"
+  (close)="cancelClearAllDialog()">
+</worky-confirm-dialog>

@@ -55,6 +55,49 @@
                     </mat-form-field>
                 </div>
 
+                <div *ngIf="dynamicFieldsForm" formGroupName="dynamicFields" class="form-input dynamic-fields">
+                    <div *ngFor="let field of dynamicFields" class="dynamic-field"
+                         [class.dependent-field]="field.cascade?.dependsOn"
+                         [style.margin-left.px]="cascadeDepth(field) * 20">
+
+                        <app-input *ngIf="isInputFieldType(field.type)"
+                            class="worky-100"
+                            [field]="field"
+                            [formControlName]="field.id">
+                        </app-input>
+
+                        <app-textarea *ngIf="field.type === enumCustomFieldType.TEXTAREA"
+                            class="worky-100"
+                            [field]="field"
+                            [formControlName]="field.id">
+                        </app-textarea>
+
+                        <app-select *ngIf="field.type === enumCustomFieldType.SELECT"
+                            class="worky-100"
+                            [field]="field"
+                            [formControlName]="field.id">
+                        </app-select>
+
+                        <app-radio *ngIf="field.type === enumCustomFieldType.RADIO"
+                            class="worky-100"
+                            [field]="field"
+                            [formControlName]="field.id">
+                        </app-radio>
+
+                        <app-checkbox *ngIf="field.type === enumCustomFieldType.BOOLEAN"
+                            class="worky-100"
+                            [field]="field"
+                            [formControlName]="field.id">
+                        </app-checkbox>
+
+                        <app-location *ngIf="field.type === enumCustomFieldType.LOCATION"
+                            class="worky-100"
+                            [field]="field"
+                            [formControlName]="field.id">
+                        </app-location>
+                    </div>
+                </div>
+
                 <div *ngIf="requirePrivacyPolicy" class="privacy-policy-check">
                     <label class="privacy-policy-label">
                         <input type="checkbox" formControlName="acceptedPrivacyPolicy" id="acceptedPrivacyPolicy">

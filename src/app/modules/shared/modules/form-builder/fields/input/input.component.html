@@ -1,19 +1,31 @@
 <mat-form-field class="worky-input worky-accent">
   <mat-label>{{ field.label }}</mat-label>
   
-  <input 
+  <input
     matInput
-    [type]="field.type || 'text'"
+    [type]="inputType"
     [formControl]="control"
     [placeholder]="field.placeholder || ''"
     [required]="isRequired"
     [attr.minlength]="field.minLength"
     [attr.maxlength]="field.maxLength"
     [id]="field.id">
-  
+
   <!-- Error messages with `mat-error` -->
   <mat-error *ngIf="isRequired && control.hasError('required') && control.touched">
     {{ 'formBuilder.fieldRequired' | workyTranslations }}
+  </mat-error>
+  <mat-error *ngIf="control.hasError('email') && control.touched">
+    {{ 'formBuilder.invalidEmail' | workyTranslations }}
+  </mat-error>
+  <mat-error *ngIf="control.hasError('pattern') && control.touched">
+    {{ 'formBuilder.invalidFormat' | workyTranslations }}
+  </mat-error>
+  <mat-error *ngIf="control.hasError('min') && control.touched">
+    {{ 'formBuilder.minValue' | workyTranslations:'arguments':field.minLength }}
+  </mat-error>
+  <mat-error *ngIf="control.hasError('max') && control.touched">
+    {{ 'formBuilder.maxValue' | workyTranslations:'arguments':field.maxLength }}
   </mat-error>
   <mat-error *ngIf="control.hasError('minlength') && control.touched">
     {{ 'formBuilder.minLength' | workyTranslations:'arguments':field.minLength }}

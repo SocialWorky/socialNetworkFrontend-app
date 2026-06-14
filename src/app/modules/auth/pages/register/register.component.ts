@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, ElementRef, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { LoadingController } from '@ionic/angular';
 
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
@@ -12,8 +12,13 @@ import { AlertService } from '@shared/services/alert.service';
 import { translations } from '@translations/translations';
 import { Alerts, Position } from '@shared/enums/alerts.enum';
 import { TemplateEmail } from '@shared/interfaces/mail.interface';
-import { Subject, takeUntil, finalize } from 'rxjs';
+import { map, Subject, Subscription, takeUntil, finalize } from 'rxjs';
 import { ConfigService } from '@shared/services/core-apis/config.service';
+import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
+import { Field } from '@shared/modules/form-builder/interfaces/field.interface';
+import { CustomFieldDestination, CustomFieldType } from '@shared/modules/form-builder/interfaces/custom-field.interface';
+import { buildDynamicFieldValidators } from '@shared/modules/form-builder/data/dynamic-field-validators';
+import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
     selector: 'worky-register',
@@ -40,6 +45,14 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   showPrivacyModal = false;
 
+  dynamicFieldsForm!: FormGroup;
+
+  dynamicFields: Field[] = [];
+
+  enumCustomFieldType = CustomFieldType;
+
+  private cascadeSubs: Subscription[] = [];
+
   private unsubscribe$ = new Subject<void>();
 
   @ViewChild('emailInput') emailInput!: ElementRef;
@@ -53,6 +66,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
     private _loadingCtrl: LoadingController,
     private _configService: ConfigService,
     private _cdr: ChangeDetectorRef,
+    private _customFieldService: CustomFieldService,
+    private _logService: LogService,
   ) {
     this._configService.getConfig().pipe(takeUntil(this.unsubscribe$)).subscribe((configData) => {
       this.invitationCode = configData.settings?.invitationCode ?? false;
@@ -97,11 +112,120 @@ export class RegisterComponent implements OnInit, OnDestroy {
     if (this.isIPhoneWithNotch) {
       document.body.classList.add('iphone-with-notch');
     }
+
+    this.loadDynamicFields();
   }
 
   ngOnDestroy(): void {
+    this.cascadeSubs.forEach((sub) => sub.unsubscribe());
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+  }
+
+  private loadDynamicFields(): void {
+    this._customFieldService.getCustomFields()
+      .pipe(
+        takeUntil(this.unsubscribe$),
+        map((fields: any[]) =>
+          fields.filter(
+            (field) =>
+              field.destination === CustomFieldDestination.REGISTRATION &&
+              field.isActive,
+          ),
+        ),
+      )
+      .subscribe((fields: any[]) => {
+        if (fields.length === 0) return;
+
+        const group: Record<string, FormControl> = {};
+
+        fields.forEach((field: any) => {
+          const validators = buildDynamicFieldValidators(field.type, field.options);
+          const initial = field.type === CustomFieldType.BOOLEAN ? false : '';
+
+          group[field.id] = new FormControl(initial, validators);
+
+          this.dynamicFields.push({
+            id: field.id,
+            index: field.index,
+            idName: field.idName,
+            type: field.type,
+            label: field.label,
+            isActive: field.isActive,
+            options: field.options?.choices || [],
+            required: field.options?.required || false,
+            placeholder: field.options?.placeholder || '',
+            destination: field.destination,
+            cascade: field.options?.cascade || undefined,
+            additionalOptions: {
+              multiSelect: field.options?.multiSelect || false,
+              visible: field.options?.visible ?? true,
+              required: field.options?.required || false,
+              minLength: field.options?.minLength || 0,
+              maxLength: field.options?.maxLength || 50,
+            },
+          });
+        });
+
+        this.dynamicFieldsForm = this._formBuilder.group(group);
+        // Nest under the main form so the values flow into the register payload
+        // and contribute to overall form validity automatically.
+        this.registerForm.addControl('dynamicFields', this.dynamicFieldsForm);
+
+        this.setupCascade();
+        this._cdr.markForCheck();
+      });
+  }
+
+  private setupCascade(): void {
+    this.cascadeSubs.forEach((sub) => sub.unsubscribe());
+    this.cascadeSubs = [];
+
+    this.dynamicFields.forEach((child) => {
+      const dependsOn = child.cascade?.dependsOn;
+      if (!dependsOn) return;
+
+      const parent = this.dynamicFields.find((f) => f.idName === dependsOn);
+      if (!parent) return;
+
+      const parentControl = this.dynamicFieldsForm.get(parent.id);
+      if (!parentControl) return;
+
+      this.applyCascadeChild(child, parentControl.value, false);
+
+      const sub = parentControl.valueChanges
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe((value: any) => this.applyCascadeChild(child, value, true));
+      this.cascadeSubs.push(sub);
+    });
+  }
+
+  private applyCascadeChild(child: Field, parentValue: any, reset: boolean): void {
+    child.options = child.cascade?.optionsByParent?.[parentValue] || [];
+    if (reset) {
+      this.dynamicFieldsForm.get(child.id)?.setValue('', { emitEvent: true });
+    }
+    this._cdr.markForCheck();
+  }
+
+  isInputFieldType(type?: string): boolean {
+    return !!type && ['text', 'number', 'email', 'phone', 'url', 'date'].includes(type);
+  }
+
+  cascadeDepth(field: Field): number {
+    let depth = 0;
+    let current: Field | undefined = field;
+    const guard = new Set<string>();
+
+    while (current?.cascade?.dependsOn && !guard.has(current.idName)) {
+      guard.add(current.idName);
+      const parentIdName: string = current.cascade.dependsOn;
+      current = this.dynamicFields.find((f) => f.idName === parentIdName);
+      if (!current) break;
+      depth++;
+    }
+
+    return depth;
   }
 
   openPrivacyModal(): void {

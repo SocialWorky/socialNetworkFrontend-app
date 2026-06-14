@@ -1,7 +1,7 @@
-import { Component, Inject, OnInit, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { map, Subject, takeUntil } from 'rxjs';
+import { map, Subject, Subscription, takeUntil } from 'rxjs';
 import { translations } from '@translations/translations';
 import { LoadingService } from '@shared/services/loading.service';
 
@@ -12,6 +12,7 @@ import { UserService } from '@shared/services/core-apis/users.service';
 import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
 import { Field } from '@shared/modules/form-builder/interfaces/field.interface';
 import { CustomFieldDestination, CustomFieldType } from '@shared/modules/form-builder/interfaces/custom-field.interface';
+import { buildDynamicFieldValidators } from '@shared/modules/form-builder/data/dynamic-field-validators';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
@@ -21,7 +22,7 @@ import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service
     encapsulation: ViewEncapsulation.None,
     standalone: false
 })
-export class EditInfoProfileDetailComponent implements OnInit {
+export class EditInfoProfileDetailComponent implements OnInit, OnDestroy {
   WorkyButtonType = WorkyButtonType;
 
   WorkyButtonTheme = WorkyButtonTheme;
@@ -43,6 +44,8 @@ export class EditInfoProfileDetailComponent implements OnInit {
   SeeDynamicFields = false;
 
   private unsubscribe$ = new Subject<void>();
+
+  private cascadeSubs: Subscription[] = [];
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public dataUser: { userData: User },
@@ -93,12 +96,10 @@ export class EditInfoProfileDetailComponent implements OnInit {
 
         filteredFields.forEach((field: any) => {
 
-          const validators = [];
-          if (field.options?.required) validators.push(Validators.required);
-          if (field.options?.maxLength > 0) validators.push(Validators.maxLength(field.options.maxLength));
-          if (field.options?.minLength > 0) validators.push(Validators.minLength(field.options.minLength));
+          const validators = buildDynamicFieldValidators(field.type, field.options);
+          const initial = field.type === CustomFieldType.BOOLEAN ? false : '';
 
-          group[field.id] = new FormControl('', validators);
+          group[field.id] = new FormControl(initial, validators);
 
           this.dynamicFields.push({
             id: field.id,
@@ -111,6 +112,7 @@ export class EditInfoProfileDetailComponent implements OnInit {
             required: field.options?.required || false,
             placeholder: field.options?.placeholder || '',
             destination: field.destination,
+            cascade: field.options?.cascade || undefined,
             additionalOptions: {
               multiSelect: field.options?.multiSelect || false,
               visible: field.options?.visible || true,
@@ -127,8 +129,77 @@ export class EditInfoProfileDetailComponent implements OnInit {
 
         this.loadBasicDetail();
 
+        // Wire cascading selects (e.g. Country -> Region -> City) AFTER saved
+        // values are patched, so children populate from the current parent value.
+        this.setupProfileCascade();
+
         this._cdr.markForCheck();
       });
+  }
+
+  /**
+   * Subscribes each cascading child select to its parent's value changes and
+   * seeds its options from the currently-selected parent value.
+   */
+  private setupProfileCascade(): void {
+    this.cascadeSubs.forEach((sub) => sub.unsubscribe());
+    this.cascadeSubs = [];
+
+    this.dynamicFields.forEach((child) => {
+      const dependsOn = child.cascade?.dependsOn;
+      if (!dependsOn) return;
+
+      const parent = this.dynamicFields.find((f) => f.idName === dependsOn);
+      if (!parent) return;
+
+      const parentControl = this.dynamicFieldsForm.get(parent.id);
+      if (!parentControl) return;
+
+      // Seed from the saved parent value without clearing the saved child value.
+      this.applyCascadeChild(child, parentControl.value, false);
+
+      const sub = parentControl.valueChanges
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe((value: any) => this.applyCascadeChild(child, value, true));
+      this.cascadeSubs.push(sub);
+    });
+  }
+
+  private applyCascadeChild(child: Field, parentValue: any, reset: boolean): void {
+    child.options = child.cascade?.optionsByParent?.[parentValue] || [];
+
+    if (reset) {
+      // emitEvent: true so grandchildren (e.g. City under Region) also reset.
+      this.dynamicFieldsForm.get(child.id)?.setValue('', { emitEvent: true });
+    }
+
+    this._cdr.markForCheck();
+  }
+
+  isInputFieldType(type?: string): boolean {
+    return !!type && ['text', 'number', 'email', 'phone', 'url', 'date'].includes(type);
+  }
+
+  cascadeDepth(field: Field): number {
+    let depth = 0;
+    let current: Field | undefined = field;
+    const guard = new Set<string>();
+
+    while (current?.cascade?.dependsOn && !guard.has(current.idName)) {
+      guard.add(current.idName);
+      const parentIdName: string = current.cascade.dependsOn;
+      current = this.dynamicFields.find((f) => f.idName === parentIdName);
+      if (!current) break;
+      depth++;
+    }
+
+    return depth;
+  }
+
+  ngOnDestroy(): void {
+    this.cascadeSubs.forEach((sub) => sub.unsubscribe());
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   toggleWhatsApp() {
@@ -151,6 +222,12 @@ export class EditInfoProfileDetailComponent implements OnInit {
 
   async onSave() {
     if (this.editProfileBasicDetailForm.invalid || this.editProfileDetailForm.invalid) {
+      return;
+    }
+
+    if (this.dynamicFieldsForm?.invalid) {
+      this.dynamicFieldsForm.markAllAsTouched();
+      this._cdr.markForCheck();
       return;
     }
 

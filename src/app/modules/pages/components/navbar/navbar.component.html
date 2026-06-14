@@ -85,8 +85,8 @@
         <worky-dropdown
           [badge]=false
           img="avatar"
-          [dataLink]="dataLinkProfile"
-          (linkClicked)="handleLinkClicked($event)">
+          [isMenu]="false"
+          (click)="toggleUserMenuPanel()">
         </worky-dropdown>
       </div>
 
@@ -161,9 +161,14 @@
     [badge]=false
     img="avatar"
     [size]="28"
-    [dataLink]="dataLinkProfile"
-    (linkClicked)="handleLinkClicked($event)">
+    [isMenu]="false"
+    (click)="toggleUserMenuPanel()">
   </worky-dropdown>
 </nav>
 
 <worky-notifications-panel></worky-notifications-panel>
+<worky-user-menu-panel
+  [navItems]="navLinks"
+  [items]="dataLinkProfile"
+  (itemClick)="handleLinkClicked($event)">
+</worky-user-menu-panel>

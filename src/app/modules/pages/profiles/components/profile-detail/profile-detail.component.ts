@@ -8,7 +8,8 @@ import { User } from '@shared/interfaces/user.interface';
 import { WorkyButtonType, WorkyButtonTheme } from '@shared/modules/buttons/models/worky-button-model';
 import { UserService } from '@shared/services/core-apis/users.service';
 import { CustomFieldService } from '@shared/services/core-apis/custom-field.service';
-import { CustomFieldDestination } from '@shared/modules/form-builder/interfaces/custom-field.interface';
+import { CustomFieldType } from '@shared/modules/form-builder/interfaces/custom-field.interface';
+import { translations } from '@translations/translations';
 import { LogService, LevelLogEnum } from '@shared/services/core-apis/log.service';
 
 @Component({
@@ -23,11 +24,11 @@ export class ProfileDetailComponent  implements OnInit {
 
   WorkyButtonTheme = WorkyButtonTheme;
 
-  dynamicFieldsDictionary = {} as { [key: string]: string };
+  dynamicFieldsDictionary = {} as {
+    [key: string]: { label: string; type: string; showInProfileDetail: boolean };
+  };
 
   dynamicFields: any[] = [];
-
-  pushData: any = [];
 
   private unsubscribe$ = new Subject<void>();
 
@@ -52,10 +53,15 @@ export class ProfileDetailComponent  implements OnInit {
   private getDynamicFields(): void {
     this._customFieldService.getCustomFields().pipe(takeUntil(this.unsubscribe$)).subscribe({
       next: (response: any[]) => {
+        // Index every field definition (any destination) so values captured at
+        // registration or in the profile both resolve their label and type.
         response.forEach((field: any) => {
-          if (field.destination === CustomFieldDestination.PROFILE) {
-            this.dynamicFieldsDictionary[field.id] = field.label;
-          }
+          this.dynamicFieldsDictionary[field.id] = {
+            label: field.label,
+            type: field.type,
+            // Default true: pre-existing fields (without the flag) keep showing.
+            showInProfileDetail: field.options?.showInProfileDetail ?? true,
+          };
         });
         this.processDynamicFields();
         this._cdr.markForCheck();
@@ -74,25 +80,64 @@ export class ProfileDetailComponent  implements OnInit {
     })
   }
 
-  private getDynamicLabel(fieldId: string): string {
-    return (this.dynamicFieldsDictionary[fieldId]);
+  private processDynamicFields(): void {
+    const values = this.userData?.profile?.dynamicFields;
+    if (!values) {
+      this.dynamicFields = [];
+      return;
+    }
+
+    this.dynamicFields = Object.keys(values)
+      .map((key) => this.formatDynamicField(this.dynamicFieldsDictionary[key], values[key]))
+      .filter((item) => item && item.hasValue);
   }
 
-  private processDynamicFields(): void {
-    if (this.userData?.profile.dynamicFields) {
-      this.pushData = [];
-      this.dynamicFields = Object.keys(this.userData?.profile.dynamicFields).map((key: string) => {
-        const data = this.userData?.profile.dynamicFields[key];
+  /** Turns a stored dynamic value into a display-ready { label, type, value } row. */
+  private formatDynamicField(
+    def: { label: string; type: string; showInProfileDetail: boolean } | undefined,
+    raw: any,
+  ): { label: string; type: string; value: any; hasValue: boolean } | null {
+    if (!def?.label) return null;
 
-        // TODO: remove this when backend fix the issue with empty array
-        if (data.length) this.pushData.push(data);
-        return {
-          type: isArray(this.userData?.profile.dynamicFields[key]) ? 'array' : 'string',
-          label: this.getDynamicLabel(key),
-          value: this.userData?.profile.dynamicFields[key]
-        };
-      });
+    // Admin opted this field out of the public profile detail.
+    if (def.showInProfileDetail === false) return null;
+
+    // Location: { country, region, comuna } -> "País, Región, Comuna" (skip empties).
+    if (def.type === CustomFieldType.LOCATION) {
+      const loc = raw || {};
+      const value = [loc.country, loc.region, loc.comuna].filter(Boolean).join(', ');
+      return { label: def.label, type: 'string', value, hasValue: value !== '' };
     }
+
+    // Boolean: only surfaced when affirmative, shown as a localized "Sí".
+    if (def.type === CustomFieldType.BOOLEAN) {
+      const yes = raw === true;
+      return {
+        label: def.label,
+        type: 'string',
+        value: translations['formBuilder.configuration.yes'],
+        hasValue: yes,
+      };
+    }
+
+    if (def.type === CustomFieldType.DATE) {
+      const value = this.formatDate(raw);
+      return { label: def.label, type: 'string', value, hasValue: value !== '' };
+    }
+
+    if (isArray(raw)) {
+      return { label: def.label, type: 'array', value: raw, hasValue: raw.length > 0 };
+    }
+
+    const value = raw === null || raw === undefined ? '' : String(raw);
+    return { label: def.label, type: 'string', value, hasValue: value.trim() !== '' };
+  }
+
+  /** "2024-11-19" -> "19/11/2024"; other shapes pass through. */
+  private formatDate(raw: any): string {
+    if (typeof raw !== 'string' || raw.trim() === '') return '';
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw);
+    return match ? `${match[3]}/${match[2]}/${match[1]}` : raw;
   }
 
   openEditProfileDetailModal() {

@@ -22,7 +22,8 @@
             "allowedCommonJsDependencies": [
               "sweetalert2",
               "cropperjs",
-              "lodash"
+              "lodash",
+              "country-state-city"
             ],
             "assets": [
               {
@@ -97,7 +98,13 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": true,
+              "buildOptimizer": true,
+              "sourceMap": false,
+              "namedChunks": false,
+              "vendorChunk": false,
+              "extractLicenses": true
             },
             "development": {
               "buildOptimizer": false,

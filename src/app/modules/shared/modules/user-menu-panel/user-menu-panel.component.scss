@@ -1,0 +1,162 @@
+@use 'src/assets/styles/worky-palettes' as c;
+@use 'src/assets/styles/worky-breakpoints.scss' as bp;
+
+.ump-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1099;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.28s ease, visibility 0.28s ease;
+
+  &--open {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.ump-panel {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1100;
+  width: 340px;
+  height: 100dvh;
+  height: calc(var(--vh, 1vh) * 100);
+  background: c.$worky-color-module-container;
+  color: c.$worky-color-text;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+  @include bp.below-sm { width: 100%; }
+  @supports (-webkit-touch-callout: none) { height: -webkit-fill-available; top: 0; }
+
+  &--open {
+    transform: translateX(0);
+    box-shadow: -8px 0 30px -10px rgba(0, 0, 0, 0.45);
+  }
+}
+
+.ump-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  padding-right: max(12px, env(safe-area-inset-right));
+  border-bottom: 1px solid c.$worky-color-navy;
+}
+
+.ump-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__handle {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.ump-close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.18s ease;
+
+  &:hover { background: rgba(127, 127, 127, 0.15); }
+  i { font-size: 22px; }
+}
+
+.ump-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+  scrollbar-width: thin;
+  &::-webkit-scrollbar { width: 3px; }
+}
+
+.ump-nav {
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid c.$worky-color-navy;
+}
+
+.ump-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 13px 18px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 0.92rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.16s ease;
+
+  &:hover { background: rgba(127, 127, 127, 0.12); }
+
+  &__icon {
+    font-size: 22px;
+    opacity: 0.85;
+    flex-shrink: 0;
+  }
+
+  &__label { flex: 1; }
+
+  &__chevron {
+    font-size: 20px;
+    opacity: 0.4;
+    flex-shrink: 0;
+  }
+}
+
+.ump-footer {
+  border-top: 1px solid c.$worky-color-navy;
+  padding: 6px 0 max(8px, env(safe-area-inset-bottom));
+}
+
+.ump-item--logout {
+  .ump-item__icon { color: #ef4444; opacity: 1; }
+  &:hover { background: rgba(239, 68, 68, 0.1); }
+}
+
+.ump-version {
+  padding: 10px 18px 4px;
+  font-size: 0.78rem;
+  opacity: 0.55;
+  text-align: center;
+}

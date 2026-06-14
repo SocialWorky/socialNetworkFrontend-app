@@ -29,6 +29,7 @@ import { WorkyButtonsModule } from '@shared/modules/buttons/buttons.module';
 import { UserOnlineModule } from '@shared/modules/user-online/user-online.module';
 import { NearbyUsersModule } from '@shared/modules/nearby-users/nearby-users.module';
 import { NotificationsPanelModule } from '@shared/modules/notifications-panel/notifications-panel.module';
+import { UserMenuPanelModule } from '@shared/modules/user-menu-panel/user-menu-panel.module';
 import { ProcessingMediaModule } from '@shared/modules/processing-media/processing-media.module';
 import { FormBuilderModule } from '@shared/modules/form-builder/form-builder.module';
 import { SharedModule } from '@shared/shared.module';
@@ -68,6 +69,7 @@ import { StoriesModule } from '@shared/modules/stories/stories.module';
     UserOnlineModule,
     NearbyUsersModule,
     NotificationsPanelModule,
+    UserMenuPanelModule,
     MarkdownModule.forRoot(),
     PipesSharedModule,
     ProcessingMediaModule,

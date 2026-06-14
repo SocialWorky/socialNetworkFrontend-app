@@ -53,4 +53,22 @@ export class InputComponent implements ControlValueAccessor, OnChanges {
     return this.field.additionalOptions?.visible !== false || true;
   }
 
+  /** Maps the field type to a valid HTML input type (e.g. phone -> tel). */
+  get inputType(): string {
+    switch (this.field.type) {
+      case 'number':
+        return 'number';
+      case 'email':
+        return 'email';
+      case 'url':
+        return 'url';
+      case 'date':
+        return 'date';
+      case 'phone':
+        return 'tel';
+      default:
+        return 'text';
+    }
+  }
+
 }

@@ -9,6 +9,7 @@ import { GenericSnackbarService } from '@shared/services/generic-snackbar.servic
 import { PaginationConfig } from '@admin/shared/components/pagination/pagination.component';
 import { LogService as FrontendLogService } from '@shared/services/core-apis/log.service';
 import { PublicationViewModalComponent, PublicationViewModalData } from './components/publication-view-modal/publication-view-modal.component';
+import { ConfirmDialogConfig } from '@admin/shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'worky-log',
@@ -46,6 +47,18 @@ export class LogComponent implements OnInit, OnDestroy {
 
   autoRefresh = false;
   Math = Math;
+
+  showClearAllDialog = false;
+  isClearingAll = false;
+  clearAllDialogConfig: ConfirmDialogConfig = {
+    title: 'Eliminar todos los logs',
+    message: 'Esto borrará permanentemente TODOS los registros de log. Esta acción no se puede deshacer.',
+    confirmText: 'Eliminar todo',
+    cancelText: 'Cancelar',
+    type: 'danger',
+    showCancel: true,
+    width: '440px',
+  };
 
   logLevels = [
     { value: '', label: 'admin.log.levels.all', icon: 'list' },
@@ -204,6 +217,36 @@ export class LogComponent implements OnInit, OnDestroy {
       pendingCount > 0 ? `Cleared ${pendingCount} pending logs` : 'No pending logs in queue',
     );
     this.refreshLogs();
+  }
+
+  openClearAllDialog(): void {
+    this.showClearAllDialog = true;
+  }
+
+  cancelClearAllDialog(): void {
+    this.showClearAllDialog = false;
+  }
+
+  confirmClearAllLogs(): void {
+    this.isClearingAll = true;
+    this._logService
+      .deleteAllLogs()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ deleted }) => {
+          this.isClearingAll = false;
+          this.showClearAllDialog = false;
+          this._genericSnackbarService.info(`Se eliminaron ${deleted} logs`);
+          this.currentPage = 1;
+          this.loadLogs();
+          this.loadLogStats();
+        },
+        error: () => {
+          this.isClearingAll = false;
+          this.showClearAllDialog = false;
+          this._genericSnackbarService.error('No se pudieron eliminar los logs');
+        },
+      });
   }
 
   exportLogs() {

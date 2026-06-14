@@ -1,0 +1,22 @@
+.radio-field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 4px 0;
+
+  &__label {
+    margin: 0 0 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  &__required {
+    color: #ef4444;
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+}

@@ -25,6 +25,14 @@
         <i *ngIf="field.type === enumCustomFieldType.TEXT" class="material-icons">format_size</i>
         <i *ngIf="field.type === enumCustomFieldType.TEXTAREA" class="material-icons">format_align_left</i>
         <i *ngIf="field.type === enumCustomFieldType.SELECT" class="material-icons">checklist</i>
+        <i *ngIf="field.type === enumCustomFieldType.RADIO" class="material-icons">radio_button_checked</i>
+        <i *ngIf="field.type === enumCustomFieldType.NUMBER" class="material-icons">pin</i>
+        <i *ngIf="field.type === enumCustomFieldType.DATE" class="material-icons">calendar_today</i>
+        <i *ngIf="field.type === enumCustomFieldType.BOOLEAN" class="material-icons">toggle_on</i>
+        <i *ngIf="field.type === enumCustomFieldType.PHONE" class="material-icons">call</i>
+        <i *ngIf="field.type === enumCustomFieldType.EMAIL" class="material-icons">alternate_email</i>
+        <i *ngIf="field.type === enumCustomFieldType.URL" class="material-icons">link</i>
+        <i *ngIf="field.type === enumCustomFieldType.LOCATION" class="material-icons">place</i>
 
         {{ field.label }}
 
@@ -38,10 +46,12 @@
       <div cdkDropList #formFieldsList="cdkDropList" [cdkDropListData]="formFields"
           [cdkDropListConnectedTo]="[fieldsList]" (cdkDropListDropped)="drop($event)">
 
-        <div *ngFor="let field of formFields; let i = index" cdkDrag class="field-wrapper">
+        <div *ngFor="let field of formFields; let i = index" cdkDrag class="field-wrapper"
+             [class.dependent-field]="field.cascade?.dependsOn"
+             [style.margin-left.px]="cascadeDepth(field) * 28">
           <div class="content-field">
 
-            <app-input *ngIf="field.type === enumCustomFieldType.TEXT"
+            <app-input *ngIf="isInputFieldType(field.type)"
               class="field-item"
               [field]="field"
               [formControlName]="field.id">
@@ -58,6 +68,24 @@
               [field]="field"
               [formControlName]="field.id">
             </app-select>
+
+            <app-radio *ngIf="field.type === enumCustomFieldType.RADIO"
+              class="field-item"
+              [field]="field"
+              [formControlName]="field.id">
+            </app-radio>
+
+            <app-checkbox *ngIf="field.type === enumCustomFieldType.BOOLEAN"
+              class="field-item"
+              [field]="field"
+              [formControlName]="field.id">
+            </app-checkbox>
+
+            <app-location *ngIf="field.type === enumCustomFieldType.LOCATION"
+              class="field-item"
+              [field]="field"
+              [formControlName]="field.id">
+            </app-location>
 
             <i class="material-icons navy-color" (click)="selectField(field, i)">settings</i>
             <i class="material-icons red-color" (click)="deleteField(field, i)">delete</i>
@@ -83,7 +111,7 @@
                     (change)="updateField(selectedField, 'label', $event)">
             </mat-form-field>
 
-            <mat-form-field *ngIf="selectedField?.type !== 'select'"
+            <mat-form-field *ngIf="isPlaceholderType(selectedField)"
               class="worky-input worky-accent">
               <mat-label>{{ 'formBuilder.configuration.placeholder' | workyTranslations }}</mat-label>
                               <input matInput type="text" formControlName="placeholder" placeholder="{{ 'formBuilder.configuration.placeholder' | workyTranslations }}"
@@ -108,17 +136,39 @@
                   </mat-select>
                 </mat-form-field>
 
-                <mat-form-field *ngIf="selectedField?.type !== 'select'"
+                <mat-form-field *ngIf="formDestination === 'profile'" class="worky-input worky-accent">
+                  <mat-label>{{ 'formBuilder.configuration.showInProfileDetail' | workyTranslations }}</mat-label>
+                  <mat-select formControlName="showInProfileDetail" (selectionChange)="updateField(selectedField, 'showInProfileDetail', $event)">
+                    <mat-option [value]="true">{{ 'formBuilder.configuration.yes' | workyTranslations }}</mat-option>
+                    <mat-option [value]="false">{{ 'formBuilder.configuration.no' | workyTranslations }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field *ngIf="isLengthType(selectedField)"
                   class="worky-input worky-accent">
                   <mat-label>{{ 'formBuilder.configuration.minLength' | workyTranslations }}</mat-label>
                   <input matInput type="number" formControlName="minLength" placeholder="{{ 'formBuilder.configuration.minLength' | workyTranslations }}"
                         (change)="updateField(selectedField, 'minLength', $event)">
                 </mat-form-field>
 
-                <mat-form-field *ngIf="selectedField?.type !== 'select'"
+                <mat-form-field *ngIf="isLengthType(selectedField)"
                   class="worky-input worky-accent">
                   <mat-label>{{ 'formBuilder.configuration.maxLength' | workyTranslations }}</mat-label>
                   <input matInput type="number" formControlName="maxLength" placeholder="{{ 'formBuilder.configuration.maxLength' | workyTranslations }}"
+                        (change)="updateField(selectedField, 'maxLength', $event)">
+                </mat-form-field>
+
+                <mat-form-field *ngIf="isNumberSelected"
+                  class="worky-input worky-accent">
+                  <mat-label>{{ 'formBuilder.configuration.minValue' | workyTranslations }}</mat-label>
+                  <input matInput type="number" formControlName="minLength" placeholder="{{ 'formBuilder.configuration.minValue' | workyTranslations }}"
+                        (change)="updateField(selectedField, 'minLength', $event)">
+                </mat-form-field>
+
+                <mat-form-field *ngIf="isNumberSelected"
+                  class="worky-input worky-accent">
+                  <mat-label>{{ 'formBuilder.configuration.maxValue' | workyTranslations }}</mat-label>
+                  <input matInput type="number" formControlName="maxLength" placeholder="{{ 'formBuilder.configuration.maxValue' | workyTranslations }}"
                         (change)="updateField(selectedField, 'maxLength', $event)">
                 </mat-form-field>
 
@@ -133,12 +183,42 @@
 
             </div>
 
-            <mat-form-field *ngIf="selectedField?.type === 'select'" class="worky-input worky-accent">
+            <mat-form-field *ngIf="isOptionsType(selectedField) && !selectedField?.cascade?.dependsOn" class="worky-input worky-accent">
               <mat-label>{{ 'formBuilder.configuration.options' | workyTranslations }}</mat-label>
               <input matInput type="text" formControlName="optionsString" (blur)="updateOptions()">
             </mat-form-field>
 
-            <button mat-raised-button color="primary" (click)="updateFieldOptions(field, i)">{{ 'formBuilder.configuration.save' | workyTranslations }}</button>
+            <!-- Cascading / dependent options (e.g. Country -> Region -> City) -->
+            <ng-container *ngIf="selectedField?.type === 'select'">
+              <mat-form-field class="worky-input worky-accent">
+                <mat-label>{{ 'formBuilder.configuration.dependsOn' | workyTranslations }}</mat-label>
+                <mat-select [value]="selectedField.cascade?.dependsOn || ''" (selectionChange)="setCascadeParent($event)">
+                  <mat-option [value]="''">{{ 'formBuilder.configuration.dependsOnNone' | workyTranslations }}</mat-option>
+                  <mat-option *ngFor="let parent of cascadeParents" [value]="parent.idName">{{ parent.label }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <p class="cascade-empty-hint" *ngIf="cascadeParents.length === 0">
+                {{ 'formBuilder.configuration.cascadeNoParents' | workyTranslations }}
+              </p>
+
+              <div *ngIf="selectedField.cascade?.dependsOn" class="cascade-editor">
+                <p class="cascade-hint">{{ 'formBuilder.configuration.cascadeHint' | workyTranslations }}</p>
+                <mat-form-field class="worky-input worky-accent"
+                  *ngFor="let choice of parentChoices(selectedField.cascade?.dependsOn)">
+                  <mat-label>{{ choice.label }}</mat-label>
+                  <input matInput type="text"
+                    [value]="cascadeOptionsString(choice.value)"
+                    placeholder="opción1, opción2, opción3"
+                    (blur)="setCascadeOptions(choice.value, $event)">
+                </mat-form-field>
+              </div>
+            </ng-container>
+
+            <button type="button" class="builder-btn builder-btn--field" (click)="updateFieldOptions(field, i)">
+              <i class="material-icons">check</i>
+              {{ 'formBuilder.configuration.save' | workyTranslations }}
+            </button>
           </div>
 
         </div>
@@ -151,9 +231,10 @@
       </div>
 
       <button *ngIf="hasValidField()"
-        class=""
-        (click)="saveForm()"
-        mat-raised-button>
+        type="button"
+        class="builder-btn builder-btn--form"
+        (click)="saveForm()">
+        <i class="material-icons">save</i>
         {{ 'formBuilder.configuration.saveForm' | workyTranslations }}
       </button>
 

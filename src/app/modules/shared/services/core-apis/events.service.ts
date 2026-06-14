@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '@env/environment';
+import { UtilityService } from '@shared/services/utility.service';
 
 export interface SocialEvent {
   _id: string;
@@ -31,6 +32,17 @@ export interface Ticket {
   event?: SocialEvent | null;
 }
 
+export interface Attendee {
+  _id: string;
+  userId: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  qrCode: string | null;
+  createdAt: string;
+  name: string;
+  username: string | null;
+  avatar: string | null;
+}
+
 export interface CreateEventPayload {
   title: string;
   description?: string;
@@ -55,7 +67,16 @@ export class EventsService {
   private _myTickets$ = new BehaviorSubject<Ticket[]>([]);
   readonly myTickets$ = this._myTickets$.asObservable();
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly utilityService: UtilityService,
+  ) {}
+
+  /** Resolves a stored cover image path to a displayable URL (file-service fallback). */
+  coverImageUrl(url: string | null | undefined): string {
+    if (!url) return '';
+    return this.utilityService.normalizeImageUrl(url, environment.MINIO_BUCKET_URL || '');
+  }
 
   getEvents(type?: string, page: number = 1, pageSize: number = 20): Observable<{ events: SocialEvent[]; total: number }> {
     const params: Record<string, string> = { page: String(page), pageSize: String(pageSize) };
@@ -93,12 +114,16 @@ export class EventsService {
       .pipe(tap((events) => this._myEvents$.next(events)));
   }
 
-  getAttendees(id: string): Observable<Ticket[]> {
-    return this.http.get<Ticket[]>(`${this.apiUrl}/events/${id}/attendees`);
+  getAttendees(id: string): Observable<Attendee[]> {
+    return this.http.get<Attendee[]>(`${this.apiUrl}/events/${id}/attendees`);
   }
 
   registerTicket(eventId: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/events/${eventId}/tickets`, {});
+  }
+
+  confirmAttendee(eventId: string, ticketId: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/events/${eventId}/attendees/${ticketId}/confirm`, {});
   }
 
   getMyTickets(): Observable<Ticket[]> {

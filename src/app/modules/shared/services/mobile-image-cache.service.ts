@@ -545,30 +545,8 @@ export class MobileImageCacheService {
                        errorMessage?.includes('Not Found') ||
                        (error instanceof HttpErrorResponse && error.status === 404);
           
-          // Log 404 errors with detailed information (fallback logging)
-          if (is404) {
-            this.logService.log(
-              LevelLogEnum.ERROR,
-              'MobileImageCacheService',
-              'Image not found (404) - Image may have been deleted from storage (caught in Observable)',
-              {
-                imageUrl: normalizedUrl,
-                imageType,
-                errorStatus: errorStatus || 'unknown',
-                errorMessage: errorMessage || String(error),
-                errorName: error?.name,
-                errorType: error?.constructor?.name,
-                isHttpErrorResponse: error instanceof HttpErrorResponse,
-                httpErrorUrl: error instanceof HttpErrorResponse ? error.url : null,
-                timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent,
-                // Include context if available in options
-                publicationId: (options as any)?.publicationId,
-                commentId: (options as any)?.commentId,
-                mediaId: (options as any)?.mediaId
-              }
-            );
-          }
+          // A 404 means the media was deleted from storage — expected; the fallback
+          // below handles it. Not logged: it floods the log system as a false "error".
           // Mirror ImageService behavior: use fallbackUrl on error instead of propagating
           if (options.fallbackUrl) {
             observer.next(options.fallbackUrl);
@@ -722,92 +700,11 @@ export class MobileImageCacheService {
                        urlContains404 ||
                        (error instanceof HttpErrorResponse && error.status === 404);
           
-          // Log 404 errors with detailed information
+          // A 404 means the media was deleted from storage — expected, not an error.
+          // Clear the stale cache entry so it stops retrying, but do NOT log it: this
+          // was the second-largest source of false "error" noise in the log system.
           if (is404) {
-            // Extract context from options
-            const publicationId = (options as any)?.publicationId;
-            const commentId = (options as any)?.commentId;
-            const mediaId = (options as any)?.mediaId;
-            
-            // Try to extract userId from URL if publicationId is not available
-            let userIdFromUrl: string | null = null;
-            let fullUrlPath: string | null = null;
-            if (!publicationId && imageUrl.includes('/publications/')) {
-              const urlMatch = imageUrl.match(/publications\/([^\/\?]+)/);
-              if (urlMatch && urlMatch[1]) {
-                // Extract userId from URL pattern: userId|timestamp-filename
-                const urlPart = urlMatch[1];
-                fullUrlPath = urlPart;
-                const userIdMatch = urlPart.match(/^([^|]+)/);
-                if (userIdMatch && userIdMatch[1]) {
-                  userIdFromUrl = userIdMatch[1];
-                }
-              }
-            }
-            
-            // Clear invalid image from cache when 404 is detected
-            // This prevents stale cache entries from causing repeated 404 errors
-            this.clearImageFromCache(imageUrl).catch(clearError => {
-              // Log cache clear error but don't block the main error logging
-              this.logService.log(
-                LevelLogEnum.WARN,
-                'MobileImageCacheService',
-                'Failed to clear invalid image from cache',
-                { imageUrl, clearError: String(clearError) }
-              );
-            });
-            
-            const logData: any = {
-              imageUrl,
-              imageType,
-              errorStatus: errorStatus || 'unknown',
-              errorMessage: errorMessage || String(error),
-              errorName: error?.name,
-              errorType: error?.constructor?.name,
-              isHttpErrorResponse: error instanceof HttpErrorResponse,
-              httpErrorUrl: error instanceof HttpErrorResponse ? error.url : null,
-              normalizedUrl: imageUrl,
-              timestamp: new Date().toISOString(),
-              userAgent: navigator.userAgent,
-              // Include context if available in options
-              publicationId: publicationId || null,
-              commentId: commentId || null,
-              mediaId: mediaId || null,
-              // Additional debugging info
-              errorKeys: error ? Object.keys(error) : [],
-              errorString: String(error),
-              // Debug: show all options keys to see what's being passed
-              optionsKeys: options ? Object.keys(options) : [],
-              fullOptions: options,
-              // Cache cleanup info
-              cacheCleared: true,
-              // URL extraction info (if publicationId not available)
-              userIdFromUrl: userIdFromUrl,
-              fullUrlPath: fullUrlPath
-            };
-            
-            // Log to service (will be sent in batch to backend)
-            // This log will appear in the system logs database
-            // Use a more specific message that includes the image URL for easier searching
-            const imageFileName = imageUrl.split('/').pop() || imageUrl;
-            const shortUrl = imageFileName.length > 50 ? imageFileName.substring(0, 50) + '...' : imageFileName;
-            const publicationContext = publicationId || userIdFromUrl || 'unknown';
-            
-            // Create a searchable message that includes key terms for easy filtering in admin panel
-            // Terms: "404", "Image", "Missing", "PublicationId", filename
-            
-            // Force immediate send for critical 404 errors to ensure they appear in logs quickly
-            // Message includes key searchable terms: "404", "Missing Image", "PublicationId", filename
-            // This makes it easy to find in the admin logs panel by searching for "404", "Missing", "Image", or the filename
-            const logMessage = `[404 Missing Image] File: ${shortUrl} | PublicationId: ${publicationContext} | Image deleted from storage or cache invalid. Cache cleared automatically.`;
-            
-            this.logService.log(
-              LevelLogEnum.ERROR,
-              'MobileImageCacheService',
-              logMessage,
-              logData,
-              true // forceImmediate = true for critical errors
-            );
+            this.clearImageFromCache(imageUrl).catch(() => undefined);
           }
           throw error;
         })

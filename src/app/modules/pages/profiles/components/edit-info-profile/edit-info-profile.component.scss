@@ -193,3 +193,14 @@
     }
   }
 }
+
+.dynamic-field {
+  transition: margin-left 0.2s ease;
+
+  &.dependent-field {
+    position: relative;
+    border-left: 3px solid color.$worky-color-accent;
+    border-radius: 8px;
+    padding-left: 12px;
+  }
+}

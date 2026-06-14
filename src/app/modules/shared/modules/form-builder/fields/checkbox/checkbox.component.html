@@ -1,0 +1,8 @@
+<div class="checkbox-field">
+  <mat-slide-toggle
+    [checked]="checked"
+    [disabled]="disabled"
+    (change)="toggle($event.checked)">
+    {{ field.label }}<span *ngIf="isRequired" class="checkbox-field__required"> *</span>
+  </mat-slide-toggle>
+</div>

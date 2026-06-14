@@ -1,1 +1,73 @@
+// Primary statistic card — aligned to the admin slate "card language"
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  background: rgba(30, 41, 59, 0.5);          // slate-800/50
+  border: 1px solid rgba(51, 65, 85, 0.6);    // slate-700/60
+  border-radius: 1rem;
+  padding: 1.5rem;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.45);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 
+  &:hover {
+    transform: translateY(-4px);
+    border-color: rgba(71, 85, 105, 0.8);     // slate-600
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.55);
+  }
+}
+
+// Top accent bar (color set via utility class, e.g. bg-blue-500)
+.stat-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  opacity: 0.85;
+}
+
+// Secondary metrics block — divider + 2-column mini grid
+.stat-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(51, 65, 85, 0.5); // slate-700/50
+}
+
+.stat-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.stat-chip-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;                             // slate-400
+}
+
+.stat-chip-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #f1f5f9;                             // slate-100
+}
+
+// Additional / secondary metric card
+.metric-card {
+  background: rgba(30, 41, 59, 0.4);          // slate-800/40
+  border: 1px solid rgba(51, 65, 85, 0.5);    // slate-700/50
+  border-radius: 1rem;
+  padding: 1.25rem;
+  backdrop-filter: blur(6px);
+  transition: transform 0.25s ease, border-color 0.25s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: rgba(71, 85, 105, 0.7);
+  }
+}

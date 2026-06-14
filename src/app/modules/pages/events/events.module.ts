@@ -6,6 +6,7 @@ import { EventsListComponent } from './events-list/events-list.component';
 import { EventDetailComponent } from './event-detail/event-detail.component';
 import { EventCreateComponent } from './event-create/event-create.component';
 import { TranslationsModule } from '@shared/modules/translations/translations.module';
+import { WorkyAvatarModule } from '@shared/modules/worky-avatar/worky-avatar.module';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,7 @@ import { TranslationsModule } from '@shared/modules/translations/translations.mo
     FormsModule,
     EventsRoutingModule,
     TranslationsModule,
+    WorkyAvatarModule,
   ],
 })
 export class EventsModule {}

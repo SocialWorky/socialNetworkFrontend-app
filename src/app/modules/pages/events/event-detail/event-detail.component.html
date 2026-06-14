@@ -1,7 +1,9 @@
 <div *ngIf="isLoading" class="loading">{{ 'analytics.loading' | workyTranslations }}</div>
 <div *ngIf="!isLoading && event" class="event-detail">
-  <div class="event-hero" [style.backgroundImage]="event.coverImage ? 'url(' + event.coverImage + ')' : ''">
-    <span class="status-badge" [class]="'status-' + event.status">{{ event.status }}</span>
+  <div class="event-hero" [class.event-hero--empty]="!event.coverImage"
+    [style.backgroundImage]="event.coverImage ? 'url(' + coverUrl(event.coverImage) + ')' : ''">
+    <i *ngIf="!event.coverImage" class="material-icons hero-placeholder-icon">celebration</i>
+    <span class="status-badge" [class]="'status-' + event.status">{{ statusLabel(event.status) }}</span>
   </div>
   <div class="event-body">
     <h1>{{ event.title }}</h1>
@@ -21,11 +23,16 @@
 
     <!-- Ticket action -->
     <div *ngIf="myTicket" class="my-ticket">
-      <div style="color:#22c55e;font-weight:600;margin-bottom:8px;">✓ {{ 'events.registered' | workyTranslations }}</div>
-      <div *ngIf="myTicket.qrCode" style="font-family:monospace;background:var(--worky-input-bg);padding:12px;border-radius:8px;font-size:13px;word-break:break-all;">
+      <div [style.color]="myTicket.status === 'confirmed' ? '#22c55e' : '#f59e0b'" style="font-weight:600;margin-bottom:8px;">
+        {{ (myTicket.status === 'confirmed' ? 'events.myStatusConfirmed' : 'events.myStatusPending') | workyTranslations }}
+      </div>
+      <div *ngIf="myTicket.qrCode" style="font-family:monospace;background:var(--worky-color-input-background);padding:12px;border-radius:8px;font-size:13px;word-break:break-all;">
         <div style="font-size:11px;font-weight:600;margin-bottom:4px;">{{ 'events.qrCode' | workyTranslations }}</div>
         {{ myTicket.qrCode }}
       </div>
+      <button *ngIf="event.status === 'published'" (click)="cancelMyTicket()" [disabled]="isLeaving" class="btn-leave">
+        {{ 'events.leave' | workyTranslations }}
+      </button>
     </div>
     <button *ngIf="canRegister && !isCreator"
       (click)="registerOrBuy()"
@@ -38,11 +45,23 @@
     <!-- Creator admin panel -->
     <div *ngIf="isCreator" class="admin-panel">
       <h4>{{ 'events.attendees' | workyTranslations }} ({{ attendees.length }})</h4>
-      <div *ngFor="let t of attendees" class="attendee-row">
-        <span>{{ t.userId }}</span>
-        <span class="qr-code">{{ t.qrCode }}</span>
+      <div *ngIf="attendees.length === 0" class="attendees-empty">{{ 'events.noAttendees' | workyTranslations }}</div>
+      <div *ngFor="let a of attendees" class="attendee-row">
+        <div class="attendee-info">
+          <worky-avatar [img]="coverUrl(a.avatar)" [name]="a.name" [size]="30"></worky-avatar>
+          <span class="attendee-name">{{ a.name }}</span>
+        </div>
+        <div class="attendee-actions">
+          <span class="att-status" [class.att-status--confirmed]="a.status === 'confirmed'">
+            {{ (a.status === 'confirmed' ? 'events.attendeeConfirmed' : 'events.attendeePending') | workyTranslations }}
+          </span>
+          <button *ngIf="a.status === 'pending'" (click)="confirmAttendee(a._id)" [disabled]="confirmingId === a._id" class="att-confirm-btn">
+            {{ 'events.confirmAttendee' | workyTranslations }}
+          </button>
+        </div>
       </div>
-      <button *ngIf="event.status === 'published'" (click)="cancelEvent()" class="btn-cancel">{{ 'events.cancel' | workyTranslations }}</button>
+      <button *ngIf="event.status === 'published'" (click)="cancelEvent()" [disabled]="isCancelling" class="btn-cancel">{{ 'events.cancel' | workyTranslations }}</button>
+      <div *ngIf="error" class="error">{{ error }}</div>
     </div>
   </div>
 </div>
