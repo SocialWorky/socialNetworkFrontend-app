@@ -66,6 +66,7 @@ export const translations = {
   'button.no': 'No',
   
   // NAVBAR COMPONENT
+  'navbar.profile': 'My profile',
   'navbar.logout': 'Logout',
   'navbar.checkUpdates': 'Check for updates',
   'navbar.version': 'Version',

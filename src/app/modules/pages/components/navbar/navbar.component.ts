@@ -12,6 +12,7 @@ import { NotificationUsersService } from '@shared/services/notifications/notific
 import { NotificationService } from '@shared/services/notifications/notification.service';
 import { NotificationCenterService } from '@shared/services/core-apis/notificationCenter.service';
 import { NotificationPanelService } from '@shared/modules/notifications-panel/services/notificationPanel.service'
+import { UserMenuPanelService } from '@shared/modules/user-menu-panel/services/userMenuPanel.service'
 import { ConfigService } from '@shared/services/core-apis/config.service';
 import { UtilityService } from '@shared/services/utility.service';
 import { environment } from '@env/environment';
@@ -46,6 +47,8 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   dataLinkProfile:DropdownDataLink<any>[] = [];
 
+  navLinks:DropdownDataLink<any>[] = [];
+
   resizeSubscription: Subscription | undefined;
 
   users: any[] = [];
@@ -79,6 +82,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
     private _notificationService: NotificationService,
     private _notificationCenterService: NotificationCenterService,
     private _notificationPanelService: NotificationPanelService,
+    private _userMenuPanelService: UserMenuPanelService,
     private _configService: ConfigService,
     private _scrollService: ScrollService,
     private _appUpdateManagerService: AppUpdateManagerService,
@@ -89,6 +93,7 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {
     this.isMobile = this._deviceDetectionService.isMobile();
     this.menuProfile();
+    this.buildNavLinks();
   }
 
   async ngOnInit() {
@@ -167,11 +172,13 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this._configService.groupsEnabled$.pipe(takeUntil(this.unsubscribe$)).subscribe((enabled) => {
       this.groupsEnabled = enabled;
+      this.buildNavLinks();
       this._cdr.markForCheck();
     });
 
     this._configService.eventsEnabled$.pipe(takeUntil(this.unsubscribe$)).subscribe((enabled) => {
       this.eventsEnabled = enabled;
+      this.buildNavLinks();
       this._cdr.markForCheck();
     });
   }
@@ -228,6 +235,25 @@ export class NavbarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   toggleNotificationsPanel() {
     this._notificationPanelService.togglePanel();
+  }
+
+  toggleUserMenuPanel() {
+    this._userMenuPanelService.togglePanel();
+  }
+
+  // Navigation shortcuts shown at the top of the user menu panel.
+  private buildNavLinks() {
+    const links: DropdownDataLink<any>[] = [
+      { icon: 'person', link: '/profile', title: translations['navbar.profile'] },
+      { icon: 'chat', link: '/messages', title: translations['messages.title'] },
+    ];
+    if (this.groupsEnabled) {
+      links.push({ icon: 'groups', link: '/groups', title: translations['groups.title'] });
+    }
+    if (this.eventsEnabled) {
+      links.push({ icon: 'calendar_month', link: '/events', title: translations['events.title'] });
+    }
+    this.navLinks = links;
   }
 
   search(event: Event) {

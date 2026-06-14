@@ -1,0 +1,46 @@
+<div class="ump-overlay" [class.ump-overlay--open]="isActive" (click)="close()"></div>
+
+<div class="ump-panel" [class.ump-panel--open]="isActive">
+
+  <!-- Header: current user -->
+  <div class="ump-header">
+    <div class="ump-user">
+      <worky-avatar [img]="userAvatar" [name]="userName" [size]="44"></worky-avatar>
+      <div class="ump-user__info">
+        <span class="ump-user__name">{{ userName }}</span>
+        <span class="ump-user__handle" *ngIf="userHandle">{{ userHandle }}</span>
+      </div>
+    </div>
+    <button class="ump-close" (click)="close()" aria-label="close">
+      <i class="material-icons">close</i>
+    </button>
+  </div>
+
+  <!-- Navigation shortcuts -->
+  <div class="ump-body">
+    <div class="ump-nav" *ngIf="navItems.length">
+      <button class="ump-item" *ngFor="let nav of navItems" type="button" (click)="onItem(nav)">
+        <i class="material-icons ump-item__icon" *ngIf="nav.icon">{{ nav.icon }}</i>
+        <span class="ump-item__label">{{ nav.title }}</span>
+        <i class="material-icons ump-item__chevron">chevron_right</i>
+      </button>
+    </div>
+
+    <!-- Main actions (provided by the navbar) -->
+    <button class="ump-item" *ngFor="let item of mainItems" type="button" (click)="onItem(item)">
+      <i class="material-icons ump-item__icon" *ngIf="item.icon">{{ item.icon }}</i>
+      <span class="ump-item__label">{{ item.title }}</span>
+      <i class="material-icons ump-item__chevron">chevron_right</i>
+    </button>
+  </div>
+
+  <!-- Footer: logout + version pinned to the bottom -->
+  <div class="ump-footer">
+    <button class="ump-item ump-item--logout" *ngIf="logoutItem" type="button" (click)="onItem(logoutItem)">
+      <i class="material-icons ump-item__icon" *ngIf="logoutItem.icon">{{ logoutItem.icon }}</i>
+      <span class="ump-item__label">{{ logoutItem.title }}</span>
+    </button>
+
+    <div class="ump-version" *ngIf="versionItem">{{ versionItem.title }}</div>
+  </div>
+</div>
