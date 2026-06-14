@@ -21,10 +21,16 @@ export interface AppVersionConfig {
  * Update these values when releasing a new version
  */
 export const APP_VERSION_CONFIG: AppVersionConfig = {
-  version: '3.5.1',
+  version: '3.5.2',
   buildNumber: Date.now().toString(),
   releaseDate: new Date().toISOString(),
   changelog: `
+    🐛 CORRECCIONES (v3.5.2 — 2026-06-14):
+    - Fixed: En móvil (iOS PWA) el menú del avatar no llegaba al fondo de la pantalla
+      (franja con la barra inferior visible) — ahora usa el alto real del viewport
+
+    ──────────────────────────────────────────────────────────────────────────────
+
     🐛 CORRECCIONES (v3.5.1 — 2026-06-14):
     - Fixed: En móvil, el menú del avatar no respetaba las zonas reservadas (notch) y no se
       podía cerrar — el botón de cerrar ahora queda bajo el safe-area y es tocable
