@@ -34,7 +34,9 @@
               box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 
   @include bp.below-sm { width: 100%; }
-  @supports (-webkit-touch-callout: none) { height: -webkit-fill-available; top: 0; }
+  // iOS: keep the var(--vh) height (refreshed by JS on open). -webkit-fill-available
+  // can be shorter than the screen in standalone PWA and left a gap at the bottom.
+  @supports (-webkit-touch-callout: none) { top: 0; }
 
   &--open {
     transform: translateX(0);
